@@ -1,0 +1,34 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Eede.Positions
+{
+    public class PositionHistory
+    {
+        public readonly Position Start;
+        public readonly Position Last;
+        public readonly Position Now;
+        public PositionHistory(Position start)
+        {
+            Start = start ?? throw new ArgumentNullException(nameof(start));
+            Last = start;
+            Now = start;
+        }
+
+        private PositionHistory(Position start, Position last, Position now)
+        {
+            Start = start;
+            Last = last;
+            Now = now;
+        }
+
+        public PositionHistory Update(Position now)
+        {
+            return new PositionHistory(Start, Now, now);
+        }
+    }
+}

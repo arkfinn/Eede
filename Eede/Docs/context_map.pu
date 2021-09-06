@@ -1,0 +1,125 @@
+@startuml コンテキストマップ
+
+!define VO ValueObject
+!define E Entity
+!define S Service
+!define R Repository
+!define C Controller
+!define F Factory
+hide <<E>> circle
+hide <<VO>> circle
+hide <<R>> circle
+hide <<C>> circle
+hide <<S>> circle
+hide <<F>> circle
+
+' 　レイヤ構成 from
+' https://little-hands.hatenablog.com/entry/2018/12/10/ddd-architecture
+
+package Domain {
+    class ペンサイズ <<VO>>
+    class 色 <<VO>>
+    class ペンスタイル <<S>>
+
+    class 画像 <<E>> {
+        読み込み()
+        書き出し()
+    }
+    class 画像リポジトリ<<R>>
+    画像 --> 画像リポジトリ
+
+    class 作業レイヤ <<S>>
+    class RGBAレイヤ <<S>>
+    作業レイヤ <|-- RGBAレイヤ
+    class RGBレイヤ <<S>>
+    作業レイヤ <|-- RGBレイヤ
+    class Aレイヤ <<S>>
+    作業レイヤ <|-- Aレイヤ
+
+    class 描画方法
+    class 画像バッファ
+
+    class 拡大率 <<VO>>
+
+    class ペンケース <<VO>>{
+        ペンサイズ
+        色
+        ペン出す():Pen
+    }
+    ペンケース *-u- ペンサイズ
+    ペンケース *-u- 色
+
+    ペンスタイル --> ペンケース
+    ペンスタイル --> 画像バッファ
+
+}
+
+
+package UseCase {
+    class 作業エリア <<C>> {
+        画像バッファ
+        作業レイヤ
+        拡大率
+        描く()
+        ペンサイズ設定()
+        色設定()
+        ペンツール設定()
+    }
+
+    作業エリア *-- ペンサイズ
+    作業エリア *-- ペンスタイル
+    作業エリア *-- 色
+    作業エリア *-- 作業レイヤ
+    作業エリア *-- 画像バッファ
+    作業エリア *-- 拡大率
+
+    class 実体エリア <<C>> {
+        作業エリアへの参照
+        作業エリアから読み込み()
+        作業エリアへ書き出し()
+        ファイルからの読み込み()
+        ファイルへの書き出し()
+    }
+    実体エリア *-- 画像
+    実体エリア o-- 作業エリア
+
+    class ペンサイズコントローラ <<C>> {
+        ペンサイズ
+    }
+    ペンサイズコントローラ *-- ペンサイズ
+    ペンサイズコントローラ --> 作業エリア : ペンサイズ設定
+
+}
+
+
+package Infrastructure {
+    class PNGファイル <<R>> {
+        読み込み()
+        書き出し()
+    }
+    画像リポジトリ <|-- PNGファイル
+}
+
+package Presentation {
+    class 作業ウィンドウ
+    作業ウィンドウ *-- 作業エリア
+    class 子ウィンドウ
+    子ウィンドウ *-- 実体エリア
+
+    package ツールボックス {
+        class ペンサイズセレクタ
+        ペンサイズセレクタ *-- ペンサイズコントローラ
+        class カラーセレクタ
+        class カラーパレット
+        class ツールセレクタ
+    }
+}
+
+
+
+カラーセレクタ *-- 色
+カラーパレット *--o{ 色
+ツールセレクタ *-- ペンスタイル
+
+
+@enduml

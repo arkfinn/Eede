@@ -1,0 +1,29 @@
+@startuml クラス図
+
+class Pen 
+class Bitmap
+class Point
+
+
+interface IImageBlender
+class AlphaOnlyImageBlender
+IImageBlender <|-- AlphaOnlyImageBlender
+AlphaOnlyImageBlender ..> Bitmap
+
+
+
+
+class PenCase
+PenCase o-- IImageBlender
+PenCase o-- Pen
+
+
+class AlphaPicture 
+AlphaPicture ..> Bitmap
+AlphaPicture .> PenCase
+
+class DrawEventArgs
+DrawEventArgs o-- PenCase
+DrawEventArgs o-- AlphaPicture
+DrawEventArgs o-- Point
+@enduml

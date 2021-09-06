@@ -1,0 +1,108 @@
+@startuml
+left to right direction
+
+hide circle
+hide methods
+hide members
+
+mix_actor ドッター
+
+class 色
+class カラースライダー
+カラースライダー o- 色
+
+class パレット
+パレット o- 色
+class 色登録
+パレット o-- 色登録
+class パレットファイル
+class ファイル読み込み
+パレット o-- ファイル読み込み
+class ファイル保存
+パレット o-- ファイル保存
+パレット o-- パレットファイル
+
+class ドット絵
+
+class プライマリ画像 extends ドット絵
+class 保存先ファイルパス
+プライマリ画像 o-- 保存先ファイルパス
+プライマリ画像 o-- ファイル読み込み
+class 転送
+プライマリ画像 o- 転送
+class 転送サイズ
+転送 o-- 転送サイズ
+class 作業エリア
+作業エリア o-- 作業画像
+class 拡大
+作業エリア o-- 拡大
+class 操作履歴
+作業エリア o-- 操作履歴
+操作履歴 o-- アンドゥ
+操作履歴 o-- リドゥ
+
+class 作業画像 extends ドット絵
+転送 o- 作業エリア
+class 描く
+作業画像 o-- 描く
+描く o-- 色
+
+class スポイト
+作業画像 o-- スポイト
+スポイト o-- 色
+
+class ペンツール
+描く o-- ペンツール
+class 自由曲線 extends ペンツール
+class 直線 extends ペンツール
+class 四角 extends ペンツール
+class 塗りつぶし四角 extends 四角
+class 円 extends ペンツール
+class 塗りつぶし円 extends 円
+
+class 塗りつぶし
+作業画像 o-- 塗りつぶし
+
+class 線の太さ
+描く o-- 線の太さ
+class 画像操作
+画像操作 o-- 作業画像
+class シフト extends 画像操作
+class 上シフト extends シフト
+class 下シフト extends シフト
+class 左シフト extends シフト
+class 右シフト extends シフト
+
+class 反転 extends 画像操作
+class 上下反転 extends 反転
+class  左右反転 extends 反転
+
+class 反転コピー extends 画像操作
+class 上下反転コピー extends 反転コピー
+class  左右反転コピー extends 反転コピー
+
+class 90度単位で回転 extends 画像操作
+class 右回転 extends 90度単位で回転
+class 左回転 extends 90度単位で回転
+
+class 範囲選択
+作業エリア o-- 範囲選択
+class 選択範囲 extends 作業画像
+範囲選択 o-- 選択範囲
+class 移動
+選択範囲 o-- 移動
+class コピー
+選択範囲 o-- コピー
+class ペースト
+ペースト o- 選択範囲
+
+ドッター o-- ドット絵
+
+class ファイル保存
+プライマリ画像 o-- ファイル保存
+class 名前を付けて保存 extends ファイル保存
+class 上書き保存 extends ファイル保存
+
+class 背景色
+
+@enduml

@@ -1,0 +1,14 @@
+@startuml クソ仕様
+
+interface PenStyle
+class Line
+PenStyle <|-- Line
+
+class AlphaPicture
+class Bmp
+
+AlphaPicture *-- Bmp
+
+Line --> Bmp : 書き換える
+
+@enduml

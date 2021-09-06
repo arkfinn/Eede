@@ -1,0 +1,16 @@
+@startuml システムコンテキスト
+left to right direction
+
+actor ドッター
+component ゲーム制作ツール
+component 3DCG制作ツール
+component 画像投稿サイト 
+
+ドッター -- (ドット絵エディタ)
+note bottom :ゲーム素材・テクスチャ利用を目的として、\n効率的にドット絵を作成する
+
+(ドット絵エディタ) -- ゲーム制作ツール
+(ドット絵エディタ) --  3DCG制作ツール
+(ドット絵エディタ) --  画像投稿サイト 
+
+@enduml

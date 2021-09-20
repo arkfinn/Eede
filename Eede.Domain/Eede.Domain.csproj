@@ -48,7 +48,7 @@
     <Compile Include="ColorDropper.cs" />
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="HalfBoxPosition.cs" />
-    <Compile Include="ICanvasBackgroundService.cs" />
+    <Compile Include="PaintLayers\ICanvasBackgroundService.cs" />
     <Compile Include="ImageBlenders\AlphaOnlyImageBlender.cs" />
     <Compile Include="ImageBlenders\DirectImageBlender.cs" />
     <Compile Include="ImageBlenders\IImageBlender.cs" />
@@ -68,8 +68,8 @@
     <Compile Include="PenStyles\IPenStyle.cs" />
     <Compile Include="PenStyles\Line.cs" />
     <Compile Include="PicturePushedEventArgs.cs" />
-    <Compile Include="Pictures\IPictureCommandService.cs" />
-    <Compile Include="Pictures\IPictureQueryService.cs" />
+    <Compile Include="Pictures\IPictureWriter.cs" />
+    <Compile Include="Pictures\IPictureReader.cs" />
     <Compile Include="Pictures\PrimaryPicture.cs" />
     <Compile Include="Positions\MinifiedPosition.cs" />
     <Compile Include="Positions\Position.cs" />
@@ -78,8 +78,6 @@
     <Compile Include="Sizes\MagnifiedSize.cs" />
     <Compile Include="ValueObjects\HsvColor.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Files\test\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

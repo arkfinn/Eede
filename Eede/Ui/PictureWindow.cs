@@ -20,7 +20,8 @@ namespace Eede.Ui
         public PictureWindow()
         {
             InitializeComponent();
-            SetupPictureBuffer(new PrimaryPicture(new FilePath(""), new Bitmap(1, 1)));
+            SaveTo = new FilePath("");
+            SetupPictureBuffer(new PrimaryPicture(new Bitmap(1, 1)));
         }
 
         public PictureWindow(Size size, IDrawingArea d)
@@ -31,18 +32,26 @@ namespace Eede.Ui
             {
                 g.FillRectangle(Brushes.White, new Rectangle(new Point(0, 0), size));
             }
-            Text = "新規ファイル";
-            SetupPictureBuffer(new PrimaryPicture(new FilePath(""), bmp));
+            UpdateSaveTo(new FilePath(""));
+            SetupPictureBuffer(new PrimaryPicture(bmp));
             DrawingArea = d;
         }
 
         public PictureWindow(FilePath filename, IDrawingArea d)
         {
             InitializeComponent();
-            var picture = new PictureQuerySurvice().Fetch(filename);
+            UpdateSaveTo(filename);
+            var picture = new PictureFileReader().Read(SaveTo);
             SetupPictureBuffer(picture);
-            Text = filename.Path;
             DrawingArea = d;
+        }
+
+        private FilePath SaveTo;
+
+        private void UpdateSaveTo(FilePath path)
+        {
+            SaveTo = path;
+            Text = path.IsEmpty() ? "新規ファイル" : path.Path;
         }
 
         private HalfBoxPosition CursorPosition;
@@ -81,8 +90,7 @@ namespace Eede.Ui
 
         public void Rename(FilePath path)
         {
-            PictureBuffer = PictureBuffer.Rename(path);
-            Text = path.Path;
+            UpdateSaveTo(path);
         }
 
         public void ResizePicture(Size size)
@@ -118,7 +126,7 @@ namespace Eede.Ui
 
         internal bool IsEmptyFileName()
         {
-            return PictureBuffer.IsEmptyFileName();
+            return SaveTo.IsEmpty();
         }
 
         private void DrawCursor(Graphics g)
@@ -135,7 +143,7 @@ namespace Eede.Ui
 
         internal void Save()
         {
-            PictureBuffer.Save(new PictureCommandService());
+            new PictureFileWriter(SaveTo).Write(PictureBuffer);
         }
 
         private bool CursorVisible = false;
@@ -201,10 +209,10 @@ namespace Eede.Ui
     public class PrimaryPictureArea
     {
         private FilePath FilePath;
-        private IPictureCommandService Command;
-        private IPictureQueryService Service;
+        private IPictureWriter Command;
+        private IPictureReader Service;
 
-        public PrimaryPictureArea(FilePath filePath, IPictureCommandService command, IPictureQueryService service)
+        public PrimaryPictureArea(FilePath filePath, IPictureWriter command, IPictureReader service)
         {
             FilePath = filePath;
             Command = command;

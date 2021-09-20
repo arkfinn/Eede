@@ -4,15 +4,8 @@ using Eede.ImageTransfers;
 using Eede.Settings;
 using Eede.Ui;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
 
 namespace Eede
 {
@@ -26,22 +19,18 @@ namespace Eede
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
         }
 
         private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
         {
-
         }
 
         private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
         {
-
         }
 
         private void splitContainer1_Panel2_Paint_1(object sender, PaintEventArgs e)
         {
-
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -118,22 +107,20 @@ namespace Eede
 
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
-            var child = ActiveMdiChild as PictureWindow;
-            if (child == null) return;
-            if (child.IsEmptyFileName())
-            {
-                RenameChildFile(child);
-            }
+            if (!(ActiveMdiChild is PictureWindow child)) return;
+            if (child.IsEmptyFileName() && !RenameChildFile(child)) return;
+
             child.Save();
         }
 
-        private void RenameChildFile(PictureWindow child)
+        private bool RenameChildFile(PictureWindow child)
         {
             if (saveFileDialog1.ShowDialog() != DialogResult.OK)
             {
-                return;
+                return false;
             }
             child.Rename(new FilePath(saveFileDialog1.FileName));
+            return true;
         }
 
         private void toolStripButton_openFile_Click(object sender, EventArgs e)
@@ -164,7 +151,6 @@ namespace Eede
 
         private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
-
         }
 
         private void toolStripButton12_Click(object sender, EventArgs e)
@@ -258,9 +244,7 @@ namespace Eede
             toolStripButton9.Checked = false;
             toolStripButton10.Checked = false;
             toolStripButton11.Checked = true;
-
         }
-
 
         private void colorPicker1_ColorChanged(object sender, EventArgs e)
         {

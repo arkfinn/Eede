@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace Eede.Domain.Pictures
 {
-    public interface IPictureQueryService
+    public interface IPictureReader
     {
-       PrimaryPicture Fetch(FilePath filename);
+       PrimaryPicture Read(FilePath filename);
     }
 }

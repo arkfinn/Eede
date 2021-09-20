@@ -1,6 +1,6 @@
-﻿using Eede.ImageBlenders;
+﻿using Eede.Domain.PaintLayers;
+using Eede.ImageBlenders;
 using Eede.ImageTransfers;
-using Eede.PaintLayers;
 using Eede.PenStyles;
 using Eede.Positions;
 using Eede.Services;
@@ -8,7 +8,6 @@ using Eede.Settings;
 using Eede.Sizes;
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace Eede.Ui
@@ -24,9 +23,10 @@ namespace Eede.Ui
             canvas.Image = new Bitmap(Buffer.Bmp);
         }
 
-        private MagnifiedSize PaintAreaSize { get; set; } 
+        private MagnifiedSize PaintAreaSize { get; set; }
 
         private AlphaPicture Buffer;
+
         public Size DrawingSize
         {
             get
@@ -34,8 +34,6 @@ namespace Eede.Ui
                 return Buffer.Size;
             }
         }
-
-
 
         public Bitmap GetImage()
         {
@@ -52,7 +50,9 @@ namespace Eede.Ui
             }
             SetSize();
         }
+
         private PenCase mPen;
+
         private PenCase PenCase
         {
             get
@@ -67,6 +67,7 @@ namespace Eede.Ui
         }
 
         private Magnification m = new Magnification(1);
+
         public float Magnification
         {
             set
@@ -75,11 +76,11 @@ namespace Eede.Ui
                 SetSize();
             }
         }
+
         public IPenStyle PenStyle { get; set; } = new FreeCurve();
         protected Bitmap DrawBuffer { get; set; }
 
         private bool IsDrawing = false;
-
 
         public void SetPenColor(Color col)
         {
@@ -90,6 +91,7 @@ namespace Eede.Ui
         {
             return PenCase.Color;
         }
+
         public void SetPenSize(int size)
         {
             PenCase.Width = size;
@@ -106,13 +108,14 @@ namespace Eede.Ui
             this.Refresh();
             //colorBox.Invalidate();
         }
+
         public void ChangeImageBlender(IImageBlender b)
         {
             PenCase.Blender = b;
         }
 
-
         private IImageTransfer imageTransfer = new DirectImageTransfer();
+
         public void ChangeImageTransfer(IImageTransfer i)
         {
             imageTransfer = i;
@@ -146,6 +149,7 @@ namespace Eede.Ui
         }
 
         #region イベント
+
         private void PaintableBox_SizeChanged(object sender, EventArgs e)
         {
             // Buffer.Bmp = new Bitmap(Buffer.Bmp, colorBox.Width, colorBox.Height);
@@ -153,6 +157,7 @@ namespace Eede.Ui
         }
 
         public event EventHandler ColorChanged;
+
         private void fireColorChanged()
         {
             this.ColorChanged?.Invoke(this, EventArgs.Empty);
@@ -203,14 +208,12 @@ namespace Eede.Ui
                 default:
                     break;
             }
-
         }
 
         private Color DropColor(MinifiedPosition pos)
         {
             var dropper = new ColorDropper(Buffer.Bmp);
             return dropper.Drop(pos.ToPosition());
-
         }
 
         private bool IsShift()
@@ -231,7 +234,6 @@ namespace Eede.Ui
             UpdatePositionHistory(pos);
             PenStyle.Drawing(Buffer, PenCase, PositionHistory, IsShift());
             canvas.Invalidate();
-
         }
 
         private void colorBox_MouseUp(object sender, MouseEventArgs e)
@@ -258,7 +260,6 @@ namespace Eede.Ui
             PaintUpdate(e.Graphics);
         }
 
-        #endregion
+        #endregion イベント
     }
-
 }

@@ -42,8 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Pictures\PictureCommandService.cs" />
-    <Compile Include="Pictures\PictureQuerySurvice.cs" />
+    <Compile Include="Pictures\PictureFileWriter.cs" />
+    <Compile Include="Pictures\PictureFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

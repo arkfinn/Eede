@@ -1,18 +1,12 @@
 ﻿using Eede.ImageTransfers;
 using Eede.Sizes;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Eede.PaintLayers
+namespace Eede.Domain.PaintLayers
 {
     public
     class PaintBufferLayer : IPaintLayer
     {
-
         private readonly IPaintLayer UpperLayer;
         private readonly MagnifiedSize PaintSize;
         private readonly Bitmap Source;

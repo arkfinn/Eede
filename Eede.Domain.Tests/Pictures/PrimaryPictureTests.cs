@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Files;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Eede.Domain.Pictures.Tests
 {
@@ -7,10 +6,12 @@ namespace Eede.Domain.Pictures.Tests
     public class PrimaryPictureTests
     {
         [Test]
-        public void IsEmptyFileNameTest()
+        public void 引数imageがnullでnewはできない()
         {
-            var p = new PrimaryPicture(new FilePath(""), new System.Drawing.Bitmap(1, 1));
-            Assert.AreEqual(true, p.IsEmptyFileName());
+            Assert.Throws<System.ArgumentNullException>(() =>
+            {
+                var p = new PrimaryPicture(null);
+            });
         }
     }
 }

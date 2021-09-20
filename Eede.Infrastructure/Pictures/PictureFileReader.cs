@@ -4,13 +4,13 @@ using System.Drawing;
 
 namespace Eede.Infrastructure.Pictures
 {
-    public class PictureQuerySurvice : IPictureQueryService
+    public class PictureFileReader : IPictureReader
     {
-        public PrimaryPicture Fetch(FilePath filename)
+        public PrimaryPicture Read(FilePath filename)
         {
             using (var image = Image.FromFile(filename.Path))
             {
-                return new PrimaryPicture(filename, new Bitmap(image));
+                return new PrimaryPicture(new Bitmap(image));
             }
         }
     }

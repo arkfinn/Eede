@@ -1,20 +1,13 @@
 ﻿using Eede.Domain.Files;
 using Eede.Domain.Pictures;
 using Eede.ImageTransfers;
-using Eede.Infrastructure;
 using Eede.Infrastructure.Pictures;
 using Eede.Positions;
 using Eede.Services;
 using Eede.Settings;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Eede.Ui
@@ -51,11 +44,13 @@ namespace Eede.Ui
             Text = filename.Path;
             DrawingArea = d;
         }
-        HalfBoxPosition CursorPosition;
+
+        private HalfBoxPosition CursorPosition;
 
         private IDrawingArea DrawingArea;
 
         public event EventHandler<BitmapEventArgs> PicturePulled;
+
         private void InvokePicturePulled(BitmapEventArgs args)
         {
             if (PicturePulled == null) return;
@@ -63,6 +58,7 @@ namespace Eede.Ui
         }
 
         public event EventHandler<PicturePushedEventArgs> PicturePushed;
+
         private void InvokePicturePushed(PicturePushedEventArgs args)
         {
             if (PicturePushed == null) return;
@@ -77,7 +73,7 @@ namespace Eede.Ui
             PictureBuffer = picture;
             if (old != null)
             {
-                old.Buffer.Dispose();
+                old.Dispose();
             }
             ResizePicture(picture.Buffer.Size);
             pictureBox1.Invalidate();
@@ -85,8 +81,8 @@ namespace Eede.Ui
 
         public void Rename(FilePath path)
         {
-                PictureBuffer = PictureBuffer.Rename(path);
-                Text = path.Path;
+            PictureBuffer = PictureBuffer.Rename(path);
+            Text = path.Path;
         }
 
         public void ResizePicture(Size size)
@@ -163,7 +159,6 @@ namespace Eede.Ui
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-
         }
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
@@ -175,6 +170,7 @@ namespace Eede.Ui
                     InvokePicturePushed(new PicturePushedEventArgs(PictureBuffer.Buffer, CursorPosition.RealPosition));
                     Refresh();
                     break;
+
                 case MouseButtons.Right:
                     var rect = CursorPosition.CreateRealRectangle(FetchBoxSize());
                     var bmpNew = PictureBuffer.Buffer.Clone(rect, PictureBuffer.Buffer.PixelFormat);
@@ -202,7 +198,8 @@ namespace Eede.Ui
         }
     }
 
-    public class PrimaryPictureArea {
+    public class PrimaryPictureArea
+    {
         private FilePath FilePath;
         private IPictureCommandService Command;
         private IPictureQueryService Service;

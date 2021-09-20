@@ -4,15 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4D2B8313-02E1-4977-AECA-925F6F636C7C}</ProjectGuid>
+    <ProjectGuid>{4E2689A4-9A26-4181-B3C4-EB04ADB6905B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Eede</RootNamespace>
-    <AssemblyName>EedeCore</AssemblyName>
+    <RootNamespace>Eede.Infrastructure</RootNamespace>
+    <AssemblyName>Eede.Infrastructure</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -44,12 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Pictures\PictureCommandService.cs" />
+    <Compile Include="Pictures\PictureQuerySurvice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Eede.Domain\Eede.Domain.csproj">
-      <Project>{00a5cb38-bf15-422e-8b32-a26e30ccc9db}</Project>
+      <Project>{00A5CB38-BF15-422E-8B32-A26E30CCC9DB}</Project>
       <Name>Eede.Domain</Name>
     </ProjectReference>
   </ItemGroup>

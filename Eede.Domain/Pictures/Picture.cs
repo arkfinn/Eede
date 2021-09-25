@@ -3,9 +3,9 @@ using System.Drawing;
 
 namespace Eede.Domain.Pictures
 {
-    public class PrimaryPicture : IDisposable
+    public class Picture : IDisposable
     {
-        public PrimaryPicture(Image image)
+        public Picture(Image image)
         {
             if (image == null)
             {
@@ -15,6 +15,11 @@ namespace Eede.Domain.Pictures
         }
 
         public Bitmap Buffer { get; private set; }
+
+        public Bitmap CutOut(Rectangle rect)
+        {
+            return Buffer.Clone(rect, Buffer.PixelFormat);
+        }
 
         public Image ToImage()
         {
@@ -26,7 +31,7 @@ namespace Eede.Domain.Pictures
             Dispose(true);
         }
 
-        ~PrimaryPicture()
+        ~Picture()
         {
             Dispose(false);
         }

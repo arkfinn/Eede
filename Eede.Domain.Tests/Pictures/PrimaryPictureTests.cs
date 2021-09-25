@@ -10,7 +10,7 @@ namespace Eede.Domain.Pictures.Tests
         {
             Assert.Throws<System.ArgumentNullException>(() =>
             {
-                var p = new PrimaryPicture(null);
+                var p = new Picture(null);
             });
         }
     }

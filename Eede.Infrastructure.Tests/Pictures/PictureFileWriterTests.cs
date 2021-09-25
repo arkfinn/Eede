@@ -15,9 +15,9 @@ namespace Eede.Infrastructure.Pictures.Tests
             string saveFilepath = Environment.CurrentDirectory + "\\SamplePictures\\SavePngFile.png";
             File.Delete(saveFilepath);
             var filepath = new FilePath(Environment.CurrentDirectory + "\\SamplePictures\\PngFile.png");
-            var reader = new PictureFileReader();
+            var reader = new PictureFileReader(filepath);
             var writer = new PictureFileWriter(new FilePath(saveFilepath));
-            using (var picture = reader.Read(filepath))
+            using (var picture = reader.Read())
             {
                 writer.Write(picture);
             }
@@ -40,7 +40,7 @@ namespace Eede.Infrastructure.Pictures.Tests
         }
 
         [Test]
-        public void 引数Pathの中身が空でWriteはできない()
+        public void 引数Pathの中身が空でnewはできない()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {

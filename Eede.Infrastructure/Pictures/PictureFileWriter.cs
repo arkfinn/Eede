@@ -1,4 +1,5 @@
-﻿using Eede.Domain.Files;
+﻿using Eede.Application.Pictures;
+using Eede.Domain.Files;
 using Eede.Domain.Pictures;
 using System;
 
@@ -17,7 +18,7 @@ namespace Eede.Infrastructure.Pictures
             }
         }
 
-        public void Write(PrimaryPicture picture)
+        public void Write(Picture picture)
         {
             if (picture == null)
             {

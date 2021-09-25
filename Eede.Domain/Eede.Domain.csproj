@@ -68,9 +68,7 @@
     <Compile Include="PenStyles\IPenStyle.cs" />
     <Compile Include="PenStyles\Line.cs" />
     <Compile Include="PicturePushedEventArgs.cs" />
-    <Compile Include="Pictures\IPictureWriter.cs" />
-    <Compile Include="Pictures\IPictureReader.cs" />
-    <Compile Include="Pictures\PrimaryPicture.cs" />
+    <Compile Include="Pictures\Picture.cs" />
     <Compile Include="Positions\MinifiedPosition.cs" />
     <Compile Include="Positions\Position.cs" />
     <Compile Include="Positions\PositionHistory.cs" />

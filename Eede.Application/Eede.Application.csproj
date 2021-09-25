@@ -41,7 +41,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Pictures\IPictureReader.cs" />
+    <Compile Include="Pictures\IPictureWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Eede.Domain\Eede.Domain.csproj">
+      <Project>{00A5CB38-BF15-422E-8B32-A26E30CCC9DB}</Project>
+      <Name>Eede.Domain</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

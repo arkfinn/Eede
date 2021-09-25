@@ -1,4 +1,5 @@
-﻿using Eede.Domain.Files;
+﻿using Eede.Application.Pictures;
+using Eede.Domain.Files;
 using Eede.Domain.Pictures;
 using Eede.ImageTransfers;
 using Eede.Infrastructure.Pictures;
@@ -21,7 +22,7 @@ namespace Eede.Ui
         {
             InitializeComponent();
             SaveTo = new FilePath("");
-            SetupPictureBuffer(new PrimaryPicture(new Bitmap(1, 1)));
+            SetupPictureBuffer(new Picture(new Bitmap(1, 1)));
         }
 
         public PictureWindow(Size size, IDrawingArea d)
@@ -33,7 +34,7 @@ namespace Eede.Ui
                 g.FillRectangle(Brushes.White, new Rectangle(new Point(0, 0), size));
             }
             UpdateSaveTo(new FilePath(""));
-            SetupPictureBuffer(new PrimaryPicture(bmp));
+            SetupPictureBuffer(new Picture(bmp));
             DrawingArea = d;
         }
 
@@ -41,7 +42,7 @@ namespace Eede.Ui
         {
             InitializeComponent();
             UpdateSaveTo(filename);
-            var picture = new PictureFileReader().Read(SaveTo);
+            var picture = new PictureFileReader(filename).Read();
             SetupPictureBuffer(picture);
             DrawingArea = d;
         }
@@ -74,9 +75,9 @@ namespace Eede.Ui
             PicturePushed(this, args);
         }
 
-        private PrimaryPicture PictureBuffer { get; set; }
+        private Picture PictureBuffer { get; set; }
 
-        private void SetupPictureBuffer(PrimaryPicture picture)
+        private void SetupPictureBuffer(Picture picture)
         {
             var old = PictureBuffer;
             PictureBuffer = picture;
@@ -181,7 +182,7 @@ namespace Eede.Ui
 
                 case MouseButtons.Right:
                     var rect = CursorPosition.CreateRealRectangle(FetchBoxSize());
-                    var bmpNew = PictureBuffer.Buffer.Clone(rect, PictureBuffer.Buffer.PixelFormat);
+                    var bmpNew = PictureBuffer.CutOut(rect);
                     try
                     {
                         InvokePicturePulled(new BitmapEventArgs(bmpNew));

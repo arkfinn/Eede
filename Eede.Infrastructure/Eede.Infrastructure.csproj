@@ -47,6 +47,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Eede.Application\Eede.Application.csproj">
+      <Project>{abbc3e52-383b-4a94-91a1-e6dcda3c019f}</Project>
+      <Name>Eede.Application</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Eede.Domain\Eede.Domain.csproj">
       <Project>{00A5CB38-BF15-422E-8B32-A26E30CCC9DB}</Project>
       <Name>Eede.Domain</Name>

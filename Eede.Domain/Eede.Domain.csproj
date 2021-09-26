@@ -44,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AlphaPicture.cs" />
-    <Compile Include="BitmapEventArgs.cs" />
     <Compile Include="ColorDropper.cs" />
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="HalfBoxPosition.cs" />
@@ -67,7 +66,6 @@
     <Compile Include="PenStyles\FreeCurve.cs" />
     <Compile Include="PenStyles\IPenStyle.cs" />
     <Compile Include="PenStyles\Line.cs" />
-    <Compile Include="PicturePushedEventArgs.cs" />
     <Compile Include="Pictures\Picture.cs" />
     <Compile Include="Positions\MinifiedPosition.cs" />
     <Compile Include="Positions\Position.cs" />

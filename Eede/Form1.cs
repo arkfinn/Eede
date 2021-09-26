@@ -1,10 +1,10 @@
-﻿using Eede.Domain.Files;
+﻿using Eede.Application.Pictures;
+using Eede.Domain.Files;
 using Eede.ImageBlenders;
 using Eede.ImageTransfers;
 using Eede.Settings;
 using Eede.Ui;
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace Eede
@@ -78,7 +78,7 @@ namespace Eede
         {
             form.MdiParent = this;
             form.FormClosed += new FormClosedEventHandler(ChildFormClosed);
-            form.PicturePulled += new EventHandler<BitmapEventArgs>(ChildFormPicturePulled);
+            form.PicturePulled += new EventHandler<PicturePulledEventArgs>(ChildFormPicturePulled);
             form.PicturePushed += new EventHandler<PicturePushedEventArgs>(ChildFormPicturePushed);
             form.Show();
             toolStripButton_saveFile.Enabled = true;
@@ -90,9 +90,9 @@ namespace Eede
             toolStripButton_saveFile.Enabled = false;
         }
 
-        private void ChildFormPicturePulled(object sender, BitmapEventArgs e)
+        private void ChildFormPicturePulled(object sender, PicturePulledEventArgs e)
         {
-            paintableBox1.SetupImage((Bitmap)e.Bitmap.Clone());
+            paintableBox1.SetupImage(e.CutOutImage());
         }
 
         private void ChildFormPicturePushed(object sender, PicturePushedEventArgs e)
@@ -102,7 +102,7 @@ namespace Eede
             //e.Bitmap.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
             //e.Bitmap.DrawImage(src, new Rectangle(e.Position, src.Size));
             var blender = new DirectImageBlender();
-            blender.Blend(src, e.Bitmap, e.Position);
+            blender.Blend(src, e.Picture.Buffer, e.Position);
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)

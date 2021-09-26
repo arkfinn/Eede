@@ -59,9 +59,9 @@ namespace Eede.Ui
 
         private IDrawingArea DrawingArea;
 
-        public event EventHandler<BitmapEventArgs> PicturePulled;
+        public event EventHandler<PicturePulledEventArgs> PicturePulled;
 
-        private void InvokePicturePulled(BitmapEventArgs args)
+        private void InvokePicturePulled(PicturePulledEventArgs args)
         {
             if (PicturePulled == null) return;
             PicturePulled(this, args);
@@ -176,22 +176,13 @@ namespace Eede.Ui
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    InvokePicturePushed(new PicturePushedEventArgs(PictureBuffer.Buffer, CursorPosition.RealPosition));
+                    InvokePicturePushed(new PicturePushedEventArgs(PictureBuffer, CursorPosition.RealPosition));
                     Refresh();
                     break;
 
                 case MouseButtons.Right:
                     var rect = CursorPosition.CreateRealRectangle(FetchBoxSize());
-                    var bmpNew = PictureBuffer.CutOut(rect);
-                    try
-                    {
-                        InvokePicturePulled(new BitmapEventArgs(bmpNew));
-                    }
-                    finally
-                    {
-                        bmpNew.Dispose();
-                    }
-
+                    InvokePicturePulled(new PicturePulledEventArgs(PictureBuffer, rect));
                     break;
             }
         }

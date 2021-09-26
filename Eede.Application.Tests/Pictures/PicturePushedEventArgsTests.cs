@@ -1,9 +1,10 @@
-﻿using Eede.Positions;
+﻿using Eede.Domain.Pictures;
+using Eede.Positions;
 using NUnit.Framework;
 using System;
 using System.Drawing;
 
-namespace Eede.Tests
+namespace Eede.Application.Pictures.Tests
 {
     [TestFixture]
     public class PicturePushedEventArgsTests
@@ -11,9 +12,9 @@ namespace Eede.Tests
         [Test]
         public void PicturePushedEventArgsTest()
         {
-            var b = new Bitmap(1, 1);
+            var b = new Picture(new Bitmap(1, 1));
             var p = new PicturePushedEventArgs(b, new Position(2, 2));
-            Assert.AreEqual(b, p.Bitmap);
+            Assert.AreEqual(b, p.Picture);
             Assert.AreEqual(new Position(2, 2), p.Position);
         }
 
@@ -31,7 +32,8 @@ namespace Eede.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                var h = new PicturePushedEventArgs(new Bitmap(1, 1), null);
+                var b = new Picture(new Bitmap(1, 1));
+                var h = new PicturePushedEventArgs(b, null);
             });
         }
     }

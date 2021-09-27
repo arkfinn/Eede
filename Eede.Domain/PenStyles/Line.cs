@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Eede.Domain.Positions;
+using System;
 using System.Drawing;
-using Eede.Positions;
 
 namespace Eede.PenStyles
 {
@@ -11,12 +9,12 @@ namespace Eede.PenStyles
         #region IPenStyle メンバ
 
         private Bitmap mBuffer;
+
         public Bitmap Buffer
         {
             get { return mBuffer; }
             set { mBuffer = value; }
         }
-
 
         public void DrawBegin(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
@@ -26,7 +24,6 @@ namespace Eede.PenStyles
 
         public void DrawEnd(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
-
         }
 
         public void Drawing(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
@@ -40,7 +37,7 @@ namespace Eede.PenStyles
 
             if (aBitmap.IsInnerBitmap(positions.Now))
             {
-                DrawLine(aBitmap,pen, positions.Start, endPoint, lastRect);
+                DrawLine(aBitmap, pen, positions.Start, endPoint, lastRect);
             }
             else if (aBitmap.IsInnerBitmap(positions.Start))
             {
@@ -53,13 +50,12 @@ namespace Eede.PenStyles
             aBitmap.Bmp = new Bitmap(Buffer);
             using (Graphics g = aBitmap.GetGraphics())
             {
-            //    g.DrawImageUnscaled(Buffer, 0, 0,Buffer.Width,Buffer.Height);
+                //    g.DrawImageUnscaled(Buffer, 0, 0,Buffer.Width,Buffer.Height);
                 g.DrawLine(pen.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
             }
         }
 
-
-        #endregion
+        #endregion IPenStyle メンバ
 
         private Position GetShiftLinePos(Position beginPos, Position endPos)
         {
@@ -73,30 +69,37 @@ namespace Eede.PenStyles
                 case 16:
                     revise = new Point(-1, 0);
                     break;
+
                 case 1:
                 case 2:
                     revise = new Point(-1, -1);
                     break;
+
                 case 3:
                 case 4:
                     revise = new Point(0, -1);
                     break;
+
                 case 5:
                 case 6:
                     revise = new Point(1, -1);
                     break;
+
                 case 7:
                 case 8:
                     revise = new Point(1, 0);
                     break;
+
                 case 9:
                 case 10:
                     revise = new Point(1, 1);
                     break;
+
                 case 11:
                 case 12:
                     revise = new Point(0, 1);
                     break;
+
                 case 13:
                 case 14:
                     revise = new Point(-1, 1);

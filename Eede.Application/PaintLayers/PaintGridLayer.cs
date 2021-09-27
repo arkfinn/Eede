@@ -1,8 +1,8 @@
-﻿using Eede.Sizes;
+﻿using Eede.Domain.Sizes;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-namespace Eede.Domain.PaintLayers
+namespace Eede.Application.PaintLayers
 {
     public class PaintGridLayer : IPaintLayer
     {

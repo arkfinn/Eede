@@ -1,7 +1,8 @@
-﻿using NUnit.Framework;
+﻿using Eede.Domain.Scales;
+using NUnit.Framework;
 using System;
 
-namespace Eede.Positions.Tests
+namespace Eede.Domain.Positions.Tests
 {
     [TestFixture]
     public class MinifiedPositionTests

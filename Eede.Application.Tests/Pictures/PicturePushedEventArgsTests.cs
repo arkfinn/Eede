@@ -1,5 +1,5 @@
 ﻿using Eede.Domain.Pictures;
-using Eede.Positions;
+using Eede.Domain.Positions;
 using NUnit.Framework;
 using System;
 using System.Drawing;

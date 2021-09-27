@@ -1,9 +1,9 @@
 ﻿using Eede.Application.Pictures;
 using Eede.Domain.Files;
 using Eede.Domain.Pictures;
+using Eede.Domain.Positions;
 using Eede.ImageTransfers;
 using Eede.Infrastructure.Pictures;
-using Eede.Positions;
 using Eede.Services;
 using Eede.Settings;
 using System;

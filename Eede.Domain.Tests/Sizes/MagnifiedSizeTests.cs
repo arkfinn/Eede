@@ -1,8 +1,9 @@
-﻿using NUnit.Framework;
+﻿using Eede.Domain.Scales;
+using NUnit.Framework;
 using System;
 using System.Drawing;
 
-namespace Eede.Sizes.Tests
+namespace Eede.Domain.Sizes.Tests
 {
     [TestFixture]
     public class MagnifiedSizeTests

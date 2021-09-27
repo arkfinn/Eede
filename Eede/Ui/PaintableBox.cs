@@ -1,11 +1,12 @@
-﻿using Eede.Domain.PaintLayers;
+﻿using Eede.Application.PaintLayers;
+using Eede.Domain.Positions;
+using Eede.Domain.Scales;
+using Eede.Domain.Sizes;
 using Eede.ImageBlenders;
 using Eede.ImageTransfers;
 using Eede.PenStyles;
-using Eede.Positions;
 using Eede.Services;
 using Eede.Settings;
-using Eede.Sizes;
 using System;
 using System.Drawing;
 using System.Windows.Forms;

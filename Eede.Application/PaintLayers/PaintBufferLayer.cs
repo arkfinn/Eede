@@ -1,8 +1,8 @@
-﻿using Eede.ImageTransfers;
-using Eede.Sizes;
+﻿using Eede.Domain.Sizes;
+using Eede.ImageTransfers;
 using System.Drawing;
 
-namespace Eede.Domain.PaintLayers
+namespace Eede.Application.PaintLayers
 {
     public
     class PaintBufferLayer : IPaintLayer

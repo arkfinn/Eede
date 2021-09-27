@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using Eede.Positions;
+﻿using Eede.Domain.Positions;
 
 namespace Eede.PenStyles
 {
     public class Fill : IPenStyle
     {
-
         public void DrawBegin(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
             aBitmap.Fill(positions.Now, pen.PreparePen().Color);
@@ -16,14 +11,10 @@ namespace Eede.PenStyles
 
         public void Drawing(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
-
         }
 
         public void DrawEnd(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
         }
-
-
-
     }
 }

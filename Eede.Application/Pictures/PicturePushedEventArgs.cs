@@ -1,5 +1,5 @@
 ﻿using Eede.Domain.Pictures;
-using Eede.Positions;
+using Eede.Domain.Positions;
 using System;
 
 namespace Eede.Application.Pictures

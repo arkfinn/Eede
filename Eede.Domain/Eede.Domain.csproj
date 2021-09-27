@@ -47,7 +47,6 @@
     <Compile Include="ColorDropper.cs" />
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="HalfBoxPosition.cs" />
-    <Compile Include="PaintLayers\ICanvasBackgroundService.cs" />
     <Compile Include="ImageBlenders\AlphaOnlyImageBlender.cs" />
     <Compile Include="ImageBlenders\DirectImageBlender.cs" />
     <Compile Include="ImageBlenders\IImageBlender.cs" />
@@ -56,11 +55,7 @@
     <Compile Include="ImageTransfers\DirectImageTransfer.cs" />
     <Compile Include="ImageTransfers\IImageTransfer.cs" />
     <Compile Include="ImageTransfers\RGBToneImageTransfer.cs" />
-    <Compile Include="Magnification.cs" />
-    <Compile Include="PaintLayers\IPaintLayer.cs" />
-    <Compile Include="PaintLayers\PaintBackgroundLayer.cs" />
-    <Compile Include="PaintLayers\PaintBufferLayer.cs" />
-    <Compile Include="PaintLayers\PaintGridLayer.cs" />
+    <Compile Include="Scales\Magnification.cs" />
     <Compile Include="PenCase.cs" />
     <Compile Include="PenStyles\Fill.cs" />
     <Compile Include="PenStyles\FreeCurve.cs" />

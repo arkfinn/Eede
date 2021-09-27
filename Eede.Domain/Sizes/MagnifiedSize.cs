@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Eede.Domain.Scales;
+using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Eede.Sizes
+namespace Eede.Domain.Sizes
 {
     public class MagnifiedSize
     {

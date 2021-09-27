@@ -52,7 +52,7 @@
     <Compile Include="ColorDropperTests.cs" />
     <Compile Include="Files\FilePathTests.cs" />
     <Compile Include="HalfBoxPositionTests.cs" />
-    <Compile Include="MagnificationTests.cs" />
+    <Compile Include="Scales\MagnificationTests.cs" />
     <Compile Include="Pictures\PrimaryPictureTests.cs" />
     <Compile Include="Positions\MinifiedPositionTests.cs" />
     <Compile Include="Positions\PositionHistoryTests.cs" />

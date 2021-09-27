@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using Eede.Positions;
+﻿using Eede.Domain.Positions;
 
 namespace Eede.PenStyles
 {
     public class FreeCurve : IPenStyle
     {
-
         public void DrawBegin(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
             aBitmap.DrawPoint(pen, positions.Now);

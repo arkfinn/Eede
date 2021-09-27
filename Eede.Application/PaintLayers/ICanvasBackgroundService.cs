@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Eede.Domain.PaintLayers
+namespace Eede.Application.PaintLayers
 {
     public interface ICanvasBackgroundService
     {

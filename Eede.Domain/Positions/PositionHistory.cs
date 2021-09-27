@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Eede.Positions
+namespace Eede.Domain.Positions
 {
     public class PositionHistory
     {
         public readonly Position Start;
         public readonly Position Last;
         public readonly Position Now;
+
         public PositionHistory(Position start)
         {
             Start = start ?? throw new ArgumentNullException(nameof(start));

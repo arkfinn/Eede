@@ -1,16 +1,14 @@
-﻿using Eede.Positions;
-using Eede.Sizes;
-using System;
-using System.Drawing;
+﻿using System;
 
-namespace Eede
+namespace Eede.Domain.Scales
 {
     /// <summary>
     /// ValueObject
     /// </summary>
     public class Magnification
     {
-        readonly float magnification;
+        private readonly float magnification;
+
         public Magnification(float magnification)
         {
             if (magnification <= 0)

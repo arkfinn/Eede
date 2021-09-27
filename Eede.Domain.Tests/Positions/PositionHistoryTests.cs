@@ -1,8 +1,7 @@
-﻿using Eede.Positions;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 
-namespace Eede.Tests
+namespace Eede.Domain.Positions.Tests
 {
     [TestFixture]
     public class PositionHistoryTests

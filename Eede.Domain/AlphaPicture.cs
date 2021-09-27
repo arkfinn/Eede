@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using System.IO;
-using System.Drawing.Imaging;
-using System.Drawing.Drawing2D;
+﻿using Eede.Domain.Positions;
 using Eede.ImageBlenders;
-using Eede.Positions;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 namespace Eede
 {
     public class AlphaPicture : IDisposable
     {
         private Bitmap mBitmap;
+
         public Bitmap Bmp
         {
             get { return mBitmap; }
@@ -30,7 +29,6 @@ namespace Eede
             }
         }
 
-
         #region コンストラクタ
 
         public AlphaPicture(Bitmap bitmap)
@@ -38,7 +36,6 @@ namespace Eede
             //newすると強制的にPixelFormat.Format32bppArgbになる
             Bmp = new Bitmap(bitmap);
         }
-
 
         ///// <summary>
         ///// 指定した既存のイメージを使用して、 ABitmap クラスの新しいインスタンスを初期化します。
@@ -73,7 +70,6 @@ namespace Eede
 
         ///// <summary>
         ///// 指定したサイズを使用して、指定した既存のイメージで ABitmap クラスの新しいインスタンスを初期化します。
-
 
         /////// </summary>
         /////// <param name="img"></param>
@@ -113,7 +109,6 @@ namespace Eede
         //    Bmp = new Bitmap(s, b);
         //}
 
-
         ///// <summary>
         ///// 指定したリソースで Bitmap クラスの新しいインスタンスを初期化します。
         ///// </summary>
@@ -123,7 +118,6 @@ namespace Eede
         //{
         //    Bmp = new Bitmap(t, s);
         //}
-
 
         ///// <summary>
         ///// 指定したサイズを使用して、指定した既存のイメージで Bitmap クラスの新しいインスタンスを初期化します。
@@ -135,7 +129,6 @@ namespace Eede
         //{
         //    Bmp = new Bitmap(img, x, y);
         //}
-
 
         ///// <summary>
         ///// 指定したサイズと指定した Graphics オブジェクトの解像度を使用して、 Bitmap クラスの新しいインスタンスを初期化します。
@@ -164,59 +157,60 @@ public ABitmap(int x, int y, PixelFormat pxf)
 [C++] public: Bitmap(int, int, int, PixelFormat, IntPtr);
 [JScript] public function Bitmap(int, int, int, PixelFormat, IntPtr);
         */
-        #endregion
+
+        #endregion コンストラクタ
 
         #region Bitmapのラッププロパティ
-        //Flags (Image から継承されます) この Image オブジェクトの属性フラグを取得します。 
-        //FrameDimensionsList (Image から継承されます) この Image オブジェクト内のフレームのディメンションを表す GUID の配列を取得します。 
+
+        //Flags (Image から継承されます) この Image オブジェクトの属性フラグを取得します。
+        //FrameDimensionsList (Image から継承されます) この Image オブジェクト内のフレームのディメンションを表す GUID の配列を取得します。
 
         /// <summary>
-        /// このイメージの高さを取得します。 
+        /// このイメージの高さを取得します。
         /// </summary>
         public int Height
         {
             get { return Bmp.Height; }
         }
 
-        //HorizontalResolution (Image から継承されます) この Image オブジェクトの水平方向の解像度を 1 インチあたりのピクセル数で取得します。 
-        //Palette (Image から継承されます) この Image オブジェクトに使用する、カラー パレットを取得または設定します。 
-        //PhysicalDimension (Image から継承されます) このイメージの幅と高さを取得します。 
-        //PixelFormat (Image から継承されます) この Image オブジェクトのピクセル形式を取得します。 
-        //PropertyIdList (Image から継承されます) この Image オブジェクトに格納されたプロパティ項目の ID を取得します。 
-        //PropertyItems (Image から継承されます) この Image オブジェクトに格納されたすべてのプロパティ項目 (メタデータの一部) を取得します。 
-        //RawFormat (Image から継承されます) この Image オブジェクトの形式を取得します。 
+        //HorizontalResolution (Image から継承されます) この Image オブジェクトの水平方向の解像度を 1 インチあたりのピクセル数で取得します。
+        //Palette (Image から継承されます) この Image オブジェクトに使用する、カラー パレットを取得または設定します。
+        //PhysicalDimension (Image から継承されます) このイメージの幅と高さを取得します。
+        //PixelFormat (Image から継承されます) この Image オブジェクトのピクセル形式を取得します。
+        //PropertyIdList (Image から継承されます) この Image オブジェクトに格納されたプロパティ項目の ID を取得します。
+        //PropertyItems (Image から継承されます) この Image オブジェクトに格納されたすべてのプロパティ項目 (メタデータの一部) を取得します。
+        //RawFormat (Image から継承されます) この Image オブジェクトの形式を取得します。
 
         /// <summary>
-        /// このイメージの幅と高さ (ピクセル単位) を取得します。 
+        /// このイメージの幅と高さ (ピクセル単位) を取得します。
         /// </summary>
         public Size Size
         {
             get { return Bmp.Size; }
         }
 
-        //VerticalResolution (Image から継承されます) この Image オブジェクトの垂直方向の解像度を 1 インチあたりのピクセル数で取得します。 
+        //VerticalResolution (Image から継承されます) この Image オブジェクトの垂直方向の解像度を 1 インチあたりのピクセル数で取得します。
 
         /// <summary>
-        ///  このイメージの幅を取得します。 
+        ///  このイメージの幅を取得します。
         /// </summary>
         public int Width
         {
             get { return Bmp.Width; }
         }
 
-
-
-        #endregion
+        #endregion Bitmapのラッププロパティ
 
         #region Bitmapのラップメソッド
 
         //
 
-        //Clone オーバーロード。 指定された PixelFormat で定義されたこの Bitmap のセクションのコピーを作成します。 
-        //CreateObjRef (MarshalByRefObject から継承されます) 
-        //リモート オブジェクトとの通信に使用するプロキシの生成に必要な情報をすべて格納しているオブジェクトを作成します。 
+        //Clone オーバーロード。 指定された PixelFormat で定義されたこの Bitmap のセクションのコピーを作成します。
+        //CreateObjRef (MarshalByRefObject から継承されます)
+        //リモート オブジェクトとの通信に使用するプロキシの生成に必要な情報をすべて格納しているオブジェクトを作成します。
 
         #region IDisposable Support
+
         private bool IsDisposed = false;
 
         protected virtual void Dispose(bool disposing)
@@ -243,14 +237,15 @@ public ABitmap(int x, int y, PixelFormat pxf)
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        #endregion
 
+        #endregion IDisposable Support
 
-        #endregion
+        #endregion Bitmapのラップメソッド
 
         #region BitmapDataアクセス関数
 
         private BitmapData tempBitmapData = null;
+
         //---------------------------------------------
         // 直接アクセス開始
         //---------------------------------------------
@@ -283,7 +278,8 @@ public ABitmap(int x, int y, PixelFormat pxf)
         {
             return tempBitmapData != null;
         }
-        #endregion
+
+        #endregion BitmapDataアクセス関数
 
         public Graphics GetGraphics()
         {
@@ -371,20 +367,17 @@ public ABitmap(int x, int y, PixelFormat pxf)
                 /* skip already painted */
                 if (GetPixelFast(point.X, point.Y) == col) continue;
 
-
                 int leftX = point.X;
                 int rightX = point.X;
                 /* search left point */
                 for (; 0 < leftX; leftX--)
                 {
                     if (GetPixelFast(leftX - 1, point.Y) != baseCol) break;
-
                 }
                 /* search right point */
                 for (; rightX < cWidth - 1; rightX++)
                 {
                     if (GetPixelFast(rightX + 1, point.Y) != baseCol) break;
-
                 }
                 /* paint from leftX to rightX */
                 if (leftX == rightX)
@@ -435,9 +428,7 @@ public ABitmap(int x, int y, PixelFormat pxf)
             }
         }
 
-
-
-        #endregion
+        #endregion 描画命令
 
         #region Pixel単位描画命令
 
@@ -505,7 +496,6 @@ public ABitmap(int x, int y, PixelFormat pxf)
             {
                 return GetAlphaBlend(Color.FromArgb((int)src), col, srca, tgta);
             });
-
         }
 
         /// <summary>
@@ -521,7 +511,6 @@ public ABitmap(int x, int y, PixelFormat pxf)
                 return GetAddColor(src, (uint)col.ToArgb());
             });
         }
-
 
         public void AddPixel(int x, int y, Color col, byte alpha)
         {
@@ -553,8 +542,8 @@ public ABitmap(int x, int y, PixelFormat pxf)
             });
         }
 
-
         private delegate uint PixelOperateCallback(uint src);
+
         private void PixelOperate(int x, int y, Color col, PixelOperateCallback psc)
         {
             if (!IsInnerBitmap(new Position(x, y)))
@@ -571,7 +560,7 @@ public ABitmap(int x, int y, PixelFormat pxf)
             EndAccess();
         }
 
-        #endregion
+        #endregion Pixel単位描画命令
 
         #region 画像合成
 
@@ -726,7 +715,7 @@ public ABitmap(int x, int y, PixelFormat pxf)
             ap.EndAccess();
         }
 
-        #endregion
+        #endregion 画像合成
 
         #region アルファブレンド
 
@@ -795,8 +784,8 @@ public ABitmap(int x, int y, PixelFormat pxf)
                 }
             );
         }
-        //SubAlphaBlend
 
+        //SubAlphaBlend
 
         public void SubAlphaBlend(Point toPt, Size copySize, AlphaPicture ap, Point fromPt)
         {
@@ -830,7 +819,7 @@ public ABitmap(int x, int y, PixelFormat pxf)
             );
         }
 
-        #endregion
+        #endregion アルファブレンド
 
         /// <summary>
         /// 一次元配列上の二次配列の位置を、x,y,wから求める
@@ -855,6 +844,7 @@ public ABitmap(int x, int y, PixelFormat pxf)
         }
 
         #region 演算
+
         /// <summary>
         /// 飽和演算用のマスクを取得します
         /// </summary>
@@ -891,7 +881,6 @@ public ABitmap(int x, int y, PixelFormat pxf)
             return (((a - b) - mask) | mask);
         }
 
-
         private uint GetAlphaBlend(Color src, Color tgt, float srca, float tgta)
         {
             float a = (float)src.A * srca + ((float)tgt.A * tgta);
@@ -908,7 +897,6 @@ public ABitmap(int x, int y, PixelFormat pxf)
             //uint mask = GetMask(a,b);
             //return (int)(((a+b) - mask) | mask);
 
-
             // return (uint)Color.FromArgb((int)a, (int)r, (int)g, (int)b).ToArgb();
 
             //uint a = (uint)((float)src.A * srca + ((float)tgt.A * tgta));
@@ -917,7 +905,6 @@ public ABitmap(int x, int y, PixelFormat pxf)
             //uint b = (uint)((float)src.B * srca + ((float)tgt.B * tgta));
 
             return ((uint)a << 24) + ((uint)r << 16) + ((uint)g << 8) + (uint)b;
-
         }
 
         //A値を重ねない（重ね合わせ時)の合成
@@ -928,7 +915,6 @@ public ABitmap(int x, int y, PixelFormat pxf)
             float b = (float)src.B * srca + ((float)tgt.B * tgta);
             //            return (uint)Color.FromArgb(src.A, (int)r, (int)g, (int)b).ToArgb();
             return ((uint)src.A << 24) + ((uint)r << 16) + ((uint)g << 8) + (uint)b;
-
         }
 
         private uint GetTransparency(Color src, float alpha)
@@ -943,17 +929,13 @@ public ABitmap(int x, int y, PixelFormat pxf)
             uint g = (uint)((float)src.G * alpha);
             uint b = (uint)((float)src.B * alpha);
             return (a << 24) + (r << 16) + (g << 8) + b;
-
-
         }
-
 
         private uint GetAFromUint(uint val)
         {
             return (val & 0xFF000000) >> 24;
         }
 
-
-        #endregion
+        #endregion 演算
     }
 }

@@ -1,12 +1,7 @@
-﻿using Eede.Positions;
+﻿using Eede.Domain.Positions;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Eede.ImageBlenders
 {
@@ -14,7 +9,6 @@ namespace Eede.ImageBlenders
     {
         public void Blend(Bitmap from, Bitmap to)
         {
-            
             BitmapData destBitmapData = to.LockBits(
                     new Rectangle(Point.Empty, to.Size),
                     ImageLockMode.WriteOnly, to.PixelFormat);
@@ -68,7 +62,7 @@ namespace Eede.ImageBlenders
                         for (int x = toPosition.X; x < maxX; x++)
                         {
                             int pos = x * 4 + destBitmapData.Stride * y;
-                            int srcPos = (x- toPosition.X) * 4 + srcBitmapData.Stride * (y- toPosition.Y);
+                            int srcPos = (x - toPosition.X) * 4 + srcBitmapData.Stride * (y - toPosition.Y);
                             destPixels[pos + 0] = srcPixels[srcPos + 0];
                             destPixels[pos + 1] = srcPixels[srcPos + 1];
                             destPixels[pos + 2] = srcPixels[srcPos + 2];

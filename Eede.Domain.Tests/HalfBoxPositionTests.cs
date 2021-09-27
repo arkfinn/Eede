@@ -1,4 +1,4 @@
-﻿using Eede.Positions;
+﻿using Eede.Domain.Positions;
 using NUnit.Framework;
 using System.Drawing;
 

@@ -1,5 +1,5 @@
-﻿using Eede.Domain.Positions;
-using Eede.ImageBlenders;
+﻿using Eede.Domain.ImageBlenders;
+using Eede.Domain.Positions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

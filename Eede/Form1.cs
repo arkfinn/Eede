@@ -1,7 +1,7 @@
 ﻿using Eede.Application.Pictures;
 using Eede.Domain.Files;
-using Eede.ImageBlenders;
-using Eede.ImageTransfers;
+using Eede.Domain.ImageBlenders;
+using Eede.Domain.ImageTransfers;
 using Eede.Settings;
 using Eede.Ui;
 using System;
@@ -102,7 +102,7 @@ namespace Eede
             //e.Bitmap.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
             //e.Bitmap.DrawImage(src, new Rectangle(e.Position, src.Size));
             var blender = new DirectImageBlender();
-            blender.Blend(src, e.Picture.Buffer, e.Position);
+            e.Picture.Blend(blender, src, e.Position);
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)

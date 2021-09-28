@@ -1,9 +1,9 @@
 ﻿using Eede.Application.PaintLayers;
+using Eede.Domain.ImageBlenders;
+using Eede.Domain.ImageTransfers;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
 using Eede.Domain.Sizes;
-using Eede.ImageBlenders;
-using Eede.ImageTransfers;
 using Eede.PenStyles;
 using Eede.Services;
 using Eede.Settings;

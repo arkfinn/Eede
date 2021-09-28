@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Eede.ImageBlenders
+namespace Eede.Domain.ImageBlenders
 {
     public interface IImageBlender
     {

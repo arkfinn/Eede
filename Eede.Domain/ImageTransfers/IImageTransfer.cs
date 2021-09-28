@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Eede.ImageTransfers
+namespace Eede.Domain.ImageTransfers
 {
     public interface IImageTransfer
     {

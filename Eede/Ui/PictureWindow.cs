@@ -1,8 +1,8 @@
 ﻿using Eede.Application.Pictures;
 using Eede.Domain.Files;
+using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
-using Eede.ImageTransfers;
 using Eede.Infrastructure.Pictures;
 using Eede.Services;
 using Eede.Settings;
@@ -85,7 +85,7 @@ namespace Eede.Ui
             {
                 old.Dispose();
             }
-            ResizePicture(picture.Buffer.Size);
+            ResizePicture(picture.Size);
             pictureBox1.Invalidate();
         }
 
@@ -121,7 +121,7 @@ namespace Eede.Ui
             CanvasBackgroundService.Instance.PaintBackground(g);
 
             var transfer = new DirectImageTransfer();
-            transfer.Transfer(PictureBuffer.Buffer, g, PictureBuffer.Buffer.Size);
+            PictureBuffer.Transfer(transfer, g);
             DrawCursor(g);
         }
 

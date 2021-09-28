@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Eede.ImageBlenders
+namespace Eede.Domain.ImageBlenders
 {
     public class AlphaOnlyImageBlender : IImageBlender
     {
         public void Blend(Bitmap from, Bitmap to)
         {
-            
             BitmapData destBitmapData = to.LockBits(
                     new Rectangle(Point.Empty, to.Size),
                     ImageLockMode.WriteOnly, to.PixelFormat);

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Eede.Domain.ImageBlenders;
+using Eede.Domain.ImageTransfers;
+using Eede.Domain.Positions;
+using System;
 using System.Drawing;
 
 namespace Eede.Domain.Pictures
@@ -14,7 +17,7 @@ namespace Eede.Domain.Pictures
             Buffer = new Bitmap(image);
         }
 
-        public Bitmap Buffer { get; private set; }
+        private Bitmap Buffer;
 
         public Bitmap CutOut(Rectangle rect)
         {
@@ -24,6 +27,19 @@ namespace Eede.Domain.Pictures
         public Image ToImage()
         {
             return new Bitmap(Buffer);
+        }
+
+        public Size Size => Buffer.Size;
+
+        public void Transfer(IImageTransfer transfer, Graphics g)
+        {
+            transfer.Transfer(Buffer, g, Buffer.Size);
+        }
+
+        // IImageBlenderのメソッドが整っていないため一時的にDirectImageBlenderを直で指定
+        public void Blend(/*IImageBlender*/ DirectImageBlender blender, Bitmap src, Position toPosition)
+        {
+            blender.Blend(src, Buffer, toPosition);
         }
 
         public void Dispose()

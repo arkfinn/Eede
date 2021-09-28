@@ -3,7 +3,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace Eede.ImageBlenders
+namespace Eede.Domain.ImageBlenders
 {
     public class DirectImageBlender : IImageBlender
     {

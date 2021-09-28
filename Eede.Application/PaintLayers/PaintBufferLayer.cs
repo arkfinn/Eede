@@ -1,5 +1,5 @@
-﻿using Eede.Domain.Sizes;
-using Eede.ImageTransfers;
+﻿using Eede.Domain.ImageTransfers;
+using Eede.Domain.Sizes;
 using System.Drawing;
 
 namespace Eede.Application.PaintLayers

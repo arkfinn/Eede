@@ -1,9 +1,8 @@
-﻿using Eede.Application.PaintLayers;
+﻿using Eede.Application;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
-using Eede.Domain.Sizes;
 using Eede.PenStyles;
 using Eede.Services;
 using Eede.Settings;
@@ -18,13 +17,14 @@ namespace Eede.Ui
         public PaintableBox()
         {
             InitializeComponent();
-            PaintAreaSize = new MagnifiedSize(new Size(32, 32), m);
             var s = GlobalSetting.Instance().BoxSize;
+            var gridSize = new Size(16, 16);
+            PaintArea = new PaintArea(CanvasBackgroundService.Instance, m, s, gridSize);
             SetupImage(new Bitmap(s.Width, s.Height));
             canvas.Image = new Bitmap(Buffer.Bmp);
         }
 
-        private MagnifiedSize PaintAreaSize { get; set; }
+        private PaintArea PaintArea;
 
         private AlphaPicture Buffer;
 
@@ -49,7 +49,8 @@ namespace Eede.Ui
             {
                 old.Dispose();
             }
-            SetSize();
+            PaintArea = PaintArea.UpdateSize(Buffer.Size);
+            RefleshCanvasSize();
         }
 
         private PenCase mPen;
@@ -74,14 +75,12 @@ namespace Eede.Ui
             set
             {
                 m = new Magnification(value);
-                SetSize();
+                PaintArea = PaintArea.UpdateMagnification(m);
+                RefleshCanvasSize();
             }
         }
 
         public IPenStyle PenStyle { get; set; } = new FreeCurve();
-        protected Bitmap DrawBuffer { get; set; }
-
-        private bool IsDrawing = false;
 
         public void SetPenColor(Color col)
         {
@@ -98,16 +97,11 @@ namespace Eede.Ui
             PenCase.Width = size;
         }
 
-        private void SetSize()
+        private void RefleshCanvasSize()
         {
-            if (Buffer == null) return;
-
-            //pictureboxのサイズをセット
-            this.PaintAreaSize = new MagnifiedSize(Buffer.Size, m);
-            this.canvas.Size = this.PaintAreaSize.ToSize();
+            canvas.Size = PaintArea.CanvasSize;
             ResetLocation();
-            this.Refresh();
-            //colorBox.Invalidate();
+            Refresh();
         }
 
         public void ChangeImageBlender(IImageBlender b)
@@ -120,40 +114,37 @@ namespace Eede.Ui
         public void ChangeImageTransfer(IImageTransfer i)
         {
             imageTransfer = i;
+            // PaintArea = PaintArea.UpdateImageTransfer(i);
             Refresh();
         }
 
         private void PaintUpdate(Graphics g)
         {
-            IPaintLayer layer = new PaintBackgroundLayer(CanvasBackgroundService.Instance);
-            layer = new PaintBufferLayer(layer, PaintAreaSize, Buffer.Bmp, imageTransfer);
-            layer = new PaintGridLayer(layer, PaintAreaSize, new MagnifiedSize(new Size(16, 16), m));
-            layer.Paint(g);
+            // PaintArea.Paint(g, Buffer);
+            PaintArea.Paint(g, Buffer, imageTransfer);
         }
 
         private void ResetLocation()
         {
-            Point now = this.AutoScrollPosition;
-            int newWidth = now.X;
-            if (this.canvas.Width < this.Width)
-            {
-                newWidth = (this.Width / 2) - (this.canvas.Width / 2);
-            }
-
-            int newHeight = now.Y;
-            if (this.canvas.Height < this.Height)
-            {
-                newHeight = (this.Height / 2) - (this.canvas.Height / 2);
-            }
-
+            Point now = AutoScrollPosition;
+            int newWidth = CalculateCenterPoint(now.X, canvas.Width, Width);
+            int newHeight = CalculateCenterPoint(now.Y, canvas.Height, Height);
             canvas.Location = new Point(newWidth, newHeight);
+        }
+
+        private int CalculateCenterPoint(int now, int canvasLength, int fullLength)
+        {
+            if (canvasLength < fullLength)
+            {
+                return (fullLength / 2) - (canvasLength / 2);
+            }
+            return now;
         }
 
         #region イベント
 
         private void PaintableBox_SizeChanged(object sender, EventArgs e)
         {
-            // Buffer.Bmp = new Bitmap(Buffer.Bmp, colorBox.Width, colorBox.Height);
             ResetLocation();
         }
 
@@ -161,23 +152,26 @@ namespace Eede.Ui
 
         private void fireColorChanged()
         {
-            this.ColorChanged?.Invoke(this, EventArgs.Empty);
+            ColorChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private PositionHistory PositionHistory = null;
+        // PositionHistory = new EmptyPositionHistory();
 
-        private void colorBox_MouseDown(object sender, MouseEventArgs e)
+        private void canvas_MouseDown(object sender, MouseEventArgs e)
         {
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    if (IsDrawing) return;
+                    if (PositionHistory != null) return;
 
+                    // PositionHistory = PaintArea.BeginDraw(Buffer, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
                     var pos = new MinifiedPosition(new Position(e.X, e.Y), m).ToPosition();
                     if (Buffer.IsInnerBitmap(pos))
                     {
-                        //TODO:DrawBuffer保存
-                        IsDrawing = true;
+                        // Bufferを控えておく
+                        // beginからfinishまでの間情報を保持するクラス
+                        // Positionhistory, BeforeBuffer, PenStyle, PenCase
 
                         PositionHistory = new PositionHistory(pos);
 
@@ -190,15 +184,17 @@ namespace Eede.Ui
                 //case MouseButtons.None:
                 //    break;
                 case MouseButtons.Right:
-                    if (IsDrawing)
+                    if (PositionHistory != null)
                     {
                         //描画をキャンセルする
-                        //TODO:DrawBufferhukki
+                        PositionHistory = null;
+                        // Bufferを元に戻す
                     }
                     else
                     {
                         //色を拾う
                         SetPenColor(DropColor(new MinifiedPosition(new Position(e.X, e.Y), m)));
+                        // TODO: PaintArea.DropColor(Buffer, new Position(e.X, e.Y))
                         fireColorChanged();
                     }
                     break;
@@ -227,9 +223,10 @@ namespace Eede.Ui
             PositionHistory = PositionHistory.Update(pos.ToPosition());
         }
 
-        private void colorBox_MouseMove(object sender, MouseEventArgs e)
+        private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!IsDrawing) return;
+            if (PositionHistory == null) return;
+            // PositionHistory = PaintArea.Drawing(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
 
             var pos = new MinifiedPosition(new Position(e.X, e.Y), m);
             UpdatePositionHistory(pos);
@@ -237,26 +234,27 @@ namespace Eede.Ui
             canvas.Invalidate();
         }
 
-        private void colorBox_MouseUp(object sender, MouseEventArgs e)
+        private void canvas_MouseUp(object sender, MouseEventArgs e)
         {
-            if (!IsDrawing) return;
+            if (PositionHistory == null) return;
+            // PositionHistory = PaintArea.FinishDraw(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
 
             var pos = new MinifiedPosition(new Position(e.X, e.Y), m);
             UpdatePositionHistory(pos);
 
             PenStyle.DrawEnd(Buffer, PenCase, PositionHistory, IsShift());
-            IsDrawing = false;
+            PositionHistory = null;
         }
 
-        private void colorBox_MouseEnter(object sender, EventArgs e)
+        private void canvas_MouseEnter(object sender, EventArgs e)
         {
         }
 
-        private void colorBox_MouseLeave(object sender, EventArgs e)
+        private void canvas_MouseLeave(object sender, EventArgs e)
         {
         }
 
-        private void colorBox_Paint(object sender, PaintEventArgs e)
+        private void canvas_Paint(object sender, PaintEventArgs e)
         {
             PaintUpdate(e.Graphics);
         }

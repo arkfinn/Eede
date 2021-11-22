@@ -6,20 +6,17 @@ namespace Eede.Application.PaintLayers
 {
     public class PaintGridLayer : IPaintLayer
     {
-        private readonly IPaintLayer layer;
         private readonly MagnifiedSize paintAreaSize;
         private readonly MagnifiedSize gridSize;
 
-        public PaintGridLayer(IPaintLayer layer, MagnifiedSize paintAreaSize, MagnifiedSize gridSize)
+        public PaintGridLayer(MagnifiedSize paintAreaSize, MagnifiedSize gridSize)
         {
-            this.layer = layer;
             this.paintAreaSize = paintAreaSize;
             this.gridSize = gridSize;
         }
 
         public void Paint(Graphics destination)
         {
-            if (layer != null) layer.Paint(destination);
             var w = gridSize.Width;
             var h = gridSize.Height;
             var p = new Pen(Color.Black, 1);

@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PaintArea.cs" />
     <Compile Include="PaintLayers\ICanvasBackgroundService.cs" />
     <Compile Include="PaintLayers\IPaintLayer.cs" />
     <Compile Include="PaintLayers\PaintBackgroundLayer.cs" />

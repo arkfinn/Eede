@@ -40,12 +40,12 @@
             this.canvas.Size = new System.Drawing.Size(99, 92);
             this.canvas.TabIndex = 0;
             this.canvas.TabStop = false;
-            this.canvas.MouseLeave += new System.EventHandler(this.colorBox_MouseLeave);
-            this.canvas.MouseMove += new System.Windows.Forms.MouseEventHandler(this.colorBox_MouseMove);
-            this.canvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.colorBox_MouseDown);
-            this.canvas.Paint += new System.Windows.Forms.PaintEventHandler(this.colorBox_Paint);
-            this.canvas.MouseUp += new System.Windows.Forms.MouseEventHandler(this.colorBox_MouseUp);
-            this.canvas.MouseEnter += new System.EventHandler(this.colorBox_MouseEnter);
+            this.canvas.MouseLeave += new System.EventHandler(this.canvas_MouseLeave);
+            this.canvas.MouseMove += new System.Windows.Forms.MouseEventHandler(this.canvas_MouseMove);
+            this.canvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.canvas_MouseDown);
+            this.canvas.Paint += new System.Windows.Forms.PaintEventHandler(this.canvas_Paint);
+            this.canvas.MouseUp += new System.Windows.Forms.MouseEventHandler(this.canvas_MouseUp);
+            this.canvas.MouseEnter += new System.EventHandler(this.canvas_MouseEnter);
             // 
             // PaintableBox
             // 

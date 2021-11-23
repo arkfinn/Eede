@@ -19,12 +19,12 @@ namespace Eede
 
         public Pen PreparePen()
         {
-            var p = new Pen(Color);
-            p.Width = Width;
-            p.StartCap = LineCap.Round;
-            p.EndCap = LineCap.Round;
-
-            return p;
+            return new Pen(Color)
+            {
+                Width = Width,
+                StartCap = LineCap.Round,
+                EndCap = LineCap.Round
+            };
         }
     }
 }

@@ -172,7 +172,7 @@ namespace Eede.Ui
                 case MouseButtons.Left:
                     if (PositionHistory != null) return;
 
-                    // PositionHistory = PaintArea.BeginDraw(Buffer, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
+                    // PositionHistory = PaintArea.DrawStart(Buffer, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
                     var pos = new MinifiedPosition(new Position(e.X, e.Y), m).ToPosition();
                     if (Buffer.IsInnerBitmap(pos))
                     {

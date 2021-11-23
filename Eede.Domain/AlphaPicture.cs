@@ -10,6 +10,12 @@ namespace Eede
 {
     public class AlphaPicture : IDisposable
     {
+        public AlphaPicture(Bitmap bitmap)
+        {
+            //newすると強制的にPixelFormat.Format32bppArgbになる
+            Bmp = new Bitmap(bitmap);
+        }
+
         private Bitmap mBitmap;
 
         public Bitmap Bmp
@@ -29,137 +35,6 @@ namespace Eede
                 mBitmap = value;
             }
         }
-
-        #region コンストラクタ
-
-        public AlphaPicture(Bitmap bitmap)
-        {
-            //newすると強制的にPixelFormat.Format32bppArgbになる
-            Bmp = new Bitmap(bitmap);
-        }
-
-        ///// <summary>
-        ///// 指定した既存のイメージを使用して、 ABitmap クラスの新しいインスタンスを初期化します。
-        ///// </summary>
-        ///// <param name="img"></param>
-        //public AlphaPicture(Image img)
-        //{
-        //    Bmp = new Bitmap(img);
-        //}
-
-        ///// <summary>
-        ///// 指定したデータ ストリームを使用して、 ABitmap クラスの新しいインスタンスを初期化します。
-        ///// </summary>
-        ///// <param name="stm"></param>
-        //public AlphaPicture(Stream stm)
-        //{
-        //    Bmp = new Bitmap(stm);
-        //}
-
-        /// <summary>
-        /// 指定したファイルで ABitmap クラスの新しいインスタンスを初期化します。
-        /// </summary>
-        /// <param name="s"></param>
-        public AlphaPicture(string s)
-        {
-            //画像によってはpixelformatが違うため二回作る
-            using (Bitmap bmp = new Bitmap(s))
-            {
-                Bmp = new Bitmap(bmp);
-            }
-        }
-
-        ///// <summary>
-        ///// 指定したサイズを使用して、指定した既存のイメージで ABitmap クラスの新しいインスタンスを初期化します。
-
-        /////// </summary>
-        /////// <param name="img"></param>
-        /////// <param name="sz"></param>
-        ////public AlphaPicture(Image img, Size sz)
-        ////{
-        ////    Bmp = new Bitmap(img, sz);
-        ////}
-
-        /// <summary>
-        /// 指定したサイズを使用して、 ABitmap クラスの新しいインスタンスを初期化します。
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        public AlphaPicture(int x, int y)
-        {
-            Bmp = new Bitmap(x, y);
-        }
-
-        ///// <summary>
-        ///// 指定したデータ ストリームを使用して、 ABitmap クラスの新しいインスタンスを初期化します。
-        ///// </summary>
-        ///// <param name="stm"></param>
-        ///// <param name="b"></param>
-        //public AlphaPicture(Stream stm, bool b)
-        //{
-        //    Bmp = new Bitmap(stm, b);
-        //}
-
-        ///// <summary>
-        ///// 指定したファイルで ABitmap クラスの新しいインスタンスを初期化します。
-        ///// </summary>
-        ///// <param name="s"></param>
-        ///// <param name="b"></param>
-        //public AlphaPicture(string s, bool b)
-        //{
-        //    Bmp = new Bitmap(s, b);
-        //}
-
-        ///// <summary>
-        ///// 指定したリソースで Bitmap クラスの新しいインスタンスを初期化します。
-        ///// </summary>
-        ///// <param name="t"></param>
-        ///// <param name="s"></param>
-        //public AlphaPicture(Type t, string s)
-        //{
-        //    Bmp = new Bitmap(t, s);
-        //}
-
-        ///// <summary>
-        ///// 指定したサイズを使用して、指定した既存のイメージで Bitmap クラスの新しいインスタンスを初期化します。
-        ///// </summary>
-        ///// <param name="img"></param>
-        ///// <param name="x"></param>
-        ///// <param name="y"></param>
-        //public AlphaPicture(Image img, int x, int y)
-        //{
-        //    Bmp = new Bitmap(img, x, y);
-        //}
-
-        ///// <summary>
-        ///// 指定したサイズと指定した Graphics オブジェクトの解像度を使用して、 Bitmap クラスの新しいインスタンスを初期化します。
-        ///// </summary>
-        ///// <param name="x"></param>
-        ///// <param name="y"></param>
-        ///// <param name="gpc"></param>
-        //public AlphaPicture(int x, int y, Graphics gpc)
-        //{
-        //    Bmp = new Bitmap(x, y, gpc);
-        //}
-
-        /* pixelFormat固定のため以下は割愛
-指定したサイズと形式を使用して、 Bitmap クラスの新しいインスタンスを初期化します。
-public ABitmap(int x, int y, PixelFormat pxf)
-                {
-    Bitmap = new Bitmap(x,y,pxf        );
-}
-
-[C++] public: Bitmap(int, int, PixelFormat);
-[JScript] public function Bitmap(int, int, PixelFormat);
-指定したサイズ、ピクセル形式、およびピクセル データを使用して、 Bitmap クラスの新しいインスタンスを初期化します。
-
-[Visual Basic] Public Sub New(Integer, Integer, Integer, PixelFormat, IntPtr)
-[C#] public Bitmap(int, int, int, PixelFormat, IntPtr);
-[C++] public: Bitmap(int, int, int, PixelFormat, IntPtr);
-[JScript] public function Bitmap(int, int, int, PixelFormat, IntPtr);
-        */
-
-        #endregion コンストラクタ
 
         #region Bitmapのラッププロパティ
 
@@ -301,43 +176,38 @@ public ABitmap(int x, int y, PixelFormat pxf)
             return tmp;
         }
 
-        public void DrawPoint(PenCase p, Position pos)
+        public AlphaPicture DrawPoint(PenCase p, Position pos)
         {
             int x = pos.X;
             int y = pos.Y;
             EndAccess();
-            var tmp = CreateTempBmp();
-            try
+            using (var newBmp = new Bitmap(Bmp))
+            using (var tmp = CreateTempBmp())
             {
                 using (var g = Graphics.FromImage(tmp))
                 {
+                    // TODO: ドットの打ち方は調整したい。1to 4ドット辺りまではrectで
                     g.CompositingMode = CompositingMode.SourceCopy;
                     g.DrawLine(p.PreparePen(), new PointF((float)x, (float)y), new PointF((float)x + 0.001f, (float)y + 0.01f));
                 }
-                p.Blender.Blend(tmp, Bmp);
-            }
-            finally
-            {
-                tmp.Dispose();
+                p.Blender.Blend(tmp, newBmp);
+                return new AlphaPicture(newBmp);
             }
         }
 
-        public void DrawLine(PenCase p, Position beginPos, Position endPos)
+        public AlphaPicture DrawLine(PenCase p, Position beginPos, Position endPos)
         {
             EndAccess();
-            var tmp = CreateTempBmp();
-            try
+            using (var newBmp = new Bitmap(Bmp))
+            using (var tmp = CreateTempBmp())
             {
                 using (var g = Graphics.FromImage(tmp))
                 {
                     g.CompositingMode = CompositingMode.SourceCopy;
                     g.DrawLine(p.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
                 }
-                p.Blender.Blend(tmp, Bmp);
-            }
-            finally
-            {
-                tmp.Dispose();
+                p.Blender.Blend(tmp, newBmp);
+                return new AlphaPicture(newBmp);
             }
         }
 

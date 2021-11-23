@@ -6,19 +6,18 @@ namespace Eede.PenStyles
     {
         public AlphaPicture DrawStart(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
-            aBitmap.DrawPoint(pen, positions.Now);
-            return aBitmap;
+            return aBitmap.DrawPoint(pen, positions.Now);
         }
 
         public AlphaPicture Drawing(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
             if (aBitmap.IsInnerBitmap(positions.Now))
             {
-                aBitmap.DrawLine(pen, positions.Last, positions.Now);
+                return aBitmap.DrawLine(pen, positions.Last, positions.Now);
             }
-            else if (aBitmap.IsInnerBitmap(positions.Last))
+            if (aBitmap.IsInnerBitmap(positions.Last))
             {
-                aBitmap.DrawLine(pen, positions.Now, positions.Last);
+                return aBitmap.DrawLine(pen, positions.Now, positions.Last);
             }
             return aBitmap;
         }

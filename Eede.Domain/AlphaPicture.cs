@@ -15,6 +15,7 @@ namespace Eede
         public Bitmap Bmp
         {
             get { return mBitmap; }
+            // TODO: private setとしたい
             set
             {
                 if (value.PixelFormat != PixelFormat.Format32bppArgb)

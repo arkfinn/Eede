@@ -4,12 +4,13 @@ namespace Eede.PenStyles
 {
     public class FreeCurve : IPenStyle
     {
-        public void DrawBegin(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
+        public AlphaPicture DrawStart(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
             aBitmap.DrawPoint(pen, positions.Now);
+            return aBitmap;
         }
 
-        public void Drawing(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
+        public AlphaPicture Drawing(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
             if (aBitmap.IsInnerBitmap(positions.Now))
             {
@@ -19,10 +20,12 @@ namespace Eede.PenStyles
             {
                 aBitmap.DrawLine(pen, positions.Now, positions.Last);
             }
+            return aBitmap;
         }
 
-        public void DrawEnd(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
+        public AlphaPicture DrawEnd(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {
+            return aBitmap;
         }
 
         //private void DrawFreeCurve(PaintableBox target, Point beginPos, Point endPos)

@@ -2,7 +2,8 @@
 
 namespace Eede.PenStyles
 {
-    public class Fill : IPenStyle
+    // 実装内容を再検討する
+    public class Fill //: IPenStyle
     {
         public void DrawBegin(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
         {

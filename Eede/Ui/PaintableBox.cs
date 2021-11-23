@@ -41,13 +41,19 @@ namespace Eede.Ui
             return Buffer.Bmp;
         }
 
-        public void SetupImage(Bitmap bmp)
+        public void SetupImage(Bitmap image)
         {
-            var old = Buffer;
-            Buffer = new AlphaPicture(bmp);
-            if (old != null)
+            UpdatePicture(new AlphaPicture(image));
+        }
+
+        private void UpdatePicture(AlphaPicture newPicture)
+        {
+            var oldPicture = Buffer;
+            Buffer = newPicture;
+            // 新・旧が同一インスタンスの場合はDisposeにより問題が生じるため処理を省く。
+            if (oldPicture != null && oldPicture != newPicture)
             {
-                old.Dispose();
+                oldPicture.Dispose();
             }
             PaintArea = PaintArea.UpdateSize(Buffer.Size);
             RefleshCanvasSize();
@@ -99,7 +105,7 @@ namespace Eede.Ui
 
         private void RefleshCanvasSize()
         {
-            canvas.Size = PaintArea.CanvasSize;
+            canvas.Size = PaintArea.MagnifiedPaintSize.ToSize();
             ResetLocation();
             Refresh();
         }
@@ -156,6 +162,7 @@ namespace Eede.Ui
         }
 
         private PositionHistory PositionHistory = null;
+
         // PositionHistory = new EmptyPositionHistory();
 
         private void canvas_MouseDown(object sender, MouseEventArgs e)
@@ -175,7 +182,7 @@ namespace Eede.Ui
 
                         PositionHistory = new PositionHistory(pos);
 
-                        PenStyle.DrawBegin(Buffer, PenCase, PositionHistory, IsShift());
+                        UpdatePicture(PenStyle.DrawStart(Buffer, PenCase, PositionHistory, IsShift()));
                         canvas.Invalidate();
                     }
                     break;
@@ -230,7 +237,7 @@ namespace Eede.Ui
 
             var pos = new MinifiedPosition(new Position(e.X, e.Y), m);
             UpdatePositionHistory(pos);
-            PenStyle.Drawing(Buffer, PenCase, PositionHistory, IsShift());
+            UpdatePicture(PenStyle.Drawing(Buffer, PenCase, PositionHistory, IsShift()));
             canvas.Invalidate();
         }
 
@@ -242,7 +249,7 @@ namespace Eede.Ui
             var pos = new MinifiedPosition(new Position(e.X, e.Y), m);
             UpdatePositionHistory(pos);
 
-            PenStyle.DrawEnd(Buffer, PenCase, PositionHistory, IsShift());
+            UpdatePicture(PenStyle.DrawEnd(Buffer, PenCase, PositionHistory, IsShift()));
             PositionHistory = null;
         }
 

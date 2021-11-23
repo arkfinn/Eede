@@ -14,7 +14,6 @@ namespace Eede.Application
             Magnification = magnification;
             PaintSize = paintSize;
             MagnifiedPaintSize = Magnify(paintSize);
-            CanvasSize = MagnifiedPaintSize.ToSize();
             GridSize = gridSize;
         }
 
@@ -25,8 +24,7 @@ namespace Eede.Application
         private readonly Size GridSize;
 
         private readonly Size PaintSize;
-        private readonly MagnifiedSize MagnifiedPaintSize;
-        public readonly Size CanvasSize;
+        public readonly MagnifiedSize MagnifiedPaintSize;
 
         private MagnifiedSize Magnify(Size size)
         {

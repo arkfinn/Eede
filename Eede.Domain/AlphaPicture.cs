@@ -36,6 +36,11 @@ namespace Eede
             }
         }
 
+        public AlphaPicture Clone()
+        {
+            return new AlphaPicture(Bmp);
+        }
+
         #region Bitmapのラッププロパティ
 
         //Flags (Image から継承されます) この Image オブジェクトの属性フラグを取得します。
@@ -80,10 +85,6 @@ namespace Eede
         #region Bitmapのラップメソッド
 
         //
-
-        //Clone オーバーロード。 指定された PixelFormat で定義されたこの Bitmap のセクションのコピーを作成します。
-        //CreateObjRef (MarshalByRefObject から継承されます)
-        //リモート オブジェクトとの通信に使用するプロキシの生成に必要な情報をすべて格納しているオブジェクトを作成します。
 
         #region IDisposable Support
 

@@ -22,6 +22,17 @@ namespace Eede.Ui
             PaintArea = new PaintArea(CanvasBackgroundService.Instance, m, s, gridSize);
             SetupImage(new Bitmap(s.Width, s.Height));
             canvas.Image = new Bitmap(Buffer.Bmp);
+            Disposed += (sender, args) =>
+            {
+                if (Buffer != null)
+                {
+                    Buffer.Dispose();
+                }
+                if (DrawingBuffer != null)
+                {
+                    DrawingBuffer.Dispose();
+                }
+            };
         }
 
         private PaintArea PaintArea;
@@ -178,6 +189,11 @@ namespace Eede.Ui
                     if (Buffer.Contains(pos))
                     {
                         // Bufferを控えておく
+                        if (DrawingBuffer != null)
+                        {
+                            DrawingBuffer.Dispose();
+                        }
+                        DrawingBuffer = Buffer.Clone();
                         // beginからfinishまでの間情報を保持するクラス
                         // Positionhistory, BeforeBuffer, PenStyle, PenCase
 
@@ -197,6 +213,11 @@ namespace Eede.Ui
                         //描画をキャンセルする
                         PositionHistory = null;
                         // Bufferを元に戻す
+                        if (DrawingBuffer != null)
+                        {
+                            UpdatePicture(DrawingBuffer);
+                            DrawingBuffer = null;
+                        }
                     }
                     else
                     {

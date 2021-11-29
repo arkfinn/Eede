@@ -1,30 +1,30 @@
 ﻿using Eede.Domain.Positions;
 
-namespace Eede.PenStyles
+namespace Eede.Domain.PenStyles
 {
     public class FreeCurve : IPenStyle
     {
-        public AlphaPicture DrawStart(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
+        public AlphaPicture DrawStart(DrawingMaterial material, PositionHistory positionHistory, bool isShift)
         {
-            return aBitmap.DrawPoint(pen, positions.Now);
+            return material.DrawingPicture.DrawPoint(material.PenCase, positionHistory.Now);
         }
 
-        public AlphaPicture Drawing(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
+        public AlphaPicture Drawing(DrawingMaterial material, PositionHistory positionHistory, bool isShift)
         {
-            if (aBitmap.IsInnerBitmap(positions.Now))
+            if (material.DrawingPicture.Contains(positionHistory.Now))
             {
-                return aBitmap.DrawLine(pen, positions.Last, positions.Now);
+                return material.DrawingPicture.DrawLine(material.PenCase, positionHistory.Last, positionHistory.Now);
             }
-            if (aBitmap.IsInnerBitmap(positions.Last))
+            if (material.DrawingPicture.Contains(positionHistory.Last))
             {
-                return aBitmap.DrawLine(pen, positions.Now, positions.Last);
+                return material.DrawingPicture.DrawLine(material.PenCase, positionHistory.Now, positionHistory.Last);
             }
-            return aBitmap;
+            return material.DrawingPicture;
         }
 
-        public AlphaPicture DrawEnd(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
+        public AlphaPicture DrawEnd(DrawingMaterial material, PositionHistory positionHistory, bool isShift)
         {
-            return aBitmap;
+            return material.DrawingPicture;
         }
 
         //private void DrawFreeCurve(PaintableBox target, Point beginPos, Point endPos)

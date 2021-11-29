@@ -312,7 +312,7 @@ namespace Eede
         public Color GetPixel(int x, int y)
         {
             if (tempBitmapData == null) return Bmp.GetPixel(x, y);
-            if (!IsInnerBitmap(new Position(x, y)))
+            if (!Contains(new Position(x, y)))
                 throw new ArgumentOutOfRangeException("x,yが範囲外です");
 
             return GetPixelFast(x, y);
@@ -345,7 +345,7 @@ namespace Eede
         /// <param name="col"></param>
         public void SetPixel(int x, int y, Color col)
         {
-            if (!IsInnerBitmap(new Position(x, y)))
+            if (!Contains(new Position(x, y)))
                 throw new ArgumentOutOfRangeException("x,yが範囲外です");
 
             BitmapData img = BeginAccess();
@@ -417,7 +417,7 @@ namespace Eede
 
         private void PixelOperate(int x, int y, Color col, PixelOperateCallback psc)
         {
-            if (!IsInnerBitmap(new Position(x, y)))
+            if (!Contains(new Position(x, y)))
                 throw new ArgumentOutOfRangeException("x,yが範囲外です");
 
             BitmapData img = BeginAccess();
@@ -546,8 +546,8 @@ namespace Eede
         private void AllPixelOperateWithTarget(Point toPt, Size copySize, AlphaPicture ap, Point fromPt, AllPixelOperateWithTargetCallback atc)
         {
             //範囲チェック（右下の）位置で判定する
-            if (!IsInnerBitmap(new Position(toPt.X + copySize.Width, toPt.Y + copySize.Height))
-                && !ap.IsInnerBitmap(new Position(fromPt.X + copySize.Width, fromPt.Y + copySize.Height)))
+            if (!Contains(new Position(toPt.X + copySize.Width, toPt.Y + copySize.Height))
+                && !ap.Contains(new Position(fromPt.X + copySize.Width, fromPt.Y + copySize.Height)))
                 throw new ArgumentOutOfRangeException("x,yが範囲外です");
 
             BitmapData source = BeginAccess();
@@ -709,7 +709,7 @@ namespace Eede
             return (float)alpha / byte.MaxValue;
         }
 
-        public bool IsInnerBitmap(Position pos)
+        public bool Contains(Position pos)
         {
             return pos.IsInnerOf(Bmp.Size);
         }

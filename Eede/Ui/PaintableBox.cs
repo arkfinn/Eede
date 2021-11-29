@@ -1,9 +1,9 @@
 ﻿using Eede.Application;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
+using Eede.Domain.PenStyles;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
-using Eede.PenStyles;
 using Eede.Services;
 using Eede.Settings;
 using System;
@@ -164,6 +164,7 @@ namespace Eede.Ui
         private PositionHistory PositionHistory = null;
 
         // PositionHistory = new EmptyPositionHistory();
+        private AlphaPicture DrawingBuffer = null;
 
         private void canvas_MouseDown(object sender, MouseEventArgs e)
         {
@@ -174,15 +175,15 @@ namespace Eede.Ui
 
                     // PositionHistory = PaintArea.DrawStart(Buffer, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
                     var pos = new MinifiedPosition(new Position(e.X, e.Y), m).ToPosition();
-                    if (Buffer.IsInnerBitmap(pos))
+                    if (Buffer.Contains(pos))
                     {
                         // Bufferを控えておく
                         // beginからfinishまでの間情報を保持するクラス
                         // Positionhistory, BeforeBuffer, PenStyle, PenCase
 
                         PositionHistory = new PositionHistory(pos);
-
-                        UpdatePicture(PenStyle.DrawStart(Buffer, PenCase, PositionHistory, IsShift()));
+                        var material = new DrawingMaterial(DrawingBuffer, Buffer, PenCase);
+                        UpdatePicture(PenStyle.DrawStart(material, PositionHistory, IsShift()));
                         canvas.Invalidate();
                     }
                     break;
@@ -237,7 +238,8 @@ namespace Eede.Ui
 
             var pos = new MinifiedPosition(new Position(e.X, e.Y), m);
             UpdatePositionHistory(pos);
-            UpdatePicture(PenStyle.Drawing(Buffer, PenCase, PositionHistory, IsShift()));
+            var material = new DrawingMaterial(DrawingBuffer, Buffer, PenCase);
+            UpdatePicture(PenStyle.Drawing(material, PositionHistory, IsShift()));
             canvas.Invalidate();
         }
 
@@ -249,7 +251,8 @@ namespace Eede.Ui
             var pos = new MinifiedPosition(new Position(e.X, e.Y), m);
             UpdatePositionHistory(pos);
 
-            UpdatePicture(PenStyle.DrawEnd(Buffer, PenCase, PositionHistory, IsShift()));
+            var material = new DrawingMaterial(DrawingBuffer, Buffer, PenCase);
+            UpdatePicture(PenStyle.DrawEnd(material, PositionHistory, IsShift()));
             PositionHistory = null;
         }
 

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            Eede.PenStyles.FreeCurve freeCurve1 = new Eede.PenStyles.FreeCurve();
+            Eede.Domain.PenStyles.FreeCurve freeCurve1 = new Eede.Domain.PenStyles.FreeCurve();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_newFile = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_openFile = new System.Windows.Forms.ToolStripButton();

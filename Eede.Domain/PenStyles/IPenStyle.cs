@@ -1,13 +1,13 @@
 ﻿using Eede.Domain.Positions;
 
-namespace Eede.PenStyles
+namespace Eede.Domain.PenStyles
 {
     public interface IPenStyle
     {
-        AlphaPicture DrawStart(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift);
+        AlphaPicture DrawStart(DrawingMaterial material, PositionHistory positionHistory, bool isShift);
 
-        AlphaPicture Drawing(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift);
+        AlphaPicture Drawing(DrawingMaterial material, PositionHistory positionHistory, bool isShift);
 
-        AlphaPicture DrawEnd(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift);
+        AlphaPicture DrawEnd(DrawingMaterial material, PositionHistory positionHistory, bool isShift);
     }
 }

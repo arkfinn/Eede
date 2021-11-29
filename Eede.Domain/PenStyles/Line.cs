@@ -38,11 +38,11 @@ namespace Eede.PenStyles
 
             Rectangle lastRect = new Rectangle(0, 0, 200, 200);
 
-            if (aBitmap.IsInnerBitmap(positions.Now))
+            if (aBitmap.Contains(positions.Now))
             {
                 DrawLine(aBitmap, pen, positions.Start, endPoint, lastRect);
             }
-            else if (aBitmap.IsInnerBitmap(positions.Start))
+            else if (aBitmap.Contains(positions.Start))
             {
                 DrawLine(aBitmap, pen, endPoint, positions.Start, lastRect);
             }

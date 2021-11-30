@@ -4,35 +4,27 @@ namespace Eede.Domain.PenStyles
 {
     public class FreeCurve : IPenStyle
     {
-        public AlphaPicture DrawStart(DrawingMaterial material, PositionHistory positionHistory, bool isShift)
+        public AlphaPicture DrawStart(DrawingPerformer performer, PositionHistory positionHistory, bool isShift)
         {
-            return material.DrawingPicture.DrawPoint(material.PenCase, positionHistory.Now);
+            return performer.DrawPoint(positionHistory.Now);
         }
 
-        public AlphaPicture Drawing(DrawingMaterial material, PositionHistory positionHistory, bool isShift)
+        public AlphaPicture Drawing(DrawingPerformer performer, PositionHistory positionHistory, bool isShift)
         {
-            if (material.DrawingPicture.Contains(positionHistory.Now))
+            if (performer.Contains(positionHistory.Now))
             {
-                return material.DrawingPicture.DrawLine(material.PenCase, positionHistory.Last, positionHistory.Now);
+                return performer.DrawLine(positionHistory.Last, positionHistory.Now);
             }
-            if (material.DrawingPicture.Contains(positionHistory.Last))
+            if (performer.Contains(positionHistory.Last))
             {
-                return material.DrawingPicture.DrawLine(material.PenCase, positionHistory.Now, positionHistory.Last);
+                return performer.DrawLine(positionHistory.Now, positionHistory.Last);
             }
-            return material.DrawingPicture;
+            return performer.DrawingPicture;
         }
 
-        public AlphaPicture DrawEnd(DrawingMaterial material, PositionHistory positionHistory, bool isShift)
+        public AlphaPicture DrawEnd(DrawingPerformer performer, PositionHistory positionHistory, bool isShift)
         {
-            return material.DrawingPicture;
+            return performer.DrawingPicture;
         }
-
-        //private void DrawFreeCurve(PaintableBox target, Point beginPos, Point endPos)
-        //{
-        //    using (Graphics g = Graphics.FromImage(target.Buffer.Bmp))
-        //    {
-        //        g.DrawLine(target.Pen, beginPos, endPos);
-        //                   }
-        //}
     }
 }

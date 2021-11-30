@@ -4,10 +4,10 @@ namespace Eede.Domain.PenStyles
 {
     public interface IPenStyle
     {
-        AlphaPicture DrawStart(DrawingMaterial material, PositionHistory positionHistory, bool isShift);
+        AlphaPicture DrawStart(DrawingPerformer performer, PositionHistory positionHistory, bool isShift);
 
-        AlphaPicture Drawing(DrawingMaterial material, PositionHistory positionHistory, bool isShift);
+        AlphaPicture Drawing(DrawingPerformer performer, PositionHistory positionHistory, bool isShift);
 
-        AlphaPicture DrawEnd(DrawingMaterial material, PositionHistory positionHistory, bool isShift);
+        AlphaPicture DrawEnd(DrawingPerformer performer, PositionHistory positionHistory, bool isShift);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Eede.Application;
+using Eede.Application.Drawings;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.PenStyles;
@@ -28,10 +29,7 @@ namespace Eede.Ui
                 {
                     Buffer.Dispose();
                 }
-                if (DrawingBuffer != null)
-                {
-                    DrawingBuffer.Dispose();
-                }
+                DrawingRunner.Dispose();
             };
         }
 
@@ -68,6 +66,7 @@ namespace Eede.Ui
             }
             PaintArea = PaintArea.UpdateSize(Buffer.Size);
             RefleshCanvasSize();
+            canvas.Invalidate();
         }
 
         private PenCase mPen;
@@ -167,64 +166,37 @@ namespace Eede.Ui
 
         public event EventHandler ColorChanged;
 
-        private void fireColorChanged()
+        private void FireColorChanged()
         {
             ColorChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private PositionHistory PositionHistory = null;
-
-        // PositionHistory = new EmptyPositionHistory();
-        private AlphaPicture DrawingBuffer = null;
+        private DrawingRunner DrawingRunner = new DrawingRunner(null, null, null);
 
         private void canvas_MouseDown(object sender, MouseEventArgs e)
         {
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    if (PositionHistory != null) return;
-
-                    // PositionHistory = PaintArea.DrawStart(Buffer, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
-                    var pos = new MinifiedPosition(new Position(e.X, e.Y), m).ToPosition();
-                    if (Buffer.Contains(pos))
-                    {
-                        // Bufferを控えておく
-                        if (DrawingBuffer != null)
-                        {
-                            DrawingBuffer.Dispose();
-                        }
-                        DrawingBuffer = Buffer.Clone();
-                        // beginからfinishまでの間情報を保持するクラス
-                        // Positionhistory, BeforeBuffer, PenStyle, PenCase
-
-                        PositionHistory = new PositionHistory(pos);
-                        var material = new DrawingMaterial(DrawingBuffer, Buffer, PenCase);
-                        UpdatePicture(PenStyle.DrawStart(material, PositionHistory, IsShift()));
-                        canvas.Invalidate();
-                    }
+                    DrawingRunner.Dispose();
+                    DrawingRunner = new DrawingRunner(PenStyle, PenCase, m);
+                    UpdatePicture(DrawingRunner.DrawStart(Buffer, new Position(e.X, e.Y), IsShift()));
                     break;
                 //case MouseButtons.Middle:
                 //    break;
                 //case MouseButtons.None:
                 //    break;
                 case MouseButtons.Right:
-                    if (PositionHistory != null)
+                    if (DrawingRunner.IsDrawing())
                     {
-                        //描画をキャンセルする
-                        PositionHistory = null;
-                        // Bufferを元に戻す
-                        if (DrawingBuffer != null)
-                        {
-                            UpdatePicture(DrawingBuffer);
-                            DrawingBuffer = null;
-                        }
+                        UpdatePicture(DrawingRunner.DrawCancel());
                     }
                     else
                     {
                         //色を拾う
                         SetPenColor(DropColor(new MinifiedPosition(new Position(e.X, e.Y), m)));
                         // TODO: PaintArea.DropColor(Buffer, new Position(e.X, e.Y))
-                        fireColorChanged();
+                        FireColorChanged();
                     }
                     break;
                 //case MouseButtons.XButton1:
@@ -247,34 +219,14 @@ namespace Eede.Ui
             return ((Control.ModifierKeys & Keys.Shift) == Keys.Shift);
         }
 
-        private void UpdatePositionHistory(MinifiedPosition pos)
-        {
-            PositionHistory = PositionHistory.Update(pos.ToPosition());
-        }
-
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (PositionHistory == null) return;
-            // PositionHistory = PaintArea.Drawing(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
-
-            var pos = new MinifiedPosition(new Position(e.X, e.Y), m);
-            UpdatePositionHistory(pos);
-            var material = new DrawingMaterial(DrawingBuffer, Buffer, PenCase);
-            UpdatePicture(PenStyle.Drawing(material, PositionHistory, IsShift()));
-            canvas.Invalidate();
+            UpdatePicture(DrawingRunner.Drawing(Buffer, new Position(e.X, e.Y), IsShift()));
         }
 
         private void canvas_MouseUp(object sender, MouseEventArgs e)
         {
-            if (PositionHistory == null) return;
-            // PositionHistory = PaintArea.FinishDraw(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
-
-            var pos = new MinifiedPosition(new Position(e.X, e.Y), m);
-            UpdatePositionHistory(pos);
-
-            var material = new DrawingMaterial(DrawingBuffer, Buffer, PenCase);
-            UpdatePicture(PenStyle.DrawEnd(material, PositionHistory, IsShift()));
-            PositionHistory = null;
+            UpdatePicture(DrawingRunner.DrawEnd(Buffer, new Position(e.X, e.Y), IsShift()));
         }
 
         private void canvas_MouseEnter(object sender, EventArgs e)

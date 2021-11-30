@@ -55,7 +55,7 @@
     <Compile Include="ImageTransfers\DirectImageTransfer.cs" />
     <Compile Include="ImageTransfers\IImageTransfer.cs" />
     <Compile Include="ImageTransfers\RGBToneImageTransfer.cs" />
-    <Compile Include="PenStyles\DrawingMaterial.cs" />
+    <Compile Include="PenStyles\DrawingPerformer.cs" />
     <Compile Include="Scales\Magnification.cs" />
     <Compile Include="PenCase.cs" />
     <Compile Include="PenStyles\Fill.cs" />

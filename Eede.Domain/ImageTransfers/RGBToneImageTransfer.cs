@@ -8,8 +8,7 @@ namespace Eede.Domain.ImageTransfers
     {
         public void Transfer(Bitmap from, Graphics to, Size size)
         {
-            var dest = new Bitmap(from.Width, from.Height);
-            try
+            using (var dest = new Bitmap(from.Width, from.Height))
             {
                 BitmapData destBitmapData = dest.LockBits(
                     new Rectangle(Point.Empty, dest.Size),
@@ -53,10 +52,6 @@ namespace Eede.Domain.ImageTransfers
                 to.InterpolationMode = InterpolationMode.NearestNeighbor;
 
                 to.DrawImage(dest, new Rectangle(0, 0, size.Width, size.Height));
-            }
-            finally
-            {
-                dest.Dispose();
             }
         }
     }

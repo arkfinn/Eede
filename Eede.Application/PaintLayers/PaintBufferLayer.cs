@@ -8,10 +8,10 @@ namespace Eede.Application.PaintLayers
     class PaintBufferLayer : IPaintLayer
     {
         private readonly MagnifiedSize PaintSize;
-        private readonly Bitmap Source;
+        private readonly AlphaPicture Source;
         private readonly IImageTransfer ImageTransfer;
 
-        public PaintBufferLayer(MagnifiedSize paintSize, Bitmap source, IImageTransfer imageTransfer)
+        public PaintBufferLayer(MagnifiedSize paintSize, AlphaPicture source, IImageTransfer imageTransfer)
         {
             PaintSize = paintSize;
             Source = source;
@@ -21,7 +21,7 @@ namespace Eede.Application.PaintLayers
         public void Paint(Graphics destination)
         {
             if (Source == null) return;
-            ImageTransfer.Transfer(Source, destination, PaintSize.ToSize());
+            ImageTransfer.Transfer(Source.Bmp, destination, PaintSize.ToSize());
         }
     }
 }

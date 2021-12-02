@@ -34,7 +34,7 @@ namespace Eede.Application
         public void Paint(Graphics g, AlphaPicture source, IImageTransfer imageTransfer)
         {
             var backgroundLayer = new PaintBackgroundLayer(Background);
-            var bufferLayer = new PaintBufferLayer(MagnifiedPaintSize, source.Bmp, imageTransfer);
+            var bufferLayer = new PaintBufferLayer(MagnifiedPaintSize, source, imageTransfer);
             var gridLayer = new PaintGridLayer(MagnifiedPaintSize, Magnify(GridSize));
             backgroundLayer.Paint(g);
             bufferLayer.Paint(g);

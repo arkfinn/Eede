@@ -169,12 +169,11 @@ namespace Eede
 
         #region 描画命令
 
+        // 通常のBitmap初期化ではAlpha値0の色情報を破棄してしまうため、独自実装のブレンドで色情報を保持する。
+
         private Bitmap CreateTempBmp()
         {
-            var tmp = new Bitmap(Bmp.Width, Bmp.Height);
-            var d = new DirectImageBlender();
-            d.Blend(Bmp, tmp);
-            return tmp;
+            return TempClone(Bmp);
         }
 
         private Bitmap TempClone(Bitmap bmp)
@@ -185,40 +184,40 @@ namespace Eede
             return tmp;
         }
 
-        public AlphaPicture DrawPoint(PenCase p, Position pos)
+        public AlphaPicture Draw(Action<Graphics> action, IImageBlender blender)
         {
-            int x = pos.X;
-            int y = pos.Y;
             EndAccess();
             using (var newBmp = CreateTempBmp())
             using (var tmp = CreateTempBmp())
             {
                 using (var g = Graphics.FromImage(tmp))
                 {
-                    // TODO: ドットの打ち方は調整したい。1to 4ドット辺りまではrectで
-                    g.CompositingMode = CompositingMode.SourceCopy;
-                    g.DrawLine(p.PreparePen(), new PointF((float)x, (float)y), new PointF((float)x + 0.001f, (float)y + 0.01f));
+                    action(g);
                 }
-                p.Blender.Blend(tmp, newBmp);
+                blender.Blend(tmp, newBmp);
                 return new AlphaPicture(newBmp);
             }
         }
 
+        public AlphaPicture DrawPoint(PenCase p, Position pos)
+        {
+            int x = pos.X;
+            int y = pos.Y;
+            return Draw(g =>
+            {
+                // TODO: ドットの打ち方は調整したい。1to 4ドット辺りまではrectで
+                g.CompositingMode = CompositingMode.SourceCopy;
+                g.DrawLine(p.PreparePen(), new PointF((float)x, (float)y), new PointF((float)x + 0.001f, (float)y + 0.01f));
+            }, p.Blender);
+        }
+
         public AlphaPicture DrawLine(PenCase p, Position beginPos, Position endPos)
         {
-            EndAccess();
-            using (var newBmp = CreateTempBmp())
-            using (var tmp = CreateTempBmp())
+            return Draw(g =>
             {
-                using (var g = Graphics.FromImage(tmp))
-                {
-                    g.CompositingMode = CompositingMode.SourceCopy;
-                    g.DrawLine(p.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
-                }
-                tmp.Save("test.png");
-                p.Blender.Blend(tmp, newBmp);
-                return new AlphaPicture(newBmp);
-            }
+                g.CompositingMode = CompositingMode.SourceCopy;
+                g.DrawLine(p.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
+            }, p.Blender);
         }
 
         /// <summary>

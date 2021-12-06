@@ -13,7 +13,7 @@ namespace Eede
         public AlphaPicture(Bitmap bitmap)
         {
             //newすると強制的にPixelFormat.Format32bppArgbになる
-            Bmp = new Bitmap(bitmap);
+            Bmp = TempClone(bitmap);
         }
 
         private Bitmap mBitmap;
@@ -177,12 +177,20 @@ namespace Eede
             return tmp;
         }
 
+        private Bitmap TempClone(Bitmap bmp)
+        {
+            var tmp = new Bitmap(bmp.Width, bmp.Height);
+            var d = new DirectImageBlender();
+            d.Blend(bmp, tmp);
+            return tmp;
+        }
+
         public AlphaPicture DrawPoint(PenCase p, Position pos)
         {
             int x = pos.X;
             int y = pos.Y;
             EndAccess();
-            using (var newBmp = new Bitmap(Bmp))
+            using (var newBmp = CreateTempBmp())
             using (var tmp = CreateTempBmp())
             {
                 using (var g = Graphics.FromImage(tmp))
@@ -199,7 +207,7 @@ namespace Eede
         public AlphaPicture DrawLine(PenCase p, Position beginPos, Position endPos)
         {
             EndAccess();
-            using (var newBmp = new Bitmap(Bmp))
+            using (var newBmp = CreateTempBmp())
             using (var tmp = CreateTempBmp())
             {
                 using (var g = Graphics.FromImage(tmp))
@@ -207,6 +215,7 @@ namespace Eede
                     g.CompositingMode = CompositingMode.SourceCopy;
                     g.DrawLine(p.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
                 }
+                tmp.Save("test.png");
                 p.Blender.Blend(tmp, newBmp);
                 return new AlphaPicture(newBmp);
             }

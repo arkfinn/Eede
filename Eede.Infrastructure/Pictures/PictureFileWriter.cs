@@ -2,6 +2,7 @@
 using Eede.Domain.Files;
 using Eede.Domain.Pictures;
 using System;
+using System.Drawing.Imaging;
 
 namespace Eede.Infrastructure.Pictures
 {
@@ -24,7 +25,10 @@ namespace Eede.Infrastructure.Pictures
             {
                 throw new ArgumentNullException("picture is null.");
             }
-            picture.ToImage().Save(Path.Path, System.Drawing.Imaging.ImageFormat.Png);
+            using (var image = picture.ToImage())
+            {
+                image.Save(Path.Path, ImageFormat.Png);
+            }
         }
     }
 }

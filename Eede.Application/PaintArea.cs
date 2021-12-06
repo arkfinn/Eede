@@ -1,5 +1,6 @@
 ﻿using Eede.Application.PaintLayers;
 using Eede.Domain.ImageTransfers;
+using Eede.Domain.Positions;
 using Eede.Domain.Scales;
 using Eede.Domain.Sizes;
 using System.Drawing;
@@ -12,8 +13,8 @@ namespace Eede.Application
         {
             Background = background;
             Magnification = magnification;
-            PaintSize = paintSize;
-            MagnifiedPaintSize = Magnify(paintSize);
+            RealSize = paintSize;
+            DisplaySize = Magnify(paintSize);
             GridSize = gridSize;
         }
 
@@ -23,8 +24,11 @@ namespace Eede.Application
 
         private readonly Size GridSize;
 
-        private readonly Size PaintSize;
-        public readonly MagnifiedSize MagnifiedPaintSize;
+        // 実際のサイズ・ポジション RealSize RealPosition
+        private readonly Size RealSize;
+
+        // 表示上のサイズ・ポジション DisplaySize DisplayPosition
+        public readonly MagnifiedSize DisplaySize;
 
         private MagnifiedSize Magnify(Size size)
         {
@@ -34,8 +38,8 @@ namespace Eede.Application
         public void Paint(Graphics g, AlphaPicture source, IImageTransfer imageTransfer)
         {
             var backgroundLayer = new PaintBackgroundLayer(Background);
-            var bufferLayer = new PaintBufferLayer(MagnifiedPaintSize, source, imageTransfer);
-            var gridLayer = new PaintGridLayer(MagnifiedPaintSize, Magnify(GridSize));
+            var bufferLayer = new PaintBufferLayer(DisplaySize, source, imageTransfer);
+            var gridLayer = new PaintGridLayer(DisplaySize, Magnify(GridSize));
             backgroundLayer.Paint(g);
             bufferLayer.Paint(g);
             gridLayer.Paint(g);
@@ -48,7 +52,12 @@ namespace Eede.Application
 
         public PaintArea UpdateMagnification(Magnification m)
         {
-            return new PaintArea(Background, m, PaintSize, GridSize);
+            return new PaintArea(Background, m, RealSize, GridSize);
+        }
+
+        public MinifiedPosition RealPositionOf(Position position)
+        {
+            return new MinifiedPosition(position, Magnification);
         }
     }
 }

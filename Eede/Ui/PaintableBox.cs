@@ -115,7 +115,7 @@ namespace Eede.Ui
 
         private void RefleshCanvasSize()
         {
-            canvas.Size = PaintArea.MagnifiedPaintSize.ToSize();
+            canvas.Size = PaintArea.DisplaySize.ToSize();
             ResetLocation();
             Refresh();
         }
@@ -171,7 +171,7 @@ namespace Eede.Ui
             ColorChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private DrawingRunner DrawingRunner = new DrawingRunner(null, null, null);
+        private DrawingRunner DrawingRunner = new DrawingRunner(null, null);
 
         private void canvas_MouseDown(object sender, MouseEventArgs e)
         {
@@ -179,8 +179,8 @@ namespace Eede.Ui
             {
                 case MouseButtons.Left:
                     DrawingRunner.Dispose();
-                    DrawingRunner = new DrawingRunner(PenStyle, PenCase, m);
-                    UpdatePicture(DrawingRunner.DrawStart(Buffer, new Position(e.X, e.Y), IsShift()));
+                    DrawingRunner = new DrawingRunner(PenStyle, PenCase);
+                    UpdatePicture(DrawingRunner.DrawStart(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
                     break;
                 //case MouseButtons.Middle:
                 //    break;
@@ -221,12 +221,12 @@ namespace Eede.Ui
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            UpdatePicture(DrawingRunner.Drawing(Buffer, new Position(e.X, e.Y), IsShift()));
+            UpdatePicture(DrawingRunner.Drawing(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
         }
 
         private void canvas_MouseUp(object sender, MouseEventArgs e)
         {
-            UpdatePicture(DrawingRunner.DrawEnd(Buffer, new Position(e.X, e.Y), IsShift()));
+            UpdatePicture(DrawingRunner.DrawEnd(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
         }
 
         private void canvas_MouseEnter(object sender, EventArgs e)

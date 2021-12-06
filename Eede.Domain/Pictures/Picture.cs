@@ -54,7 +54,7 @@ namespace Eede.Domain.Pictures
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (Buffer != null)
             {
                 Buffer.Dispose();
                 Buffer = null;

@@ -23,7 +23,7 @@ namespace Eede.Infrastructure.Pictures
         {
             using (var image = Image.FromFile(Path.Path))
             {
-                return new Picture(new Bitmap(image));
+                return new Picture(image);
             }
         }
     }

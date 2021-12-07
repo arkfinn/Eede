@@ -1,5 +1,6 @@
 ﻿using Eede.Application.PaintLayers;
 using Eede.Domain.ImageTransfers;
+using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
 using Eede.Domain.Sizes;
@@ -9,12 +10,10 @@ namespace Eede.Application
 {
     public class PaintArea
     {
-        public PaintArea(ICanvasBackgroundService background, Magnification magnification, Size paintSize, Size gridSize)
+        public PaintArea(ICanvasBackgroundService background, Magnification magnification, Size gridSize)
         {
             Background = background;
             Magnification = magnification;
-            RealSize = paintSize;
-            DisplaySize = Magnify(paintSize);
             GridSize = gridSize;
         }
 
@@ -24,40 +23,36 @@ namespace Eede.Application
 
         private readonly Size GridSize;
 
-        // 実際のサイズ・ポジション RealSize RealPosition
-        private readonly Size RealSize;
-
-        // 表示上のサイズ・ポジション DisplaySize DisplayPosition
-        public readonly MagnifiedSize DisplaySize;
-
         private MagnifiedSize Magnify(Size size)
         {
             return new MagnifiedSize(size, Magnification);
         }
 
-        public void Paint(Graphics g, AlphaPicture source, IImageTransfer imageTransfer)
+        public void Paint(Graphics g, Picture source, IImageTransfer imageTransfer)
         {
+            // 表示上のサイズ・ポジション DisplaySize DisplayPosition
+            var displaySize = Magnify(source.Size);
             var backgroundLayer = new PaintBackgroundLayer(Background);
-            var bufferLayer = new PaintBufferLayer(DisplaySize, source, imageTransfer);
-            var gridLayer = new PaintGridLayer(DisplaySize, Magnify(GridSize));
+            var bufferLayer = new PaintBufferLayer(displaySize, source, imageTransfer);
+            var gridLayer = new PaintGridLayer(displaySize, Magnify(GridSize));
             backgroundLayer.Paint(g);
             bufferLayer.Paint(g);
             gridLayer.Paint(g);
         }
 
-        public PaintArea UpdateSize(Size paintSize)
-        {
-            return new PaintArea(Background, Magnification, paintSize, GridSize);
-        }
-
         public PaintArea UpdateMagnification(Magnification m)
         {
-            return new PaintArea(Background, m, RealSize, GridSize);
+            return new PaintArea(Background, m, GridSize);
         }
 
         public MinifiedPosition RealPositionOf(Position position)
         {
             return new MinifiedPosition(position, Magnification);
+        }
+
+        public Size DisplaySizeOf(Picture picture)
+        {
+            return Magnify(picture.Size).ToSize();
         }
     }
 }

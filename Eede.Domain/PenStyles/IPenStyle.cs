@@ -1,13 +1,14 @@
-﻿using Eede.Domain.Positions;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Positions;
 
 namespace Eede.Domain.PenStyles
 {
     public interface IPenStyle
     {
-        AlphaPicture DrawStart(DrawingPerformer performer, PositionHistory positionHistory, bool isShift);
+        Picture DrawStart(DrawingPerformer performer, PositionHistory positionHistory, bool isShift);
 
-        AlphaPicture Drawing(DrawingPerformer performer, PositionHistory positionHistory, bool isShift);
+        Picture Drawing(DrawingPerformer performer, PositionHistory positionHistory, bool isShift);
 
-        AlphaPicture DrawEnd(DrawingPerformer performer, PositionHistory positionHistory, bool isShift);
+        Picture DrawEnd(DrawingPerformer performer, PositionHistory positionHistory, bool isShift);
     }
 }

@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 
 namespace Eede
 {
+    [Obsolete("AlphaPictureはPictureに置き換えて廃止予定")]
     public class AlphaPicture : IDisposable
     {
         public AlphaPicture(Bitmap bitmap)

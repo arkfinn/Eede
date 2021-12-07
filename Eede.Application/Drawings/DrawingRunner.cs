@@ -1,4 +1,5 @@
 ﻿using Eede.Domain.PenStyles;
+using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using System;
 
@@ -17,9 +18,9 @@ namespace Eede.Application.Drawings
 
         private PositionHistory PositionHistory = null;
 
-        private AlphaPicture DrawingBuffer = null;
+        private Picture DrawingBuffer = null;
 
-        public AlphaPicture DrawStart(AlphaPicture NowPicture, PaintArea paintArea, Position position, bool isShift)
+        public Picture DrawStart(Picture NowPicture, PaintArea paintArea, Position position, bool isShift)
         {
             if (PositionHistory != null) return NowPicture;
 
@@ -43,7 +44,7 @@ namespace Eede.Application.Drawings
             return PenStyle.DrawStart(material, PositionHistory, isShift);
         }
 
-        public AlphaPicture Drawing(AlphaPicture NowPicture, PaintArea paintArea, Position position, bool isShift)
+        public Picture Drawing(Picture NowPicture, PaintArea paintArea, Position position, bool isShift)
         {
             if (PositionHistory == null) return NowPicture;
             // PositionHistory = PaintArea.Drawing(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
@@ -53,7 +54,7 @@ namespace Eede.Application.Drawings
             return PenStyle.Drawing(material, PositionHistory, isShift);
         }
 
-        public AlphaPicture DrawEnd(AlphaPicture NowPicture, PaintArea paintArea, Position position, bool isShift)
+        public Picture DrawEnd(Picture NowPicture, PaintArea paintArea, Position position, bool isShift)
         {
             if (PositionHistory == null) return NowPicture;
             // PositionHistory = PaintArea.FinishDraw(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
@@ -68,7 +69,7 @@ namespace Eede.Application.Drawings
             return result;
         }
 
-        public AlphaPicture DrawCancel()
+        public Picture DrawCancel()
         {
             var result = DrawingBuffer.Clone();
             PositionHistory = null;

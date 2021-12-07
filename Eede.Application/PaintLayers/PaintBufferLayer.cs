@@ -1,4 +1,5 @@
 ﻿using Eede.Domain.ImageTransfers;
+using Eede.Domain.Pictures;
 using Eede.Domain.Sizes;
 using System.Drawing;
 
@@ -8,10 +9,10 @@ namespace Eede.Application.PaintLayers
     class PaintBufferLayer : IPaintLayer
     {
         private readonly MagnifiedSize PaintSize;
-        private readonly AlphaPicture Source;
+        private readonly Picture Source;
         private readonly IImageTransfer ImageTransfer;
 
-        public PaintBufferLayer(MagnifiedSize paintSize, AlphaPicture source, IImageTransfer imageTransfer)
+        public PaintBufferLayer(MagnifiedSize paintSize, Picture source, IImageTransfer imageTransfer)
         {
             PaintSize = paintSize;
             Source = source;
@@ -21,7 +22,7 @@ namespace Eede.Application.PaintLayers
         public void Paint(Graphics destination)
         {
             if (Source == null) return;
-            ImageTransfer.Transfer(Source.Bmp, destination, PaintSize.ToSize());
+            Source.Transfer(ImageTransfer, destination, PaintSize.ToSize());
         }
     }
 }

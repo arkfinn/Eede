@@ -3,6 +3,7 @@ using Eede.Application.Drawings;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.PenStyles;
+using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
 using Eede.Services;
@@ -20,9 +21,9 @@ namespace Eede.Ui
             InitializeComponent();
             var s = GlobalSetting.Instance().BoxSize;
             var gridSize = new Size(16, 16);
-            PaintArea = new PaintArea(CanvasBackgroundService.Instance, m, s, gridSize);
+            PaintArea = new PaintArea(CanvasBackgroundService.Instance, m, gridSize);
             SetupImage(new Bitmap(s.Width, s.Height));
-            canvas.Image = new Bitmap(Buffer.Bmp);
+            canvas.Image = Buffer.ToImage();
             Disposed += (sender, args) =>
             {
                 if (Buffer != null)
@@ -35,7 +36,7 @@ namespace Eede.Ui
 
         private PaintArea PaintArea;
 
-        private AlphaPicture Buffer;
+        private Picture Buffer;
 
         public Size DrawingSize
         {
@@ -47,15 +48,15 @@ namespace Eede.Ui
 
         public Bitmap GetImage()
         {
-            return Buffer.Bmp;
+            return Buffer.CutOut(new Rectangle(new Point(0, 0), Buffer.Size));
         }
 
         public void SetupImage(Bitmap image)
         {
-            UpdatePicture(new AlphaPicture(image));
+            UpdatePicture(new Picture(image));
         }
 
-        private void UpdatePicture(AlphaPicture newPicture)
+        private void UpdatePicture(Picture newPicture)
         {
             var oldPicture = Buffer;
             Buffer = newPicture;
@@ -64,8 +65,7 @@ namespace Eede.Ui
             {
                 oldPicture.Dispose();
             }
-            PaintArea = PaintArea.UpdateSize(Buffer.Size);
-            RefleshCanvasSize();
+            UpdateCanvasSize();
             canvas.Invalidate();
         }
 
@@ -92,7 +92,7 @@ namespace Eede.Ui
             {
                 m = new Magnification(value);
                 PaintArea = PaintArea.UpdateMagnification(m);
-                RefleshCanvasSize();
+                UpdateCanvasSize();
             }
         }
 
@@ -113,9 +113,9 @@ namespace Eede.Ui
             PenCase.Width = size;
         }
 
-        private void RefleshCanvasSize()
+        private void UpdateCanvasSize()
         {
-            canvas.Size = PaintArea.DisplaySize.ToSize();
+            canvas.Size = PaintArea.DisplaySizeOf(Buffer);
             ResetLocation();
             Refresh();
         }
@@ -194,7 +194,7 @@ namespace Eede.Ui
                     else
                     {
                         //色を拾う
-                        SetPenColor(DropColor(new MinifiedPosition(new Position(e.X, e.Y), m)));
+                        SetPenColor(PickColor(new MinifiedPosition(new Position(e.X, e.Y), m)));
                         // TODO: PaintArea.DropColor(Buffer, new Position(e.X, e.Y))
                         FireColorChanged();
                     }
@@ -208,10 +208,9 @@ namespace Eede.Ui
             }
         }
 
-        private Color DropColor(MinifiedPosition pos)
+        private Color PickColor(MinifiedPosition pos)
         {
-            var dropper = new ColorDropper(Buffer.Bmp);
-            return dropper.Drop(pos.ToPosition());
+            return Buffer.PickColor(pos.ToPosition());
         }
 
         private bool IsShift()

@@ -1,15 +1,16 @@
-﻿using Eede.Domain.Positions;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Positions;
 
 namespace Eede.Domain.PenStyles
 {
     public class FreeCurve : IPenStyle
     {
-        public AlphaPicture DrawStart(DrawingPerformer performer, PositionHistory positionHistory, bool isShift)
+        public Picture DrawStart(DrawingPerformer performer, PositionHistory positionHistory, bool isShift)
         {
             return performer.DrawPoint(positionHistory.Now);
         }
 
-        public AlphaPicture Drawing(DrawingPerformer performer, PositionHistory positionHistory, bool isShift)
+        public Picture Drawing(DrawingPerformer performer, PositionHistory positionHistory, bool isShift)
         {
             if (performer.Contains(positionHistory.Now))
             {
@@ -22,7 +23,7 @@ namespace Eede.Domain.PenStyles
             return performer.DrawingPicture;
         }
 
-        public AlphaPicture DrawEnd(DrawingPerformer performer, PositionHistory positionHistory, bool isShift)
+        public Picture DrawEnd(DrawingPerformer performer, PositionHistory positionHistory, bool isShift)
         {
             return performer.DrawingPicture;
         }

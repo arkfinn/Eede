@@ -49,7 +49,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColorDropperTests.cs" />
     <Compile Include="Files\FilePathTests.cs" />
     <Compile Include="HalfBoxPositionTests.cs" />
     <Compile Include="Scales\MagnificationTests.cs" />

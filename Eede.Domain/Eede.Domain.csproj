@@ -44,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AlphaPicture.cs" />
-    <Compile Include="ColorDropper.cs" />
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="HalfBoxPosition.cs" />
     <Compile Include="ImageBlenders\AlphaOnlyImageBlender.cs" />

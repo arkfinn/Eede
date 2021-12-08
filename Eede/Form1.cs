@@ -2,6 +2,7 @@
 using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
+using Eede.Domain.Pictures;
 using Eede.Settings;
 using Eede.Ui;
 using System;
@@ -79,7 +80,7 @@ namespace Eede
             form.MdiParent = this;
             form.FormClosed += new FormClosedEventHandler(ChildFormClosed);
             form.PicturePulled += new EventHandler<PicturePulledEventArgs>(ChildFormPicturePulled);
-            form.PicturePushed += new EventHandler<PicturePushedEventArgs>(ChildFormPicturePushed);
+            form.PicturePushed = ChildFormPicturePushed;
             form.Show();
             toolStripButton_saveFile.Enabled = true;
         }
@@ -95,14 +96,14 @@ namespace Eede
             paintableBox1.SetupImage(e.CutOutImage());
         }
 
-        private void ChildFormPicturePushed(object sender, PicturePushedEventArgs e)
+        private Picture ChildFormPicturePushed(PicturePushedEventArgs e)
         {
             var src = paintableBox1.GetImage();
             // TODO:アルファ値ゼロの色情報が消える問題あり
             //e.Bitmap.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
             //e.Bitmap.DrawImage(src, new Rectangle(e.Position, src.Size));
             var blender = new DirectImageBlender();
-            e.Picture.Blend(blender, src, e.Position);
+            return e.Picture.Blend(blender, src, e.Position);
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)

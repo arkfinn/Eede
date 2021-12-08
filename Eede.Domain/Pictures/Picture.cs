@@ -23,11 +23,12 @@ namespace Eede.Domain.Pictures
             {
                 throw new ArgumentNullException("imageの値は必ず指定してください。");
             }
-            Buffer = CreatelCone(image);
+            Buffer = CreateClone(image);
         }
 
-        private Bitmap CreatelCone(Bitmap source)
+        private Bitmap CreateClone(Bitmap source)
         {
+            // new Bitmap(source)とすると、alpha=0のRGB情報が失われるため、手動で合成し直している。
             var tmp = new Bitmap(source.Width, source.Height);
             var d = new DirectImageBlender();
             d.Blend(source, tmp);
@@ -39,7 +40,7 @@ namespace Eede.Domain.Pictures
             return new Picture(Buffer);
         }
 
-        private Bitmap Buffer;
+        private readonly Bitmap Buffer;
 
         public Bitmap CutOut(Rectangle rect)
         {
@@ -63,17 +64,27 @@ namespace Eede.Domain.Pictures
             transfer.Transfer(Buffer, g, size);
         }
 
-        // TODO: Bufferを書き換えているので副作用があるため、Transfer同様に別画像に対して転送するか、DrawのようにPictureを返したい。
         // IImageBlenderのメソッドが整っていないため一時的にDirectImageBlenderを直で指定
-        public void Blend(/*IImageBlender*/ DirectImageBlender blender, Bitmap src, Position toPosition)
+        /// <summary>
+        /// このPictureのtoPositionにsrcを合成した新しいPictureを返す。
+        /// </summary>
+        /// <param name="blender"></param>
+        /// <param name="src"></param>
+        /// <param name="toPosition"></param>
+        /// <returns></returns>
+        public Picture Blend(/*IImageBlender*/ DirectImageBlender blender, Bitmap src, Position toPosition)
         {
-            blender.Blend(src, Buffer, toPosition);
+            using (var tmp = CreateClone(Buffer))
+            {
+                blender.Blend(src, tmp, toPosition);
+                return new Picture(tmp);
+            }
         }
 
         public Picture Draw(Action<Graphics> action, IImageBlender blender)
         {
-            using (var newBmp = CreatelCone(Buffer))
-            using (var tmp = CreatelCone(Buffer))
+            using (var newBmp = CreateClone(Buffer))
+            using (var tmp = CreateClone(Buffer))
             {
                 using (var g = Graphics.FromImage(tmp))
                 {
@@ -103,18 +114,9 @@ namespace Eede.Domain.Pictures
             Dispose(true);
         }
 
-        ~Picture()
-        {
-            Dispose(false);
-        }
-
         protected virtual void Dispose(bool disposing)
         {
-            if (Buffer != null)
-            {
-                Buffer.Dispose();
-                Buffer = null;
-            }
+            Buffer.Dispose();
         }
     }
 }

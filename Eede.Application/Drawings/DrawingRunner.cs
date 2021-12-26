@@ -40,7 +40,7 @@ namespace Eede.Application.Drawings
             // Positionhistory, BeforeBuffer, PenStyle, PenCase
 
             PositionHistory = new PositionHistory(realPosition);
-            var material = new DrawingPerformer(DrawingBuffer, NowPicture, PenCase);
+            var material = new Drawer(DrawingBuffer, NowPicture, PenCase);
             return PenStyle.DrawStart(material, PositionHistory, isShift);
         }
 
@@ -50,7 +50,7 @@ namespace Eede.Application.Drawings
             // PositionHistory = PaintArea.Drawing(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
 
             PositionHistory = UpdatePositionHistory(paintArea.RealPositionOf(position));
-            var material = new DrawingPerformer(DrawingBuffer, NowPicture, PenCase);
+            var material = new Drawer(DrawingBuffer, NowPicture, PenCase);
             return PenStyle.Drawing(material, PositionHistory, isShift);
         }
 
@@ -61,7 +61,7 @@ namespace Eede.Application.Drawings
 
             PositionHistory = UpdatePositionHistory(paintArea.RealPositionOf(position));
 
-            var material = new DrawingPerformer(DrawingBuffer, NowPicture, PenCase);
+            var material = new Drawer(DrawingBuffer, NowPicture, PenCase);
             var result = PenStyle.DrawEnd(material, PositionHistory, isShift);
             PositionHistory = null;
             DrawingBuffer.Dispose();

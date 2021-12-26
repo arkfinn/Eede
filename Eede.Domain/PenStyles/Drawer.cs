@@ -5,13 +5,13 @@ using System.Drawing.Drawing2D;
 
 namespace Eede.Domain.PenStyles
 {
-    public class DrawingPerformer
+    public class Drawer
     {
         private readonly Picture SourcePicture;
         public readonly Picture DrawingPicture;
         private readonly PenCase PenCase;
 
-        public DrawingPerformer(Picture sourcePicture, Picture drawingPicture, PenCase penCase)
+        public Drawer(Picture sourcePicture, Picture drawingPicture, PenCase penCase)
         {
             SourcePicture = sourcePicture;
             DrawingPicture = drawingPicture;

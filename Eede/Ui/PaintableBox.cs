@@ -157,6 +157,13 @@ namespace Eede.Ui
             return now;
         }
 
+        private void UpdateAfterDrawing(DrawingResult result)
+        {
+            UpdatePicture(result.Picture);
+            DrawingRunner.Dispose();
+            DrawingRunner = result.Runner;
+        }
+
         #region イベント
 
         private void PaintableBox_SizeChanged(object sender, EventArgs e)
@@ -178,9 +185,10 @@ namespace Eede.Ui
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    DrawingRunner.Dispose();
-                    DrawingRunner = new DrawingRunner(PenStyle, PenCase);
-                    UpdatePicture(DrawingRunner.DrawStart(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
+                    using (var runner = new DrawingRunner(PenStyle, PenCase))
+                    {
+                        UpdateAfterDrawing(runner.DrawStart(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
+                    }
                     break;
                 //case MouseButtons.Middle:
                 //    break;
@@ -189,7 +197,7 @@ namespace Eede.Ui
                 case MouseButtons.Right:
                     if (DrawingRunner.IsDrawing())
                     {
-                        UpdatePicture(DrawingRunner.DrawCancel());
+                        UpdateAfterDrawing(DrawingRunner.DrawCancel());
                     }
                     else
                     {
@@ -220,12 +228,12 @@ namespace Eede.Ui
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            UpdatePicture(DrawingRunner.Drawing(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
+            UpdateAfterDrawing(DrawingRunner.Drawing(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
         }
 
         private void canvas_MouseUp(object sender, MouseEventArgs e)
         {
-            UpdatePicture(DrawingRunner.DrawEnd(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
+            UpdateAfterDrawing(DrawingRunner.DrawEnd(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
         }
 
         private void canvas_MouseEnter(object sender, EventArgs e)

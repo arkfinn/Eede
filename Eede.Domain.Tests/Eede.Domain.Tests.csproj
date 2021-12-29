@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DrawStyles\PenStyleTests.cs" />
     <Compile Include="Files\FilePathTests.cs" />
     <Compile Include="HalfBoxPositionTests.cs" />
     <Compile Include="Scales\MagnificationTests.cs" />

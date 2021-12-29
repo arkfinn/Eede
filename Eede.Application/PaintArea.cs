@@ -54,5 +54,10 @@ namespace Eede.Application
         {
             return Magnify(picture.Size).ToSize();
         }
+
+        public Color PickColor(Picture picture, Position pos)
+        {
+            return picture.PickColor(RealPositionOf(pos).ToPosition());
+        }
     }
 }

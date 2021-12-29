@@ -21,7 +21,7 @@ namespace Eede.Ui
             InitializeComponent();
             var s = GlobalSetting.Instance().BoxSize;
             var gridSize = new Size(16, 16);
-            PaintArea = new PaintArea(CanvasBackgroundService.Instance, m, gridSize);
+            PaintArea = new PaintArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize);
             SetupImage(new Bitmap(s.Width, s.Height));
             canvas.Image = Buffer.Fetch().ToImage();
             Disposed += (sender, args) =>
@@ -70,48 +70,28 @@ namespace Eede.Ui
             canvas.Invalidate();
         }
 
-        private PenStyle mPen;
-
-        private PenStyle PenCase
-        {
-            get
-            {
-                if (mPen == null)
-                {
-                    mPen = new PenStyle(new Pen(Color.Black), new DirectImageBlender());
-                }
-                return mPen;
-            }
-            set { mPen = value; }
-        }
-
-        private Magnification m = new Magnification(1);
+        private PenStyle PenStyle = new PenStyle(new DirectImageBlender());
 
         public float Magnification
         {
             set
             {
-                m = new Magnification(value);
-                PaintArea = PaintArea.UpdateMagnification(m);
+                PaintArea = PaintArea.UpdateMagnification(new Magnification(value));
                 UpdateCanvasSize();
             }
         }
 
-        public IDrawStyle PenStyle { get; set; } = new FreeCurve();
+        public IDrawStyle DrawStyle { private get; set; } = new FreeCurve();
 
-        public void SetPenColor(Color col)
+        public Color PenColor
         {
-            PenCase.Color = col;
+            get => PenStyle.Color;
+            set => PenStyle = PenStyle.UpdateColor(value);
         }
 
-        public Color GetPenColor()
+        public int PenSize
         {
-            return PenCase.Color;
-        }
-
-        public void SetPenSize(int size)
-        {
-            PenCase.Width = size;
+            set => PenStyle = PenStyle.UpdateWidth(value);
         }
 
         private void UpdateCanvasSize()
@@ -123,7 +103,7 @@ namespace Eede.Ui
 
         public void ChangeImageBlender(IImageBlender b)
         {
-            PenCase.Blender = b;
+            PenStyle = PenStyle.UpdateBlender(b);
         }
 
         private IImageTransfer imageTransfer = new DirectImageTransfer();
@@ -179,7 +159,7 @@ namespace Eede.Ui
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    var runner = new DrawingRunner(PenStyle, PenCase);
+                    var runner = new DrawingRunner(DrawStyle, PenStyle);
                     using (var result = runner.DrawStart(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()))
                     {
                         UpdatePicture(result.PictureBuffer);
@@ -202,8 +182,7 @@ namespace Eede.Ui
                     else
                     {
                         //色を拾う
-                        SetPenColor(PickColor(new MinifiedPosition(new Position(e.X, e.Y), m)));
-                        // TODO: PaintArea.DropColor(Buffer, new Position(e.X, e.Y))
+                        PenColor = PaintArea.PickColor(Buffer.Fetch(), new Position(e.X, e.Y));
                         FireColorChanged();
                     }
                     break;
@@ -214,11 +193,6 @@ namespace Eede.Ui
                 default:
                     break;
             }
-        }
-
-        private Color PickColor(MinifiedPosition pos)
-        {
-            return Buffer.Fetch().PickColor(pos.ToPosition());
         }
 
         private bool IsShift()

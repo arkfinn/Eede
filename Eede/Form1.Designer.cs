@@ -381,7 +381,7 @@
             this.paintableBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.paintableBox1.Location = new System.Drawing.Point(0, 0);
             this.paintableBox1.Name = "paintableBox1";
-            this.paintableBox1.PenStyle = freeCurve1;
+            this.paintableBox1.DrawStyle = freeCurve1;
             this.paintableBox1.Size = new System.Drawing.Size(424, 402);
             this.paintableBox1.TabIndex = 1;
             this.paintableBox1.ColorChanged += new System.EventHandler(this.paintableBox1_ColorChanged);

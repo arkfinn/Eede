@@ -249,17 +249,17 @@ namespace Eede
 
         private void colorPicker1_ColorChanged(object sender, EventArgs e)
         {
-            paintableBox1.SetPenColor(colorPicker1.GetArgb());
+            paintableBox1.PenColor = colorPicker1.GetArgb();
         }
 
         private void penSizeSetter1_PenSizeChanged(object sender, EventArgs e)
         {
-            paintableBox1.SetPenSize(penSizeSetter1.PenSize);
+            paintableBox1.PenSize = penSizeSetter1.PenSize;
         }
 
         private void paintableBox1_ColorChanged(object sender, EventArgs e)
         {
-            colorPicker1.SetColor(paintableBox1.GetPenColor());
+            colorPicker1.SetColor(paintableBox1.PenColor);
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)

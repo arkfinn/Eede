@@ -9,12 +9,12 @@ namespace Eede.Domain.DrawStyles
     {
         public readonly Picture DrawingPicture;
 
-        private readonly PenStyle PenCase;
+        private readonly PenStyle PenStyle;
 
         public Drawer(Picture drawingPicture, PenStyle penCase)
         {
             DrawingPicture = drawingPicture;
-            PenCase = penCase;
+            PenStyle = penCase;
         }
 
         public Picture DrawPoint(Position position)
@@ -25,8 +25,8 @@ namespace Eede.Domain.DrawStyles
             {
                 // TODO: ドットの打ち方は調整したい。1to 4ドット辺りまではrectで
                 g.CompositingMode = CompositingMode.SourceCopy;
-                g.DrawLine(PenCase.PreparePen(), new PointF((float)x, (float)y), new PointF((float)x + 0.001f, (float)y + 0.01f));
-            }, PenCase.Blender);
+                g.DrawLine(PenStyle.PreparePen(), new PointF((float)x, (float)y), new PointF((float)x + 0.001f, (float)y + 0.01f));
+            }, PenStyle.Blender);
         }
 
         public Picture DrawLine(Position from, Position to)
@@ -34,8 +34,8 @@ namespace Eede.Domain.DrawStyles
             return DrawingPicture.Draw(g =>
             {
                 g.CompositingMode = CompositingMode.SourceCopy;
-                g.DrawLine(PenCase.PreparePen(), from.ToPoint(), to.ToPoint());
-            }, PenCase.Blender);
+                g.DrawLine(PenStyle.PreparePen(), from.ToPoint(), to.ToPoint());
+            }, PenStyle.Blender);
         }
 
         public bool Contains(Position position)

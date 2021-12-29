@@ -53,7 +53,7 @@
     <Compile Include="Files\FilePathTests.cs" />
     <Compile Include="HalfBoxPositionTests.cs" />
     <Compile Include="Scales\MagnificationTests.cs" />
-    <Compile Include="Pictures\PrimaryPictureTests.cs" />
+    <Compile Include="Pictures\PictureTests.cs" />
     <Compile Include="Positions\MinifiedPositionTests.cs" />
     <Compile Include="Positions\PositionHistoryTests.cs" />
     <Compile Include="Positions\PositionTests.cs" />

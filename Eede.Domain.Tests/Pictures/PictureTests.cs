@@ -6,7 +6,7 @@ using System.Drawing;
 namespace Eede.Domain.Pictures.Tests
 {
     [TestFixture]
-    public class PrimaryPictureTests
+    public class PictureTests
     {
         [Test]
         public void 引数imageがnullでnewはできない()

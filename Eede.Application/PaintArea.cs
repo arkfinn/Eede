@@ -55,9 +55,19 @@ namespace Eede.Application
             return Magnify(picture.Size).ToSize();
         }
 
-        public Color PickColor(Picture picture, Position pos)
+        public Color PickColor(Picture picture, Position displayPosition)
         {
-            return picture.PickColor(RealPositionOf(pos).ToPosition());
+            return picture.PickColor(RealPositionOf(displayPosition).ToPosition());
+        }
+
+        public PositionHistory CreatePositionHistory(Position displayPosition)
+        {
+            return new PositionHistory(RealPositionOf(displayPosition).ToPosition());
+        }
+
+        public PositionHistory NextPositionHistory(PositionHistory history, Position displayPosition)
+        {
+            return history.Update(RealPositionOf(displayPosition).ToPosition());
         }
     }
 }

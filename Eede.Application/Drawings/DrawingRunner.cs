@@ -11,22 +11,21 @@ namespace Eede.Application.Drawings
 
         private DrawingRunner(IDrawStyle penStyle, PenStyle penCase, PositionHistory positionHistory)
         {
-            PenStyle = penStyle;
-            PenCase = penCase;
+            DrawStyle = penStyle;
+            PenStyle = penCase;
             PositionHistory = positionHistory;
         }
 
-        private readonly IDrawStyle PenStyle;
-        private readonly PenStyle PenCase;
+        private readonly IDrawStyle DrawStyle;
+        private readonly PenStyle PenStyle;
         private readonly PositionHistory PositionHistory;
 
         public DrawingResult DrawStart(DrawingBuffer picture, PaintArea paintArea, Position position, bool isShift)
         {
             if (IsDrawing()) return new DrawingResult(picture, this);
 
-            // PositionHistory = PaintArea.DrawStart(Buffer, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
-            var realPosition = paintArea.RealPositionOf(position).ToPosition();
-            if (!picture.Fetch().Contains(realPosition))
+            var nextHistory = paintArea.CreatePositionHistory(position);
+            if (!picture.Fetch().Contains(nextHistory.Now))
             {
                 return new DrawingResult(picture, this);
             }
@@ -34,30 +33,26 @@ namespace Eede.Application.Drawings
             // beginからfinishまでの間情報を保持するクラス
             // Positionhistory, BeforeBuffer, PenStyle, PenCase
 
-            var nextHistory = new PositionHistory(realPosition);
-            var material = new Drawer(picture.Previous, PenCase);
-            return new DrawingResult(picture.UpdateDrawing(PenStyle.DrawStart(material, nextHistory, isShift)), Update(nextHistory));
+            var material = new Drawer(picture.Previous, PenStyle);
+            return new DrawingResult(picture.UpdateDrawing(DrawStyle.DrawStart(material, nextHistory, isShift)), Update(nextHistory));
         }
 
         public DrawingResult Drawing(DrawingBuffer picture, PaintArea paintArea, Position position, bool isShift)
         {
             if (!IsDrawing()) return new DrawingResult(picture, this);
-            // PositionHistory = PaintArea.Drawing(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
 
-            var nextHistory = UpdatePositionHistory(paintArea.RealPositionOf(position));
-            var material = new Drawer(picture.Fetch(), PenCase);
-            return new DrawingResult(picture.UpdateDrawing(PenStyle.Drawing(material, nextHistory, isShift)), Update(nextHistory));
+            var nextHistory = paintArea.NextPositionHistory(PositionHistory, position);
+            var material = new Drawer(picture.Fetch(), PenStyle);
+            return new DrawingResult(picture.UpdateDrawing(DrawStyle.Drawing(material, nextHistory, isShift)), Update(nextHistory));
         }
 
         public DrawingResult DrawEnd(DrawingBuffer picture, PaintArea paintArea, Position position, bool isShift)
         {
             if (!IsDrawing()) return new DrawingResult(picture, this);
-            // PositionHistory = PaintArea.FinishDraw(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
 
-            var nextHistory = UpdatePositionHistory(paintArea.RealPositionOf(position));
-
-            var material = new Drawer(picture.Fetch(), PenCase);
-            var result = PenStyle.DrawEnd(material, nextHistory, isShift);
+            var nextHistory = paintArea.NextPositionHistory(PositionHistory, position);
+            var material = new Drawer(picture.Fetch(), PenStyle);
+            var result = DrawStyle.DrawEnd(material, nextHistory, isShift);
             return new DrawingResult(picture.DecideDrawing(result), Update(null));
         }
 
@@ -69,12 +64,7 @@ namespace Eede.Application.Drawings
 
         private DrawingRunner Update(PositionHistory positionHistory)
         {
-            return new DrawingRunner(PenStyle, PenCase, positionHistory);
-        }
-
-        private PositionHistory UpdatePositionHistory(MinifiedPosition pos)
-        {
-            return PositionHistory.Update(pos.ToPosition());
+            return new DrawingRunner(DrawStyle, PenStyle, positionHistory);
         }
 
         public bool IsDrawing()

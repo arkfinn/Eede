@@ -95,11 +95,11 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Ui\IDrawingArea.cs" />
-    <Compile Include="Ui\PaintableBox.cs">
+    <Compile Include="Ui\DrawableBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Ui\PaintableBox.designer.cs">
-      <DependentUpon>PaintableBox.cs</DependentUpon>
+    <Compile Include="Ui\DrawableBox.designer.cs">
+      <DependentUpon>DrawableBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Ui\PenSizeSetBox.cs">
       <SubType>Component</SubType>
@@ -144,8 +144,8 @@
     <EmbeddedResource Include="Ui\ColorPickerBox.resx">
       <DependentUpon>ColorPickerBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Ui\PaintableBox.resx">
-      <DependentUpon>PaintableBox.cs</DependentUpon>
+    <EmbeddedResource Include="Ui\DrawableBox.resx">
+      <DependentUpon>DrawableBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Ui\PenSizeSetter.resx">
       <DependentUpon>PenSizeSetter.cs</DependentUpon>

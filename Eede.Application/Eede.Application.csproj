@@ -45,7 +45,7 @@
     <Compile Include="Drawings\DrawingBuffer.cs" />
     <Compile Include="Drawings\DrawingResult.cs" />
     <Compile Include="Drawings\DrawingRunner.cs" />
-    <Compile Include="PaintArea.cs" />
+    <Compile Include="Drawings\DrawableArea.cs" />
     <Compile Include="PaintLayers\ICanvasBackgroundService.cs" />
     <Compile Include="PaintLayers\IPaintLayer.cs" />
     <Compile Include="PaintLayers\PaintBackgroundLayer.cs" />

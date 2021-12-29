@@ -6,11 +6,11 @@ using Eede.Domain.Scales;
 using Eede.Domain.Sizes;
 using System.Drawing;
 
-namespace Eede.Application
+namespace Eede.Application.Drawings
 {
-    public class PaintArea
+    public class DrawableArea
     {
-        public PaintArea(ICanvasBackgroundService background, Magnification magnification, Size gridSize)
+        public DrawableArea(ICanvasBackgroundService background, Magnification magnification, Size gridSize)
         {
             Background = background;
             Magnification = magnification;
@@ -40,9 +40,9 @@ namespace Eede.Application
             gridLayer.Paint(g);
         }
 
-        public PaintArea UpdateMagnification(Magnification m)
+        public DrawableArea UpdateMagnification(Magnification m)
         {
-            return new PaintArea(Background, m, GridSize);
+            return new DrawableArea(Background, m, GridSize);
         }
 
         public MinifiedPosition RealPositionOf(Position position)

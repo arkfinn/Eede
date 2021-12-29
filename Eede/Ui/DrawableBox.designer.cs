@@ -1,6 +1,6 @@
 ﻿namespace Eede.Ui
 {
-    partial class PaintableBox
+    partial class DrawableBox
     {
         /// <summary> 
         /// 必要なデザイナ変数です。

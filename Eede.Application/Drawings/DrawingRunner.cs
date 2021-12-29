@@ -20,7 +20,7 @@ namespace Eede.Application.Drawings
         private readonly PenStyle PenStyle;
         private readonly PositionHistory PositionHistory;
 
-        public DrawingResult DrawStart(DrawingBuffer picture, PaintArea paintArea, Position position, bool isShift)
+        public DrawingResult DrawStart(DrawingBuffer picture, DrawableArea paintArea, Position position, bool isShift)
         {
             if (IsDrawing()) return new DrawingResult(picture, this);
 
@@ -37,7 +37,7 @@ namespace Eede.Application.Drawings
             return new DrawingResult(picture.UpdateDrawing(DrawStyle.DrawStart(material, nextHistory, isShift)), Update(nextHistory));
         }
 
-        public DrawingResult Drawing(DrawingBuffer picture, PaintArea paintArea, Position position, bool isShift)
+        public DrawingResult Drawing(DrawingBuffer picture, DrawableArea paintArea, Position position, bool isShift)
         {
             if (!IsDrawing()) return new DrawingResult(picture, this);
 
@@ -46,7 +46,7 @@ namespace Eede.Application.Drawings
             return new DrawingResult(picture.UpdateDrawing(DrawStyle.Drawing(material, nextHistory, isShift)), Update(nextHistory));
         }
 
-        public DrawingResult DrawEnd(DrawingBuffer picture, PaintArea paintArea, Position position, bool isShift)
+        public DrawingResult DrawEnd(DrawingBuffer picture, DrawableArea paintArea, Position position, bool isShift)
         {
             if (!IsDrawing()) return new DrawingResult(picture, this);
 

@@ -58,7 +58,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.penSizeSetter1 = new Eede.Ui.PenSizeSetter();
-            this.paintableBox1 = new Eede.Ui.PaintableBox();
+            this.paintableBox1 = new Eede.Ui.DrawableBox();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.colorPicker1 = new Eede.Ui.ColorPicker();
             this.splitter1 = new System.Windows.Forms.Splitter();
@@ -485,7 +485,7 @@
         private Ui.ColorPicker colorPicker1;
         private Ui.PenSizeSetter penSizeSetter1;
         private System.Windows.Forms.ToolStrip toolStrip2;
-        private Ui.PaintableBox paintableBox1;
+        private Ui.DrawableBox paintableBox1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;

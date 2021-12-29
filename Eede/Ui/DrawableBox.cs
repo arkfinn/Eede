@@ -1,5 +1,4 @@
-﻿using Eede.Application;
-using Eede.Application.Drawings;
+﻿using Eede.Application.Drawings;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
@@ -14,14 +13,14 @@ using System.Windows.Forms;
 
 namespace Eede.Ui
 {
-    public partial class PaintableBox : UserControl, IDrawingArea
+    public partial class DrawableBox : UserControl, IDrawingArea
     {
-        public PaintableBox()
+        public DrawableBox()
         {
             InitializeComponent();
             var s = GlobalSetting.Instance().BoxSize;
             var gridSize = new Size(16, 16);
-            PaintArea = new PaintArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize);
+            DrawableArea = new DrawableArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize);
             SetupImage(new Bitmap(s.Width, s.Height));
             canvas.Image = Buffer.Fetch().ToImage();
             Disposed += (sender, args) =>
@@ -33,7 +32,7 @@ namespace Eede.Ui
             };
         }
 
-        private PaintArea PaintArea;
+        private DrawableArea DrawableArea;
 
         private DrawingBuffer Buffer;
 
@@ -76,7 +75,7 @@ namespace Eede.Ui
         {
             set
             {
-                PaintArea = PaintArea.UpdateMagnification(new Magnification(value));
+                DrawableArea = DrawableArea.UpdateMagnification(new Magnification(value));
                 UpdateCanvasSize();
             }
         }
@@ -96,7 +95,7 @@ namespace Eede.Ui
 
         private void UpdateCanvasSize()
         {
-            canvas.Size = PaintArea.DisplaySizeOf(Buffer.Fetch());
+            canvas.Size = DrawableArea.DisplaySizeOf(Buffer.Fetch());
             ResetLocation();
             Refresh();
         }
@@ -118,7 +117,7 @@ namespace Eede.Ui
         private void PaintUpdate(Graphics g)
         {
             // PaintArea.Paint(g, Buffer);
-            PaintArea.Paint(g, Buffer.Fetch(), imageTransfer);
+            DrawableArea.Paint(g, Buffer.Fetch(), imageTransfer);
         }
 
         private void ResetLocation()
@@ -160,7 +159,7 @@ namespace Eede.Ui
             {
                 case MouseButtons.Left:
                     var runner = new DrawingRunner(DrawStyle, PenStyle);
-                    using (var result = runner.DrawStart(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()))
+                    using (var result = runner.DrawStart(Buffer, DrawableArea, new Position(e.X, e.Y), IsShift()))
                     {
                         UpdatePicture(result.PictureBuffer);
                         DrawingRunner = result.Runner;
@@ -182,7 +181,7 @@ namespace Eede.Ui
                     else
                     {
                         //色を拾う
-                        PenColor = PaintArea.PickColor(Buffer.Fetch(), new Position(e.X, e.Y));
+                        PenColor = DrawableArea.PickColor(Buffer.Fetch(), new Position(e.X, e.Y));
                         FireColorChanged();
                     }
                     break;
@@ -202,7 +201,7 @@ namespace Eede.Ui
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            using (var result = DrawingRunner.Drawing(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()))
+            using (var result = DrawingRunner.Drawing(Buffer, DrawableArea, new Position(e.X, e.Y), IsShift()))
             {
                 UpdatePicture(result.PictureBuffer);
                 DrawingRunner = result.Runner;
@@ -211,7 +210,7 @@ namespace Eede.Ui
 
         private void canvas_MouseUp(object sender, MouseEventArgs e)
         {
-            using (var result = (DrawingRunner.DrawEnd(Buffer, PaintArea, new Position(e.X, e.Y), IsShift())))
+            using (var result = (DrawingRunner.DrawEnd(Buffer, DrawableArea, new Position(e.X, e.Y), IsShift())))
             {
                 UpdatePicture(result.PictureBuffer);
                 DrawingRunner = result.Runner;

@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Drawings\DrawingBuffer.cs" />
     <Compile Include="Drawings\DrawingResult.cs" />
     <Compile Include="Drawings\DrawingRunner.cs" />
     <Compile Include="PaintArea.cs" />

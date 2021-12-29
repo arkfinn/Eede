@@ -1,9 +1,9 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 
-namespace Eede.Domain.PenStyles
+namespace Eede.Domain.DrawStyles
 {
-    public class FreeCurve : IPenStyle
+    public class FreeCurve : IDrawStyle
     {
         public Picture DrawStart(Drawer performer, PositionHistory positionHistory, bool isShift)
         {

@@ -2,7 +2,7 @@
 using System;
 using System.Drawing;
 
-namespace Eede.PenStyles
+namespace Eede.Domain.DrawStyles
 {
     // 実装内容を再検討する
     public class Line //: IPenStyle
@@ -17,19 +17,19 @@ namespace Eede.PenStyles
             set { mBuffer = value; }
         }
 
-        public AlphaPicture DrawStart(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
+        public AlphaPicture DrawStart(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
         {
             aBitmap.DrawPoint(pen, positions.Now);
             Buffer = new Bitmap(aBitmap.Bmp);
             return aBitmap;
         }
 
-        public AlphaPicture DrawEnd(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
+        public AlphaPicture DrawEnd(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
         {
             return aBitmap;
         }
 
-        public AlphaPicture Drawing(AlphaPicture aBitmap, PenCase pen, PositionHistory positions, bool isShift)
+        public AlphaPicture Drawing(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
         {
             Position endPoint;
             endPoint = isShift ?
@@ -49,7 +49,7 @@ namespace Eede.PenStyles
             return aBitmap;
         }
 
-        private void DrawLine(AlphaPicture aBitmap, PenCase pen, Position beginPos, Position endPos, Rectangle lastRect)
+        private void DrawLine(AlphaPicture aBitmap, PenStyle pen, Position beginPos, Position endPos, Rectangle lastRect)
         {
             aBitmap.Bmp = new Bitmap(Buffer);
             using (Graphics g = aBitmap.GetGraphics())

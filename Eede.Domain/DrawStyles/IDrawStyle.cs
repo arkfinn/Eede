@@ -1,9 +1,9 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 
-namespace Eede.Domain.PenStyles
+namespace Eede.Domain.DrawStyles
 {
-    public interface IPenStyle
+    public interface IDrawStyle
     {
         Picture DrawStart(Drawer performer, PositionHistory positionHistory, bool isShift);
 

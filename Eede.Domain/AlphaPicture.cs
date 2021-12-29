@@ -1,4 +1,5 @@
-﻿using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.DrawStyles;
+using Eede.Domain.ImageBlenders;
 using Eede.Domain.Positions;
 using System;
 using System.Collections.Generic;
@@ -200,7 +201,7 @@ namespace Eede
             }
         }
 
-        public AlphaPicture DrawPoint(PenCase p, Position pos)
+        public AlphaPicture DrawPoint(PenStyle p, Position pos)
         {
             int x = pos.X;
             int y = pos.Y;
@@ -212,7 +213,7 @@ namespace Eede
             }, p.Blender);
         }
 
-        public AlphaPicture DrawLine(PenCase p, Position beginPos, Position endPos)
+        public AlphaPicture DrawLine(PenStyle p, Position beginPos, Position endPos)
         {
             return Draw(g =>
             {

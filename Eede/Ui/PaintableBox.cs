@@ -1,8 +1,8 @@
 ﻿using Eede.Application;
 using Eede.Application.Drawings;
+using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
-using Eede.Domain.PenStyles;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
@@ -23,45 +23,46 @@ namespace Eede.Ui
             var gridSize = new Size(16, 16);
             PaintArea = new PaintArea(CanvasBackgroundService.Instance, m, gridSize);
             SetupImage(new Bitmap(s.Width, s.Height));
-            canvas.Image = Buffer.ToImage();
+            canvas.Image = Buffer.Fetch().ToImage();
             Disposed += (sender, args) =>
             {
                 if (Buffer != null)
                 {
                     Buffer.Dispose();
                 }
-                DrawingRunner.Dispose();
             };
         }
 
         private PaintArea PaintArea;
 
-        private Picture Buffer;
+        private DrawingBuffer Buffer;
 
         public Size DrawingSize
         {
             get
             {
-                return Buffer.Size;
+                return Buffer.Fetch().Size;
             }
         }
 
         public Bitmap GetImage()
         {
-            return Buffer.CutOut(new Rectangle(new Point(0, 0), Buffer.Size));
+            return Buffer.Fetch().CutOut(new Rectangle(new Point(0, 0), Buffer.Fetch().Size));
         }
 
         public void SetupImage(Bitmap image)
         {
-            UpdatePicture(new Picture(image));
+            using (var picture = new Picture(image))
+            {
+                UpdatePicture(new DrawingBuffer(picture));
+            }
         }
 
-        private void UpdatePicture(Picture newPicture)
+        private void UpdatePicture(DrawingBuffer newPicture)
         {
             var oldPicture = Buffer;
-            Buffer = newPicture;
-            // 新・旧が同一インスタンスの場合はDisposeにより問題が生じるため処理を省く。
-            if (oldPicture != null && oldPicture != newPicture)
+            Buffer = newPicture.Clone();
+            if (oldPicture != null)
             {
                 oldPicture.Dispose();
             }
@@ -69,15 +70,15 @@ namespace Eede.Ui
             canvas.Invalidate();
         }
 
-        private PenCase mPen;
+        private PenStyle mPen;
 
-        private PenCase PenCase
+        private PenStyle PenCase
         {
             get
             {
                 if (mPen == null)
                 {
-                    mPen = new PenCase(new Pen(Color.Black), new DirectImageBlender());
+                    mPen = new PenStyle(new Pen(Color.Black), new DirectImageBlender());
                 }
                 return mPen;
             }
@@ -96,7 +97,7 @@ namespace Eede.Ui
             }
         }
 
-        public IPenStyle PenStyle { get; set; } = new FreeCurve();
+        public IDrawStyle PenStyle { get; set; } = new FreeCurve();
 
         public void SetPenColor(Color col)
         {
@@ -115,7 +116,7 @@ namespace Eede.Ui
 
         private void UpdateCanvasSize()
         {
-            canvas.Size = PaintArea.DisplaySizeOf(Buffer);
+            canvas.Size = PaintArea.DisplaySizeOf(Buffer.Fetch());
             ResetLocation();
             Refresh();
         }
@@ -137,7 +138,7 @@ namespace Eede.Ui
         private void PaintUpdate(Graphics g)
         {
             // PaintArea.Paint(g, Buffer);
-            PaintArea.Paint(g, Buffer, imageTransfer);
+            PaintArea.Paint(g, Buffer.Fetch(), imageTransfer);
         }
 
         private void ResetLocation()
@@ -155,13 +156,6 @@ namespace Eede.Ui
                 return (fullLength / 2) - (canvasLength / 2);
             }
             return now;
-        }
-
-        private void UpdateAfterDrawing(DrawingResult result)
-        {
-            UpdatePicture(result.Picture);
-            DrawingRunner.Dispose();
-            DrawingRunner = result.Runner;
         }
 
         #region イベント
@@ -185,9 +179,11 @@ namespace Eede.Ui
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    using (var runner = new DrawingRunner(PenStyle, PenCase))
+                    var runner = new DrawingRunner(PenStyle, PenCase);
+                    using (var result = runner.DrawStart(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()))
                     {
-                        UpdateAfterDrawing(runner.DrawStart(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
+                        UpdatePicture(result.PictureBuffer);
+                        DrawingRunner = result.Runner;
                     }
                     break;
                 //case MouseButtons.Middle:
@@ -197,7 +193,11 @@ namespace Eede.Ui
                 case MouseButtons.Right:
                     if (DrawingRunner.IsDrawing())
                     {
-                        UpdateAfterDrawing(DrawingRunner.DrawCancel());
+                        using (var result = DrawingRunner.DrawCancel(Buffer))
+                        {
+                            UpdatePicture(result.PictureBuffer);
+                            DrawingRunner = result.Runner;
+                        }
                     }
                     else
                     {
@@ -218,7 +218,7 @@ namespace Eede.Ui
 
         private Color PickColor(MinifiedPosition pos)
         {
-            return Buffer.PickColor(pos.ToPosition());
+            return Buffer.Fetch().PickColor(pos.ToPosition());
         }
 
         private bool IsShift()
@@ -228,12 +228,20 @@ namespace Eede.Ui
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            UpdateAfterDrawing(DrawingRunner.Drawing(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
+            using (var result = DrawingRunner.Drawing(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()))
+            {
+                UpdatePicture(result.PictureBuffer);
+                DrawingRunner = result.Runner;
+            }
         }
 
         private void canvas_MouseUp(object sender, MouseEventArgs e)
         {
-            UpdateAfterDrawing(DrawingRunner.DrawEnd(Buffer, PaintArea, new Position(e.X, e.Y), IsShift()));
+            using (var result = (DrawingRunner.DrawEnd(Buffer, PaintArea, new Position(e.X, e.Y), IsShift())))
+            {
+                UpdatePicture(result.PictureBuffer);
+                DrawingRunner = result.Runner;
+            }
         }
 
         private void canvas_MouseEnter(object sender, EventArgs e)

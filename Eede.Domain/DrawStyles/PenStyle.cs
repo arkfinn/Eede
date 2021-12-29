@@ -2,17 +2,17 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-namespace Eede
+namespace Eede.Domain.DrawStyles
 {
     // AlphaOnlyBrushみたいなので実現できるんじゃないの
 
-    public class PenCase
+    public class PenStyle
     {
         public IImageBlender Blender;
         public Color Color = Color.Black;
         public int Width = 1;
 
-        public PenCase(Pen pen, IImageBlender blender)
+        public PenStyle(Pen pen, IImageBlender blender)
         {
             Blender = blender;
         }

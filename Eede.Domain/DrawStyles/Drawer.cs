@@ -3,17 +3,16 @@ using Eede.Domain.Positions;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-namespace Eede.Domain.PenStyles
+namespace Eede.Domain.DrawStyles
 {
     public class Drawer
     {
-        private readonly Picture SourcePicture;
         public readonly Picture DrawingPicture;
-        private readonly PenCase PenCase;
 
-        public Drawer(Picture sourcePicture, Picture drawingPicture, PenCase penCase)
+        private readonly PenStyle PenCase;
+
+        public Drawer(Picture drawingPicture, PenStyle penCase)
         {
-            SourcePicture = sourcePicture;
             DrawingPicture = drawingPicture;
             PenCase = penCase;
         }

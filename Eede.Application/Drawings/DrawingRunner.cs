@@ -1,79 +1,75 @@
-﻿using Eede.Domain.PenStyles;
-using Eede.Domain.Pictures;
+﻿using Eede.Domain.DrawStyles;
 using Eede.Domain.Positions;
-using System;
 
 namespace Eede.Application.Drawings
 {
-    public class DrawingRunner : IDisposable
+    public class DrawingRunner
     {
-        public DrawingRunner(IPenStyle penStyle, PenCase penCase) : this(penStyle, penCase, null, null)
+        public DrawingRunner(IDrawStyle penStyle, PenStyle penCase) : this(penStyle, penCase, null)
         {
         }
 
-        private DrawingRunner(IPenStyle penStyle, PenCase penCase, PositionHistory positionHistory, Picture drawingBuffer)
+        private DrawingRunner(IDrawStyle penStyle, PenStyle penCase, PositionHistory positionHistory)
         {
             PenStyle = penStyle;
             PenCase = penCase;
             PositionHistory = positionHistory;
-            DrawingBuffer = drawingBuffer?.Clone();
         }
 
-        private readonly IPenStyle PenStyle;
-        private readonly PenCase PenCase;
+        private readonly IDrawStyle PenStyle;
+        private readonly PenStyle PenCase;
         private readonly PositionHistory PositionHistory;
-        private readonly Picture DrawingBuffer;
 
-        public DrawingResult DrawStart(Picture NowPicture, PaintArea paintArea, Position position, bool isShift)
+        public DrawingResult DrawStart(DrawingBuffer picture, PaintArea paintArea, Position position, bool isShift)
         {
-            if (IsDrawing()) return new DrawingResult(NowPicture, this);
+            if (IsDrawing()) return new DrawingResult(picture, this);
 
             // PositionHistory = PaintArea.DrawStart(Buffer, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
             var realPosition = paintArea.RealPositionOf(position).ToPosition();
-            if (!NowPicture.Contains(realPosition))
+            if (!picture.Fetch().Contains(realPosition))
             {
-                return new DrawingResult(NowPicture, this);
+                return new DrawingResult(picture, this);
             }
 
             // beginからfinishまでの間情報を保持するクラス
             // Positionhistory, BeforeBuffer, PenStyle, PenCase
 
             var nextHistory = new PositionHistory(realPosition);
-            var material = new Drawer(NowPicture, NowPicture, PenCase);
-            return new DrawingResult(PenStyle.DrawStart(material, nextHistory, isShift), Update(nextHistory, NowPicture));
+            var material = new Drawer(picture.Previous, PenCase);
+            return new DrawingResult(picture.UpdateDrawing(PenStyle.DrawStart(material, nextHistory, isShift)), Update(nextHistory));
         }
 
-        public DrawingResult Drawing(Picture NowPicture, PaintArea paintArea, Position position, bool isShift)
+        public DrawingResult Drawing(DrawingBuffer picture, PaintArea paintArea, Position position, bool isShift)
         {
-            if (!IsDrawing()) return new DrawingResult(NowPicture, this);
+            if (!IsDrawing()) return new DrawingResult(picture, this);
             // PositionHistory = PaintArea.Drawing(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
 
             var nextHistory = UpdatePositionHistory(paintArea.RealPositionOf(position));
-            var material = new Drawer(DrawingBuffer, NowPicture, PenCase);
-            return new DrawingResult(PenStyle.Drawing(material, nextHistory, isShift), Update(nextHistory, DrawingBuffer));
+            var material = new Drawer(picture.Fetch(), PenCase);
+            return new DrawingResult(picture.UpdateDrawing(PenStyle.Drawing(material, nextHistory, isShift)), Update(nextHistory));
         }
 
-        public DrawingResult DrawEnd(Picture NowPicture, PaintArea paintArea, Position position, bool isShift)
+        public DrawingResult DrawEnd(DrawingBuffer picture, PaintArea paintArea, Position position, bool isShift)
         {
-            if (!IsDrawing()) return new DrawingResult(NowPicture, this);
+            if (!IsDrawing()) return new DrawingResult(picture, this);
             // PositionHistory = PaintArea.FinishDraw(Buffer, PositionHistory, new Position(e.X, e.Y), PenStyle, PenCase, IsShift())
 
             var nextHistory = UpdatePositionHistory(paintArea.RealPositionOf(position));
 
-            var material = new Drawer(DrawingBuffer, NowPicture, PenCase);
+            var material = new Drawer(picture.Fetch(), PenCase);
             var result = PenStyle.DrawEnd(material, nextHistory, isShift);
-            return new DrawingResult(result, Update(null, null));
+            return new DrawingResult(picture.DecideDrawing(result), Update(null));
         }
 
-        public DrawingResult DrawCancel()
+        public DrawingResult DrawCancel(DrawingBuffer picture)
         {
-            var result = DrawingBuffer.Clone();
-            return new DrawingResult(result, Update(null, null));
+            //var result = DrawingBuffer.Clone();
+            return new DrawingResult(picture.CancelDrawing(), Update(null));
         }
 
-        private DrawingRunner Update(PositionHistory positionHistory, Picture drawingBuffer)
+        private DrawingRunner Update(PositionHistory positionHistory)
         {
-            return new DrawingRunner(PenStyle, PenCase, positionHistory, drawingBuffer);
+            return new DrawingRunner(PenStyle, PenCase, positionHistory);
         }
 
         private PositionHistory UpdatePositionHistory(MinifiedPosition pos)
@@ -84,14 +80,6 @@ namespace Eede.Application.Drawings
         public bool IsDrawing()
         {
             return (PositionHistory != null);
-        }
-
-        public void Dispose()
-        {
-            if (DrawingBuffer != null)
-            {
-                DrawingBuffer.Dispose();
-            }
         }
     }
 }

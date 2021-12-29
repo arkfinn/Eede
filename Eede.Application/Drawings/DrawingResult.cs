@@ -1,16 +1,22 @@
 ﻿using Eede.Domain.Pictures;
+using System;
 
 namespace Eede.Application.Drawings
 {
-    public class DrawingResult
+    public class DrawingResult : IDisposable
     {
-        public readonly Picture Picture;
+        public readonly DrawingBuffer PictureBuffer;
         public readonly DrawingRunner Runner;
 
-        public DrawingResult(Picture picture, DrawingRunner runner)
+        public DrawingResult(DrawingBuffer picture, DrawingRunner runner)
         {
-            Picture = picture;
+            PictureBuffer = picture;
             Runner = runner;
+        }
+
+        public void Dispose()
+        {
+            PictureBuffer.Dispose();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Eede.Application.PaintLayers;
+using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
@@ -10,11 +11,12 @@ namespace Eede.Application.Drawings
 {
     public class DrawableArea
     {
-        public DrawableArea(ICanvasBackgroundService background, Magnification magnification, Size gridSize)
+        public DrawableArea(ICanvasBackgroundService background, Magnification magnification, Size gridSize, PositionHistory positionHistory)
         {
             Background = background;
             Magnification = magnification;
             GridSize = gridSize;
+            PositionHistory = positionHistory;
         }
 
         private readonly ICanvasBackgroundService Background;
@@ -22,6 +24,8 @@ namespace Eede.Application.Drawings
         private readonly Magnification Magnification;
 
         private readonly Size GridSize;
+
+        private readonly PositionHistory PositionHistory;
 
         private MagnifiedSize Magnify(Size size)
         {
@@ -42,10 +46,15 @@ namespace Eede.Application.Drawings
 
         public DrawableArea UpdateMagnification(Magnification m)
         {
-            return new DrawableArea(Background, m, GridSize);
+            return new DrawableArea(Background, m, GridSize, PositionHistory);
         }
 
-        public MinifiedPosition RealPositionOf(Position position)
+        private DrawableArea UpdatePositionHistory(PositionHistory positionHistory)
+        {
+            return new DrawableArea(Background, Magnification, GridSize, positionHistory);
+        }
+
+        private MinifiedPosition RealPositionOf(Position position)
         {
             return new MinifiedPosition(position, Magnification);
         }
@@ -60,14 +69,68 @@ namespace Eede.Application.Drawings
             return picture.PickColor(RealPositionOf(displayPosition).ToPosition());
         }
 
-        public PositionHistory CreatePositionHistory(Position displayPosition)
+        private PositionHistory CreatePositionHistory(Position displayPosition)
         {
             return new PositionHistory(RealPositionOf(displayPosition).ToPosition());
         }
 
-        public PositionHistory NextPositionHistory(PositionHistory history, Position displayPosition)
+        private PositionHistory NextPositionHistory(PositionHistory history, Position displayPosition)
         {
             return history.Update(RealPositionOf(displayPosition).ToPosition());
+        }
+
+        public DrawingResult DrawStart(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
+        {
+            if (IsDrawing()) return new DrawingResult(picture, this);
+
+            var nextHistory = CreatePositionHistory(displayPosition);
+            if (!picture.Fetch().Contains(nextHistory.Now))
+            {
+                return new DrawingResult(picture, this);
+            }
+
+            // beginからfinishまでの間情報を保持するクラス
+            // Positionhistory, BeforeBuffer, PenStyle, PenCase
+
+            var drawer = new Drawer(picture.Previous, penStyle);
+            using (var result = drawStyle.DrawStart(drawer, nextHistory, isShift))
+            {
+                return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
+            }
+        }
+
+        public DrawingResult Drawing(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
+        {
+            if (!IsDrawing()) return new DrawingResult(picture, this);
+
+            var nextHistory = NextPositionHistory(PositionHistory, displayPosition);
+            var drawer = new Drawer(picture.Fetch(), penStyle);
+            using (var result = drawStyle.Drawing(drawer, nextHistory, isShift))
+            {
+                return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
+            }
+        }
+
+        public DrawingResult DrawEnd(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
+        {
+            if (!IsDrawing()) return new DrawingResult(picture, this);
+
+            var nextHistory = NextPositionHistory(PositionHistory, displayPosition);
+            var drawer = new Drawer(picture.Fetch(), penStyle);
+            using (var result = drawStyle.DrawEnd(drawer, nextHistory, isShift))
+            {
+                return new DrawingResult(picture.DecideDrawing(result), UpdatePositionHistory(null));
+            }
+        }
+
+        public DrawingResult DrawCancel(DrawingBuffer picture)
+        {
+            return new DrawingResult(picture.CancelDrawing(), UpdatePositionHistory(null));
+        }
+
+        public bool IsDrawing()
+        {
+            return (PositionHistory != null);
         }
     }
 }

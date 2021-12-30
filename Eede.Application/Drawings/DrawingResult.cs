@@ -6,12 +6,12 @@ namespace Eede.Application.Drawings
     public class DrawingResult : IDisposable
     {
         public readonly DrawingBuffer PictureBuffer;
-        public readonly DrawingRunner Runner;
+        public readonly DrawableArea DrawableArea;
 
-        public DrawingResult(DrawingBuffer picture, DrawingRunner runner)
+        public DrawingResult(DrawingBuffer picture, DrawableArea runner)
         {
             PictureBuffer = picture;
-            Runner = runner;
+            DrawableArea = runner;
         }
 
         public void Dispose()

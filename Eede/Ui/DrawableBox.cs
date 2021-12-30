@@ -20,7 +20,7 @@ namespace Eede.Ui
             InitializeComponent();
             var s = GlobalSetting.Instance().BoxSize;
             var gridSize = new Size(16, 16);
-            DrawableArea = new DrawableArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize);
+            DrawableArea = new DrawableArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize, null);
             SetupImage(new Bitmap(s.Width, s.Height));
             canvas.Image = Buffer.Fetch().ToImage();
             Disposed += (sender, args) =>
@@ -151,18 +151,15 @@ namespace Eede.Ui
             ColorChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private DrawingRunner DrawingRunner = new DrawingRunner(null, null);
-
         private void canvas_MouseDown(object sender, MouseEventArgs e)
         {
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    var runner = new DrawingRunner(DrawStyle, PenStyle);
-                    using (var result = runner.DrawStart(Buffer, DrawableArea, new Position(e.X, e.Y), IsShift()))
+                    using (var result = DrawableArea.DrawStart(DrawStyle, PenStyle, Buffer, new Position(e.X, e.Y), IsShift()))
                     {
                         UpdatePicture(result.PictureBuffer);
-                        DrawingRunner = result.Runner;
+                        DrawableArea = result.DrawableArea;
                     }
                     break;
                 //case MouseButtons.Middle:
@@ -170,12 +167,12 @@ namespace Eede.Ui
                 //case MouseButtons.None:
                 //    break;
                 case MouseButtons.Right:
-                    if (DrawingRunner.IsDrawing())
+                    if (DrawableArea.IsDrawing())
                     {
-                        using (var result = DrawingRunner.DrawCancel(Buffer))
+                        using (var result = DrawableArea.DrawCancel(Buffer))
                         {
                             UpdatePicture(result.PictureBuffer);
-                            DrawingRunner = result.Runner;
+                            DrawableArea = result.DrawableArea;
                         }
                     }
                     else
@@ -201,19 +198,19 @@ namespace Eede.Ui
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            using (var result = DrawingRunner.Drawing(Buffer, DrawableArea, new Position(e.X, e.Y), IsShift()))
+            using (var result = DrawableArea.Drawing(DrawStyle, PenStyle, Buffer, new Position(e.X, e.Y), IsShift()))
             {
                 UpdatePicture(result.PictureBuffer);
-                DrawingRunner = result.Runner;
+                DrawableArea = result.DrawableArea;
             }
         }
 
         private void canvas_MouseUp(object sender, MouseEventArgs e)
         {
-            using (var result = (DrawingRunner.DrawEnd(Buffer, DrawableArea, new Position(e.X, e.Y), IsShift())))
+            using (var result = DrawableArea.DrawEnd(DrawStyle, PenStyle, Buffer, new Position(e.X, e.Y), IsShift()))
             {
                 UpdatePicture(result.PictureBuffer);
-                DrawingRunner = result.Runner;
+                DrawableArea = result.DrawableArea;
             }
         }
 

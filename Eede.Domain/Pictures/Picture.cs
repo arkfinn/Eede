@@ -26,6 +26,11 @@ namespace Eede.Domain.Pictures
             Buffer = CreateClone(image);
         }
 
+        public Picture(Size size)
+        {
+            Buffer = new Bitmap(size.Width, size.Height);
+        }
+
         private Bitmap CreateClone(Bitmap source)
         {
             // new Bitmap(source)とすると、alpha=0のRGB情報が失われるため、手動で合成し直している。

@@ -8,8 +8,9 @@ namespace Eede.Domain.Sizes
     {
         public readonly Magnification Magnification;
 
-        public int Width { get; }
-        public int Height { get; }
+        public readonly int Width;
+        public readonly int Height;
+        public readonly Size RealSize;
 
         public MagnifiedSize(Size size, Magnification magnification)
         {
@@ -20,6 +21,7 @@ namespace Eede.Domain.Sizes
             Width = magnification.Magnify(size.Width);
             Height = magnification.Magnify(size.Height);
             Magnification = magnification;
+            RealSize = size;
         }
 
         public Size ToSize()

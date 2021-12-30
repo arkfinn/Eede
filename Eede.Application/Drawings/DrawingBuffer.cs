@@ -29,11 +29,16 @@ namespace Eede.Application.Drawings
 
         public Picture Fetch()
         {
-            if (Drawing != null)
+            if (IsDrawing())
             {
                 return Drawing;
             }
             return Previous;
+        }
+
+        public bool IsDrawing()
+        {
+            return (Drawing != null);
         }
 
         public DrawingBuffer UpdateDrawing(Picture drawing)

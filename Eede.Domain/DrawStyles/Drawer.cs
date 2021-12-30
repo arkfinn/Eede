@@ -23,9 +23,25 @@ namespace Eede.Domain.DrawStyles
             int y = position.Y;
             return DrawingPicture.Draw(g =>
             {
-                // TODO: ドットの打ち方は調整したい。1to 4ドット辺りまではrectで
                 g.CompositingMode = CompositingMode.SourceCopy;
-                g.DrawLine(PenStyle.PreparePen(), new PointF((float)x, (float)y), new PointF((float)x + 0.001f, (float)y + 0.01f));
+                var offset = PenStyle.Width / 2;
+                switch (PenStyle.Width)
+                {
+                    case 1:
+                        g.FillRectangle(PenStyle.PrepareBrush(), new Rectangle(x, y, 1, 1));
+                        break;
+
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        g.FillRectangle(PenStyle.PrepareBrush(), new Rectangle(x - offset, y - offset, PenStyle.Width, PenStyle.Width));
+                        break;
+
+                    default:
+                        g.FillEllipse(PenStyle.PrepareBrush(), new Rectangle(x - offset, y - offset, PenStyle.Width, PenStyle.Width));
+                        break;
+                }
             }, PenStyle.Blender);
         }
 

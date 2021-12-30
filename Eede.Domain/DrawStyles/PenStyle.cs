@@ -49,5 +49,10 @@ namespace Eede.Domain.DrawStyles
                 EndCap = LineCap.Round
             };
         }
+
+        public Brush PrepareBrush()
+        {
+            return new SolidBrush(Color);
+        }
     }
 }

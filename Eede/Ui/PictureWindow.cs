@@ -154,7 +154,16 @@ namespace Eede.Ui
         private void DrawCursor(Graphics g)
         {
             if (!CursorVisible) return;
-            var rect = CursorPosition.CreateRealRectangle(DrawingArea.DrawingSize);
+            var rect = Rectangle.Empty;
+            if (IsSelecting)
+            {
+                rect = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
+            }
+            else
+            {
+                rect = CursorPosition.CreateRealRectangle(DrawingArea.DrawingSize);
+            }
+
             g.DrawRectangle(new Pen(Color.Yellow, 1), rect);
             var p = new Pen(Color.Red, 1)
             {
@@ -170,13 +179,6 @@ namespace Eede.Ui
 
         private bool CursorVisible = false;
 
-        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
-        {
-            CursorVisible = IsInnerPictureBox(new Position(e.Location));
-            CursorPosition = new HalfBoxPosition(FetchBoxSize(), e.Location);
-            pictureBox1.Refresh();
-        }
-
         private bool IsInnerPictureBox(Position p)
         {
             return p.IsInnerOf(pictureBox1.Size);
@@ -191,25 +193,61 @@ namespace Eede.Ui
         {
         }
 
+        private bool IsSelecting = false;
+        private HalfBoxPosition SelectingPosition;
+
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             if (!CursorVisible) return;
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    SetupPictureBuffer(InvokePicturePushed(new PicturePushedEventArgs(PictureBuffer, CursorPosition.RealPosition)));
-                    Refresh();
+                    if (!IsSelecting)
+                    {
+                        SetupPictureBuffer(InvokePicturePushed(new PicturePushedEventArgs(PictureBuffer, CursorPosition.RealPosition)));
+                        Refresh();
+                    }
                     break;
 
                 case MouseButtons.Right:
-                    var rect = CursorPosition.CreateRealRectangle(FetchBoxSize());
-                    InvokePicturePulled(new PicturePulledEventArgs(PictureBuffer, rect));
+                    // 範囲選択開始
+                    IsSelecting = true;
+                    SelectingPosition = new HalfBoxPosition(FetchBoxSize(), e.Location);
                     break;
             }
         }
 
+        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (IsSelecting)
+            {
+                SelectingPosition = SelectingPosition.UpdatePosition(e.Location);
+            }
+            else
+            {
+                CursorVisible = IsInnerPictureBox(new Position(e.Location));
+                CursorPosition = new HalfBoxPosition(FetchBoxSize(), e.Location);
+            }
+            pictureBox1.Refresh();
+        }
+
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    break;
+
+                case MouseButtons.Right:
+                    // 範囲選択してるとき
+                    if (IsSelecting)
+                    {
+                        var rect = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
+                        InvokePicturePulled(new PicturePulledEventArgs(PictureBuffer, rect));
+                        IsSelecting = false;
+                    }
+                    break;
+            }
         }
 
         private void pictureBox1_MouseLeave(object sender, EventArgs e)

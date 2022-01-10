@@ -40,31 +40,29 @@ namespace Eede
 
         public HalfBoxPosition UpdatePosition(Point location)
         {
-            var startPosition = new Position(
-               ArrangeTo(StartPosition.X, HalfCursorSize.Width),
-               ArrangeTo(StartPosition.Y, HalfCursorSize.Height));
-            //x, w
-            var x = location.X - startPosition.X;
-            if (x < 0)
-            {
-                x = Math.Abs(x) + HalfCursorSize.Width - 1;
-            }
-            var newWidth = DefaultCursorSize.Width + ArrangeTo(x, HalfCursorSize.Width);
+            var newWidth = DefaultCursorSize.Width + ArrangeFromDistance(StartPosition.X, location.X, HalfCursorSize.Width);
             var newX = Math.Min(location.X, StartPosition.X);
-            //y, h
-            var y = location.Y - startPosition.Y;
-            if (y < 0)
-            {
-                y = Math.Abs(y) + HalfCursorSize.Height - 1;
-            }
-            var newHeight = DefaultCursorSize.Height + ArrangeTo(y, HalfCursorSize.Height);
+
+            var newHeight = DefaultCursorSize.Height + ArrangeFromDistance(StartPosition.Y, location.Y, HalfCursorSize.Height);
             var newY = Math.Min(location.Y, StartPosition.Y);
+
             return new HalfBoxPosition(new Size(newWidth, newHeight), new Point(newX, newY), DefaultCursorSize, StartPosition.ToPoint());
         }
 
         private int ArrangeTo(int value, int gridLength)
         {
             return value - (value % gridLength);
+        }
+
+        private int ArrangeFromDistance(int startValue, int nowValue, int gridLength)
+        {
+            var value = nowValue - ArrangeTo(startValue, gridLength);
+            // マイナス方向に広がる場合、元のサイズプラスマイナス方向分とする。
+            if (value < 0)
+            {
+                return ArrangeTo(Math.Abs(value) + gridLength - 1, gridLength);
+            }
+            return ArrangeTo(value, gridLength);
         }
     }
 }

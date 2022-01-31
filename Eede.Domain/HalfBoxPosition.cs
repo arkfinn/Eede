@@ -40,11 +40,13 @@ namespace Eede
 
         public HalfBoxPosition UpdatePosition(Point location)
         {
-            var newWidth = DefaultCursorSize.Width + ArrangeFromDistance(StartPosition.X, location.X, HalfCursorSize.Width);
-            var newX = Math.Min(location.X, StartPosition.X);
+            var locationX = Math.Max(0, location.X);
+            var newWidth = DefaultCursorSize.Width + ArrangeFromDistance(StartPosition.X, locationX, HalfCursorSize.Width);
+            var newX = Math.Min(locationX, StartPosition.X);
 
-            var newHeight = DefaultCursorSize.Height + ArrangeFromDistance(StartPosition.Y, location.Y, HalfCursorSize.Height);
-            var newY = Math.Min(location.Y, StartPosition.Y);
+            var locationY = Math.Max(0, location.Y);
+            var newHeight = DefaultCursorSize.Height + ArrangeFromDistance(StartPosition.Y, locationY, HalfCursorSize.Height);
+            var newY = Math.Min(locationY, StartPosition.Y);
 
             return new HalfBoxPosition(new Size(newWidth, newHeight), new Point(newX, newY), DefaultCursorSize, StartPosition.ToPoint());
         }

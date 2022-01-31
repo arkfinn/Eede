@@ -33,7 +33,9 @@ namespace Eede.Tests
             new TestCaseData(new Point(17, 47), new Point(7, 47)).Returns(new Rectangle(new Point(0, 40),new Size(32, 16))).SetName("X - 16"),
             new TestCaseData(new Point(17, 47), new Point(17, 39)).Returns(new Rectangle(new Point(16, 32),new Size(16, 24))).SetName("Y - 1"),
             new TestCaseData(new Point(17, 47), new Point(17, 32)).Returns(new Rectangle(new Point(16, 32),new Size(16, 24))).SetName("Y - 8"),
-            new TestCaseData(new Point(17, 47), new Point(17, 31)).Returns(new Rectangle(new Point(16, 24),new Size(16, 32))).SetName("Y - 16")
+            new TestCaseData(new Point(17, 47), new Point(17, 31)).Returns(new Rectangle(new Point(16, 24),new Size(16, 32))).SetName("Y - 16"),
+            new TestCaseData(new Point(17, 47), new Point(-1, -1)).Returns(new Rectangle(new Point(0, 0),new Size(32, 56))).SetName("min 0"),
+            new TestCaseData(new Point(17, 47), new Point(-9, -9)).Returns(new Rectangle(new Point(0, 0),new Size(32, 56))).SetName("min -9")
         };
 
         [TestCaseSource(nameof(UpdatePositionTestSource))]

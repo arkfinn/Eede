@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            Eede.PenStyles.FreeCurve freeCurve1 = new Eede.PenStyles.FreeCurve();
+            Eede.Domain.DrawStyles.FreeCurve freeCurve1 = new Eede.Domain.DrawStyles.FreeCurve();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_newFile = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_openFile = new System.Windows.Forms.ToolStripButton();
@@ -52,18 +52,18 @@
             this.toolStripButton15 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton16 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton17 = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.panel1 = new System.Windows.Forms.Panel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.penSizeSetter1 = new Eede.Ui.PenSizeSetter();
+            this.paintableBox1 = new Eede.Ui.DrawableBox();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.colorPicker1 = new Eede.Ui.ColorPicker();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
-            this.penSizeSetter1 = new Eede.Ui.PenSizeSetter();
-            this.paintableBox1 = new Eede.Ui.PaintableBox();
-            this.colorPicker1 = new Eede.Ui.ColorPicker();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -301,6 +301,21 @@
             this.toolStripButton17.Text = "x12";
             this.toolStripButton17.Click += new System.EventHandler(this.toolStripButton17_Click);
             // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripButton2
+            // 
+            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
+            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton2.Name = "toolStripButton2";
+            this.toolStripButton2.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton2.Text = "カーソルサイズ設定";
+            this.toolStripButton2.Click += new System.EventHandler(this.toolStripButton2_Click);
+            // 
             // panel1
             // 
             this.panel1.Controls.Add(this.splitContainer1);
@@ -348,49 +363,6 @@
             this.splitContainer2.SplitterDistance = 110;
             this.splitContainer2.TabIndex = 0;
             // 
-            // toolStrip2
-            // 
-            this.toolStrip2.Dock = System.Windows.Forms.DockStyle.Right;
-            this.toolStrip2.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.toolStrip2.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
-            this.toolStrip2.Location = new System.Drawing.Point(424, 0);
-            this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(26, 402);
-            this.toolStrip2.TabIndex = 0;
-            this.toolStrip2.Text = "toolStrip2";
-            // 
-            // splitter1
-            // 
-            this.splitter1.Location = new System.Drawing.Point(564, 25);
-            this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 598);
-            this.splitter1.TabIndex = 3;
-            this.splitter1.TabStop = false;
-            // 
-            // saveFileDialog1
-            // 
-            this.saveFileDialog1.Filter = "PNG|*.png";
-            this.saveFileDialog1.Title = "名前を付けて保存";
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.Filter = "All Files|*.bmp;*.png|bmp|*.bmp|png|*.png";
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripButton2
-            // 
-            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
-            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton2.Name = "toolStripButton2";
-            this.toolStripButton2.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton2.Text = "カーソルサイズ設定";
-            this.toolStripButton2.Click += new System.EventHandler(this.toolStripButton2_Click);
-            // 
             // penSizeSetter1
             // 
             this.penSizeSetter1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -409,10 +381,21 @@
             this.paintableBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.paintableBox1.Location = new System.Drawing.Point(0, 0);
             this.paintableBox1.Name = "paintableBox1";
-            this.paintableBox1.PenStyle = freeCurve1;
+            this.paintableBox1.DrawStyle = freeCurve1;
             this.paintableBox1.Size = new System.Drawing.Size(424, 402);
             this.paintableBox1.TabIndex = 1;
             this.paintableBox1.ColorChanged += new System.EventHandler(this.paintableBox1_ColorChanged);
+            // 
+            // toolStrip2
+            // 
+            this.toolStrip2.Dock = System.Windows.Forms.DockStyle.Right;
+            this.toolStrip2.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip2.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
+            this.toolStrip2.Location = new System.Drawing.Point(424, 0);
+            this.toolStrip2.Name = "toolStrip2";
+            this.toolStrip2.Size = new System.Drawing.Size(26, 402);
+            this.toolStrip2.TabIndex = 0;
+            this.toolStrip2.Text = "toolStrip2";
             // 
             // colorPicker1
             // 
@@ -421,6 +404,23 @@
             this.colorPicker1.Size = new System.Drawing.Size(91, 176);
             this.colorPicker1.TabIndex = 0;
             this.colorPicker1.ColorChanged += new System.EventHandler(this.colorPicker1_ColorChanged);
+            // 
+            // splitter1
+            // 
+            this.splitter1.Location = new System.Drawing.Point(564, 25);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(3, 598);
+            this.splitter1.TabIndex = 3;
+            this.splitter1.TabStop = false;
+            // 
+            // saveFileDialog1
+            // 
+            this.saveFileDialog1.Filter = "PNG|*.png";
+            this.saveFileDialog1.Title = "名前を付けて保存";
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.Filter = "All Files|*.bmp;*.png|bmp|*.bmp|png|*.png";
             // 
             // Form1
             // 
@@ -433,7 +433,7 @@
             this.Controls.Add(this.toolStrip1);
             this.IsMdiContainer = true;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Eede";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.Form1_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
@@ -485,7 +485,7 @@
         private Ui.ColorPicker colorPicker1;
         private Ui.PenSizeSetter penSizeSetter1;
         private System.Windows.Forms.ToolStrip toolStrip2;
-        private Ui.PaintableBox paintableBox1;
+        private Ui.DrawableBox paintableBox1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;

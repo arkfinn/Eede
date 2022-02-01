@@ -1,20 +1,14 @@
-﻿using Eede.Domain.Files;
+﻿using Eede.Application.Pictures;
+using Eede.Domain.Files;
+using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
-using Eede.ImageTransfers;
-using Eede.Infrastructure;
+using Eede.Domain.Positions;
 using Eede.Infrastructure.Pictures;
-using Eede.Positions;
 using Eede.Services;
 using Eede.Settings;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Eede.Ui
@@ -27,7 +21,15 @@ namespace Eede.Ui
         public PictureWindow()
         {
             InitializeComponent();
-            SetupPictureBuffer(new PrimaryPicture(new FilePath(""), new Bitmap(1, 1)));
+            SaveTo = new FilePath("");
+            SetupPictureBuffer(new Picture(new Bitmap(1, 1)));
+            Disposed += (sender, args) =>
+            {
+                if (PictureBuffer != null)
+                {
+                    PictureBuffer.Dispose();
+                }
+            };
         }
 
         public PictureWindow(Size size, IDrawingArea d)
@@ -38,55 +40,79 @@ namespace Eede.Ui
             {
                 g.FillRectangle(Brushes.White, new Rectangle(new Point(0, 0), size));
             }
-            Text = "新規ファイル";
-            SetupPictureBuffer(new PrimaryPicture(new FilePath(""), bmp));
+            UpdateSaveTo(new FilePath(""));
+            SetupPictureBuffer(new Picture(bmp));
             DrawingArea = d;
+            Disposed += (sender, args) =>
+            {
+                if (PictureBuffer != null)
+                {
+                    PictureBuffer.Dispose();
+                }
+            };
         }
 
         public PictureWindow(FilePath filename, IDrawingArea d)
         {
             InitializeComponent();
-            var picture = new PictureQuerySurvice().Fetch(filename);
+            UpdateSaveTo(filename);
+            var picture = new PictureFileReader(filename).Read();
             SetupPictureBuffer(picture);
-            Text = filename.Path;
             DrawingArea = d;
+            Disposed += (sender, args) =>
+            {
+                if (PictureBuffer != null)
+                {
+                    PictureBuffer.Dispose();
+                }
+            };
         }
-        HalfBoxPosition CursorPosition;
+
+        private FilePath SaveTo;
+
+        private void UpdateSaveTo(FilePath path)
+        {
+            SaveTo = path;
+            Text = path.IsEmpty() ? "新規ファイル" : path.Path;
+        }
+
+        private HalfBoxPosition CursorPosition;
 
         private IDrawingArea DrawingArea;
 
-        public event EventHandler<BitmapEventArgs> PicturePulled;
-        private void InvokePicturePulled(BitmapEventArgs args)
+        public event EventHandler<PicturePulledEventArgs> PicturePulled;
+
+        private void InvokePicturePulled(PicturePulledEventArgs args)
         {
             if (PicturePulled == null) return;
             PicturePulled(this, args);
         }
 
-        public event EventHandler<PicturePushedEventArgs> PicturePushed;
-        private void InvokePicturePushed(PicturePushedEventArgs args)
+        public Func<PicturePushedEventArgs, Picture> PicturePushed;
+
+        private Picture InvokePicturePushed(PicturePushedEventArgs args)
         {
-            if (PicturePushed == null) return;
-            PicturePushed(this, args);
+            if (PicturePushed == null) return args.Picture;
+            return PicturePushed(args);
         }
 
-        private PrimaryPicture PictureBuffer { get; set; }
+        private Picture PictureBuffer;
 
-        private void SetupPictureBuffer(PrimaryPicture picture)
+        private void SetupPictureBuffer(Picture picture)
         {
             var old = PictureBuffer;
             PictureBuffer = picture;
-            if (old != null)
+            if (old != null && old != picture)
             {
-                old.Buffer.Dispose();
+                old.Dispose();
             }
-            ResizePicture(picture.Buffer.Size);
+            ResizePicture(picture.Size);
             pictureBox1.Invalidate();
         }
 
         public void Rename(FilePath path)
         {
-                PictureBuffer = PictureBuffer.Rename(path);
-                Text = path.Path;
+            UpdateSaveTo(path);
         }
 
         public void ResizePicture(Size size)
@@ -116,19 +142,28 @@ namespace Eede.Ui
             CanvasBackgroundService.Instance.PaintBackground(g);
 
             var transfer = new DirectImageTransfer();
-            transfer.Transfer(PictureBuffer.Buffer, g, PictureBuffer.Buffer.Size);
+            PictureBuffer.Transfer(transfer, g);
             DrawCursor(g);
         }
 
         internal bool IsEmptyFileName()
         {
-            return PictureBuffer.IsEmptyFileName();
+            return SaveTo.IsEmpty();
         }
 
         private void DrawCursor(Graphics g)
         {
             if (!CursorVisible) return;
-            var rect = CursorPosition.CreateRealRectangle(DrawingArea.DrawingSize);
+            var rect = Rectangle.Empty;
+            if (IsSelecting)
+            {
+                rect = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
+            }
+            else
+            {
+                rect = CursorPosition.CreateRealRectangle(DrawingArea.DrawingSize);
+            }
+
             g.DrawRectangle(new Pen(Color.Yellow, 1), rect);
             var p = new Pen(Color.Red, 1)
             {
@@ -139,17 +174,10 @@ namespace Eede.Ui
 
         internal void Save()
         {
-            PictureBuffer.Save(new PictureCommandService());
+            new PictureFileWriter(SaveTo).Write(PictureBuffer);
         }
 
         private bool CursorVisible = false;
-
-        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
-        {
-            CursorVisible = IsInnerPictureBox(new Position(e.Location));
-            CursorPosition = new HalfBoxPosition(FetchBoxSize(), e.Location);
-            pictureBox1.Refresh();
-        }
 
         private bool IsInnerPictureBox(Position p)
         {
@@ -163,8 +191,10 @@ namespace Eede.Ui
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-
         }
+
+        private bool IsSelecting = false;
+        private HalfBoxPosition SelectingPosition;
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -172,27 +202,52 @@ namespace Eede.Ui
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    InvokePicturePushed(new PicturePushedEventArgs(PictureBuffer.Buffer, CursorPosition.RealPosition));
-                    Refresh();
+                    if (!IsSelecting)
+                    {
+                        SetupPictureBuffer(InvokePicturePushed(new PicturePushedEventArgs(PictureBuffer, CursorPosition.RealPosition)));
+                        Refresh();
+                    }
                     break;
-                case MouseButtons.Right:
-                    var rect = CursorPosition.CreateRealRectangle(FetchBoxSize());
-                    var bmpNew = PictureBuffer.Buffer.Clone(rect, PictureBuffer.Buffer.PixelFormat);
-                    try
-                    {
-                        InvokePicturePulled(new BitmapEventArgs(bmpNew));
-                    }
-                    finally
-                    {
-                        bmpNew.Dispose();
-                    }
 
+                case MouseButtons.Right:
+                    // 範囲選択開始
+                    IsSelecting = true;
+                    SelectingPosition = new HalfBoxPosition(FetchBoxSize(), e.Location);
                     break;
             }
         }
 
+        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (IsSelecting)
+            {
+                SelectingPosition = SelectingPosition.UpdatePosition(e.Location, PictureBuffer.Size);
+            }
+            else
+            {
+                CursorVisible = IsInnerPictureBox(new Position(e.Location));
+                CursorPosition = new HalfBoxPosition(FetchBoxSize(), e.Location);
+            }
+            pictureBox1.Refresh();
+        }
+
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    break;
+
+                case MouseButtons.Right:
+                    // 範囲選択してるとき
+                    if (IsSelecting)
+                    {
+                        var rect = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
+                        InvokePicturePulled(new PicturePulledEventArgs(PictureBuffer, rect));
+                        IsSelecting = false;
+                    }
+                    break;
+            }
         }
 
         private void pictureBox1_MouseLeave(object sender, EventArgs e)
@@ -202,12 +257,13 @@ namespace Eede.Ui
         }
     }
 
-    public class PrimaryPictureArea {
+    public class PrimaryPictureArea
+    {
         private FilePath FilePath;
-        private IPictureCommandService Command;
-        private IPictureQueryService Service;
+        private IPictureWriter Command;
+        private IPictureReader Service;
 
-        public PrimaryPictureArea(FilePath filePath, IPictureCommandService command, IPictureQueryService service)
+        public PrimaryPictureArea(FilePath filePath, IPictureWriter command, IPictureReader service)
         {
             FilePath = filePath;
             Command = command;

@@ -10,20 +10,21 @@ namespace Eede
         public readonly Position Position;
         public readonly Position RealPosition;
         private readonly Size DefaultCursorSize;
-        private readonly Size HalfCursorSize;
+        private readonly Size GridSize;
         private readonly Position StartPosition;
 
         private HalfBoxPosition(Size boxSize, Point localPosition, Size minimumSize, Point startPosition)
         {
             BoxSize = boxSize;
             DefaultCursorSize = minimumSize;
-            HalfCursorSize = new Size(DefaultCursorSize.Width / 2, DefaultCursorSize.Height / 2);
+            GridSize = new Size(DefaultCursorSize.Width / 2, DefaultCursorSize.Height / 2);
             Position = new Position(
-                localPosition.X / HalfCursorSize.Width,
-                localPosition.Y / HalfCursorSize.Height);
+                localPosition.X / GridSize.Width,
+                localPosition.Y / GridSize.Height
+            );
             RealPosition = new Position(
-                Position.X * HalfCursorSize.Width,
-                Position.Y * HalfCursorSize.Height
+                Position.X * GridSize.Width,
+                Position.Y * GridSize.Height
             );
 
             StartPosition = new Position(startPosition.X, startPosition.Y);
@@ -38,14 +39,14 @@ namespace Eede
             return new Rectangle(RealPosition.ToPoint(), size);
         }
 
-        public HalfBoxPosition UpdatePosition(Point location)
+        public HalfBoxPosition UpdatePosition(Point location, Size limit)
         {
             var locationX = Math.Max(0, location.X);
-            var newWidth = DefaultCursorSize.Width + ArrangeFromDistance(StartPosition.X, locationX, HalfCursorSize.Width);
+            var newWidth = LimittedDistance(StartPosition.X, locationX, DefaultCursorSize.Width, GridSize.Width, limit.Width);
             var newX = Math.Min(locationX, StartPosition.X);
 
             var locationY = Math.Max(0, location.Y);
-            var newHeight = DefaultCursorSize.Height + ArrangeFromDistance(StartPosition.Y, locationY, HalfCursorSize.Height);
+            var newHeight = LimittedDistance(StartPosition.Y, locationY, DefaultCursorSize.Height, GridSize.Height, limit.Height);
             var newY = Math.Min(locationY, StartPosition.Y);
 
             return new HalfBoxPosition(new Size(newWidth, newHeight), new Point(newX, newY), DefaultCursorSize, StartPosition.ToPoint());
@@ -56,15 +57,23 @@ namespace Eede
             return value - (value % gridLength);
         }
 
-        private int ArrangeFromDistance(int startValue, int nowValue, int gridLength)
+        private int LimittedDistance(int startValue, int nowValue, int cursorLength, int gridLength, int limitLength)
         {
-            var value = nowValue - ArrangeTo(startValue, gridLength);
+            var startGrid = ArrangeTo(startValue, gridLength);
+            return Math.Min(
+                cursorLength + ArrangeFromDistance(nowValue - startGrid, gridLength),
+                limitLength - ArrangeTo(startValue, gridLength)
+            );
+        }
+
+        private int ArrangeFromDistance(int distance, int gridLength)
+        {
             // マイナス方向に広がる場合、元のサイズプラスマイナス方向分とする。
-            if (value < 0)
+            if (distance < 0)
             {
-                return ArrangeTo(Math.Abs(value) + gridLength - 1, gridLength);
+                return ArrangeTo(Math.Abs(distance) + gridLength - 1, gridLength);
             }
-            return ArrangeTo(value, gridLength);
+            return ArrangeTo(distance, gridLength);
         }
     }
 }

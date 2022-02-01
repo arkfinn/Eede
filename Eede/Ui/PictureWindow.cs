@@ -221,7 +221,7 @@ namespace Eede.Ui
         {
             if (IsSelecting)
             {
-                SelectingPosition = SelectingPosition.UpdatePosition(e.Location);
+                SelectingPosition = SelectingPosition.UpdatePosition(e.Location, PictureBuffer.Size);
             }
             else
             {

@@ -35,14 +35,15 @@ namespace Eede.Tests
             new TestCaseData(new Point(17, 47), new Point(17, 32)).Returns(new Rectangle(new Point(16, 32),new Size(16, 24))).SetName("Y - 8"),
             new TestCaseData(new Point(17, 47), new Point(17, 31)).Returns(new Rectangle(new Point(16, 24),new Size(16, 32))).SetName("Y - 16"),
             new TestCaseData(new Point(17, 47), new Point(-1, -1)).Returns(new Rectangle(new Point(0, 0),new Size(32, 56))).SetName("min 0"),
-            new TestCaseData(new Point(17, 47), new Point(-9, -9)).Returns(new Rectangle(new Point(0, 0),new Size(32, 56))).SetName("min -9")
+            new TestCaseData(new Point(17, 47), new Point(-9, -9)).Returns(new Rectangle(new Point(0, 0),new Size(32, 56))).SetName("min -9"),
+            new TestCaseData(new Point(17, 47), new Point(120, 120)).Returns(new Rectangle(new Point(16, 40),new Size(84, 60))).SetName("max")
         };
 
         [TestCaseSource(nameof(UpdatePositionTestSource))]
         public Rectangle UpdatePositionTest(Point startPos, Point updatePos)
         {
             var pos = new HalfBoxPosition(new Size(16, 16), startPos);
-            var updated = pos.UpdatePosition(updatePos);
+            var updated = pos.UpdatePosition(updatePos, new Size(100, 100));
             return new Rectangle(updated.RealPosition.ToPoint(), updated.BoxSize);
         }
     }

@@ -7,10 +7,11 @@ Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描く�
 - 子ウィンドウ
   - プライマリ画像
 
-# フォルダ構成
-- Eede プレゼンテーション層とインフラ層
-- Application アプリケーション層
-- Domain層
+# プロジェクト構成
+- Eede プレゼンテーション層
+- Eede.Infrastructure インフラ層
+- Eede.Application アプリケーション層
+- Eede.Domain ドメイン層
 
 # 機能
 - 複数の画像ファイルをプライマリ画像として子ウィンドウで開くことができる

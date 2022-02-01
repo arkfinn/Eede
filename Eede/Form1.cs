@@ -1,18 +1,12 @@
-﻿using Eede.Domain.Files;
-using Eede.ImageBlenders;
-using Eede.ImageTransfers;
+﻿using Eede.Application.Pictures;
+using Eede.Domain.Files;
+using Eede.Domain.ImageBlenders;
+using Eede.Domain.ImageTransfers;
+using Eede.Domain.Pictures;
 using Eede.Settings;
 using Eede.Ui;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
 
 namespace Eede
 {
@@ -26,22 +20,18 @@ namespace Eede
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
         }
 
         private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
         {
-
         }
 
         private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
         {
-
         }
 
         private void splitContainer1_Panel2_Paint_1(object sender, PaintEventArgs e)
         {
-
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -89,8 +79,8 @@ namespace Eede
         {
             form.MdiParent = this;
             form.FormClosed += new FormClosedEventHandler(ChildFormClosed);
-            form.PicturePulled += new EventHandler<BitmapEventArgs>(ChildFormPicturePulled);
-            form.PicturePushed += new EventHandler<PicturePushedEventArgs>(ChildFormPicturePushed);
+            form.PicturePulled += new EventHandler<PicturePulledEventArgs>(ChildFormPicturePulled);
+            form.PicturePushed = ChildFormPicturePushed;
             form.Show();
             toolStripButton_saveFile.Enabled = true;
         }
@@ -101,39 +91,37 @@ namespace Eede
             toolStripButton_saveFile.Enabled = false;
         }
 
-        private void ChildFormPicturePulled(object sender, BitmapEventArgs e)
+        private void ChildFormPicturePulled(object sender, PicturePulledEventArgs e)
         {
-            paintableBox1.SetupImage((Bitmap)e.Bitmap.Clone());
+            paintableBox1.SetupImage(e.CutOutImage());
         }
 
-        private void ChildFormPicturePushed(object sender, PicturePushedEventArgs e)
+        private Picture ChildFormPicturePushed(PicturePushedEventArgs e)
         {
             var src = paintableBox1.GetImage();
             // TODO:アルファ値ゼロの色情報が消える問題あり
             //e.Bitmap.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
             //e.Bitmap.DrawImage(src, new Rectangle(e.Position, src.Size));
             var blender = new DirectImageBlender();
-            blender.Blend(src, e.Bitmap, e.Position);
+            return e.Picture.Blend(blender, src, e.Position);
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
-            var child = ActiveMdiChild as PictureWindow;
-            if (child == null) return;
-            if (child.IsEmptyFileName())
-            {
-                RenameChildFile(child);
-            }
+            if (!(ActiveMdiChild is PictureWindow child)) return;
+            if (child.IsEmptyFileName() && !RenameChildFile(child)) return;
+
             child.Save();
         }
 
-        private void RenameChildFile(PictureWindow child)
+        private bool RenameChildFile(PictureWindow child)
         {
             if (saveFileDialog1.ShowDialog() != DialogResult.OK)
             {
-                return;
+                return false;
             }
             child.Rename(new FilePath(saveFileDialog1.FileName));
+            return true;
         }
 
         private void toolStripButton_openFile_Click(object sender, EventArgs e)
@@ -164,7 +152,6 @@ namespace Eede
 
         private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
-
         }
 
         private void toolStripButton12_Click(object sender, EventArgs e)
@@ -258,23 +245,21 @@ namespace Eede
             toolStripButton9.Checked = false;
             toolStripButton10.Checked = false;
             toolStripButton11.Checked = true;
-
         }
-
 
         private void colorPicker1_ColorChanged(object sender, EventArgs e)
         {
-            paintableBox1.SetPenColor(colorPicker1.GetArgb());
+            paintableBox1.PenColor = colorPicker1.GetArgb();
         }
 
         private void penSizeSetter1_PenSizeChanged(object sender, EventArgs e)
         {
-            paintableBox1.SetPenSize(penSizeSetter1.PenSize);
+            paintableBox1.PenSize = penSizeSetter1.PenSize;
         }
 
         private void paintableBox1_ColorChanged(object sender, EventArgs e)
         {
-            colorPicker1.SetColor(paintableBox1.GetPenColor());
+            colorPicker1.SetColor(paintableBox1.PenColor);
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)

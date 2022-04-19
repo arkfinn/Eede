@@ -69,7 +69,6 @@ namespace Eede.Domain.Pictures
             transfer.Transfer(Buffer, g, size);
         }
 
-        // IImageBlenderのメソッドが整っていないため一時的にDirectImageBlenderを直で指定
         /// <summary>
         /// このPictureのtoPositionにsrcを合成した新しいPictureを返す。
         /// </summary>
@@ -77,7 +76,7 @@ namespace Eede.Domain.Pictures
         /// <param name="src"></param>
         /// <param name="toPosition"></param>
         /// <returns></returns>
-        public Picture Blend(/*IImageBlender*/ DirectImageBlender blender, Bitmap src, Position toPosition)
+        public Picture Blend(IImageBlender blender, Bitmap src, Position toPosition)
         {
             using (var tmp = CreateClone(Buffer))
             {

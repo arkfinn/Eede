@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using Eede.Domain.Positions;
+using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 
 namespace Eede.Domain.ImageBlenders
@@ -7,9 +9,14 @@ namespace Eede.Domain.ImageBlenders
     {
         public void Blend(Bitmap from, Bitmap to)
         {
+            Blend(from, to, new Position(0, 0));
+        }
+
+        public void Blend(Bitmap from, Bitmap to, Position toPosition)
+        {
             BitmapData destBitmapData = to.LockBits(
-                    new Rectangle(Point.Empty, to.Size),
-                    ImageLockMode.WriteOnly, to.PixelFormat);
+                new Rectangle(Point.Empty, to.Size),
+                ImageLockMode.WriteOnly, to.PixelFormat);
             try
             {
                 BitmapData srcBitmapData = from.LockBits(
@@ -24,9 +31,12 @@ namespace Eede.Domain.ImageBlenders
                     byte[] destPixels = new byte[destBitmapData.Stride * destBitmapData.Height];
                     System.Runtime.InteropServices.Marshal.Copy(destBitmapData.Scan0, destPixels, 0, destPixels.Length);
 
-                    for (int y = 0; y < destBitmapData.Height; y++)
+                    var maxY = Math.Min(toPosition.Y + from.Height, destBitmapData.Height);
+                    var maxX = Math.Min(toPosition.X + from.Width, destBitmapData.Width);
+
+                    for (int y = 0; y < maxY; y++)
                     {
-                        for (int x = 0; x < destBitmapData.Width; x++)
+                        for (int x = 0; x < maxX; x++)
                         {
                             int pos = x * 4 + destBitmapData.Stride * y;
                             destPixels[pos + 3] = srcPixels[pos + 3];

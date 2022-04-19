@@ -47,6 +47,7 @@
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="HalfBoxPosition.cs" />
     <Compile Include="ImageBlenders\AlphaOnlyImageBlender.cs" />
+    <Compile Include="ImageBlenders\AlphaBlender.cs" />
     <Compile Include="ImageBlenders\DirectImageBlender.cs" />
     <Compile Include="ImageBlenders\IImageBlender.cs" />
     <Compile Include="ImageBlenders\RGBOnlyImageBlender.cs" />

@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 
 namespace Eede.Domain.ImageBlenders
 {
-    public class RGBOnlyImageBlender : IImageBlender
+    public class AlphaBlender : IImageBlender
     {
         public void Blend(Bitmap from, Bitmap to)
         {
@@ -33,14 +33,23 @@ namespace Eede.Domain.ImageBlenders
                     var maxY = Math.Min(toPosition.Y + from.Height, destBitmapData.Height);
                     var maxX = Math.Min(toPosition.X + from.Width, destBitmapData.Width);
 
-                    for (int y = 0; y < maxY; y++)
+                    for (int y = toPosition.Y; y < maxY; y++)
                     {
-                        for (int x = 0; x < maxX; x++)
+                        for (int x = toPosition.X; x < maxX; x++)
                         {
                             int pos = x * 4 + destBitmapData.Stride * y;
-                            destPixels[pos + 0] = srcPixels[pos + 0];
-                            destPixels[pos + 1] = srcPixels[pos + 1];
-                            destPixels[pos + 2] = srcPixels[pos + 2];
+                            int srcPos = (x - toPosition.X) * 4 + srcBitmapData.Stride * (y - toPosition.Y);
+                            decimal srcAlpha = Decimal.Divide(srcPixels[srcPos + 3], 255);
+                            decimal destAlpha = Decimal.Divide(destPixels[srcPos + 3], 255);
+                            decimal alpha = srcAlpha + destAlpha - (srcAlpha * destAlpha);
+                            destPixels[pos + 3] = (byte)(Decimal.Add(Decimal.Multiply(alpha, 255), 0.5m));
+                            if (alpha == 0)
+                            {
+                                continue;
+                            }
+                            destPixels[pos + 0] = (byte)(Decimal.Add(Decimal.Divide((destPixels[pos + 0] * destAlpha * (1 - srcAlpha)) + (srcPixels[srcPos + 0] * srcAlpha), alpha), 0.5m));
+                            destPixels[pos + 1] = (byte)(Decimal.Add(Decimal.Divide((destPixels[pos + 1] * destAlpha * (1 - srcAlpha)) + (srcPixels[srcPos + 1] * srcAlpha), alpha), 0.5m));
+                            destPixels[pos + 2] = (byte)(Decimal.Add(Decimal.Divide((destPixels[pos + 2] * destAlpha * (1 - srcAlpha)) + (srcPixels[srcPos + 2] * srcAlpha), alpha), 0.5m));
                         }
                     }
                     System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, destBitmapData.Scan0, destPixels.Length);

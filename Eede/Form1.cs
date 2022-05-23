@@ -99,11 +99,16 @@ namespace Eede
         private Picture ChildFormPicturePushed(PicturePushedEventArgs e)
         {
             var src = paintableBox1.GetImage();
-            // TODO:アルファ値ゼロの色情報が消える問題あり
-            //e.Bitmap.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
-            //e.Bitmap.DrawImage(src, new Rectangle(e.Position, src.Size));
-            var blender = new DirectImageBlender();
-            return e.Picture.Blend(blender, src, e.Position);
+            return e.Picture.Blend(PrepareImageBlender(), src, e.Position);
+        }
+
+        private IImageBlender PrepareImageBlender()
+        {
+            if (alphaTransferButton.Checked)
+            {
+                return new AlphaImageBlender();
+            }
+            return new DirectImageBlender();
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)

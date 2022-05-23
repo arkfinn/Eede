@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 
 namespace Eede.Domain.ImageBlenders
 {
-    public class AlphaBlender : IImageBlender
+    public class AlphaImageBlender : IImageBlender
     {
         public void Blend(Bitmap from, Bitmap to)
         {
@@ -39,8 +39,23 @@ namespace Eede.Domain.ImageBlenders
                         {
                             int pos = x * 4 + destBitmapData.Stride * y;
                             int srcPos = (x - toPosition.X) * 4 + srcBitmapData.Stride * (y - toPosition.Y);
+                            // 転送元がアルファ0なら転送しない
+                            if (srcPixels[srcPos + 3] == 0)
+                            {
+                                continue;
+                            }
+                            // 転送先がアルファ0なら無条件で転送
+                            if (destPixels[pos + 3] == 0)
+                            {
+                                destPixels[pos + 0] = srcPixels[srcPos + 0];
+                                destPixels[pos + 1] = srcPixels[srcPos + 1];
+                                destPixels[pos + 2] = srcPixels[srcPos + 2];
+                                destPixels[pos + 3] = srcPixels[srcPos + 3];
+                                continue;
+                            }
+                            // それ以外の場合、アルファ値・カラーを合成する
                             decimal srcAlpha = Decimal.Divide(srcPixels[srcPos + 3], 255);
-                            decimal destAlpha = Decimal.Divide(destPixels[srcPos + 3], 255);
+                            decimal destAlpha = Decimal.Divide(destPixels[pos + 3], 255);
                             decimal alpha = srcAlpha + destAlpha - (srcAlpha * destAlpha);
                             destPixels[pos + 3] = (byte)(Decimal.Add(Decimal.Multiply(alpha, 255), 0.5m));
                             if (alpha == 0)

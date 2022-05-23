@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            Eede.Domain.DrawStyles.FreeCurve freeCurve1 = new Eede.Domain.DrawStyles.FreeCurve();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_newFile = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_openFile = new System.Windows.Forms.ToolStripButton();
@@ -60,6 +59,10 @@
             this.penSizeSetter1 = new Eede.Ui.PenSizeSetter();
             this.paintableBox1 = new Eede.Ui.DrawableBox();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.toolStrip3 = new System.Windows.Forms.ToolStrip();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.alphaTransferButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.colorPicker1 = new Eede.Ui.ColorPicker();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
@@ -74,6 +77,7 @@
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            this.toolStrip3.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -338,6 +342,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.toolStrip3);
             this.splitContainer1.Panel2.Controls.Add(this.colorPicker1);
             this.splitContainer1.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel2_Paint_1);
             this.splitContainer1.Size = new System.Drawing.Size(564, 598);
@@ -381,7 +386,7 @@
             this.paintableBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.paintableBox1.Location = new System.Drawing.Point(0, 0);
             this.paintableBox1.Name = "paintableBox1";
-            this.paintableBox1.DrawStyle = freeCurve1;
+            this.paintableBox1.PenColor = System.Drawing.Color.Black;
             this.paintableBox1.Size = new System.Drawing.Size(424, 402);
             this.paintableBox1.TabIndex = 1;
             this.paintableBox1.ColorChanged += new System.EventHandler(this.paintableBox1_ColorChanged);
@@ -396,6 +401,41 @@
             this.toolStrip2.Size = new System.Drawing.Size(26, 402);
             this.toolStrip2.TabIndex = 0;
             this.toolStrip2.Text = "toolStrip2";
+            // 
+            // toolStrip3
+            // 
+            this.toolStrip3.Dock = System.Windows.Forms.DockStyle.Right;
+            this.toolStrip3.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripSeparator6,
+            this.alphaTransferButton,
+            this.toolStripSeparator7});
+            this.toolStrip3.Location = new System.Drawing.Point(532, 0);
+            this.toolStrip3.Name = "toolStrip3";
+            this.toolStrip3.Size = new System.Drawing.Size(32, 192);
+            this.toolStrip3.TabIndex = 1;
+            this.toolStrip3.Text = "toolStrip3";
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(29, 6);
+            // 
+            // alphaTransferButton
+            // 
+            this.alphaTransferButton.CheckOnClick = true;
+            this.alphaTransferButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.alphaTransferButton.Image = ((System.Drawing.Image)(resources.GetObject("alphaTransferButton.Image")));
+            this.alphaTransferButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.alphaTransferButton.Name = "alphaTransferButton";
+            this.alphaTransferButton.Size = new System.Drawing.Size(29, 20);
+            this.alphaTransferButton.Text = "toolStripButton1";
+            this.alphaTransferButton.ToolTipText = "アルファ値を適用する";
+            // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(29, 6);
             // 
             // colorPicker1
             // 
@@ -442,6 +482,7 @@
             this.panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
@@ -449,6 +490,8 @@
             this.splitContainer2.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
+            this.toolStrip3.ResumeLayout(false);
+            this.toolStrip3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -490,6 +533,10 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton toolStripButton2;
+        private System.Windows.Forms.ToolStrip toolStrip3;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripButton alphaTransferButton;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
     }
 }
 

@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Eede.ValueObjects;
+using System;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
-using Eede.ValueObjects;
 
 namespace Eede.Ui
 {
-    enum ColorPickerMode
+    internal enum ColorPickerMode
     {
         Empty,
         RGB,
@@ -23,7 +19,6 @@ namespace Eede.Ui
     //    public int V;
     //}
 
-
     public partial class ColorPicker : UserControl
     {
         public ColorPicker()
@@ -33,6 +28,7 @@ namespace Eede.Ui
         }
 
         public event EventHandler ColorChanged;
+
         private void fireColorChanged()
         {
             if (this.ColorChanged != null)
@@ -43,16 +39,15 @@ namespace Eede.Ui
 
         private void ColorPicker_Load(object sender, EventArgs e)
         {
-
         }
 
-        int r = 0;
-        int g = 0;
-        int b = 0;
+        private int r = 0;
+        private int g = 0;
+        private int b = 0;
 
         private void SetupGradationColor()
         {
-            pickerA.GradationColor = new Color[] { Color.FromArgb(0, 0, 0), Color.FromArgb(255, 255, 255) };
+            pickerA.GradationColor = new Color[] { Color.FromArgb(255, 255, 255), Color.FromArgb(0, 0, 0) };
             switch (mode)
             {
                 case ColorPickerMode.RGB:
@@ -63,6 +58,7 @@ namespace Eede.Ui
                     pickerG.GradationColor = new Color[] { Color.FromArgb(r, 255, b), Color.FromArgb(r, 0, b) };
                     pickerB.GradationColor = new Color[] { Color.FromArgb(r, g, 255), Color.FromArgb(r, g, 0) };
                     break;
+
                 case ColorPickerMode.HSV:
                     Color tmp = HsvColor.FromHsv(pickerR.Value, pickerG.Value, pickerB.Value).ToColor();
                     r = tmp.R;
@@ -82,11 +78,12 @@ namespace Eede.Ui
                         HsvColor.FromHsv(pickerR.Value, pickerG.Value, 0).ToColor()
                     };
                     break;
+
                 default:
                     break;
             }
-
         }
+
         //private Hsv GetHsvFromRgb(int R, int G, int B)
         //{
         //    Hsv hsv = new Hsv();
@@ -94,10 +91,10 @@ namespace Eede.Ui
         //    double max = Math.Max(Math.Max(R, G), B);
         //    double min = Math.Min(Math.Min(R, G), B);
 
-        //    //Vを求める  
+        //    //Vを求める
         //    hsv.V = (int)max;
 
-        //    //RGBすべてが同じ場合　HとSは0     
+        //    //RGBすべてが同じ場合　HとSは0
         //    if (max == min)
         //    {
         //        hsv.H = 0;
@@ -105,10 +102,10 @@ namespace Eede.Ui
         //    }
         //    else
         //    {
-        //        //Sを求める  
+        //        //Sを求める
         //        hsv.S = (int)(((max - min) * 255) / max);
 
-        //        //Hを求める  
+        //        //Hを求める
         //        hsv.H = 0;
 
         //        if (max == R)
@@ -127,7 +124,6 @@ namespace Eede.Ui
         //            if (hsv.H < 0) hsv.H += 360;
         //        }
         //    }
-
 
         //    return hsv;
         //}
@@ -172,7 +168,6 @@ namespace Eede.Ui
 
         //    return rgb;
         //}
-
 
         private void picker_ValueChanged(object sender, EventArgs e)
         {
@@ -220,6 +215,7 @@ namespace Eede.Ui
                     pickerB.Value = hsv.V;
                     mode = ColorPickerMode.HSV;
                     break;
+
                 case ColorPickerMode.HSV:
                     button1.Text = "A   R   G   B";
                     mode = ColorPickerMode.Empty;
@@ -229,12 +225,11 @@ namespace Eede.Ui
                     pickerB.Value = b;
                     mode = ColorPickerMode.RGB;
                     break;
+
                 default:
                     break;
             }
             SetupGradationColor();
         }
-
-
     }
 }

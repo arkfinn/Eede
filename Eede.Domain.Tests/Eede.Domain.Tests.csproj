@@ -59,6 +59,7 @@
     <Compile Include="Positions\PositionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sizes\MagnifiedSizeTests.cs" />
+    <Compile Include="Systems\UndoSystemTests.cs" />
     <Compile Include="ValueObjects\HsvColorTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +74,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

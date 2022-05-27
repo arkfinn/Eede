@@ -57,7 +57,9 @@
     <Compile Include="Pictures\PicturePushedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Eede.Domain\Eede.Domain.csproj">
       <Project>{00A5CB38-BF15-422E-8B32-A26E30CCC9DB}</Project>

@@ -1,8 +1,10 @@
-﻿using Eede.Application.Pictures;
+﻿using Eede.Actions;
+using Eede.Application.Pictures;
 using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
+using Eede.Domain.Systems;
 using Eede.Settings;
 using Eede.Ui;
 using System;
@@ -93,11 +95,17 @@ namespace Eede
 
         private void ChildFormPicturePulled(object sender, PicturePulledEventArgs e)
         {
-            paintableBox1.SetupImage(e.CutOutImage());
+            using (var picture = new Picture(e.CutOutImage()))
+            {
+                var action = new ChildFormPicturePullAction(paintableBox1, picture);
+                action.Do();
+                AddUndoItem(action);
+            }
         }
 
         private Picture ChildFormPicturePushed(PicturePushedEventArgs e)
         {
+            // ここでUnmdo.Add
             var src = paintableBox1.GetImage();
             return e.Picture.Blend(PrepareImageBlender(), src, e.Position);
         }
@@ -280,5 +288,35 @@ namespace Eede
                 GlobalSetting.Instance().BoxSize = dialog.GetInputBoxSize();
             }
         }
+
+        #region Undo
+
+        private UndoSystem UndoSystem = new UndoSystem();
+
+        private void AddUndoItem(IUndoItem item)
+        {
+            UndoSystem = UndoSystem.Add(item);
+            UpdateUndoButtonEnabled();
+        }
+
+        private void UpdateUndoButtonEnabled()
+        {
+            toolStripButtonUndo.Enabled = UndoSystem.CanUndo();
+            toolStripButtonRedo.Enabled = UndoSystem.CanRedo();
+        }
+
+        private void toolStripButtonUndo_Click(object sender, EventArgs e)
+        {
+            UndoSystem = UndoSystem.Undo();
+            UpdateUndoButtonEnabled();
+        }
+
+        private void toolStripButtonRedo_Click(object sender, EventArgs e)
+        {
+            UndoSystem = UndoSystem.Redo();
+            UpdateUndoButtonEnabled();
+        }
+
+        #endregion Undo
     }
 }

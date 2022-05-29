@@ -18,10 +18,13 @@ namespace Eede.Ui
         public DrawableBox()
         {
             InitializeComponent();
-            var s = GlobalSetting.Instance().BoxSize;
+            var defaultBoxSize = GlobalSetting.Instance().BoxSize;
             var gridSize = new Size(16, 16);
             DrawableArea = new DrawableArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize, null);
-            SetupImage(new Bitmap(s.Width, s.Height));
+            using (var picture = new Picture(defaultBoxSize))
+            {
+                SetupPicture(picture);
+            }
             canvas.Image = PictureBuffer.Fetch().ToImage();
             Disposed += (sender, args) =>
             {
@@ -49,12 +52,9 @@ namespace Eede.Ui
             return PictureBuffer.Fetch().CutOut(new Rectangle(new Point(0, 0), PictureBuffer.Fetch().Size));
         }
 
-        public void SetupImage(Bitmap image)
+        public void SetupPicture(Picture sourcePicture)
         {
-            using (var picture = new Picture(image))
-            {
-                UpdatePictureBuffer(new DrawingBuffer(picture));
-            }
+            UpdatePictureBuffer(new DrawingBuffer(sourcePicture));
         }
 
         private void UpdatePictureBuffer(DrawingBuffer newPicture)

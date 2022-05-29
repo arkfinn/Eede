@@ -34,8 +34,8 @@
             this.toolStripButton_openFile = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_saveFile = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButton4 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton5 = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonUndo = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonRedo = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton7 = new System.Windows.Forms.ToolStripButton();
@@ -88,8 +88,8 @@
             this.toolStripButton_openFile,
             this.toolStripButton_saveFile,
             this.toolStripSeparator1,
-            this.toolStripButton4,
-            this.toolStripButton5,
+            this.toolStripButtonUndo,
+            this.toolStripButtonRedo,
             this.toolStripSeparator2,
             this.toolStripButton6,
             this.toolStripButton7,
@@ -151,23 +151,27 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
-            // toolStripButton4
+            // toolStripButtonUndo
             // 
-            this.toolStripButton4.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton4.Image = global::Eede.Properties.Resources.Undo_16x;
-            this.toolStripButton4.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton4.Name = "toolStripButton4";
-            this.toolStripButton4.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton4.Text = "toolStripButton4";
+            this.toolStripButtonUndo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonUndo.Enabled = false;
+            this.toolStripButtonUndo.Image = global::Eede.Properties.Resources.Undo_16x;
+            this.toolStripButtonUndo.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonUndo.Name = "toolStripButtonUndo";
+            this.toolStripButtonUndo.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonUndo.Text = "toolStripButton4";
+            this.toolStripButtonUndo.Click += new System.EventHandler(this.toolStripButtonUndo_Click);
             // 
-            // toolStripButton5
+            // toolStripButtonRedo
             // 
-            this.toolStripButton5.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton5.Image = global::Eede.Properties.Resources.Redo_16x;
-            this.toolStripButton5.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton5.Name = "toolStripButton5";
-            this.toolStripButton5.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton5.Text = "toolStripButton5";
+            this.toolStripButtonRedo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonRedo.Enabled = false;
+            this.toolStripButtonRedo.Image = global::Eede.Properties.Resources.Redo_16x;
+            this.toolStripButtonRedo.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonRedo.Name = "toolStripButtonRedo";
+            this.toolStripButtonRedo.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonRedo.Text = "toolStripButton5";
+            this.toolStripButtonRedo.Click += new System.EventHandler(this.toolStripButtonRedo_Click);
             // 
             // toolStripSeparator2
             // 
@@ -410,16 +414,16 @@
             this.toolStripSeparator6,
             this.alphaTransferButton,
             this.toolStripSeparator7});
-            this.toolStrip3.Location = new System.Drawing.Point(532, 0);
+            this.toolStrip3.Location = new System.Drawing.Point(540, 0);
             this.toolStrip3.Name = "toolStrip3";
-            this.toolStrip3.Size = new System.Drawing.Size(32, 192);
+            this.toolStrip3.Size = new System.Drawing.Size(24, 192);
             this.toolStrip3.TabIndex = 1;
             this.toolStrip3.Text = "toolStrip3";
             // 
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(29, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(21, 6);
             // 
             // alphaTransferButton
             // 
@@ -428,14 +432,14 @@
             this.alphaTransferButton.Image = ((System.Drawing.Image)(resources.GetObject("alphaTransferButton.Image")));
             this.alphaTransferButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.alphaTransferButton.Name = "alphaTransferButton";
-            this.alphaTransferButton.Size = new System.Drawing.Size(29, 20);
+            this.alphaTransferButton.Size = new System.Drawing.Size(21, 20);
             this.alphaTransferButton.Text = "toolStripButton1";
             this.alphaTransferButton.ToolTipText = "アルファ値を適用する";
             // 
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(29, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(21, 6);
             // 
             // colorPicker1
             // 
@@ -504,8 +508,8 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_openFile;
         private System.Windows.Forms.ToolStripButton toolStripButton_saveFile;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton toolStripButton4;
-        private System.Windows.Forms.ToolStripButton toolStripButton5;
+        private System.Windows.Forms.ToolStripButton toolStripButtonUndo;
+        private System.Windows.Forms.ToolStripButton toolStripButtonRedo;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton toolStripButton6;
         private System.Windows.Forms.ToolStripButton toolStripButton7;

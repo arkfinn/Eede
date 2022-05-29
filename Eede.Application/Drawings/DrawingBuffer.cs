@@ -4,7 +4,6 @@ using System;
 namespace Eede.Application.Drawings
 {
     public class DrawingBuffer : IDisposable
-
     {
         public readonly Picture Previous;
         public readonly Picture Drawing;

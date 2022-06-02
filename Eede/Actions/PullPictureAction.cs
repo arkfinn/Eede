@@ -5,13 +5,13 @@ using System;
 
 namespace Eede.Actions
 {
-    internal class ChildFormPicturePullAction : IUndoItem
+    internal class PullPictureAction : IUndoItem
     {
         private readonly DrawableBox ParentBox;
         private readonly Picture NowPicture;
         private readonly Picture PulledPicture;
 
-        public ChildFormPicturePullAction(DrawableBox parentBox, Picture pulledImage)
+        public PullPictureAction(DrawableBox parentBox, Picture pulledImage)
         {
             ParentBox = parentBox ?? throw new ArgumentNullException(nameof(parentBox));
             NowPicture = new Picture(ParentBox.GetImage());

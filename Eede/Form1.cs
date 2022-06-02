@@ -82,7 +82,7 @@ namespace Eede
             form.MdiParent = this;
             form.FormClosed += new FormClosedEventHandler(ChildFormClosed);
             form.PicturePulled += new EventHandler<PicturePulledEventArgs>(ChildFormPicturePulled);
-            form.PicturePushed = ChildFormPicturePushed;
+            form.PicturePushed += new EventHandler<PicturePushedEventArgs>(ChildFormPicturePushed);
             form.Show();
             toolStripButton_saveFile.Enabled = true;
         }
@@ -97,17 +97,24 @@ namespace Eede
         {
             using (var picture = new Picture(e.CutOutImage()))
             {
-                var action = new ChildFormPicturePullAction(paintableBox1, picture);
+                var action = new PullPictureAction(paintableBox1, picture);
                 action.Do();
                 AddUndoItem(action);
             }
         }
 
-        private Picture ChildFormPicturePushed(PicturePushedEventArgs e)
+        private void ChildFormPicturePushed(object sender, PicturePushedEventArgs e)
         {
-            // ここでUnmdo.Add
-            var src = paintableBox1.GetImage();
-            return e.Picture.Blend(PrepareImageBlender(), src, e.Position);
+            if (sender is PictureWindow)
+            {
+                var window = sender as PictureWindow;
+                using (var src = new Picture(paintableBox1.GetImage()))
+                {
+                    var action = new PushPictureAction(window, e.Picture, src, PrepareImageBlender(), e.Position);
+                    action.Do();
+                    AddUndoItem(action);
+                }
+            }
         }
 
         private IImageBlender PrepareImageBlender()

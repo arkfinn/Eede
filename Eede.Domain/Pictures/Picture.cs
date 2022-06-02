@@ -85,6 +85,15 @@ namespace Eede.Domain.Pictures
             }
         }
 
+        public Picture Blend(IImageBlender blender, Picture src, Position toPosition)
+        {
+            using (var tmp = CreateClone(Buffer))
+            {
+                blender.Blend(src.Buffer, tmp, toPosition);
+                return new Picture(tmp);
+            }
+        }
+
         public Picture Draw(Action<Graphics> action, IImageBlender blender)
         {
             using (var newBmp = CreateClone(Buffer))

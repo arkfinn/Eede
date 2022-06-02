@@ -22,7 +22,10 @@ namespace Eede.Ui
         {
             InitializeComponent();
             SaveTo = new FilePath("");
-            SetupPictureBuffer(new Picture(new Bitmap(1, 1)));
+            using (var picture = new Picture(new Bitmap(1, 1)))
+            {
+                SetupPictureBuffer(picture);
+            }
             Disposed += (sender, args) =>
             {
                 if (PictureBuffer != null)
@@ -41,7 +44,10 @@ namespace Eede.Ui
                 g.FillRectangle(Brushes.White, new Rectangle(new Point(0, 0), size));
             }
             UpdateSaveTo(new FilePath(""));
-            SetupPictureBuffer(new Picture(bmp));
+            using (var picture = new Picture(bmp))
+            {
+                SetupPictureBuffer(picture);
+            }
             DrawingArea = d;
             Disposed += (sender, args) =>
             {
@@ -56,8 +62,10 @@ namespace Eede.Ui
         {
             InitializeComponent();
             UpdateSaveTo(filename);
-            var picture = new PictureFileReader(filename).Read();
-            SetupPictureBuffer(picture);
+            using (var picture = new PictureFileReader(filename).Read())
+            {
+                SetupPictureBuffer(picture);
+            }
             DrawingArea = d;
             Disposed += (sender, args) =>
             {
@@ -88,21 +96,21 @@ namespace Eede.Ui
             PicturePulled(this, args);
         }
 
-        public Func<PicturePushedEventArgs, Picture> PicturePushed;
+        public event EventHandler<PicturePushedEventArgs> PicturePushed;
 
-        private Picture InvokePicturePushed(PicturePushedEventArgs args)
+        private void InvokePicturePushed(PicturePushedEventArgs args)
         {
-            if (PicturePushed == null) return args.Picture;
-            return PicturePushed(args);
+            if (PicturePushed == null) return;
+            PicturePushed(this, args);
         }
 
         private Picture PictureBuffer;
 
-        private void SetupPictureBuffer(Picture picture)
+        public void SetupPictureBuffer(Picture picture)
         {
             var old = PictureBuffer;
-            PictureBuffer = picture;
-            if (old != null && old != picture)
+            PictureBuffer = picture.Clone();
+            if (old != null)
             {
                 old.Dispose();
             }
@@ -204,7 +212,7 @@ namespace Eede.Ui
                 case MouseButtons.Left:
                     if (!IsSelecting)
                     {
-                        SetupPictureBuffer(InvokePicturePushed(new PicturePushedEventArgs(PictureBuffer, CursorPosition.RealPosition)));
+                        InvokePicturePushed(new PicturePushedEventArgs(PictureBuffer, CursorPosition.RealPosition));
                         Refresh();
                     }
                     break;

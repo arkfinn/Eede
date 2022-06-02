@@ -63,7 +63,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actions\ChildFormPicturePullAction.cs" />
+    <Compile Include="Actions\PullPictureAction.cs" />
+    <Compile Include="Actions\PushPictureAction.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

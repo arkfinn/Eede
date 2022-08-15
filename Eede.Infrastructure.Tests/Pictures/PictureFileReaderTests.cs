@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using System;
 using System.Drawing;
+using System.IO;
+using System.Reflection;
 
 namespace Eede.Infrastructure.Pictures.Tests
 {
@@ -11,7 +13,7 @@ namespace Eede.Infrastructure.Pictures.Tests
         [Test]
         public void Pngファイルを開くことができる()
         {
-            var filepath = new FilePath(Environment.CurrentDirectory + "\\SamplePictures\\PngFile.png");
+            var filepath = Location("\\SamplePictures\\PngFile.png");
             using (var destination = new Bitmap(new PictureFileReader(filepath).Read().ToImage()))
             {
                 var col = destination.GetPixel(1, 1);
@@ -24,7 +26,7 @@ namespace Eede.Infrastructure.Pictures.Tests
         [Test]
         public void アルファチャンネル無しのPngファイルを開くことができる()
         {
-            var filepath = new FilePath(Environment.CurrentDirectory + "\\SamplePictures\\PngFile16.png");
+            var filepath = Location("\\SamplePictures\\PngFile16.png");
             using (var destination = new Bitmap(new PictureFileReader(filepath).Read().ToImage()))
             {
                 var col = destination.GetPixel(1, 1);
@@ -37,7 +39,7 @@ namespace Eede.Infrastructure.Pictures.Tests
         [Test]
         public void インデックス256色のPngファイルを開くことができる()
         {
-            var filepath = new FilePath(Environment.CurrentDirectory + "\\SamplePictures\\PngFile8.png");
+            var filepath = Location("\\SamplePictures\\PngFile8.png");
             using (var destination = new Bitmap(new PictureFileReader(filepath).Read().ToImage()))
             {
                 var col = destination.GetPixel(1, 1);
@@ -50,7 +52,7 @@ namespace Eede.Infrastructure.Pictures.Tests
         [Test]
         public void bmpファイルを開くことができる()
         {
-            var filepath = new FilePath(Environment.CurrentDirectory + "\\SamplePictures\\BmpFile.bmp");
+            var filepath = Location("\\SamplePictures\\BmpFile.bmp");
             using (var destination = new Bitmap(new PictureFileReader(filepath).Read().ToImage()))
             {
                 var col = destination.GetPixel(1, 1);
@@ -58,6 +60,11 @@ namespace Eede.Infrastructure.Pictures.Tests
                 Assert.AreEqual(0, col.G);
                 Assert.AreEqual(0, col.B);
             }
+        }
+
+        private FilePath Location(string path)
+        {
+            return new FilePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + path);
         }
 
         [Test]

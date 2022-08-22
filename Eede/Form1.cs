@@ -325,5 +325,11 @@ namespace Eede
         }
 
         #endregion Undo
+
+        private void paintableBox1_Drew(object sender, Application.Drawings.DrawEventArgs e)
+        {
+                var action = new DrawAction(paintableBox1, e.PreviousPicture, e.NowPicture);
+                AddUndoItem(action);
+        }
     }
 }

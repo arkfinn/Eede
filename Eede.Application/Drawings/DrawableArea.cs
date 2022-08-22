@@ -65,6 +65,11 @@ namespace Eede.Application.Drawings
             return new DrawableArea(Background, Magnification, GridSize, positionHistory);
         }
 
+        private DrawableArea ClearPositionHistory()
+        {
+            return UpdatePositionHistory(null);
+        }
+
         private MinifiedPosition RealPositionOf(Position position)
         {
             return new MinifiedPosition(position, Magnification);
@@ -114,7 +119,7 @@ namespace Eede.Application.Drawings
             }
         }
 
-        public DrawingResult OnMove(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
+        public DrawingResult Move(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
         {
             var nextHistory = NextPositionHistory(PositionHistory, displayPosition);
             if (!picture.IsDrawing())
@@ -139,22 +144,22 @@ namespace Eede.Application.Drawings
             var drawer = new Drawer(picture.Fetch(), penStyle);
             using (var result = drawStyle.DrawEnd(drawer, nextHistory, isShift))
             {
-                return new DrawingResult(picture.DecideDrawing(result), UpdatePositionHistory(null));
+                return new DrawingResult(picture.DecideDrawing(result), ClearPositionHistory());
             }
         }
 
         public DrawingResult DrawCancel(DrawingBuffer picture)
         {
-            return new DrawingResult(picture.CancelDrawing(), UpdatePositionHistory(null));
+            return new DrawingResult(picture.CancelDrawing(), ClearPositionHistory());
         }
 
-        public DrawableArea OnLeave(DrawingBuffer picture)
+        public DrawableArea Leave(DrawingBuffer picture)
         {
             if (picture.IsDrawing())
             {
                 return this;
             }
-            return UpdatePositionHistory(null);
+            return ClearPositionHistory();
         }
     }
 }

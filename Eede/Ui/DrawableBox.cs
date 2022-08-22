@@ -153,7 +153,7 @@ namespace Eede.Ui
             return ((Control.ModifierKeys & Keys.Shift) == Keys.Shift);
         }
 
-        #region イベント
+        public event EventHandler<DrawEventArgs> Drew;
 
         private void canvas_MouseDown(object sender, MouseEventArgs e)
         {
@@ -197,7 +197,7 @@ namespace Eede.Ui
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            using (var result = DrawableArea.OnMove(DrawStyle, PenStyle, PictureBuffer, new Position(e.X, e.Y), IsShift()))
+            using (var result = DrawableArea.Move(DrawStyle, PenStyle, PictureBuffer, new Position(e.X, e.Y), IsShift()))
             {
                 UpdatePictureBuffer(result.PictureBuffer);
                 DrawableArea = result.DrawableArea;
@@ -206,10 +206,14 @@ namespace Eede.Ui
 
         private void canvas_MouseUp(object sender, MouseEventArgs e)
         {
-            using (var result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(e.X, e.Y), IsShift()))
+            using (var previous = PictureBuffer.Previous.Clone())
             {
-                UpdatePictureBuffer(result.PictureBuffer);
-                DrawableArea = result.DrawableArea;
+                using (var result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(e.X, e.Y), IsShift()))
+                {
+                    UpdatePictureBuffer(result.PictureBuffer);
+                    DrawableArea = result.DrawableArea;
+                    Drew?.Invoke(this, new DrawEventArgs(previous, result.PictureBuffer.Previous));
+                }
             }
         }
 
@@ -219,7 +223,7 @@ namespace Eede.Ui
 
         private void canvas_MouseLeave(object sender, EventArgs e)
         {
-            DrawableArea = DrawableArea.OnLeave(PictureBuffer);
+            DrawableArea = DrawableArea.Leave(PictureBuffer);
             canvas.Invalidate();
         }
 
@@ -228,6 +232,5 @@ namespace Eede.Ui
             PaintUpdate(e.Graphics);
         }
 
-        #endregion イベント
     }
 }

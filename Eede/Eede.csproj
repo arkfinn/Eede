@@ -1,228 +1,45 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FFCDFE42-6511-4269-A4F8-3E19014EAF8E}</ProjectGuid>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Eede</RootNamespace>
-    <AssemblyName>Eede</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
+    <StartupObject>Eede.Program</StartupObject>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
+    <None Remove="Resources\Copy_6524.png" />
+    <None Remove="Resources\Cut_6523.png" />
+    <None Remove="Resources\InvisibleBackground.png" />
+    <None Remove="Resources\NewFile_6276.png" />
+    <None Remove="Resources\Open_6529.png" />
+    <None Remove="Resources\PaintFormBackGround.bmp" />
+    <None Remove="Resources\Paste_6520.png" />
+    <None Remove="Resources\Redo_16x.png" />
+    <None Remove="Resources\Saveall_6518.png" />
+    <None Remove="Resources\Save_6530.png" />
+    <None Remove="Resources\Undo_16x.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Copy_6524.png" />
+    <EmbeddedResource Include="Resources\Cut_6523.png" />
+    <EmbeddedResource Include="Resources\InvisibleBackground.png" />
+    <EmbeddedResource Include="Resources\NewFile_6276.png" />
+    <EmbeddedResource Include="Resources\Open_6529.png" />
+    <EmbeddedResource Include="Resources\PaintFormBackGround.bmp" />
+    <EmbeddedResource Include="Resources\Paste_6520.png" />
+    <EmbeddedResource Include="Resources\Redo_16x.png" />
+    <EmbeddedResource Include="Resources\Saveall_6518.png" />
+    <EmbeddedResource Include="Resources\Save_6530.png" />
+    <EmbeddedResource Include="Resources\Undo_16x.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Eede.Infrastructure\Eede.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Actions\PullPictureAction.cs" />
-    <Compile Include="Actions\PushPictureAction.cs" />
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\CanvasBackgroundService.cs" />
-    <Compile Include="Settings\GlobalSetting.cs" />
-    <Compile Include="Ui\BoxSizeSettingDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Ui\BoxSizeSettingDialog.Designer.cs">
-      <DependentUpon>BoxSizeSettingDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\ColorPicker.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Ui\ColorPicker.designer.cs">
-      <DependentUpon>ColorPicker.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\ColorPickerBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Ui\ColorPickerBox.designer.cs">
-      <DependentUpon>ColorPickerBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\GradationSlider.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Ui\IDrawingArea.cs" />
-    <Compile Include="Ui\DrawableBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Ui\DrawableBox.designer.cs">
-      <DependentUpon>DrawableBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\PenSizeSetBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Ui\PenSizeSetter.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Ui\PenSizeSetter.designer.cs">
-      <DependentUpon>PenSizeSetter.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\PictureWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Ui\PictureWindow.Designer.cs">
-      <DependentUpon>PictureWindow.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\SizeSelectDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Ui\SizeSelectDialog.Designer.cs">
-      <DependentUpon>SizeSelectDialog.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <EmbeddedResource Include="Ui\BoxSizeSettingDialog.resx">
-      <DependentUpon>BoxSizeSettingDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Ui\ColorPicker.resx">
-      <DependentUpon>ColorPicker.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Ui\ColorPickerBox.resx">
-      <DependentUpon>ColorPickerBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Ui\DrawableBox.resx">
-      <DependentUpon>DrawableBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Ui\PenSizeSetter.resx">
-      <DependentUpon>PenSizeSetter.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Ui\PictureWindow.resx">
-      <DependentUpon>PictureWindow.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Ui\SizeSelectDialog.resx">
-      <DependentUpon>SizeSelectDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <None Include="Docs\spec.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="icons\mag1.bmp" />
-    <Content Include="icons\mag12.bmp" />
-    <Content Include="icons\mag2.bmp" />
-    <Content Include="icons\mag4.bmp" />
-    <Content Include="icons\mag6.bmp" />
-    <Content Include="icons\mag8.bmp" />
-    <Content Include="icons\unko.bmp" />
-    <Content Include="icons\viewalpha.bmp" />
-    <Content Include="icons\viewcolor.bmp" />
-    <Content Include="icons\viewmix.bmp" />
-    <Content Include="Resources\PaintFormBackGround.bmp" />
-    <None Include="Resources\InvisibleBackground.png" />
-    <None Include="Resources\Paste_6520.png" />
-    <None Include="Resources\Copy_6524.png" />
-    <None Include="Resources\Cut_6523.png" />
-    <None Include="Resources\Redo_16x.png" />
-    <None Include="Resources\Undo_16x.png" />
-    <None Include="Resources\Saveall_6518.png" />
-    <None Include="Resources\Save_6530.png" />
-    <None Include="Resources\Open_6529.png" />
-    <None Include="Resources\NewFile_6276.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.6.1 %28x86 および x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Eede.Application\Eede.Application.csproj">
-      <Project>{abbc3e52-383b-4a94-91a1-e6dcda3c019f}</Project>
-      <Name>Eede.Application</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Eede.Domain\Eede.Domain.csproj">
-      <Project>{00A5CB38-BF15-422E-8B32-A26E30CCC9DB}</Project>
-      <Name>Eede.Domain</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Eede.Infrastructure\Eede.Infrastructure.csproj">
-      <Project>{4e2689a4-9a26-4181-b3c4-eb04adb6905b}</Project>
-      <Name>Eede.Infrastructure</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Components\" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

@@ -206,14 +206,19 @@ namespace Eede.Ui
 
         private void canvas_MouseUp(object sender, MouseEventArgs e)
         {
-            using (var previous = PictureBuffer.Previous.Clone())
+            switch (e.Button)
             {
-                using (var result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(e.X, e.Y), IsShift()))
-                {
-                    UpdatePictureBuffer(result.PictureBuffer);
-                    DrawableArea = result.DrawableArea;
-                    Drew?.Invoke(this, new DrawEventArgs(previous, result.PictureBuffer.Previous));
-                }
+                case MouseButtons.Left:
+                    using (var previous = PictureBuffer.Previous.Clone())
+                    {
+                        using (var result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(e.X, e.Y), IsShift()))
+                        {
+                            UpdatePictureBuffer(result.PictureBuffer);
+                            DrawableArea = result.DrawableArea;
+                            Drew?.Invoke(this, new DrawEventArgs(previous, result.PictureBuffer.Previous));
+                        }
+                    }
+                    break;
             }
         }
 

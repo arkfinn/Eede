@@ -36,17 +36,18 @@
             // 
             // vGradationSlider1
             // 
-            this.vGradationSlider1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)));
+            this.vGradationSlider1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.vGradationSlider1.GradationColor = new System.Drawing.Color[] {
         System.Drawing.Color.Empty,
         System.Drawing.Color.Black};
             this.vGradationSlider1.GradientMode = System.Drawing.Drawing2D.LinearGradientMode.Vertical;
-            this.vGradationSlider1.Location = new System.Drawing.Point(3, 15);
+            this.vGradationSlider1.Location = new System.Drawing.Point(4, 19);
+            this.vGradationSlider1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.vGradationSlider1.Maximum = 255;
             this.vGradationSlider1.Minimum = 0;
             this.vGradationSlider1.Name = "vGradationSlider1";
-            this.vGradationSlider1.Size = new System.Drawing.Size(19, 101);
+            this.vGradationSlider1.Size = new System.Drawing.Size(22, 126);
             this.vGradationSlider1.TabIndex = 0;
             this.vGradationSlider1.Text = "vGradationSlider1";
             this.vGradationSlider1.Value = 255;
@@ -55,10 +56,11 @@
             // textBox1
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox1.Font = new System.Drawing.Font("MS UI Gothic", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.textBox1.Location = new System.Drawing.Point(0, 132);
+            this.textBox1.Font = new System.Drawing.Font("MS UI Gothic", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.textBox1.Location = new System.Drawing.Point(0, 165);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(21, 17);
+            this.textBox1.Size = new System.Drawing.Size(24, 17);
             this.textBox1.TabIndex = 1;
             this.textBox1.Text = "0";
             this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -67,10 +69,11 @@
             // 
             // button1
             // 
-            this.button1.Font = new System.Drawing.Font("MS UI Gothic", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.button1.Font = new System.Drawing.Font("MS UI Gothic", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.button1.Location = new System.Drawing.Point(1, 0);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(17, 17);
+            this.button1.Size = new System.Drawing.Size(20, 21);
             this.button1.TabIndex = 2;
             this.button1.Text = "▲";
             this.button1.UseVisualStyleBackColor = true;
@@ -79,10 +82,11 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button2.Font = new System.Drawing.Font("MS UI Gothic", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.button2.Location = new System.Drawing.Point(1, 115);
+            this.button2.Font = new System.Drawing.Font("MS UI Gothic", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.button2.Location = new System.Drawing.Point(1, 144);
+            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(17, 17);
+            this.button2.Size = new System.Drawing.Size(20, 21);
             this.button2.TabIndex = 3;
             this.button2.Text = "▼";
             this.button2.UseVisualStyleBackColor = true;
@@ -90,14 +94,15 @@
             // 
             // ColorPickerBox
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.vGradationSlider1);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "ColorPickerBox";
-            this.Size = new System.Drawing.Size(23, 150);
+            this.Size = new System.Drawing.Size(27, 188);
             this.ResumeLayout(false);
             this.PerformLayout();
 

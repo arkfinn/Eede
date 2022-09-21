@@ -56,17 +56,17 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.penSizeSetter1 = new Eede.Ui.PenSizeSetter();
+            this.paintableBox1 = new Eede.Ui.DrawableBox();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStrip3 = new System.Windows.Forms.ToolStrip();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.alphaTransferButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.colorPicker1 = new Eede.Ui.ColorPicker();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.penSizeSetter1 = new Eede.Ui.PenSizeSetter();
-            this.paintableBox1 = new Eede.Ui.DrawableBox();
-            this.colorPicker1 = new Eede.Ui.ColorPicker();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -110,7 +110,7 @@
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip1.Size = new System.Drawing.Size(944, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1065, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             this.toolStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip1_ItemClicked);
@@ -329,14 +329,16 @@
             this.panel1.Controls.Add(this.splitContainer1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(0, 25);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(564, 598);
+            this.panel1.Size = new System.Drawing.Size(658, 641);
             this.panel1.TabIndex = 2;
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -349,8 +351,9 @@
             this.splitContainer1.Panel2.Controls.Add(this.toolStrip3);
             this.splitContainer1.Panel2.Controls.Add(this.colorPicker1);
             this.splitContainer1.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel2_Paint_1);
-            this.splitContainer1.Size = new System.Drawing.Size(564, 598);
-            this.splitContainer1.SplitterDistance = 402;
+            this.splitContainer1.Size = new System.Drawing.Size(658, 641);
+            this.splitContainer1.SplitterDistance = 430;
+            this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 0;
             // 
             // splitContainer2
@@ -358,6 +361,7 @@
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.splitContainer2.Name = "splitContainer2";
             // 
             // splitContainer2.Panel1
@@ -368,18 +372,45 @@
             // 
             this.splitContainer2.Panel2.Controls.Add(this.paintableBox1);
             this.splitContainer2.Panel2.Controls.Add(this.toolStrip2);
-            this.splitContainer2.Size = new System.Drawing.Size(564, 402);
+            this.splitContainer2.Size = new System.Drawing.Size(658, 430);
             this.splitContainer2.SplitterDistance = 110;
+            this.splitContainer2.SplitterWidth = 5;
             this.splitContainer2.TabIndex = 0;
+            // 
+            // penSizeSetter1
+            // 
+            this.penSizeSetter1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.penSizeSetter1.Location = new System.Drawing.Point(7, 354);
+            this.penSizeSetter1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.penSizeSetter1.MinimumSize = new System.Drawing.Size(54, 65);
+            this.penSizeSetter1.Name = "penSizeSetter1";
+            this.penSizeSetter1.PenSize = 1;
+            this.penSizeSetter1.Size = new System.Drawing.Size(90, 76);
+            this.penSizeSetter1.TabIndex = 0;
+            this.penSizeSetter1.PenSizeChanged += new System.EventHandler(this.penSizeSetter1_PenSizeChanged);
+            // 
+            // paintableBox1
+            // 
+            this.paintableBox1.AutoScroll = true;
+            this.paintableBox1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("paintableBox1.BackgroundImage")));
+            this.paintableBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.paintableBox1.Location = new System.Drawing.Point(0, 0);
+            this.paintableBox1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.paintableBox1.Name = "paintableBox1";
+            this.paintableBox1.PenColor = System.Drawing.Color.Black;
+            this.paintableBox1.Size = new System.Drawing.Size(517, 430);
+            this.paintableBox1.TabIndex = 1;
+            this.paintableBox1.ColorChanged += new System.EventHandler(this.paintableBox1_ColorChanged);
+            this.paintableBox1.Drew += new System.EventHandler<Eede.Application.Drawings.DrawEventArgs>(this.paintableBox1_Drew);
             // 
             // toolStrip2
             // 
             this.toolStrip2.Dock = System.Windows.Forms.DockStyle.Right;
             this.toolStrip2.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip2.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
-            this.toolStrip2.Location = new System.Drawing.Point(424, 0);
+            this.toolStrip2.Location = new System.Drawing.Point(517, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(26, 402);
+            this.toolStrip2.Size = new System.Drawing.Size(26, 430);
             this.toolStrip2.TabIndex = 0;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -391,9 +422,9 @@
             this.toolStripSeparator6,
             this.alphaTransferButton,
             this.toolStripSeparator7});
-            this.toolStrip3.Location = new System.Drawing.Point(540, 0);
+            this.toolStrip3.Location = new System.Drawing.Point(634, 0);
             this.toolStrip3.Name = "toolStrip3";
-            this.toolStrip3.Size = new System.Drawing.Size(24, 192);
+            this.toolStrip3.Size = new System.Drawing.Size(24, 206);
             this.toolStrip3.TabIndex = 1;
             this.toolStrip3.Text = "toolStrip3";
             // 
@@ -418,11 +449,21 @@
             this.toolStripSeparator7.Name = "toolStripSeparator7";
             this.toolStripSeparator7.Size = new System.Drawing.Size(21, 6);
             // 
+            // colorPicker1
+            // 
+            this.colorPicker1.Location = new System.Drawing.Point(7, 2);
+            this.colorPicker1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.colorPicker1.Name = "colorPicker1";
+            this.colorPicker1.Size = new System.Drawing.Size(106, 220);
+            this.colorPicker1.TabIndex = 0;
+            this.colorPicker1.ColorChanged += new System.EventHandler(this.colorPicker1_ColorChanged);
+            // 
             // splitter1
             // 
-            this.splitter1.Location = new System.Drawing.Point(564, 25);
+            this.splitter1.Location = new System.Drawing.Point(658, 25);
+            this.splitter1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 598);
+            this.splitter1.Size = new System.Drawing.Size(4, 641);
             this.splitter1.TabIndex = 3;
             this.splitter1.TabStop = false;
             // 
@@ -435,48 +476,17 @@
             // 
             this.openFileDialog1.Filter = "All Files|*.bmp;*.png|bmp|*.bmp|png|*.png";
             // 
-            // penSizeSetter1
-            // 
-            this.penSizeSetter1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.penSizeSetter1.Location = new System.Drawing.Point(6, 341);
-            this.penSizeSetter1.MinimumSize = new System.Drawing.Size(46, 52);
-            this.penSizeSetter1.Name = "penSizeSetter1";
-            this.penSizeSetter1.PenSize = 1;
-            this.penSizeSetter1.Size = new System.Drawing.Size(77, 61);
-            this.penSizeSetter1.TabIndex = 0;
-            this.penSizeSetter1.PenSizeChanged += new System.EventHandler(this.penSizeSetter1_PenSizeChanged);
-            // 
-            // paintableBox1
-            // 
-            this.paintableBox1.AutoScroll = true;
-            this.paintableBox1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("paintableBox1.BackgroundImage")));
-            this.paintableBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.paintableBox1.Location = new System.Drawing.Point(0, 0);
-            this.paintableBox1.Name = "paintableBox1";
-            this.paintableBox1.PenColor = System.Drawing.Color.Black;
-            this.paintableBox1.Size = new System.Drawing.Size(424, 402);
-            this.paintableBox1.TabIndex = 1;
-            this.paintableBox1.ColorChanged += new System.EventHandler(this.paintableBox1_ColorChanged);
-            this.paintableBox1.Drew += new System.EventHandler<Eede.Application.Drawings.DrawEventArgs>(this.paintableBox1_Drew);
-            // 
-            // colorPicker1
-            // 
-            this.colorPicker1.Location = new System.Drawing.Point(6, 2);
-            this.colorPicker1.Name = "colorPicker1";
-            this.colorPicker1.Size = new System.Drawing.Size(91, 176);
-            this.colorPicker1.TabIndex = 0;
-            this.colorPicker1.ColorChanged += new System.EventHandler(this.colorPicker1_ColorChanged);
-            // 
             // Form1
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(944, 623);
+            this.ClientSize = new System.Drawing.Size(1065, 666);
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.toolStrip1);
             this.IsMdiContainer = true;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.Text = "Eede";
             this.Load += new System.EventHandler(this.Form1_Load);

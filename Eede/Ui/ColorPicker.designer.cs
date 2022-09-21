@@ -39,9 +39,10 @@
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.Location = new System.Drawing.Point(0, 150);
+            this.button1.Location = new System.Drawing.Point(0, 201);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(85, 23);
+            this.button1.Size = new System.Drawing.Size(99, 29);
             this.button1.TabIndex = 4;
             this.button1.Text = "A   R   G   B";
             this.button1.UseVisualStyleBackColor = true;
@@ -54,10 +55,11 @@
             this.pickerB.GradationColor = new System.Drawing.Color[] {
         System.Drawing.Color.Empty,
         System.Drawing.Color.Black};
-            this.pickerB.Location = new System.Drawing.Point(63, 0);
+            this.pickerB.Location = new System.Drawing.Point(74, 0);
+            this.pickerB.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.pickerB.Maximum = 255;
             this.pickerB.Name = "pickerB";
-            this.pickerB.Size = new System.Drawing.Size(23, 150);
+            this.pickerB.Size = new System.Drawing.Size(27, 201);
             this.pickerB.TabIndex = 2;
             this.pickerB.Value = 0;
             this.pickerB.ValueChanged += new System.EventHandler(this.picker_ValueChanged);
@@ -69,10 +71,11 @@
             this.pickerG.GradationColor = new System.Drawing.Color[] {
         System.Drawing.Color.Empty,
         System.Drawing.Color.Black};
-            this.pickerG.Location = new System.Drawing.Point(42, 0);
+            this.pickerG.Location = new System.Drawing.Point(49, 0);
+            this.pickerG.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.pickerG.Maximum = 255;
             this.pickerG.Name = "pickerG";
-            this.pickerG.Size = new System.Drawing.Size(23, 150);
+            this.pickerG.Size = new System.Drawing.Size(27, 201);
             this.pickerG.TabIndex = 1;
             this.pickerG.Value = 0;
             this.pickerG.ValueChanged += new System.EventHandler(this.picker_ValueChanged);
@@ -84,10 +87,11 @@
             this.pickerR.GradationColor = new System.Drawing.Color[] {
         System.Drawing.Color.Empty,
         System.Drawing.Color.Black};
-            this.pickerR.Location = new System.Drawing.Point(21, 0);
+            this.pickerR.Location = new System.Drawing.Point(24, 0);
+            this.pickerR.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.pickerR.Maximum = 255;
             this.pickerR.Name = "pickerR";
-            this.pickerR.Size = new System.Drawing.Size(23, 150);
+            this.pickerR.Size = new System.Drawing.Size(27, 201);
             this.pickerR.TabIndex = 0;
             this.pickerR.Value = 0;
             this.pickerR.ValueChanged += new System.EventHandler(this.picker_ValueChanged);
@@ -100,24 +104,26 @@
         System.Drawing.Color.Empty,
         System.Drawing.Color.Black};
             this.pickerA.Location = new System.Drawing.Point(0, 0);
+            this.pickerA.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.pickerA.Maximum = 255;
             this.pickerA.Name = "pickerA";
-            this.pickerA.Size = new System.Drawing.Size(23, 150);
+            this.pickerA.Size = new System.Drawing.Size(27, 201);
             this.pickerA.TabIndex = 3;
             this.pickerA.Value = 255;
             this.pickerA.ValueChanged += new System.EventHandler(this.picker_ValueChanged);
             // 
             // ColorPicker
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.button1);
             this.Controls.Add(this.pickerB);
             this.Controls.Add(this.pickerG);
             this.Controls.Add(this.pickerR);
             this.Controls.Add(this.pickerA);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "ColorPicker";
-            this.Size = new System.Drawing.Size(91, 176);
+            this.Size = new System.Drawing.Size(106, 233);
             this.Load += new System.EventHandler(this.ColorPicker_Load);
             this.ResumeLayout(false);
 

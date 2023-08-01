@@ -5,10 +5,14 @@ using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Systems;
+using Eede.Infrastructure.Pictures;
 using Eede.Settings;
 using Eede.Ui;
 using System;
+using System.Drawing.Imaging;
+using System.Drawing;
 using System.Windows.Forms;
+using Eede.Application.UseCase.Pictures;
 
 namespace Eede
 {
@@ -50,8 +54,9 @@ namespace Eede
                 {
                     return;
                 }
-                var form = new PictureWindow(dialog.PictureSize, paintableBox1);
-                AddChildWindow(form);
+                var size = dialog.PictureSize;
+                // TODO: pictureがDisposeされないが、別の修正でそもそもpictureからIDisposableを取る
+                AddChildWindow(new CreatePictureUseCase().Execute(size));
             }
         }
 
@@ -61,15 +66,17 @@ namespace Eede
             {
                 return;
             }
-            var filename = new FilePath(openFileDialog1.FileName);
-            OpenPicture(filename);
+            OpenPicture(new FilePath(openFileDialog1.FileName));
         }
 
         private void OpenPicture(FilePath filename)
         {
             try
             {
-                AddChildWindow(new PictureWindow(filename, paintableBox1));
+                using (var picture = new PictureFileReader(filename).Read())
+                {
+                    AddChildWindow(new PictureFile(filename, picture));
+                }
             }
             catch (Exception)
             {
@@ -77,8 +84,9 @@ namespace Eede
             }
         }
 
-        private void AddChildWindow(PictureWindow form)
+        private void AddChildWindow(PictureFile file)
         {
+            var form = new PictureWindow(file.FilePath, file.Picture, paintableBox1);
             form.MdiParent = this;
             form.FormClosed += new FormClosedEventHandler(ChildFormClosed);
             form.PicturePulled += new EventHandler<PicturePulledEventArgs>(ChildFormPicturePulled);
@@ -328,8 +336,8 @@ namespace Eede
 
         private void paintableBox1_Drew(object sender, Application.Drawings.DrawEventArgs e)
         {
-                var action = new DrawAction(paintableBox1, e.PreviousPicture, e.NowPicture);
-                AddUndoItem(action);
+            var action = new DrawAction(paintableBox1, e.PreviousPicture, e.NowPicture);
+            AddUndoItem(action);
         }
     }
 }

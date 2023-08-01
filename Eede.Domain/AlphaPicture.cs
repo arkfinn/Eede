@@ -182,7 +182,7 @@ namespace Eede
         {
             var tmp = new Bitmap(bmp.Width, bmp.Height);
             var d = new DirectImageBlender();
-            d.Blend(bmp, tmp);
+            //d.Blend(bmp, tmp);
             return tmp;
         }
 
@@ -196,7 +196,7 @@ namespace Eede
                 {
                     action(g);
                 }
-                blender.Blend(tmp, newBmp);
+                //blender.Blend(tmp, newBmp);
                 return new AlphaPicture(newBmp);
             }
         }

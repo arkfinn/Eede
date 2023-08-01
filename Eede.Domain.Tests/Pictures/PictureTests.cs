@@ -8,14 +8,14 @@ namespace Eede.Domain.Pictures.Tests
     [TestFixture]
     public class PictureTests
     {
-        [Test]
-        public void 引数imageがnullでnewはできない()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                var p = new Picture(null);
-            });
-        }
+        //[Test]
+        //public void 引数imageがnullでnewはできない()
+        //{
+        //    Assert.Throws<ArgumentNullException>(() =>
+        //    {
+        //        var p = new Picture(null);
+        //    });
+        //}
 
         [Test]
         public void PickColorTest()

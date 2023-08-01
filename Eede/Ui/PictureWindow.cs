@@ -28,51 +28,19 @@ namespace Eede.Ui
             }
             Disposed += (sender, args) =>
             {
-                if (PictureBuffer != null)
-                {
-                    PictureBuffer.Dispose();
-                }
+                PictureBuffer?.Dispose();
             };
         }
 
-        public PictureWindow(Size size, IDrawingArea d)
-        {
-            InitializeComponent();
-            var bmp = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppArgb);
-            using (var g = Graphics.FromImage(bmp))
-            {
-                g.FillRectangle(Brushes.White, new Rectangle(new Point(0, 0), size));
-            }
-            UpdateSaveTo(new FilePath(""));
-            using (var picture = new Picture(bmp))
-            {
-                SetupPictureBuffer(picture);
-            }
-            DrawingArea = d;
-            Disposed += (sender, args) =>
-            {
-                if (PictureBuffer != null)
-                {
-                    PictureBuffer.Dispose();
-                }
-            };
-        }
-
-        public PictureWindow(FilePath filename, IDrawingArea d)
+        public PictureWindow(FilePath filename, Picture picture, IDrawingArea d)
         {
             InitializeComponent();
             UpdateSaveTo(filename);
-            using (var picture = new PictureFileReader(filename).Read())
-            {
-                SetupPictureBuffer(picture);
-            }
+            SetupPictureBuffer(picture);
             DrawingArea = d;
             Disposed += (sender, args) =>
             {
-                if (PictureBuffer != null)
-                {
-                    PictureBuffer.Dispose();
-                }
+                PictureBuffer?.Dispose();
             };
         }
 

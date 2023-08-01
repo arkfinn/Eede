@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Pictures\PictureFile.cs~RF38f2ef46.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Eede.Domain\Eede.Domain.csproj" />
   </ItemGroup>
 

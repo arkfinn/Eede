@@ -18,7 +18,8 @@ namespace Eede.Domain.Tests.ImageBlenders
         [Test]
         public void TestBlend()
         {
-            var src = new Bitmap(@"ImageBlenders\test\blend.png");
+            var srcBmp = new Bitmap(@"ImageBlenders\test\blend.png");
+            var src = new Picture(srcBmp);
             var dst = new Bitmap(@"ImageBlenders\test\base.png");
 
             var blender = new RGBOnlyImageBlender();

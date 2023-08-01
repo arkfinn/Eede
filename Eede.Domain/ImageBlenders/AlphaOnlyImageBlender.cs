@@ -1,4 +1,5 @@
-﻿using Eede.Domain.Positions;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Positions;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -7,52 +8,31 @@ namespace Eede.Domain.ImageBlenders
 {
     public class AlphaOnlyImageBlender : IImageBlender
     {
-        public void Blend(Bitmap from, Bitmap to)
+        public PictureData Blend(PictureData from, PictureData to)
         {
-            Blend(from, to, new Position(0, 0));
+            return Blend(from, to, new Position(0, 0));
         }
 
-        public void Blend(Bitmap from, Bitmap to, Position toPosition)
+        public PictureData Blend(PictureData from, PictureData to, Position toPosition)
         {
-            BitmapData destBitmapData = to.LockBits(
-                new Rectangle(Point.Empty, to.Size),
-                ImageLockMode.WriteOnly, to.PixelFormat);
-            try
+            var dest = to;
+            var destPixels = dest.ImageData.Clone() as byte[];
+
+            var src = from;
+            // 変換対象のカラー画像の情報をバイト列へ書き出す
+
+            var maxY = Math.Min(toPosition.Y + src.Height, dest.Height);
+            var maxX = Math.Min(toPosition.X + src.Width, dest.Width);
+
+            for (int y = 0; y < maxY; y++)
             {
-                BitmapData srcBitmapData = from.LockBits(
-                        new Rectangle(Point.Empty, from.Size),
-                        ImageLockMode.WriteOnly, from.PixelFormat);
-                try
+                for (int x = 0; x < maxX; x++)
                 {
-                    // 変換対象のカラー画像の情報をバイト列へ書き出す
-                    byte[] srcPixels = new byte[srcBitmapData.Stride * from.Height];
-                    System.Runtime.InteropServices.Marshal.Copy(srcBitmapData.Scan0, srcPixels, 0, srcPixels.Length);
-
-                    byte[] destPixels = new byte[destBitmapData.Stride * destBitmapData.Height];
-                    System.Runtime.InteropServices.Marshal.Copy(destBitmapData.Scan0, destPixels, 0, destPixels.Length);
-
-                    var maxY = Math.Min(toPosition.Y + from.Height, destBitmapData.Height);
-                    var maxX = Math.Min(toPosition.X + from.Width, destBitmapData.Width);
-
-                    for (int y = 0; y < maxY; y++)
-                    {
-                        for (int x = 0; x < maxX; x++)
-                        {
-                            int pos = x * 4 + destBitmapData.Stride * y;
-                            destPixels[pos + 3] = srcPixels[pos + 3];
-                        }
-                    }
-                    System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, destBitmapData.Scan0, destPixels.Length);
-                }
-                finally
-                {
-                    from.UnlockBits(srcBitmapData);
+                    int pos = x * 4 + dest.Stride * y;
+                    destPixels[pos + 3] = src.ImageData[pos + 3];
                 }
             }
-            finally
-            {
-                to.UnlockBits(destBitmapData);
-            }
+            return new PictureData(dest.Size, destPixels);
         }
     }
 }

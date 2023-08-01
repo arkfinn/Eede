@@ -3,6 +3,8 @@ using Eede.Domain.ImageTransfers;
 using Eede.Domain.Positions;
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Xml.Serialization;
 
 namespace Eede.Domain.Pictures
 {
@@ -31,13 +33,18 @@ namespace Eede.Domain.Pictures
             Buffer = new Bitmap(size.Width, size.Height);
         }
 
+        public Picture(PictureData data)
+        {
+            Buffer = PictureData.CreateBitmap(data);
+        }
+
         private Bitmap CreateClone(Bitmap source)
         {
             // new Bitmap(source)とすると、alpha=0のRGB情報が失われるため、手動で合成し直している。
-            var tmp = new Bitmap(source.Width, source.Height);
+            using var tmp = new Bitmap(source.Width, source.Height);
             var d = new DirectImageBlender();
-            d.Blend(source, tmp);
-            return tmp;
+            var src = PictureData.CreateBuffer(source);
+            return PictureData.CreateBitmap(d.Blend(src, PictureData.CreateBuffer(tmp)));
         }
 
         public Picture Clone()
@@ -45,7 +52,17 @@ namespace Eede.Domain.Pictures
             return new Picture(Buffer);
         }
 
-        private readonly Bitmap Buffer;
+        private Bitmap buffer;
+        private Bitmap Buffer
+        {
+            get { return buffer; }
+            set
+            {
+                buffer = value;
+                BufferData = PictureData.CreateBuffer(buffer);
+            }
+        }
+        private PictureData BufferData;
 
         public Bitmap CutOut(Rectangle rect)
         {
@@ -54,7 +71,7 @@ namespace Eede.Domain.Pictures
 
         public Image ToImage()
         {
-            return new Bitmap(Buffer);
+            return PictureData.CreateBitmap(BufferData);
         }
 
         public Size Size => Buffer.Size;
@@ -66,7 +83,7 @@ namespace Eede.Domain.Pictures
 
         public void Transfer(IImageTransfer transfer, Graphics g, Size size)
         {
-            transfer.Transfer(Buffer, g, size);
+            transfer.Transfer(PictureData.CreateBitmap(BufferData), g, size);
         }
 
         /// <summary>
@@ -76,22 +93,18 @@ namespace Eede.Domain.Pictures
         /// <param name="src"></param>
         /// <param name="toPosition"></param>
         /// <returns></returns>
-        public Picture Blend(IImageBlender blender, Bitmap src, Position toPosition)
-        {
-            using (var tmp = CreateClone(Buffer))
-            {
-                blender.Blend(src, tmp, toPosition);
-                return new Picture(tmp);
-            }
-        }
+        //public Picture Blend(IImageBlender blender, Bitmap src, Position toPosition)
+        //{
+        //    using (var tmp = CreateClone(Buffer))
+        //    {
+        //        blender.Blend(src, tmp, toPosition);
+        //        return new Picture(tmp);
+        //    }
+        //}
 
         public Picture Blend(IImageBlender blender, Picture src, Position toPosition)
         {
-            using (var tmp = CreateClone(Buffer))
-            {
-                blender.Blend(src.Buffer, tmp, toPosition);
-                return new Picture(tmp);
-            }
+            return new Picture(blender.Blend(src.BufferData, BufferData, toPosition));
         }
 
         public Picture Draw(Action<Graphics> action, IImageBlender blender)
@@ -103,8 +116,8 @@ namespace Eede.Domain.Pictures
                 {
                     action(g);
                 }
-                blender.Blend(tmp, newBmp);
-                return new Picture(newBmp);
+                var src = PictureData.CreateBuffer(tmp);
+                return new Picture(blender.Blend(src, PictureData.CreateBuffer(newBmp)));
             }
         }
 

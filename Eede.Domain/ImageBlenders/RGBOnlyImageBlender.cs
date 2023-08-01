@@ -1,8 +1,6 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 
 namespace Eede.Domain.ImageBlenders
 {
@@ -15,26 +13,25 @@ namespace Eede.Domain.ImageBlenders
 
         public PictureData Blend(PictureData from, PictureData to, Position toPosition)
         {
-            var dest = to;
-            var destPixels = dest.ImageData.Clone() as byte[];
+            var toPixels = to.ImageData.Clone() as byte[];
 
-            var src = from;
+            var maxY = Math.Min(toPosition.Y + from.Height, to.Height);
+            var maxX = Math.Min(toPosition.X + from.Width, to.Width);
 
-            var maxY = Math.Min(toPosition.Y + src.Height, dest.Height);
-            var maxX = Math.Min(toPosition.X + src.Width, dest.Width);
-
-            for (int y = 0; y < maxY; y++)
+            for (int y = toPosition.Y; y < maxY; y++)
             {
-                for (int x = 0; x < maxX; x++)
+                for (int x = toPosition.X; x < maxX; x++)
                 {
-                    int pos = x * 4 + dest.Stride * y;
-                    destPixels[pos + 0] = src.ImageData[pos + 0];
-                    destPixels[pos + 1] = src.ImageData[pos + 1];
-                    destPixels[pos + 2] = src.ImageData[pos + 2];
+                    int toPos = x * 4 + to.Stride * y;
+                    int fromPos = (x - toPosition.X) * 4 + from.Stride * (y - toPosition.Y);
+
+                    toPixels[toPos + 0] = from.ImageData[fromPos + 0];
+                    toPixels[toPos + 1] = from.ImageData[fromPos + 1];
+                    toPixels[toPos + 2] = from.ImageData[fromPos + 2];
                 }
             }
 
-            return new PictureData(dest.Size, destPixels);
+            return new PictureData(to.Size, toPixels);
         }
     }
 }

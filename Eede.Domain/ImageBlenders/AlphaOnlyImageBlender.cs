@@ -13,7 +13,7 @@ namespace Eede.Domain.ImageBlenders
 
         public PictureData Blend(PictureData from, PictureData to, Position toPosition)
         {
-            var toPixels = to.ImageData.Clone() as byte[];
+            var toPixels = to.CloneImage();
 
             var maxY = Math.Min(toPosition.Y + from.Height, to.Height);
             var maxX = Math.Min(toPosition.X + from.Width, to.Width);
@@ -25,10 +25,10 @@ namespace Eede.Domain.ImageBlenders
                     int toPos = x * 4 + to.Stride * y;
                     int fromPos = (x - toPosition.X) * 4 + from.Stride * (y - toPosition.Y);
 
-                    toPixels[toPos + 3] = from.ImageData[fromPos + 3];
+                    toPixels[toPos + 3] = from[fromPos + 3];
                 }
             }
-            return new PictureData(to.Size, toPixels);
+            return PictureData.Create(to.Size, toPixels);
         }
     }
 }

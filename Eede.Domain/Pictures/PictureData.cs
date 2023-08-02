@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Eede.Domain.Pictures
 {
@@ -26,7 +22,7 @@ namespace Eede.Domain.Pictures
             byte[] imageData = new byte[dataSize];
             System.Runtime.InteropServices.Marshal.Copy(scan0, imageData, 0, dataSize);
             bitmap.UnlockBits(bmpData);
-            return new PictureData(new PictureSize(width, height), imageData);
+            return Create(new PictureSize(width, height), imageData);
         }
 
         public static Bitmap CreateBitmap(PictureData data)
@@ -47,17 +43,23 @@ namespace Eede.Domain.Pictures
             }
         }
 
-        public readonly PictureSize Size;
-        public readonly byte[] ImageData;
-        public readonly int Stride;
-
-        public PictureData(PictureSize size, byte[] imageData)
+        public static PictureData Create(PictureSize size, byte[] imageData)
         {
             var stride = size.Width * 4;
             if (stride * size.Height != imageData.Length)
             {
                 throw new ArgumentException($"(width:{size.Width}, height:{size.Height}) != length:{imageData.Length}");
             }
+
+            return new PictureData(size, imageData, stride);
+        }
+
+        public readonly PictureSize Size;
+        private readonly byte[] ImageData;
+        public readonly int Stride;
+
+        private PictureData(PictureSize size, byte[] imageData, int stride)
+        {
             Size = size;
             ImageData = imageData;
             Stride = stride;
@@ -66,5 +68,15 @@ namespace Eede.Domain.Pictures
         public int Width => Size.Width;
         public int Height => Size.Height;
         public int Length => ImageData.Length;
+
+        public byte this[int i]
+        {
+            get { return ImageData[i]; }
+        }
+
+        public byte[] CloneImage()
+        {
+            return ImageData.Clone() as byte[];
+        }
     }
 }

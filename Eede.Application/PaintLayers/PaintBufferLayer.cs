@@ -22,7 +22,7 @@ namespace Eede.Application.PaintLayers
         public void Paint(Graphics destination)
         {
             if (Source == null) return;
-            Source.Transfer(ImageTransfer, destination, PaintSize.ToSize());
+            Source.Transfer(ImageTransfer, destination, PaintSize);
         }
     }
 }

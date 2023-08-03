@@ -1,10 +1,9 @@
 ﻿using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Positions;
+using Eede.Domain.Sizes;
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Xml.Serialization;
 
 namespace Eede.Domain.Pictures
 {
@@ -78,10 +77,10 @@ namespace Eede.Domain.Pictures
 
         public void Transfer(IImageTransfer transfer, Graphics g)
         {
-            Transfer(transfer, g, Buffer.Size);
+            Transfer(transfer, g, new MagnifiedSize(Buffer.Size, new Scales.Magnification(1)));
         }
 
-        public void Transfer(IImageTransfer transfer, Graphics g, Size size)
+        public void Transfer(IImageTransfer transfer, Graphics g, MagnifiedSize size)
         {
             transfer.Transfer(PictureData.CreateBitmap(BufferData), g, size);
         }

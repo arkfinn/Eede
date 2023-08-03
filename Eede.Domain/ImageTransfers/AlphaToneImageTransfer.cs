@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using Eede.Domain.Sizes;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
@@ -6,7 +7,7 @@ namespace Eede.Domain.ImageTransfers
 {
     public class AlphaToneImageTransfer : IImageTransfer
     {
-        public void Transfer(Bitmap from, Graphics to, Size size)
+        public void Transfer(Bitmap from, Graphics to, MagnifiedSize size)
         {
             var ia = new ImageAttributes();
             ia.SetColorMatrix(new ColorMatrix(new float[][]{

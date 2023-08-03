@@ -19,14 +19,14 @@ namespace Eede.Domain.ImageTransfers
         public void ARGB値をコピー()
         {
             var src = new Bitmap(@"ImageTransfers\test\blend.png");
-            var dst = new Bitmap(src.Width, src.Height);
+            var dst = new Bitmap(src.Width * 2, src.Height * 2);
 
             var transfer = new DirectImageTransfer();
             var picture = new Picture(src);
 
             using var graphics = Graphics.FromImage(dst);
             graphics.FillRectangle(Brushes.Black, new Rectangle(new Point(0, 0), dst.Size));
-            picture.Transfer(transfer, graphics);
+            picture.Transfer(transfer, graphics, new Sizes.MagnifiedSize(src.Size, new Scales.Magnification(2)));
 
             // dst.Save(@"ImageTransfers\test\direct.png", ImageFormat.Png);
             var expected = new Bitmap(@"ImageTransfers\test\direct.png");

@@ -19,15 +19,16 @@ namespace Eede.Domain.ImageTransfers
         public void RGB値のみをコピー()
         {
             var src = new Bitmap(@"ImageTransfers\test\blend.png");
-            var dst = new Bitmap(src.Width, src.Height);
+            var dst = new Bitmap(src.Width * 2, src.Height * 2);
 
             var transfer = new RGBToneImageTransfer();
             var picture = new Picture(src);
 
             using var graphics = Graphics.FromImage(dst);
             graphics.FillRectangle(Brushes.Black, new Rectangle(new Point(0, 0), dst.Size));
-            picture.Transfer(transfer, graphics);
+            picture.Transfer(transfer, graphics, new Sizes.MagnifiedSize(src.Size, new Scales.Magnification(2)));
 
+            // dst.Save(@"ImageTransfers\test\rgb.png", ImageFormat.Png);
             var expected = new Bitmap(@"ImageTransfers\test\rgb.png");
             Assert.IsTrue(ImageComparer.Equals(dst, expected));
         }

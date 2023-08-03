@@ -1,11 +1,12 @@
-﻿using System.Drawing;
+﻿using Eede.Domain.Sizes;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 
 namespace Eede.Domain.ImageTransfers
 {
     public class DirectImageTransfer : IImageTransfer
     {
-        public void Transfer(Bitmap from, Graphics to, Size size)
+        public void Transfer(Bitmap from, Graphics to, MagnifiedSize size)
         {
             to.PixelOffsetMode = PixelOffsetMode.Half;
             to.InterpolationMode = InterpolationMode.NearestNeighbor;

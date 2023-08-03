@@ -29,7 +29,7 @@ namespace Eede.Application.PaintLayers
             var drawer = new Drawer(Source, PenStyle);
             using (var cursor = drawer.DrawPoint(Position))
             {
-                cursor.Transfer(ImageTransfer, destination, PaintSize.ToSize());
+                cursor.Transfer(ImageTransfer, destination, PaintSize);
             }
         }
     }

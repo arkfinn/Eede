@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Eede.Domain.Tests.ImageBlenders
+namespace Eede.Domain.ImageBlenders
 {
     [TestFixture]
     public class RGBOnlyImageBlenderTests

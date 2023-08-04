@@ -8,6 +8,7 @@ using Eede.Services;
 using Eede.Settings;
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 
@@ -118,7 +119,11 @@ namespace Eede.Ui
             CanvasBackgroundService.Instance.PaintBackground(g);
 
             var transfer = new DirectImageTransfer();
-            PictureBuffer.Transfer(transfer, g);
+            var data = PictureBuffer.Transfer(transfer);
+            using var dest = PictureData.CreateBitmap(data);
+            g.PixelOffsetMode = PixelOffsetMode.Half;
+            g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.DrawImage(dest, new Point(0, 0));
             DrawCursor(g);
         }
 

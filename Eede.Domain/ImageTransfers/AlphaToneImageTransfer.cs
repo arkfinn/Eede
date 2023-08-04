@@ -1,28 +1,45 @@
-﻿using Eede.Domain.Sizes;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Sizes;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 
 namespace Eede.Domain.ImageTransfers
 {
     public class AlphaToneImageTransfer : IImageTransfer
     {
-        public void Transfer(Bitmap from, Graphics to, MagnifiedSize size)
+        public PictureData Transfer(Bitmap from, MagnifiedSize size)
         {
-            var ia = new ImageAttributes();
-            ia.SetColorMatrix(new ColorMatrix(new float[][]{
-                new float[]{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-                new float[]{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-                new float[]{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-                new float[]{ 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
-                new float[]{ 0.0f, 0.0f, 0.0f, 255.0f, 1.0f}
-            }));
+            var src = PictureData.CreateBuffer(from);
 
-            to.PixelOffsetMode = PixelOffsetMode.Half;
-            to.InterpolationMode = InterpolationMode.NearestNeighbor;
-            to.DrawImage(from,
-                new Rectangle(0, 0, size.Width, size.Height),
-                0, 0, from.Width, from.Height, GraphicsUnit.Pixel, ia);
+            var srcPixels = src;
+            var toStride = size.Magnification.Magnify(src.Stride);
+            byte[] destPixels = new byte[toStride * size.Height];
+            int destWidth = size.Width;
+            int destHeight = size.Height;
+
+            for (int y = 0; y < destHeight; y++)
+            {
+                int srcOffset = src.Stride * size.Magnification.Minify(y);
+                int destOffset = y * toStride;
+
+                for (int x = 0; x < destWidth; x++)
+                {
+                    int pos = x * 4 + destOffset;
+                    int srcX = size.Magnification.Minify(x);
+                    int fromPos = srcX * 4 + srcOffset;
+                    var alpha = srcPixels[fromPos + 3];
+
+                    destPixels[pos + 0] = alpha;
+                    destPixels[pos + 1] = alpha;
+                    destPixels[pos + 2] = alpha;
+                    destPixels[pos + 3] = 255;
+                }
+            }
+            return PictureData.Create(new PictureSize(size.Width, size.Height), destPixels);
+            //PictureDataをreturnするようにしたい
+            //using var dest = PictureData.CreateBitmap(PictureData.Create(new PictureSize(size.Width, size.Height), destPixels));
+            //to.PixelOffsetMode = PixelOffsetMode.Half;
+            //to.InterpolationMode = InterpolationMode.NearestNeighbor;
+            //to.DrawImage(dest, new Rectangle(0, 0, size.Width, size.Height));
         }
     }
 }

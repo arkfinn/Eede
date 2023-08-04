@@ -75,14 +75,14 @@ namespace Eede.Domain.Pictures
 
         public Size Size => Buffer.Size;
 
-        public void Transfer(IImageTransfer transfer, Graphics g)
+        public PictureData Transfer(IImageTransfer transfer)
         {
-            Transfer(transfer, g, new MagnifiedSize(Buffer.Size, new Scales.Magnification(1)));
+            return Transfer(transfer, new MagnifiedSize(Buffer.Size, new Scales.Magnification(1)));
         }
 
-        public void Transfer(IImageTransfer transfer, Graphics g, MagnifiedSize size)
+        public PictureData Transfer(IImageTransfer transfer, MagnifiedSize size)
         {
-            transfer.Transfer(PictureData.CreateBitmap(BufferData), g, size);
+            return transfer.Transfer(PictureData.CreateBitmap(BufferData), size);
         }
 
         /// <summary>

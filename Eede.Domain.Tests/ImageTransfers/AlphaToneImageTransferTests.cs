@@ -1,14 +1,6 @@
-﻿using Eede.Domain.ImageTransfers;
-using Eede.Domain.Pictures;
+﻿using Eede.Domain.Pictures;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Eede.Domain.ImageTransfers
 {
@@ -19,14 +11,12 @@ namespace Eede.Domain.ImageTransfers
         public void A値のみをコピー()
         {
             var src = new Bitmap(@"ImageTransfers\test\blend.png");
-            var dst = new Bitmap(src.Width * 2, src.Height * 2);
 
             var transfer = new AlphaToneImageTransfer();
             var picture = new Picture(src);
 
-            using var graphics = Graphics.FromImage(dst);
-            graphics.FillRectangle(Brushes.Black, new Rectangle(new Point(0, 0), dst.Size));
-            picture.Transfer(transfer, graphics, new Sizes.MagnifiedSize(src.Size, new Scales.Magnification(2)));
+            var data = picture.Transfer(transfer, new Sizes.MagnifiedSize(src.Size, new Scales.Magnification(2)));
+            var dst = PictureData.CreateBitmap(data);
 
             // dst.Save(@"ImageTransfers\test\alpha.png", ImageFormat.Png);
             var expected = new Bitmap(@"ImageTransfers\test\alpha.png");

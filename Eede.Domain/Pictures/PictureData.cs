@@ -27,20 +27,12 @@ namespace Eede.Domain.Pictures
 
         public static Bitmap CreateBitmap(PictureData data)
         {
-            var stride = data.Width * 4;
+            var stride = data.Stride;
 
             // IntPtrに画像データをマーシャリングします
             System.IntPtr scan0 = System.Runtime.InteropServices.Marshal.AllocHGlobal(data.Length);
             System.Runtime.InteropServices.Marshal.Copy(data.ImageData, 0, scan0, data.Length);
-            try
-            {
-                return new Bitmap(data.Width, data.Height, stride, PixelFormat.Format32bppArgb, scan0);
-            }
-            finally
-            {
-                // メモリリークを防ぐため、IntPtrのメモリを解放します
-                // System.Runtime.InteropServices.Marshal.FreeHGlobal(scan0);
-            }
+            return new Bitmap(data.Width, data.Height, stride, PixelFormat.Format32bppArgb, scan0);
         }
 
         public static PictureData Create(PictureSize size, byte[] imageData)

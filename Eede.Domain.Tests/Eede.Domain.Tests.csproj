@@ -19,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="DrawStyles\test\base.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DrawStyles\test\point1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="ImageBlenders\test\alpha_blend.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -29,7 +29,7 @@ namespace Eede.Domain.ImageBlenders
 
             // result.ToImage().Save(@"ImageBlenders\test\rgb_blend.png", ImageFormat.Png);
             var expected = new Bitmap(@"ImageBlenders\test\rgb_blend.png");
-            Assert.IsTrue(ImageComparer.Equals(result.ToImage(), expected));
+            Assert.That(ImageComparer.Equals(result.ToImage(), expected), Is.True);
         }
     }
 }

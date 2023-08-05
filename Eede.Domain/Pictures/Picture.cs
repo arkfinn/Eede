@@ -1,6 +1,7 @@
 ﻿using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Positions;
+using Eede.Domain.Scales;
 using Eede.Domain.Sizes;
 using System;
 using System.Drawing;
@@ -77,12 +78,12 @@ namespace Eede.Domain.Pictures
 
         public PictureData Transfer(IImageTransfer transfer)
         {
-            return Transfer(transfer, new MagnifiedSize(Buffer.Size, new Scales.Magnification(1)));
+            return Transfer(transfer,  new Magnification(1));
         }
 
-        public PictureData Transfer(IImageTransfer transfer, MagnifiedSize size)
+        public PictureData Transfer(IImageTransfer transfer, Magnification magnification)
         {
-            return transfer.Transfer(PictureData.CreateBitmap(BufferData), size);
+            return transfer.Transfer(BufferData, magnification);
         }
 
         /// <summary>

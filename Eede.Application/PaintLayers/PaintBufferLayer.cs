@@ -23,7 +23,7 @@ namespace Eede.Application.PaintLayers
         public void Paint(Graphics destination)
         {
             if (Source == null) return;
-            var data = Source.Transfer(ImageTransfer, PaintSize);
+            var data = Source.Transfer(ImageTransfer, PaintSize.Magnification);
 
             using var dest = PictureData.CreateBitmap(data);
             destination.PixelOffsetMode = PixelOffsetMode.Half;

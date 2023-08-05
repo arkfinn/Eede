@@ -2,6 +2,7 @@
 using Eede.Domain.Scales;
 using NUnit.Framework;
 using System.Drawing;
+using System.Security.Cryptography;
 
 namespace Eede.Domain.ImageTransfers
 {
@@ -17,11 +18,11 @@ namespace Eede.Domain.ImageTransfers
             var picture = new Picture(src);
 
             var data = picture.Transfer(transfer, new Magnification(2));
-            var dst = PictureData.CreateBitmap(data);
-
+    
             // dst.Save(@"ImageTransfers\test\rgb.png", ImageFormat.Png);
             var expected = new Bitmap(@"ImageTransfers\test\rgb.png");
-            Assert.IsTrue(ImageComparer.Equals(dst, expected));
+            var md5 = MD5.Create();
+            Assert.That(md5.ComputeHash(data.CloneImage()), Is.EqualTo(md5.ComputeHash(PictureData.CreateBuffer(expected).CloneImage())));
         }
     }
 }

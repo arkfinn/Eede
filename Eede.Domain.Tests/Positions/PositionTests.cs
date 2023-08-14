@@ -17,7 +17,7 @@ namespace Eede.Domain.Positions.Tests
         [Test]
         public void PositionCreateFromPoint()
         {
-            var p = new Position(new Point(1, 2));
+            var p = new Position(1, 2);
             Assert.AreEqual(1, p.X);
             Assert.AreEqual(2, p.Y);
         }

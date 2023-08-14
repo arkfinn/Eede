@@ -206,7 +206,7 @@ namespace Eede.Ui
             }
             else
             {
-                CursorVisible = IsInnerPictureBox(new Position(e.Location));
+                CursorVisible = IsInnerPictureBox(new Position(e.Location.X, e.Location.Y));
                 CursorPosition = new HalfBoxPosition(FetchBoxSize(), e.Location);
             }
             pictureBox1.Refresh();

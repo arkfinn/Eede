@@ -30,7 +30,7 @@ namespace Eede.Domain.DrawStyles
             var dst = tool.DrawEnd(drawer4, pos3, false);
 
             var dstBmp = dst.ToImage();
-            //dstBmp.Save(@"DrawStyles\test\freeCurve1.png", ImageFormat.Png);
+            dstBmp.Save(@"DrawStyles\test\freeCurve1_.png", ImageFormat.Png);
             var expected = new Bitmap(@"DrawStyles\test\freeCurve1.png");
             Assert.IsTrue(ImageComparer.Equals(dstBmp, expected));
         }

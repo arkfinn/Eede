@@ -78,7 +78,7 @@ namespace Eede.Domain.Pictures
 
         public PictureData Transfer(IImageTransfer transfer)
         {
-            return Transfer(transfer,  new Magnification(1));
+            return Transfer(transfer, new Magnification(1));
         }
 
         public PictureData Transfer(IImageTransfer transfer, Magnification magnification)
@@ -107,18 +107,10 @@ namespace Eede.Domain.Pictures
             return new Picture(blender.Blend(src.BufferData, BufferData, toPosition));
         }
 
-        public Picture Draw(Action<Graphics> action, IImageBlender blender)
+        public Picture Draw(Func<PictureData, PictureData> function, IImageBlender blender)
         {
-            using (var newBmp = CreateClone(Buffer))
-            using (var tmp = CreateClone(Buffer))
-            {
-                using (var g = Graphics.FromImage(tmp))
-                {
-                    action(g);
-                }
-                var src = PictureData.CreateBuffer(tmp);
-                return new Picture(blender.Blend(src, PictureData.CreateBuffer(newBmp)));
-            }
+            var data = function(BufferData);
+            return new Picture(blender.Blend(data, BufferData));
         }
 
         public Color PickColor(Position pos)

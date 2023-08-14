@@ -13,12 +13,6 @@ namespace Eede.Domain.Positions
             Y = y;
         }
 
-        public Position(Point p)
-        {
-            X = p.X;
-            Y = p.Y;
-        }
-
         public override bool Equals(object obj)
         {
             var position = obj as Position;

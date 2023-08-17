@@ -17,18 +17,26 @@ namespace Eede.Domain.Pictures.Tests
         //    });
         //}
 
-        [Test]
-        public void PickColorTest()
+        [TestCaseSource(nameof(PickColorCases))]
+        public void PickColorTest(int x, int y, Color expected)
         {
             using (var b = new Bitmap(10, 10))
             {
                 b.SetPixel(1, 2, Color.DarkSeaGreen);
                 b.SetPixel(2, 3, Color.Beige);
                 var d = new Picture(b);
-                Assert.AreEqual(Color.DarkSeaGreen.ToArgb(), d.PickColor(new Position(1, 2)).ToArgb());
-                Assert.AreEqual(Color.Beige.ToArgb(), d.PickColor(new Position(2, 3)).ToArgb());
+                var color = d.PickColor(new Position(x, y));
+                Assert.That(
+                    Tuple.Create(color.Alpha, color.Red, color.Green, color.Blue),
+                    Is.EqualTo(Tuple.Create(expected.A, expected.R, expected.G, expected.B)));
             }
         }
+
+        static object[] PickColorCases =
+        {
+            new object[] { 1, 2, Color.DarkSeaGreen },
+            new object[] { 2, 3, Color.Beige },
+        };
 
         [Test]
         public void PickColorの引数posはbitmapの範囲外を許容しない()
@@ -42,5 +50,26 @@ namespace Eede.Domain.Pictures.Tests
                 }
             });
         }
+
+        [TestCaseSource(nameof(CutOutCases))]
+        public void CutOutTest(int x, int y, Color expected)
+        {
+            using (var b = new Bitmap(10, 10))
+            {
+                b.SetPixel(1, 2, Color.DarkSeaGreen);
+                b.SetPixel(2, 3, Color.Beige);
+                var d = new Picture(b).CutOut(new Rectangle(1,2,5,6));
+                var color = d.PickColor(new Position(x, y));
+                Assert.That(
+                    Tuple.Create(color.Alpha, color.Red, color.Green, color.Blue),
+                    Is.EqualTo(Tuple.Create(expected.A, expected.R, expected.G, expected.B)));
+            }
+        }
+
+        static object[] CutOutCases =
+        {
+            new object[] { 0, 0, Color.DarkSeaGreen },
+            new object[] { 1, 1, Color.Beige },
+        };
     }
 }

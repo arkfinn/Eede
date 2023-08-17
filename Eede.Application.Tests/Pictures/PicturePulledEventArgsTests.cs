@@ -11,11 +11,12 @@ namespace Eede.Application.Pictures.Tests
         [Test]
         public void PicturePulledEventArgsTest()
         {
-            var b = new Picture(new Bitmap(10, 10));
+            using var bmp = new Bitmap(10, 10);
+            var b = new Picture(bmp);
             var p = new PicturePulledEventArgs(b, new Rectangle(2, 2, 3, 3));
             var image = p.CutOutImage();
 
-            Assert.AreEqual(image.Size, new Size(3, 3));
+            Assert.That(Tuple.Create(image.Size.Width, image.Size.Height), Is.EqualTo(Tuple.Create(3, 3)));
         }
 
         [Test]

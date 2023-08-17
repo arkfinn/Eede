@@ -28,7 +28,7 @@ namespace Eede.Application.PaintLayers
         public void Paint(Graphics destination)
         {
             var drawer = new Drawer(Source, PenStyle);
-            using var cursor = drawer.DrawPoint(Position);
+            var cursor = drawer.DrawPoint(Position);
             var data = cursor.Transfer(ImageTransfer, PaintSize.Magnification);
             using var dest = PictureData.CreateBitmap(data);
             destination.PixelOffsetMode = PixelOffsetMode.Half;

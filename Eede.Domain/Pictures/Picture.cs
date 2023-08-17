@@ -8,16 +8,8 @@ using System.Drawing;
 
 namespace Eede.Domain.Pictures
 {
-    public class Picture : IDisposable
+    public class Picture
     {
-        public Picture(Image image)
-        {
-            if (image == null)
-            {
-                throw new ArgumentNullException("imageの値は必ず指定してください。");
-            }
-            Buffer = new Bitmap(image);
-        }
 
         public Picture(Bitmap image)
         {
@@ -25,48 +17,24 @@ namespace Eede.Domain.Pictures
             {
                 throw new ArgumentNullException("imageの値は必ず指定してください。");
             }
-            Buffer = CreateClone(image);
+            BufferData = PictureData.CreateBuffer(image);
         }
 
         public Picture(Size size)
         {
-            Buffer = new Bitmap(size.Width, size.Height);
+            BufferData = PictureData.CreateEmpty(new PictureSize(size.Width, size.Height));
         }
 
         public Picture(PictureData data)
         {
-            Buffer = PictureData.CreateBitmap(data);
+            BufferData = data;
         }
 
-        private Bitmap CreateClone(Bitmap source)
-        {
-            // new Bitmap(source)とすると、alpha=0のRGB情報が失われるため、手動で合成し直している。
-            using var tmp = new Bitmap(source.Width, source.Height);
-            var d = new DirectImageBlender();
-            var src = PictureData.CreateBuffer(source);
-            return PictureData.CreateBitmap(d.Blend(src, PictureData.CreateBuffer(tmp)));
-        }
-
-        public Picture Clone()
-        {
-            return new Picture(Buffer);
-        }
-
-        private Bitmap buffer;
-        private Bitmap Buffer
-        {
-            get { return buffer; }
-            set
-            {
-                buffer = value;
-                BufferData = PictureData.CreateBuffer(buffer);
-            }
-        }
         private PictureData BufferData;
 
-        public Bitmap CutOut(Rectangle rect)
+        public Picture CutOut(Rectangle rect)
         {
-            return Buffer.Clone(rect, Buffer.PixelFormat);
+            return new Picture(BufferData.CutOut(rect.X, rect.Y, rect.Width, rect.Height));
         }
 
         public Image ToImage()
@@ -74,7 +42,7 @@ namespace Eede.Domain.Pictures
             return PictureData.CreateBitmap(BufferData);
         }
 
-        public Size Size => Buffer.Size;
+        public PictureSize Size => BufferData.Size;
 
         public PictureData Transfer(IImageTransfer transfer)
         {
@@ -85,22 +53,6 @@ namespace Eede.Domain.Pictures
         {
             return transfer.Transfer(BufferData, magnification);
         }
-
-        /// <summary>
-        /// このPictureのtoPositionにsrcを合成した新しいPictureを返す。
-        /// </summary>
-        /// <param name="blender"></param>
-        /// <param name="src"></param>
-        /// <param name="toPosition"></param>
-        /// <returns></returns>
-        //public Picture Blend(IImageBlender blender, Bitmap src, Position toPosition)
-        //{
-        //    using (var tmp = CreateClone(Buffer))
-        //    {
-        //        blender.Blend(src, tmp, toPosition);
-        //        return new Picture(tmp);
-        //    }
-        //}
 
         public Picture Blend(IImageBlender blender, Picture src, Position toPosition)
         {
@@ -113,28 +65,18 @@ namespace Eede.Domain.Pictures
             return new Picture(blender.Blend(data, BufferData));
         }
 
-        public Color PickColor(Position pos)
+        public ArgbColor PickColor(Position pos)
         {
             if (!Contains(pos))
             {
                 throw new ArgumentOutOfRangeException();
             }
-            return Buffer.GetPixel(pos.X, pos.Y);
+            return BufferData.PickColor(pos);
         }
 
         public bool Contains(Position position)
         {
-            return position.IsInnerOf(Buffer.Size);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            Buffer.Dispose();
+            return BufferData.Size.Contains(position);
         }
     }
 }

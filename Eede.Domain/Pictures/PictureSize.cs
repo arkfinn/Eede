@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Eede.Domain.Positions;
+using System;
+using System.Drawing;
 
 namespace Eede.Domain.Pictures
 {
@@ -15,6 +17,15 @@ namespace Eede.Domain.Pictures
             }
             Width = width;
             Height = height;
+        }
+
+        public bool Contains(Position pos)
+        {
+            if (pos.X < 0) return false;
+            if (pos.Y < 0) return false;
+            if (pos.X >= Width) return false;
+            if (pos.Y >= Height) return false;
+            return true;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Eede.Application.Pictures
 
         public readonly Rectangle Rect;
 
-        public Bitmap CutOutImage()
+        public Picture CutOutImage()
         {
             return Picture.CutOut(Rect);
         }

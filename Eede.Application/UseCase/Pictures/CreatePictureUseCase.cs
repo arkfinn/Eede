@@ -10,7 +10,7 @@ namespace Eede.Application.UseCase.Pictures
     {
         public PictureFile Execute(Size size)
         {
-            var bmp = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppArgb);
+            using var bmp = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppArgb);
             using (var g = Graphics.FromImage(bmp))
             {
                 g.FillRectangle(Brushes.White, new Rectangle(new Point(0, 0), size));

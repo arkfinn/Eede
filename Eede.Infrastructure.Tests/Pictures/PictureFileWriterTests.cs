@@ -18,10 +18,10 @@ namespace Eede.Infrastructure.Pictures.Tests
             var filepath = Location("\\SamplePictures\\PngFile.png");
             var reader = new PictureFileReader(filepath);
             var writer = new PictureFileWriter(saveFilepath);
-            using (var picture = reader.Read())
-            {
-                writer.Write(picture);
-            }
+            var picture = reader.Read();
+
+            writer.Write(picture);
+
             using (var destination = new Bitmap(Image.FromFile(saveFilepath.Path)))
             {
                 var col = destination.GetPixel(1, 1);

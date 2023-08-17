@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Drawing.Imaging;
 using System.Drawing;
+using Eede.Domain.Positions;
 
 namespace Eede.Domain.Pictures
 {
     public class PictureData
     {
+        private const int COLOR_32BIT = 4;
 
         public static PictureData CreateBuffer(Bitmap bitmap)
         {
@@ -13,7 +15,7 @@ namespace Eede.Domain.Pictures
             int width = bitmap.Width;
             int height = bitmap.Height;
             PixelFormat format = bitmap.PixelFormat;
-            int stride = width * 4;
+            int stride = width * COLOR_32BIT;
 
             // ソースのBitmapの画像データを取得します
             BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, format);
@@ -37,13 +39,18 @@ namespace Eede.Domain.Pictures
 
         public static PictureData Create(PictureSize size, byte[] imageData)
         {
-            var stride = size.Width * 4;
+            var stride = size.Width * COLOR_32BIT;
             if (stride * size.Height != imageData.Length)
             {
                 throw new ArgumentException($"(width:{size.Width}, height:{size.Height}) != length:{imageData.Length}");
             }
 
             return new PictureData(size, imageData, stride);
+        }
+
+        public static PictureData CreateEmpty(PictureSize size)
+        {
+            return Create(size, new byte[size.Width * COLOR_32BIT * size.Height]);
         }
 
         public readonly PictureSize Size;
@@ -69,6 +76,32 @@ namespace Eede.Domain.Pictures
         public byte[] CloneImage()
         {
             return ImageData.Clone() as byte[];
+        }
+
+        public ArgbColor PickColor(Position pos)
+        {
+            var index = pos.X * COLOR_32BIT + this.Stride * pos.Y;
+            return new ArgbColor(
+                this[index + 3],
+                this[index + 2],
+                this[index + 1],
+                this[index]);
+        }
+
+        public PictureData CutOut(int x, int y, int width, int height)
+        {
+            var destinationStride = width * COLOR_32BIT;
+            var destinationX = x * COLOR_32BIT;
+            byte[] cutImageData = new byte[destinationStride * height];
+
+            for (int i = 0; i < height; i++)
+            {
+                int sourceStartIndex = destinationX + (y + i) * this.Stride;
+                int destinationStartIndex = i * destinationStride;
+                Array.Copy(ImageData, sourceStartIndex, cutImageData, destinationStartIndex, destinationStride);
+            }
+
+            return PictureData.Create(new PictureSize(width, height), cutImageData);
         }
     }
 }

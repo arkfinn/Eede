@@ -14,8 +14,8 @@ namespace Eede.Actions
         public PullPictureAction(DrawableBox parentBox, Picture pulledImage)
         {
             ParentBox = parentBox ?? throw new ArgumentNullException(nameof(parentBox));
-            NowPicture = new Picture(ParentBox.GetImage());
-            PulledPicture = (pulledImage ?? throw new ArgumentNullException(nameof(pulledImage))).Clone();
+            NowPicture = ParentBox.GetImage();
+            PulledPicture = (pulledImage ?? throw new ArgumentNullException(nameof(pulledImage)));
         }
 
         public void Do()
@@ -35,8 +35,6 @@ namespace Eede.Actions
 
         public void Dispose()
         {
-            NowPicture.Dispose();
-            PulledPicture.Dispose();
         }
     }
 }

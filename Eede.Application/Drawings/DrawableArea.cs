@@ -36,7 +36,7 @@ namespace Eede.Application.Drawings
         {
             var source = buffer.Fetch();
             // 表示上のサイズ・ポジション DisplaySize DisplayPosition
-            var displaySize = Magnify(source.Size);
+            var displaySize = Magnify(new Size(source.Size.Width, source.Size.Height));
             var backgroundLayer = new PaintBackgroundLayer(Background);
             backgroundLayer.Paint(g);
 
@@ -77,12 +77,13 @@ namespace Eede.Application.Drawings
 
         public Size DisplaySizeOf(Picture picture)
         {
-            return Magnify(picture.Size).ToSize();
+            return Magnify(new Size(picture.Size.Width, picture.Size.Height)).ToSize();
         }
 
         public Color PickColor(Picture picture, Position displayPosition)
         {
-            return picture.PickColor(RealPositionOf(displayPosition).ToPosition());
+            var color = picture.PickColor(RealPositionOf(displayPosition).ToPosition());
+            return Color.FromArgb(color.Alpha, color.Red, color.Green, color.Blue);
         }
 
         private PositionHistory CreatePositionHistory(Position displayPosition)
@@ -113,10 +114,8 @@ namespace Eede.Application.Drawings
             }
 
             var drawer = new Drawer(picture.Previous, penStyle);
-            using (var result = drawStyle.DrawStart(drawer, nextHistory, isShift))
-            {
-                return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
-            }
+            var result = drawStyle.DrawStart(drawer, nextHistory, isShift);
+            return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
         }
 
         public DrawingResult Move(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
@@ -127,10 +126,8 @@ namespace Eede.Application.Drawings
                 return new DrawingResult(picture, UpdatePositionHistory(nextHistory));
             }
             var drawer = new Drawer(picture.Fetch(), penStyle);
-            using (var result = drawStyle.Drawing(drawer, nextHistory, isShift))
-            {
-                return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
-            }
+            var result = drawStyle.Drawing(drawer, nextHistory, isShift);
+            return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
         }
 
         public DrawingResult DrawEnd(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
@@ -142,10 +139,8 @@ namespace Eede.Application.Drawings
 
             var nextHistory = NextPositionHistory(PositionHistory, displayPosition);
             var drawer = new Drawer(picture.Fetch(), penStyle);
-            using (var result = drawStyle.DrawEnd(drawer, nextHistory, isShift))
-            {
-                return new DrawingResult(picture.DecideDrawing(result), ClearPositionHistory());
-            }
+            var result = drawStyle.DrawEnd(drawer, nextHistory, isShift);
+            return new DrawingResult(picture.DecideDrawing(result), ClearPositionHistory());
         }
 
         public DrawingResult DrawCancel(DrawingBuffer picture)

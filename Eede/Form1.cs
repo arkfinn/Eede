@@ -73,10 +73,8 @@ namespace Eede
         {
             try
             {
-                using (var picture = new PictureFileReader(filename).Read())
-                {
-                    AddChildWindow(new PictureFile(filename, picture));
-                }
+                var picture = new PictureFileReader(filename).Read();
+                AddChildWindow(new PictureFile(filename, picture));
             }
             catch (Exception)
             {
@@ -103,12 +101,10 @@ namespace Eede
 
         private void ChildFormPicturePulled(object sender, PicturePulledEventArgs e)
         {
-            using (var picture = new Picture(e.CutOutImage()))
-            {
-                var action = new PullPictureAction(paintableBox1, picture);
-                action.Do();
-                AddUndoItem(action);
-            }
+            var picture = e.CutOutImage();
+            var action = new PullPictureAction(paintableBox1, picture);
+            action.Do();
+            AddUndoItem(action);
         }
 
         private void ChildFormPicturePushed(object sender, PicturePushedEventArgs e)
@@ -116,12 +112,12 @@ namespace Eede
             if (sender is PictureWindow)
             {
                 var window = sender as PictureWindow;
-                using (var src = new Picture(paintableBox1.GetImage()))
-                {
-                    var action = new PushPictureAction(window, e.Picture, src, PrepareImageBlender(), e.Position);
-                    action.Do();
-                    AddUndoItem(action);
-                }
+                var src = paintableBox1.GetImage();
+
+                var action = new PushPictureAction(window, e.Picture, src, PrepareImageBlender(), e.Position);
+                action.Do();
+                AddUndoItem(action);
+
             }
         }
 

@@ -23,14 +23,9 @@ namespace Eede.Ui
         {
             InitializeComponent();
             SaveTo = new FilePath("");
-            using (var picture = new Picture(new Bitmap(1, 1)))
-            {
-                SetupPictureBuffer(picture);
-            }
-            Disposed += (sender, args) =>
-            {
-                PictureBuffer?.Dispose();
-            };
+            using var image = new Bitmap(1, 1);
+            var picture = new Picture(image);
+            SetupPictureBuffer(picture);
         }
 
         public PictureWindow(FilePath filename, Picture picture, IDrawingArea d)
@@ -39,10 +34,6 @@ namespace Eede.Ui
             UpdateSaveTo(filename);
             SetupPictureBuffer(picture);
             DrawingArea = d;
-            Disposed += (sender, args) =>
-            {
-                PictureBuffer?.Dispose();
-            };
         }
 
         private FilePath SaveTo;
@@ -77,13 +68,8 @@ namespace Eede.Ui
 
         public void SetupPictureBuffer(Picture picture)
         {
-            var old = PictureBuffer;
-            PictureBuffer = picture.Clone();
-            if (old != null)
-            {
-                old.Dispose();
-            }
-            ResizePicture(picture.Size);
+            PictureBuffer = picture;
+            ResizePicture(new Size(picture.Size.Width, picture.Size.Height));
             pictureBox1.Invalidate();
         }
 
@@ -202,7 +188,7 @@ namespace Eede.Ui
         {
             if (IsSelecting)
             {
-                SelectingPosition = SelectingPosition.UpdatePosition(e.Location, PictureBuffer.Size);
+                SelectingPosition = SelectingPosition.UpdatePosition(e.Location, new Size(PictureBuffer.Size.Width, PictureBuffer.Size.Height));
             }
             else
             {

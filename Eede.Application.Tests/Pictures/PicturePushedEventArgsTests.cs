@@ -12,7 +12,8 @@ namespace Eede.Application.Pictures.Tests
         [Test]
         public void PicturePushedEventArgsTest()
         {
-            var b = new Picture(new Bitmap(1, 1));
+            using var bmp = new Bitmap(1, 1);
+            var b = new Picture(bmp);
             var p = new PicturePushedEventArgs(b, new Position(2, 2));
             Assert.AreEqual(b, p.Picture);
             Assert.AreEqual(new Position(2, 2), p.Position);
@@ -32,7 +33,8 @@ namespace Eede.Application.Pictures.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                var b = new Picture(new Bitmap(1, 1));
+                using var bmp = new Bitmap(1, 1);
+                var b = new Picture(bmp);
                 var h = new PicturePushedEventArgs(b, null);
             });
         }

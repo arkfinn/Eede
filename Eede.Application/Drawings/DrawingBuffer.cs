@@ -10,20 +10,18 @@ namespace Eede.Application.Drawings
 
         public DrawingBuffer(Picture previous)
         {
-            Previous = previous.Clone();
+            Previous = previous;
             Drawing = null;
         }
 
         public DrawingBuffer(Picture previous, Picture drawing)
         {
-            Previous = previous.Clone();
-            Drawing = drawing?.Clone();
+            Previous = previous;
+            Drawing = drawing;
         }
 
         public void Dispose()
         {
-            Previous.Dispose();
-            Drawing?.Dispose();
         }
 
         public Picture Fetch()

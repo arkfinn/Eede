@@ -21,11 +21,10 @@ namespace Eede.Ui
             var defaultBoxSize = GlobalSetting.Instance().BoxSize;
             var gridSize = new Size(16, 16);
             DrawableArea = new DrawableArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize, null);
-            using (var picture = new Picture(defaultBoxSize))
-            {
-                SetupPicture(picture);
-            }
-            canvas.Image = PictureBuffer.Fetch().ToImage();
+            var picture = new Picture(defaultBoxSize);
+            SetupPicture(picture);
+ 
+            //canvas.Image = PictureBuffer.Fetch().ToImage();
             Disposed += (sender, args) =>
             {
                 if (PictureBuffer != null)
@@ -43,13 +42,14 @@ namespace Eede.Ui
         {
             get
             {
-                return PictureBuffer.Fetch().Size;
+                var size = PictureBuffer.Fetch().Size;
+                return new Size(size.Width, size.Height);
             }
         }
 
-        public Bitmap GetImage()
+        public Picture GetImage()
         {
-            return PictureBuffer.Fetch().CutOut(new Rectangle(new Point(0, 0), PictureBuffer.Fetch().Size));
+            return PictureBuffer.Fetch().CutOut(new Rectangle(new Point(0, 0), DrawingSize));
         }
 
         public void SetupPicture(Picture sourcePicture)
@@ -209,15 +209,14 @@ namespace Eede.Ui
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    using (var previous = PictureBuffer.Previous.Clone())
-                    {
-                        using (var result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(e.X, e.Y), IsShift()))
-                        {
-                            UpdatePictureBuffer(result.PictureBuffer);
-                            DrawableArea = result.DrawableArea;
-                            Drew?.Invoke(this, new DrawEventArgs(previous, result.PictureBuffer.Previous));
-                        }
-                    }
+                    var previous = PictureBuffer.Previous;
+
+                    var result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(e.X, e.Y), IsShift());
+
+                    UpdatePictureBuffer(result.PictureBuffer);
+                    DrawableArea = result.DrawableArea;
+                    Drew?.Invoke(this, new DrawEventArgs(previous, result.PictureBuffer.Previous));
+
                     break;
             }
         }

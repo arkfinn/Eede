@@ -2,7 +2,6 @@
 using Eede.Domain.Scales;
 using NUnit.Framework;
 using System.Drawing;
-using System.IO;
 using System.Security.Cryptography;
 
 namespace Eede.Domain.ImageTransfers
@@ -13,10 +12,10 @@ namespace Eede.Domain.ImageTransfers
         [Test]
         public void A値のみをコピー()
         {
-            var src = new Bitmap(@"ImageTransfers\test\blend.png");
+            using var src = new Bitmap(@"ImageTransfers\test\blend.png");
 
             var transfer = new AlphaToneImageTransfer();
-            var picture = new Picture(src);
+            var picture = new Picture(PictureData.CreateBuffer(src));
 
             var data = picture.Transfer(transfer, new Magnification(2));
 

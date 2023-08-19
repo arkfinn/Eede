@@ -24,7 +24,7 @@ namespace Eede.Ui
             InitializeComponent();
             SaveTo = new FilePath("");
             using var image = new Bitmap(1, 1);
-            var picture = new Picture(image);
+            var picture = new Picture(PictureData.CreateBuffer(image));
             SetupPictureBuffer(picture);
         }
 

@@ -1,7 +1,9 @@
-﻿using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.Files;
+using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
+using Eede.Infrastructure.Pictures;
 using NUnit.Framework;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -14,8 +16,7 @@ namespace Eede.Domain.DrawStyles
         [Test()]
         public void DrawTest()
         {
-            var srcBmp = new Bitmap(@"DrawStyles\test\base.png");
-            var src = new Picture(srcBmp);
+            var src = ReadPicture(@"DrawStyles\test\base.png");
             var drawer = new Drawer(src, new PenStyle(new DirectImageBlender(), Color.Black, 1));
             var tool = new FreeCurve();
             var pos = new PositionHistory(new Position(5, 5));
@@ -29,10 +30,14 @@ namespace Eede.Domain.DrawStyles
             var drawer4 = new Drawer(process3, new PenStyle(new DirectImageBlender(), Color.Black, 1));
             var dst = tool.DrawEnd(drawer4, pos3, false);
 
-            var dstBmp = dst.ToImage();
-            dstBmp.Save(@"DrawStyles\test\freeCurve1_.png", ImageFormat.Png);
-            var expected = new Bitmap(@"DrawStyles\test\freeCurve1.png");
-            Assert.IsTrue(ImageComparer.Equals(dstBmp, expected));
+            //　dstBmp.Save(@"DrawStyles\test\freeCurve1_.png", ImageFormat.Png);
+            var expected = ReadPicture(@"DrawStyles\test\freeCurve1.png");
+            Assert.That(dst.CloneImage(), Is.EqualTo(expected.CloneImage()));
+        }
+
+        private Picture ReadPicture(string path)
+        {
+            return new PictureFileReader(new FilePath(path)).Read();
         }
     }
 }

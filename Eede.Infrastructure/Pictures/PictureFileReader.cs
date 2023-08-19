@@ -22,20 +22,14 @@ namespace Eede.Infrastructure.Pictures
 
         public Picture Read()
         {
-            using var image = Image.FromFile(Path.Path);
-            using var tmp = To32bppArg(image);
-            return new Picture(tmp);
+            using var image = new Bitmap(Path.Path);
+            using var tmp = To32bppArgb(image);
+            return new Picture(PictureData.CreateBuffer(tmp));
         }
 
-        private static Bitmap To32bppArg(Image image)
+        private static Bitmap To32bppArgb(Bitmap image)
         {
-            var bmp = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppArgb);
-            using (var g = Graphics.FromImage(bmp))
-            {
-                g.PageUnit = GraphicsUnit.Pixel;
-                g.DrawImageUnscaled(image, 0, 0);
-            }
-            return bmp;
+            return image.Clone(new Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
         }
     }
 }

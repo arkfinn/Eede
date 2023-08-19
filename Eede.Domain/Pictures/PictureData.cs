@@ -11,30 +11,20 @@ namespace Eede.Domain.Pictures
 
         public static PictureData CreateBuffer(Bitmap bitmap)
         {
-            // ソースのBitmapから必要な情報を取得します
-            int width = bitmap.Width;
-            int height = bitmap.Height;
-            PixelFormat format = bitmap.PixelFormat;
-            int stride = width * COLOR_32BIT;
-
-            // ソースのBitmapの画像データを取得します
-            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, format);
-            System.IntPtr scan0 = bmpData.Scan0;
-            int dataSize = stride * height;
-            byte[] imageData = new byte[dataSize];
-            System.Runtime.InteropServices.Marshal.Copy(scan0, imageData, 0, dataSize);
+            var bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+            byte[] bytes = new byte[Math.Abs(bmpData.Stride) * bitmap.Height];
+            System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, bytes, 0, bytes.Length);
             bitmap.UnlockBits(bmpData);
-            return Create(new PictureSize(width, height), imageData);
+            return Create(new PictureSize(bitmap.Width, bitmap.Height), bytes);
         }
 
         public static Bitmap CreateBitmap(PictureData data)
         {
-            var stride = data.Stride;
-
-            // IntPtrに画像データをマーシャリングします
-            System.IntPtr scan0 = System.Runtime.InteropServices.Marshal.AllocHGlobal(data.Length);
-            System.Runtime.InteropServices.Marshal.Copy(data.ImageData, 0, scan0, data.Length);
-            return new Bitmap(data.Width, data.Height, stride, PixelFormat.Format32bppArgb, scan0);
+            var dst = new Bitmap(data.Width, data.Height, PixelFormat.Format32bppArgb);
+            var bmpData = dst.LockBits(new Rectangle(0, 0, dst.Width, dst.Height), ImageLockMode.ReadWrite, dst.PixelFormat);
+            System.Runtime.InteropServices.Marshal.Copy(data.ImageData, 0, bmpData.Scan0, data.Length);
+            dst.UnlockBits(bmpData);
+            return dst;
         }
 
         public static PictureData Create(PictureSize size, byte[] imageData)

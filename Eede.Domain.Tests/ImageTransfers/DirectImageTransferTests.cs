@@ -12,10 +12,10 @@ namespace Eede.Domain.ImageTransfers
         [Test]
         public void ARGB値をコピー()
         {
-            var src = new Bitmap(@"ImageTransfers\test\blend.png");
+            using var src = new Bitmap(@"ImageTransfers\test\blend.png");
 
             var transfer = new DirectImageTransfer();
-            var picture = new Picture(src);
+            var picture = new Picture(PictureData.CreateBuffer(src));
 
             var data = picture.Transfer(transfer, new Magnification(2));
      

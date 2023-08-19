@@ -12,7 +12,7 @@ namespace Eede.Application.Pictures.Tests
         public void PicturePulledEventArgsTest()
         {
             using var bmp = new Bitmap(10, 10);
-            var b = new Picture(bmp);
+            var b = new Picture(PictureData.CreateBuffer(bmp));
             var p = new PicturePulledEventArgs(b, new Rectangle(2, 2, 3, 3));
             var image = p.CutOutImage();
 

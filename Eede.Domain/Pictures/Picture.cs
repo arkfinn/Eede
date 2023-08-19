@@ -11,15 +11,6 @@ namespace Eede.Domain.Pictures
     public class Picture
     {
 
-        public Picture(Bitmap image)
-        {
-            if (image == null)
-            {
-                throw new ArgumentNullException("imageの値は必ず指定してください。");
-            }
-            BufferData = PictureData.CreateBuffer(image);
-        }
-
         public Picture(Size size)
         {
             BufferData = PictureData.CreateEmpty(new PictureSize(size.Width, size.Height));
@@ -37,12 +28,12 @@ namespace Eede.Domain.Pictures
             return new Picture(BufferData.CutOut(rect.X, rect.Y, rect.Width, rect.Height));
         }
 
-        public Image ToImage()
-        {
-            return PictureData.CreateBitmap(BufferData);
-        }
-
         public PictureSize Size => BufferData.Size;
+        public int Width => BufferData.Width;
+        public int Height => BufferData.Height;
+        public int Stride => BufferData.Stride;
+
+        public byte[] CloneImage() => BufferData.CloneImage();
 
         public PictureData Transfer(IImageTransfer transfer)
         {

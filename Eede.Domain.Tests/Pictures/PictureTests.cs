@@ -24,7 +24,7 @@ namespace Eede.Domain.Pictures.Tests
             {
                 b.SetPixel(1, 2, Color.DarkSeaGreen);
                 b.SetPixel(2, 3, Color.Beige);
-                var d = new Picture(b);
+                var d = new Picture(PictureData.CreateBuffer(b));
                 var color = d.PickColor(new Position(x, y));
                 Assert.That(
                     Tuple.Create(color.Alpha, color.Red, color.Green, color.Blue),
@@ -45,7 +45,7 @@ namespace Eede.Domain.Pictures.Tests
             {
                 using (var b = new Bitmap(10, 10))
                 {
-                    var d = new Picture(b);
+                    var d = new Picture(PictureData.CreateBuffer(b));
                     d.PickColor(new Position(10, 10));
                 }
             });
@@ -58,7 +58,7 @@ namespace Eede.Domain.Pictures.Tests
             {
                 b.SetPixel(1, 2, Color.DarkSeaGreen);
                 b.SetPixel(2, 3, Color.Beige);
-                var d = new Picture(b).CutOut(new Rectangle(1,2,5,6));
+                var d = new Picture(PictureData.CreateBuffer(b)).CutOut(new Rectangle(1,2,5,6));
                 var color = d.PickColor(new Position(x, y));
                 Assert.That(
                     Tuple.Create(color.Alpha, color.Red, color.Green, color.Blue),

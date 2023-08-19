@@ -15,7 +15,7 @@ namespace Eede.Application.UseCase.Pictures
             {
                 g.FillRectangle(Brushes.White, new Rectangle(new Point(0, 0), size));
             }
-            return new PictureFile(new FilePath(""), new Picture(bmp));
+            return new PictureFile(new FilePath(""), new Picture(PictureData.CreateBuffer(bmp)));
         }
     }
 }

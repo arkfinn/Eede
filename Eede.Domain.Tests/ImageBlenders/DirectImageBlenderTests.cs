@@ -1,14 +1,7 @@
-﻿using Eede.Domain.ImageBlenders;
-using Eede.Domain.ImageTransfers;
+﻿using Eede.Domain.Files;
 using Eede.Domain.Pictures;
+using Eede.Infrastructure.Pictures;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Eede.Domain.ImageBlenders
 {
@@ -18,18 +11,20 @@ namespace Eede.Domain.ImageBlenders
         [Test]
         public void TestBlend()
         {
-            var srcBmp = new Bitmap(@"ImageBlenders\test\blend.png");
-            var src = new Picture(srcBmp);
-            var dst = new Bitmap(@"ImageBlenders\test\base.png");
-
+            var src = ReadPicture(@"ImageBlenders\test\blend.png");
             var blender = new DirectImageBlender();
-            var picture = new Picture(dst);
+            var dst = ReadPicture(@"ImageBlenders\test\base.png");
 
-            var result = picture.Blend(blender, src, new Positions.Position(0, 0));
+            var result = dst.Blend(blender, src, new Positions.Position(0, 0));
 
             // result.ToImage().Save(@"ImageBlenders\test\direct_blend.png", ImageFormat.Png);
-            var expected = new Bitmap(@"ImageBlenders\test\direct_blend.png");
-            Assert.That(ImageComparer.Equals(result.ToImage(), expected), Is.True);
+            var expected = ReadPicture(@"ImageBlenders\test\direct_blend.png");
+            Assert.That(result.CloneImage(), Is.EqualTo(expected.CloneImage()));
+        }
+
+        private Picture ReadPicture(string path)
+        {
+            return new PictureFileReader(new FilePath(path)).Read();
         }
     }
 }

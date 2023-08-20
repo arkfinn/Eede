@@ -21,7 +21,7 @@ namespace Eede.Ui
             var defaultBoxSize = GlobalSetting.Instance().BoxSize;
             var gridSize = new Size(16, 16);
             DrawableArea = new DrawableArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize, null);
-            var picture = new Picture(defaultBoxSize);
+            var picture = Picture.CreateEmpty(new PictureSize(defaultBoxSize.Width, defaultBoxSize.Height));
             SetupPicture(picture);
  
             //canvas.Image = PictureBuffer.Fetch().ToImage();
@@ -49,7 +49,7 @@ namespace Eede.Ui
 
         public Picture GetImage()
         {
-            return PictureBuffer.Fetch().CutOut(new Rectangle(new Point(0, 0), DrawingSize));
+            return PictureBuffer.Fetch().CutOut(new PictureArea(new Position(0, 0), new PictureSize(DrawingSize.Width, DrawingSize.Height)));
         }
 
         public void SetupPicture(Picture sourcePicture)

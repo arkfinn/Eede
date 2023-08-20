@@ -24,11 +24,11 @@ namespace Eede.Domain.DrawStyles
             return DrawingPicture.Draw(dest =>
             {
                 var imageData = DrawPointRoutine(dest, dest.CloneImage(), position);
-                return PictureData.Create(dest.Size, imageData);
+                return Picture.Create(dest.Size, imageData);
             }, PenStyle.Blender);
         }
 
-        private byte[] DrawPointRoutine(PictureData dest, byte[] imageData, Position position)
+        private byte[] DrawPointRoutine(Picture dest, byte[] imageData, Position position)
         {
             if (PenStyle.Width == 1)
             {
@@ -116,7 +116,7 @@ namespace Eede.Domain.DrawStyles
                     }
                 }
 
-                return PictureData.Create(dest.Size, imageData);
+                return Picture.Create(dest.Size, imageData);
             }, PenStyle.Blender);
         }
 
@@ -149,7 +149,7 @@ namespace Eede.Domain.DrawStyles
                     {
                         drawPixel(imageData, stride, fx, fy, color);
                     }
-                    return PictureData.Create(dest.Size, imageData);
+                    return Picture.Create(dest.Size, imageData);
                 }
                 int centerX = fx + width / 2;
                 int centerY = fy + height / 2;
@@ -232,7 +232,7 @@ namespace Eede.Domain.DrawStyles
                     x++;
                 }
 
-                return PictureData.Create(dest.Size, imageData);
+                return Picture.Create(dest.Size, imageData);
             }, PenStyle.Blender);
         }
 
@@ -241,11 +241,11 @@ namespace Eede.Domain.DrawStyles
             return DrawingPicture.Draw(dest =>
             {
                 var imageData = DrawFillEllipseRoutine(dest, dest.CloneImage(), from, to);
-                return PictureData.Create(dest.Size, imageData);
+                return Picture.Create(dest.Size, imageData);
             }, PenStyle.Blender);
         }
 
-        private byte[] DrawFillEllipseRoutine(PictureData dest, byte[] imageData, Position from, Position to)
+        private byte[] DrawFillEllipseRoutine(Picture dest, byte[] imageData, Position from, Position to)
         {
             var color = PenStyle.Color;
 

@@ -1,13 +1,12 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
-using System.Drawing;
 
 namespace Eede.Domain.ImageBlenders
 {
     public interface IImageBlender
     {
-        PictureData Blend(PictureData from, PictureData to);
+        Picture Blend(Picture from, Picture to);
 
-        PictureData Blend(PictureData from, PictureData to, Position toPosition);
+        Picture Blend(Picture from, Picture to, Position toPosition);
     }
 }

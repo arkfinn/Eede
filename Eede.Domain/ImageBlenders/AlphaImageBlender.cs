@@ -6,12 +6,12 @@ namespace Eede.Domain.ImageBlenders
 {
     public class AlphaImageBlender : IImageBlender
     {
-        public PictureData Blend(PictureData from, PictureData to)
+        public Picture Blend(Picture from, Picture to)
         {
             return Blend(from, to, new Position(0, 0));
         }
 
-        public PictureData Blend(PictureData from, PictureData to, Position toPosition)
+        public Picture Blend(Picture from, Picture to, Position toPosition)
         {
             var toPixels = to.CloneImage();
 
@@ -57,7 +57,7 @@ namespace Eede.Domain.ImageBlenders
                 }
             }
 
-            return PictureData.Create(to.Size, toPixels);
+            return Picture.Create(to.Size, toPixels);
         }
     }
 }

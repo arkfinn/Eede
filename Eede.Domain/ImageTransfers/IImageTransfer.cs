@@ -5,6 +5,6 @@ namespace Eede.Domain.ImageTransfers
 {
     public interface IImageTransfer
     {
-        PictureData Transfer(PictureData from, Magnification magnification);
+        Picture Transfer(Picture from, Magnification magnification);
     }
 }

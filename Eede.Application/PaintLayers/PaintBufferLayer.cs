@@ -25,7 +25,7 @@ namespace Eede.Application.PaintLayers
             if (Source == null) return;
             var data = Source.Transfer(ImageTransfer, PaintSize.Magnification);
 
-            using var dest = PictureData.CreateBitmap(data);
+            using var dest = BitmapConverter.Convert(data);
             destination.PixelOffsetMode = PixelOffsetMode.Half;
             destination.InterpolationMode = InterpolationMode.NearestNeighbor;
             destination.DrawImage(dest, new Point(0, 0));

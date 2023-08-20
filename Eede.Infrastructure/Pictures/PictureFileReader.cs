@@ -24,7 +24,7 @@ namespace Eede.Infrastructure.Pictures
         {
             using var image = new Bitmap(Path.Path);
             using var tmp = To32bppArgb(image);
-            return new Picture(PictureData.CreateBuffer(tmp));
+            return BitmapConverter.ConvertBack(tmp);
         }
 
         private static Bitmap To32bppArgb(Bitmap image)

@@ -13,7 +13,7 @@ namespace Eede.Application.Pictures.Tests
         public void PicturePushedEventArgsTest()
         {
             using var bmp = new Bitmap(1, 1);
-            var b = new Picture(PictureData.CreateBuffer(bmp));
+            var b = BitmapConverter.ConvertBack(bmp);
             var p = new PicturePushedEventArgs(b, new Position(2, 2));
             Assert.AreEqual(b, p.Picture);
             Assert.AreEqual(new Position(2, 2), p.Position);
@@ -34,7 +34,7 @@ namespace Eede.Application.Pictures.Tests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 using var bmp = new Bitmap(1, 1);
-                var b = new Picture(PictureData.CreateBuffer(bmp));
+                var b = BitmapConverter.ConvertBack(bmp);
                 var h = new PicturePushedEventArgs(b, null);
             });
         }

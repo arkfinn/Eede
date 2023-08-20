@@ -30,7 +30,7 @@ namespace Eede.Application.PaintLayers
             var drawer = new Drawer(Source, PenStyle);
             var cursor = drawer.DrawPoint(Position);
             var data = cursor.Transfer(ImageTransfer, PaintSize.Magnification);
-            using var dest = PictureData.CreateBitmap(data);
+            using var dest = BitmapConverter.Convert(data);
             destination.PixelOffsetMode = PixelOffsetMode.Half;
             destination.InterpolationMode = InterpolationMode.NearestNeighbor;
             destination.DrawImage(dest, new Point(0, 0));

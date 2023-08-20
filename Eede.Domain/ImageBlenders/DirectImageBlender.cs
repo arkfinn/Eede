@@ -6,12 +6,12 @@ namespace Eede.Domain.ImageBlenders
 {
     public class DirectImageBlender : IImageBlender
     {
-        public PictureData Blend(PictureData from, PictureData to)
+        public Picture Blend(Picture from, Picture to)
         {
             return Blend(from, to, new Position(0, 0));
         }
 
-        public PictureData Blend(PictureData from, PictureData to, Position toPosition)
+        public Picture Blend(Picture from, Picture to, Position toPosition)
         {
             var toPixels = to.CloneImage();
 
@@ -30,7 +30,7 @@ namespace Eede.Domain.ImageBlenders
                     toPixels[toPos + 3] = from[fromPos + 3];
                 }
             }
-            return PictureData.Create(to.Size, toPixels);
+            return Picture.Create(to.Size, toPixels);
         }
     }
 }

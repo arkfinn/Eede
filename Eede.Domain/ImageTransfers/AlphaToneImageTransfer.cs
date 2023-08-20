@@ -1,12 +1,11 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Scales;
-using Eede.Domain.Sizes;
 
 namespace Eede.Domain.ImageTransfers
 {
     public class AlphaToneImageTransfer : IImageTransfer
     {
-        public PictureData Transfer(PictureData src, Magnification magnification)
+        public Picture Transfer(Picture src, Magnification magnification)
         {
             var toStride = magnification.Magnify(src.Stride);
             int destWidth = magnification.Magnify(src.Width);
@@ -31,7 +30,7 @@ namespace Eede.Domain.ImageTransfers
                     destPixels[pos + 3] = 255;
                 }
             }
-            return PictureData.Create(new PictureSize(destWidth, destHeight), destPixels);
+            return Picture.Create(new PictureSize(destWidth, destHeight), destPixels);
         }
     }
 }

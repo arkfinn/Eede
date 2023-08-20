@@ -1,4 +1,5 @@
 ﻿using Eede.Domain.Pictures;
+using Eede.Domain.Positions;
 using System;
 using System.Drawing;
 
@@ -18,7 +19,7 @@ namespace Eede.Application.Pictures
 
         public Picture CutOutImage()
         {
-            return Picture.CutOut(Rect);
+            return Picture.CutOut(new PictureArea(new Position(Rect.X, Rect.Y), new PictureSize(Rect.Width, Rect.Height)));
         }
     }
 }

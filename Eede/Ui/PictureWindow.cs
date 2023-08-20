@@ -24,7 +24,7 @@ namespace Eede.Ui
             InitializeComponent();
             SaveTo = new FilePath("");
             using var image = new Bitmap(1, 1);
-            var picture = new Picture(PictureData.CreateBuffer(image));
+            var picture = BitmapConverter.ConvertBack(image);
             SetupPictureBuffer(picture);
         }
 
@@ -106,7 +106,7 @@ namespace Eede.Ui
 
             var transfer = new DirectImageTransfer();
             var data = PictureBuffer.Transfer(transfer);
-            using var dest = PictureData.CreateBitmap(data);
+            using var dest = BitmapConverter.Convert(data);
             g.PixelOffsetMode = PixelOffsetMode.Half;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
             g.DrawImage(dest, new Point(0, 0));

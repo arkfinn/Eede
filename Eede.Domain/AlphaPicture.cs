@@ -209,7 +209,7 @@ namespace Eede
             {
                 // TODO: ドットの打ち方は調整したい。1to 4ドット辺りまではrectで
                 g.CompositingMode = CompositingMode.SourceCopy;
-                g.DrawLine(p.PreparePen(), new PointF((float)x, (float)y), new PointF((float)x + 0.001f, (float)y + 0.01f));
+                //g.DrawLine(p.PreparePen(), new PointF((float)x, (float)y), new PointF((float)x + 0.001f, (float)y + 0.01f));
             }, p.Blender);
         }
 
@@ -218,7 +218,7 @@ namespace Eede
             return Draw(g =>
             {
                 g.CompositingMode = CompositingMode.SourceCopy;
-                g.DrawLine(p.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
+                //g.DrawLine(p.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
             }, p.Blender);
         }
 

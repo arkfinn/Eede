@@ -1,7 +1,7 @@
-﻿using Eede.Domain.Pictures;
+﻿using Eede.Domain.Colors;
+using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using System;
-using System.Drawing;
 
 namespace Eede.Domain.DrawStyles
 {
@@ -333,24 +333,24 @@ namespace Eede.Domain.DrawStyles
             return imageData;
         }
 
-        private static void drawPixel(byte[] imageArray, int stride, int x, int y, Color color)
+        private static void drawPixel(byte[] imageArray, int stride, int x, int y, ArgbColor color)
         {
             int index = x * 4 + stride * y;
-            imageArray[index] = color.B;
-            imageArray[index + 1] = color.G;
-            imageArray[index + 2] = color.R;
-            imageArray[index + 3] = color.A;
+            imageArray[index] = color.Blue;
+            imageArray[index + 1] = color.Green;
+            imageArray[index + 2] = color.Red;
+            imageArray[index + 3] = color.Alpha;
         }
 
-        private static void drawScanLine(byte[] imageArray, int stride, int x, int y, int toX, Color color)
+        private static void drawScanLine(byte[] imageArray, int stride, int x, int y, int toX, ArgbColor color)
         {
             int index = x * 4 + stride * y;
             for (int i = x; i <= toX; i++)
             {
-                imageArray[index] = color.B;
-                imageArray[index + 1] = color.G;
-                imageArray[index + 2] = color.R;
-                imageArray[index + 3] = color.A;
+                imageArray[index] = color.Blue;
+                imageArray[index + 1] = color.Green;
+                imageArray[index + 2] = color.Red;
+                imageArray[index + 3] = color.Alpha;
                 index += 4;
             }
         }

@@ -7,7 +7,7 @@ namespace Eede.Domain.DrawStyles
     {
         public void DrawBegin(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
         {
-            aBitmap.Fill(positions.Now, pen.PreparePen().Color);
+            //aBitmap.Fill(positions.Now, pen.PreparePen().Color);
         }
 
         public void Drawing(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)

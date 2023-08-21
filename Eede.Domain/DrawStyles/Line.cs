@@ -55,7 +55,7 @@ namespace Eede.Domain.DrawStyles
             using (Graphics g = aBitmap.GetGraphics())
             {
                 //    g.DrawImageUnscaled(Buffer, 0, 0,Buffer.Width,Buffer.Height);
-                g.DrawLine(pen.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
+                //g.DrawLine(pen.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
             }
         }
 

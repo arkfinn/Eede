@@ -1,4 +1,5 @@
 ﻿using Eede.Application.Drawings;
+using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
@@ -23,7 +24,7 @@ namespace Eede.Ui
             DrawableArea = new DrawableArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize, null);
             var picture = Picture.CreateEmpty(new PictureSize(defaultBoxSize.Width, defaultBoxSize.Height));
             SetupPicture(picture);
- 
+
             //canvas.Image = PictureBuffer.Fetch().ToImage();
             Disposed += (sender, args) =>
             {
@@ -84,8 +85,8 @@ namespace Eede.Ui
 
         public Color PenColor
         {
-            get => PenStyle.Color;
-            set => PenStyle = PenStyle.UpdateColor(value);
+            get => Color.FromArgb(PenStyle.Color.Alpha, PenStyle.Color.Red, PenStyle.Color.Green, PenStyle.Color.Blue);
+            set => PenStyle = PenStyle.UpdateColor(new ArgbColor(value.A, value.R, value.G, value.B));
         }
 
         public int PenSize

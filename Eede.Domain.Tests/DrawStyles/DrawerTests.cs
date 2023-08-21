@@ -1,12 +1,9 @@
-﻿using Eede.Domain.Files;
+﻿using Eede.Domain.Colors;
+using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
-using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Infrastructure.Pictures;
 using NUnit.Framework;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Eede.Domain.DrawStyles
 {
@@ -17,7 +14,7 @@ namespace Eede.Domain.DrawStyles
         public void DrawPointTest()
         {
             var src = ReadPicture(@"DrawStyles\test\base.png");
-            var drawer = new Drawer(src, new PenStyle(new DirectImageBlender(), Color.Black, 1));
+            var drawer = new Drawer(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1));
             var dst = drawer.DrawPoint(new Positions.Position(5, 5));
             //dstBmp.Save(@"DrawStyles\test\dest.png", ImageFormat.Png);
             var expected = ReadPicture(@"DrawStyles\test\point1.png");
@@ -28,7 +25,7 @@ namespace Eede.Domain.DrawStyles
         public void DrawEllipseTest()
         {
             var src = ReadPicture(@"DrawStyles\test\base.png");
-            var drawer = new Drawer(src, new PenStyle(new DirectImageBlender(), Color.Red, 1));
+            var drawer = new Drawer(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
             var dst = drawer.DrawEllipse(new Positions.Position(5, 5), new Positions.Position(10, 10));
             // dstBmp.Save(@"DrawStyles\test\ellipse1.png", ImageFormat.Png);
             var expected = ReadPicture(@"DrawStyles\test\ellipse1.png");
@@ -39,7 +36,7 @@ namespace Eede.Domain.DrawStyles
         public void DrawFillEllipseTest()
         {
             var src = ReadPicture(@"DrawStyles\test\base.png");
-            var drawer = new Drawer(src, new PenStyle(new DirectImageBlender(), Color.Red, 1));
+            var drawer = new Drawer(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
             var dst = drawer.DrawFillEllipse(new Positions.Position(5, 5), new Positions.Position(10, 10));
             // dstBmp.Save(@"DrawStyles\test\fillEllipse1.png", ImageFormat.Png);
             var expected = ReadPicture(@"DrawStyles\test\fillEllipse1.png");

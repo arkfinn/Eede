@@ -1,4 +1,5 @@
-﻿using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.Colors;
+using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;

@@ -44,7 +44,7 @@ namespace Eede.Ui
             Text = path.IsEmpty() ? "新規ファイル" : path.Path;
         }
 
-        private HalfBoxPosition CursorPosition;
+        private HalfBoxArea CursorPosition;
 
         private IDrawingArea DrawingArea;
 
@@ -121,15 +121,16 @@ namespace Eede.Ui
         private void DrawCursor(Graphics g)
         {
             if (!CursorVisible) return;
-            var rect = Rectangle.Empty;
+            PictureArea area;
             if (IsSelecting)
             {
-                rect = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
+                area = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
             }
             else
             {
-                rect = CursorPosition.CreateRealRectangle(DrawingArea.DrawingSize);
+                area = CursorPosition.CreateRealRectangle(new PictureSize(DrawingArea.DrawingSize.Width, DrawingArea.DrawingSize.Height));
             }
+            var rect = new Rectangle(area.X, area.Y, area.Width, area.Height);
 
             g.DrawRectangle(new Pen(Color.Yellow, 1), rect);
             var p = new Pen(Color.Red, 1)
@@ -161,7 +162,7 @@ namespace Eede.Ui
         }
 
         private bool IsSelecting = false;
-        private HalfBoxPosition SelectingPosition;
+        private HalfBoxArea SelectingPosition;
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -179,7 +180,8 @@ namespace Eede.Ui
                 case MouseButtons.Right:
                     // 範囲選択開始
                     IsSelecting = true;
-                    SelectingPosition = new HalfBoxPosition(FetchBoxSize(), e.Location);
+                    var size = FetchBoxSize();
+                    SelectingPosition = HalfBoxArea.Create(new PictureSize(size.Width, size.Height), new Position(e.Location.X, e.Location.Y));
                     break;
             }
         }
@@ -188,12 +190,15 @@ namespace Eede.Ui
         {
             if (IsSelecting)
             {
-                SelectingPosition = SelectingPosition.UpdatePosition(e.Location, new Size(PictureBuffer.Size.Width, PictureBuffer.Size.Height));
+                SelectingPosition = SelectingPosition.UpdatePosition(
+                    new Position(e.Location.X, e.Location.Y), 
+                    new PictureSize(PictureBuffer.Size.Width, PictureBuffer.Size.Height));
             }
             else
             {
                 CursorVisible = IsInnerPictureBox(new Position(e.Location.X, e.Location.Y));
-                CursorPosition = new HalfBoxPosition(FetchBoxSize(), e.Location);
+                var size = FetchBoxSize();
+                CursorPosition = HalfBoxArea.Create(new PictureSize(size.Width, size.Height), new Position(e.Location.X, e.Location.Y));
             }
             pictureBox1.Refresh();
         }
@@ -209,7 +214,8 @@ namespace Eede.Ui
                     // 範囲選択してるとき
                     if (IsSelecting)
                     {
-                        var rect = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
+                        var area = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
+                        var rect = new Rectangle(area.X, area.Y, area.Width, area.Height);
                         InvokePicturePulled(new PicturePulledEventArgs(PictureBuffer, rect));
                         IsSelecting = false;
                     }

@@ -1,5 +1,6 @@
 ﻿using Eede.Application.Drawings;
 using Eede.Domain.Colors;
+using Eede.Domain.Drawings;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;

@@ -13,6 +13,7 @@ using System.Drawing.Imaging;
 using System.Drawing;
 using System.Windows.Forms;
 using Eede.Application.UseCase.Pictures;
+using Eede.Domain.DrawStyles;
 
 namespace Eede
 {
@@ -334,6 +335,20 @@ namespace Eede
         {
             var action = new DrawAction(paintableBox1, e.PreviousPicture, e.NowPicture);
             AddUndoItem(action);
+        }
+
+        private void freeCurveToolButton_Click(object sender, EventArgs e)
+        {
+            paintableBox1.DrawStyle = new FreeCurve();
+            freeCurveToolButton.Checked = true;
+            lineToolButton.Checked = false;
+        }
+
+        private void lineToolButton_Click(object sender, EventArgs e)
+        {
+            paintableBox1.DrawStyle = new Line();
+            freeCurveToolButton.Checked = false;
+            lineToolButton.Checked = true;
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Eede.Domain.Positions
             StartPosition = startPosition;
         }
 
-        public PictureArea CreateRealRectangle(PictureSize size)
+        public PictureArea CreateRealArea(PictureSize size)
         {
             return new PictureArea(RealPosition, size);
         }

@@ -1,4 +1,5 @@
 ﻿using Eede.Application.PaintLayers;
+using Eede.Domain.Drawings;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
@@ -113,9 +114,8 @@ namespace Eede.Application.Drawings
                 return new DrawingResult(picture, this);
             }
 
-            var drawer = new Drawer(picture.Previous, penStyle);
-            var result = drawStyle.DrawStart(drawer, nextHistory, isShift);
-            return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
+            var result = drawStyle.DrawStart(picture, penStyle, nextHistory, isShift);
+            return new DrawingResult(result, UpdatePositionHistory(nextHistory));
         }
 
         public DrawingResult Move(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
@@ -125,9 +125,8 @@ namespace Eede.Application.Drawings
             {
                 return new DrawingResult(picture, UpdatePositionHistory(nextHistory));
             }
-            var drawer = new Drawer(picture.Fetch(), penStyle);
-            var result = drawStyle.Drawing(drawer, nextHistory, isShift);
-            return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
+            var result = drawStyle.Drawing(picture, penStyle, nextHistory, isShift);
+            return new DrawingResult(result, UpdatePositionHistory(nextHistory));
         }
 
         public DrawingResult DrawEnd(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
@@ -136,11 +135,9 @@ namespace Eede.Application.Drawings
             {
                 return new DrawingResult(picture, this);
             }
-
             var nextHistory = NextPositionHistory(PositionHistory, displayPosition);
-            var drawer = new Drawer(picture.Fetch(), penStyle);
-            var result = drawStyle.DrawEnd(drawer, nextHistory, isShift);
-            return new DrawingResult(picture.DecideDrawing(result), ClearPositionHistory());
+            var result = drawStyle.DrawEnd(picture, penStyle, nextHistory, isShift);
+            return new DrawingResult(result, ClearPositionHistory());
         }
 
         public DrawingResult DrawCancel(DrawingBuffer picture)

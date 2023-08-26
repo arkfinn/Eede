@@ -1,119 +1,55 @@
-﻿using Eede.Domain.Positions;
+﻿using Eede.Domain.Drawings;
+using Eede.Domain.Pictures;
+using Eede.Domain.Positions;
 using System;
-using System.Drawing;
 
 namespace Eede.Domain.DrawStyles
 {
     // 実装内容を再検討する
-    public class Line //: IPenStyle
+    public class Line : IDrawStyle
     {
-        #region IPenStyle メンバ
-
-        private Bitmap mBuffer;
-
-        public Bitmap Buffer
+        public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            get { return mBuffer; }
-            set { mBuffer = value; }
+            var drawer = new Drawer(buffer.Previous, penStyle);
+            return buffer.UpdateDrawing(drawer.DrawPoint(positionHistory.Now));
         }
 
-        public AlphaPicture DrawStart(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
+        public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            aBitmap.DrawPoint(pen, positions.Now);
-            Buffer = new Bitmap(aBitmap.Bmp);
-            return aBitmap;
+            var drawer = new Drawer(buffer.Previous, penStyle);
+            return buffer.UpdateDrawing(Draw(drawer, positionHistory, isShift));
         }
 
-        public AlphaPicture DrawEnd(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
+        public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            return aBitmap;
+            var drawer = new Drawer(buffer.Previous, penStyle);
+            return buffer.DecideDrawing(Draw(drawer, positionHistory, isShift));
         }
 
-        public AlphaPicture Drawing(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
+        private Picture Draw(Drawer drawer, PositionHistory positionHistory, bool isShift)
         {
-            Position endPoint;
-            endPoint = isShift ?
-                GetShiftLinePos(positions.Start, positions.Now) :
-                positions.Now;
-
-            Rectangle lastRect = new Rectangle(0, 0, 200, 200);
-
-            if (aBitmap.Contains(positions.Now))
-            {
-                DrawLine(aBitmap, pen, positions.Start, endPoint, lastRect);
-            }
-            else if (aBitmap.Contains(positions.Start))
-            {
-                DrawLine(aBitmap, pen, endPoint, positions.Start, lastRect);
-            }
-            return aBitmap;
+            Position to = isShift ? CalculateShiftedPosition(positionHistory.Start, positionHistory.Now) : positionHistory.Now;
+            return drawer.DrawLine(positionHistory.Start, to);
         }
 
-        private void DrawLine(AlphaPicture aBitmap, PenStyle pen, Position beginPos, Position endPos, Rectangle lastRect)
+        private Position CalculateShiftedPosition(Position beginPos, Position endPos)
         {
-            aBitmap.Bmp = new Bitmap(Buffer);
-            using (Graphics g = aBitmap.GetGraphics())
-            {
-                //    g.DrawImageUnscaled(Buffer, 0, 0,Buffer.Width,Buffer.Height);
-                //g.DrawLine(pen.PreparePen(), beginPos.ToPoint(), endPos.ToPoint());
-            }
-        }
-
-        #endregion IPenStyle メンバ
-
-        private Position GetShiftLinePos(Position beginPos, Position endPos)
-        {
-            Point margin = new Point(endPos.X - beginPos.X, endPos.Y - beginPos.Y);
+            Position margin = new Position(endPos.X - beginPos.X, endPos.Y - beginPos.Y);
             int deg = (int)Math.Round(((Math.Atan2(margin.Y, margin.X) * 57.29578) + 180) / 22.5);
-            Point revise;
-            switch (deg)
+            Position revise = deg switch
             {
-                case 0:
-                case 15:
-                case 16:
-                    revise = new Point(-1, 0);
-                    break;
+                0 or 15 or 16 => new Position(-1, 0),
+                1 or 2 => new Position(-1, -1),
+                3 or 4 => new Position(0, -1),
+                5 or 6 => new Position(1, -1),
+                7 or 8 => new Position(1, 0),
+                9 or 10 => new Position(1, 1),
+                11 or 12 => new Position(0, 1),
+                13 or 14 => new Position(-1, 1),
+                _ => throw new InvalidOperationException("不正な計算によるエラー"),
+            };
 
-                case 1:
-                case 2:
-                    revise = new Point(-1, -1);
-                    break;
-
-                case 3:
-                case 4:
-                    revise = new Point(0, -1);
-                    break;
-
-                case 5:
-                case 6:
-                    revise = new Point(1, -1);
-                    break;
-
-                case 7:
-                case 8:
-                    revise = new Point(1, 0);
-                    break;
-
-                case 9:
-                case 10:
-                    revise = new Point(1, 1);
-                    break;
-
-                case 11:
-                case 12:
-                    revise = new Point(0, 1);
-                    break;
-
-                case 13:
-                case 14:
-                    revise = new Point(-1, 1);
-                    break;
-
-                default:
-                    throw new InvalidOperationException("不正な計算によるエラー");
-            }
-
-            //角度別に処理(強引)
+            // 角度別に処理(強引)
             int plusValue = Math.Max(Math.Abs(margin.X), Math.Abs(margin.Y));
             return new Position(
                 beginPos.X + (plusValue * revise.X),

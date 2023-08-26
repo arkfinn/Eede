@@ -124,11 +124,11 @@ namespace Eede.Ui
             PictureArea area;
             if (IsSelecting)
             {
-                area = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
+                area = SelectingPosition.CreateRealArea(SelectingPosition.BoxSize);
             }
             else
             {
-                area = CursorPosition.CreateRealRectangle(new PictureSize(DrawingArea.DrawingSize.Width, DrawingArea.DrawingSize.Height));
+                area = CursorPosition.CreateRealArea(new PictureSize(DrawingArea.DrawingSize.Width, DrawingArea.DrawingSize.Height));
             }
             var rect = new Rectangle(area.X, area.Y, area.Width, area.Height);
 
@@ -214,7 +214,7 @@ namespace Eede.Ui
                     // 範囲選択してるとき
                     if (IsSelecting)
                     {
-                        var area = SelectingPosition.CreateRealRectangle(SelectingPosition.BoxSize);
+                        var area = SelectingPosition.CreateRealArea(SelectingPosition.BoxSize);
                         var rect = new Rectangle(area.X, area.Y, area.Width, area.Height);
                         InvokePicturePulled(new PicturePulledEventArgs(PictureBuffer, rect));
                         IsSelecting = false;

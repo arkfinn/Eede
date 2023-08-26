@@ -1,7 +1,7 @@
 ﻿using Eede.Domain.Pictures;
 using System;
 
-namespace Eede.Application.Drawings
+namespace Eede.Domain.Drawings
 {
     public class DrawingBuffer : IDisposable
     {

@@ -149,7 +149,7 @@ namespace Eede.Ui
 
         private bool IsInnerPictureBox(Position p)
         {
-            return p.IsInnerOf(pictureBox1.Size);
+            return new PictureSize(pictureBox1.Size.Width, pictureBox1.Size.Height).Contains(p);
         }
 
         private Size FetchBoxSize()

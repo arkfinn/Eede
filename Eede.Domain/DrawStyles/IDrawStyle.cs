@@ -1,5 +1,4 @@
 ﻿using Eede.Domain.Drawings;
-using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 
 namespace Eede.Domain.DrawStyles

@@ -12,7 +12,7 @@ namespace Eede.Application.Drawings
 {
     public class DrawableArea
     {
-        public DrawableArea(ICanvasBackgroundService background, Magnification magnification, Size gridSize, PositionHistory positionHistory)
+        public DrawableArea(ICanvasBackgroundService background, Magnification magnification, PictureSize gridSize, PositionHistory positionHistory)
         {
             Background = background;
             Magnification = magnification;
@@ -24,11 +24,11 @@ namespace Eede.Application.Drawings
 
         private readonly Magnification Magnification;
 
-        private readonly Size GridSize;
+        private readonly PictureSize GridSize;
 
         private readonly PositionHistory PositionHistory;
 
-        private MagnifiedSize Magnify(Size size)
+        private MagnifiedSize Magnify(PictureSize size)
         {
             return new MagnifiedSize(size, Magnification);
         }
@@ -37,7 +37,7 @@ namespace Eede.Application.Drawings
         {
             var source = buffer.Fetch();
             // 表示上のサイズ・ポジション DisplaySize DisplayPosition
-            var displaySize = Magnify(new Size(source.Size.Width, source.Size.Height));
+            var displaySize = Magnify(source.Size);
             var backgroundLayer = new PaintBackgroundLayer(Background);
             backgroundLayer.Paint(g);
 
@@ -78,7 +78,8 @@ namespace Eede.Application.Drawings
 
         public Size DisplaySizeOf(Picture picture)
         {
-            return Magnify(new Size(picture.Size.Width, picture.Size.Height)).ToSize();
+            var size = Magnify(picture.Size);
+            return new Size(size.Width, size.Height);
         }
 
         public Color PickColor(Picture picture, Position displayPosition)

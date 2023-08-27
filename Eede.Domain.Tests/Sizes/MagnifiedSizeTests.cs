@@ -1,4 +1,5 @@
-﻿using Eede.Domain.Scales;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Scales;
 using NUnit.Framework;
 using System;
 using System.Drawing;
@@ -11,10 +12,8 @@ namespace Eede.Domain.Sizes.Tests
         [Test]
         public void MagnifiedSizeTest()
         {
-            var size = new MagnifiedSize(new Size(8, 4), new Magnification(8));
-            Assert.AreEqual(64, size.Width);
-            Assert.AreEqual(32, size.Height);
-            Assert.AreEqual(new Size(64, 32), size.ToSize());
+            var size = new MagnifiedSize(new PictureSize(8, 4), new Magnification(8));
+            Assert.That(new int[] { size.Width, size.Height }, Is.EqualTo(new int[] { 64, 32 }));
         }
 
         [Test]
@@ -22,7 +21,7 @@ namespace Eede.Domain.Sizes.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                var size = new MagnifiedSize(new Size(0, 0), null);
+                var size = new MagnifiedSize(new PictureSize(0, 0), null);
             });
         }
     }

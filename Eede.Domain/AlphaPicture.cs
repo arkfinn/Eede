@@ -722,7 +722,7 @@ namespace Eede
 
         public bool Contains(Position pos)
         {
-            return pos.IsInnerOf(Bmp.Size);
+            return new Domain.Pictures.PictureSize(Bmp.Size.Width, Bmp.Size.Height).Contains(pos);
         }
 
         #region 演算

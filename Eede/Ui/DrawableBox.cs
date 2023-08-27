@@ -21,7 +21,7 @@ namespace Eede.Ui
         {
             InitializeComponent();
             var defaultBoxSize = GlobalSetting.Instance().BoxSize;
-            var gridSize = new Size(16, 16);
+            var gridSize = new PictureSize(16, 16);
             DrawableArea = new DrawableArea(CanvasBackgroundService.Instance, new Magnification(1), gridSize, null);
             var picture = Picture.CreateEmpty(new PictureSize(defaultBoxSize.Width, defaultBoxSize.Height));
             SetupPicture(picture);

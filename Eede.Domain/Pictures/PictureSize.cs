@@ -1,6 +1,5 @@
 ﻿using Eede.Domain.Positions;
 using System;
-using System.Drawing;
 
 namespace Eede.Domain.Pictures
 {

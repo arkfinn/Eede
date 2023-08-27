@@ -1,4 +1,4 @@
-﻿using Eede.ValueObjects;
+﻿using Eede.Domain.Colors;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -60,28 +60,37 @@ namespace Eede.Ui
                     break;
 
                 case ColorPickerMode.HSV:
-                    Color tmp = HsvColor.FromHsv(pickerR.Value, pickerG.Value, pickerB.Value).ToColor();
+                    Color tmp = ConvertHsvColor(HsvColor.FromHsv(pickerR.Value, pickerG.Value, pickerB.Value));
                     r = tmp.R;
                     g = tmp.G;
                     b = tmp.B;
                     pickerR.GradationColor = new Color[] {
-                        Color.FromArgb(255, 0, 255), Color.FromArgb(0, 0, 255),
-                        Color.FromArgb(0, 255, 255),  Color.FromArgb(0, 255, 0),
-                        Color.FromArgb(255, 255, 0), Color.FromArgb(255, 0, 0),
+                        Color.FromArgb(255, 0, 255), 
+                        Color.FromArgb(0, 0, 255),
+                        Color.FromArgb(0, 255, 255),  
+                        Color.FromArgb(0, 255, 0),
+                        Color.FromArgb(255, 255, 0), 
+                        Color.FromArgb(255, 0, 0),
                     };
                     pickerG.GradationColor = new Color[] {
-                        HsvColor.FromHsv(pickerR.Value, 255, pickerB.Value).ToColor(),
-                        HsvColor.FromHsv(pickerR.Value, 0, pickerB.Value).ToColor()
+                        ConvertHsvColor(HsvColor.FromHsv(pickerR.Value, 255, pickerB.Value)),
+                        ConvertHsvColor(HsvColor.FromHsv(pickerR.Value, 0, pickerB.Value))
                     };
                     pickerB.GradationColor = new Color[] {
-                        HsvColor.FromHsv(pickerR.Value, pickerG.Value, 255).ToColor(),
-                        HsvColor.FromHsv(pickerR.Value, pickerG.Value, 0).ToColor()
+                        ConvertHsvColor(HsvColor.FromHsv(pickerR.Value, pickerG.Value, 255)),
+                        ConvertHsvColor(HsvColor.FromHsv(pickerR.Value, pickerG.Value, 0))
                     };
                     break;
 
                 default:
                     break;
             }
+        }
+
+        private Color ConvertHsvColor(HsvColor hsvColor)
+        {
+            var color = hsvColor.ToArgbColor();
+            return Color.FromArgb(color.Red, color.Green, color.Blue);
         }
 
         //private Hsv GetHsvFromRgb(int R, int G, int B)
@@ -210,9 +219,9 @@ namespace Eede.Ui
                     mode = ColorPickerMode.Empty;
                     HsvColor hsv = HsvColor.FromRgb(r, g, b);
                     pickerR.Maximum = 360;
-                    pickerR.Value = hsv.H;
-                    pickerG.Value = hsv.S;
-                    pickerB.Value = hsv.V;
+                    pickerR.Value = hsv.Hue;
+                    pickerG.Value = hsv.Saturation;
+                    pickerB.Value = hsv.Value;
                     mode = ColorPickerMode.HSV;
                     break;
 

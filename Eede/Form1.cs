@@ -342,6 +342,7 @@ namespace Eede
             paintableBox1.DrawStyle = new FreeCurve();
             freeCurveToolButton.Checked = true;
             lineToolButton.Checked = false;
+            fillToolButton.Checked = false;
         }
 
         private void lineToolButton_Click(object sender, EventArgs e)
@@ -349,6 +350,17 @@ namespace Eede
             paintableBox1.DrawStyle = new Line();
             freeCurveToolButton.Checked = false;
             lineToolButton.Checked = true;
+            fillToolButton.Checked = false;
+
+        }
+
+        private void fillToolButton_Click(object sender, EventArgs e)
+        {
+            paintableBox1.DrawStyle = new Fill();
+            freeCurveToolButton.Checked = false;
+            lineToolButton.Checked = false;
+            fillToolButton.Checked = true;
+
         }
     }
 }

@@ -14,5 +14,20 @@
             Green = green;
             Red = red;
         }
+
+        public bool EqualsRgb(ArgbColor other)
+        {
+            return Red == other.Red
+                && Green == other.Green
+                && Blue == other.Blue;
+        }
+
+        public bool EqualsArgb(ArgbColor other)
+        {
+            return Alpha == other.Alpha
+                && Red == other.Red
+                && Green == other.Green
+                && Blue == other.Blue;
+        }
     }
 }

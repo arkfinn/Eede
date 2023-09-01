@@ -59,6 +59,7 @@
             toolStrip4 = new System.Windows.Forms.ToolStrip();
             freeCurveToolButton = new System.Windows.Forms.ToolStripButton();
             lineToolButton = new System.Windows.Forms.ToolStripButton();
+            fillToolButton = new System.Windows.Forms.ToolStripButton();
             penSizeSetter1 = new Ui.PenSizeSetter();
             paintableBox1 = new Ui.DrawableBox();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
@@ -362,7 +363,7 @@
             // toolStrip4
             // 
             toolStrip4.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            toolStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { freeCurveToolButton, lineToolButton });
+            toolStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { freeCurveToolButton, lineToolButton, fillToolButton });
             toolStrip4.Location = new System.Drawing.Point(0, 0);
             toolStrip4.Name = "toolStrip4";
             toolStrip4.Padding = new System.Windows.Forms.Padding(4, 0, 4, 0);
@@ -391,6 +392,16 @@
             lineToolButton.Size = new System.Drawing.Size(23, 22);
             lineToolButton.Text = "toolStripButton3";
             lineToolButton.Click += lineToolButton_Click;
+            // 
+            // fillToolButton
+            // 
+            fillToolButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            fillToolButton.Image = (System.Drawing.Image)resources.GetObject("fillToolButton.Image");
+            fillToolButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            fillToolButton.Name = "fillToolButton";
+            fillToolButton.Size = new System.Drawing.Size(23, 22);
+            fillToolButton.Text = "fillToolButton";
+            fillToolButton.Click += fillToolButton_Click;
             // 
             // penSizeSetter1
             // 
@@ -569,6 +580,7 @@
         private System.Windows.Forms.ToolStrip toolStrip4;
         private System.Windows.Forms.ToolStripButton freeCurveToolButton;
         private System.Windows.Forms.ToolStripButton lineToolButton;
+        private System.Windows.Forms.ToolStripButton fillToolButton;
     }
 }
 

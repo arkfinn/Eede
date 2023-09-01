@@ -2,6 +2,8 @@
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace Eede.Domain.DrawStyles
 {
@@ -352,6 +354,117 @@ namespace Eede.Domain.DrawStyles
                 imageArray[index + 2] = color.Red;
                 imageArray[index + 3] = color.Alpha;
                 index += 4;
+            }
+        }
+
+        public Picture Fill(Position from)
+        {
+            return DrawingPicture.Draw(dest =>
+            {
+                int cWidth = dest.Width;
+                int cHeight = dest.Height;
+                var color = PenStyle.Color;
+
+                ArgbColor baseCol = dest.PickColor(from);
+
+                if (color.EqualsArgb(baseCol))
+                {
+                    return dest;
+                }
+                byte[] image = dest.CloneImage();
+                Stack<Position> buffer = new();
+                buffer.Push(from);
+                //Pen p = new Pen(col);
+                while (buffer.Count > 0)
+                {
+                    Position point = buffer.Pop();
+                    int sy = dest.Stride * point.Y;
+                    int index = point.X * 4 + sy;
+
+                    /* skip already painted */
+                    if (color.EqualsArgb(PickColor(image, index)))
+                    {
+                        continue;
+                    }
+
+                    int leftX = point.X;
+                    int rightX = point.X;
+                    /* search left point */
+                    for (; 0 < leftX; leftX--)
+                    {
+                        int leftIndex = (leftX - 1) * 4 + sy;
+                        if (!baseCol.EqualsArgb(PickColor(image, leftIndex)))
+                        {
+                            break;
+                        }
+                    }
+                    /* search right point */
+                    for (; rightX < cWidth - 1; rightX++)
+                    {
+                        int rightIndex = (rightX + 1) * 4 + sy;
+                        if (!baseCol.EqualsArgb(PickColor(image, rightIndex)))
+                        {
+                            break;
+                        }
+                    }
+                    /* paint from leftX to rightX */
+                    if (leftX == rightX)
+                    {
+                        drawPixel(image, dest.Stride, leftX, point.Y, color);
+                    }
+                    else
+                    {
+                        drawScanLine(image, dest.Stride, leftX, point.Y, rightX, color);
+                    }
+                    /* search next lines */
+                    if (point.Y + 1 < cHeight)
+                    {
+                        scanLine(image, leftX, rightX, point.Y + 1, dest.Stride, buffer, baseCol);
+                    }
+                    if (point.Y - 1 >= 0)
+                    {
+                        scanLine(image, leftX, rightX, point.Y - 1, dest.Stride, buffer, baseCol);
+                    }
+                }
+                return Picture.Create(dest.Size, image);
+            }, PenStyle.Blender);
+        }
+
+        private static ArgbColor PickColor(byte[] image, int index)
+        {
+            return new ArgbColor(
+                image[index + 3],
+                image[index + 2],
+                image[index + 1],
+                image[index]);
+        }
+
+        private void scanLine(byte[] image, int leftX, int rightX, int y, int stride, Stack<Position> buffer, ArgbColor baseCol)
+        {
+            int sy = stride * y;
+            while (leftX <= rightX)
+            {
+                for (; leftX <= rightX; leftX++)
+                {
+                    int index = leftX * 4 + sy;
+                    if (baseCol.EqualsArgb(PickColor(image, index)))
+                    {
+                        break;
+                    }
+                }
+                if (rightX < leftX)
+                {
+                    break;
+                }
+                for (; leftX <= rightX; leftX++)
+                {
+                    int index = leftX * 4 + sy;
+                    if (!baseCol.EqualsArgb(PickColor(image, index)))
+                    {
+                        break;
+                    }
+                }
+                buffer.Push(new Position(leftX - 1, y));
             }
         }
 

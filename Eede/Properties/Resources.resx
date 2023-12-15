@@ -181,4 +181,19 @@
   <data name="InvisibleBackground" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\invisiblebackground.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="pen_fill" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\pen_fill.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pen_free" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\pen_free.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pen_line" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\pen_line.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tool_enable_alpha" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\tool_enable_alpha.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tool_size" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\tool_size.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

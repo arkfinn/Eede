@@ -19,10 +19,10 @@ namespace Eede.Properties {
     // または Visual Studio のようなツールを使用して自動生成されました。
     // メンバーを追加または削除するには、.ResX ファイルを編集して、/str オプションと共に
     // ResGen を実行し直すか、または VS プロジェクトをビルドし直します。
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Eede.Properties {
         ///   このクラスで使用されているキャッシュされた ResourceManager インスタンスを返します。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Eede.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace Eede.Properties {
         ///   現在のスレッドの CurrentUICulture プロパティをオーバーライドします。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap Copy_6524 {
+        public static System.Drawing.Bitmap Copy_6524 {
             get {
                 object obj = ResourceManager.GetObject("Copy_6524", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -73,7 +73,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap Cut_6523 {
+        public static System.Drawing.Bitmap Cut_6523 {
             get {
                 object obj = ResourceManager.GetObject("Cut_6523", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -83,7 +83,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap InvisibleBackground {
+        public static System.Drawing.Bitmap InvisibleBackground {
             get {
                 object obj = ResourceManager.GetObject("InvisibleBackground", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -93,7 +93,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap mag1 {
+        public static System.Drawing.Bitmap mag1 {
             get {
                 object obj = ResourceManager.GetObject("mag1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -103,7 +103,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap mag12 {
+        public static System.Drawing.Bitmap mag12 {
             get {
                 object obj = ResourceManager.GetObject("mag12", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -113,7 +113,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap mag2 {
+        public static System.Drawing.Bitmap mag2 {
             get {
                 object obj = ResourceManager.GetObject("mag2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -123,7 +123,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap mag4 {
+        public static System.Drawing.Bitmap mag4 {
             get {
                 object obj = ResourceManager.GetObject("mag4", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -133,7 +133,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap mag6 {
+        public static System.Drawing.Bitmap mag6 {
             get {
                 object obj = ResourceManager.GetObject("mag6", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -143,7 +143,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap mag8 {
+        public static System.Drawing.Bitmap mag8 {
             get {
                 object obj = ResourceManager.GetObject("mag8", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -153,7 +153,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap NewFile_6276 {
+        public static System.Drawing.Bitmap NewFile_6276 {
             get {
                 object obj = ResourceManager.GetObject("NewFile_6276", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -163,7 +163,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap Open_6529 {
+        public static System.Drawing.Bitmap Open_6529 {
             get {
                 object obj = ResourceManager.GetObject("Open_6529", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -173,7 +173,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap PaintFormBackGround {
+        public static System.Drawing.Bitmap PaintFormBackGround {
             get {
                 object obj = ResourceManager.GetObject("PaintFormBackGround", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -183,7 +183,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap Paste_6520 {
+        public static System.Drawing.Bitmap Paste_6520 {
             get {
                 object obj = ResourceManager.GetObject("Paste_6520", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -193,7 +193,37 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap Redo_16x {
+        public static System.Drawing.Bitmap pen_fill {
+            get {
+                object obj = ResourceManager.GetObject("pen_fill", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap pen_free {
+            get {
+                object obj = ResourceManager.GetObject("pen_free", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap pen_line {
+            get {
+                object obj = ResourceManager.GetObject("pen_line", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap Redo_16x {
             get {
                 object obj = ResourceManager.GetObject("Redo_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -203,7 +233,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap Save_6530 {
+        public static System.Drawing.Bitmap Save_6530 {
             get {
                 object obj = ResourceManager.GetObject("Save_6530", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -213,7 +243,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap Saveall_6518 {
+        public static System.Drawing.Bitmap Saveall_6518 {
             get {
                 object obj = ResourceManager.GetObject("Saveall_6518", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -223,7 +253,27 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap Undo_16x {
+        public static System.Drawing.Bitmap tool_enable_alpha {
+            get {
+                object obj = ResourceManager.GetObject("tool_enable_alpha", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap tool_size {
+            get {
+                object obj = ResourceManager.GetObject("tool_size", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap Undo_16x {
             get {
                 object obj = ResourceManager.GetObject("Undo_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -233,7 +283,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap unko {
+        public static System.Drawing.Bitmap unko {
             get {
                 object obj = ResourceManager.GetObject("unko", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -243,7 +293,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap viewalpha {
+        public static System.Drawing.Bitmap viewalpha {
             get {
                 object obj = ResourceManager.GetObject("viewalpha", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -253,7 +303,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap viewcolor {
+        public static System.Drawing.Bitmap viewcolor {
             get {
                 object obj = ResourceManager.GetObject("viewcolor", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -263,7 +313,7 @@ namespace Eede.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap viewmix {
+        public static System.Drawing.Bitmap viewmix {
             get {
                 object obj = ResourceManager.GetObject("viewmix", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));

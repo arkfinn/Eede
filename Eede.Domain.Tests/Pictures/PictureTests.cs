@@ -1,4 +1,5 @@
 ﻿using Eede.Application.Pictures;
+using Eede.Domain.Colors;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using NUnit.Framework;
@@ -25,7 +26,7 @@ namespace Eede.Domain.Tests.Pictures
             using Bitmap b = new(10, 10);
             b.SetPixel(1, 2, Color.DarkSeaGreen);
             b.SetPixel(2, 3, Color.Beige);
-            Colors.ArgbColor color = BitmapConverter.ConvertBack(b).PickColor(new Position(x, y));
+            ArgbColor color = BitmapConverter.ConvertBack(b).PickColor(new Position(x, y));
             Assert.That(
                 Tuple.Create(color.Alpha, color.Red, color.Green, color.Blue),
                 Is.EqualTo(Tuple.Create(expected.A, expected.R, expected.G, expected.B)));
@@ -54,7 +55,7 @@ namespace Eede.Domain.Tests.Pictures
             b.SetPixel(1, 2, Color.DarkSeaGreen);
             b.SetPixel(2, 3, Color.Beige);
             Picture d = BitmapConverter.ConvertBack(b).CutOut(new PictureArea(new Position(1, 2), new PictureSize(5, 6)));
-            Colors.ArgbColor color = d.PickColor(new Position(x, y));
+            ArgbColor color = d.PickColor(new Position(x, y));
             Assert.That(
                 Tuple.Create(color.Alpha, color.Red, color.Green, color.Blue),
                 Is.EqualTo(Tuple.Create(expected.A, expected.R, expected.G, expected.B)));

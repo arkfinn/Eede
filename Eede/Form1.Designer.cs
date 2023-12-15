@@ -299,7 +299,7 @@
             // toolStripButton2
             // 
             toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            toolStripButton2.Image = (System.Drawing.Image)resources.GetObject("toolStripButton2.Image");
+            toolStripButton2.Image = Properties.Resources.tool_size;
             toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
             toolStripButton2.Name = "toolStripButton2";
             toolStripButton2.Size = new System.Drawing.Size(23, 22);
@@ -376,7 +376,7 @@
             freeCurveToolButton.Checked = true;
             freeCurveToolButton.CheckState = System.Windows.Forms.CheckState.Checked;
             freeCurveToolButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            freeCurveToolButton.Image = (System.Drawing.Image)resources.GetObject("freeCurveToolButton.Image");
+            freeCurveToolButton.Image = Properties.Resources.pen_free;
             freeCurveToolButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             freeCurveToolButton.Name = "freeCurveToolButton";
             freeCurveToolButton.Size = new System.Drawing.Size(23, 22);
@@ -386,7 +386,7 @@
             // lineToolButton
             // 
             lineToolButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            lineToolButton.Image = (System.Drawing.Image)resources.GetObject("lineToolButton.Image");
+            lineToolButton.Image = Properties.Resources.pen_line;
             lineToolButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             lineToolButton.Name = "lineToolButton";
             lineToolButton.Size = new System.Drawing.Size(23, 22);
@@ -396,7 +396,7 @@
             // fillToolButton
             // 
             fillToolButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            fillToolButton.Image = (System.Drawing.Image)resources.GetObject("fillToolButton.Image");
+            fillToolButton.Image = Properties.Resources.pen_fill;
             fillToolButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             fillToolButton.Name = "fillToolButton";
             fillToolButton.Size = new System.Drawing.Size(23, 22);
@@ -460,7 +460,7 @@
             // 
             alphaTransferButton.CheckOnClick = true;
             alphaTransferButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            alphaTransferButton.Image = (System.Drawing.Image)resources.GetObject("alphaTransferButton.Image");
+            alphaTransferButton.Image = Properties.Resources.tool_enable_alpha;
             alphaTransferButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             alphaTransferButton.Name = "alphaTransferButton";
             alphaTransferButton.Size = new System.Drawing.Size(21, 20);

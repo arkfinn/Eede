@@ -14,8 +14,8 @@ namespace Eede.Actions
         public DrawAction(DrawableBox parentBox, Picture nowPicture, Picture drewPicture)
         {
             ParentBox = parentBox ?? throw new ArgumentNullException(nameof(parentBox));
-            NowPicture = (nowPicture ?? throw new ArgumentNullException(nameof(nowPicture)));
-            PulledPicture = (drewPicture ?? throw new ArgumentNullException(nameof(drewPicture)));
+            NowPicture = nowPicture ?? throw new ArgumentNullException(nameof(nowPicture));
+            PulledPicture = drewPicture ?? throw new ArgumentNullException(nameof(drewPicture));
         }
 
         public void Do()

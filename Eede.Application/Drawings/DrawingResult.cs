@@ -1,9 +1,8 @@
 ﻿using Eede.Domain.Drawings;
-using System;
 
 namespace Eede.Application.Drawings
 {
-    public class DrawingResult : IDisposable
+    public class DrawingResult
     {
         public readonly DrawingBuffer PictureBuffer;
         public readonly DrawableArea DrawableArea;
@@ -12,11 +11,6 @@ namespace Eede.Application.Drawings
         {
             PictureBuffer = picture;
             DrawableArea = runner;
-        }
-
-        public void Dispose()
-        {
-            PictureBuffer.Dispose();
         }
     }
 }

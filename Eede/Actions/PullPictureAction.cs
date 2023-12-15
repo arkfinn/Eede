@@ -15,7 +15,7 @@ namespace Eede.Actions
         {
             ParentBox = parentBox ?? throw new ArgumentNullException(nameof(parentBox));
             NowPicture = ParentBox.GetImage();
-            PulledPicture = (pulledImage ?? throw new ArgumentNullException(nameof(pulledImage)));
+            PulledPicture = pulledImage ?? throw new ArgumentNullException(nameof(pulledImage));
         }
 
         public void Do()

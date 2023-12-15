@@ -31,8 +31,7 @@ namespace Eede.Ui
 
         private void fireColorChanged()
         {
-            if (this.ColorChanged != null)
-                this.ColorChanged(this, EventArgs.Empty);
+            ColorChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private ColorPickerMode mode = ColorPickerMode.RGB;
@@ -65,11 +64,11 @@ namespace Eede.Ui
                     g = tmp.G;
                     b = tmp.B;
                     pickerR.GradationColor = new Color[] {
-                        Color.FromArgb(255, 0, 255), 
+                        Color.FromArgb(255, 0, 255),
                         Color.FromArgb(0, 0, 255),
-                        Color.FromArgb(0, 255, 255),  
+                        Color.FromArgb(0, 255, 255),
                         Color.FromArgb(0, 255, 0),
-                        Color.FromArgb(255, 255, 0), 
+                        Color.FromArgb(255, 255, 0),
                         Color.FromArgb(255, 0, 0),
                     };
                     pickerG.GradationColor = new Color[] {
@@ -89,7 +88,7 @@ namespace Eede.Ui
 
         private Color ConvertHsvColor(HsvColor hsvColor)
         {
-            var color = hsvColor.ToArgbColor();
+            ArgbColor color = hsvColor.ToArgbColor();
             return Color.FromArgb(color.Red, color.Green, color.Blue);
         }
 

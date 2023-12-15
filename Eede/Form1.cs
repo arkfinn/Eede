@@ -1,5 +1,7 @@
 ﻿using Eede.Actions;
 using Eede.Application.Pictures;
+using Eede.Application.UseCase.Pictures;
+using Eede.Domain.DrawStyles;
 using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
@@ -9,11 +11,8 @@ using Eede.Infrastructure.Pictures;
 using Eede.Settings;
 using Eede.Ui;
 using System;
-using System.Drawing.Imaging;
 using System.Drawing;
 using System.Windows.Forms;
-using Eede.Application.UseCase.Pictures;
-using Eede.Domain.DrawStyles;
 
 namespace Eede
 {
@@ -48,17 +47,15 @@ namespace Eede
 
         private void CreateNewPicture()
         {
-            using (var dialog = new SizeSelectDialog())
+            using SizeSelectDialog dialog = new();
+            _ = dialog.ShowDialog();
+            if (dialog.DialogResult != DialogResult.OK)
             {
-                dialog.ShowDialog();
-                if (dialog.DialogResult != DialogResult.OK)
-                {
-                    return;
-                }
-                var size = dialog.PictureSize;
-                // TODO: pictureがDisposeされないが、別の修正でそもそもpictureからIDisposableを取る
-                AddChildWindow(new CreatePictureUseCase().Execute(size));
+                return;
             }
+            Size size = dialog.PictureSize;
+            // TODO: pictureがDisposeされないが、別の修正でそもそもpictureからIDisposableを取る
+            AddChildWindow(new CreatePictureUseCase().Execute(size));
         }
 
         private void OpenPictureFromDialog()
@@ -74,19 +71,21 @@ namespace Eede
         {
             try
             {
-                var picture = new PictureFileReader(filename).Read();
+                Picture picture = new PictureFileReader(filename).Read();
                 AddChildWindow(new PictureFile(filename, picture));
             }
             catch (Exception)
             {
-                MessageBox.Show("ファイルの読み込みに失敗しました");
+                _ = MessageBox.Show("ファイルの読み込みに失敗しました");
             }
         }
 
         private void AddChildWindow(PictureFile file)
         {
-            var form = new PictureWindow(file.FilePath, file.Picture, paintableBox1);
-            form.MdiParent = this;
+            PictureWindow form = new(file.FilePath, file.Picture, paintableBox1)
+            {
+                MdiParent = this
+            };
             form.FormClosed += new FormClosedEventHandler(ChildFormClosed);
             form.PicturePulled += new EventHandler<PicturePulledEventArgs>(ChildFormPicturePulled);
             form.PicturePushed += new EventHandler<PicturePushedEventArgs>(ChildFormPicturePushed);
@@ -96,14 +95,18 @@ namespace Eede
 
         private void ChildFormClosed(object sender, FormClosedEventArgs e)
         {
-            if (MdiChildren.Length > 1) return;
+            if (MdiChildren.Length > 1)
+            {
+                return;
+            }
+
             toolStripButton_saveFile.Enabled = false;
         }
 
         private void ChildFormPicturePulled(object sender, PicturePulledEventArgs e)
         {
-            var picture = e.CutOutImage();
-            var action = new PullPictureAction(paintableBox1, picture);
+            Picture picture = e.CutOutImage();
+            PullPictureAction action = new(paintableBox1, picture);
             action.Do();
             AddUndoItem(action);
         }
@@ -112,10 +115,10 @@ namespace Eede
         {
             if (sender is PictureWindow)
             {
-                var window = sender as PictureWindow;
-                var src = paintableBox1.GetImage();
+                PictureWindow window = sender as PictureWindow;
+                Picture src = paintableBox1.GetImage();
 
-                var action = new PushPictureAction(window, e.Picture, src, PrepareImageBlender(), e.Position);
+                PushPictureAction action = new(window, e.Picture, src, PrepareImageBlender(), e.Position);
                 action.Do();
                 AddUndoItem(action);
 
@@ -124,17 +127,20 @@ namespace Eede
 
         private IImageBlender PrepareImageBlender()
         {
-            if (alphaTransferButton.Checked)
-            {
-                return new AlphaImageBlender();
-            }
-            return new DirectImageBlender();
+            return alphaTransferButton.Checked ? new AlphaImageBlender() : new DirectImageBlender();
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
-            if (!(ActiveMdiChild is PictureWindow child)) return;
-            if (child.IsEmptyFileName() && !RenameChildFile(child)) return;
+            if (ActiveMdiChild is not PictureWindow child)
+            {
+                return;
+            }
+
+            if (child.IsEmptyFileName() && !RenameChildFile(child))
+            {
+                return;
+            }
 
             child.Save();
         }
@@ -156,20 +162,13 @@ namespace Eede
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effect = DragDropEffects.All;
-            }
-            else
-            {
-                e.Effect = DragDropEffects.None;
-            }
+            e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.All : DragDropEffects.None;
         }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            foreach (var filename in files)
+            foreach (string filename in files)
             {
                 OpenPicture(new FilePath(filename));
             }
@@ -289,21 +288,19 @@ namespace Eede
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
-            using (var dialog = new BoxSizeSettingDialog())
+            using BoxSizeSettingDialog dialog = new();
+            dialog.SetBoxSize(GlobalSetting.Instance().BoxSize);
+            _ = dialog.ShowDialog();
+            if (dialog.DialogResult != DialogResult.OK)
             {
-                dialog.SetBoxSize(GlobalSetting.Instance().BoxSize);
-                dialog.ShowDialog();
-                if (dialog.DialogResult != DialogResult.OK)
-                {
-                    return;
-                }
-                GlobalSetting.Instance().BoxSize = dialog.GetInputBoxSize();
+                return;
             }
+            GlobalSetting.Instance().BoxSize = dialog.GetInputBoxSize();
         }
 
         #region Undo
 
-        private UndoSystem UndoSystem = new UndoSystem();
+        private UndoSystem UndoSystem = new();
 
         private void AddUndoItem(IUndoItem item)
         {
@@ -333,7 +330,7 @@ namespace Eede
 
         private void paintableBox1_Drew(object sender, Application.Drawings.DrawEventArgs e)
         {
-            var action = new DrawAction(paintableBox1, e.PreviousPicture, e.NowPicture);
+            DrawAction action = new(paintableBox1, e.PreviousPicture, e.NowPicture);
             AddUndoItem(action);
         }
 

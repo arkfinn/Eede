@@ -13,10 +13,8 @@ namespace Eede.Services
 
         public void PaintBackground(Graphics g)
         {
-            using (var tb = new TextureBrush(Properties.Resources.InvisibleBackground))
-            {
-                g.FillRectangle(tb, g.VisibleClipBounds);
-            }
+            using TextureBrush tb = new(Properties.Resources.InvisibleBackground);
+            g.FillRectangle(tb, g.VisibleClipBounds);
         }
     }
 }

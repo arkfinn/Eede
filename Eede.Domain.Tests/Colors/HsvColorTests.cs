@@ -1,7 +1,7 @@
 using Eede.Domain.Colors;
 using NUnit.Framework;
 
-namespace Eede.Colors.Tests
+namespace Eede.Domain.Tests.Colors
 {
     [TestFixture]
     public class HsvColorTests
@@ -15,7 +15,7 @@ namespace Eede.Colors.Tests
         [Test]
         public void TestCreate()
         {
-            HsvColor hsv = new HsvColor(1, 2, 3);
+            HsvColor hsv = new(1, 2, 3);
             Assert.AreEqual(1, hsv.Hue);
             Assert.AreEqual(2, hsv.Saturation);
             Assert.AreEqual(3, hsv.Value);

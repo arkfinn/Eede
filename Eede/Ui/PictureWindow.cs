@@ -23,8 +23,8 @@ namespace Eede.Ui
         {
             InitializeComponent();
             SaveTo = new FilePath("");
-            using var image = new Bitmap(1, 1);
-            var picture = BitmapConverter.ConvertBack(image);
+            using Bitmap image = new(1, 1);
+            Picture picture = BitmapConverter.ConvertBack(image);
             SetupPictureBuffer(picture);
         }
 
@@ -46,13 +46,17 @@ namespace Eede.Ui
 
         private HalfBoxArea CursorPosition;
 
-        private IDrawingArea DrawingArea;
+        private readonly IDrawingArea DrawingArea;
 
         public event EventHandler<PicturePulledEventArgs> PicturePulled;
 
         private void InvokePicturePulled(PicturePulledEventArgs args)
         {
-            if (PicturePulled == null) return;
+            if (PicturePulled == null)
+            {
+                return;
+            }
+
             PicturePulled(this, args);
         }
 
@@ -60,7 +64,11 @@ namespace Eede.Ui
 
         private void InvokePicturePushed(PicturePushedEventArgs args)
         {
-            if (PicturePushed == null) return;
+            if (PicturePushed == null)
+            {
+                return;
+            }
+
             PicturePushed(this, args);
         }
 
@@ -80,19 +88,16 @@ namespace Eede.Ui
 
         public void ResizePicture(Size size)
         {
-            var old = pictureBox1.Image;
+            Image old = pictureBox1.Image;
             pictureBox1.Image = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppArgb);
-            if (old != null)
-            {
-                old.Dispose();
-            }
+            old?.Dispose();
             pictureBox1.Size = size;
             ClientSize = size;
         }
 
         public void Transfer(Bitmap from, Rectangle rect)
         {
-            using (var g = Graphics.FromImage(pictureBox1.Image))
+            using (Graphics g = Graphics.FromImage(pictureBox1.Image))
             {
                 g.DrawImage(from, rect);
             }
@@ -101,12 +106,12 @@ namespace Eede.Ui
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            var g = e.Graphics;
+            Graphics g = e.Graphics;
             CanvasBackgroundService.Instance.PaintBackground(g);
 
-            var transfer = new DirectImageTransfer();
-            var data = PictureBuffer.Transfer(transfer);
-            using var dest = BitmapConverter.Convert(data);
+            DirectImageTransfer transfer = new();
+            Picture data = PictureBuffer.Transfer(transfer);
+            using Bitmap dest = BitmapConverter.Convert(data);
             g.PixelOffsetMode = PixelOffsetMode.Half;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
             g.DrawImage(dest, new Point(0, 0));
@@ -120,20 +125,18 @@ namespace Eede.Ui
 
         private void DrawCursor(Graphics g)
         {
-            if (!CursorVisible) return;
-            PictureArea area;
-            if (IsSelecting)
+            if (!CursorVisible)
             {
-                area = SelectingPosition.CreateRealArea(SelectingPosition.BoxSize);
+                return;
             }
-            else
-            {
-                area = CursorPosition.CreateRealArea(new PictureSize(DrawingArea.DrawingSize.Width, DrawingArea.DrawingSize.Height));
-            }
-            var rect = new Rectangle(area.X, area.Y, area.Width, area.Height);
+
+            PictureArea area = IsSelecting
+                ? SelectingPosition.CreateRealArea(SelectingPosition.BoxSize)
+                : CursorPosition.CreateRealArea(new PictureSize(DrawingArea.DrawingSize.Width, DrawingArea.DrawingSize.Height));
+            Rectangle rect = new(area.X, area.Y, area.Width, area.Height);
 
             g.DrawRectangle(new Pen(Color.Yellow, 1), rect);
-            var p = new Pen(Color.Red, 1)
+            Pen p = new(Color.Red, 1)
             {
                 DashStyle = System.Drawing.Drawing2D.DashStyle.Dash
             };
@@ -166,7 +169,11 @@ namespace Eede.Ui
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (!CursorVisible) return;
+            if (!CursorVisible)
+            {
+                return;
+            }
+
             switch (e.Button)
             {
                 case MouseButtons.Left:
@@ -180,7 +187,7 @@ namespace Eede.Ui
                 case MouseButtons.Right:
                     // 範囲選択開始
                     IsSelecting = true;
-                    var size = FetchBoxSize();
+                    Size size = FetchBoxSize();
                     SelectingPosition = HalfBoxArea.Create(new PictureSize(size.Width, size.Height), new Position(e.Location.X, e.Location.Y));
                     break;
             }
@@ -191,13 +198,13 @@ namespace Eede.Ui
             if (IsSelecting)
             {
                 SelectingPosition = SelectingPosition.UpdatePosition(
-                    new Position(e.Location.X, e.Location.Y), 
+                    new Position(e.Location.X, e.Location.Y),
                     new PictureSize(PictureBuffer.Size.Width, PictureBuffer.Size.Height));
             }
             else
             {
                 CursorVisible = IsInnerPictureBox(new Position(e.Location.X, e.Location.Y));
-                var size = FetchBoxSize();
+                Size size = FetchBoxSize();
                 CursorPosition = HalfBoxArea.Create(new PictureSize(size.Width, size.Height), new Position(e.Location.X, e.Location.Y));
             }
             pictureBox1.Refresh();
@@ -214,8 +221,8 @@ namespace Eede.Ui
                     // 範囲選択してるとき
                     if (IsSelecting)
                     {
-                        var area = SelectingPosition.CreateRealArea(SelectingPosition.BoxSize);
-                        var rect = new Rectangle(area.X, area.Y, area.Width, area.Height);
+                        PictureArea area = SelectingPosition.CreateRealArea(SelectingPosition.BoxSize);
+                        Rectangle rect = new(area.X, area.Y, area.Width, area.Height);
                         InvokePicturePulled(new PicturePulledEventArgs(PictureBuffer, rect));
                         IsSelecting = false;
                     }
@@ -232,9 +239,9 @@ namespace Eede.Ui
 
     public class PrimaryPictureArea
     {
-        private FilePath FilePath;
-        private IPictureWriter Command;
-        private IPictureReader Service;
+        private readonly FilePath FilePath;
+        private readonly IPictureWriter Command;
+        private readonly IPictureReader Service;
 
         public PrimaryPictureArea(FilePath filePath, IPictureWriter command, IPictureReader service)
         {

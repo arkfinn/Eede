@@ -10,19 +10,19 @@ namespace Eede.Domain.DrawStyles
     {
         public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            var drawer = new Drawer(buffer.Previous, penStyle);
+            Drawer drawer = new(buffer.Previous, penStyle);
             return buffer.UpdateDrawing(drawer.DrawPoint(positionHistory.Now));
         }
 
         public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            var drawer = new Drawer(buffer.Previous, penStyle);
+            Drawer drawer = new(buffer.Previous, penStyle);
             return buffer.UpdateDrawing(Draw(drawer, positionHistory, isShift));
         }
 
         public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            var drawer = new Drawer(buffer.Previous, penStyle);
+            Drawer drawer = new(buffer.Previous, penStyle);
             return buffer.DecideDrawing(Draw(drawer, positionHistory, isShift));
         }
 
@@ -34,7 +34,7 @@ namespace Eede.Domain.DrawStyles
 
         private Position CalculateShiftedPosition(Position beginPos, Position endPos)
         {
-            Position margin = new Position(endPos.X - beginPos.X, endPos.Y - beginPos.Y);
+            Position margin = new(endPos.X - beginPos.X, endPos.Y - beginPos.Y);
             int deg = (int)Math.Round(((Math.Atan2(margin.Y, margin.X) * 57.29578) + 180) / 22.5);
             Position revise = deg switch
             {

@@ -7,7 +7,7 @@ namespace Eede.Domain.ImageTransfers
     {
         public Picture Transfer(Picture src, Magnification magnification)
         {
-            var toStride = magnification.Magnify(src.Stride);
+            int toStride = magnification.Magnify(src.Stride);
             int destWidth = magnification.Magnify(src.Width);
             int destHeight = magnification.Magnify(src.Height);
             byte[] destPixels = new byte[toStride * destHeight];
@@ -19,10 +19,10 @@ namespace Eede.Domain.ImageTransfers
 
                 for (int x = 0; x < destWidth; x++)
                 {
-                    int pos = x * 4 + destOffset;
+                    int pos = (x * 4) + destOffset;
                     int srcX = magnification.Minify(x);
-                    int fromPos = srcX * 4 + srcOffset;
-                    var alpha = src[fromPos + 3];
+                    int fromPos = (srcX * 4) + srcOffset;
+                    byte alpha = src[fromPos + 3];
 
                     destPixels[pos + 0] = alpha;
                     destPixels[pos + 1] = alpha;

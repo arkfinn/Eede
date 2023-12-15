@@ -35,24 +35,24 @@ namespace Eede.Application.Drawings
 
         public void Paint(Graphics g, DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
         {
-            var source = buffer.Fetch();
+            Picture source = buffer.Fetch();
             // 表示上のサイズ・ポジション DisplaySize DisplayPosition
-            var displaySize = Magnify(source.Size);
-            var backgroundLayer = new PaintBackgroundLayer(Background);
+            MagnifiedSize displaySize = Magnify(source.Size);
+            PaintBackgroundLayer backgroundLayer = new(Background);
             backgroundLayer.Paint(g);
 
             if (!buffer.IsDrawing() && PositionHistory != null)
             {
-                var cursorLayer = new CursorLayer(displaySize, source, penStyle, PositionHistory.Now, imageTransfer);
+                CursorLayer cursorLayer = new(displaySize, source, penStyle, PositionHistory.Now, imageTransfer);
                 cursorLayer.Paint(g);
             }
             else
             {
-                var bufferLayer = new PaintBufferLayer(displaySize, source, imageTransfer);
+                PaintBufferLayer bufferLayer = new(displaySize, source, imageTransfer);
                 bufferLayer.Paint(g);
             }
 
-            var gridLayer = new PaintGridLayer(displaySize, Magnify(GridSize));
+            PaintGridLayer gridLayer = new(displaySize, Magnify(GridSize));
             gridLayer.Paint(g);
         }
 
@@ -78,13 +78,13 @@ namespace Eede.Application.Drawings
 
         public Size DisplaySizeOf(Picture picture)
         {
-            var size = Magnify(picture.Size);
+            MagnifiedSize size = Magnify(picture.Size);
             return new Size(size.Width, size.Height);
         }
 
         public Color PickColor(Picture picture, Position displayPosition)
         {
-            var color = picture.PickColor(RealPositionOf(displayPosition).ToPosition());
+            Domain.Colors.ArgbColor color = picture.PickColor(RealPositionOf(displayPosition).ToPosition());
             return Color.FromArgb(color.Alpha, color.Red, color.Green, color.Blue);
         }
 
@@ -95,10 +95,7 @@ namespace Eede.Application.Drawings
 
         private PositionHistory NextPositionHistory(PositionHistory history, Position displayPosition)
         {
-            if (history == null)
-            {
-                history = CreatePositionHistory(displayPosition);
-            }
+            history ??= CreatePositionHistory(displayPosition);
             return history.Update(RealPositionOf(displayPosition).ToPosition());
         }
 
@@ -109,24 +106,24 @@ namespace Eede.Application.Drawings
                 return new DrawingResult(picture, this);
             }
 
-            var nextHistory = CreatePositionHistory(displayPosition);
+            PositionHistory nextHistory = CreatePositionHistory(displayPosition);
             if (!picture.Fetch().Contains(nextHistory.Now))
             {
                 return new DrawingResult(picture, this);
             }
 
-            var result = drawStyle.DrawStart(picture, penStyle, nextHistory, isShift);
+            DrawingBuffer result = drawStyle.DrawStart(picture, penStyle, nextHistory, isShift);
             return new DrawingResult(result, UpdatePositionHistory(nextHistory));
         }
 
         public DrawingResult Move(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
         {
-            var nextHistory = NextPositionHistory(PositionHistory, displayPosition);
+            PositionHistory nextHistory = NextPositionHistory(PositionHistory, displayPosition);
             if (!picture.IsDrawing())
             {
                 return new DrawingResult(picture, UpdatePositionHistory(nextHistory));
             }
-            var result = drawStyle.Drawing(picture, penStyle, nextHistory, isShift);
+            DrawingBuffer result = drawStyle.Drawing(picture, penStyle, nextHistory, isShift);
             return new DrawingResult(result, UpdatePositionHistory(nextHistory));
         }
 
@@ -136,8 +133,8 @@ namespace Eede.Application.Drawings
             {
                 return new DrawingResult(picture, this);
             }
-            var nextHistory = NextPositionHistory(PositionHistory, displayPosition);
-            var result = drawStyle.DrawEnd(picture, penStyle, nextHistory, isShift);
+            PositionHistory nextHistory = NextPositionHistory(PositionHistory, displayPosition);
+            DrawingBuffer result = drawStyle.DrawEnd(picture, penStyle, nextHistory, isShift);
             return new DrawingResult(result, ClearPositionHistory());
         }
 
@@ -148,11 +145,7 @@ namespace Eede.Application.Drawings
 
         public DrawableArea Leave(DrawingBuffer picture)
         {
-            if (picture.IsDrawing())
-            {
-                return this;
-            }
-            return ClearPositionHistory();
+            return picture.IsDrawing() ? this : ClearPositionHistory();
         }
     }
 }

@@ -9,13 +9,13 @@ namespace Eede.Domain.DrawStyles
 
         public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            var drawer = new Drawer(buffer.Previous, penStyle);
+            Drawer drawer = new(buffer.Previous, penStyle);
             return buffer.UpdateDrawing(drawer.DrawPoint(positionHistory.Now));
         }
 
         public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            var drawer = new Drawer(buffer.Fetch(), penStyle);
+            Drawer drawer = new(buffer.Fetch(), penStyle);
             return buffer.UpdateDrawing(Draw(drawer, positionHistory));
         }
 
@@ -26,15 +26,9 @@ namespace Eede.Domain.DrawStyles
 
         private Picture Draw(Drawer drawer, PositionHistory positionHistory)
         {
-            if (drawer.Contains(positionHistory.Now))
-            {
-                return drawer.DrawLine(positionHistory.Last, positionHistory.Now);
-            }
-            if (drawer.Contains(positionHistory.Last))
-            {
-                return drawer.DrawLine(positionHistory.Now, positionHistory.Last);
-            }
-            return drawer.DrawingPicture;
+            return drawer.Contains(positionHistory.Now)
+                ? drawer.DrawLine(positionHistory.Last, positionHistory.Now)
+                : drawer.Contains(positionHistory.Last) ? drawer.DrawLine(positionHistory.Now, positionHistory.Last) : drawer.DrawingPicture;
         }
     }
 }

@@ -1,8 +1,7 @@
-﻿using Eede.Domain.Pictures;
+﻿using Eede.Domain.Positions;
 using NUnit.Framework;
-using System.Drawing;
 
-namespace Eede.Domain.Positions.Tests
+namespace Eede.Domain.Tests.Positions
 {
     [TestFixture]
     public class PositionTests
@@ -10,7 +9,7 @@ namespace Eede.Domain.Positions.Tests
         [Test]
         public void PositionTest()
         {
-            var p = new Position(1, 2);
+            Position p = new(1, 2);
             Assert.AreEqual(1, p.X);
             Assert.AreEqual(2, p.Y);
         }
@@ -18,7 +17,7 @@ namespace Eede.Domain.Positions.Tests
         [Test]
         public void PositionCreateFromPoint()
         {
-            var p = new Position(1, 2);
+            Position p = new(1, 2);
             Assert.AreEqual(1, p.X);
             Assert.AreEqual(2, p.Y);
         }

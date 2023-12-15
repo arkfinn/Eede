@@ -18,8 +18,8 @@ namespace Eede.Actions
         public PushPictureAction(PictureWindow childBox, Picture nowPicture, Picture pushedPicture, IImageBlender blender, Position position)
         {
             ChildBox = childBox ?? throw new ArgumentNullException(nameof(childBox));
-            NowPicture = (nowPicture ?? throw new ArgumentNullException(nameof(nowPicture)));
-            PushedPicture = (pushedPicture ?? throw new ArgumentNullException(nameof(pushedPicture)));
+            NowPicture = nowPicture ?? throw new ArgumentNullException(nameof(nowPicture));
+            PushedPicture = pushedPicture ?? throw new ArgumentNullException(nameof(pushedPicture));
             Blender = blender ?? throw new ArgumentNullException(nameof(blender));
             Position = position ?? throw new ArgumentNullException(nameof(position));
         }

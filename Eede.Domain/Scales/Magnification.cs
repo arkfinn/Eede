@@ -20,8 +20,7 @@ namespace Eede.Domain.Scales
 
         public override bool Equals(object obj)
         {
-            var magnification = obj as Magnification;
-            return magnification != null &&
+            return obj is Magnification magnification &&
                    this.magnification == magnification.magnification;
         }
 

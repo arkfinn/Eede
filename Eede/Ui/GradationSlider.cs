@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace Eede.Ui
 {
     //http://komozo.blogspot.com/2010/01/c_04.html
-    class GradationSlider : Control
+    internal class GradationSlider : Control
     {
 
         // イベントの宣言  
@@ -17,27 +15,9 @@ namespace Eede.Ui
         [Category("アクション")]
         public event EventHandler ValueChanged;
 
-        // プロパティ  
-        private int _maximum = 255;
-        public int Maximum
-        {
-            set
-            {
-                this._maximum = value;
-            }
-            get
-            {
-                return this._maximum;
-            }
-        }
+        public int Maximum { set; get; } = 255;
 
-        private int minimum;
-
-        public int Minimum
-        {
-            get { return minimum; }
-            set { minimum = value; }
-        }
+        public int Minimum { get; set; }
 
 
         private int _value;
@@ -45,15 +25,16 @@ namespace Eede.Ui
         {
             set
             {
-                int old_val = this._value;
-                this._value = Math.Min(Math.Max(Minimum, value), Maximum);
-                if (ValueChanged != null && this._value != old_val) ValueChanged(this, new EventArgs());
-                this.Refresh();
+                int old_val = _value;
+                _value = Math.Min(Math.Max(Minimum, value), Maximum);
+                if (ValueChanged != null && _value != old_val)
+                {
+                    ValueChanged(this, new EventArgs());
+                }
+
+                Refresh();
             }
-            get
-            {
-                return this._value;
-            }
+            get => _value;
         }
 
         private Color[] _gradationColor;
@@ -61,32 +42,28 @@ namespace Eede.Ui
         {
             set
             {
-                this._gradationColor = value;
+                _gradationColor = value;
                 drawGradation();
-                this.Refresh();
+                Refresh();
             }
-            get
-            {
-
-                return this._gradationColor;
-            }
+            get => _gradationColor;
         }
 
         public GradationSlider()
             : base()
         {
 
-            this.SetStyle(ControlStyles.ResizeRedraw, true);
-            this.SetStyle(ControlStyles.DoubleBuffer, true);
-            this.SetStyle(ControlStyles.UserPaint, true);
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.ResizeRedraw, true);
+            SetStyle(ControlStyles.DoubleBuffer, true);
+            SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
 
-            this.Resize += new System.EventHandler(this.CSlider_Resize);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.CSlider_MouseMove);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.CSlider_MouseDown);
-            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.CSlider_MouseUp);
-            this.MouseLeave += new System.EventHandler(this.CSlider_MouseLeave);
-            this.MouseEnter += new System.EventHandler(this.CSlider_MouseEnter);
+            Resize += new System.EventHandler(CSlider_Resize);
+            MouseMove += new System.Windows.Forms.MouseEventHandler(CSlider_MouseMove);
+            MouseDown += new System.Windows.Forms.MouseEventHandler(CSlider_MouseDown);
+            MouseUp += new System.Windows.Forms.MouseEventHandler(CSlider_MouseUp);
+            MouseLeave += new System.EventHandler(CSlider_MouseLeave);
+            MouseEnter += new System.EventHandler(CSlider_MouseEnter);
 
             drawTick();
         }
@@ -105,33 +82,31 @@ namespace Eede.Ui
                     break;
                 case LinearGradientMode.Horizontal:
                     tick = new Bitmap(10, 8);
-                    point = new Point[]{   new Point(5,1), new Point(9,5),  
-                                 new Point(9,6), new Point(1,6),  
+                    point = new Point[]{   new Point(5,1), new Point(9,5),
+                                 new Point(9,6), new Point(1,6),
                                  new Point(1,5), new Point(5,1) };
                     break;
                 case LinearGradientMode.Vertical:
                     tick = new Bitmap(8, 10);
-                    point = new Point[] {   new Point(1,5), new Point(5,9),  
-                                 new Point(6,9), new Point(6,1),  
+                    point = new Point[] {   new Point(1,5), new Point(5,9),
+                                 new Point(6,9), new Point(6,1),
                                  new Point(5,1), new Point(1,5) };
                     break;
                 default:
                     break;
             }
 
-            using (Graphics g = Graphics.FromImage(tick))
-            {
-                g.SmoothingMode = SmoothingMode.HighQuality;
+            using Graphics g = Graphics.FromImage(tick);
+            g.SmoothingMode = SmoothingMode.HighQuality;
 
-                Brush b = new SolidBrush(Color.White);
-                g.FillPolygon(b, point);
-                Pen p = new Pen(Color.Black, 1);
-                if (activeFlag == true)
-                {
-                    p = new Pen(Color.Brown, 1);
-                }
-                g.DrawLines(p, point);
+            Brush b = new SolidBrush(Color.White);
+            g.FillPolygon(b, point);
+            Pen p = new(Color.Black, 1);
+            if (activeFlag == true)
+            {
+                p = new Pen(Color.Brown, 1);
             }
+            g.DrawLines(p, point);
         }
 
         protected override void OnPaint(PaintEventArgs pe)
@@ -146,11 +121,11 @@ namespace Eede.Ui
                     break;
                 case LinearGradientMode.Horizontal:
                     pe.Graphics.DrawImage(gradation, tick.Width / 2, 0, gradation.Width, gradation.Height);
-                    pe.Graphics.DrawImage(tick, (Value * gradation.Width-2) / (Maximum - Minimum), gradation.Height);
+                    pe.Graphics.DrawImage(tick, ((Value * gradation.Width) - 2) / (Maximum - Minimum), gradation.Height);
                     break;
                 case LinearGradientMode.Vertical:
                     pe.Graphics.DrawImage(gradation, 0, tick.Height / 2, gradation.Width, gradation.Height);
-                    pe.Graphics.DrawImage(tick, gradation.Width, (Value * gradation.Height-2) / (Maximum - Minimum));
+                    pe.Graphics.DrawImage(tick, gradation.Width, ((Value * gradation.Height) - 2) / (Maximum - Minimum));
                     break;
                 default:
                     break;
@@ -161,7 +136,7 @@ namespace Eede.Ui
 
         public LinearGradientMode GradientMode
         {
-            get { return gradientMode; }
+            get => gradientMode;
             set
             {
                 gradientMode = value;
@@ -175,14 +150,14 @@ namespace Eede.Ui
         private Bitmap gradation;
         private void drawGradation()
         {
-            if (this.Width > tick.Width && this.Height > tick.Height)
+            if (Width > tick.Width && Height > tick.Height)
             {
-                Size gradationSize = new Size(this.Width - tick.Width, this.Height - tick.Height);
+                Size gradationSize = new(Width - tick.Width, Height - tick.Height);
 
                 gradation = new Bitmap(gradationSize.Width, gradationSize.Height);
                 Graphics g = Graphics.FromImage(gradation);
                 LinearGradientBrush lgb =
-                    new LinearGradientBrush(new Rectangle(0, 0, gradationSize.Width, gradationSize.Height),
+                    new(new Rectangle(0, 0, gradationSize.Width, gradationSize.Height),
                         Color.Black, Color.White, gradientMode);
 
                 //多色用  
@@ -191,12 +166,14 @@ namespace Eede.Ui
                 if (GradationColor != null && GradationColor.Length >= 2)
                 {
                     // ColorBlendクラスを生成   
-                    ColorBlend cb = new ColorBlend();
-                    cb.Colors = GradationColor;
+                    ColorBlend cb = new()
+                    {
+                        Colors = GradationColor
+                    };
                     float[] Position = new float[GradationColor.Length];
                     for (int i = 0; i < GradationColor.Length; i++)
                     {
-                        Position[i] = (1.0f / (GradationColor.Length - 1)) * (i);
+                        Position[i] = 1.0f / (GradationColor.Length - 1) * i;
                     }
 
                     cb.Positions = Position;
@@ -208,7 +185,7 @@ namespace Eede.Ui
                 g.FillRectangle(lgb, new Rectangle(0, 0, gradationSize.Width, gradationSize.Height));
 
                 //枠線  
-                Pen p = new Pen(Color.Black, 1);
+                Pen p = new(Color.Black, 1);
                 if (activeFlag == true)
                 {
                     p = new Pen(Color.Brown, 1);
@@ -226,7 +203,7 @@ namespace Eede.Ui
         private void CSlider_Resize(object sender, EventArgs e)
         {
             drawGradation();
-            this.Refresh();
+            Refresh();
         }
 
 
@@ -241,10 +218,10 @@ namespace Eede.Ui
                 case LinearGradientMode.ForwardDiagonal:
                     break;
                 case LinearGradientMode.Horizontal:
-                    Value = (int)(((float)(e.X - (tick.Width / 2)) / (gradation.Width)) * (Maximum - Minimum));
+                    Value = (int)((float)(e.X - (tick.Width / 2)) / gradation.Width * (Maximum - Minimum));
                     break;
                 case LinearGradientMode.Vertical:
-                    Value = (int)(((float)(e.Y - (tick.Height / 2)) / (gradation.Height)) * (Maximum - Minimum));
+                    Value = (int)((float)(e.Y - (tick.Height / 2)) / gradation.Height * (Maximum - Minimum));
                     break;
                 default:
                     break;
@@ -263,10 +240,10 @@ namespace Eede.Ui
                     case LinearGradientMode.ForwardDiagonal:
                         break;
                     case LinearGradientMode.Horizontal:
-                        Value = (int)(((float)(e.X - (tick.Width / 2)) / (gradation.Width)) * (Maximum - Minimum));
+                        Value = (int)((float)(e.X - (tick.Width / 2)) / gradation.Width * (Maximum - Minimum));
                         break;
                     case LinearGradientMode.Vertical:
-                        Value = (int)(((float)(e.Y - (tick.Height / 2)) / (gradation.Height)) * (Maximum - Minimum));
+                        Value = (int)((float)(e.Y - (tick.Height / 2)) / gradation.Height * (Maximum - Minimum));
                         break;
                     default:
                         break;
@@ -287,7 +264,7 @@ namespace Eede.Ui
 
             drawGradation();
             drawTick();
-            this.Refresh();
+            Refresh();
         }
 
         private void CSlider_MouseLeave(object sender, EventArgs e)
@@ -296,7 +273,7 @@ namespace Eede.Ui
 
             drawGradation();
             drawTick();
-            this.Refresh();
+            Refresh();
         }
     }
 }

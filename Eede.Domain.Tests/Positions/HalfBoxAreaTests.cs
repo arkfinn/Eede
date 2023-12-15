@@ -1,8 +1,9 @@
 ﻿using Eede.Domain.Pictures;
+using Eede.Domain.Positions;
 using NUnit.Framework;
 using System;
 
-namespace Eede.Domain.Positions
+namespace Eede.Domain.Tests.Positions
 {
     [TestFixture]
     public class HalfBoxAreaTests
@@ -10,7 +11,7 @@ namespace Eede.Domain.Positions
         [Test]
         public void BoxPositionTest()
         {
-            var pos = HalfBoxArea.Create(new PictureSize(16, 32), At(17, 47));
+            HalfBoxArea pos = HalfBoxArea.Create(new PictureSize(16, 32), At(17, 47));
             Assert.That(Tuple.Create(pos.GridPosition, pos.RealPosition),
                 Is.EqualTo(Tuple.Create(At(2, 2), At(16, 32))));
         }
@@ -18,13 +19,13 @@ namespace Eede.Domain.Positions
         [Test]
         public void CreateRaalRectangleTest()
         {
-            var pos = HalfBoxArea.Create(new PictureSize(16, 32), At(17, 47));
-            var area = pos.CreateRealArea(new PictureSize(5, 6));
+            HalfBoxArea pos = HalfBoxArea.Create(new PictureSize(16, 32), At(17, 47));
+            PictureArea area = pos.CreateRealArea(new PictureSize(5, 6));
             Assert.That(Tuple.Create(area.X, area.Y, area.Width, area.Height),
                 Is.EqualTo(Tuple.Create(16, 32, 5, 6)));
         }
 
-        static public TestCaseData[] UpdatePositionTestSource = new[]{
+        public static TestCaseData[] UpdatePositionTestSource = new[]{
             new TestCaseData(At(17, 47), At(25, 47), new int[] { 16, 40, 24, 16 }).SetName("X + 8"),
             new TestCaseData(At(17, 47), At(17, 55), new int[] { 16, 40, 16, 24 }).SetName("Y + 8"),
             new TestCaseData(At(17, 47), At(16, 47), new int[] { 16, 40, 16, 16 }).SetName("X - 0"),
@@ -42,8 +43,8 @@ namespace Eede.Domain.Positions
         [TestCaseSource(nameof(UpdatePositionTestSource))]
         public void UpdatePositionTest(Position startPos, Position updatePos, int[] expected)
         {
-            var pos = HalfBoxArea.Create(new PictureSize(16, 16), startPos);
-            var updated = pos.UpdatePosition(updatePos, new PictureSize(100, 100));
+            HalfBoxArea pos = HalfBoxArea.Create(new PictureSize(16, 16), startPos);
+            HalfBoxArea updated = pos.UpdatePosition(updatePos, new PictureSize(100, 100));
 
             Assert.That(new int[] { updated.RealPosition.X, updated.RealPosition.Y, updated.BoxSize.Width, updated.BoxSize.Height },
                 Is.EqualTo(expected));

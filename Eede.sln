@@ -19,6 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eede.Application.Tests", "E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{0FA03259-66A9-4916-8510-8936666E2F0A}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		coverage.ps1 = coverage.ps1
 	EndProjectSection
 EndProject

@@ -3,7 +3,6 @@ using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace Eede.Domain.DrawStyles
 {
@@ -25,7 +24,7 @@ namespace Eede.Domain.DrawStyles
             int y = position.Y;
             return DrawingPicture.Draw(dest =>
             {
-                var imageData = DrawPointRoutine(dest, dest.CloneImage(), position);
+                byte[] imageData = DrawPointRoutine(dest, dest.CloneImage(), position);
                 return Picture.Create(dest.Size, imageData);
             }, PenStyle.Blender);
         }
@@ -36,10 +35,10 @@ namespace Eede.Domain.DrawStyles
             {
                 return DrawFillEllipseRoutine(dest, imageData, position, position);
             }
-            var d = PenStyle.Width / 2;
-            var dd = PenStyle.Width - d;
-            var fromPosition = new Position(position.X - d, position.Y - d);
-            var toPosition = new Position(position.X + dd, position.Y + dd);
+            int d = PenStyle.Width / 2;
+            int dd = PenStyle.Width - d;
+            Position fromPosition = new(position.X - d, position.Y - d);
+            Position toPosition = new(position.X + dd, position.Y + dd);
             return DrawFillEllipseRoutine(dest, imageData, fromPosition, toPosition);
         }
 
@@ -54,25 +53,25 @@ namespace Eede.Domain.DrawStyles
                 int x2 = to.X;
                 int y2 = to.Y;
                 /* 二点間の距離 */
-                var dx = (x2 > x1) ? x2 - x1 : x1 - x2;
-                var dy = (y2 > y1) ? y2 - y1 : y1 - y2;
+                int dx = (x2 > x1) ? x2 - x1 : x1 - x2;
+                int dy = (y2 > y1) ? y2 - y1 : y1 - y2;
 
                 /* 二点の方向 */
-                var sx = (x2 > x1) ? 1 : -1;
-                var sy = (y2 > y1) ? 1 : -1;
+                int sx = (x2 > x1) ? 1 : -1;
+                int sy = (y2 > y1) ? 1 : -1;
 
-                var cx = x1;
-                var cy = y1;
+                int cx = x1;
+                int cy = y1;
 
-                var dx2 = dx * 2;
-                var dy2 = dy * 2;
+                int dx2 = dx * 2;
+                int dy2 = dy * 2;
 
-                var color = PenStyle.Color;
+                ArgbColor color = PenStyle.Color;
                 /* 傾きが1より小さい場合 */
                 if (dx > dy)
                 {
                     int E = -dx;
-                    for (var i = 0; i <= dx; i++)
+                    for (int i = 0; i <= dx; i++)
                     {
                         if (cy >= 0 && cy < dest.Height && cx >= 0 && cx < dest.Width)
                         {
@@ -97,7 +96,7 @@ namespace Eede.Domain.DrawStyles
                 else
                 {
                     int E = -dy;
-                    for (var i = 0; i <= dy; i++)
+                    for (int i = 0; i <= dy; i++)
                     {
                         if (cy >= 0 && cy < dest.Height && cx >= 0 && cx < dest.Width)
                         {
@@ -127,12 +126,12 @@ namespace Eede.Domain.DrawStyles
             return DrawingPicture.Draw(dest =>
             {
                 byte[] imageData = dest.CloneImage();
-                var color = PenStyle.Color;
+                ArgbColor color = PenStyle.Color;
 
-                var fx = from.X;
-                var fy = from.Y;
-                var tx = to.X;
-                var ty = to.Y;
+                int fx = from.X;
+                int fy = from.Y;
+                int tx = to.X;
+                int ty = to.Y;
                 if (tx > fx)
                 {
                     (fx, tx) = (tx, fx);
@@ -144,7 +143,7 @@ namespace Eede.Domain.DrawStyles
 
                 int width = fx - tx;
                 int height = fy - ty;
-                var stride = dest.Stride;
+                int stride = dest.Stride;
                 if (width == 0 && height == 0)
                 {
                     if (fx >= 0 && fx < dest.Width && fy >= 0 && fy < dest.Height)
@@ -153,11 +152,11 @@ namespace Eede.Domain.DrawStyles
                     }
                     return Picture.Create(dest.Size, imageData);
                 }
-                int centerX = fx + width / 2;
-                int centerY = fy + height / 2;
+                int centerX = fx + (width / 2);
+                int centerY = fy + (height / 2);
                 int diameter = Math.Min(width, height);
-                var mirrorX = centerX;
-                var mirrorY = centerY;
+                int mirrorX = centerX;
+                int mirrorY = centerY;
                 if ((diameter & 1) == 0)
                 {
                     mirrorX++;
@@ -165,10 +164,10 @@ namespace Eede.Domain.DrawStyles
                 }
 
                 int x = 0;
-                int y = diameter / 2 + 1;
-                int d = -diameter * diameter + 4 * y * y - 4 * y + 2;
-                var dx = 4;
-                var dy = -8 * y + 8;
+                int y = (diameter / 2) + 1;
+                int d = (-diameter * diameter) + (4 * y * y) - (4 * y) + 2;
+                int dx = 4;
+                int dy = (-8 * y) + 8;
                 while (x <= y)
                 {
                     if (d > 0)
@@ -177,10 +176,10 @@ namespace Eede.Domain.DrawStyles
                         dy += 8;
                         y--;
                     }
-                    var cx = centerX + x;
-                    var cy = centerY + y;
-                    var mx = mirrorX - x;
-                    var my = mirrorY - y;
+                    int cx = centerX + x;
+                    int cy = centerY + y;
+                    int mx = mirrorX - x;
+                    int my = mirrorY - y;
                     if (/*cx >= 0 && */cx < dest.Width)
                     {
                         if (/*cy >= 0 &&*/ cy < dest.Height)
@@ -203,10 +202,10 @@ namespace Eede.Domain.DrawStyles
                             drawPixel(imageData, stride, mx, my, color);
                         }
                     }
-                    var cxy = centerX + y;
-                    var cyx = centerY + x;
-                    var mxy = mirrorX - y;
-                    var myx = mirrorY - x;
+                    int cxy = centerX + y;
+                    int cyx = centerY + x;
+                    int mxy = mirrorX - y;
+                    int myx = mirrorY - x;
                     if (/*cxy >= 0 &&*/ cxy < dest.Width)
                     {
                         if (/*cyx >= 0 &&*/ cyx < dest.Height)
@@ -242,19 +241,19 @@ namespace Eede.Domain.DrawStyles
         {
             return DrawingPicture.Draw(dest =>
             {
-                var imageData = DrawFillEllipseRoutine(dest, dest.CloneImage(), from, to);
+                byte[] imageData = DrawFillEllipseRoutine(dest, dest.CloneImage(), from, to);
                 return Picture.Create(dest.Size, imageData);
             }, PenStyle.Blender);
         }
 
         private byte[] DrawFillEllipseRoutine(Picture dest, byte[] imageData, Position from, Position to)
         {
-            var color = PenStyle.Color;
+            ArgbColor color = PenStyle.Color;
 
-            var fx = from.X;
-            var fy = from.Y;
-            var tx = to.X;
-            var ty = to.Y;
+            int fx = from.X;
+            int fy = from.Y;
+            int tx = to.X;
+            int ty = to.Y;
             if (tx < fx)
             {
                 (fx, tx) = (tx, fx);
@@ -266,7 +265,7 @@ namespace Eede.Domain.DrawStyles
 
             int width = tx - fx;
             int height = ty - fy;
-            var stride = dest.Stride;
+            int stride = dest.Stride;
             if (width == 0 && height == 0)
             {
                 if (fx >= 0 && fx < dest.Width && fy >= 0 && fy < dest.Height)
@@ -275,11 +274,11 @@ namespace Eede.Domain.DrawStyles
                 }
                 return imageData;
             }
-            int centerX = fx + width / 2;
-            int centerY = fy + height / 2;
+            int centerX = fx + (width / 2);
+            int centerY = fy + (height / 2);
             int diameter = Math.Min(width, height);
-            var mirrorX = centerX;
-            var mirrorY = centerY;
+            int mirrorX = centerX;
+            int mirrorY = centerY;
             if ((diameter & 1) == 0)
             {
                 // 偶数直径対応時にいい感じの位置にするため右に1px、上に1px拡張している
@@ -289,10 +288,10 @@ namespace Eede.Domain.DrawStyles
             }
 
             int x = 0;
-            int y = diameter / 2 + 1;
-            int d = -diameter * diameter + 4 * y * y - 4 * y + 2;
-            var dx = 4;
-            var dy = -8 * y + 8;
+            int y = (diameter / 2) + 1;
+            int d = (-diameter * diameter) + (4 * y * y) - (4 * y) + 2;
+            int dx = 4;
+            int dy = (-8 * y) + 8;
             while (x <= y)
             {
                 if (d > 0)
@@ -301,10 +300,10 @@ namespace Eede.Domain.DrawStyles
                     dy += 8;
                     y--;
                 }
-                var cx = Math.Min(centerX + x, dest.Width - 1);
-                var cy = centerY + y;
-                var mx = Math.Max(mirrorX - x, 0);
-                var my = mirrorY - y;
+                int cx = Math.Min(centerX + x, dest.Width - 1);
+                int cy = centerY + y;
+                int mx = Math.Max(mirrorX - x, 0);
+                int my = mirrorY - y;
                 if (cy >= 0 && cy < dest.Height)
                 {
                     drawScanLine(imageData, stride, mx, cy, cx, color);
@@ -313,10 +312,10 @@ namespace Eede.Domain.DrawStyles
                 {
                     drawScanLine(imageData, stride, mx, my, cx, color);
                 }
-                var cxy = Math.Min(centerX + y, dest.Width - 1);
-                var cyx = centerY + x;
-                var mxy = Math.Max(mirrorX - y, 0);
-                var myx = mirrorY - x;
+                int cxy = Math.Min(centerX + y, dest.Width - 1);
+                int cyx = centerY + x;
+                int mxy = Math.Max(mirrorX - y, 0);
+                int myx = mirrorY - x;
 
                 if (cyx >= 0 && cyx < dest.Height)
                 {
@@ -337,7 +336,7 @@ namespace Eede.Domain.DrawStyles
 
         private static void drawPixel(byte[] imageArray, int stride, int x, int y, ArgbColor color)
         {
-            int index = x * 4 + stride * y;
+            int index = (x * 4) + (stride * y);
             imageArray[index] = color.Blue;
             imageArray[index + 1] = color.Green;
             imageArray[index + 2] = color.Red;
@@ -346,7 +345,7 @@ namespace Eede.Domain.DrawStyles
 
         private static void drawScanLine(byte[] imageArray, int stride, int x, int y, int toX, ArgbColor color)
         {
-            int index = x * 4 + stride * y;
+            int index = (x * 4) + (stride * y);
             for (int i = x; i <= toX; i++)
             {
                 imageArray[index] = color.Blue;
@@ -363,7 +362,7 @@ namespace Eede.Domain.DrawStyles
             {
                 int cWidth = dest.Width;
                 int cHeight = dest.Height;
-                var color = PenStyle.Color;
+                ArgbColor color = PenStyle.Color;
 
                 ArgbColor baseCol = dest.PickColor(from);
 
@@ -379,7 +378,7 @@ namespace Eede.Domain.DrawStyles
                 {
                     Position point = buffer.Pop();
                     int sy = dest.Stride * point.Y;
-                    int index = point.X * 4 + sy;
+                    int index = (point.X * 4) + sy;
 
                     /* skip already painted */
                     if (color.EqualsArgb(PickColor(image, index)))
@@ -392,7 +391,7 @@ namespace Eede.Domain.DrawStyles
                     /* search left point */
                     for (; 0 < leftX; leftX--)
                     {
-                        int leftIndex = (leftX - 1) * 4 + sy;
+                        int leftIndex = ((leftX - 1) * 4) + sy;
                         if (!baseCol.EqualsArgb(PickColor(image, leftIndex)))
                         {
                             break;
@@ -401,7 +400,7 @@ namespace Eede.Domain.DrawStyles
                     /* search right point */
                     for (; rightX < cWidth - 1; rightX++)
                     {
-                        int rightIndex = (rightX + 1) * 4 + sy;
+                        int rightIndex = ((rightX + 1) * 4) + sy;
                         if (!baseCol.EqualsArgb(PickColor(image, rightIndex)))
                         {
                             break;
@@ -446,7 +445,7 @@ namespace Eede.Domain.DrawStyles
             {
                 for (; leftX <= rightX; leftX++)
                 {
-                    int index = leftX * 4 + sy;
+                    int index = (leftX * 4) + sy;
                     if (baseCol.EqualsArgb(PickColor(image, index)))
                     {
                         break;
@@ -458,7 +457,7 @@ namespace Eede.Domain.DrawStyles
                 }
                 for (; leftX <= rightX; leftX++)
                 {
-                    int index = leftX * 4 + sy;
+                    int index = (leftX * 4) + sy;
                     if (!baseCol.EqualsArgb(PickColor(image, index)))
                     {
                         break;

@@ -1,10 +1,11 @@
 ﻿using Eede.Domain.Files;
+using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Scales;
 using Eede.Infrastructure.Pictures;
 using NUnit.Framework;
 
-namespace Eede.Domain.ImageTransfers
+namespace Eede.Domain.Tests.ImageTransfers
 {
     [TestFixture]
     public class RGBToneImageTransferTests
@@ -12,13 +13,13 @@ namespace Eede.Domain.ImageTransfers
         [Test]
         public void RGB値のみをコピー()
         {
-            var src = ReadPicture(@"ImageTransfers\test\blend.png");
-            var transfer = new RGBToneImageTransfer();
+            Picture src = ReadPicture(@"ImageTransfers\test\blend.png");
+            RGBToneImageTransfer transfer = new();
 
-            var data = src.Transfer(transfer, new Magnification(2));
+            Picture data = src.Transfer(transfer, new Magnification(2));
 
             // dst.Save(@"ImageTransfers\test\rgb.png", ImageFormat.Png);
-            var expected = ReadPicture(@"ImageTransfers\test\rgb.png");
+            Picture expected = ReadPicture(@"ImageTransfers\test\rgb.png");
             Assert.That(data.CloneImage(), Is.EqualTo(expected.CloneImage()));
         }
 

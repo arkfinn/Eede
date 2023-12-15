@@ -18,7 +18,11 @@ namespace Eede.Domain.DrawStyles
 
         public PenStyle(IImageBlender blender, ArgbColor color, int width)
         {
-            if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width) + " is 1 or more. then:" + width);
+            if (width <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(width) + " is 1 or more. then:" + width);
+            }
+
             Blender = blender ?? throw new ArgumentNullException(nameof(blender));
             Color = color;
             Width = width;

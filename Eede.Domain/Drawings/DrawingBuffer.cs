@@ -1,9 +1,8 @@
 ﻿using Eede.Domain.Pictures;
-using System;
 
 namespace Eede.Domain.Drawings
 {
-    public class DrawingBuffer : IDisposable
+    public class DrawingBuffer
     {
         public readonly Picture Previous;
         public readonly Picture Drawing;
@@ -20,22 +19,15 @@ namespace Eede.Domain.Drawings
             Drawing = drawing;
         }
 
-        public void Dispose()
-        {
-        }
 
         public Picture Fetch()
         {
-            if (IsDrawing())
-            {
-                return Drawing;
-            }
-            return Previous;
+            return IsDrawing() ? Drawing : Previous;
         }
 
         public bool IsDrawing()
         {
-            return (Drawing != null);
+            return Drawing != null;
         }
 
         public DrawingBuffer UpdateDrawing(Picture drawing)

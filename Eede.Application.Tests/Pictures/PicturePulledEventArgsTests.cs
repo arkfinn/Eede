@@ -1,9 +1,10 @@
-﻿using Eede.Domain.Pictures;
+﻿using Eede.Application.Pictures;
+using Eede.Domain.Pictures;
 using NUnit.Framework;
 using System;
 using System.Drawing;
 
-namespace Eede.Application.Pictures.Tests
+namespace Eede.Application.Tests.Pictures
 {
     [TestFixture]
     public class PicturePulledEventArgsTests
@@ -11,10 +12,10 @@ namespace Eede.Application.Pictures.Tests
         [Test]
         public void PicturePulledEventArgsTest()
         {
-            using var bmp = new Bitmap(10, 10);
-            var b = BitmapConverter.ConvertBack(bmp);
-            var p = new PicturePulledEventArgs(b, new Rectangle(2, 2, 3, 3));
-            var image = p.CutOutImage();
+            using Bitmap bmp = new(10, 10);
+            Picture b = BitmapConverter.ConvertBack(bmp);
+            PicturePulledEventArgs p = new(b, new Rectangle(2, 2, 3, 3));
+            Picture image = p.CutOutImage();
 
             Assert.That(Tuple.Create(image.Size.Width, image.Size.Height), Is.EqualTo(Tuple.Create(3, 3)));
         }
@@ -22,9 +23,9 @@ namespace Eede.Application.Pictures.Tests
         [Test]
         public void 引数graphicsについてnullによる作成を許可しない()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                var p = new PicturePulledEventArgs(null, new Rectangle(2, 2, 3, 3));
+                PicturePulledEventArgs p = new(null, new Rectangle(2, 2, 3, 3));
             });
         }
     }

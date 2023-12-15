@@ -17,15 +17,17 @@ namespace Eede.Application.PaintLayers
 
         public void Paint(Graphics destination)
         {
-            var w = gridSize.Width;
-            var h = gridSize.Height;
-            var p = new Pen(Color.Black, 1);
-            p.DashStyle = DashStyle.Dash;
-            for (int i = w; i < paintAreaSize.Width; i = i + w)
+            int w = gridSize.Width;
+            int h = gridSize.Height;
+            Pen p = new(Color.Black, 1)
+            {
+                DashStyle = DashStyle.Dash
+            };
+            for (int i = w; i < paintAreaSize.Width; i += w)
             {
                 destination.DrawLine(p, i, 0, i, paintAreaSize.Height);
             }
-            for (int i = h; i < paintAreaSize.Height; i = i + h)
+            for (int i = h; i < paintAreaSize.Height; i += h)
             {
                 destination.DrawLine(p, 0, i, paintAreaSize.Width, i);
             }

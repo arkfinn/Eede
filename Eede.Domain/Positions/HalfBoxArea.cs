@@ -19,20 +19,20 @@ namespace Eede.Domain.Positions
 
         private static HalfBoxArea With(PictureSize boxSize, Position localPosition, PictureSize defaultBoxSize, Position startPosition)
         {
-            var BoxSize = new PictureSize(boxSize.Width, boxSize.Height);
-            var GridSize = new PictureSize(defaultBoxSize.Width / 2, defaultBoxSize.Height / 2);
+            PictureSize BoxSize = new(boxSize.Width, boxSize.Height);
+            PictureSize GridSize = new(defaultBoxSize.Width / 2, defaultBoxSize.Height / 2);
             // gridSize上の位置
-            var Position = new Position(
+            Position Position = new(
                 localPosition.X / GridSize.Width,
                 localPosition.Y / GridSize.Height
             );
             // gridSize上の位置を実際の座標に変換した位置
-            var RealPosition = new Position(
+            Position RealPosition = new(
                 Position.X * GridSize.Width,
                 Position.Y * GridSize.Height
             );
 
-            var StartPosition = new Position(startPosition.X, startPosition.Y);
+            Position StartPosition = new(startPosition.X, startPosition.Y);
 
             return new HalfBoxArea(BoxSize, Position, RealPosition, defaultBoxSize, GridSize, StartPosition);
         }
@@ -60,25 +60,25 @@ namespace Eede.Domain.Positions
 
         public HalfBoxArea UpdatePosition(Position location, PictureSize limit)
         {
-            var locationX = Math.Max(0, location.X);
-            var newWidth = LimittedDistance(StartPosition.X, locationX, DefaultBoxSize.Width, GridSize.Width, limit.Width);
-            var newX = Math.Min(locationX, StartPosition.X);
+            int locationX = Math.Max(0, location.X);
+            int newWidth = LimittedDistance(StartPosition.X, locationX, DefaultBoxSize.Width, GridSize.Width, limit.Width);
+            int newX = Math.Min(locationX, StartPosition.X);
 
-            var locationY = Math.Max(0, location.Y);
-            var newHeight = LimittedDistance(StartPosition.Y, locationY, DefaultBoxSize.Height, GridSize.Height, limit.Height);
-            var newY = Math.Min(locationY, StartPosition.Y);
+            int locationY = Math.Max(0, location.Y);
+            int newHeight = LimittedDistance(StartPosition.Y, locationY, DefaultBoxSize.Height, GridSize.Height, limit.Height);
+            int newY = Math.Min(locationY, StartPosition.Y);
 
             return With(new PictureSize(newWidth, newHeight), new Position(newX, newY), DefaultBoxSize, StartPosition);
         }
 
         private int ArrangeTo(int value, int gridLength)
         {
-            return value - value % gridLength;
+            return value - (value % gridLength);
         }
 
         private int LimittedDistance(int startValue, int nowValue, int cursorLength, int gridLength, int limitLength)
         {
-            var startGrid = ArrangeTo(startValue, gridLength);
+            int startGrid = ArrangeTo(startValue, gridLength);
             return Math.Min(
                 cursorLength + ArrangeFromDistance(nowValue - startGrid, gridLength),
                 limitLength - ArrangeTo(startValue, gridLength)
@@ -88,11 +88,7 @@ namespace Eede.Domain.Positions
         private int ArrangeFromDistance(int distance, int gridLength)
         {
             // マイナス方向に広がる場合、元のサイズプラスマイナス方向分とする。
-            if (distance < 0)
-            {
-                return ArrangeTo(Math.Abs(distance) + gridLength - 1, gridLength);
-            }
-            return ArrangeTo(distance, gridLength);
+            return distance < 0 ? ArrangeTo(Math.Abs(distance) + gridLength - 1, gridLength) : ArrangeTo(distance, gridLength);
         }
     }
 }

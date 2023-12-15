@@ -19,8 +19,8 @@ namespace Eede.Ui
         }
         private void comboBox_Validating(object sender, CancelEventArgs e)
         {
-            var regex = new Regex(@"^[0-9]+$");
-            var c = sender as ComboBox;
+            Regex regex = new(@"^[0-9]+$");
+            ComboBox c = sender as ComboBox;
             if (!regex.IsMatch(c.Text) || int.Parse(c.Text) <= 0)
             {
                 e.Cancel = true;

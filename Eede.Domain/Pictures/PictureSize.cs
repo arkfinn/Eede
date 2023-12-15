@@ -20,11 +20,7 @@ namespace Eede.Domain.Pictures
 
         public bool Contains(Position pos)
         {
-            if (pos.X < 0) return false;
-            if (pos.Y < 0) return false;
-            if (pos.X >= Width) return false;
-            if (pos.Y >= Height) return false;
-            return true;
+            return pos.X >= 0 && pos.Y >= 0 && pos.X < Width && pos.Y < Height;
         }
     }
 }

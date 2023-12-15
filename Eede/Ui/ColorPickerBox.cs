@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Eede.Ui
@@ -22,8 +18,7 @@ namespace Eede.Ui
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            int res;
-            if (!int.TryParse(textBox1.Text, out res))
+            if (!int.TryParse(textBox1.Text, out int res))
             {
                 res = Maximum;
             }
@@ -33,45 +28,47 @@ namespace Eede.Ui
 
         public int Value
         {
-            get { return Maximum - vGradationSlider1.Value; }
-            set { textBox1.Text = value.ToString(); }
+            get => Maximum - vGradationSlider1.Value;
+            set => textBox1.Text = value.ToString();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            vGradationSlider1.Value = vGradationSlider1.Value - 1;
+            vGradationSlider1.Value--;
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            vGradationSlider1.Value = vGradationSlider1.Value + 1;
+            vGradationSlider1.Value++;
 
         }
 
 
         public Color[] GradationColor
         {
-            get { return vGradationSlider1.GradationColor; }
-            set { vGradationSlider1.GradationColor = value; }
+            get => vGradationSlider1.GradationColor;
+            set => vGradationSlider1.GradationColor = value;
         }
 
         public event EventHandler ValueChanged
         {
-            add { vGradationSlider1.ValueChanged += value; }
-            remove { vGradationSlider1.ValueChanged -= value; }
+            add => vGradationSlider1.ValueChanged += value;
+            remove => vGradationSlider1.ValueChanged -= value;
         }
 
- 
+
         public int Maximum
         {
-            get { return vGradationSlider1.Maximum; }
-            set { vGradationSlider1.Maximum = value; }
+            get => vGradationSlider1.Maximum;
+            set => vGradationSlider1.Maximum = value;
         }
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!('0' <= e.KeyChar && e.KeyChar <= '9')) e.Handled = true;
-  
+            if (e.KeyChar is not (>= '0' and <= '9'))
+            {
+                e.Handled = true;
+            }
         }
 
 

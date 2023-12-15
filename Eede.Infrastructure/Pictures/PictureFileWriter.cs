@@ -25,10 +25,8 @@ namespace Eede.Infrastructure.Pictures
             {
                 throw new ArgumentNullException("picture is null.");
             }
-            using (var image = BitmapConverter.Convert(picture))
-            {
-                image.Save(Path.Path, ImageFormat.Png);
-            }
+            using System.Drawing.Bitmap image = BitmapConverter.Convert(picture);
+            image.Save(Path.Path, ImageFormat.Png);
         }
     }
 }

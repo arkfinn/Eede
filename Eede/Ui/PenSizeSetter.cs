@@ -1,6 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
 using System.Windows.Forms;
-using System;
 
 namespace Eede.Ui
 {
@@ -10,21 +9,21 @@ namespace Eede.Ui
         public PenSizeSetter()
         {
             InitializeComponent();
-           
+
             SetupScrollBar();
             RefleshPenSize();
         }
 
         public int PenSize
         {
-            get { return pictureBox1.PenSize; }
-            set { pictureBox1.PenSize = value; }
+            get => pictureBox1.PenSize;
+            set => pictureBox1.PenSize = value;
         }
 
         public event EventHandler PenSizeChanged;
         private void InvokePenSizeChanged()
         {
-            this.PenSizeChanged?.Invoke(this, EventArgs.Empty);
+            PenSizeChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -34,13 +33,15 @@ namespace Eede.Ui
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!('0' <= e.KeyChar && e.KeyChar <= '9')) e.Handled = true;
+            if (e.KeyChar is not (>= '0' and <= '9'))
+            {
+                e.Handled = true;
+            }
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            int res;
-            if (!int.TryParse(textBox1.Text, out res))
+            if (!int.TryParse(textBox1.Text, out int res))
             {
                 res = pictureBox1.MinimumPenSize;
             }

@@ -1,4 +1,5 @@
-﻿using Eede.Domain.ImageTransfers;
+﻿using Eede.Application.Pictures;
+using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Sizes;
 using System.Drawing;
@@ -22,10 +23,14 @@ namespace Eede.Application.PaintLayers
 
         public void Paint(Graphics destination)
         {
-            if (Source == null) return;
-            var data = Source.Transfer(ImageTransfer, PaintSize.Magnification);
+            if (Source == null)
+            {
+                return;
+            }
 
-            using var dest = BitmapConverter.Convert(data);
+            Picture data = Source.Transfer(ImageTransfer, PaintSize.Magnification);
+
+            using Bitmap dest = BitmapConverter.Convert(data);
             destination.PixelOffsetMode = PixelOffsetMode.Half;
             destination.InterpolationMode = InterpolationMode.NearestNeighbor;
             destination.DrawImage(dest, new Point(0, 0));

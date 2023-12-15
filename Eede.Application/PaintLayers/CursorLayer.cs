@@ -1,4 +1,5 @@
-﻿using Eede.Domain.DrawStyles;
+﻿using Eede.Application.Pictures;
+using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
@@ -27,10 +28,10 @@ namespace Eede.Application.PaintLayers
 
         public void Paint(Graphics destination)
         {
-            var drawer = new Drawer(Source, PenStyle);
-            var cursor = drawer.DrawPoint(Position);
-            var data = cursor.Transfer(ImageTransfer, PaintSize.Magnification);
-            using var dest = BitmapConverter.Convert(data);
+            Drawer drawer = new(Source, PenStyle);
+            Picture cursor = drawer.DrawPoint(Position);
+            Picture data = cursor.Transfer(ImageTransfer, PaintSize.Magnification);
+            using Bitmap dest = BitmapConverter.Convert(data);
             destination.PixelOffsetMode = PixelOffsetMode.Half;
             destination.InterpolationMode = InterpolationMode.NearestNeighbor;
             destination.DrawImage(dest, new Point(0, 0));

@@ -1,9 +1,10 @@
 ﻿using Eede.Domain.Files;
+using Eede.Domain.ImageBlenders;
 using Eede.Domain.Pictures;
 using Eede.Infrastructure.Pictures;
 using NUnit.Framework;
 
-namespace Eede.Domain.ImageBlenders
+namespace Eede.Domain.Tests.ImageBlenders
 {
     [TestFixture]
     public class RGBOnlyImageBlenderTests
@@ -11,14 +12,14 @@ namespace Eede.Domain.ImageBlenders
         [Test]
         public void TestBlend()
         {
-            var src = ReadPicture(@"ImageBlenders\test\blend.png");
-            var blender = new RGBOnlyImageBlender();
-            var dst = ReadPicture(@"ImageBlenders\test\base.png");
+            Picture src = ReadPicture(@"ImageBlenders\test\blend.png");
+            RGBOnlyImageBlender blender = new();
+            Picture dst = ReadPicture(@"ImageBlenders\test\base.png");
 
-            var result = dst.Blend(blender, src, new Positions.Position(0, 0));
+            Picture result = dst.Blend(blender, src, new Positions.Position(0, 0));
 
             // result.ToImage().Save(@"ImageBlenders\test\rgb_blend.png", ImageFormat.Png);
-            var expected = ReadPicture(@"ImageBlenders\test\rgb_blend.png");
+            Picture expected = ReadPicture(@"ImageBlenders\test\rgb_blend.png");
             Assert.That(result.CloneImage(), Is.EqualTo(expected.CloneImage()));
         }
 

@@ -1,25 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace Eede.Ui
 {
-    class PenSizeSetBox : System.Windows.Forms.PictureBox
+    internal class PenSizeSetBox : System.Windows.Forms.PictureBox
     {
-        Image backBuf=null;
+        private Image backBuf = null;
 
         public PenSizeSetBox()
             : base()
         {
 
-            this.Disposed += DoDisposed;
-            this.SizeChanged += DoSizeChanged;
+            Disposed += DoDisposed;
+            SizeChanged += DoSizeChanged;
 
-            this.MouseDown += DoMouseDown;
-            this.MouseMove += DoMouseMove;
-            this.MouseUp += DoMouseUp;
+            MouseDown += DoMouseDown;
+            MouseMove += DoMouseMove;
+            MouseUp += DoMouseUp;
 
             SetupBackBuffer();
             UpdatePictureBoxBuffer();
@@ -28,14 +26,14 @@ namespace Eede.Ui
 
         private void DoDisposed(object sender, EventArgs e)
         {
-            if (backBuf != null) backBuf.Dispose();
+            backBuf?.Dispose();
         }
 
         private void SetupBackBuffer()
         {
-            if (backBuf != null) backBuf.Dispose();
+            backBuf?.Dispose();
             backBuf = new Bitmap(Width, Height);
-            this.Image = backBuf;
+            Image = backBuf;
         }
 
         private void UpdatePictureBoxBuffer()
@@ -62,12 +60,16 @@ namespace Eede.Ui
         private int penSize = 1;
         public int PenSize
         {
-            get { return penSize; }
+            get => penSize;
             set
             {
                 if (penSize != value)
                 {
-                    if (0 < MaximumPenSize) value = Math.Max(value, MaximumPenSize);
+                    if (0 < MaximumPenSize)
+                    {
+                        value = Math.Max(value, MaximumPenSize);
+                    }
+
                     penSize = Math.Max(MinimumPenSize, value);
                     UpdatePictureBoxBuffer();
                     InvokePenSizeChanged();
@@ -79,8 +81,8 @@ namespace Eede.Ui
 
         public int MinimumPenSize
         {
-            get { return minimumPenSize; }
-            set { minimumPenSize = Math.Max(1, value); }
+            get => minimumPenSize;
+            set => minimumPenSize = Math.Max(1, value);
         }
 
         private int maximumPenSize = -1;
@@ -90,11 +92,14 @@ namespace Eede.Ui
         /// </summary>
         public int MaximumPenSize
         {
-            get { return maximumPenSize; }
+            get => maximumPenSize;
             set
             {
                 maximumPenSize = value;
-                if (maximumPenSize <= 0) maximumPenSize = -1;
+                if (maximumPenSize <= 0)
+                {
+                    maximumPenSize = -1;
+                }
             }
         }
 
@@ -136,14 +141,7 @@ namespace Eede.Ui
                 case MouseButtons.Left:
                     if (drag)
                     {
-                        if (e.Y < Height - 1 || (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
-                        {
-                            PenSize = e.Y - 1;
-                        }
-                        else
-                        {
-                            PenSize = Height - 2;
-                        }
+                        PenSize = e.Y < Height - 1 || (Control.ModifierKeys & Keys.Shift) == Keys.Shift ? e.Y - 1 : Height - 2;
                     }
                     break;
                 case MouseButtons.Middle:
@@ -191,10 +189,7 @@ namespace Eede.Ui
 
         public void InvokePenSizeChanged()
         {
-            if (PenSizeChanged != null)
-            {
-                PenSizeChanged(this, EventArgs.Empty);
-            }
+            PenSizeChanged?.Invoke(this, EventArgs.Empty);
         }
 
     }

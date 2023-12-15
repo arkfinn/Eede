@@ -1,7 +1,6 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Scales;
 using System;
-using System.Drawing;
 
 namespace Eede.Domain.Sizes
 {

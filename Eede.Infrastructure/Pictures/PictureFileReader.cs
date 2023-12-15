@@ -22,8 +22,8 @@ namespace Eede.Infrastructure.Pictures
 
         public Picture Read()
         {
-            using var image = new Bitmap(Path.Path);
-            using var tmp = To32bppArgb(image);
+            using Bitmap image = new(Path.Path);
+            using Bitmap tmp = To32bppArgb(image);
             return BitmapConverter.ConvertBack(tmp);
         }
 

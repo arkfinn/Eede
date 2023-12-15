@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 
 namespace Eede.Settings
 {
-    class GlobalSetting
+    internal class GlobalSetting
     {
-        private static GlobalSetting _instance = new GlobalSetting();
+        private static readonly GlobalSetting _instance = new();
 
         public static GlobalSetting Instance()
         {
@@ -18,10 +13,10 @@ namespace Eede.Settings
 
         private GlobalSetting()
         {
-            
+
         }
 
-        public Size BoxSize = new Size(32, 32);
+        public Size BoxSize = new(32, 32);
 
         public bool IsHalfMoveBox = true;
     }

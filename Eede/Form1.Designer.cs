@@ -332,7 +332,6 @@
             // 
             splitContainer1.Panel2.Controls.Add(toolStrip3);
             splitContainer1.Panel2.Controls.Add(colorPicker1);
-            splitContainer1.Panel2.Paint += splitContainer1_Panel2_Paint_1;
             splitContainer1.Size = new System.Drawing.Size(658, 641);
             splitContainer1.SplitterDistance = 430;
             splitContainer1.SplitterWidth = 5;
@@ -413,7 +412,6 @@
             penSizeSetter1.PenSize = 1;
             penSizeSetter1.Size = new System.Drawing.Size(90, 76);
             penSizeSetter1.TabIndex = 0;
-            penSizeSetter1.PenSizeChanged += penSizeSetter1_PenSizeChanged;
             // 
             // paintableBox1
             // 
@@ -423,7 +421,6 @@
             paintableBox1.Location = new System.Drawing.Point(0, 0);
             paintableBox1.Margin = new System.Windows.Forms.Padding(5);
             paintableBox1.Name = "paintableBox1";
-            paintableBox1.PenColor = System.Drawing.Color.FromArgb(0, 0, 0);
             paintableBox1.Size = new System.Drawing.Size(517, 430);
             paintableBox1.TabIndex = 1;
             paintableBox1.ColorChanged += paintableBox1_ColorChanged;
@@ -512,7 +509,6 @@
             Margin = new System.Windows.Forms.Padding(4);
             Name = "Form1";
             Text = "Eede";
-            Load += Form1_Load;
             DragDrop += Form1_DragDrop;
             DragEnter += Form1_DragEnter;
             toolStrip1.ResumeLayout(false);

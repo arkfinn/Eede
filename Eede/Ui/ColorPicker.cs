@@ -24,7 +24,7 @@ namespace Eede.Ui
         public ColorPicker()
         {
             InitializeComponent();
-            SetupGradationColor();
+            UpdateGradationColor();
         }
 
         public event EventHandler ColorChanged;
@@ -44,18 +44,14 @@ namespace Eede.Ui
         private int g = 0;
         private int b = 0;
 
-        private void SetupGradationColor()
+        private void UpdateColor()
         {
-            pickerA.GradationColor = new Color[] { Color.FromArgb(255, 255, 255), Color.FromArgb(0, 0, 0) };
             switch (mode)
             {
                 case ColorPickerMode.RGB:
                     r = pickerR.Value;
                     g = pickerG.Value;
                     b = pickerB.Value;
-                    pickerR.GradationColor = new Color[] { Color.FromArgb(255, g, b), Color.FromArgb(0, g, b) };
-                    pickerG.GradationColor = new Color[] { Color.FromArgb(r, 255, b), Color.FromArgb(r, 0, b) };
-                    pickerB.GradationColor = new Color[] { Color.FromArgb(r, g, 255), Color.FromArgb(r, g, 0) };
                     break;
 
                 case ColorPickerMode.HSV:
@@ -63,6 +59,25 @@ namespace Eede.Ui
                     r = tmp.R;
                     g = tmp.G;
                     b = tmp.B;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void UpdateGradationColor()
+        {
+            UpdateColor();
+            pickerA.GradationColor = new Color[] { Color.FromArgb(255, 255, 255), Color.FromArgb(0, 0, 0) };
+            switch (mode)
+            {
+                case ColorPickerMode.RGB:
+                    pickerR.GradationColor = new Color[] { Color.FromArgb(255, g, b), Color.FromArgb(0, g, b) };
+                    pickerG.GradationColor = new Color[] { Color.FromArgb(r, 255, b), Color.FromArgb(r, 0, b) };
+                    pickerB.GradationColor = new Color[] { Color.FromArgb(r, g, 255), Color.FromArgb(r, g, 0) };
+                    break;
+
+                case ColorPickerMode.HSV:
                     pickerR.GradationColor = new Color[] {
                         Color.FromArgb(255, 0, 255),
                         Color.FromArgb(0, 0, 255),
@@ -92,6 +107,75 @@ namespace Eede.Ui
             return Color.FromArgb(color.Red, color.Green, color.Blue);
         }
 
+        private void picker_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateGradationColor();
+            fireColorChanged();
+        }
+
+        private ArgbColor _nowColor = new(255, 0, 0, 0);
+        public ArgbColor NowColor
+        {
+            get =>  new ArgbColor((byte)pickerA.Value, (byte)r, (byte)g, (byte)b);
+            set
+            {
+                SetColor(value);
+            }
+        }
+
+        private void SetColor(ArgbColor c)
+        {
+            pickerA.Value = c.Alpha;
+            pickerR.Value = c.Red;
+            pickerG.Value = c.Green;
+            pickerB.Value = c.Blue;
+        }
+
+        //private Color GetArgb()
+        //{
+        //    return Color.FromArgb(pickerA.Value, r, g, b);
+        //}
+
+        //public Color GetRgb()
+        //{
+        //    return Color.FromArgb(255, r, g, b);
+        //}
+
+        //public Color GetA()
+        //{
+        //    return Color.FromArgb(pickerA.Value, pickerA.Value, pickerA.Value, pickerA.Value);
+        //}
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            switch (mode)
+            {
+                case ColorPickerMode.RGB:
+                    button1.Text = "A   H   S   V";
+                    mode = ColorPickerMode.Empty;
+                    HsvColor hsv = HsvColor.FromRgb(r, g, b);
+                    pickerR.Maximum = 360;
+                    pickerR.Value = hsv.Hue;
+                    pickerG.Value = hsv.Saturation;
+                    pickerB.Value = hsv.Value;
+                    mode = ColorPickerMode.HSV;
+                    break;
+
+                case ColorPickerMode.HSV:
+                    button1.Text = "A   R   G   B";
+                    mode = ColorPickerMode.Empty;
+                    pickerR.Maximum = 255;
+                    pickerR.Value = r;
+                    pickerG.Value = g;
+                    pickerB.Value = b;
+                    mode = ColorPickerMode.RGB;
+                    break;
+
+                default:
+                    break;
+            }
+            UpdateGradationColor();
+        }
         //private Hsv GetHsvFromRgb(int R, int G, int B)
         //{
         //    Hsv hsv = new Hsv();
@@ -177,67 +261,5 @@ namespace Eede.Ui
         //    return rgb;
         //}
 
-        private void picker_ValueChanged(object sender, EventArgs e)
-        {
-            SetupGradationColor();
-            fireColorChanged();
-        }
-
-        public void SetColor(Color c)
-        {
-            if (GetArgb() != c)
-            {
-                pickerA.Value = c.A;
-                pickerR.Value = c.R;
-                pickerG.Value = c.G;
-                pickerB.Value = c.B;
-            }
-        }
-
-        public Color GetArgb()
-        {
-            return Color.FromArgb(pickerA.Value, r, g, b);
-        }
-
-        public Color GetRgb()
-        {
-            return Color.FromArgb(255, r, g, b);
-        }
-
-        public Color GetA()
-        {
-            return Color.FromArgb(pickerA.Value, pickerA.Value, pickerA.Value, pickerA.Value);
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            switch (mode)
-            {
-                case ColorPickerMode.RGB:
-                    button1.Text = "A   H   S   V";
-                    mode = ColorPickerMode.Empty;
-                    HsvColor hsv = HsvColor.FromRgb(r, g, b);
-                    pickerR.Maximum = 360;
-                    pickerR.Value = hsv.Hue;
-                    pickerG.Value = hsv.Saturation;
-                    pickerB.Value = hsv.Value;
-                    mode = ColorPickerMode.HSV;
-                    break;
-
-                case ColorPickerMode.HSV:
-                    button1.Text = "A   R   G   B";
-                    mode = ColorPickerMode.Empty;
-                    pickerR.Maximum = 255;
-                    pickerR.Value = r;
-                    pickerG.Value = g;
-                    pickerB.Value = b;
-                    mode = ColorPickerMode.RGB;
-                    break;
-
-                default:
-                    break;
-            }
-            SetupGradationColor();
-        }
     }
 }

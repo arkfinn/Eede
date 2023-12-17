@@ -1,4 +1,5 @@
 ﻿using Eede.Application.PaintLayers;
+using Eede.Domain.Colors;
 using Eede.Domain.Drawings;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageTransfers;
@@ -22,7 +23,7 @@ namespace Eede.Application.Drawings
 
         private readonly ICanvasBackgroundService Background;
 
-        private readonly Magnification Magnification;
+        public readonly Magnification Magnification;
 
         private readonly PictureSize GridSize;
 
@@ -82,10 +83,9 @@ namespace Eede.Application.Drawings
             return new Size(size.Width, size.Height);
         }
 
-        public Color PickColor(Picture picture, Position displayPosition)
+        public ArgbColor PickColor(Picture picture, Position displayPosition)
         {
-            Domain.Colors.ArgbColor color = picture.PickColor(RealPositionOf(displayPosition).ToPosition());
-            return Color.FromArgb(color.Alpha, color.Red, color.Green, color.Blue);
+            return picture.PickColor(RealPositionOf(displayPosition).ToPosition());
         }
 
         private PositionHistory CreatePositionHistory(Position displayPosition)

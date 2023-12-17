@@ -36,6 +36,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ReactiveProperty" Version="9.3.4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Eede.Infrastructure\Eede.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -57,27 +57,29 @@ namespace Eede.Ui
             canvas.Invalidate();
         }
 
-        private PenStyle PenStyle = new(new DirectImageBlender());
+        private PenStyle PenStyle = new(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
 
-        public float Magnification
+        public Magnification Magnification
         {
+            get => DrawableArea.Magnification;
             set
             {
-                DrawableArea = DrawableArea.UpdateMagnification(new Magnification(value));
+                DrawableArea = DrawableArea.UpdateMagnification(value);
                 UpdateCanvasSize();
             }
         }
 
-        public IDrawStyle DrawStyle { private get; set; } = new FreeCurve();
+        public IDrawStyle DrawStyle { get; set; } = new FreeCurve();
 
-        public Color PenColor
+        public ArgbColor PenColor
         {
-            get => Color.FromArgb(PenStyle.Color.Alpha, PenStyle.Color.Red, PenStyle.Color.Green, PenStyle.Color.Blue);
-            set => PenStyle = PenStyle.UpdateColor(new ArgbColor(value.A, value.R, value.G, value.B));
+            get => PenStyle.Color;
+            set => PenStyle = PenStyle.UpdateColor(value);
         }
 
         public int PenSize
         {
+            get => PenStyle.Width;
             set => PenStyle = PenStyle.UpdateWidth(value);
         }
 

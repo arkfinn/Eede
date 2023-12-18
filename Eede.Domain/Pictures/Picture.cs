@@ -16,7 +16,7 @@ namespace Eede.Domain.Pictures
         {
             int stride = size.Width * COLOR_32BIT;
             return stride * size.Height != imageData.Length
-                ? throw new ArgumentException($"(width:{size.Width}, height:{size.Height}) != length:{imageData.Length}")
+                ? throw new ArgumentException($"(width:{size.Width}, height:{size.Height}) * {COLOR_32BIT} != length:{imageData.Length}")
                 : new Picture(size, imageData, stride);
         }
 

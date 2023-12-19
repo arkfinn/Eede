@@ -65,17 +65,19 @@ namespace Eede.Domain.Pictures
         public Picture CutOut(PictureArea area)
         {
             int destinationStride = area.Width * COLOR_32BIT;
+            int length = Math.Min((Width - area.X) * COLOR_32BIT, destinationStride);
             int destinationX = area.X * COLOR_32BIT;
             byte[] cutImageData = new byte[destinationStride * area.Height];
 
             for (int i = 0; i < area.Height; i++)
             {
+                if (i >= Height) break;
                 int sourceStartIndex = destinationX + ((area.Y + i) * Stride);
                 int destinationStartIndex = i * destinationStride;
-                Array.Copy(ImageData, sourceStartIndex, cutImageData, destinationStartIndex, destinationStride);
+                Array.Copy(ImageData, sourceStartIndex, cutImageData, destinationStartIndex, length);
             }
 
-            return Picture.Create(area.Size, cutImageData);
+            return Create(area.Size, cutImageData);
         }
 
         public Picture Transfer(IImageTransfer transfer)

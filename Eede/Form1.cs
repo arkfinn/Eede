@@ -1,7 +1,9 @@
-﻿using Eede.Actions;
+﻿
+using Avalonia;
+using Eede.Actions;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
-using Eede.Domain.Colors;
+using Eede.Common.Drawings;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
@@ -12,23 +14,34 @@ using Eede.Domain.Systems;
 using Eede.Infrastructure.Pictures;
 using Eede.Settings;
 using Eede.Ui;
+using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Reflection.Emit;
+using System.Security.Policy;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Xml.Linq;
 
 namespace Eede
 {
-    public partial class Form1 : Form
+    internal partial class Form1 : Form, IViewFor<Form1ViewModel>
     {
-        private readonly Form1ViewModel ViewModel = new();
+        public Form1ViewModel ViewModel
+        {
+            get; set;
+        }
+        object IViewFor.ViewModel
+        {
+            get { return ViewModel; }
+            set { ViewModel = value as Form1ViewModel; }
+        }
+
         public Form1()
         {
             InitializeComponent();
+
+            ViewModel = new Form1ViewModel();
+
 
             Bind(() => paintableBox1.Magnification, () => ViewModel.Magnification.Value);
 
@@ -38,8 +51,24 @@ namespace Eede
             Bind(() => paintableBox1.PenSize, () => ViewModel.PenSize.Value);
             Bind(() => penSizeSetter1.PenSize, () => ViewModel.PenSize.Value);
 
+            // 暫定
+            drawStyleMenu1 = new();
+            drawStyleMenu1.Dock = DockStyle.Top;
+            splitContainer2.Panel1.Controls.Add(drawStyleMenu1);
+            drawStyleMenu1.Element.DrawStyleChanged += (value) =>
+            {
+                ViewModel.DrawStyle = value;
+                paintableBox1.DrawStyle = value;
+            };
+
+            //    this.Bind(ViewModel, vm => vm.DrawStyle, v => v.drawStyleMenu1.DrawStyle);
+            //    this.Bind(ViewModel, vm => vm.DrawStyle, v => v.paintableBox1.DrawStyle);
+            pictureActionMenu1.Command = ViewModel.PictureActionCommand;
+
             toolStripButton14.PerformClick();
         }
+        private Ui.AvaloniaWrapper.Navigation.DrawStyleMenu drawStyleMenu1;
+
 
         private static void Bind<T, U>(Expression<Func<T>> targetValue, Expression<Func<U>> modelValue)
         {
@@ -70,8 +99,7 @@ namespace Eede
             {
                 return;
             }
-            Size size = dialog.PictureSize;
-            // TODO: pictureがDisposeされないが、別の修正でそもそもpictureからIDisposableを取る
+            System.Drawing.Size size = dialog.PictureSize;
             AddChildWindow(new CreatePictureUseCase().Execute(size));
         }
 
@@ -312,6 +340,7 @@ namespace Eede
 
         private UndoSystem UndoSystem = new();
 
+
         private void AddUndoItem(IUndoItem item)
         {
             UndoSystem = UndoSystem.Add(item);
@@ -344,30 +373,5 @@ namespace Eede
             AddUndoItem(action);
         }
 
-        private void freeCurveToolButton_Click(object sender, EventArgs e)
-        {
-            paintableBox1.DrawStyle = new FreeCurve();
-            freeCurveToolButton.Checked = true;
-            lineToolButton.Checked = false;
-            fillToolButton.Checked = false;
-        }
-
-        private void lineToolButton_Click(object sender, EventArgs e)
-        {
-            paintableBox1.DrawStyle = new Line();
-            freeCurveToolButton.Checked = false;
-            lineToolButton.Checked = true;
-            fillToolButton.Checked = false;
-
-        }
-
-        private void fillToolButton_Click(object sender, EventArgs e)
-        {
-            paintableBox1.DrawStyle = new Fill();
-            freeCurveToolButton.Checked = false;
-            lineToolButton.Checked = false;
-            fillToolButton.Checked = true;
-
-        }
     }
 }

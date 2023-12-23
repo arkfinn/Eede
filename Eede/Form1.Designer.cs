@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            Domain.DrawStyles.FreeCurve freeCurve1 = new Domain.DrawStyles.FreeCurve();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             toolStripButton_newFile = new System.Windows.Forms.ToolStripButton();
             toolStripButton_openFile = new System.Windows.Forms.ToolStripButton();
@@ -56,13 +57,9 @@
             panel1 = new System.Windows.Forms.Panel();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
-            toolStrip4 = new System.Windows.Forms.ToolStrip();
-            freeCurveToolButton = new System.Windows.Forms.ToolStripButton();
-            lineToolButton = new System.Windows.Forms.ToolStripButton();
-            fillToolButton = new System.Windows.Forms.ToolStripButton();
             penSizeSetter1 = new Ui.PenSizeSetter();
             paintableBox1 = new Ui.DrawableBox();
-            toolStrip2 = new System.Windows.Forms.ToolStrip();
+            pictureActionMenu1 = new Ui.WpfWrapper.Navigation.PictureActionMenu();
             toolStrip3 = new System.Windows.Forms.ToolStrip();
             toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             alphaTransferButton = new System.Windows.Forms.ToolStripButton();
@@ -81,7 +78,6 @@
             splitContainer2.Panel1.SuspendLayout();
             splitContainer2.Panel2.SuspendLayout();
             splitContainer2.SuspendLayout();
-            toolStrip4.SuspendLayout();
             toolStrip3.SuspendLayout();
             SuspendLayout();
             // 
@@ -347,60 +343,16 @@
             // 
             // splitContainer2.Panel1
             // 
-            splitContainer2.Panel1.Controls.Add(toolStrip4);
             splitContainer2.Panel1.Controls.Add(penSizeSetter1);
             // 
             // splitContainer2.Panel2
             // 
             splitContainer2.Panel2.Controls.Add(paintableBox1);
-            splitContainer2.Panel2.Controls.Add(toolStrip2);
+            splitContainer2.Panel2.Controls.Add(pictureActionMenu1);
             splitContainer2.Size = new System.Drawing.Size(658, 430);
             splitContainer2.SplitterDistance = 110;
             splitContainer2.SplitterWidth = 5;
             splitContainer2.TabIndex = 0;
-            // 
-            // toolStrip4
-            // 
-            toolStrip4.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            toolStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { freeCurveToolButton, lineToolButton, fillToolButton });
-            toolStrip4.Location = new System.Drawing.Point(0, 0);
-            toolStrip4.Name = "toolStrip4";
-            toolStrip4.Padding = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            toolStrip4.Size = new System.Drawing.Size(110, 25);
-            toolStrip4.TabIndex = 1;
-            toolStrip4.Text = "toolStrip4";
-            // 
-            // freeCurveToolButton
-            // 
-            freeCurveToolButton.Checked = true;
-            freeCurveToolButton.CheckState = System.Windows.Forms.CheckState.Checked;
-            freeCurveToolButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            freeCurveToolButton.Image = Properties.Resources.pen_free;
-            freeCurveToolButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            freeCurveToolButton.Name = "freeCurveToolButton";
-            freeCurveToolButton.Size = new System.Drawing.Size(23, 22);
-            freeCurveToolButton.Text = "toolStripButton1";
-            freeCurveToolButton.Click += freeCurveToolButton_Click;
-            // 
-            // lineToolButton
-            // 
-            lineToolButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            lineToolButton.Image = Properties.Resources.pen_line;
-            lineToolButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            lineToolButton.Name = "lineToolButton";
-            lineToolButton.Size = new System.Drawing.Size(23, 22);
-            lineToolButton.Text = "toolStripButton3";
-            lineToolButton.Click += lineToolButton_Click;
-            // 
-            // fillToolButton
-            // 
-            fillToolButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            fillToolButton.Image = Properties.Resources.pen_fill;
-            fillToolButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            fillToolButton.Name = "fillToolButton";
-            fillToolButton.Size = new System.Drawing.Size(23, 22);
-            fillToolButton.Text = "fillToolButton";
-            fillToolButton.Click += fillToolButton_Click;
             // 
             // penSizeSetter1
             // 
@@ -418,24 +370,24 @@
             paintableBox1.AutoScroll = true;
             paintableBox1.BackgroundImage = (System.Drawing.Image)resources.GetObject("paintableBox1.BackgroundImage");
             paintableBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            paintableBox1.DrawStyle = freeCurve1;
             paintableBox1.Location = new System.Drawing.Point(0, 0);
             paintableBox1.Margin = new System.Windows.Forms.Padding(5);
             paintableBox1.Name = "paintableBox1";
-            paintableBox1.Size = new System.Drawing.Size(517, 430);
+            paintableBox1.PenSize = 1;
+            paintableBox1.Size = new System.Drawing.Size(519, 430);
             paintableBox1.TabIndex = 1;
             paintableBox1.ColorChanged += paintableBox1_ColorChanged;
             paintableBox1.Drew += paintableBox1_Drew;
             // 
-            // toolStrip2
+            // pictureActionMenu1
             // 
-            toolStrip2.Dock = System.Windows.Forms.DockStyle.Right;
-            toolStrip2.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            toolStrip2.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
-            toolStrip2.Location = new System.Drawing.Point(517, 0);
-            toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(26, 430);
-            toolStrip2.TabIndex = 0;
-            toolStrip2.Text = "toolStrip2";
+            pictureActionMenu1.Command = null;
+            pictureActionMenu1.Dock = System.Windows.Forms.DockStyle.Right;
+            pictureActionMenu1.Location = new System.Drawing.Point(519, 0);
+            pictureActionMenu1.Name = "pictureActionMenu1";
+            pictureActionMenu1.Size = new System.Drawing.Size(24, 430);
+            pictureActionMenu1.TabIndex = 2;
             // 
             // toolStrip3
             // 
@@ -520,13 +472,9 @@
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
             splitContainer2.Panel1.ResumeLayout(false);
-            splitContainer2.Panel1.PerformLayout();
             splitContainer2.Panel2.ResumeLayout(false);
-            splitContainer2.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
             splitContainer2.ResumeLayout(false);
-            toolStrip4.ResumeLayout(false);
-            toolStrip4.PerformLayout();
             toolStrip3.ResumeLayout(false);
             toolStrip3.PerformLayout();
             ResumeLayout(false);
@@ -563,7 +511,6 @@
         private System.Windows.Forms.SplitContainer splitContainer2;
         private Ui.ColorPicker colorPicker1;
         private Ui.PenSizeSetter penSizeSetter1;
-        private System.Windows.Forms.ToolStrip toolStrip2;
         private Ui.DrawableBox paintableBox1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
@@ -573,10 +520,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripButton alphaTransferButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
-        private System.Windows.Forms.ToolStrip toolStrip4;
-        private System.Windows.Forms.ToolStripButton freeCurveToolButton;
-        private System.Windows.Forms.ToolStripButton lineToolButton;
-        private System.Windows.Forms.ToolStripButton fillToolButton;
+        private Ui.WpfWrapper.Navigation.PictureActionMenu pictureActionMenu1;
     }
 }
 

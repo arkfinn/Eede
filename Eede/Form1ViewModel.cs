@@ -1,21 +1,34 @@
 ﻿using Eede.Actions;
 using Eede.Application.Drawings;
+using Eede.Common.Drawings;
+using Eede.Common.Pictures.Actions;
 using Eede.Domain.Colors;
+using Eede.Domain.DrawStyles;
 using Eede.Domain.Scales;
 using Reactive.Bindings;
+using ReactiveUI;
 using System;
 using System.ComponentModel;
 using System.Drawing;
 
 namespace Eede
 {
-    internal class Form1ViewModel : INotifyPropertyChanged
+    internal class Form1ViewModel : ReactiveObject, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ReactiveProperty<Magnification> Magnification { get; } = new ReactiveProperty<Magnification>();
         public ReactiveProperty<ArgbColor> PenColor { get; } = new ReactiveProperty<ArgbColor>();
         public ReactiveProperty<int> PenSize { get; } = new ReactiveProperty<int>();
+
+        private IDrawStyle _drawStyle = new FreeCurve();
+        public IDrawStyle DrawStyle
+        {
+            get => _drawStyle;
+            set => this.RaiseAndSetIfChanged(ref _drawStyle, value);
+        }
+
+        public ReactiveCommand<PictureActions> PictureActionCommand { get; } = new();
 
         //public ReactiveCommand<DrawEventArgs> AddUndoDrawCommand { get; } = new();
 
@@ -31,6 +44,23 @@ namespace Eede
             //    //DrawAction action = new(paintableBox1, e.PreviousPicture, e.NowPicture);
             //    //AddUndoItem(action);
             //}));
+            PictureActionCommand.Subscribe(new Action<PictureActions>(action =>
+            {
+                switch (action)
+                {
+                    case PictureActions.ShiftUp:
+                        Console.WriteLine("shift_up");
+                        break;
+                    case PictureActions.ShiftDown:
+                        break;
+                    case PictureActions.ShiftLeft:
+                        break;
+                    case PictureActions.ShiftRight:
+                        break;
+                    default:
+                        break;
+                }
+            }));
         }
     }
 }

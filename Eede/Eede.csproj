@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\pen_fill.png" />
+    <None Remove="Assets\pen_free.png" />
+    <None Remove="Assets\pen_line.png" />
     <None Remove="Resources\Copy_6524.png" />
     <None Remove="Resources\Cut_6523.png" />
     <None Remove="Resources\InvisibleBackground.png" />
@@ -18,6 +25,7 @@
     <None Remove="Resources\Redo_16x.png" />
     <None Remove="Resources\Saveall_6518.png" />
     <None Remove="Resources\Save_6530.png" />
+    <None Remove="Resources\tool_shift_up.png" />
     <None Remove="Resources\Undo_16x.png" />
   </ItemGroup>
 
@@ -36,6 +44,18 @@
   </ItemGroup>
 
   <ItemGroup>
+
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.6" />
+
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.6" />
+
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.6" />
+
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.6" />
+
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.6" />
+
+    <PackageReference Include="Avalonia.Win32.Interoperability" Version="11.0.6" />
     <PackageReference Include="ReactiveProperty" Version="9.3.4" />
   </ItemGroup>
 
@@ -56,6 +76,14 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Pages\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\tool_shift_up.png" />
   </ItemGroup>
 
 </Project>

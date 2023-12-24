@@ -1,26 +1,25 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Systems;
-using Eede.Ui;
 using System;
 
 namespace Eede.Actions
 {
     internal class PullPictureAction : IUndoItem
     {
-        private readonly DrawableBox ParentBox;
+        private readonly Action<Picture> UpdatePicture;
         private readonly Picture NowPicture;
         private readonly Picture PulledPicture;
 
-        public PullPictureAction(DrawableBox parentBox, Picture pulledImage)
+        public PullPictureAction(Action<Picture> updatePicture, Picture nowPicture, Picture pulledImage)
         {
-            ParentBox = parentBox ?? throw new ArgumentNullException(nameof(parentBox));
-            NowPicture = ParentBox.GetImage();
+            UpdatePicture = updatePicture ?? throw new ArgumentNullException(nameof(updatePicture));
+            NowPicture = nowPicture ?? throw new ArgumentNullException(nameof(nowPicture));
             PulledPicture = pulledImage ?? throw new ArgumentNullException(nameof(pulledImage));
         }
 
         public void Do()
         {
-            ParentBox.SetupPicture(PulledPicture);
+            UpdatePicture(PulledPicture);
         }
 
         public void Redo()
@@ -30,7 +29,7 @@ namespace Eede.Actions
 
         public void Undo()
         {
-            ParentBox.SetupPicture(NowPicture);
+            UpdatePicture(NowPicture);
         }
 
         public void Dispose()

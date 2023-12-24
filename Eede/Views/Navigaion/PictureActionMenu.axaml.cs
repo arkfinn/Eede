@@ -15,7 +15,8 @@ namespace Eede.Views.Navigaion
             InitializeComponent();
         }
 
-        public static readonly StyledProperty<ICommand?> CommandProperty = AvaloniaProperty.Register<PictureActionMenu, ICommand?>(nameof(Command));
+        public static readonly StyledProperty<ICommand?> CommandProperty = 
+            AvaloniaProperty.Register<PictureActionMenu, ICommand?>(nameof(Command));
 
         public ICommand? Command
         {

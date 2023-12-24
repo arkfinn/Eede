@@ -1,4 +1,4 @@
-﻿namespace Eede.Ui.WpfWrapper.Navigation
+﻿namespace Eede.Ui.AvaloniaWrapper.Navigation
 {
     partial class PictureActionMenu
     {

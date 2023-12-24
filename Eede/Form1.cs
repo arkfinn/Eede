@@ -1,26 +1,23 @@
-﻿
-using Avalonia;
-using Eede.Actions;
+﻿using Eede.Actions;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
-using Eede.Common.Drawings;
-using Eede.Domain.DrawStyles;
+using Eede.Common.Pictures.Actions;
 using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
+using Eede.Domain.Pictures.Actions;
 using Eede.Domain.Scales;
 using Eede.Domain.Systems;
 using Eede.Infrastructure.Pictures;
 using Eede.Settings;
 using Eede.Ui;
+using Reactive.Bindings;
 using ReactiveUI;
+using SkiaSharp;
 using System;
-using System.Drawing;
 using System.Linq.Expressions;
-using System.Security.Policy;
 using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace Eede
 {
@@ -29,7 +26,8 @@ namespace Eede
         public Form1ViewModel ViewModel
         {
             get; set;
-        }
+        } = new Form1ViewModel();
+
         object IViewFor.ViewModel
         {
             get { return ViewModel; }
@@ -39,9 +37,6 @@ namespace Eede
         public Form1()
         {
             InitializeComponent();
-
-            ViewModel = new Form1ViewModel();
-
 
             Bind(() => paintableBox1.Magnification, () => ViewModel.Magnification.Value);
 
@@ -61,9 +56,31 @@ namespace Eede
                 paintableBox1.DrawStyle = value;
             };
 
-            //    this.Bind(ViewModel, vm => vm.DrawStyle, v => v.drawStyleMenu1.DrawStyle);
-            //    this.Bind(ViewModel, vm => vm.DrawStyle, v => v.paintableBox1.DrawStyle);
-            pictureActionMenu1.Command = ViewModel.PictureActionCommand;
+            // pictureActionMenu1.Command = ViewModel.PictureActionCommand;
+            ReactiveCommand<PictureActions> pictureActionCommand = new();
+            pictureActionCommand.Subscribe(new Action<PictureActions>(actionType =>
+            {
+                Picture nowPicture = paintableBox1.GetImage();
+                switch (actionType)
+                {
+                    case PictureActions.ShiftUp:
+                        Picture updatedPicture = new ShiftUpAction(nowPicture).Execute();
+                        PullPictureAction action = new(p => paintableBox1.SetupPicture(p), nowPicture, updatedPicture);
+                        action.Do();
+                        AddUndoItem(action);
+                        break;
+                    case PictureActions.ShiftDown:
+                        break;
+                    case PictureActions.ShiftLeft:
+                        break;
+                    case PictureActions.ShiftRight:
+                        break;
+                    default:
+                        break;
+                }
+            }));
+            pictureActionMenu1.Command = pictureActionCommand;
+
 
             toolStripButton14.PerformClick();
         }
@@ -151,7 +168,7 @@ namespace Eede
         private void ChildFormPicturePulled(object sender, PicturePulledEventArgs e)
         {
             Picture picture = e.CutOutImage();
-            PullPictureAction action = new(paintableBox1, picture);
+            PullPictureAction action = new(p => paintableBox1.SetupPicture(p), paintableBox1.GetImage(), picture);
             action.Do();
             AddUndoItem(action);
         }

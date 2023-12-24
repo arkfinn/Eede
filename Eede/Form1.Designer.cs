@@ -59,7 +59,7 @@
             splitContainer2 = new System.Windows.Forms.SplitContainer();
             penSizeSetter1 = new Ui.PenSizeSetter();
             paintableBox1 = new Ui.DrawableBox();
-            pictureActionMenu1 = new Ui.WpfWrapper.Navigation.PictureActionMenu();
+            pictureActionMenu1 = new Ui.AvaloniaWrapper.Navigation.PictureActionMenu();
             toolStrip3 = new System.Windows.Forms.ToolStrip();
             toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             alphaTransferButton = new System.Windows.Forms.ToolStripButton();
@@ -520,7 +520,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripButton alphaTransferButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
-        private Ui.WpfWrapper.Navigation.PictureActionMenu pictureActionMenu1;
+        private Ui.AvaloniaWrapper.Navigation.PictureActionMenu pictureActionMenu1;
     }
 }
 

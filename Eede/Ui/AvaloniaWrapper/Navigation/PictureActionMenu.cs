@@ -4,7 +4,7 @@ using System;
 using System.Windows.Forms;
 using System.Windows.Input;
 
-namespace Eede.Ui.WpfWrapper.Navigation
+namespace Eede.Ui.AvaloniaWrapper.Navigation
 {
     public partial class PictureActionMenu : UserControl
     {

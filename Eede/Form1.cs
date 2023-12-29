@@ -43,8 +43,6 @@ namespace Eede
             Bind(() => paintableBox1.PenColor, () => ViewModel.PenColor.Value);
             Bind(() => colorPicker1.NowColor, () => ViewModel.PenColor.Value);
 
-            Bind(() => paintableBox1.PenSize, () => ViewModel.PenSize.Value);
-            Bind(() => penSizeSetter1.PenSize, () => ViewModel.PenSize.Value);
 
             // 暫定
             drawStyleMenu1 = new();
@@ -81,10 +79,19 @@ namespace Eede
             }));
             pictureActionMenu1.Command = pictureActionCommand;
 
+            penWidthSelector1 = new();
+            penWidthSelector1.Dock = DockStyle.Bottom;
+            splitContainer2.Panel1.Controls.Add(penWidthSelector1);
+            penWidthSelector1.Element.PenWidthChanged += (width) =>
+            {
+                ViewModel.PenSize = width;
+                paintableBox1.PenSize = width;
+            };
 
             toolStripButton14.PerformClick();
         }
         private Ui.AvaloniaWrapper.Navigation.DrawStyleMenu drawStyleMenu1;
+        private Ui.AvaloniaWrapper.DataDisplay.PenWidthSelector penWidthSelector1;
 
 
         private static void Bind<T, U>(Expression<Func<T>> targetValue, Expression<Func<U>> modelValue)

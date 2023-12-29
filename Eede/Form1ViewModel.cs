@@ -19,7 +19,13 @@ namespace Eede
 
         public ReactiveProperty<Magnification> Magnification { get; } = new ReactiveProperty<Magnification>();
         public ReactiveProperty<ArgbColor> PenColor { get; } = new ReactiveProperty<ArgbColor>();
-        public ReactiveProperty<int> PenSize { get; } = new ReactiveProperty<int>();
+
+        private int _penSize = 1;
+        public int PenSize
+        {
+            get => _penSize;
+            set => this.RaiseAndSetIfChanged(ref _penSize, value);
+        }
 
         private IDrawStyle _drawStyle = new FreeCurve();
         public IDrawStyle DrawStyle
@@ -36,7 +42,6 @@ namespace Eede
         {
             Magnification.Value = new Magnification(4);
             PenColor.Value = new ArgbColor(255, 0, 0, 0);
-            PenSize.Value = 1;
 
             // senderの渡し方を検討する（送信元でActionに詰めるなど）
             //AddUndoDrawCommand.Subscribe(new Action<DrawEventArgs>(x =>

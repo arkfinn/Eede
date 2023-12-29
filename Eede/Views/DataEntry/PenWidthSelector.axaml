@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="80" d:DesignHeight="450"
+             x:Class="Eede.Views.DataEntry.PenWidthSelector">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="2*" />
+      <ColumnDefinition Width="1*" />
+    </Grid.ColumnDefinitions>
+      <StackPanel Orientation="Vertical" Grid.Column="0">
+        <Button Height="24" FontSize="10" Click="PenWidth1px">　　1px</Button>
+        <Button Height="24" FontSize="10" Click="PenWidth3px">　　3px</Button>
+        <Button Height="24" FontSize="10" Click="PenWidth6px">　　6px</Button>
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Column="1">
+        <Button Height="24" FontSize="10" HorizontalAlignment="Center"
+                Click="PenWidthUp">▲</Button>
+        <TextBox FontSize="10" HorizontalAlignment="Center" TextAlignment="Center" MinWidth="26" Width="26" MinHeight="26" Height="26" Padding="4"
+                 x:Name="textBox1" TextInput="OnTextInput">1</TextBox>
+        <Button Height="24" FontSize="10" HorizontalAlignment="Center"
+                Click="PenWidthDown">▼</Button>
+      </StackPanel>
+  </Grid>
+</UserControl>

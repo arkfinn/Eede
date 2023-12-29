@@ -57,7 +57,6 @@
             panel1 = new System.Windows.Forms.Panel();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
-            penSizeSetter1 = new Ui.PenSizeSetter();
             paintableBox1 = new Ui.DrawableBox();
             pictureActionMenu1 = new Ui.AvaloniaWrapper.Navigation.PictureActionMenu();
             toolStrip3 = new System.Windows.Forms.ToolStrip();
@@ -75,7 +74,6 @@
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
-            splitContainer2.Panel1.SuspendLayout();
             splitContainer2.Panel2.SuspendLayout();
             splitContainer2.SuspendLayout();
             toolStrip3.SuspendLayout();
@@ -341,10 +339,6 @@
             splitContainer2.Margin = new System.Windows.Forms.Padding(4);
             splitContainer2.Name = "splitContainer2";
             // 
-            // splitContainer2.Panel1
-            // 
-            splitContainer2.Panel1.Controls.Add(penSizeSetter1);
-            // 
             // splitContainer2.Panel2
             // 
             splitContainer2.Panel2.Controls.Add(paintableBox1);
@@ -353,17 +347,6 @@
             splitContainer2.SplitterDistance = 110;
             splitContainer2.SplitterWidth = 5;
             splitContainer2.TabIndex = 0;
-            // 
-            // penSizeSetter1
-            // 
-            penSizeSetter1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            penSizeSetter1.Location = new System.Drawing.Point(7, 354);
-            penSizeSetter1.Margin = new System.Windows.Forms.Padding(5);
-            penSizeSetter1.MinimumSize = new System.Drawing.Size(54, 65);
-            penSizeSetter1.Name = "penSizeSetter1";
-            penSizeSetter1.PenSize = 1;
-            penSizeSetter1.Size = new System.Drawing.Size(90, 76);
-            penSizeSetter1.TabIndex = 0;
             // 
             // paintableBox1
             // 
@@ -471,7 +454,6 @@
             splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
-            splitContainer2.Panel1.ResumeLayout(false);
             splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
             splitContainer2.ResumeLayout(false);
@@ -510,7 +492,6 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private Ui.ColorPicker colorPicker1;
-        private Ui.PenSizeSetter penSizeSetter1;
         private Ui.DrawableBox paintableBox1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;

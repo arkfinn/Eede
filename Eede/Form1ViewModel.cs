@@ -5,9 +5,11 @@ using Eede.Common.Pictures.Actions;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.Scales;
+using Eede.ViewModels.DataDisplay;
 using Reactive.Bindings;
 using ReactiveUI;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 
@@ -18,7 +20,15 @@ namespace Eede
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ReactiveProperty<Magnification> Magnification { get; } = new ReactiveProperty<Magnification>();
-        public ReactiveProperty<ArgbColor> PenColor { get; } = new ReactiveProperty<ArgbColor>();
+
+        public ObservableCollection<DockPictureViewModel> Pictures { get; } = new ObservableCollection<DockPictureViewModel>();
+
+        private ArgbColor _penColor = new ArgbColor(255, 0, 0, 0);
+        public ArgbColor PenColor
+        {
+            get => _penColor;
+            set => this.RaiseAndSetIfChanged(ref _penColor, value);
+        }
 
         private int _penSize = 1;
         public int PenSize
@@ -41,8 +51,7 @@ namespace Eede
         public Form1ViewModel()
         {
             Magnification.Value = new Magnification(4);
-            PenColor.Value = new ArgbColor(255, 0, 0, 0);
-
+      
             // senderの渡し方を検討する（送信元でActionに詰めるなど）
             //AddUndoDrawCommand.Subscribe(new Action<DrawEventArgs>(x =>
             //{

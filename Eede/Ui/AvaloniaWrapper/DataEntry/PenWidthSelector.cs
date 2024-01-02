@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Eede.Ui.AvaloniaWrapper.DataDisplay
+namespace Eede.Ui.AvaloniaWrapper.DataEntry
 {
     internal partial class PenWidthSelector : UserControl
     {

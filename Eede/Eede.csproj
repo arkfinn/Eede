@@ -15,6 +15,8 @@
     <None Remove="Assets\pen_fill.png" />
     <None Remove="Assets\pen_free.png" />
     <None Remove="Assets\pen_line.png" />
+    <None Remove="Assets\Tiles\InvisibleBackground.png" />
+    <None Remove="Assets\Tiles\OutsideBackGround.bmp" />
     <None Remove="Resources\Copy_6524.png" />
     <None Remove="Resources\Cut_6523.png" />
     <None Remove="Resources\InvisibleBackground.png" />
@@ -47,8 +49,6 @@
 
     <PackageReference Include="Avalonia.Desktop" Version="11.0.6" />
 
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.6" />
-
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.6" />
 
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.6" />
@@ -56,6 +56,10 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.6" />
 
     <PackageReference Include="Avalonia.Win32.Interoperability" Version="11.0.6" />
+
+    <PackageReference Include="Dock.Avalonia" Version="11.0.0.5" />
+
+    <PackageReference Include="Dock.Model.Avalonia" Version="11.0.0.5" />
     <PackageReference Include="ReactiveProperty" Version="9.3.4" />
   </ItemGroup>
 
@@ -69,6 +73,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Ui\AvaloniaWrapper\DataDisplay\PictureFrame.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Ui\AvaloniaWrapper\DataEntry\ColorPicker.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -79,6 +87,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Views\DataEntry\新しいフォルダー\" />
     <Folder Include="Views\Pages\" />
   </ItemGroup>
 

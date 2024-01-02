@@ -150,51 +150,52 @@ namespace Eede.Ui
         private Bitmap gradation;
         private void drawGradation()
         {
-            if (Width > tick.Width && Height > tick.Height)
+            if (Width <= tick.Width || Height <= tick.Height)
             {
-                Size gradationSize = new(Width - tick.Width, Height - tick.Height);
-
-                gradation = new Bitmap(gradationSize.Width, gradationSize.Height);
-                Graphics g = Graphics.FromImage(gradation);
-                LinearGradientBrush lgb =
-                    new(new Rectangle(0, 0, gradationSize.Width, gradationSize.Height),
-                        Color.Black, Color.White, gradientMode);
-
-                //多色用  
-
-
-                if (GradationColor != null && GradationColor.Length >= 2)
-                {
-                    // ColorBlendクラスを生成   
-                    ColorBlend cb = new()
-                    {
-                        Colors = GradationColor
-                    };
-                    float[] Position = new float[GradationColor.Length];
-                    for (int i = 0; i < GradationColor.Length; i++)
-                    {
-                        Position[i] = 1.0f / (GradationColor.Length - 1) * i;
-                    }
-
-                    cb.Positions = Position;
-                    // ブラシのInterpolationColorsに設定   
-                    lgb.InterpolationColors = cb;
-                }
-
-
-                g.FillRectangle(lgb, new Rectangle(0, 0, gradationSize.Width, gradationSize.Height));
-
-                //枠線  
-                Pen p = new(Color.Black, 1);
-                if (activeFlag == true)
-                {
-                    p = new Pen(Color.Brown, 1);
-                }
-
-                g.DrawRectangle(p, 0, 0, gradationSize.Width - 1, gradationSize.Height - 1);
-                lgb.Dispose();
-                g.Dispose();
+                return;
             }
+            Size gradationSize = new(Width - tick.Width, Height - tick.Height);
+
+            gradation = new Bitmap(gradationSize.Width, gradationSize.Height);
+            Graphics g = Graphics.FromImage(gradation);
+            LinearGradientBrush lgb =
+                new(new Rectangle(0, 0, gradationSize.Width, gradationSize.Height),
+                    Color.Black, Color.White, gradientMode);
+
+            //多色用  
+
+
+            if (GradationColor != null && GradationColor.Length >= 2)
+            {
+                // ColorBlendクラスを生成   
+                ColorBlend cb = new()
+                {
+                    Colors = GradationColor
+                };
+                float[] Position = new float[GradationColor.Length];
+                for (int i = 0; i < GradationColor.Length; i++)
+                {
+                    Position[i] = 1.0f / (GradationColor.Length - 1) * i;
+                }
+
+                cb.Positions = Position;
+                // ブラシのInterpolationColorsに設定   
+                lgb.InterpolationColors = cb;
+            }
+
+
+            g.FillRectangle(lgb, new Rectangle(0, 0, gradationSize.Width, gradationSize.Height));
+
+            //枠線  
+            Pen p = new(Color.Black, 1);
+            if (activeFlag == true)
+            {
+                p = new Pen(Color.Brown, 1);
+            }
+
+            g.DrawRectangle(p, 0, 0, gradationSize.Width - 1, gradationSize.Height - 1);
+            lgb.Dispose();
+            g.Dispose();
 
         }
 

@@ -12,32 +12,33 @@ namespace Eede.Common.Converters
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is string path)
+            if (value is not string path)
             {
-                Uri? uri = null;
+                return null;
+            }
+            Uri? uri = null;
 
-                if (path.StartsWith("avares://"))
+            if (path.StartsWith("avares://"))
+            {
+                uri = new Uri(path);
+            }
+            else
+            {
+                Assembly? assembly = Assembly.GetEntryAssembly();
+                if (assembly != null)
                 {
-                    uri = new Uri(path);
-                }
-                else
-                {
-                    Assembly? assembly = Assembly.GetEntryAssembly();
-                    if (assembly != null)
+                    // string? assemblyName = assembly.GetName().Name;
+                    string? assemblyName = "Eede";
+                    if (assemblyName != null)
                     {
-                        // string? assemblyName = assembly.GetName().Name;
-                        string? assemblyName = "Eede";
-                        if (assemblyName != null)
-                        {
-                            uri = new Uri($"avares://{assemblyName}{path}");
-                        }
+                        uri = new Uri($"avares://{assemblyName}{path}");
                     }
                 }
-                if (uri != null)
-                {
-                    using var stream = AssetLoader.Open(uri);
-                    return new Bitmap(stream);
-                }
+            }
+            if (uri != null)
+            {
+                using var stream = AssetLoader.Open(uri);
+                return new Bitmap(stream);
             }
             return null;
         }

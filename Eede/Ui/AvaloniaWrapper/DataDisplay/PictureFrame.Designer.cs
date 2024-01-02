@@ -1,6 +1,6 @@
 ﻿namespace Eede.Ui.AvaloniaWrapper.DataDisplay
 {
-    partial class PenWidthSelector
+    partial class PictureFrame
     {
         /// <summary> 
         /// 必要なデザイナー変数です。

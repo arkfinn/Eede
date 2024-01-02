@@ -63,7 +63,6 @@
             toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             alphaTransferButton = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-            colorPicker1 = new Ui.ColorPicker();
             splitter1 = new System.Windows.Forms.Splitter();
             saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -325,7 +324,6 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(toolStrip3);
-            splitContainer1.Panel2.Controls.Add(colorPicker1);
             splitContainer1.Size = new System.Drawing.Size(658, 641);
             splitContainer1.SplitterDistance = 430;
             splitContainer1.SplitterWidth = 5;
@@ -360,7 +358,6 @@
             paintableBox1.PenSize = 1;
             paintableBox1.Size = new System.Drawing.Size(519, 430);
             paintableBox1.TabIndex = 1;
-            paintableBox1.ColorChanged += paintableBox1_ColorChanged;
             paintableBox1.Drew += paintableBox1_Drew;
             // 
             // pictureActionMenu1
@@ -377,16 +374,16 @@
             toolStrip3.Dock = System.Windows.Forms.DockStyle.Right;
             toolStrip3.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             toolStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripSeparator6, alphaTransferButton, toolStripSeparator7 });
-            toolStrip3.Location = new System.Drawing.Point(634, 0);
+            toolStrip3.Location = new System.Drawing.Point(626, 0);
             toolStrip3.Name = "toolStrip3";
-            toolStrip3.Size = new System.Drawing.Size(24, 206);
+            toolStrip3.Size = new System.Drawing.Size(32, 206);
             toolStrip3.TabIndex = 1;
             toolStrip3.Text = "toolStrip3";
             // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new System.Drawing.Size(21, 6);
+            toolStripSeparator6.Size = new System.Drawing.Size(29, 6);
             // 
             // alphaTransferButton
             // 
@@ -395,23 +392,14 @@
             alphaTransferButton.Image = Properties.Resources.tool_enable_alpha;
             alphaTransferButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             alphaTransferButton.Name = "alphaTransferButton";
-            alphaTransferButton.Size = new System.Drawing.Size(21, 20);
+            alphaTransferButton.Size = new System.Drawing.Size(29, 20);
             alphaTransferButton.Text = "toolStripButton1";
             alphaTransferButton.ToolTipText = "アルファ値を適用する";
             // 
             // toolStripSeparator7
             // 
             toolStripSeparator7.Name = "toolStripSeparator7";
-            toolStripSeparator7.Size = new System.Drawing.Size(21, 6);
-            // 
-            // colorPicker1
-            // 
-            colorPicker1.Location = new System.Drawing.Point(7, 2);
-            colorPicker1.Margin = new System.Windows.Forms.Padding(5);
-            colorPicker1.Name = "colorPicker1";
-            colorPicker1.Size = new System.Drawing.Size(106, 220);
-            colorPicker1.TabIndex = 0;
-            colorPicker1.ColorChanged += colorPicker1_ColorChanged;
+            toolStripSeparator7.Size = new System.Drawing.Size(29, 6);
             // 
             // splitter1
             // 
@@ -491,7 +479,6 @@
         private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private Ui.ColorPicker colorPicker1;
         private Ui.DrawableBox paintableBox1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;

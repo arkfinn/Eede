@@ -1,4 +1,5 @@
-﻿using Eede.Actions;
+﻿using Avalonia;
+using Eede.Actions;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Common.Pictures.Actions;
@@ -12,11 +13,15 @@ using Eede.Domain.Systems;
 using Eede.Infrastructure.Pictures;
 using Eede.Settings;
 using Eede.Ui;
+using Eede.ViewModels.DataDisplay;
+using Eede.Views.DataDisplay;
 using Reactive.Bindings;
 using ReactiveUI;
 using SkiaSharp;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using System.Security.Policy;
 using System.Windows.Forms;
 
 namespace Eede
@@ -40,8 +45,6 @@ namespace Eede
 
             Bind(() => paintableBox1.Magnification, () => ViewModel.Magnification.Value);
 
-            Bind(() => paintableBox1.PenColor, () => ViewModel.PenColor.Value);
-            Bind(() => colorPicker1.NowColor, () => ViewModel.PenColor.Value);
 
 
             // 暫定
@@ -88,10 +91,38 @@ namespace Eede
                 paintableBox1.PenSize = width;
             };
 
+            pictureFrame1 = new();
+            pictureFrame1.Dock = DockStyle.Right;
+            this.Controls.Add(pictureFrame1);
+            pictureFrame1.Element.Bind(PictureFrame.PicturesProperty, new Avalonia.Data.Binding
+            {
+                Source = ViewModel,
+                Path = nameof(ViewModel.Pictures)
+            });
+
+            colorPicker2 = new();
+            colorPicker2.Size = new System.Drawing.Size(106, 220);
+            colorPicker2.Dock = DockStyle.Left;
+            splitContainer1.Panel2.Controls.Add(colorPicker2);
+            colorPicker2.Element.ColorChanged += (sender, e) =>
+            {
+                ViewModel.PenColor = colorPicker2.Element.NowColor;
+                paintableBox1.PenColor = ViewModel.PenColor;
+            };
+            paintableBox1.ColorChanged += (sender, e) =>
+            {
+                ViewModel.PenColor = paintableBox1.PenColor;
+                colorPicker2.Element.NowColor = ViewModel.PenColor;
+            };
+
             toolStripButton14.PerformClick();
         }
         private Ui.AvaloniaWrapper.Navigation.DrawStyleMenu drawStyleMenu1;
-        private Ui.AvaloniaWrapper.DataDisplay.PenWidthSelector penWidthSelector1;
+        private Ui.AvaloniaWrapper.DataEntry.PenWidthSelector penWidthSelector1;
+        private Ui.AvaloniaWrapper.DataDisplay.PictureFrame pictureFrame1;
+        private Ui.AvaloniaWrapper.DataEntry.ColorPicker colorPicker2;
+
+
 
 
         private static void Bind<T, U>(Expression<Func<T>> targetValue, Expression<Func<U>> modelValue)
@@ -160,6 +191,9 @@ namespace Eede
             form.PicturePushed += new EventHandler<PicturePushedEventArgs>(ChildFormPicturePushed);
             form.Show();
             toolStripButton_saveFile.Enabled = true;
+
+            // TODO:
+            ViewModel.Pictures.Add(new DockPictureViewModel(new Uri(file.FilePath.Path)));
         }
 
         private void ChildFormClosed(object sender, FormClosedEventArgs e)
@@ -339,15 +373,7 @@ namespace Eede
             toolStripButton10.Checked = false;
             toolStripButton11.Checked = true;
         }
-        private void colorPicker1_ColorChanged(object sender, EventArgs e)
-        {
-            ViewModel.PenColor.Value = colorPicker1.NowColor;
-        }
 
-        private void paintableBox1_ColorChanged(object sender, EventArgs e)
-        {
-            ViewModel.PenColor.Value = paintableBox1.PenColor;
-        }
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             using BoxSizeSettingDialog dialog = new();

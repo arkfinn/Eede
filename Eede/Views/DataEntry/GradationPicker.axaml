@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Eede.Views.DataEntry"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Eede.Views.DataEntry.GradationPicker">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="24"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="24"/>
+      <RowDefinition Height="24"/>
+    </Grid.RowDefinitions>
+    <RepeatButton Grid.Row="0"  Height="24" FontSize="10"  HorizontalAlignment="Center" Click="IncrementValue">▲</RepeatButton>
+    <local:GradationSlider x:Name="slider" Grid.Row="1" Width="24" Height="127" HorizontalAlignment="Center"  />
+    <RepeatButton Grid.Row="2" Height="24" FontSize="10"  HorizontalAlignment="Center" Click="DecrementValue">▼</RepeatButton>
+    <TextBox x:Name="textbox" Grid.Row="3" 
+             MinWidth="24" MinHeight="24" 
+             Width="24" Height="24" FontSize="10"  Padding="2 4"
+             TextAlignment="Center" HorizontalAlignment="Center"
+             >0</TextBox>
+  </Grid>
+</UserControl>

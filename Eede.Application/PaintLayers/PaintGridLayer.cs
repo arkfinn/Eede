@@ -1,4 +1,5 @@
-﻿using Eede.Domain.Sizes;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Sizes;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
@@ -31,6 +32,11 @@ namespace Eede.Application.PaintLayers
             {
                 destination.DrawLine(p, 0, i, paintAreaSize.Width, i);
             }
+        }
+
+        public Picture Painted(Picture destination)
+        {
+            return destination;
         }
     }
 }

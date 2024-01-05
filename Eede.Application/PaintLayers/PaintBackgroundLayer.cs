@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using Eede.Domain.Pictures;
+using System.Drawing;
 
 namespace Eede.Application.PaintLayers
 {
@@ -14,6 +15,11 @@ namespace Eede.Application.PaintLayers
         public void Paint(Graphics destination)
         {
             Background.PaintBackground(destination);
+        }
+
+        public Picture Painted(Picture destination)
+        {
+            return destination; 
         }
     }
 }

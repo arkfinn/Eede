@@ -5,6 +5,7 @@
     <OutputType>WinExe</OutputType>
     <StartupObject>Eede.Program</StartupObject>
     <UseWindowsForms>True</UseWindowsForms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -77,6 +78,9 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="Ui\AvaloniaWrapper\DataEntry\ColorPicker.cs" />
+    <Compile Update="Views\DataEntry\DrawableCanvas.axaml.cs">
+      <DependentUpon>DrawableCanvas.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -87,7 +91,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\DataEntry\新しいフォルダー\" />
     <Folder Include="Views\Pages\" />
   </ItemGroup>
 

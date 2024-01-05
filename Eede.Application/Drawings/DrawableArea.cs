@@ -57,6 +57,31 @@ namespace Eede.Application.Drawings
             gridLayer.Paint(g);
         }
 
+        public Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
+        {
+            Picture source = buffer.Fetch();
+            var picture = source;
+            // 表示上のサイズ・ポジション DisplaySize DisplayPosition
+            MagnifiedSize displaySize = Magnify(source.Size);
+            //PaintBackgroundLayer backgroundLayer = new(Background);
+            //var picture = backgroundLayer.Painted(null);
+
+            if (!buffer.IsDrawing() && PositionHistory != null)
+            {
+                CursorLayer cursorLayer = new(displaySize, source, penStyle, PositionHistory.Now, imageTransfer);
+                picture = cursorLayer.Painted(picture);
+            }
+            else
+            {
+                PaintBufferLayer bufferLayer = new(displaySize, source, imageTransfer);
+                picture = bufferLayer.Painted(picture);
+            }
+
+            //PaintGridLayer gridLayer = new(displaySize, Magnify(GridSize));
+            //picture = gridLayer.Paint(picture);
+            return picture;
+        }
+
         public DrawableArea UpdateMagnification(Magnification m)
         {
             return new DrawableArea(Background, m, GridSize, PositionHistory);
@@ -77,10 +102,10 @@ namespace Eede.Application.Drawings
             return new MinifiedPosition(position, Magnification);
         }
 
-        public Size DisplaySizeOf(Picture picture)
+        public PictureSize DisplaySizeOf(Picture picture)
         {
             MagnifiedSize size = Magnify(picture.Size);
-            return new Size(size.Width, size.Height);
+            return new PictureSize(size.Width, size.Height);
         }
 
         public ArgbColor PickColor(Picture picture, Position displayPosition)

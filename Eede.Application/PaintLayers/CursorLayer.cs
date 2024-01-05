@@ -36,5 +36,12 @@ namespace Eede.Application.PaintLayers
             destination.InterpolationMode = InterpolationMode.NearestNeighbor;
             destination.DrawImage(dest, new Point(0, 0));
         }
+
+        public Picture Painted(Picture destination)
+        {
+            Drawer drawer = new(Source, PenStyle);
+            Picture cursor = drawer.DrawPoint(Position);
+            return cursor.Transfer(ImageTransfer, PaintSize.Magnification);
+        }
     }
 }

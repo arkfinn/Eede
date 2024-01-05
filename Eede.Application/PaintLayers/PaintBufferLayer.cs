@@ -35,5 +35,14 @@ namespace Eede.Application.PaintLayers
             destination.InterpolationMode = InterpolationMode.NearestNeighbor;
             destination.DrawImage(dest, new Point(0, 0));
         }
+
+        public Picture Painted(Picture destination)
+        {
+            if (Source == null)
+            {
+                return destination;
+            }
+            return Source.Transfer(ImageTransfer, PaintSize.Magnification);
+        }
     }
 }

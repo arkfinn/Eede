@@ -1,4 +1,5 @@
 ﻿using Eede.Application.Drawings;
+using Eede.Application.Pictures;
 using Eede.Domain.Colors;
 using Eede.Domain.Drawings;
 using Eede.Domain.DrawStyles;
@@ -11,6 +12,7 @@ using Eede.Services;
 using Eede.Settings;
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace Eede.Ui
@@ -85,7 +87,8 @@ namespace Eede.Ui
 
         private void UpdateCanvasSize()
         {
-            canvas.Size = DrawableArea.DisplaySizeOf(PictureBuffer.Fetch());
+            PictureSize size = DrawableArea.DisplaySizeOf(PictureBuffer.Fetch());
+            canvas.Size = new(size.Width, size.Height);
             ResetLocation();
             Refresh();
         }
@@ -213,7 +216,12 @@ namespace Eede.Ui
 
         private void canvas_Paint(object sender, PaintEventArgs e)
         {
-            PaintUpdate(e.Graphics);
+            var painted = DrawableArea.Painted(PictureBuffer, PenStyle, imageTransfer);
+            using Bitmap src = BitmapConverter.Convert(painted);
+            var destination = e.Graphics;
+            destination.PixelOffsetMode = PixelOffsetMode.Half;
+            destination.InterpolationMode = InterpolationMode.NearestNeighbor;
+            destination.DrawImage(src, new Point(0, 0));
         }
 
     }

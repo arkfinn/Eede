@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Eede.Actions;
+using Eede.Application.Drawings;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Common.Pictures.Actions;
@@ -48,6 +49,10 @@ namespace Eede
 
 
             // 暫定
+            drawableArea1 = new();
+            splitContainer2.Panel2.Controls.Add(drawableArea1);
+            drawableArea1.Dock = DockStyle.Bottom;
+
             drawStyleMenu1 = new();
             drawStyleMenu1.Dock = DockStyle.Top;
             splitContainer2.Panel1.Controls.Add(drawStyleMenu1);
@@ -55,6 +60,7 @@ namespace Eede
             {
                 ViewModel.DrawStyle = value;
                 paintableBox1.DrawStyle = value;
+                drawableArea1.Element.DrawStyle = value;
             };
 
             // pictureActionMenu1.Command = ViewModel.PictureActionCommand;
@@ -82,6 +88,8 @@ namespace Eede
             }));
             pictureActionMenu1.Command = pictureActionCommand;
 
+  
+
             penWidthSelector1 = new();
             penWidthSelector1.Dock = DockStyle.Bottom;
             splitContainer2.Panel1.Controls.Add(penWidthSelector1);
@@ -89,6 +97,7 @@ namespace Eede
             {
                 ViewModel.PenSize = width;
                 paintableBox1.PenSize = width;
+                drawableArea1.Element.PenSize = width;
             };
 
             pictureFrame1 = new();
@@ -108,12 +117,21 @@ namespace Eede
             {
                 ViewModel.PenColor = colorPicker2.Element.NowColor;
                 paintableBox1.PenColor = ViewModel.PenColor;
+                drawableArea1.Element.PenColor = ViewModel.PenColor;
             };
             paintableBox1.ColorChanged += (sender, e) =>
             {
                 ViewModel.PenColor = paintableBox1.PenColor;
                 colorPicker2.Element.NowColor = ViewModel.PenColor;
             };
+            drawableArea1.Element.ColorChanged += (sender, e) =>
+            {
+                ViewModel.PenColor = paintableBox1.PenColor;
+                colorPicker2.Element.NowColor = ViewModel.PenColor;
+            };
+
+
+
 
             toolStripButton14.PerformClick();
         }
@@ -121,7 +139,7 @@ namespace Eede
         private Ui.AvaloniaWrapper.DataEntry.PenWidthSelector penWidthSelector1;
         private Ui.AvaloniaWrapper.DataDisplay.PictureFrame pictureFrame1;
         private Ui.AvaloniaWrapper.DataEntry.ColorPicker colorPicker2;
-
+        private Ui.AvaloniaWrapper.DataEntry.DrawableCanvas drawableArea1;
 
 
 
@@ -284,6 +302,7 @@ namespace Eede
         private void toolStripButton12_Click(object sender, EventArgs e)
         {
             ViewModel.Magnification.Value = new Magnification(1);
+            drawableArea1.Element.Magnification = new Magnification(1);
             toolStripButton12.Checked = true;
             toolStripButton13.Checked = false;
             toolStripButton14.Checked = false;
@@ -295,6 +314,7 @@ namespace Eede
         private void toolStripButton13_Click(object sender, EventArgs e)
         {
             ViewModel.Magnification.Value = new Magnification(2);
+            drawableArea1.Element.Magnification = new Magnification(2);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = true;
             toolStripButton14.Checked = false;
@@ -306,6 +326,7 @@ namespace Eede
         private void toolStripButton14_Click(object sender, EventArgs e)
         {
             ViewModel.Magnification.Value = new Magnification(4);
+            drawableArea1.Element.Magnification = new Magnification(4);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = false;
             toolStripButton14.Checked = true;
@@ -317,6 +338,7 @@ namespace Eede
         private void toolStripButton15_Click(object sender, EventArgs e)
         {
             ViewModel.Magnification.Value = new Magnification(6);
+            drawableArea1.Element.Magnification = new Magnification(6);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = false;
             toolStripButton14.Checked = false;
@@ -328,6 +350,7 @@ namespace Eede
         private void toolStripButton16_Click(object sender, EventArgs e)
         {
             ViewModel.Magnification.Value = new Magnification(8);
+            drawableArea1.Element.Magnification = new Magnification(8);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = false;
             toolStripButton14.Checked = false;
@@ -339,6 +362,7 @@ namespace Eede
         private void toolStripButton17_Click(object sender, EventArgs e)
         {
             ViewModel.Magnification.Value = new Magnification(12);
+            drawableArea1.Element.Magnification = new Magnification(12);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = false;
             toolStripButton14.Checked = false;

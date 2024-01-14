@@ -15,7 +15,7 @@ namespace Eede.Application.Tests.Pictures
         {
             using Bitmap bmp = new(1, 1);
             Picture b = BitmapConverter.ConvertBack(bmp);
-            PicturePushedEventArgs p = new(b, new Position(2, 2));
+            PicturePullEventArgs p = new(b, new Position(2, 2));
             Assert.AreEqual(b, p.Picture);
             Assert.AreEqual(new Position(2, 2), p.Position);
         }
@@ -25,7 +25,7 @@ namespace Eede.Application.Tests.Pictures
         {
             _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                PicturePushedEventArgs h = new(null, new Position(2, 2));
+                PicturePullEventArgs h = new(null, new Position(2, 2));
             });
         }
 
@@ -36,7 +36,7 @@ namespace Eede.Application.Tests.Pictures
             {
                 using Bitmap bmp = new(1, 1);
                 Picture b = BitmapConverter.ConvertBack(bmp);
-                PicturePushedEventArgs h = new(b, null);
+                PicturePullEventArgs h = new(b, null);
             });
         }
     }

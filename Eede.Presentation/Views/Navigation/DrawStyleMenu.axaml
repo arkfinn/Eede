@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Eede.Views.Navigation"
+             xmlns:buttons="clr-namespace:Eede.Views.General.Buttons"
+             xmlns:c="clr-namespace:Eede.Common.Converters"
+             xmlns:p="clr-namespace:Eede.Common.Drawings"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Eede.Views.Navigation.DrawStyleMenu">
+  <Grid>
+    <Grid.Styles>
+      <StyleInclude Source="/Styles/Styles.axaml" />
+    </Grid.Styles>
+    <WrapPanel>
+      <WrapPanel.Resources>
+        <c:BitmapConverter x:Key="bitmapConverter" />
+      </WrapPanel.Resources>
+      <ToggleButton x:Name="ButtonFreeVurve" Classes="tool" Click="SetDrawStyleFreeCurve" >
+        <Image Source="/Assets/Tools/pen_free.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonLine" Classes="tool" Click="SetDrawStyleLine" >
+        <Image Source="/Assets/Tools/pen_line.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonFill" Classes="tool" Click="SetDrawStyleFill" >
+        <Image Source="/Assets/Tools/pen_fill.png" Stretch="None" />
+      </ToggleButton>
+    </WrapPanel>
+  </Grid>
+</UserControl>

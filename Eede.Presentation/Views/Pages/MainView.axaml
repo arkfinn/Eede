@@ -38,13 +38,6 @@
             <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
           </Button>
           <Panel Classes="horizontal-separator" />
-          <Button Classes="tool" Command="{Binding UndoCommand}">
-            <Image Source="/Assets/Tools/tool_undo.png" Stretch="None" />
-          </Button>
-          <Button Classes="tool" Command="{Binding RedoCommand}">
-            <Image Source="/Assets/Tools/tool_redo.png" Stretch="None" />
-          </Button>
-          <Panel Classes="horizontal-separator" />
           <ComboBox x:Name="ThemeSelect" SelectedIndex="0" SelectionChanged="OnClickThemeSelect">
             <ComboBoxItem>Light</ComboBoxItem>
             <ComboBoxItem>Dark</ComboBoxItem>
@@ -57,6 +50,13 @@
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center"
                         Margin="2">
+              <Button Classes="tool" Command="{Binding UndoCommand}">
+                <Image Source="/Assets/Tools/tool_undo.png" Stretch="None" />
+              </Button>
+              <Button Classes="tool" Command="{Binding RedoCommand}">
+                <Image Source="/Assets/Tools/tool_redo.png" Stretch="None" />
+              </Button>
+              <Panel Classes="horizontal-separator" />
               <navi:LayerStyleMenu ImageTransfer="{Binding ImageTransfer}"
                                    ImageBlender="{Binding ImageBlender}"/>
               <Panel Classes="horizontal-separator" />
@@ -71,18 +71,19 @@
             </StackPanel>
           </Panel>
 
-          <Panel DockPanel.Dock="Left" Margin="0" Width="120">
+          <Panel DockPanel.Dock="Bottom" Background="Transparent">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock>aaaaa</TextBlock>
+            </StackPanel>
+          </Panel>
+
+          <Panel DockPanel.Dock="Left" Margin="0" Width="100">
             <StackPanel Orientation="Vertical">
               <navi:DrawStyleMenu Margin="2" DrawStyle="{Binding DrawStyle}" />
               <entry:PenWidthSelector Margin="2" PenWidth="{Binding PenWidth}"/>
               <entry:ColorPicker Margin="2" NowColor="{Binding PenColor}"/>
             </StackPanel>
           </Panel>
-
-          <Panel DockPanel.Dock="Bottom" Background="Transparent">
-            <TextBlock>aaaaaa</TextBlock>
-          </Panel>
-
 
 
           <ScrollViewer DockPanel.Dock="Top" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
@@ -95,7 +96,7 @@
 
         </DockPanel>
         <GridSplitter Grid.Column="1" Background="Black" ResizeDirection="Columns"/>
-        <display:PictureFrame Grid.Column="2" 
+        <display:PictureFrame Grid.Column="2"
                               Pictures="{Binding Pictures}"
                               ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"/>
       </Grid>

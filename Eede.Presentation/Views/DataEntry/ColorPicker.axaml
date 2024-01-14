@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Eede.Views.DataEntry"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="96" d:DesignHeight="450"
              x:Class="Eede.Views.DataEntry.ColorPicker">
   <StackPanel Orientation="Vertical">
   <StackPanel Orientation="Horizontal">
@@ -12,7 +12,11 @@
     <local:GradationPicker x:Name="pickerG"></local:GradationPicker>
     <local:GradationPicker x:Name="pickerB"></local:GradationPicker>
   </StackPanel>
-    <Button HorizontalAlignment="Stretch" Click="ToggleColorMode">
+    <Button HorizontalAlignment="Stretch" 
+            Height="21"
+            Padding="0"
+            Margin="0 3"
+            Click="ToggleColorMode">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>

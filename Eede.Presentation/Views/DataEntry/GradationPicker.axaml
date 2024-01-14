@@ -6,19 +6,32 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Views.DataEntry.GradationPicker">
   <Grid>
+    <Grid.Styles>
+      <StyleInclude Source="/Styles/Styles.axaml" />
+    </Grid.Styles>
     <Grid.RowDefinitions>
       <RowDefinition Height="24"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="24"/>
       <RowDefinition Height="24"/>
     </Grid.RowDefinitions>
-    <RepeatButton Grid.Row="0"  Height="24" FontSize="10"  HorizontalAlignment="Center" Click="IncrementValue">▲</RepeatButton>
+    <RepeatButton Grid.Row="0"
+                  Classes="allow"
+                  Click="IncrementValue">
+      <Polygon Classes="button-shape" Points="0,7 10,7 5,0" />
+    </RepeatButton>
     <local:GradationSlider x:Name="slider" Grid.Row="1" Width="24" Height="127" HorizontalAlignment="Center"  />
-    <RepeatButton Grid.Row="2" Height="24" FontSize="10"  HorizontalAlignment="Center" Click="DecrementValue">▼</RepeatButton>
-    <TextBox x:Name="textbox" Grid.Row="3" 
-             MinWidth="24" MinHeight="24" 
-             Width="24" Height="24" FontSize="10"  Padding="2 4"
-             TextAlignment="Center" HorizontalAlignment="Center"
-             >0</TextBox>
+    <RepeatButton Grid.Row="2"
+                  Classes="allow"
+                  Click="DecrementValue">
+      <Polygon Classes="button-shape" Points="0,0 10,0 5,7" />
+    </RepeatButton>
+    <TextBox x:Name="textbox" Grid.Row="3"
+             MinWidth="24" MinHeight="24"
+             Width="24" Height="24"
+             FontSize="10"
+             Padding="2 4"
+             TextAlignment="Center" 
+             HorizontalAlignment="Center">0</TextBox>
   </Grid>
 </UserControl>

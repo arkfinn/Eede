@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Eede.ViewModels.DataEntry"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Eede.Views.DataEntry.DrawableCanvas"
+             x:DataType="vm:DrawableCanvasViewModel"
+             IsShifted="{Binding IsShifted}"
+             PointerLeftButtonPressedCommand="{Binding DrawBeginCommand}"
+             PointerRightButtonPressedCommand="{Binding PointerRightButtonPressedCommand}"
+             PointerMovedCommand="{Binding DrawingCommand}"
+             PointerLeftButtonReleasedCommand="{Binding DrawEndCommand}"
+             PointerLeaveCommand="{Binding CanvasLeaveCommand}">
+  <Design.DataContext>
+    <vm:DrawableCanvasViewModel />
+  </Design.DataContext>
+  <Panel>
+    <Panel.Background>
+      <ImageBrush Source="/Assets/Tiles/OutsideBackGround.bmp"
+                  Stretch="None"
+                  TileMode="Tile"
+                  SourceRect="0,0,16,16"
+                  DestinationRect="0,0,16,16"
+                  AlignmentY="Top"
+                  AlignmentX="Left"/>
+    </Panel.Background>
+    <Panel x:Name="background"
+           Width="{Binding MyBitmap.PixelSize.Width}"
+           Height="{Binding MyBitmap.PixelSize.Height}">
+      <Panel.Background>
+        <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+                    Stretch="None"
+                    TileMode="Tile"
+                    SourceRect="0,0,16,16"
+                    DestinationRect="0,0,16,16"
+                    AlignmentY="Top"
+                    AlignmentX="Left"/>
+      </Panel.Background>
+      <Image x:Name="canvas"
+             Stretch="None"
+             Focusable="True"
+             Source="{Binding MyBitmap}"
+             Width="{Binding MyBitmap.PixelSize.Width}"
+             Height="{Binding MyBitmap.PixelSize.Height}"/>
+    </Panel>
+  </Panel>
+</UserControl>

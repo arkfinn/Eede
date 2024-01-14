@@ -1,0 +1,104 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Eede.ViewModels.Pages"
+             xmlns:local="clr-namespace:Eede.Views.Pages"
+             xmlns:navi="clr-namespace:Eede.Views.Navigation"
+             xmlns:entry="clr-namespace:Eede.Views.DataEntry"
+             xmlns:display="clr-namespace:Eede.Views.DataDisplay"
+             
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Eede.Views.Pages.MainView"
+             x:DataType="vm:MainViewModel"
+             DragDrop.AllowDrop="True">
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <vm:MainViewModel />
+  </Design.DataContext>
+  <Panel Background="Transparent">
+    <Panel.Styles>
+      <StyleInclude Source="/Styles/Styles.axaml" />
+    </Panel.Styles>
+    <DockPanel LastChildFill="True">
+      <Panel DockPanel.Dock="Top">
+        <StackPanel Orientation="Horizontal">
+          <Button Classes="tool"
+                  ToolTip.Tip="開く(O)"
+                  HotKey="O"
+                  Command="{Binding LoadPictureCommand}"
+                  CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+            <Image Source="/Assets/Tools/file_open.png" Stretch="None" />
+          </Button>
+          <Button Classes="tool"
+            ToolTip.Tip="保存(Ctrl+S)"
+            HotKey="Ctrl+S"
+            Command="{Binding SavePictureCommand}">
+            <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
+          </Button>
+          <Panel Classes="horizontal-separator" />
+          <Button Classes="tool" Command="{Binding UndoCommand}">
+            <Image Source="/Assets/Tools/tool_undo.png" Stretch="None" />
+          </Button>
+          <Button Classes="tool" Command="{Binding RedoCommand}">
+            <Image Source="/Assets/Tools/tool_redo.png" Stretch="None" />
+          </Button>
+          <Panel Classes="horizontal-separator" />
+          <ComboBox x:Name="ThemeSelect" SelectedIndex="0" SelectionChanged="OnClickThemeSelect">
+            <ComboBoxItem>Light</ComboBoxItem>
+            <ComboBoxItem>Dark</ComboBoxItem>
+          </ComboBox>
+        </StackPanel>
+      </Panel>
+      <Grid ColumnDefinitions="*, 4, *" DockPanel.Dock="Bottom">
+        <DockPanel Grid.Column="0" LastChildFill="True">
+          <Panel DockPanel.Dock="Top" >
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="2">
+              <navi:LayerStyleMenu ImageTransfer="{Binding ImageTransfer}"
+                                   ImageBlender="{Binding ImageBlender}"/>
+              <Panel Classes="horizontal-separator" />
+              <navi:MagnificationMenu Magnification="{Binding Magnification}"/>
+            </StackPanel>
+          </Panel>
+
+          <Panel DockPanel.Dock="Right" Margin="0,0,0,0" Width="40">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+              <navi:PictureActionMenu />
+              <Separator/>
+            </StackPanel>
+          </Panel>
+
+          <Panel DockPanel.Dock="Left" Margin="0" Width="120">
+            <StackPanel Orientation="Vertical">
+              <navi:DrawStyleMenu Margin="2" DrawStyle="{Binding DrawStyle}" />
+              <entry:PenWidthSelector Margin="2" PenWidth="{Binding PenWidth}"/>
+              <entry:ColorPicker Margin="2" NowColor="{Binding PenColor}"/>
+            </StackPanel>
+          </Panel>
+
+          <Panel DockPanel.Dock="Bottom" Background="Transparent">
+            <TextBlock>aaaaaa</TextBlock>
+          </Panel>
+
+
+
+          <ScrollViewer DockPanel.Dock="Top" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
+            <DockPanel LastChildFill="True" >
+
+              <entry:DrawableCanvas DockPanel.Dock="Bottom"
+                                    DataContext="{Binding DrawableCanvasViewModel}"/>
+            </DockPanel>
+          </ScrollViewer>
+
+        </DockPanel>
+        <GridSplitter Grid.Column="1" Background="Black" ResizeDirection="Columns"/>
+        <display:PictureFrame Grid.Column="2" 
+                              Pictures="{Binding Pictures}"
+                              ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"/>
+      </Grid>
+    </DockPanel>
+  </Panel>
+</UserControl>

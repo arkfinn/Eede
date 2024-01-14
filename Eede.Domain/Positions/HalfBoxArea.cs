@@ -90,5 +90,10 @@ namespace Eede.Domain.Positions
             // マイナス方向に広がる場合、元のサイズプラスマイナス方向分とする。
             return distance < 0 ? ArrangeTo(Math.Abs(distance) + gridLength - 1, gridLength) : ArrangeTo(distance, gridLength);
         }
+
+        public HalfBoxArea Move(Position localPosition)
+        {
+            return With(BoxSize, localPosition, DefaultBoxSize, localPosition);
+        }
     }
 }

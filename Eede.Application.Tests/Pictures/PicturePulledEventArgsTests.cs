@@ -14,7 +14,7 @@ namespace Eede.Application.Tests.Pictures
         {
             using Bitmap bmp = new(10, 10);
             Picture b = BitmapConverter.ConvertBack(bmp);
-            PicturePulledEventArgs p = new(b, new Rectangle(2, 2, 3, 3));
+            PicturePushEventArgs p = new(b, new PictureArea(new Domain.Positions.Position(2, 2), new PictureSize(3, 3)));
             Picture image = p.CutOutImage();
 
             Assert.That(Tuple.Create(image.Size.Width, image.Size.Height), Is.EqualTo(Tuple.Create(3, 3)));
@@ -25,7 +25,7 @@ namespace Eede.Application.Tests.Pictures
         {
             _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                PicturePulledEventArgs p = new(null, new Rectangle(2, 2, 3, 3));
+                PicturePushEventArgs p = new(null, new PictureArea(new Domain.Positions.Position(2, 2), new PictureSize(3, 3)));
             });
         }
     }

@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:entry="clr-namespace:Eede.Views.DataEntry"
+             xmlns:display="clr-namespace:Eede.Views.DataDisplay"
+             xmlns:displayvm="clr-namespace:Eede.ViewModels.DataDisplay"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Eede.Views.DataDisplay.PictureFrame"
+             x:Name="Root">
+  <DockControl InitializeLayout="True"
+               InitializeFactory="True">
+    <DockControl.Factory>
+      <Factory />
+    </DockControl.Factory>
+    <RootDock IsCollapsable="False"
+              DefaultDockable="{Binding #MainLayout}">
+
+      <ProportionalDock x:Name="MainLayout"
+                        Id="MainLayout"
+                        Orientation="Horizontal">
+
+        <display:PictureDock x:Name="pictureDock"
+                             Pictures="{Binding ElementName=Root, Path=Pictures}"
+                             ActiveDockable="{Binding ElementName=Root, Path=ActiveDockable, Mode=TwoWay}"
+                             CanCreateDocument="False">
+          <display:PictureDock.DocumentTemplate>
+            <DocumentTemplate x:DataType="displayvm:DockPictureViewModel">
+              <entry:PictureContainer />
+            </DocumentTemplate>
+          </display:PictureDock.DocumentTemplate>
+          <Document>
+            <entry:PictureContainer/>
+          </Document>
+        </display:PictureDock>
+      </ProportionalDock>
+    </RootDock>
+  </DockControl>
+</UserControl>

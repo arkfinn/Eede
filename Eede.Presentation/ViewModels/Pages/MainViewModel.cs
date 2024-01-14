@@ -71,6 +71,10 @@ public class MainViewModel : ViewModelBase
     [Reactive] public IImageBlender PullBlender { get; set; }
     [Reactive] public IDockable? ActiveDockable { get; set; }
 
+    [Reactive] public List<int> MinCursorSizeList { get; set; }
+    [Reactive] public int MinCursorWidth { get; set; }
+    [Reactive] public int MinCursorHeight { get; set; }
+
     [Reactive] public UndoSystem UndoSystem { get; private set; }
 
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
@@ -84,6 +88,22 @@ public class MainViewModel : ViewModelBase
         PenColor = DrawableCanvasViewModel.PenColor;
         PullBlender = new DirectImageBlender();
         this.WhenAnyValue(x => x.PenColor).BindTo(this, x => x.DrawableCanvasViewModel.PenColor);
+        MinCursorSizeList = new()
+        {
+            8, 16, 24, 32, 48, 64
+        };
+        MinCursorWidth = 32;
+        MinCursorHeight = 32;
+        this.WhenAnyValue(x => x.MinCursorWidth, x => x.MinCursorHeight)
+            .Subscribe(x =>
+            {
+                PictureSize size = new(MinCursorWidth, MinCursorHeight);
+                foreach (var vm in Pictures)
+                {
+                    vm.MinCursorSize = size;
+                }
+            });
+
         DrawableCanvasViewModel.ColorPicked += (sender, args) =>
         {
             PenColor = args.NewColor;
@@ -205,9 +225,9 @@ public class MainViewModel : ViewModelBase
 
     private void ExecuteSavePicture()
     {
-        if(ActiveDockable is Dock.Model.Avalonia.Controls.Document doc)
+        if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc)
         {
-            if(doc.DataContext is DockPictureViewModel vm)
+            if (doc.DataContext is DockPictureViewModel vm)
             {
                 vm.Save();
             }

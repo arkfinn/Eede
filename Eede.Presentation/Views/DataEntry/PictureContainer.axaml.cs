@@ -62,6 +62,11 @@ namespace Eede.Views.DataEntry
                 Path = nameof(vm.Bitmap)
             });
             canvas.Background = canvasBrush;
+            this.Bind(MinCursorSizeProperty, new Binding
+            {
+                Source = vm,
+                Path = nameof(vm.MinCursorSize)
+            });
             PicturePushAction = vm.OnPicturePush;
             PicturePullAction = vm.OnPicturePull;
         }
@@ -82,7 +87,7 @@ namespace Eede.Views.DataEntry
 
                 cursor.Width = size.Width;
                 cursor.Height = size.Height;
-                cursor.Margin = new Thickness(grid.X * MinCursorSize.Width / 2, grid.Y * MinCursorSize.Height / 2, 0, 0);
+                cursor.Margin = new Thickness(cursorArea.RealPosition.X ,cursorArea.RealPosition.Y, 0, 0);
 
             });
 
@@ -127,6 +132,16 @@ namespace Eede.Views.DataEntry
             set => SetValue(PicturePullActionProperty, value);
         }
 
+        public static readonly StyledProperty<PictureSize> MinCursorSizeProperty =
+            AvaloniaProperty.Register<PictureContainer, PictureSize>(nameof(MinCursorSize), new PictureSize(32, 32), defaultBindingMode:BindingMode.TwoWay);
+        public PictureSize MinCursorSize
+        {
+            get => GetValue(MinCursorSizeProperty);
+            set {
+                SetValue(MinCursorSizeProperty, value);
+                CursorArea = CursorArea.UpdateSize(value);
+            }
+        }
 
         private bool IsSelecting = false;
         private HalfBoxArea SelectingArea = HalfBoxArea.Create(new PictureSize(32, 32), new Position(0, 0));
@@ -135,8 +150,7 @@ namespace Eede.Views.DataEntry
         public event EventHandler<PicturePushEventArgs> PicturePushed;
 
         private PictureSize CanvasSize = new PictureSize(32, 32);
-        public PictureSize MinCursorSize { get; set; } = new PictureSize(32, 32);
-
+   
 
 
         private void OnPointerPressed(object? sender, PointerPressedEventArgs e)

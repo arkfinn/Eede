@@ -38,6 +38,17 @@
     <Setter Property="Height" Value="16" />
   </Style>
 
+  <Style Selector="RepeatButton.allow">
+    <Setter Property="Height" Value="20" />
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Padding" Value="6 5 6 6" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Polygon.button-shape">
+    <Setter Property="Points" Value="0,0 10,0 5,7"/>
+    <Setter Property="Fill" Value="{DynamicResource TextBrush}" />
+  </Style>
+
   <Style Selector="Panel.horizontal-separator">
     <Setter Property="Margin" Value="4,0" />
     <Setter Property="Width" Value="2" />

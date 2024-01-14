@@ -121,7 +121,7 @@ namespace Eede.Views.DataEntry
         private void DrawGradation(DrawingContext context)
         {
             var brush = CreateBrush();
-            context.FillRectangle(brush, new Rect(0, TickPolygon.Height / 2, SliderSize.Width, SliderSize.Height));
+            context.FillRectangle(brush, new Rect(TickPolygon.Width / 2, TickPolygon.Height / 2, SliderSize.Width, SliderSize.Height));
         }
 
         private IBrush CreateBrush()
@@ -157,7 +157,7 @@ namespace Eede.Views.DataEntry
         {
             Pen p = IsActive() ? new(Brushes.Brown, 1) : new(Brushes.Black, 1);
 
-            context.DrawRectangle(p, new Rect(0.5, TickPolygon.Height / 2, SliderSize.Width, SliderSize.Height));
+            context.DrawRectangle(p, new Rect(TickPolygon.Width / 2 + 0.5, TickPolygon.Height / 2, SliderSize.Width, SliderSize.Height));
         }
 
         private bool IsActive()
@@ -170,7 +170,7 @@ namespace Eede.Views.DataEntry
             Dispatcher.UIThread.Post(() =>
             {
                 double yPosition = (MaxValue - (Value - MinValue)) / (double)(MaxValue - MinValue) * SliderSize.Height;
-                TickPolygon.Margin = new Thickness(0, yPosition, 0, 0);
+                TickPolygon.Margin = new Thickness(TickPolygon.Width , yPosition, 0, 0);
             });
 
         }

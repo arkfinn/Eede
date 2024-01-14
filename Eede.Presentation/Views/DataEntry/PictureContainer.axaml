@@ -12,20 +12,12 @@
   </Design.DataContext>
   <DockPanel LastChildFill="True">
     <ScrollViewer DockPanel.Dock="Bottom"
+                   Background="{DynamicResource BaseBrush}"
                   VerticalScrollBarVisibility="Visible"
                   HorizontalScrollBarVisibility="Visible">
-      <ScrollViewer.Background>
-        <ImageBrush Source="/Assets/Tiles/OutsideBackGround.bmp"
-                    Stretch="None"
-                    TileMode="Tile"
-                    SourceRect="0,0,16,16"
-                    DestinationRect="0,0,16,16"
-                    AlignmentY="Top"
-                    AlignmentX="Left"/>
-      </ScrollViewer.Background>
-      <Panel Name="background">
+      <Panel>
         <Panel.Background>
-          <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+          <ImageBrush Source="/Assets/Tiles/OutsideBackGround.bmp"
                       Stretch="None"
                       TileMode="Tile"
                       SourceRect="0,0,16,16"
@@ -33,13 +25,24 @@
                       AlignmentY="Top"
                       AlignmentX="Left"/>
         </Panel.Background>
-        <Panel x:Name="canvas">
-           
-          <Rectangle x:Name="cursor"
-                     VerticalAlignment="Top"
-                     HorizontalAlignment="Left"
-                     Width="10" Height="10" Stroke="Red" StrokeThickness="2" />
-      
+        <Panel Name="background">
+          <Panel.Background>
+            <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+                        Stretch="None"
+                        TileMode="Tile"
+                        SourceRect="0,0,16,16"
+                        DestinationRect="0,0,16,16"
+                        AlignmentY="Top"
+                        AlignmentX="Left"/>
+          </Panel.Background>
+          <Panel x:Name="canvas">
+
+            <Rectangle x:Name="cursor"
+                       VerticalAlignment="Top"
+                       HorizontalAlignment="Left"
+                       Width="10" Height="10" Stroke="Red" StrokeThickness="2" />
+
+          </Panel>
         </Panel>
       </Panel>
     </ScrollViewer>

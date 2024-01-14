@@ -95,5 +95,10 @@ namespace Eede.Domain.Positions
         {
             return With(BoxSize, localPosition, DefaultBoxSize, localPosition);
         }
+
+        public HalfBoxArea UpdateSize(PictureSize size)
+        {
+            return With(BoxSize, RealPosition, size, StartPosition);
+        }
     }
 }

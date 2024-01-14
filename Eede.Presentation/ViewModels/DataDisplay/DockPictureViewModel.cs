@@ -27,11 +27,15 @@ namespace Eede.ViewModels.DataDisplay
             };
         }
 
+        [Reactive] public Bitmap Bitmap { get; set; }
+        [Reactive] public PictureSize MinCursorSize { get; set; }
+
         public DockPictureViewModel()
         {
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
             Bitmap ??= new WriteableBitmap(new PixelSize(32, 32), new Vector(96, 96), PixelFormat.Bgra8888);
+            MinCursorSize = new PictureSize(32, 32);
         }
 
         public void Save()
@@ -51,7 +55,6 @@ namespace Eede.ViewModels.DataDisplay
 
         public string Subject { get; private set; } = "新しいファイル";
 
-        [Reactive] public Bitmap Bitmap { get; set; }
 
         public ReactiveCommand<PictureArea, Unit> OnPicturePush { get; }
         public event EventHandler<PicturePushEventArgs>? PicturePush;

@@ -23,7 +23,7 @@
     </Panel.Styles>
     <DockPanel LastChildFill="True">
       <Panel DockPanel.Dock="Top">
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" Margin="2">
           <Button Classes="tool"
                   ToolTip.Tip="開く(O)"
                   HotKey="O"
@@ -37,6 +37,12 @@
             Command="{Binding SavePictureCommand}">
             <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
           </Button>
+          <Panel Classes="horizontal-separator" />
+          <ComboBox ItemsSource="{Binding MinCursorSizeList}"
+            SelectedItem="{Binding MinCursorWidth, Mode=TwoWay}"/>
+          <TextBlock VerticalAlignment="Center" Text=" x "/>
+          <ComboBox ItemsSource="{Binding MinCursorSizeList}"
+                    SelectedItem="{Binding MinCursorHeight, Mode=TwoWay}"/>
           <Panel Classes="horizontal-separator" />
           <ComboBox x:Name="ThemeSelect" SelectedIndex="0" SelectionChanged="OnClickThemeSelect">
             <ComboBoxItem>Light</ComboBoxItem>

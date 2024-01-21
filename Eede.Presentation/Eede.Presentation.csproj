@@ -4,6 +4,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWindowsForms>True</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Eede</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,6 +44,7 @@
     <None Remove="Resources\Save_6530.png" />
     <None Remove="Resources\tool_shift_up.png" />
     <None Remove="Resources\Undo_16x.png" />
+    <None Remove="Views\Pages\lbsy5fhr.hct~" />
   </ItemGroup>
 
   <ItemGroup>

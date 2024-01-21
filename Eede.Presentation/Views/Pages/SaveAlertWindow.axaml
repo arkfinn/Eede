@@ -1,0 +1,62 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="130"
+        x:Class="Eede.Views.Pages.SaveAlertWindow"
+        MinWidth="400"
+        Width="400"
+        MinHeight="130"
+        Height="130"
+        WindowStartupLocation="CenterOwner"
+        Title="Eede">
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Margin" Value="15 0 0 0" />
+      <Setter Property="MinHeight" Value="24" />
+      <Setter Property="MinWidth" Value="75" />
+    </Style>
+  </Window.Styles>
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="15" />
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="15" />
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="15" />
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="15" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="15" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="15" />
+    </Grid.RowDefinitions>
+    <Grid Grid.Row="1" Grid.Column="3">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="15" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <StackPanel Grid.Row="2"
+                  Orientation="Horizontal" >
+        <TextBlock Text="無題"/>
+        <TextBlock Text="への変更内容を保存しますか？"/>
+      </StackPanel>
+    </Grid>
+    <StackPanel Orientation="Horizontal"
+                Grid.Row="3"
+                Grid.Column="1"
+                Grid.ColumnSpan="3"
+                HorizontalAlignment="Right">
+      
+      <Button Content="上書き保存(S)"
+              Click="OnSave" />
+      <Button Content="保存しない(N)"
+              Click="OnNoSave" />
+      <Button Content="キャンセル"
+              Click="OnCancel" />
+              
+    </StackPanel>
+  </Grid>
+</Window>

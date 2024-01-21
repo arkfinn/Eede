@@ -15,13 +15,10 @@
     </DockControl.Factory>
     <RootDock IsCollapsable="False"
               DefaultDockable="{Binding #MainLayout}">
-
       <ProportionalDock x:Name="MainLayout"
                         Id="MainLayout"
                         Orientation="Horizontal">
-
-        <display:PictureDock x:Name="pictureDock"
-                             Pictures="{Binding ElementName=Root, Path=Pictures}"
+        <display:PictureDock Pictures="{Binding ElementName=Root, Path=Pictures}"
                              ActiveDockable="{Binding ElementName=Root, Path=ActiveDockable, Mode=TwoWay}"
                              CanCreateDocument="False">
           <display:PictureDock.DocumentTemplate>
@@ -30,7 +27,6 @@
             </DocumentTemplate>
           </display:PictureDock.DocumentTemplate>
           <Document>
-            <entry:PictureContainer/>
           </Document>
         </display:PictureDock>
       </ProportionalDock>

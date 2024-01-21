@@ -95,14 +95,7 @@ namespace Eede.Views.DataEntry
 
         private HalfBoxArea GetNowCursorArea()
         {
-            if (IsSelecting)
-            {
-                return SelectingArea;
-            }
-            else
-            {
-                return CursorArea;
-            }
+            return IsSelecting ? SelectingArea : CursorArea;
         }
 
         private bool _visibleCursor = false;

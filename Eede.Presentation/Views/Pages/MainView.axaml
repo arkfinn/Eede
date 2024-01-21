@@ -72,7 +72,7 @@
 
           <Panel DockPanel.Dock="Right" Margin="0,0,0,0" Width="40">
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-              <navi:PictureActionMenu />
+              <navi:PictureActionMenu Command="{Binding PictureActionCommand}"/>
               <Separator/>
             </StackPanel>
           </Panel>

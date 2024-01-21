@@ -6,11 +6,13 @@ using Dock.Model.Core;
 using Eede.Actions;
 using Eede.Application.Pictures;
 using Eede.Common.Enums;
+using Eede.Common.Pictures.Actions;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
+using Eede.Domain.Pictures.Actions;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
 using Eede.Domain.Systems;
@@ -83,7 +85,7 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
     public ReactiveCommand<StorageService, Unit> LoadPictureCommand { get; }
     public ReactiveCommand<Unit, Unit> SavePictureCommand { get; }
-
+    public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; }
     public MainViewModel()
     {
         ImageTransfer = new DirectImageTransfer();
@@ -126,6 +128,7 @@ public class MainViewModel : ViewModelBase
            (undoSystem) => undoSystem.CanRedo()));
         LoadPictureCommand = ReactiveCommand.Create<StorageService>(ExecuteLoadPicture);
         SavePictureCommand = ReactiveCommand.Create(ExecuteSavePicture);
+        PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
     }
 
 
@@ -265,10 +268,34 @@ public class MainViewModel : ViewModelBase
         var now = adapter.ConvertToBitmap(
             adapter.ConvertToPicture(vm.Bitmap).Blend(PullBlender, DrawableCanvasViewModel.PictureBuffer.Previous, args.Position));
 
-        // TODO: 子ウィンドウが閉じられていた時の処理が不足している
         UndoSystem = UndoSystem.Add(new UndoItem(
-            new Action(() => { if (vm.Enabled) vm.Bitmap = previous; }),
-            new Action(() => { if (vm.Enabled) vm.Bitmap = now; })));
+           new Action(() => { if (vm.Enabled) vm.Bitmap = previous; }),
+           new Action(() => { if (vm.Enabled) vm.Bitmap = now; })));
         vm.Bitmap = now;
+    }
+
+    private void ExecutePictureAction(PictureActions actionType)
+    {
+        Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
+
+        switch (actionType)
+        {
+            case PictureActions.ShiftUp:
+                Picture updatedPicture = new ShiftUpAction(previous).Execute();
+                UndoSystem = UndoSystem.Add(new UndoItem(
+                    new Action(() => { DrawableCanvasViewModel.SetPicture(previous); }),
+                    new Action(() => { DrawableCanvasViewModel.SetPicture(updatedPicture); })));
+                DrawableCanvasViewModel.SetPicture(updatedPicture);
+                break;
+            case PictureActions.ShiftDown:
+                break;
+            case PictureActions.ShiftLeft:
+                break;
+            case PictureActions.ShiftRight:
+                break;
+            default:
+                break;
+        }
+
     }
 }

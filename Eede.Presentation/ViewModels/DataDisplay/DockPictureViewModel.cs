@@ -2,6 +2,7 @@
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Eede.Application.Pictures;
+using Eede.Common.Enums;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using ReactiveUI;
@@ -9,6 +10,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 
@@ -29,13 +31,25 @@ namespace Eede.ViewModels.DataDisplay
 
         [Reactive] public Bitmap Bitmap { get; set; }
         [Reactive] public PictureSize MinCursorSize { get; set; }
+        [Reactive] public bool Enabled { get; set; }
+        [Reactive] public bool Closable { get; set; }
 
         public DockPictureViewModel()
         {
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
+            OnClosing = ReactiveCommand.Create(ExecuteClosing);
             Bitmap ??= new WriteableBitmap(new PixelSize(32, 32), new Vector(96, 96), PixelFormat.Bgra8888);
             MinCursorSize = new PictureSize(32, 32);
+            Subject = "新しいファイル";
+            Enabled = true;
+            Closable = true;
+            Edited = false;
+            this.WhenAnyValue(x => x.Edited)
+               .Subscribe(_ =>
+               {
+                   Closable = !Edited;
+               });
         }
 
         public void Save()
@@ -48,13 +62,35 @@ namespace Eede.ViewModels.DataDisplay
             {
                 var fullPath = HttpUtility.UrlDecode(Path.AbsolutePath);
                 Bitmap.Save(fullPath);
+                Subject = fullPath;
             }
         }
 
+        [Reactive] public bool Edited { get; set; }
+
         public Uri? Path { get; private set; }
 
-        public string Subject { get; private set; } = "新しいファイル";
+        [Reactive] public string Subject { get; private set; }
+        [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
 
+        public ReactiveCommand<Unit, Unit> OnClosing { get; }
+
+        public void ExecuteClosing()
+        {
+            switch (SaveAlertResult)
+            {
+                case SaveAlertResult.Cancel:
+                    Closable = false;
+                    break;
+                case SaveAlertResult.Save:
+                    Save();
+                    Closable = true;
+                    break;
+                default:
+                    Closable = true;
+                    break;
+            }
+        }
 
         public ReactiveCommand<PictureArea, Unit> OnPicturePush { get; }
         public event EventHandler<PicturePushEventArgs>? PicturePush;
@@ -68,6 +104,11 @@ namespace Eede.ViewModels.DataDisplay
         private void ExecutePicturePull(Position position)
         {
             PicturePull?.Invoke(this, new PicturePullEventArgs(BringPictureBuffer(), position));
+            if (!Edited)
+            {
+                Edited = true;
+                Subject = "●" + Subject;
+            }
         }
 
         private Picture BringPictureBuffer()

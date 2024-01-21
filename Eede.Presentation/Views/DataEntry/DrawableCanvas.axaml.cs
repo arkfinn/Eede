@@ -25,22 +25,13 @@ namespace Eede.Views.DataEntry
         public DrawableCanvas()
         {
             InitializeComponent();
+
             canvas.PointerPressed += OnCanvasPointerPressed;
             canvas.PointerMoved += OnCvanvasPointerMoved;
             canvas.PointerReleased += OnCanvasPointerReleased;
             canvas.PointerExited += OnCanvasPointerExited;
             canvas.KeyDown += OnKeyDown;
             canvas.KeyUp += OnKeyUp;
-
-            UpdateImage();
-        }
-
-        private void UpdateImage()
-        {
-            if (DataContext is DrawableCanvasViewModel vm)
-            {
-                //InvalidateVisual();
-            }
         }
 
         public static readonly StyledProperty<ICommand?> PointerLeftButtonPressedCommandProperty =
@@ -123,7 +114,6 @@ namespace Eede.Views.DataEntry
             {
                 PointerRightButtonPressedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
             }
-            UpdateImage();
         }
 
         private void OnCvanvasPointerMoved(object? sender, PointerEventArgs e)
@@ -135,7 +125,6 @@ namespace Eede.Views.DataEntry
                 IsLeftButtonPressing = false;
             }
             PointerMovedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
-            UpdateImage();
         }
 
         private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -144,16 +133,13 @@ namespace Eede.Views.DataEntry
             {
                 var pos = e.GetPosition(this.canvas);
                 PointerLeftButtonReleasedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
-                IsLeftButtonPressing = false;
-                UpdateImage();
             }
+            IsLeftButtonPressing = false;
         }
 
         private void OnCanvasPointerExited(object? sender, EventArgs e)
         {
             PointerLeaveCommand?.Execute(null);
-            UpdateImage();
         }
-
     }
 }

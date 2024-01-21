@@ -1,27 +1,36 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Platform.Storage;
+using Avalonia.ReactiveUI;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Eede.Common.Enums;
 using Eede.Presentation.Common.Services;
 using Eede.ViewModels.Pages;
+using ReactiveUI;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Eede.Views.Pages;
 
-public partial class MainView : UserControl
+public partial class MainView : ReactiveUserControl<MainViewModel>
 {
     public MainView()
     {
         InitializeComponent();
         StorageService = new StorageService(new Window().StorageProvider);
 
+
+
         DataContextChanged += (sender, e) =>
         {
-            if (DataContext is MainViewModel viewModel)
+            if (DataContext is not MainViewModel viewModel)
             {
-                AddHandler(DragDrop.DragOverEvent, viewModel.DragOverPicture);
-                AddHandler(DragDrop.DropEvent, viewModel.DropPicture);
+                return;
             }
+            AddHandler(DragDrop.DragOverEvent, viewModel.DragOverPicture);
+            AddHandler(DragDrop.DropEvent, viewModel.DropPicture);
         };
     }
 

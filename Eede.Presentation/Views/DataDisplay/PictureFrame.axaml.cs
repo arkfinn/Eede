@@ -1,9 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Dock.Model.Core;
 using System.Collections;
-using System.Collections.Specialized;
 
 namespace Eede.Views.DataDisplay
 {

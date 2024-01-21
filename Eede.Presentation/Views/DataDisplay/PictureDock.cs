@@ -1,12 +1,11 @@
 ﻿using Avalonia;
 using Avalonia.Collections;
+using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Threading;
 using Dock.Model.Avalonia.Controls;
 using Dock.Model.Core;
+using Eede.Presentation.Views.DataDisplay;
 using Eede.ViewModels.DataDisplay;
-using Eede.Views.DataEntry;
-using System;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Linq;
@@ -76,13 +75,34 @@ namespace Eede.Views.DataDisplay
                         {
                             return;
                         }
-                        var document = new Document
+                        var document = new PictureDocument
                         {
                             DataContext = vm,
                             CanFloat = false,
                             Title = vm.Subject,
                             Content = DocumentTemplate.Content
                         };
+                        document.Bind(PictureDocument.ClosingActionProperty, new Binding
+                        {
+                            Source = vm,
+                            Path = nameof(vm.OnClosing)
+                        });
+                        document.Bind(PictureDocument.ClosableProperty, new Binding
+                        {
+                            Source = vm,
+                            Path = nameof(vm.Closable)
+                        });
+                        document.Bind(PictureDocument.SaveAlertResultProperty, new Binding
+                        {
+                            Source = vm,
+                            Path = nameof(vm.SaveAlertResult)
+                        });
+                        document.Bind(TitleProperty, new Binding
+                        {
+                            Source = vm,
+                            Path = nameof(vm.Subject)
+                        });
+                        document.Factory = Factory;
 
                         Factory?.AddDockable(this, document);
                         Factory?.SetActiveDockable(document);
@@ -93,15 +113,18 @@ namespace Eede.Views.DataDisplay
                 case NotifyCollectionChangedAction.Remove:
                     {
                         var data = e.OldItems?.Count == 1 ? e.OldItems[0] : null;
-                        if (data is null)
+                        if (data is null || data is not DockPictureViewModel vm)
                         {
                             break;
                         }
-                        var document = VisibleDockables?.Cast<Document>().Where(d => ReferenceEquals(d, data)).FirstOrDefault();
-                        if (document is not null)
-                        {
-                            Owner!.Factory!.CloseDockable(document);
-                        }
+
+                        vm.Enabled = false;
+
+                        //var document = VisibleDockables?.Cast<Document>().Where(d => ReferenceEquals(d.DataContext, vm)).FirstOrDefault();
+                        //if (document is not null)
+                        //{
+                        //    Owner!.Factory!.CloseDockable(document);
+                        //}
                         break;
                     }
             }

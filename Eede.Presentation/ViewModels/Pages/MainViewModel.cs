@@ -5,6 +5,7 @@ using Dock.Model.Avalonia.Controls;
 using Dock.Model.Core;
 using Eede.Actions;
 using Eede.Application.Pictures;
+using Eede.Common.Enums;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
@@ -28,6 +29,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Eede.ViewModels.Pages;
 
@@ -265,8 +267,8 @@ public class MainViewModel : ViewModelBase
 
         // TODO: 子ウィンドウが閉じられていた時の処理が不足している
         UndoSystem = UndoSystem.Add(new UndoItem(
-            new Action(() => { vm.Bitmap = previous; }),
-            new Action(() => { vm.Bitmap = now; })));
+            new Action(() => { if (vm.Enabled) vm.Bitmap = previous; }),
+            new Action(() => { if (vm.Enabled) vm.Bitmap = now; })));
         vm.Bitmap = now;
     }
 }

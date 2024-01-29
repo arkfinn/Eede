@@ -277,25 +277,31 @@ public class MainViewModel : ViewModelBase
     private void ExecutePictureAction(PictureActions actionType)
     {
         Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
-
+        Picture updatedPicture;
         switch (actionType)
         {
             case PictureActions.ShiftUp:
-                Picture updatedPicture = new ShiftUpAction(previous).Execute();
-                UndoSystem = UndoSystem.Add(new UndoItem(
-                    new Action(() => { DrawableCanvasViewModel.SetPicture(previous); }),
-                    new Action(() => { DrawableCanvasViewModel.SetPicture(updatedPicture); })));
-                DrawableCanvasViewModel.SetPicture(updatedPicture);
+                updatedPicture = new ShiftUpAction(previous).Execute();
                 break;
             case PictureActions.ShiftDown:
+                return;
                 break;
             case PictureActions.ShiftLeft:
+                return;
                 break;
             case PictureActions.ShiftRight:
+                return;
+                break;
+            case PictureActions.HorizontalFlip:
+                updatedPicture = new HorizontalFlipAction(previous).Execute();
                 break;
             default:
+                return;
                 break;
         }
-
+        UndoSystem = UndoSystem.Add(new UndoItem(
+                   new Action(() => { DrawableCanvasViewModel.SetPicture(previous); }),
+                   new Action(() => { DrawableCanvasViewModel.SetPicture(updatedPicture); })));
+        DrawableCanvasViewModel.SetPicture(updatedPicture);
     }
 }

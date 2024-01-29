@@ -30,6 +30,7 @@
     <None Remove="Assets\Tools\mag4.bmp" />
     <None Remove="Assets\Tools\mag6.bmp" />
     <None Remove="Assets\Tools\mag8.bmp" />
+    <None Remove="Assets\Tools\tool_horizontal_flip.png" />
     <None Remove="Assets\Tools\tool_redo.png" />
     <None Remove="Assets\Tools\tool_undo.png" />
     <None Remove="Resources\Copy_6524.png" />

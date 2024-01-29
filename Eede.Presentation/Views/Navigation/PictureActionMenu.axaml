@@ -20,6 +20,14 @@
                     CommandParameter="{ x:Static p:PictureActions.ShiftUp }" >
         <Image Source="/Assets/Tools/tool_shift_up.png" Stretch="None" />
       </ToggleButton>
+      <Separator/>
+      <ToggleButton x:Name="f2"
+              Classes="tool"
+              Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+              CommandParameter="{ x:Static p:PictureActions.HorizontalFlip }" >
+        <Image Source="/Assets/Tools/tool_horizontal_flip.png" Stretch="None" />
+      </ToggleButton>
+
     </StackPanel>
   </Grid>
 </UserControl>

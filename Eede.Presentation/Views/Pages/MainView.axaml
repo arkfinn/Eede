@@ -22,34 +22,7 @@
       <StyleInclude Source="/Styles/Styles.axaml" />
     </Panel.Styles>
     <DockPanel LastChildFill="True">
-      <Panel DockPanel.Dock="Top">
-        <StackPanel Orientation="Horizontal" Margin="2">
-          <Button Classes="tool"
-                  ToolTip.Tip="開く(O)"
-                  HotKey="O"
-                  Command="{Binding LoadPictureCommand}"
-                  CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
-            <Image Source="/Assets/Tools/file_open.png" Stretch="None" />
-          </Button>
-          <Button Classes="tool"
-            ToolTip.Tip="保存(Ctrl+S)"
-            HotKey="Ctrl+S"
-            Command="{Binding SavePictureCommand}">
-            <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
-          </Button>
-          <Panel Classes="horizontal-separator" />
-          <ComboBox ItemsSource="{Binding MinCursorSizeList}"
-            SelectedItem="{Binding MinCursorWidth, Mode=TwoWay}"/>
-          <TextBlock VerticalAlignment="Center" Text=" x "/>
-          <ComboBox ItemsSource="{Binding MinCursorSizeList}"
-                    SelectedItem="{Binding MinCursorHeight, Mode=TwoWay}"/>
-          <Panel Classes="horizontal-separator" />
-          <ComboBox x:Name="ThemeSelect" SelectedIndex="0" SelectionChanged="OnClickThemeSelect">
-            <ComboBoxItem>Light</ComboBoxItem>
-            <ComboBoxItem>Dark</ComboBoxItem>
-          </ComboBox>
-        </StackPanel>
-      </Panel>
+
       <Grid ColumnDefinitions="*, 4, *" DockPanel.Dock="Bottom">
         <DockPanel Grid.Column="0" LastChildFill="True">
           <Panel DockPanel.Dock="Top" >
@@ -102,9 +75,38 @@
 
         </DockPanel>
         <GridSplitter Grid.Column="1" Background="Black" ResizeDirection="Columns"/>
-        <display:PictureFrame Grid.Column="2"
-                              Pictures="{Binding Pictures}"
-                              ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"/>
+        <DockPanel LastChildFill="True" Grid.Column="2">
+          <Panel DockPanel.Dock="Top">
+            <StackPanel Orientation="Horizontal" Margin="2">
+              <Button Classes="tool"
+                      ToolTip.Tip="開く(O)"
+                      HotKey="O"
+                      Command="{Binding LoadPictureCommand}"
+                      CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+                <Image Source="/Assets/Tools/file_open.png" Stretch="None" />
+              </Button>
+              <Button Classes="tool"
+                ToolTip.Tip="保存(Ctrl+S)"
+                HotKey="Ctrl+S"
+                Command="{Binding SavePictureCommand}">
+                <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
+              </Button>
+              <Panel Classes="horizontal-separator" />
+              <ComboBox ItemsSource="{Binding MinCursorSizeList}"
+                SelectedItem="{Binding MinCursorWidth, Mode=TwoWay}"/>
+              <TextBlock VerticalAlignment="Center" Text=" x "/>
+              <ComboBox ItemsSource="{Binding MinCursorSizeList}"
+                        SelectedItem="{Binding MinCursorHeight, Mode=TwoWay}"/>
+              <Panel Classes="horizontal-separator" />
+              <ComboBox x:Name="ThemeSelect" SelectedIndex="0" SelectionChanged="OnClickThemeSelect">
+                <ComboBoxItem>Light</ComboBoxItem>
+                <ComboBoxItem>Dark</ComboBoxItem>
+              </ComboBox>
+            </StackPanel>
+          </Panel>
+          <display:PictureFrame Pictures="{Binding Pictures}"
+                                ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"/>
+        </DockPanel>
       </Grid>
     </DockPanel>
   </Panel>

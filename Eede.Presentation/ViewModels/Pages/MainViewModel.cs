@@ -295,6 +295,13 @@ public class MainViewModel : ViewModelBase
             case PictureActions.HorizontalFlip:
                 updatedPicture = new HorizontalFlipAction(previous).Execute();
                 break;
+            case PictureActions.VerticalFlip:
+                return;
+            case PictureActions.RotateLeft:
+                return;
+            case PictureActions.RotateRight:
+                updatedPicture = new RotateRightAction(previous).Execute();
+                break;
             default:
                 return;
                 break;

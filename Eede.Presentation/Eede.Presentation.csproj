@@ -32,6 +32,7 @@
     <None Remove="Assets\Tools\mag8.bmp" />
     <None Remove="Assets\Tools\tool_horizontal_flip.png" />
     <None Remove="Assets\Tools\tool_redo.png" />
+    <None Remove="Assets\Tools\tool_rotate_right.png" />
     <None Remove="Assets\Tools\tool_undo.png" />
     <None Remove="Resources\Copy_6524.png" />
     <None Remove="Resources\Cut_6523.png" />
@@ -45,6 +46,7 @@
     <None Remove="Resources\Save_6530.png" />
     <None Remove="Resources\tool_shift_up.png" />
     <None Remove="Resources\Undo_16x.png" />
+    <None Remove="Views\Navigation\z25l0kx5.z31~" />
     <None Remove="Views\Pages\lbsy5fhr.hct~" />
   </ItemGroup>
 

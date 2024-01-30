@@ -12,6 +12,9 @@ namespace Eede.Common.Pictures.Actions
         ShiftDown,
         ShiftLeft,
         ShiftRight,
-        HorizontalFlip
+        VerticalFlip,
+        HorizontalFlip,
+        RotateRight,
+        RotateLeft
     }
 }

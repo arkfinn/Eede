@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Eede.Domain.Pictures.Actions
 {
-    public class HorizontalFlipAction
+    public class RotateRightAction
     {
         private readonly Picture Source;
 
-        public HorizontalFlipAction(Picture source)
+        public RotateRightAction(Picture source)
         {
             Source = source;
         }
@@ -19,12 +19,14 @@ namespace Eede.Domain.Pictures.Actions
         public Picture Execute()
         {
             var action = new PictureAction(Source);
-            return action.ProcessResult(Source.Size,Offset);
+            return action.ProcessResult(Source.Size.Swap(), Offset);
         }
 
         private Position Offset(Position p)
         {
-            return new Position(Source.Width - 1 - p.X, p.Y);
+            var offsetX = p.Y;// Source.Height-1-p.Y;
+            var offsetY = Source.Height - 1 - p.X;
+            return new Position(offsetX, offsetY);
         }
     }
 }

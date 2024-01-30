@@ -1,34 +1,48 @@
-﻿using System;
+﻿using Eede.Domain.Positions;
+using System;
 
-namespace Eede.Domain.Pictures.Actions
+namespace Eede.Domain.Pictures.Actions;
+
+internal class PictureAction
 {
-    internal class PictureAction
+    private readonly Picture Source;
+
+    public PictureAction(Picture source)
     {
-        public byte[] Process(Picture src, Func<int, int> processX, Func<int, int> processY)
+        Source = source;
+    }
+
+    public byte[] Process(PictureSize destSize, Func<Position, Position> process)
+    {
+        var height = destSize.Height;
+        var width = destSize.Width;
+        var stride = width * 4;
+        byte[] destPixels = new byte[stride * height];
+
+        for (int y = 0; y < height; y++)
         {
-            byte[] destPixels = new byte[src.Length];
-            var height = src.Height;
-            var width = src.Width;
+            int toY = stride * y;
 
-            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
             {
-                int baseY = src.Stride * y;
-                int srcY = processY(y);
-                int offsetY = src.Stride * srcY;
-
-                for (int x = 0; x < width; x++)
-                {
-                    int pos = (x * 4) + baseY;
-                    int offsetX = processX(x);
-                    int fromPos = (offsetX * 4) + offsetY;
-
-                    destPixels[pos + 0] = src[fromPos + 0];
-                    destPixels[pos + 1] = src[fromPos + 1];
-                    destPixels[pos + 2] = src[fromPos + 2];
-                    destPixels[pos + 3] = src[fromPos + 3];
-                }
+                int pos = (x * 4) + toY;
+                Position offset = process(new Position(x, y));
+                int offsetY = Source.Stride * offset.Y;
+                int fromPos = (offset.X * 4) + offsetY;
+                Console.WriteLine(x.ToString() + "," + y.ToString());
+                Console.WriteLine(offset.X + "," + offset.Y);
+                destPixels[pos + 0] = Source[fromPos + 0];
+                destPixels[pos + 1] = Source[fromPos + 1];
+                destPixels[pos + 2] = Source[fromPos + 2];
+                destPixels[pos + 3] = Source[fromPos + 3];
             }
-            return destPixels;
         }
+        return destPixels;
+    }
+
+    public Picture ProcessResult(PictureSize destSize, Func<Position, Position> process)
+    {
+        var pixels = Process(destSize, process);
+        return Picture.Create(destSize, pixels);
     }
 }

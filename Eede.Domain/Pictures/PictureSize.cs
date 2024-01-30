@@ -22,5 +22,10 @@ namespace Eede.Domain.Pictures
         {
             return pos.X >= 0 && pos.Y >= 0 && pos.X < Width && pos.Y < Height;
         }
+
+        public PictureSize Swap()
+        {
+            return new PictureSize(Height, Width);
+        }
     }
 }

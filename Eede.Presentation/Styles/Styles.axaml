@@ -55,4 +55,10 @@
     <Setter Property="Height" Value="16" />
     <Setter Property="Background" Value="{DynamicResource BaseBrush}" />
   </Style>
+  <Style Selector="Panel.vertical-separator">
+    <Setter Property="Margin" Value="4,0" />
+    <Setter Property="Width" Value="16" />
+    <Setter Property="Height" Value="2" />
+    <Setter Property="Background" Value="{DynamicResource BaseBrush}" />
+  </Style>
 </Styles>

@@ -1,4 +1,5 @@
-﻿using Eede.Domain.Scales;
+﻿using Eede.Domain.Positions;
+using Eede.Domain.Scales;
 using System;
 
 namespace Eede.Domain.Pictures.Actions
@@ -14,25 +15,15 @@ namespace Eede.Domain.Pictures.Actions
 
         public Picture Execute()
         {
-            var action = new PictureAction();
-            return Picture.Create(Source.Size, action.Process(Source, OffsetX, OffsetY));
+            var action = new PictureAction(Source);
+            return action.ProcessResult(Source.Size, Offset);
         }
 
-        private int OffsetY(int y)
+        private Position Offset(Position p)
         {
-            //return y;
-            var offsetY = y + 1;
-            return offsetY >= Source.Height ? offsetY - Source.Height : offsetY;
-            //var offsetY = y - 1;
-            //return offsetY < 0 ? offsetY + Source.Height : offsetY;
-        }
-
-        private int OffsetX(int x)
-        { 
-            //var offsetX = x + 1;
-            //return offsetX >= Source.Height ? offsetX - Source.Height : offsetX;
-
-            return x;
+            var offsetY = p.Y + 1;
+            var newY = offsetY >= Source.Height ? offsetY - Source.Height : offsetY;
+            return new Position(p.X, newY);
         }
     }
 }

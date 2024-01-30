@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Eede.Domain.Positions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,21 +18,13 @@ namespace Eede.Domain.Pictures.Actions
 
         public Picture Execute()
         {
-            var action = new PictureAction();
-            return Picture.Create(Source.Size, action.Process(Source, OffsetX, OffsetY));
+            var action = new PictureAction(Source);
+            return action.ProcessResult(Source.Size,Offset);
         }
 
-        private int OffsetX(int x)
+        private Position Offset(Position p)
         {
-            return Source.Width -1 - x;
+            return new Position(Source.Width - 1 - p.X, p.Y);
         }
-
-        private int OffsetY(int y)
-        {
-            return y;
-            //return Source.Height-1-y;
-        }
-
-
     }
 }

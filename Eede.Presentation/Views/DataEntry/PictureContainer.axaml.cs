@@ -62,6 +62,7 @@ namespace Eede.Views.DataEntry
                 Path = nameof(vm.Bitmap)
             });
             canvas.Background = canvasBrush;
+            MinCursorSize = vm.MinCursorSize;
             this.Bind(MinCursorSizeProperty, new Binding
             {
                 Source = vm,

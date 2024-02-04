@@ -77,6 +77,7 @@ namespace Eede.ViewModels.DataDisplay
 
         public void ExecuteClosing()
         {
+            if (!Edited) return;
             switch (SaveAlertResult)
             {
                 case SaveAlertResult.Cancel:

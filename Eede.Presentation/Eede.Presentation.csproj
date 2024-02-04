@@ -33,6 +33,9 @@
     <None Remove="Assets\Tools\tool_horizontal_flip.png" />
     <None Remove="Assets\Tools\tool_redo.png" />
     <None Remove="Assets\Tools\tool_rotate_right.png" />
+    <None Remove="Assets\Tools\tool_shift_down.png" />
+    <None Remove="Assets\Tools\tool_shift_left.png" />
+    <None Remove="Assets\Tools\tool_shift_right.png" />
     <None Remove="Assets\Tools\tool_undo.png" />
     <None Remove="Resources\Copy_6524.png" />
     <None Remove="Resources\Cut_6523.png" />

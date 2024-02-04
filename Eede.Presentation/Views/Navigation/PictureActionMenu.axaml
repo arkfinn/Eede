@@ -14,11 +14,25 @@
       <StyleInclude Source="/Styles/Styles.axaml" />
     </Grid.Styles>
     <StackPanel Orientation="Vertical" >
-      <ToggleButton 
-                    Classes="tool"  
+      <ToggleButton Classes="tool"  
                     Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
                     CommandParameter="{ x:Static p:PictureActions.ShiftUp }" >
         <Image Source="/Assets/Tools/tool_shift_up.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton Classes="tool"
+                    Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+                    CommandParameter="{ x:Static p:PictureActions.ShiftRight }" >
+        <Image Source="/Assets/Tools/tool_shift_right.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton Classes="tool"
+                    Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+                    CommandParameter="{ x:Static p:PictureActions.ShiftLeft }" >
+        <Image Source="/Assets/Tools/tool_shift_left.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton Classes="tool"
+                    Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+                    CommandParameter="{ x:Static p:PictureActions.ShiftDown }" >
+        <Image Source="/Assets/Tools/tool_shift_down.png" Stretch="None" />
       </ToggleButton>
       <Panel Classes="vertical-separator" />
       <ToggleButton 

@@ -26,7 +26,8 @@
               <entry:PictureContainer />
             </DocumentTemplate>
           </display:PictureDock.DocumentTemplate>
-          <Document>
+          <Document CanClose="False" CanFloat="False" Title="ようこそ">
+            <TextBlock Text="説明など"/>
           </Document>
         </display:PictureDock>
       </ProportionalDock>

@@ -71,7 +71,7 @@ namespace Eede.Domain.Pictures
 
             for (int i = 0; i < area.Height; i++)
             {
-                if (i >= Height) break;
+                if (area.Y + i >= Height) break;
                 int sourceStartIndex = destinationX + ((area.Y + i) * Stride);
                 int destinationStartIndex = i * destinationStride;
                 Array.Copy(ImageData, sourceStartIndex, cutImageData, destinationStartIndex, length);

@@ -225,6 +225,7 @@ public class MainViewModel : ViewModelBase
         var vm = DockPictureViewModel.FromUri(path);
         vm.PicturePush += PushToDrawArea;
         vm.PicturePull += PullFromDrawArea;
+        vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
         return vm;
     }
 
@@ -277,38 +278,35 @@ public class MainViewModel : ViewModelBase
     private void ExecutePictureAction(PictureActions actionType)
     {
         Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
-        Picture updatedPicture;
-        switch (actionType)
-        {
-            case PictureActions.ShiftUp:
-                updatedPicture = new ShiftUpAction(previous).Execute();
-                break;
-            case PictureActions.ShiftDown:
-                return;
-                break;
-            case PictureActions.ShiftLeft:
-                return;
-                break;
-            case PictureActions.ShiftRight:
-                return;
-                break;
-            case PictureActions.HorizontalFlip:
-                updatedPicture = new HorizontalFlipAction(previous).Execute();
-                break;
-            case PictureActions.VerticalFlip:
-                return;
-            case PictureActions.RotateLeft:
-                return;
-            case PictureActions.RotateRight:
-                updatedPicture = new RotateRightAction(previous).Execute();
-                break;
-            default:
-                return;
-                break;
-        }
+        Picture updatedPicture = FindPictureAction(actionType, previous);
         UndoSystem = UndoSystem.Add(new UndoItem(
                    new Action(() => { DrawableCanvasViewModel.SetPicture(previous); }),
                    new Action(() => { DrawableCanvasViewModel.SetPicture(updatedPicture); })));
         DrawableCanvasViewModel.SetPicture(updatedPicture);
+    }
+
+    private Picture FindPictureAction(PictureActions actionType, Picture previous)
+    {
+        switch (actionType)
+        {
+            case PictureActions.ShiftUp:
+                return new ShiftUpAction(previous).Execute();
+            case PictureActions.ShiftDown:
+                return new ShiftDownAction(previous).Execute();
+            case PictureActions.ShiftLeft:
+                return new ShiftLeftAction(previous).Execute();
+            case PictureActions.ShiftRight:
+                return new ShiftRightAction(previous).Execute();
+            case PictureActions.HorizontalFlip:
+                return new HorizontalFlipAction(previous).Execute();
+            //case PictureActions.VerticalFlip:
+            //    return;
+            //case PictureActions.RotateLeft:
+            //    return;
+            case PictureActions.RotateRight:
+                return new RotateRightAction(previous).Execute();
+            default:
+                throw new ArgumentException(nameof(actionType));
+        }
     }
 }

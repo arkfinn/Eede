@@ -14,11 +14,12 @@ namespace Eede.Views.DataEntry
             RGB,
             HSV
         }
-     
+
         public GradationPicker()
         {
             InitializeComponent();
             slider.ValueChanged += SliderValueChanged;
+            textbox.TextChanging += OnTextChanging;
         }
 
         public int Value
@@ -58,6 +59,20 @@ namespace Eede.Views.DataEntry
         private void SliderValueChanged(object? sender, GradationSlider.ValueChangedEventArgs e)
         {
             textbox.Text = e.Value.ToString();
+        }
+
+        private void OnTextChanging(object sender, TextChangingEventArgs e)
+        {
+            if (textbox.Text == Value.ToString())
+            {
+                e.Handled = true;
+                return;
+            }
+            if (int.TryParse(textbox.Text, out var value))
+            {
+                Value = value;
+            }
+
         }
     }
 }

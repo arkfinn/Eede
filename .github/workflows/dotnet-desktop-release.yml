@@ -17,7 +17,7 @@ jobs:
 
     env:
       Solution_Name: Eede.sln
-      Wap_Project_Directory: Eede
+      Wap_Project_Directory: Eede.Presentation.Desktop
       Wap_Project_Path: Eede.Presentation.Desktop\Eede.Presentation.Desktop.csproj
 
     outputs:

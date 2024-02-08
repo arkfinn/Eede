@@ -31,6 +31,8 @@ namespace Eede.ViewModels.DataDisplay
 
         [Reactive] public Bitmap Bitmap { get; set; }
         [Reactive] public PictureSize MinCursorSize { get; set; }
+        [Reactive] public PictureSize CursorSize { get; set; }
+        [Reactive] public HalfBoxArea CursorArea { get; set; }
         [Reactive] public bool Enabled { get; set; }
         [Reactive] public bool Closable { get; set; }
 
@@ -41,6 +43,11 @@ namespace Eede.ViewModels.DataDisplay
             OnClosing = ReactiveCommand.Create(ExecuteClosing);
             Bitmap ??= new WriteableBitmap(new PixelSize(32, 32), new Vector(96, 96), PixelFormat.Bgra8888);
             MinCursorSize = new PictureSize(32, 32);
+            CursorSize = new PictureSize(32, 32);
+            this.WhenAnyValue(x => x.CursorSize).Subscribe(size =>
+            {
+                CursorArea = HalfBoxArea.Create(size, new Position(0, 0));
+            });
             Subject = "新しいファイル";
             Enabled = true;
             Closable = true;

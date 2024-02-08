@@ -1,135 +1,109 @@
-﻿using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.Colors;
+using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Positions;
+using Eede.Domain.Scales;
 using System;
-using System.Drawing;
 
 namespace Eede.Domain.Pictures
 {
-    public class Picture : IDisposable
+    public class Picture
     {
-        public Picture(Image image)
+        private const int COLOR_32BIT = 4;
+
+
+        public static Picture Create(PictureSize size, byte[] imageData)
         {
-            if (image == null)
-            {
-                throw new ArgumentNullException("imageの値は必ず指定してください。");
-            }
-            Buffer = new Bitmap(image);
+            int stride = size.Width * COLOR_32BIT;
+            return stride * size.Height != imageData.Length
+                ? throw new ArgumentException($"(width:{size.Width}, height:{size.Height}) * {COLOR_32BIT} != length:{imageData.Length}")
+                : new Picture(size, imageData, stride);
         }
 
-        public Picture(Bitmap image)
+        public static Picture CreateEmpty(PictureSize size)
         {
-            if (image == null)
-            {
-                throw new ArgumentNullException("imageの値は必ず指定してください。");
-            }
-            Buffer = CreateClone(image);
+            return Create(size, new byte[size.Width * COLOR_32BIT * size.Height]);
         }
 
-        public Picture(Size size)
+        public readonly PictureSize Size;
+        private readonly byte[] ImageData;
+        public readonly int Stride;
+
+        private Picture(PictureSize size, byte[] imageData, int stride)
         {
-            Buffer = new Bitmap(size.Width, size.Height);
+            Size = size;
+            ImageData = imageData;
+            Stride = stride;
         }
 
-        private Bitmap CreateClone(Bitmap source)
+        public int Width => Size.Width;
+        public int Height => Size.Height;
+        public int Length => ImageData.Length;
+
+        public byte this[int i] => ImageData[i];
+
+        public byte[] CloneImage()
         {
-            // new Bitmap(source)とすると、alpha=0のRGB情報が失われるため、手動で合成し直している。
-            var tmp = new Bitmap(source.Width, source.Height);
-            var d = new DirectImageBlender();
-            d.Blend(source, tmp);
-            return tmp;
+            return ImageData.Clone() as byte[];
         }
 
-        public Picture Clone()
-        {
-            return new Picture(Buffer);
-        }
-
-        private readonly Bitmap Buffer;
-
-        public Bitmap CutOut(Rectangle rect)
-        {
-            return Buffer.Clone(rect, Buffer.PixelFormat);
-        }
-
-        public Image ToImage()
-        {
-            return new Bitmap(Buffer);
-        }
-
-        public Size Size => Buffer.Size;
-
-        public void Transfer(IImageTransfer transfer, Graphics g)
-        {
-            Transfer(transfer, g, Buffer.Size);
-        }
-
-        public void Transfer(IImageTransfer transfer, Graphics g, Size size)
-        {
-            transfer.Transfer(Buffer, g, size);
-        }
-
-        /// <summary>
-        /// このPictureのtoPositionにsrcを合成した新しいPictureを返す。
-        /// </summary>
-        /// <param name="blender"></param>
-        /// <param name="src"></param>
-        /// <param name="toPosition"></param>
-        /// <returns></returns>
-        public Picture Blend(IImageBlender blender, Bitmap src, Position toPosition)
-        {
-            using (var tmp = CreateClone(Buffer))
-            {
-                blender.Blend(src, tmp, toPosition);
-                return new Picture(tmp);
-            }
-        }
-
-        public Picture Blend(IImageBlender blender, Picture src, Position toPosition)
-        {
-            using (var tmp = CreateClone(Buffer))
-            {
-                blender.Blend(src.Buffer, tmp, toPosition);
-                return new Picture(tmp);
-            }
-        }
-
-        public Picture Draw(Action<Graphics> action, IImageBlender blender)
-        {
-            using (var newBmp = CreateClone(Buffer))
-            using (var tmp = CreateClone(Buffer))
-            {
-                using (var g = Graphics.FromImage(tmp))
-                {
-                    action(g);
-                }
-                blender.Blend(tmp, newBmp);
-                return new Picture(newBmp);
-            }
-        }
-
-        public Color PickColor(Position pos)
+        public ArgbColor PickColor(Position pos)
         {
             if (!Contains(pos))
             {
                 throw new ArgumentOutOfRangeException();
             }
-            return Buffer.GetPixel(pos.X, pos.Y);
+
+            int index = (pos.X * COLOR_32BIT) + (Stride * pos.Y);
+            return new ArgbColor(
+                this[index + 3],
+                this[index + 2],
+                this[index + 1],
+                this[index]);
+        }
+
+        public Picture CutOut(PictureArea area)
+        {
+            int destinationStride = area.Width * COLOR_32BIT;
+            int length = Math.Min((Width - area.X) * COLOR_32BIT, destinationStride);
+            int destinationX = area.X * COLOR_32BIT;
+            byte[] cutImageData = new byte[destinationStride * area.Height];
+
+            for (int i = 0; i < area.Height; i++)
+            {
+                if (area.Y + i >= Height) break;
+                int sourceStartIndex = destinationX + ((area.Y + i) * Stride);
+                int destinationStartIndex = i * destinationStride;
+                Array.Copy(ImageData, sourceStartIndex, cutImageData, destinationStartIndex, length);
+            }
+
+            return Create(area.Size, cutImageData);
+        }
+
+        public Picture Transfer(IImageTransfer transfer)
+        {
+            return Transfer(transfer, new Magnification(1));
+        }
+
+        public Picture Transfer(IImageTransfer transfer, Magnification magnification)
+        {
+            return transfer.Transfer(this, magnification);
+        }
+
+        public Picture Blend(IImageBlender blender, Picture src, Position toPosition)
+        {
+            return blender.Blend(src, this, toPosition);
+        }
+
+        public Picture Draw(Func<Picture, Picture> function, IImageBlender blender)
+        {
+            Picture data = function(this);
+            return blender.Blend(data, this);
         }
 
         public bool Contains(Position position)
         {
-            return position.IsInnerOf(Buffer.Size);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            Buffer.Dispose();
+            return Size.Contains(position);
         }
     }
 }

@@ -20,14 +20,14 @@ namespace Eede.Domain.Systems
 
         public UndoSystem Undo()
         {
-            var item = UndoList.Peek();
+            IUndoItem item = UndoList.Peek();
             item.Undo();
             return new UndoSystem(UndoList.Pop(), RedoList.Push(item));
         }
 
         public UndoSystem Redo()
         {
-            var item = RedoList.Peek();
+            IUndoItem item = RedoList.Peek();
             item.Redo();
             return new UndoSystem(UndoList.Push(item), RedoList.Pop());
         }
@@ -56,7 +56,7 @@ namespace Eede.Domain.Systems
 
         private void DisposeUndoList()
         {
-            foreach (var item in UndoList)
+            foreach (IUndoItem item in UndoList)
             {
                 item.Dispose();
             }
@@ -64,7 +64,7 @@ namespace Eede.Domain.Systems
 
         private void DisposeRedoList()
         {
-            foreach (var item in RedoList)
+            foreach (IUndoItem item in RedoList)
             {
                 item.Dispose();
             }

@@ -1,9 +1,10 @@
-﻿using System.Drawing;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Scales;
 
 namespace Eede.Domain.ImageTransfers
 {
     public interface IImageTransfer
     {
-        void Transfer(Bitmap from, Graphics to, Size size);
+        Picture Transfer(Picture from, Magnification magnification);
     }
 }

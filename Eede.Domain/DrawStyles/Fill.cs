@@ -1,21 +1,26 @@
-﻿using Eede.Domain.Positions;
+﻿using Eede.Domain.Drawings;
+using Eede.Domain.Positions;
 
 namespace Eede.Domain.DrawStyles
 {
     // 実装内容を再検討する
-    public class Fill //: IPenStyle
+    public class Fill : IDrawStyle
     {
-        public void DrawBegin(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
+        public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            aBitmap.Fill(positions.Now, pen.PreparePen().Color);
+            Drawer drawer = new(buffer.Previous, penStyle);
+            return buffer.UpdateDrawing(drawer.Fill(positionHistory.Now));
         }
 
-        public void Drawing(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
+        public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
+            return buffer;
         }
 
-        public void DrawEnd(AlphaPicture aBitmap, PenStyle pen, PositionHistory positions, bool isShift)
+        public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
+            return buffer.DecideDrawing(buffer.Fetch());
         }
+
     }
 }

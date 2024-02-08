@@ -7,7 +7,7 @@ namespace Eede.Domain.Scales
     /// </summary>
     public class Magnification
     {
-        private readonly float magnification;
+        public readonly float Value;
 
         public Magnification(float magnification)
         {
@@ -15,29 +15,28 @@ namespace Eede.Domain.Scales
             {
                 throw new ArgumentOutOfRangeException("Magnification needs more than 0");
             }
-            this.magnification = magnification;
+            this.Value = magnification;
         }
 
         public override bool Equals(object obj)
         {
-            var magnification = obj as Magnification;
-            return magnification != null &&
-                   this.magnification == magnification.magnification;
+            return obj is Magnification magnification &&
+                   this.Value == magnification.Value;
         }
 
         public override int GetHashCode()
         {
-            return -192445598 + magnification.GetHashCode();
+            return -192445598 + Value.GetHashCode();
         }
 
         public int Magnify(int value)
         {
-            return (int)(value * magnification);
+            return (int)(value * Value);
         }
 
         public int Minify(int value)
         {
-            return (int)(value / magnification);
+            return (int)(value / Value);
         }
     }
 }

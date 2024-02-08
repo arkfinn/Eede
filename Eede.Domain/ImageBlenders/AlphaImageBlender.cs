@@ -1,83 +1,63 @@
-﻿using Eede.Domain.Positions;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Positions;
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 
 namespace Eede.Domain.ImageBlenders
 {
     public class AlphaImageBlender : IImageBlender
     {
-        public void Blend(Bitmap from, Bitmap to)
+        public Picture Blend(Picture from, Picture to)
         {
-            Blend(from, to, new Position(0, 0));
+            return Blend(from, to, new Position(0, 0));
         }
 
-        public void Blend(Bitmap from, Bitmap to, Position toPosition)
+        public Picture Blend(Picture from, Picture to, Position toPosition)
         {
-            BitmapData destBitmapData = to.LockBits(
-                    new Rectangle(Point.Empty, to.Size),
-                    ImageLockMode.WriteOnly, to.PixelFormat);
-            try
+            byte[] toPixels = to.CloneImage();
+
+            int maxY = Math.Min(toPosition.Y + from.Height, to.Height);
+            int maxX = Math.Min(toPosition.X + from.Width, to.Width);
+
+            for (int y = toPosition.Y; y < maxY; y++)
             {
-                BitmapData srcBitmapData = from.LockBits(
-                        new Rectangle(Point.Empty, from.Size),
-                        ImageLockMode.WriteOnly, from.PixelFormat);
-                try
+                for (int x = toPosition.X; x < maxX; x++)
                 {
-                    byte[] srcPixels = new byte[srcBitmapData.Stride * from.Height];
-                    System.Runtime.InteropServices.Marshal.Copy(srcBitmapData.Scan0, srcPixels, 0, srcPixels.Length);
+                    int toPos = (x * 4) + (to.Stride * y);
+                    int fromPos = ((x - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
 
-                    byte[] destPixels = new byte[destBitmapData.Stride * destBitmapData.Height];
-                    System.Runtime.InteropServices.Marshal.Copy(destBitmapData.Scan0, destPixels, 0, destPixels.Length);
-
-                    var maxY = Math.Min(toPosition.Y + from.Height, destBitmapData.Height);
-                    var maxX = Math.Min(toPosition.X + from.Width, destBitmapData.Width);
-
-                    for (int y = toPosition.Y; y < maxY; y++)
+                    // 転送元がアルファ0なら転送しない
+                    byte fromA = from[fromPos + 3];
+                    if (fromA == 0)
                     {
-                        for (int x = toPosition.X; x < maxX; x++)
-                        {
-                            int pos = x * 4 + destBitmapData.Stride * y;
-                            int srcPos = (x - toPosition.X) * 4 + srcBitmapData.Stride * (y - toPosition.Y);
-                            // 転送元がアルファ0なら転送しない
-                            if (srcPixels[srcPos + 3] == 0)
-                            {
-                                continue;
-                            }
-                            // 転送先がアルファ0なら無条件で転送
-                            if (destPixels[pos + 3] == 0)
-                            {
-                                destPixels[pos + 0] = srcPixels[srcPos + 0];
-                                destPixels[pos + 1] = srcPixels[srcPos + 1];
-                                destPixels[pos + 2] = srcPixels[srcPos + 2];
-                                destPixels[pos + 3] = srcPixels[srcPos + 3];
-                                continue;
-                            }
-                            // それ以外の場合、アルファ値・カラーを合成する
-                            decimal srcAlpha = Decimal.Divide(srcPixels[srcPos + 3], 255);
-                            decimal destAlpha = Decimal.Divide(destPixels[pos + 3], 255);
-                            decimal alpha = srcAlpha + destAlpha - (srcAlpha * destAlpha);
-                            destPixels[pos + 3] = (byte)(Decimal.Add(Decimal.Multiply(alpha, 255), 0.5m));
-                            if (alpha == 0)
-                            {
-                                continue;
-                            }
-                            destPixels[pos + 0] = (byte)(Decimal.Add(Decimal.Divide((destPixels[pos + 0] * destAlpha * (1 - srcAlpha)) + (srcPixels[srcPos + 0] * srcAlpha), alpha), 0.5m));
-                            destPixels[pos + 1] = (byte)(Decimal.Add(Decimal.Divide((destPixels[pos + 1] * destAlpha * (1 - srcAlpha)) + (srcPixels[srcPos + 1] * srcAlpha), alpha), 0.5m));
-                            destPixels[pos + 2] = (byte)(Decimal.Add(Decimal.Divide((destPixels[pos + 2] * destAlpha * (1 - srcAlpha)) + (srcPixels[srcPos + 2] * srcAlpha), alpha), 0.5m));
-                        }
+                        continue;
                     }
-                    System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, destBitmapData.Scan0, destPixels.Length);
-                }
-                finally
-                {
-                    from.UnlockBits(srcBitmapData);
+                    // 転送先がアルファ0なら無条件で転送
+                    byte toA = toPixels[toPos + 3];
+                    if (toA == 0)
+                    {
+                        toPixels[toPos + 0] = from[fromPos + 0];
+                        toPixels[toPos + 1] = from[fromPos + 1];
+                        toPixels[toPos + 2] = from[fromPos + 2];
+                        toPixels[toPos + 3] = fromA;
+                        continue;
+                    }
+                    // それ以外の場合、アルファ値・カラーを合成する
+                    decimal fromAlpha = decimal.Divide(fromA, 255);
+                    decimal toAlpha = decimal.Divide(toA, 255);
+                    decimal alpha = fromAlpha + toAlpha - (fromAlpha * toAlpha);
+                    toPixels[toPos + 3] = (byte)decimal.Add(decimal.Multiply(alpha, 255), 0.5m);
+                    if (alpha == 0)
+                    {
+                        continue;
+                    }
+                    decimal blendedAlpha = toAlpha * (1 - fromAlpha);
+                    toPixels[toPos + 0] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 0] * blendedAlpha) + (from[fromPos + 0] * fromAlpha), alpha), 0.5m);
+                    toPixels[toPos + 1] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 1] * blendedAlpha) + (from[fromPos + 1] * fromAlpha), alpha), 0.5m);
+                    toPixels[toPos + 2] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 2] * blendedAlpha) + (from[fromPos + 2] * fromAlpha), alpha), 0.5m);
                 }
             }
-            finally
-            {
-                to.UnlockBits(destBitmapData);
-            }
+
+            return Picture.Create(to.Size, toPixels);
         }
     }
 }

@@ -1,9 +1,10 @@
-﻿using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.Colors;
+using Eede.Domain.DrawStyles;
+using Eede.Domain.ImageBlenders;
 using NUnit.Framework;
 using System;
-using System.Drawing;
 
-namespace Eede.Domain.DrawStyles.Tests
+namespace Eede.Domain.Tests.DrawStyles
 {
     [TestFixture()]
     public class PenStyleTests
@@ -11,26 +12,31 @@ namespace Eede.Domain.DrawStyles.Tests
         [Test()]
         public void 正常生成()
         {
-            var penStyle = new PenStyle(new DirectImageBlender(), Color.Black, 1);
-            Assert.AreEqual(Color.Black, penStyle.Color);
-            Assert.AreEqual(1, penStyle.Width);
+            PenStyle penStyle = new(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
+            Assert.That(Tuple.Create(
+                penStyle.Color.Alpha,
+                penStyle.Color.Red,
+                penStyle.Color.Green,
+                penStyle.Color.Blue,
+                penStyle.Width),
+                Is.EqualTo(Tuple.Create(255, 0, 0, 0, 1)));
         }
 
         [Test()]
         public void Blenderはnullを許容しない()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                new PenStyle(null, Color.Black, 1);
+                _ = new PenStyle(null, new ArgbColor(255, 0, 0, 0), 1);
             });
         }
 
         [Test()]
         public void Widthは1以上でなければならない()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                new PenStyle(new DirectImageBlender(), Color.Black, 0);
+                _ = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 0);
             });
         }
     }

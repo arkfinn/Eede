@@ -3,6 +3,7 @@ using Eede.Domain.Files;
 using Eede.Domain.Pictures;
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace Eede.Infrastructure.Pictures
 {
@@ -21,10 +22,14 @@ namespace Eede.Infrastructure.Pictures
 
         public Picture Read()
         {
-            using (var image = Image.FromFile(Path.Path))
-            {
-                return new Picture(image);
-            }
+            using Bitmap image = new(Path.Path);
+            using Bitmap tmp = To32bppArgb(image);
+            return BitmapConverter.ConvertBack(tmp);
+        }
+
+        private static Bitmap To32bppArgb(Bitmap image)
+        {
+            return image.Clone(new Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
         }
     }
 }

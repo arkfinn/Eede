@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:c="clr-namespace:Eede.Common.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Eede.Views.Navigation.MagnificationMenu">
+  <Grid>
+    <Grid.Styles>
+      <StyleInclude Source="/Styles/Styles.axaml" />
+    </Grid.Styles>
+    <WrapPanel>
+      <WrapPanel.Resources>
+        <c:BitmapConverter x:Key="bitmapConverter" />
+      </WrapPanel.Resources>
+      <ToggleButton x:Name="m1" Classes="tool" Click="SetMagnification1" >
+        <Image Source="/Assets/Tools/mag1.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m2" Classes="tool" Click="SetMagnification2" >
+        <Image Source="/Assets/Tools/mag2.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m4" Classes="tool" Click="SetMagnification4" >
+        <Image Source="/Assets/Tools/mag4.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m6" Classes="tool" Click="SetMagnification6" >
+        <Image Source="/Assets/Tools/mag6.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m8" Classes="tool" Click="SetMagnification8" >
+        <Image Source="/Assets/Tools/mag8.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m12" Classes="tool" Click="SetMagnification12" >
+        <Image Source="/Assets/Tools/mag12.bmp" Stretch="None" />
+      </ToggleButton>
+
+    </WrapPanel>
+  </Grid>
+</UserControl>

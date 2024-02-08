@@ -1,4 +1,6 @@
 ﻿using Eede.Application.PaintLayers;
+using Eede.Domain.Colors;
+using Eede.Domain.Drawings;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
@@ -11,7 +13,7 @@ namespace Eede.Application.Drawings
 {
     public class DrawableArea
     {
-        public DrawableArea(ICanvasBackgroundService background, Magnification magnification, Size gridSize, PositionHistory positionHistory)
+        public DrawableArea(ICanvasBackgroundService background, Magnification magnification, PictureSize gridSize, PositionHistory positionHistory)
         {
             Background = background;
             Magnification = magnification;
@@ -21,38 +23,63 @@ namespace Eede.Application.Drawings
 
         private readonly ICanvasBackgroundService Background;
 
-        private readonly Magnification Magnification;
+        public readonly Magnification Magnification;
 
-        private readonly Size GridSize;
+        private readonly PictureSize GridSize;
 
         private readonly PositionHistory PositionHistory;
 
-        private MagnifiedSize Magnify(Size size)
+        private MagnifiedSize Magnify(PictureSize size)
         {
             return new MagnifiedSize(size, Magnification);
         }
 
         public void Paint(Graphics g, DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
         {
-            var source = buffer.Fetch();
+            Picture source = buffer.Fetch();
             // 表示上のサイズ・ポジション DisplaySize DisplayPosition
-            var displaySize = Magnify(source.Size);
-            var backgroundLayer = new PaintBackgroundLayer(Background);
+            MagnifiedSize displaySize = Magnify(source.Size);
+            PaintBackgroundLayer backgroundLayer = new(Background);
             backgroundLayer.Paint(g);
 
             if (!buffer.IsDrawing() && PositionHistory != null)
             {
-                var cursorLayer = new CursorLayer(displaySize, source, penStyle, PositionHistory.Now, imageTransfer);
+                CursorLayer cursorLayer = new(displaySize, source, penStyle, PositionHistory.Now, imageTransfer);
                 cursorLayer.Paint(g);
             }
             else
             {
-                var bufferLayer = new PaintBufferLayer(displaySize, source, imageTransfer);
+                PaintBufferLayer bufferLayer = new(displaySize, source, imageTransfer);
                 bufferLayer.Paint(g);
             }
 
-            var gridLayer = new PaintGridLayer(displaySize, Magnify(GridSize));
+            PaintGridLayer gridLayer = new(displaySize, Magnify(GridSize));
             gridLayer.Paint(g);
+        }
+
+        public Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
+        {
+            Picture source = buffer.Fetch();
+            var picture = source;
+            // 表示上のサイズ・ポジション DisplaySize DisplayPosition
+            MagnifiedSize displaySize = Magnify(source.Size);
+            //PaintBackgroundLayer backgroundLayer = new(Background);
+            //var picture = backgroundLayer.Painted(null);
+
+            if (!buffer.IsDrawing() && PositionHistory != null)
+            {
+                CursorLayer cursorLayer = new(displaySize, source, penStyle, PositionHistory.Now, imageTransfer);
+                picture = cursorLayer.Painted(picture);
+            }
+            else
+            {
+                PaintBufferLayer bufferLayer = new(displaySize, source, imageTransfer);
+                picture = bufferLayer.Painted(picture);
+            }
+
+            //PaintGridLayer gridLayer = new(displaySize, Magnify(GridSize));
+            //picture = gridLayer.Paint(picture);
+            return picture;
         }
 
         public DrawableArea UpdateMagnification(Magnification m)
@@ -75,12 +102,13 @@ namespace Eede.Application.Drawings
             return new MinifiedPosition(position, Magnification);
         }
 
-        public Size DisplaySizeOf(Picture picture)
+        public PictureSize DisplaySizeOf(Picture picture)
         {
-            return Magnify(picture.Size).ToSize();
+            MagnifiedSize size = Magnify(picture.Size);
+            return new PictureSize(size.Width, size.Height);
         }
 
-        public Color PickColor(Picture picture, Position displayPosition)
+        public ArgbColor PickColor(Picture picture, Position displayPosition)
         {
             return picture.PickColor(RealPositionOf(displayPosition).ToPosition());
         }
@@ -92,10 +120,7 @@ namespace Eede.Application.Drawings
 
         private PositionHistory NextPositionHistory(PositionHistory history, Position displayPosition)
         {
-            if (history == null)
-            {
-                history = CreatePositionHistory(displayPosition);
-            }
+            history ??= CreatePositionHistory(displayPosition);
             return history.Update(RealPositionOf(displayPosition).ToPosition());
         }
 
@@ -106,31 +131,25 @@ namespace Eede.Application.Drawings
                 return new DrawingResult(picture, this);
             }
 
-            var nextHistory = CreatePositionHistory(displayPosition);
+            PositionHistory nextHistory = CreatePositionHistory(displayPosition);
             if (!picture.Fetch().Contains(nextHistory.Now))
             {
                 return new DrawingResult(picture, this);
             }
 
-            var drawer = new Drawer(picture.Previous, penStyle);
-            using (var result = drawStyle.DrawStart(drawer, nextHistory, isShift))
-            {
-                return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
-            }
+            DrawingBuffer result = drawStyle.DrawStart(picture, penStyle, nextHistory, isShift);
+            return new DrawingResult(result, UpdatePositionHistory(nextHistory));
         }
 
         public DrawingResult Move(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
         {
-            var nextHistory = NextPositionHistory(PositionHistory, displayPosition);
+            PositionHistory nextHistory = NextPositionHistory(PositionHistory, displayPosition);
             if (!picture.IsDrawing())
             {
                 return new DrawingResult(picture, UpdatePositionHistory(nextHistory));
             }
-            var drawer = new Drawer(picture.Fetch(), penStyle);
-            using (var result = drawStyle.Drawing(drawer, nextHistory, isShift))
-            {
-                return new DrawingResult(picture.UpdateDrawing(result), UpdatePositionHistory(nextHistory));
-            }
+            DrawingBuffer result = drawStyle.Drawing(picture, penStyle, nextHistory, isShift);
+            return new DrawingResult(result, UpdatePositionHistory(nextHistory));
         }
 
         public DrawingResult DrawEnd(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
@@ -139,13 +158,9 @@ namespace Eede.Application.Drawings
             {
                 return new DrawingResult(picture, this);
             }
-
-            var nextHistory = NextPositionHistory(PositionHistory, displayPosition);
-            var drawer = new Drawer(picture.Fetch(), penStyle);
-            using (var result = drawStyle.DrawEnd(drawer, nextHistory, isShift))
-            {
-                return new DrawingResult(picture.DecideDrawing(result), ClearPositionHistory());
-            }
+            PositionHistory nextHistory = NextPositionHistory(PositionHistory, displayPosition);
+            DrawingBuffer result = drawStyle.DrawEnd(picture, penStyle, nextHistory, isShift);
+            return new DrawingResult(result, ClearPositionHistory());
         }
 
         public DrawingResult DrawCancel(DrawingBuffer picture)
@@ -155,11 +170,7 @@ namespace Eede.Application.Drawings
 
         public DrawableArea Leave(DrawingBuffer picture)
         {
-            if (picture.IsDrawing())
-            {
-                return this;
-            }
-            return ClearPositionHistory();
+            return picture.IsDrawing() ? this : ClearPositionHistory();
         }
     }
 }

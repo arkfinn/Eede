@@ -1,11 +1,7 @@
 ﻿using Avalonia.Input;
-using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
-using Dock.Model.Avalonia.Controls;
 using Dock.Model.Core;
-using Eede.Actions;
 using Eede.Application.Pictures;
-using Eede.Common.Enums;
 using Eede.Common.Pictures.Actions;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
@@ -13,13 +9,11 @@ using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;
-using Eede.Domain.Positions;
 using Eede.Domain.Scales;
 using Eede.Domain.Systems;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Services;
-using Eede.Ui;
 using Eede.ViewModels.DataDisplay;
 using Eede.ViewModels.DataEntry;
 using ReactiveUI;
@@ -29,9 +23,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Eede.ViewModels.Pages;
 
@@ -78,6 +69,7 @@ public class MainViewModel : ViewModelBase
     [Reactive] public List<int> MinCursorSizeList { get; set; }
     [Reactive] public int MinCursorWidth { get; set; }
     [Reactive] public int MinCursorHeight { get; set; }
+    [Reactive] public PictureSize CursorSize { get; set; }
 
     [Reactive] public UndoSystem UndoSystem { get; private set; }
 
@@ -108,6 +100,15 @@ public class MainViewModel : ViewModelBase
                 }
             });
 
+        this.WhenAnyValue(x => x.CursorSize)
+           .Subscribe(size =>
+           {
+               foreach (var vm in Pictures)
+               {
+                   vm.CursorSize = size;
+               }
+           });
+
         DrawableCanvasViewModel.ColorPicked += (sender, args) =>
         {
             PenColor = args.NewColor;
@@ -116,8 +117,8 @@ public class MainViewModel : ViewModelBase
         DrawableCanvasViewModel.Drew += (previous, now) =>
         {
             UndoSystem = UndoSystem.Add(new UndoItem(
-                new Action(() => { DrawableCanvasViewModel.SetPicture(previous); }),
-                new Action(() => { DrawableCanvasViewModel.SetPicture(now); })));
+                new Action(() => { SetPicture(previous); }),
+                new Action(() => { SetPicture(now); })));
         };
 
         UndoCommand = ReactiveCommand.Create(ExecuteUndo, this.WhenAnyValue(
@@ -194,25 +195,25 @@ public class MainViewModel : ViewModelBase
     {
         return new List<FilePickerFileType>
         {
-            new FilePickerFileType("All Images")
+            new("All Images")
             {
                 Patterns = new[] { "*.png", "*.bmp" },
                 AppleUniformTypeIdentifiers = new[] { "public.image" },
                 MimeTypes = new[] { "image/*" }
             },
-            new FilePickerFileType("PNG Image")
+            new("PNG Image")
             {
                 Patterns = new[] { "*.png" },
                 AppleUniformTypeIdentifiers = new[] { "public.png" },
                 MimeTypes = new[] { "image/png" }
             },
-            new FilePickerFileType("BMP Image")
+            new("BMP Image")
             {
                 Patterns = new[] { "*.bmp" },
                 AppleUniformTypeIdentifiers = new[] { "public.bmp" },
                 MimeTypes = new[] { "image/bmp" }
             },
-            new FilePickerFileType("All")
+            new("All")
             {
                 Patterns = new[] { "*.*" },
                 MimeTypes = new[] { "*/*" }
@@ -226,6 +227,7 @@ public class MainViewModel : ViewModelBase
         vm.PicturePush += PushToDrawArea;
         vm.PicturePull += PullFromDrawArea;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
+        vm.CursorSize = DrawableCanvasViewModel.PictureBuffer.Previous.Size;
         return vm;
     }
 
@@ -250,10 +252,16 @@ public class MainViewModel : ViewModelBase
         Picture from = adapter.ConvertToPicture(vm.Bitmap).CutOut(args.Rect);
         Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
         UndoSystem = UndoSystem.Add(new UndoItem(
-            new Action(() => { DrawableCanvasViewModel.SetPicture(previous); }),
-            new Action(() => { DrawableCanvasViewModel.SetPicture(from); })));
+            new Action(() => { SetPicture(previous); }),
+            new Action(() => { SetPicture(from); })));
 
-        DrawableCanvasViewModel.SetPicture(from);
+        SetPicture(from);
+    }
+
+    private void SetPicture(Picture picture)
+    {
+        DrawableCanvasViewModel.SetPicture(picture);
+        CursorSize = picture.Size;
     }
 
     private void PullFromDrawArea(object? sender, PicturePullEventArgs args)
@@ -280,33 +288,26 @@ public class MainViewModel : ViewModelBase
         Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
         Picture updatedPicture = FindPictureAction(actionType, previous);
         UndoSystem = UndoSystem.Add(new UndoItem(
-                   new Action(() => { DrawableCanvasViewModel.SetPicture(previous); }),
-                   new Action(() => { DrawableCanvasViewModel.SetPicture(updatedPicture); })));
-        DrawableCanvasViewModel.SetPicture(updatedPicture);
+                   new Action(() => { SetPicture(previous); }),
+                   new Action(() => { SetPicture(updatedPicture); })));
+        SetPicture(updatedPicture);
     }
 
     private Picture FindPictureAction(PictureActions actionType, Picture previous)
     {
-        switch (actionType)
+        return actionType switch
         {
-            case PictureActions.ShiftUp:
-                return new ShiftUpAction(previous).Execute();
-            case PictureActions.ShiftDown:
-                return new ShiftDownAction(previous).Execute();
-            case PictureActions.ShiftLeft:
-                return new ShiftLeftAction(previous).Execute();
-            case PictureActions.ShiftRight:
-                return new ShiftRightAction(previous).Execute();
-            case PictureActions.HorizontalFlip:
-                return new HorizontalFlipAction(previous).Execute();
+            PictureActions.ShiftUp => new ShiftUpAction(previous).Execute(),
+            PictureActions.ShiftDown => new ShiftDownAction(previous).Execute(),
+            PictureActions.ShiftLeft => new ShiftLeftAction(previous).Execute(),
+            PictureActions.ShiftRight => new ShiftRightAction(previous).Execute(),
+            PictureActions.HorizontalFlip => new HorizontalFlipAction(previous).Execute(),
             //case PictureActions.VerticalFlip:
             //    return;
             //case PictureActions.RotateLeft:
             //    return;
-            case PictureActions.RotateRight:
-                return new RotateRightAction(previous).Execute();
-            default:
-                throw new ArgumentException(nameof(actionType));
-        }
+            PictureActions.RotateRight => new RotateRightAction(previous).Execute(),
+            _ => throw new ArgumentException(nameof(actionType)),
+        };
     }
 }

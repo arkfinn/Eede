@@ -68,6 +68,12 @@ namespace Eede.Views.DataEntry
                 Source = vm,
                 Path = nameof(vm.MinCursorSize)
             });
+            CursorArea = HalfBoxArea.Create(vm.CursorSize, new Position(0, 0));
+            this.Bind(CursorAreaProperty, new Binding
+            {
+                Source = vm,
+                Path = nameof(vm.CursorArea)
+            });
             PicturePushAction = vm.OnPicturePush;
             PicturePullAction = vm.OnPicturePull;
         }
@@ -89,9 +95,7 @@ namespace Eede.Views.DataEntry
                 cursor.Width = size.Width;
                 cursor.Height = size.Height;
                 cursor.Margin = new Thickness(cursorArea.RealPosition.X ,cursorArea.RealPosition.Y, 0, 0);
-
             });
-
         }
 
         private HalfBoxArea GetNowCursorArea()
@@ -133,13 +137,20 @@ namespace Eede.Views.DataEntry
             get => GetValue(MinCursorSizeProperty);
             set {
                 SetValue(MinCursorSizeProperty, value);
-                CursorArea = CursorArea.UpdateSize(value);
             }
+        }
+
+        public static readonly StyledProperty<HalfBoxArea> CursorAreaProperty =
+            AvaloniaProperty.Register<PictureContainer, HalfBoxArea>(nameof(CursorArea), 
+                HalfBoxArea.Create(new PictureSize(32, 32), new Position(0, 0)));
+        public HalfBoxArea CursorArea
+        {
+            get => GetValue(CursorAreaProperty);
+            set => SetValue(CursorAreaProperty, value);
         }
 
         private bool IsSelecting = false;
         private HalfBoxArea SelectingArea = HalfBoxArea.Create(new PictureSize(32, 32), new Position(0, 0));
-        private HalfBoxArea CursorArea = HalfBoxArea.Create(new PictureSize(32, 32), new Position(0, 0));
         public event EventHandler<PicturePullEventArgs> PicturePulled;
         public event EventHandler<PicturePushEventArgs> PicturePushed;
 

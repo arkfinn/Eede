@@ -117,4 +117,8 @@
     <Resource Include="Assets\Tools\tool_shift_up.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\General\Buttons\" />
+  </ItemGroup>
+
 </Project>

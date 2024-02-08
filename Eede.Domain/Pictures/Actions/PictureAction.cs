@@ -29,8 +29,6 @@ internal class PictureAction
                 Position offset = process(new Position(x, y));
                 int offsetY = Source.Stride * offset.Y;
                 int fromPos = (offset.X * 4) + offsetY;
-                Console.WriteLine(x.ToString() + "," + y.ToString());
-                Console.WriteLine(offset.X + "," + offset.Y);
                 destPixels[pos + 0] = Source[fromPos + 0];
                 destPixels[pos + 1] = Source[fromPos + 1];
                 destPixels[pos + 2] = Source[fromPos + 2];

@@ -1,58 +1,35 @@
-﻿using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Scales;
 
 namespace Eede.Domain.ImageTransfers
 {
     public class RGBToneImageTransfer : IImageTransfer
     {
-        public void Transfer(Bitmap from, Graphics to, Size size)
+        public Picture Transfer(Picture src, Magnification magnification)
         {
-            using (var dest = new Bitmap(from.Width, from.Height))
+            int toStride = magnification.Magnify(src.Stride);
+            int destWidth = magnification.Magnify(src.Width);
+            int destHeight = magnification.Magnify(src.Height);
+            byte[] destPixels = new byte[toStride * destHeight];
+
+            for (int y = 0; y < destHeight; y++)
             {
-                BitmapData destBitmapData = dest.LockBits(
-                    new Rectangle(Point.Empty, dest.Size),
-                    ImageLockMode.WriteOnly, dest.PixelFormat);
-                try
+                int srcOffset = src.Stride * magnification.Minify(y);
+                int destOffset = y * toStride;
+
+                for (int x = 0; x < destWidth; x++)
                 {
-                    BitmapData srcBitmapData = from.LockBits(
-                            new Rectangle(Point.Empty, from.Size),
-                            ImageLockMode.WriteOnly, from.PixelFormat);
-                    try
-                    {
-                        byte[] srcPixels = new byte[srcBitmapData.Stride * from.Height];
-                        System.Runtime.InteropServices.Marshal.Copy(srcBitmapData.Scan0, srcPixels, 0, srcPixels.Length);
+                    int pos = (x * 4) + destOffset;
+                    int srcX = magnification.Minify(x);
+                    int fromPos = (srcX * 4) + srcOffset;
 
-                        byte[] destPixels = new byte[destBitmapData.Stride * destBitmapData.Height];
-
-                        for (int y = 0; y < destBitmapData.Height; y++)
-                        {
-                            for (int x = 0; x < destBitmapData.Width; x++)
-                            {
-                                int pos = x * 4 + destBitmapData.Stride * y;
-                                destPixels[pos + 0] = srcPixels[pos + 0];
-                                destPixels[pos + 1] = srcPixels[pos + 1];
-                                destPixels[pos + 2] = srcPixels[pos + 2];
-                                destPixels[pos + 3] = 255;
-                            }
-                        }
-                        System.Runtime.InteropServices.Marshal.Copy(destPixels, 0, destBitmapData.Scan0, destPixels.Length);
-                    }
-                    finally
-                    {
-                        from.UnlockBits(srcBitmapData);
-                    }
+                    destPixels[pos + 0] = src[fromPos + 0];
+                    destPixels[pos + 1] = src[fromPos + 1];
+                    destPixels[pos + 2] = src[fromPos + 2];
+                    destPixels[pos + 3] = 255;
                 }
-                finally
-                {
-                    dest.UnlockBits(destBitmapData);
-                }
-
-                to.PixelOffsetMode = PixelOffsetMode.Half;
-                to.InterpolationMode = InterpolationMode.NearestNeighbor;
-
-                to.DrawImage(dest, new Rectangle(0, 0, size.Width, size.Height));
             }
+            return Picture.Create(new PictureSize(destWidth, destHeight), destPixels);
         }
     }
 }

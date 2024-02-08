@@ -1,6 +1,6 @@
-﻿using Eede.Domain.Scales;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Scales;
 using System;
-using System.Drawing;
 
 namespace Eede.Domain.Sizes
 {
@@ -10,9 +10,9 @@ namespace Eede.Domain.Sizes
 
         public readonly int Width;
         public readonly int Height;
-        public readonly Size RealSize;
+        public readonly PictureSize BaseSize;
 
-        public MagnifiedSize(Size size, Magnification magnification)
+        public MagnifiedSize(PictureSize size, Magnification magnification)
         {
             if (magnification == null)
             {
@@ -21,12 +21,7 @@ namespace Eede.Domain.Sizes
             Width = magnification.Magnify(size.Width);
             Height = magnification.Magnify(size.Height);
             Magnification = magnification;
-            RealSize = size;
-        }
-
-        public Size ToSize()
-        {
-            return new Size(Width, Height);
+            BaseSize = size;
         }
     }
 }

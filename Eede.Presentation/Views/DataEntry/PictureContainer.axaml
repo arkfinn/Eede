@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Eede.ViewModels.DataDisplay"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Eede.Views.DataEntry.PictureContainer"
+             x:DataType="vm:DockPictureViewModel"
+            >
+  <Design.DataContext>
+    <vm:DockPictureViewModel />
+  </Design.DataContext>
+  <DockPanel LastChildFill="True">
+    <ScrollViewer DockPanel.Dock="Bottom"
+                   Background="{DynamicResource BaseBrush}"
+                  VerticalScrollBarVisibility="Visible"
+                  HorizontalScrollBarVisibility="Visible">
+      <Panel>
+        <Panel.Background>
+          <ImageBrush Source="/Assets/Tiles/OutsideBackGround.bmp"
+                      Stretch="None"
+                      TileMode="Tile"
+                      SourceRect="0,0,16,16"
+                      DestinationRect="0,0,16,16"
+                      AlignmentY="Top"
+                      AlignmentX="Left"/>
+        </Panel.Background>
+        <Panel Name="background">
+          <Panel.Background>
+            <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+                        Stretch="None"
+                        TileMode="Tile"
+                        SourceRect="0,0,16,16"
+                        DestinationRect="0,0,16,16"
+                        AlignmentY="Top"
+                        AlignmentX="Left"/>
+          </Panel.Background>
+          <Panel x:Name="canvas">
+
+            <Rectangle x:Name="cursor"
+                       VerticalAlignment="Top"
+                       HorizontalAlignment="Left"
+                       Width="10" Height="10" Stroke="Red" StrokeThickness="2" />
+
+          </Panel>
+        </Panel>
+      </Panel>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

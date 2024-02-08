@@ -1,11 +1,10 @@
 ﻿using Eede.Domain.Files;
+using Eede.Domain.Positions;
+using Eede.Infrastructure.Pictures;
 using NUnit.Framework;
 using System;
-using System.Drawing;
-using System.IO;
-using System.Reflection;
 
-namespace Eede.Infrastructure.Pictures.Tests
+namespace Eede.Infrastructure.Tests.Pictures
 {
     [TestFixture()]
     public class PictureFileReaderTests
@@ -13,75 +12,54 @@ namespace Eede.Infrastructure.Pictures.Tests
         [Test]
         public void Pngファイルを開くことができる()
         {
-            var filepath = Location("\\SamplePictures\\PngFile.png");
-            using (var destination = new Bitmap(new PictureFileReader(filepath).Read().ToImage()))
-            {
-                var col = destination.GetPixel(1, 1);
-                Assert.AreEqual(255, col.R);
-                Assert.AreEqual(0, col.G);
-                Assert.AreEqual(0, col.B);
-            }
+            FilePath filepath = new(@"SamplePictures\PngFile.png");
+            Domain.Pictures.Picture destination = new PictureFileReader(filepath).Read();
+            Domain.Colors.ArgbColor col = destination.PickColor(new Position(1, 1));
+            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(new[] { 255, 0, 0 }));
         }
 
         [Test]
         public void アルファチャンネル無しのPngファイルを開くことができる()
         {
-            var filepath = Location("\\SamplePictures\\PngFile16.png");
-            using (var destination = new Bitmap(new PictureFileReader(filepath).Read().ToImage()))
-            {
-                var col = destination.GetPixel(1, 1);
-                Assert.AreEqual(0, col.R);
-                Assert.AreEqual(0, col.G);
-                Assert.AreEqual(0, col.B);
-            }
+            FilePath filepath = new(@"SamplePictures\PngFile16.png");
+            Domain.Pictures.Picture destination = new PictureFileReader(filepath).Read();
+            Domain.Colors.ArgbColor col = destination.PickColor(new Position(1, 1));
+            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(new[] { 0, 0, 0 }));
         }
 
         [Test]
         public void インデックス256色のPngファイルを開くことができる()
         {
-            var filepath = Location("\\SamplePictures\\PngFile8.png");
-            using (var destination = new Bitmap(new PictureFileReader(filepath).Read().ToImage()))
-            {
-                var col = destination.GetPixel(1, 1);
-                Assert.AreEqual(0, col.R);
-                Assert.AreEqual(0, col.G);
-                Assert.AreEqual(0, col.B);
-            }
+            FilePath filepath = new(@"SamplePictures\PngFile8.png");
+            Domain.Pictures.Picture destination = new PictureFileReader(filepath).Read();
+            Domain.Colors.ArgbColor col = destination.PickColor(new Position(1, 1));
+            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(new[] { 0, 0, 0 }));
         }
 
         [Test]
-        public void bmpファイルを開くことができる()
+        public void Bmpファイルを開くことができる()
         {
-            var filepath = Location("\\SamplePictures\\BmpFile.bmp");
-            using (var destination = new Bitmap(new PictureFileReader(filepath).Read().ToImage()))
-            {
-                var col = destination.GetPixel(1, 1);
-                Assert.AreEqual(255, col.R);
-                Assert.AreEqual(0, col.G);
-                Assert.AreEqual(0, col.B);
-            }
-        }
-
-        private FilePath Location(string path)
-        {
-            return new FilePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + path);
+            FilePath filepath = new(@"SamplePictures\BmpFile.bmp");
+            Domain.Pictures.Picture destination = new PictureFileReader(filepath).Read();
+            Domain.Colors.ArgbColor col = destination.PickColor(new Position(1, 1));
+            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(new[] { 255, 0, 0 }));
         }
 
         [Test]
         public void 引数nullでnewはできない()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                new PictureFileReader(null);
+                _ = new PictureFileReader(null);
             });
         }
 
         [Test]
         public void 引数Pathの中身が空でnewはできない()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            _ = Assert.Throws<InvalidOperationException>(() =>
             {
-                new PictureFileReader(new FilePath(""));
+                _ = new PictureFileReader(new FilePath(""));
             });
         }
     }

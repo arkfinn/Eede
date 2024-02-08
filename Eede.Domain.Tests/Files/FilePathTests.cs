@@ -1,6 +1,7 @@
-﻿using NUnit.Framework;
+﻿using Eede.Domain.Files;
+using NUnit.Framework;
 
-namespace Eede.Domain.Files.Tests
+namespace Eede.Domain.Tests.Files
 {
     [TestFixture]
     public class FilePathTests
@@ -8,7 +9,7 @@ namespace Eede.Domain.Files.Tests
         [Test]
         public void FilePathTest()
         {
-            var path = new FilePath(@"Files\test\test.png");
+            FilePath path = new(@"Files\test\test.png");
             Assert.AreEqual(@"Files\test\test.png", path.Path);
         }
 
@@ -16,7 +17,7 @@ namespace Eede.Domain.Files.Tests
         [TestCase(true, "")]
         public void IsEmptyTest(bool expected, string path)
         {
-            var p = new FilePath(path);
+            FilePath p = new(path);
             Assert.AreEqual(expected, p.IsEmpty());
         }
     }

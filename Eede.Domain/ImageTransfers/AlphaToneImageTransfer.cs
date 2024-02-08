@@ -1,27 +1,36 @@
-﻿using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Scales;
 
 namespace Eede.Domain.ImageTransfers
 {
     public class AlphaToneImageTransfer : IImageTransfer
     {
-        public void Transfer(Bitmap from, Graphics to, Size size)
+        public Picture Transfer(Picture src, Magnification magnification)
         {
-            var ia = new ImageAttributes();
-            ia.SetColorMatrix(new ColorMatrix(new float[][]{
-                new float[]{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-                new float[]{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-                new float[]{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-                new float[]{ 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
-                new float[]{ 0.0f, 0.0f, 0.0f, 255.0f, 1.0f}
-            }));
+            int toStride = magnification.Magnify(src.Stride);
+            int destWidth = magnification.Magnify(src.Width);
+            int destHeight = magnification.Magnify(src.Height);
+            byte[] destPixels = new byte[toStride * destHeight];
 
-            to.PixelOffsetMode = PixelOffsetMode.Half;
-            to.InterpolationMode = InterpolationMode.NearestNeighbor;
-            to.DrawImage(from,
-                new Rectangle(0, 0, size.Width, size.Height),
-                0, 0, from.Width, from.Height, GraphicsUnit.Pixel, ia);
+            for (int y = 0; y < destHeight; y++)
+            {
+                int srcOffset = src.Stride * magnification.Minify(y);
+                int destOffset = y * toStride;
+
+                for (int x = 0; x < destWidth; x++)
+                {
+                    int pos = (x * 4) + destOffset;
+                    int srcX = magnification.Minify(x);
+                    int fromPos = (srcX * 4) + srcOffset;
+                    byte alpha = src[fromPos + 3];
+
+                    destPixels[pos + 0] = alpha;
+                    destPixels[pos + 1] = alpha;
+                    destPixels[pos + 2] = alpha;
+                    destPixels[pos + 3] = 255;
+                }
+            }
+            return Picture.Create(new PictureSize(destWidth, destHeight), destPixels);
         }
     }
 }

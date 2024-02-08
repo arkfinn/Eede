@@ -1,7 +1,8 @@
-﻿using NUnit.Framework;
+﻿using Eede.Domain.Scales;
+using NUnit.Framework;
 using System;
 
-namespace Eede.Domain.Scales.Tests
+namespace Eede.Domain.Tests.Scales
 {
     [TestFixture]
     public class MagnificationTests
@@ -9,16 +10,16 @@ namespace Eede.Domain.Scales.Tests
         [Test]
         public void OutOfRange()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                new Magnification(0);
+                _ = new Magnification(0);
             });
         }
 
         [Test]
         public void MagnifyTest()
         {
-            var m = new Magnification(4);
+            Magnification m = new(4);
             Assert.AreEqual(12, m.Magnify(3));
         }
 

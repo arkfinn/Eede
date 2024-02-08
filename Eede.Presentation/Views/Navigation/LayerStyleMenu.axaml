@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Eede.Views.Navigation.LayerStyleMenu">
+  <Grid>
+    <Grid.Styles>
+      <StyleInclude Source="/Styles/Styles.axaml" />
+    </Grid.Styles>
+    <WrapPanel>
+      <ToggleButton x:Name="ButtonRgb" Classes="tool" Click="SetRgbLayer" >
+        <Image Source="/Assets/Tools/layer_rgb.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonAlpha" Classes="tool" Click="SetAlphaLayer" >
+        <Image Source="/Assets/Tools/layer_alpha.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonArgb" Classes="tool" Click="SetArgbLayer" >
+        <Image Source="/Assets/Tools/layer_full.bmp" Stretch="None" />
+      </ToggleButton>
+    </WrapPanel>
+  </Grid>
+</UserControl>

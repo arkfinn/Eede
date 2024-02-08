@@ -1,6 +1,7 @@
-﻿using NUnit.Framework;
+﻿using Eede.Domain.Systems;
+using NUnit.Framework;
 
-namespace Eede.Domain.Systems.Tests
+namespace Eede.Domain.Tests.Systems
 {
     [TestFixture()]
     public class UndoSystemTests
@@ -8,8 +9,8 @@ namespace Eede.Domain.Systems.Tests
         [Test()]
         public void UndoTest()
         {
-            var undo = new UndoSystem();
-            var item = new TestUndoItem();
+            UndoSystem undo = new();
+            TestUndoItem item = new();
 
             undo = undo.Add(new TestUndoItem());
             Assert.AreEqual(true, undo.CanUndo());
@@ -32,8 +33,8 @@ namespace Eede.Domain.Systems.Tests
         [Test()]
         public void AddTest()
         {
-            var undo = new UndoSystem();
-            var item = new TestUndoItem();
+            UndoSystem undo = new();
+            TestUndoItem item = new();
 
             undo = undo.Add(item);
             undo = undo.Undo();
@@ -47,8 +48,8 @@ namespace Eede.Domain.Systems.Tests
         [Test()]
         public void DosposeUndoListTest()
         {
-            var undo = new UndoSystem();
-            var item = new TestUndoItem();
+            UndoSystem undo = new();
+            TestUndoItem item = new();
 
             undo = undo.Add(item);
             undo.Dispose();
@@ -58,8 +59,8 @@ namespace Eede.Domain.Systems.Tests
         [Test()]
         public void DosposeRedoListTest()
         {
-            var undo = new UndoSystem();
-            var item = new TestUndoItem();
+            UndoSystem undo = new();
+            TestUndoItem item = new();
 
             undo = undo.Add(item);
             undo = undo.Undo();

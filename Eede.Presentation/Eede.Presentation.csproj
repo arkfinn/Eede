@@ -5,10 +5,18 @@
     <UseWindowsForms>True</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Eede</RootNamespace>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaXaml Remove="Views\General\**" />
+    <Compile Remove="Views\General\**" />
+    <EmbeddedResource Remove="Views\General\**" />
+    <None Remove="Views\General\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -115,10 +123,6 @@
 
   <ItemGroup>
     <Resource Include="Assets\Tools\tool_shift_up.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Views\General\Buttons\" />
   </ItemGroup>
 
 </Project>

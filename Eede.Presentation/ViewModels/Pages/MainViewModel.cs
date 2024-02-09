@@ -301,9 +301,8 @@ public class MainViewModel : ViewModelBase
             PictureActions.ShiftDown => new ShiftDownAction(previous).Execute(),
             PictureActions.ShiftLeft => new ShiftLeftAction(previous).Execute(),
             PictureActions.ShiftRight => new ShiftRightAction(previous).Execute(),
-            PictureActions.HorizontalFlip => new HorizontalFlipAction(previous).Execute(),
-            //case PictureActions.VerticalFlip:
-            //    return;
+            PictureActions.FlipHorizontal => new FlipHorizontalAction(previous).Execute(),
+            PictureActions.FlipVertical => new FlipVerticalAction(previous).Execute(),
             //case PictureActions.RotateLeft:
             //    return;
             PictureActions.RotateRight => new RotateRightAction(previous).Execute(),

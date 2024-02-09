@@ -9,6 +9,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <RootNamespace>Eede.Presentation.Desktop</RootNamespace>
     <AssemblyName>Eede</AssemblyName>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

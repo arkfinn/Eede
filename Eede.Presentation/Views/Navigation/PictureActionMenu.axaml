@@ -35,11 +35,15 @@
         <Image Source="/Assets/Tools/tool_shift_down.png" Stretch="None" />
       </Button>
       <Panel Classes="vertical-separator" />
-      <Button
-              Classes="tool"
+      <Button Classes="tool"
               Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
-              CommandParameter="{ x:Static p:PictureActions.HorizontalFlip }" >
-        <Image Source="/Assets/Tools/tool_horizontal_flip.png" Stretch="None" />
+              CommandParameter="{ x:Static p:PictureActions.FlipHorizontal }" >
+        <Image Source="/Assets/Tools/tool_flip_horizontal.png" Stretch="None" />
+      </Button>
+      <Button Classes="tool"
+        Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+        CommandParameter="{ x:Static p:PictureActions.FlipVertical }" >
+        <Image Source="/Assets/Tools/tool_flip_vertical.png" Stretch="None" />
       </Button>
       <Panel Classes="vertical-separator" />
       <Button

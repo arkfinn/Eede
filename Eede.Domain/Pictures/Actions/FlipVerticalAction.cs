@@ -1,17 +1,12 @@
 ﻿using Eede.Domain.Positions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Eede.Domain.Pictures.Actions
 {
-    public class HorizontalFlipAction
+    public class FlipVerticalAction
     {
         private readonly Picture Source;
 
-        public HorizontalFlipAction(Picture source)
+        public FlipVerticalAction(Picture source)
         {
             Source = source;
         }
@@ -19,12 +14,12 @@ namespace Eede.Domain.Pictures.Actions
         public Picture Execute()
         {
             var action = new PictureAction(Source);
-            return action.ProcessResult(Source.Size,Offset);
+            return action.ProcessResult(Source.Size, Offset);
         }
 
         private Position Offset(Position p)
         {
-            return new Position(Source.Width - 1 - p.X, p.Y);
+            return new Position(p.X, Source.Height - 1 - p.Y);
         }
     }
 }

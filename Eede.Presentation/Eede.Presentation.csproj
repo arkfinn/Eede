@@ -38,7 +38,7 @@
     <None Remove="Assets\Tools\mag4.bmp" />
     <None Remove="Assets\Tools\mag6.bmp" />
     <None Remove="Assets\Tools\mag8.bmp" />
-    <None Remove="Assets\Tools\tool_horizontal_flip.png" />
+    <None Remove="Assets\Tools\tool_flip_horizontal.png" />
     <None Remove="Assets\Tools\tool_redo.png" />
     <None Remove="Assets\Tools\tool_rotate_right.png" />
     <None Remove="Assets\Tools\tool_shift_down.png" />

@@ -50,6 +50,7 @@ namespace Eede.Views.DataDisplay
             base.OnPropertyChanged(change);
         }
 
+        // TODO: この部分の処理は間違っている。Documentをクローズした場合にのみ呼び出されてほしい
         void VisibleDockables_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Remove)

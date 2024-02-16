@@ -35,6 +35,9 @@ Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描く�
 
 ##  今後の改善点
 
+### バグ
+- Dockを移動するとMainViewModel.Picturesから外れてしまう不具合
+
 ### デザイン
 
 - アイコンの作成

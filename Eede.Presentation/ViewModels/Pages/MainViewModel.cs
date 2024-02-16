@@ -227,7 +227,6 @@ public class MainViewModel : ViewModelBase
         vm.PicturePush += PushToDrawArea;
         vm.PicturePull += PullFromDrawArea;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
-        vm.CursorSize = DrawableCanvasViewModel.PictureBuffer.Previous.Size;
         return vm;
     }
 

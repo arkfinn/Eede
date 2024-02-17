@@ -5,6 +5,7 @@ using Avalonia.Data;
 using Dock.Model.Avalonia.Controls;
 using Eede.Common.Enums;
 using Eede.Views.Pages;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -20,6 +21,8 @@ namespace Eede.Presentation.Views.DataDisplay
             get => GetValue(ClosingActionProperty);
             set => SetValue(ClosingActionProperty, value);
         }
+
+        public Action CloseAction { get; set; }
 
         public static readonly StyledProperty<bool> ClosableProperty =
             AvaloniaProperty.Register<PictureDocument, bool>(nameof(Closable));
@@ -37,10 +40,12 @@ namespace Eede.Presentation.Views.DataDisplay
             set => SetValue(SaveAlertResultProperty, value);
         }
 
+
         public override bool OnClose()
         {
             if (Closable)
             {
+                CloseAction?.Invoke();
                 return base.OnClose();
             }
             OpenSaveAlertDialog();
@@ -56,7 +61,7 @@ namespace Eede.Presentation.Views.DataDisplay
             //var parent = this.GetVisualRoot() as Window ?? new Window();
             await window.ShowDialog(mainWindow);
             SaveAlertResult = window.Result;
-            ClosingAction.Execute(null);
+            ClosingAction?.Execute(null);
             if (Closable)
             {
                 Factory?.CloseDockable(this);

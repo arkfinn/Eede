@@ -22,6 +22,7 @@ namespace Eede.Domain.Positions
             Now = now;
         }
 
+
         public PositionHistory Update(Position now)
         {
             return new PositionHistory(Start, Now, now);

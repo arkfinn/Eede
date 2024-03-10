@@ -5,8 +5,8 @@ namespace Eede.Domain.Pictures
 {
     public class PictureSize
     {
-        public readonly int Width;
-        public readonly int Height;
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
         public PictureSize(int width, int height)
         {

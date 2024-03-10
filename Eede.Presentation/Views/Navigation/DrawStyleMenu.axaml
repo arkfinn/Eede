@@ -6,7 +6,7 @@
              xmlns:buttons="clr-namespace:Eede.Views.General.Buttons"
              xmlns:c="clr-namespace:Eede.Common.Converters"
              xmlns:p="clr-namespace:Eede.Common.Drawings"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="450"
              x:Class="Eede.Views.Navigation.DrawStyleMenu">
   <Grid>
     <Grid.Styles>
@@ -16,6 +16,9 @@
       <WrapPanel.Resources>
         <c:BitmapConverter x:Key="bitmapConverter" />
       </WrapPanel.Resources>
+      <ToggleButton x:Name="ButtonRegionSelector" Classes="tool" Click="SetDrawStyleRegionSelector" >
+        <Image Source="/Assets/Tools/pen_region.png" Stretch="None" />
+      </ToggleButton>
       <ToggleButton x:Name="ButtonFreeVurve" Classes="tool" Click="SetDrawStyleFreeCurve" >
         <Image Source="/Assets/Tools/pen_free.png" Stretch="None" />
       </ToggleButton>

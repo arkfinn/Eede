@@ -38,6 +38,7 @@ Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描く�
 ### バグ
 - 一度でもDocumentをCloseした後に他のDocumentを移動するとDockが表示されなくなる不具合
 - Documentを開いた際にCursorAreaが必ず32x32になる不具合
+- 一度保存した後に再編集しても編集マークがつかない不具合
 
 ### デザイン
 
@@ -59,7 +60,6 @@ Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描く�
     - コピー
     - 貼り付け
     - 移動
-    - シフト等アクション
 - 描画エリア自動保存を追加
 - 子ウィンドウの拡大縮小機能
 - 自動アンチエイリアスの実装

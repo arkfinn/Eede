@@ -1,7 +1,9 @@
 ﻿using Avalonia.Input;
 using Avalonia.Platform.Storage;
+using Dock.Model.Avalonia.Controls;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
+using Eede.Common.Drawings;
 using Eede.Common.Pictures.Actions;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
@@ -9,6 +11,7 @@ using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;
+using Eede.Domain.Positions;
 using Eede.Domain.Scales;
 using Eede.Domain.Systems;
 using Eede.Presentation.Actions;
@@ -37,11 +40,7 @@ public class MainViewModel : ViewModelBase
         set => DrawableCanvasViewModel.Magnification = value;
     }
 
-    public IDrawStyle DrawStyle
-    {
-        get => DrawableCanvasViewModel.DrawStyle;
-        set => DrawableCanvasViewModel.DrawStyle = value;
-    }
+    [Reactive] public DrawStyles DrawStyle { get; set; }
 
     public IImageBlender ImageBlender
     {
@@ -108,6 +107,8 @@ public class MainViewModel : ViewModelBase
                    vm.CursorSize = size;
                }
            });
+        DrawStyle = DrawStyles.Free;
+        this.WhenAnyValue(x => x.DrawStyle).Subscribe(drawStyle => DrawableCanvasViewModel.DrawStyle = ExcuteUpdateDrawStyle(drawStyle));
 
         DrawableCanvasViewModel.ColorPicked += (sender, args) =>
         {
@@ -285,27 +286,35 @@ public class MainViewModel : ViewModelBase
     private void ExecutePictureAction(PictureActions actionType)
     {
         Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
-        Picture updatedPicture = FindPictureAction(actionType, previous);
+
+        Picture updatedPicture;
+        if (DrawableCanvasViewModel.IsRegionSelecting)
+        {
+            Picture region = previous.CutOut(DrawableCanvasViewModel.SelectingArea);
+            Picture updatedRegion = actionType.Execute(region);
+            DirectImageBlender blender = new();
+            updatedPicture = blender.Blend(updatedRegion, previous, DrawableCanvasViewModel.SelectingArea.Position);
+        }
+        else
+        {
+            updatedPicture = actionType.Execute(previous);
+        }
         UndoSystem = UndoSystem.Add(new UndoItem(
                    new Action(() => { SetPicture(previous); }),
                    new Action(() => { SetPicture(updatedPicture); })));
         SetPicture(updatedPicture);
     }
 
-    private Picture FindPictureAction(PictureActions actionType, Picture previous)
+    private IDrawStyle ExcuteUpdateDrawStyle(DrawStyles drawStyle)
     {
-        return actionType switch
+        DrawableCanvasViewModel.IsRegionSelecting = false;
+        return drawStyle switch
         {
-            PictureActions.ShiftUp => new ShiftUpAction(previous).Execute(),
-            PictureActions.ShiftDown => new ShiftDownAction(previous).Execute(),
-            PictureActions.ShiftLeft => new ShiftLeftAction(previous).Execute(),
-            PictureActions.ShiftRight => new ShiftRightAction(previous).Execute(),
-            PictureActions.FlipHorizontal => new FlipHorizontalAction(previous).Execute(),
-            PictureActions.FlipVertical => new FlipVerticalAction(previous).Execute(),
-            //case PictureActions.RotateLeft:
-            //    return;
-            PictureActions.RotateRight => new RotateRightAction(previous).Execute(),
-            _ => throw new ArgumentException(nameof(actionType)),
+            DrawStyles.RegionSelect => DrawableCanvasViewModel.SetupRegionSelector(),
+            DrawStyles.Free => new FreeCurve(),
+            DrawStyles.Line => new Line(),
+            DrawStyles.Fill => new Fill(),
+            _ => throw new ArgumentException(null, nameof(drawStyle)),
         };
     }
 }

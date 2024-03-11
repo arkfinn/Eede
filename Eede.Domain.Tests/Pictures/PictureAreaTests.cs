@@ -6,21 +6,23 @@ namespace Eede.Domain.Pictures
     [TestFixture]
     public class PictureAreaTests
     {
-        [TestCaseSource(nameof(UpdatePositionCases))]
-        public void UpdatePositionTest(PictureArea area, Position to, PictureSize limit, PictureArea expected)
+        [TestCaseSource(nameof(FromPositionCases))]
+        public void FromPositionTest(Position from, Position to, PictureSize limit, PictureArea expected)
         {
-            PictureArea result = area.UpdatePosition(to, limit);
+            PictureArea result = PictureArea.FromPosition(from, to, limit);
             Assert.That((result.X, result.Y, result.Width, result.Height), Is.EqualTo((expected.X, expected.Y, expected.Width, expected.Height)));
         }
 
-        private static readonly object[] UpdatePositionCases =
+        private static readonly object[] FromPositionCases =
         {
-            new object[] { new PictureArea(new Position(10, 20), new PictureSize(50, 60)),
-                new Position(100, 200), new PictureSize(300, 400),
+            new object[] { new Position(10, 20), new Position(100, 200), new PictureSize(300, 400),
                 new PictureArea(new Position(10, 20), new PictureSize(90, 180)) },
-            new object[] { new PictureArea(new Position(10, 20), new PictureSize(50, 60)),
-                new Position(0, 10), new PictureSize(300, 400),
+            new object[] { new Position(10, 20), new Position(0, 10), new PictureSize(300, 400),
                 new PictureArea(new Position(0, 10), new PictureSize(10, 10)) },
+             new object[] { new Position(0, 0), new Position(500, 500), new PictureSize(300, 400),
+                new PictureArea(new Position(0, 0), new PictureSize(300, 400)) },
+            new object[] { new Position(1, 1), new Position(500, 500), new PictureSize(300, 400),
+                new PictureArea(new Position(1, 1), new PictureSize(299, 399)) },
         };
     }
 }

@@ -214,16 +214,15 @@ public class DrawableCanvasViewModel : ViewModelBase
         tool.OnDrawStart += (sender, args) =>
         {
             IsRegionSelecting = false;
-            SelectingArea = new PictureArea(args.Start, new PictureSize(0, 0));
         };
         tool.OnDrawing += (sender, args) =>
         {
-            SelectingArea = SelectingArea.UpdatePosition(args.Now, PictureBuffer.Previous.Size);
+            SelectingArea = PictureArea.FromPosition(args.Start, args.Now, PictureBuffer.Previous.Size);
             IsRegionSelecting = true;
         };
         tool.OnDrawEnd += (sender, args) =>
         {
-            SelectingArea = SelectingArea.UpdatePosition(args.Now, PictureBuffer.Previous.Size);
+            SelectingArea = PictureArea.FromPosition(args.Start, args.Now, PictureBuffer.Previous.Size);
             IsRegionSelecting = true;
         };
         return tool;

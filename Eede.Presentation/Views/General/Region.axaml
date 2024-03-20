@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="32" d:DesignHeight="32"
+             x:Class="Eede.Views.General.Region">
+  <Panel>
+    <Panel.Styles>
+      <Style Selector="Rectangle.upper">
+        <Style.Animations>
+          <Animation Duration="0:0:2" IterationCount="INFINITE">
+            <KeyFrame Cue="0%">
+              <Setter Property="StrokeDashOffset" Value="0"/>
+            </KeyFrame>
+            <KeyFrame Cue="100%">
+              <Setter Property="StrokeDashOffset" Value="12"/>
+            </KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+    </Panel.Styles>
+    
+    <Rectangle VerticalAlignment="Stretch"
+               HorizontalAlignment="Stretch"
+               Stroke="Yellow" StrokeThickness="1" />
+    <Rectangle Classes="upper"
+               VerticalAlignment="Stretch"
+               HorizontalAlignment="Stretch"
+               StrokeDashArray="3,3"
+               Stroke="Red" StrokeThickness="1" />
+  </Panel>
+</UserControl>

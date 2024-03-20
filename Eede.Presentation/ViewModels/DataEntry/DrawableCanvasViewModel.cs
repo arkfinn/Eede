@@ -18,6 +18,7 @@ using Eede.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
+using System.Diagnostics.Contracts;
 using System.Reactive;
 using System.Runtime.InteropServices;
 
@@ -34,7 +35,9 @@ public class DrawableCanvasViewModel : ViewModelBase
         PenSize = 1;
         PenStyle = new(ImageBlender, PenColor, PenSize);
         ImageTransfer = new DirectImageTransfer();
-
+        IsRegionSelecting = false;
+        SelectingThickness = new Thickness(0, 0, 0, 0);
+        SelectingSize = new PictureSize(0, 0);
         //UpdatePicture(Picture.CreateEmpty(new PictureSize(32, 32)));
 
 
@@ -64,6 +67,15 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         this.WhenAnyValue(x => x.ImageTransfer)
             .Subscribe(x => UpdateImage());
+        this.WhenAnyValue(x => x.SelectingArea, x => x.Magnification)
+            .Subscribe(area =>
+            {
+                if (SelectingArea != null)
+                {
+                    SelectingThickness = new Thickness(Magnification.Magnify(SelectingArea.X), Magnification.Magnify(SelectingArea.Y), 0, 0);
+                    SelectingSize = new PictureSize(Magnification.Magnify(SelectingArea.Width), Magnification.Magnify(SelectingArea.Height));
+                }
+            });
     }
 
     [Reactive] public Magnification Magnification { get; set; }
@@ -74,6 +86,10 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public PenStyle PenStyle { get; set; }
     [Reactive] public IImageTransfer ImageTransfer { get; set; }
     [Reactive] public bool IsShifted { get; set; }
+    [Reactive] public bool IsRegionSelecting { get; set; }
+    [Reactive] public PictureArea SelectingArea { get; set; }
+    [Reactive] public Thickness SelectingThickness { get; set; }
+    [Reactive] public PictureSize SelectingSize { get; set; }
 
     private Bitmap _bitmap;
     public Bitmap MyBitmap
@@ -91,6 +107,8 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private DrawableArea DrawableArea;
     public DrawingBuffer PictureBuffer;
+
+
 
     private Picture Picture = null;
 
@@ -189,4 +207,24 @@ public class DrawableCanvasViewModel : ViewModelBase
         UpdateImage();
     }
 
+
+    public RegionSelector SetupRegionSelector()
+    {
+        RegionSelector tool = new();
+        tool.OnDrawStart += (sender, args) =>
+        {
+            IsRegionSelecting = false;
+        };
+        tool.OnDrawing += (sender, args) =>
+        {
+            SelectingArea = PictureArea.FromPosition(args.Start, args.Now, PictureBuffer.Previous.Size);
+            IsRegionSelecting = true;
+        };
+        tool.OnDrawEnd += (sender, args) =>
+        {
+            SelectingArea = PictureArea.FromPosition(args.Start, args.Now, PictureBuffer.Previous.Size);
+            IsRegionSelecting = true;
+        };
+        return tool;
+    }
 }

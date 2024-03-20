@@ -21,11 +21,6 @@ namespace Eede.Views.DataDisplay
                 o => o.Pictures,
                 (o, v) => o.Pictures = v);
 
-        public PictureDock()
-        {
-            ((IAvaloniaList<IDockable>)VisibleDockables!).CollectionChanged += VisibleDockables_CollectionChanged; ;
-        }
-
         IList? pictures;
 
         public IList? Pictures
@@ -48,15 +43,6 @@ namespace Eede.Views.DataDisplay
                 }
             }
             base.OnPropertyChanged(change);
-        }
-
-        void VisibleDockables_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                var vm = e.OldItems?.Cast<Document>().FirstOrDefault()?.DataContext as DockPictureViewModel;
-                Pictures!.Remove(vm);
-            }
         }
 
         void Pictures_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -92,6 +78,7 @@ namespace Eede.Views.DataDisplay
                             Source = vm,
                             Path = nameof(vm.Closable)
                         });
+                        document.CloseAction = () => Pictures!.Remove(vm);
                         document.Bind(PictureDocument.SaveAlertResultProperty, new Binding
                         {
                             Source = vm,
@@ -119,12 +106,6 @@ namespace Eede.Views.DataDisplay
                         }
 
                         vm.Enabled = false;
-
-                        //var document = VisibleDockables?.Cast<Document>().Where(d => ReferenceEquals(d.DataContext, vm)).FirstOrDefault();
-                        //if (document is not null)
-                        //{
-                        //    Owner!.Factory!.CloseDockable(document);
-                        //}
                         break;
                     }
             }

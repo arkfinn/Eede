@@ -2,6 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:general="using:Eede.Views.General"
+             xmlns:converters="using:Avalonia.Controls.Converters"
              xmlns:vm="using:Eede.ViewModels.DataEntry"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Views.DataEntry.DrawableCanvas"
@@ -15,6 +17,7 @@
   <Design.DataContext>
     <vm:DrawableCanvasViewModel />
   </Design.DataContext>
+
   <Panel Background="{DynamicResource BaseBrush}">
     <Panel>
       <Panel.Background>
@@ -44,6 +47,13 @@
                Source="{Binding MyBitmap}"
                Width="{Binding MyBitmap.PixelSize.Width}"
                Height="{Binding MyBitmap.PixelSize.Height}"/>
+        <general:Region IsVisible="{Binding IsRegionSelecting}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="{Binding SelectingThickness}"
+                        Width="{Binding SelectingSize.Width}"
+                        Height="{Binding SelectingSize.Height}" />
+
       </Panel>
     </Panel>
   </Panel>

@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:general="clr-namespace:Eede.Views.General"
              xmlns:vm="clr-namespace:Eede.ViewModels.DataDisplay"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Views.DataEntry.PictureContainer"
@@ -37,10 +38,9 @@
           </Panel.Background>
           <Panel x:Name="canvas">
 
-            <Rectangle x:Name="cursor"
-                       VerticalAlignment="Top"
-                       HorizontalAlignment="Left"
-                       Width="10" Height="10" Stroke="Red" StrokeThickness="2" />
+            <general:Region x:Name="cursor" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"/>
 
           </Panel>
         </Panel>

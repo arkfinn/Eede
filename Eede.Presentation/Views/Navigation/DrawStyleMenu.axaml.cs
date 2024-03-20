@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Eede.Common.Drawings;
 using Eede.Domain.DrawStyles;
 using System;
+using System.Windows.Input;
 
 namespace Eede.Views.Navigation
 {
@@ -14,9 +16,9 @@ namespace Eede.Views.Navigation
             UpdateChecked();
         }
 
-        public static readonly StyledProperty<IDrawStyle> DrawStyleProperty =
-            AvaloniaProperty.Register<DrawStyleMenu, IDrawStyle>(nameof(DrawStyle),new FreeCurve(), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
-        public IDrawStyle DrawStyle
+        public static readonly StyledProperty<DrawStyles> DrawStyleProperty =
+            AvaloniaProperty.Register<DrawStyleMenu, DrawStyles>(nameof(DrawStyle), DrawStyles.Free, defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
+        public DrawStyles DrawStyle
         {
             get => GetValue(DrawStyleProperty);
             set
@@ -27,28 +29,34 @@ namespace Eede.Views.Navigation
             }
         }
 
+        public void SetDrawStyleRegionSelector(object sender, RoutedEventArgs e)
+        {
+            DrawStyle = DrawStyles.RegionSelect;
+        }
+
         public void SetDrawStyleFreeCurve(object sender, RoutedEventArgs e)
         {
-            DrawStyle = new FreeCurve();
+            DrawStyle = DrawStyles.Free;
         }
 
         public void SetDrawStyleLine(object sender, RoutedEventArgs e)
         {
-            DrawStyle = new Line();
+            DrawStyle = DrawStyles.Line;
         }
 
         public void SetDrawStyleFill(object sender, RoutedEventArgs e)
         {
-            DrawStyle = new Fill();
+            DrawStyle = DrawStyles.Fill;
         }
 
         private void UpdateChecked()
         {
-            ButtonFreeVurve.IsChecked = DrawStyle is FreeCurve;
-            ButtonLine.IsChecked = DrawStyle is Line;
-            ButtonFill.IsChecked = DrawStyle is Fill;
+            ButtonRegionSelector.IsChecked = DrawStyle == DrawStyles.RegionSelect;
+            ButtonFreeVurve.IsChecked = DrawStyle ==DrawStyles.Free;
+            ButtonLine.IsChecked = DrawStyle == DrawStyles.Line;
+            ButtonFill.IsChecked = DrawStyle == DrawStyles.Fill;
         }
 
-        public event Action<IDrawStyle>? DrawStyleChanged;
+        public event Action<DrawStyles>? DrawStyleChanged;
     }
 }

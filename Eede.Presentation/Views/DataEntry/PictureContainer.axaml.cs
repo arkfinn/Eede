@@ -68,7 +68,7 @@ namespace Eede.Views.DataEntry
                 Source = vm,
                 Path = nameof(vm.MinCursorSize)
             });
-            CursorArea = HalfBoxArea.Create(vm.CursorSize, new Position(0, 0));
+            CursorArea = vm.CursorArea;
             this.Bind(CursorAreaProperty, new Binding
             {
                 Source = vm,
@@ -94,7 +94,7 @@ namespace Eede.Views.DataEntry
 
                 cursor.Width = size.Width;
                 cursor.Height = size.Height;
-                cursor.Margin = new Thickness(cursorArea.RealPosition.X ,cursorArea.RealPosition.Y, 0, 0);
+                cursor.Margin = new Thickness(cursorArea.RealPosition.X, cursorArea.RealPosition.Y, 0, 0);
             });
         }
 
@@ -131,18 +131,16 @@ namespace Eede.Views.DataEntry
         }
 
         public static readonly StyledProperty<PictureSize> MinCursorSizeProperty =
-            AvaloniaProperty.Register<PictureContainer, PictureSize>(nameof(MinCursorSize), new PictureSize(32, 32), defaultBindingMode:BindingMode.TwoWay);
+            AvaloniaProperty.Register<PictureContainer, PictureSize>(nameof(MinCursorSize), new PictureSize(32, 32));
         public PictureSize MinCursorSize
         {
             get => GetValue(MinCursorSizeProperty);
-            set {
-                SetValue(MinCursorSizeProperty, value);
-            }
+            set => SetValue(MinCursorSizeProperty, value);
         }
 
         public static readonly StyledProperty<HalfBoxArea> CursorAreaProperty =
-            AvaloniaProperty.Register<PictureContainer, HalfBoxArea>(nameof(CursorArea), 
-                HalfBoxArea.Create(new PictureSize(32, 32), new Position(0, 0)));
+            AvaloniaProperty.Register<PictureContainer, HalfBoxArea>(nameof(CursorArea),
+                HalfBoxArea.Create(new PictureSize(32, 32), new Position(0, 0)), defaultBindingMode: BindingMode.TwoWay);
         public HalfBoxArea CursorArea
         {
             get => GetValue(CursorAreaProperty);
@@ -155,7 +153,7 @@ namespace Eede.Views.DataEntry
         public event EventHandler<PicturePushEventArgs> PicturePushed;
 
         private PictureSize CanvasSize = new PictureSize(32, 32);
-   
+
 
 
         private void OnPointerPressed(object? sender, PointerPressedEventArgs e)

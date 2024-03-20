@@ -1,7 +1,8 @@
 ﻿namespace Eede.Common.Drawings
 {
-    internal enum DrawStyles
+    public enum DrawStyles
     {
+        RegionSelect,
         Free,
         Line,
         Fill,

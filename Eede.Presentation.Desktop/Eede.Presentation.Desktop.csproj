@@ -11,9 +11,8 @@
     <AssemblyName>Eede</AssemblyName>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Avalonia.Desktop" Version="11.0.6" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
   </ItemGroup>
 
   <ItemGroup>

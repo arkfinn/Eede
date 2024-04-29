@@ -107,6 +107,9 @@
     <Compile Update="Views\DataEntry\DrawableCanvas.axaml.cs">
       <DependentUpon>DrawableCanvas.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\DataEntry\PaletteForm.axaml.cs">
+      <DependentUpon>PaletteForm.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

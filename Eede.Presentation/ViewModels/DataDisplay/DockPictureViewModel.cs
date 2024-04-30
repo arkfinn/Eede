@@ -67,6 +67,7 @@ namespace Eede.ViewModels.DataDisplay
                 var fullPath = HttpUtility.UrlDecode(Path.AbsolutePath);
                 Bitmap.Save(fullPath);
                 Subject = fullPath;
+                Edited = false;
             }
         }
 

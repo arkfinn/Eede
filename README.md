@@ -6,7 +6,7 @@ Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描く�
 
 ##  必要条件
 
-- .NET 6.0  以上
+- .NET 8.0  以上
 - Visual Studio 2022  以上
 
 ##  インストール
@@ -38,7 +38,6 @@ Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描く�
 ### バグ
 - 一度でもDocumentをCloseした後に他のDocumentを移動するとDockが表示されなくなる不具合
 - Documentを開いた際にCursorAreaが必ず32x32になる不具合
-- 一度保存した後に再編集しても編集マークがつかない不具合
 
 ### デザイン
 
@@ -47,7 +46,6 @@ Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描く�
 ### 機能
 
 - パレット機能
-    - 色の一時保存
     - パレットの保存・自動読み込み
 - 新規ファイル作成を実装
 - グリッド表示を実装

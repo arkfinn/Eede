@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>True</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Eede</RootNamespace>
@@ -72,21 +72,21 @@
 
   <ItemGroup>
 
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.6" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.10" Condition="'$(Configuration)' == 'Debug'" />
 
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.6" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />
 
-    <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.6" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10" />
 
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.6" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
 
-    <PackageReference Include="Avalonia.Win32.Interoperability" Version="11.0.6" />
+    <PackageReference Include="Avalonia.Win32.Interoperability" Version="11.0.10" />
 
-    <PackageReference Include="Dock.Avalonia" Version="11.0.0.5" />
+    <PackageReference Include="Dock.Avalonia" Version="11.0.0.7" />
 
-    <PackageReference Include="Dock.Model.Avalonia" Version="11.0.0.5" />
-    <PackageReference Include="ReactiveProperty" Version="9.3.4" />
-    <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
+    <PackageReference Include="Dock.Model.Avalonia" Version="11.0.0.7" />
+    <PackageReference Include="ReactiveProperty" Version="9.5.0" />
+    <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
 
   </ItemGroup>
 
@@ -106,6 +106,9 @@
     <Compile Update="Ui\AvaloniaWrapper\DataEntry\ColorPicker.cs" />
     <Compile Update="Views\DataEntry\DrawableCanvas.axaml.cs">
       <DependentUpon>DrawableCanvas.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\DataEntry\PaletteForm.axaml.cs">
+      <DependentUpon>PaletteForm.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
 

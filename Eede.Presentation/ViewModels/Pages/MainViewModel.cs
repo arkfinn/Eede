@@ -1,4 +1,5 @@
 ﻿using Avalonia.Input;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Dock.Model.Avalonia.Controls;
 using Dock.Model.Core;
@@ -72,11 +73,17 @@ public class MainViewModel : ViewModelBase
 
     [Reactive] public UndoSystem UndoSystem { get; private set; }
 
+    [Reactive] public Palette TempPalette { get; set; }
+
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
     public ReactiveCommand<StorageService, Unit> LoadPictureCommand { get; }
     public ReactiveCommand<Unit, Unit> SavePictureCommand { get; }
     public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; }
+    public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; }
+    public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; }
+
+
     public MainViewModel()
     {
         ImageTransfer = new DirectImageTransfer();
@@ -131,6 +138,10 @@ public class MainViewModel : ViewModelBase
         LoadPictureCommand = ReactiveCommand.Create<StorageService>(ExecuteLoadPicture);
         SavePictureCommand = ReactiveCommand.Create(ExecuteSavePicture);
         PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
+
+        TempPalette = Palette.Create();
+        PutPaletteColorCommand = ReactiveCommand.Create<int>(ExecutePutPaletteColor);
+        GetPaletteColorCommand = ReactiveCommand.Create<int>(ExecuteGetPaletteColor);
     }
 
 
@@ -317,4 +328,17 @@ public class MainViewModel : ViewModelBase
             _ => throw new ArgumentException(null, nameof(drawStyle)),
         };
     }
+
+    #region パレット
+    private void ExecutePutPaletteColor(int number)
+    {
+        TempPalette = TempPalette.Set(number, PenColor);
+    }
+
+    private void ExecuteGetPaletteColor(int number)
+    {
+        PenColor = TempPalette.Get(number);
+    }
+    #endregion
+
 }

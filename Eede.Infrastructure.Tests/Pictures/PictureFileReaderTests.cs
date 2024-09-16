@@ -9,13 +9,16 @@ namespace Eede.Infrastructure.Tests.Pictures
     [TestFixture()]
     public class PictureFileReaderTests
     {
+        private static readonly int[] Red = [255, 0, 0];
+        private static readonly int[] Black = [0, 0, 0];
+
         [Test]
         public void Pngファイルを開くことができる()
         {
             FilePath filepath = new(@"SamplePictures\PngFile.png");
             Domain.Pictures.Picture destination = new PictureFileReader(filepath).Read();
             Domain.Colors.ArgbColor col = destination.PickColor(new Position(1, 1));
-            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(new[] { 255, 0, 0 }));
+            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(Red));
         }
 
         [Test]
@@ -24,7 +27,7 @@ namespace Eede.Infrastructure.Tests.Pictures
             FilePath filepath = new(@"SamplePictures\PngFile16.png");
             Domain.Pictures.Picture destination = new PictureFileReader(filepath).Read();
             Domain.Colors.ArgbColor col = destination.PickColor(new Position(1, 1));
-            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(new[] { 0, 0, 0 }));
+            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(Black));
         }
 
         [Test]
@@ -33,8 +36,9 @@ namespace Eede.Infrastructure.Tests.Pictures
             FilePath filepath = new(@"SamplePictures\PngFile8.png");
             Domain.Pictures.Picture destination = new PictureFileReader(filepath).Read();
             Domain.Colors.ArgbColor col = destination.PickColor(new Position(1, 1));
-            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(new[] { 0, 0, 0 }));
+            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(Black));
         }
+
 
         [Test]
         public void Bmpファイルを開くことができる()
@@ -42,7 +46,7 @@ namespace Eede.Infrastructure.Tests.Pictures
             FilePath filepath = new(@"SamplePictures\BmpFile.bmp");
             Domain.Pictures.Picture destination = new PictureFileReader(filepath).Read();
             Domain.Colors.ArgbColor col = destination.PickColor(new Position(1, 1));
-            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(new[] { 255, 0, 0 }));
+            Assert.That(new[] { col.Red, col.Green, col.Blue }, Is.EqualTo(Red));
         }
 
         [Test]

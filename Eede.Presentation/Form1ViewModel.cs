@@ -1,17 +1,16 @@
-﻿using Eede.Actions;
-using Eede.Application.Drawings;
-using Eede.Common.Drawings;
-using Eede.Common.Pictures.Actions;
+﻿using Eede.Common.Pictures.Actions;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.Scales;
+using Eede.Domain.Systems;
+using Eede.Presentation.Common.Services;
 using Eede.ViewModels.DataDisplay;
-using Reactive.Bindings;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Drawing;
+using System.Reactive;
 
 namespace Eede
 {
@@ -19,7 +18,7 @@ namespace Eede
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ReactiveProperty<Magnification> Magnification { get; } = new ReactiveProperty<Magnification>();
+        [Reactive] public Magnification Magnification { get; set; }
 
         public ObservableCollection<DockPictureViewModel> Pictures { get; } = new ObservableCollection<DockPictureViewModel>();
 
@@ -44,37 +43,38 @@ namespace Eede
             set => this.RaiseAndSetIfChanged(ref _drawStyle, value);
         }
 
-        public ReactiveCommand<PictureActions> PictureActionCommand { get; } = new();
+        public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; }
 
         //public ReactiveCommand<DrawEventArgs> AddUndoDrawCommand { get; } = new();
 
         public Form1ViewModel()
         {
-            Magnification.Value = new Magnification(4);
-      
+            Magnification = new Magnification(4);
+
             // senderの渡し方を検討する（送信元でActionに詰めるなど）
             //AddUndoDrawCommand.Subscribe(new Action<DrawEventArgs>(x =>
             //{
             //    //DrawAction action = new(paintableBox1, e.PreviousPicture, e.NowPicture);
             //    //AddUndoItem(action);
             //}));
-            PictureActionCommand.Subscribe(new Action<PictureActions>(action =>
+            PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
+        }
+
+        private void ExecutePictureAction(PictureActions action)
+        {
+            switch (action)
             {
-                switch (action)
-                {
-                    case PictureActions.ShiftUp:
-                        Console.WriteLine("shift_up");
-                        break;
-                    case PictureActions.ShiftDown:
-                        break;
-                    case PictureActions.ShiftLeft:
-                        break;
-                    case PictureActions.ShiftRight:
-                        break;
-                    default:
-                        break;
-                }
-            }));
+                case PictureActions.ShiftUp:
+                    break;
+                case PictureActions.ShiftDown:
+                    break;
+                case PictureActions.ShiftLeft:
+                    break;
+                case PictureActions.ShiftRight:
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

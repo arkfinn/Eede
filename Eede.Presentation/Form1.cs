@@ -15,7 +15,6 @@ using Eede.Settings;
 using Eede.Ui;
 using Eede.ViewModels.DataDisplay;
 using Eede.Views.DataDisplay;
-using Reactive.Bindings;
 using ReactiveUI;
 using System;
 using System.Linq.Expressions;
@@ -60,31 +59,31 @@ namespace Eede
             //};
 
             // pictureActionMenu1.Command = ViewModel.PictureActionCommand;
-            ReactiveCommand<PictureActions> pictureActionCommand = new();
-            pictureActionCommand.Subscribe(new Action<PictureActions>(actionType =>
-            {
-                Picture nowPicture = paintableBox1.GetImage();
-                switch (actionType)
-                {
-                    case PictureActions.ShiftUp:
-                        Picture updatedPicture = new ShiftUpAction(nowPicture).Execute();
-                        PullPictureAction action = new(p => paintableBox1.SetupPicture(p), nowPicture, updatedPicture);
-                        action.Do();
-                        AddUndoItem(action);
-                        break;
-                    case PictureActions.ShiftDown:
-                        break;
-                    case PictureActions.ShiftLeft:
-                        break;
-                    case PictureActions.ShiftRight:
-                        break;
-                    default:
-                        break;
-                }
-            }));
-            pictureActionMenu1.Command = pictureActionCommand;
+            //ReactiveCommand<PictureActions> pictureActionCommand = new();
+            //pictureActionCommand.Subscribe(new Action<PictureActions>(actionType =>
+            //{
+            //    Picture nowPicture = paintableBox1.GetImage();
+            //    switch (actionType)
+            //    {
+            //        case PictureActions.ShiftUp:
+            //            Picture updatedPicture = new ShiftUpAction(nowPicture).Execute();
+            //            PullPictureAction action = new(p => paintableBox1.SetupPicture(p), nowPicture, updatedPicture);
+            //            action.Do();
+            //            AddUndoItem(action);
+            //            break;
+            //        case PictureActions.ShiftDown:
+            //            break;
+            //        case PictureActions.ShiftLeft:
+            //            break;
+            //        case PictureActions.ShiftRight:
+            //            break;
+            //        default:
+            //            break;
+            //    }
+            //}));
+            //pictureActionMenu1.Command = pictureActionCommand;
 
-  
+
 
             penWidthSelector1 = new();
             penWidthSelector1.Dock = DockStyle.Bottom;
@@ -297,7 +296,7 @@ namespace Eede
 
         private void toolStripButton12_Click(object sender, EventArgs e)
         {
-            ViewModel.Magnification.Value = new Magnification(1);
+            ViewModel.Magnification = new Magnification(1);
             //drawableArea1.Element.Magnification = new Magnification(1);
             toolStripButton12.Checked = true;
             toolStripButton13.Checked = false;
@@ -309,7 +308,7 @@ namespace Eede
 
         private void toolStripButton13_Click(object sender, EventArgs e)
         {
-            ViewModel.Magnification.Value = new Magnification(2);
+            ViewModel.Magnification = new Magnification(2);
             //drawableArea1.Element.Magnification = new Magnification(2);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = true;
@@ -321,7 +320,7 @@ namespace Eede
 
         private void toolStripButton14_Click(object sender, EventArgs e)
         {
-            ViewModel.Magnification.Value = new Magnification(4);
+            ViewModel.Magnification = new Magnification(4);
             //drawableArea1.Element.Magnification = new Magnification(4);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = false;
@@ -333,7 +332,7 @@ namespace Eede
 
         private void toolStripButton15_Click(object sender, EventArgs e)
         {
-            ViewModel.Magnification.Value = new Magnification(6);
+            ViewModel.Magnification = new Magnification(6);
             //drawableArea1.Element.Magnification = new Magnification(6);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = false;
@@ -345,7 +344,7 @@ namespace Eede
 
         private void toolStripButton16_Click(object sender, EventArgs e)
         {
-            ViewModel.Magnification.Value = new Magnification(8);
+            ViewModel.Magnification = new Magnification(8);
             //drawableArea1.Element.Magnification = new Magnification(8);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = false;
@@ -357,7 +356,7 @@ namespace Eede
 
         private void toolStripButton17_Click(object sender, EventArgs e)
         {
-            ViewModel.Magnification.Value = new Magnification(12);
+            ViewModel.Magnification = new Magnification(12);
             //drawableArea1.Element.Magnification = new Magnification(12);
             toolStripButton12.Checked = false;
             toolStripButton13.Checked = false;

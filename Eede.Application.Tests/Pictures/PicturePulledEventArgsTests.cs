@@ -2,7 +2,6 @@
 using Eede.Domain.Pictures;
 using NUnit.Framework;
 using System;
-using System.Drawing;
 
 namespace Eede.Application.Tests.Pictures
 {
@@ -12,8 +11,7 @@ namespace Eede.Application.Tests.Pictures
         [Test]
         public void PicturePulledEventArgsTest()
         {
-            using Bitmap bmp = new(10, 10);
-            Picture b = BitmapConverter.ConvertBack(bmp);
+            Picture b = Picture.CreateEmpty(new PictureSize(10, 10));
             PicturePushEventArgs p = new(b, new PictureArea(new Domain.Positions.Position(2, 2), new PictureSize(3, 3)));
             Picture image = p.CutOutImage();
 

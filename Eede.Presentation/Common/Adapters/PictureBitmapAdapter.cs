@@ -14,7 +14,7 @@ using System.Collections;
 
 namespace Eede.Presentation.Common.Adapters;
 
-internal class PictureBitmapAdapter
+public class PictureBitmapAdapter
 {
     // ModelからViewModelへの変換メソッド
     public Bitmap ConvertToBitmap(Picture picture)
@@ -37,8 +37,8 @@ internal class PictureBitmapAdapter
 
     private WriteableBitmap CreateBitmapFromPixelData(byte[] rgbPixelData, int width, int height)
     {
-        Vector dpi = new (96, 96);
-        WriteableBitmap bitmap = new (new PixelSize(width, height), dpi, PixelFormat.Bgra8888);
+        Vector dpi = new(96, 96);
+        WriteableBitmap bitmap = new(new PixelSize(width, height), dpi, PixelFormat.Bgra8888);
         using (var frameBuffer = bitmap.Lock())
         {
             Marshal.Copy(rgbPixelData, 0, frameBuffer.Address, rgbPixelData.Length);

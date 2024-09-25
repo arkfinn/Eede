@@ -2,9 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Eede.Common.Drawings;
-using Eede.Domain.DrawStyles;
 using System;
-using System.Windows.Input;
 
 namespace Eede.Views.Navigation
 {
@@ -52,7 +50,7 @@ namespace Eede.Views.Navigation
         private void UpdateChecked()
         {
             ButtonRegionSelector.IsChecked = DrawStyle == DrawStyles.RegionSelect;
-            ButtonFreeVurve.IsChecked = DrawStyle ==DrawStyles.Free;
+            ButtonFreeVurve.IsChecked = DrawStyle == DrawStyles.Free;
             ButtonLine.IsChecked = DrawStyle == DrawStyles.Line;
             ButtonFill.IsChecked = DrawStyle == DrawStyles.Fill;
         }

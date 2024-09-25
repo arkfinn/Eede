@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Eede.ViewModels.Pages"
+        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight=""
+        x:Class="Eede.Views.Pages.NewPictureWindow"
+        x:DataType="vm:NewPictureWindowViewModel"
+        WindowStartupLocation="CenterOwner"
+        Title="Eede New File">
+  <StackPanel>
+    <TextBlock Text="新規ピクチャのサイズを指定してください" Margin="10"/>
+
+    <TextBlock Text="Width:" Margin="10,0,10,5"/>
+    <NumericUpDown Value="{Binding Width}" Increment="4" Minimum="1" Margin="10,0,10,10"/>
+
+    <TextBlock Text="Height:" Margin="10,0,10,5"/>
+    <NumericUpDown Value="{Binding Height}" Increment="4" Minimum="1" Margin="10,0,10,10"/>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+      <Button Content="OK" Command="{Binding ConfirmCommand}" Margin="10"/>
+      <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="10"/>
+    </StackPanel>
+  </StackPanel>
+</Window>

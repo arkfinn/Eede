@@ -5,7 +5,7 @@ using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
-using Eede.Infrastructure.Pictures;
+using Eede.Domain.Tests.Helpers;
 using NUnit.Framework;
 
 namespace Eede.Domain.Tests.DrawStyles
@@ -35,7 +35,7 @@ namespace Eede.Domain.Tests.DrawStyles
 
         private Picture ReadPicture(string path)
         {
-            return new PictureFileReader(new FilePath(path)).Read();
+            return PictureHelper.ReadBitmap(path);
         }
     }
 }

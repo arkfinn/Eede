@@ -13,11 +13,10 @@ namespace Eede.Application.Tests.Pictures
         [Test]
         public void PicturePushedEventArgsTest()
         {
-            using Bitmap bmp = new(1, 1);
-            Picture b = BitmapConverter.ConvertBack(bmp);
+            Picture b = Picture.CreateEmpty(new PictureSize(1, 1));
             PicturePullEventArgs p = new(b, new Position(2, 2));
-            Assert.AreEqual(b, p.Picture);
-            Assert.AreEqual(new Position(2, 2), p.Position);
+            Assert.That(p.Picture, Is.EqualTo(b));
+            Assert.That(p.Position, Is.EqualTo(new Position(2, 2)));
         }
 
         [Test]
@@ -34,8 +33,7 @@ namespace Eede.Application.Tests.Pictures
         {
             _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                using Bitmap bmp = new(1, 1);
-                Picture b = BitmapConverter.ConvertBack(bmp);
+                Picture b = Picture.CreateEmpty(new PictureSize(1, 1));
                 PicturePullEventArgs h = new(b, null);
             });
         }

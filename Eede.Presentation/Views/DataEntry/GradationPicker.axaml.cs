@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using Eede.Ui;
 using System;
 
 namespace Eede.Views.DataEntry

@@ -6,7 +6,6 @@ using Dock.Model.Avalonia.Controls;
 using Eede.Common.Enums;
 using Eede.Views.Pages;
 using System;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Views.DataDisplay

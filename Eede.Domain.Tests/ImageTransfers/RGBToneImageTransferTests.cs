@@ -2,7 +2,7 @@
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Scales;
-using Eede.Infrastructure.Pictures;
+using Eede.Domain.Tests.Helpers;
 using NUnit.Framework;
 
 namespace Eede.Domain.Tests.ImageTransfers
@@ -25,7 +25,7 @@ namespace Eede.Domain.Tests.ImageTransfers
 
         private Picture ReadPicture(string path)
         {
-            return new PictureFileReader(new FilePath(path)).Read();
+            return PictureHelper.ReadBitmap(path);
         }
     }
 }

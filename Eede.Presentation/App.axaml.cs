@@ -1,10 +1,11 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Eede.Presentation.ViewModels.Pages;
 using Eede.ViewModels.Pages;
 using Eede.Views.Pages;
 
-namespace Eede;
+namespace Eede.Presentation;
 
 public partial class App : Avalonia.Application
 {

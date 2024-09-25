@@ -12,9 +12,9 @@ namespace Eede.Domain.Tests.Positions
         public void MinifiedPositionTest()
         {
             MinifiedPosition pos = new(new Position(64, 32), new Magnification(8));
-            Assert.AreEqual(8, pos.X);
-            Assert.AreEqual(4, pos.Y);
-            Assert.AreEqual(new Position(8, 4), pos.ToPosition());
+            Assert.That(pos.X, Is.EqualTo(8));
+            Assert.That(pos.Y, Is.EqualTo(4));
+            Assert.That(pos.ToPosition(), Is.EqualTo(new Position(8, 4)));
         }
 
         [Test]

@@ -13,21 +13,21 @@ namespace Eede.Domain.Tests.Systems
             TestUndoItem item = new();
 
             undo = undo.Add(new TestUndoItem());
-            Assert.AreEqual(true, undo.CanUndo());
+            Assert.That(undo.CanUndo(), Is.EqualTo(true));
 
             undo = undo.Add(item);
             undo = undo.Undo();
-            Assert.AreEqual(true, item.Undone);
-            Assert.AreEqual(true, undo.CanRedo());
+            Assert.That(item.Undone, Is.EqualTo(true));
+            Assert.That(undo.CanRedo(), Is.EqualTo(true));
 
             undo = undo.Redo();
-            Assert.AreEqual(true, item.Redone);
-            Assert.AreEqual(true, undo.CanUndo());
-            Assert.AreEqual(false, undo.CanRedo());
+            Assert.That(item.Redone, Is.EqualTo(true));
+            Assert.That(undo.CanUndo(), Is.EqualTo(true));
+            Assert.That(undo.CanRedo(), Is.EqualTo(false));
 
             undo = undo.Undo();
             undo = undo.Undo();
-            Assert.AreEqual(false, undo.CanUndo());
+            Assert.That(undo.CanUndo(), Is.EqualTo(false));
         }
 
         [Test()]
@@ -40,9 +40,9 @@ namespace Eede.Domain.Tests.Systems
             undo = undo.Undo();
             undo = undo.Add(new TestUndoItem());
 
-            Assert.AreEqual(true, item.Disposed);
-            Assert.AreEqual(true, undo.CanUndo());
-            Assert.AreEqual(false, undo.CanRedo());
+            Assert.That(item.Disposed, Is.EqualTo(true));
+            Assert.That(undo.CanUndo(), Is.EqualTo(true));
+            Assert.That(undo.CanRedo(), Is.EqualTo(false));
         }
 
         [Test()]
@@ -53,7 +53,7 @@ namespace Eede.Domain.Tests.Systems
 
             undo = undo.Add(item);
             undo.Dispose();
-            Assert.AreEqual(true, item.Disposed);
+            Assert.That(item.Disposed, Is.EqualTo(true));
         }
 
         [Test()]
@@ -65,7 +65,7 @@ namespace Eede.Domain.Tests.Systems
             undo = undo.Add(item);
             undo = undo.Undo();
             undo.Dispose();
-            Assert.AreEqual(true, item.Disposed);
+            Assert.That(item.Disposed, Is.EqualTo(true));
         }
 
         private sealed class TestUndoItem : IUndoItem

@@ -1,10 +1,7 @@
 ﻿using Avalonia;
-using Avalonia.Input;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using Eede.Application.Colors;
 using Eede.Application.Drawings;
-using Eede.Common.Drawings;
 using Eede.Domain.Colors;
 using Eede.Domain.Drawings;
 using Eede.Domain.DrawStyles;
@@ -18,9 +15,7 @@ using Eede.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
-using System.Diagnostics.Contracts;
 using System.Reactive;
-using System.Runtime.InteropServices;
 
 namespace Eede.ViewModels.DataEntry;
 

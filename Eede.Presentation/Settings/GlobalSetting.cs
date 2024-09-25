@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Eede.Settings
+namespace Eede.Presentation.Settings
 {
     internal class GlobalSetting
     {

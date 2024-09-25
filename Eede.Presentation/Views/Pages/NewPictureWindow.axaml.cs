@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace Eede.Views.Pages;
+namespace Eede.Presentation.Views.Pages;
 
 public partial class NewPictureWindow : Window
 {

@@ -1,9 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Eede.Presentation.Views.DataEntry;
 using System;
 
-namespace Eede.Views.DataEntry
+namespace Eede.Presentation.Views.DataEntry
 {
     public partial class GradationPicker : UserControl
     {
@@ -67,7 +68,7 @@ namespace Eede.Views.DataEntry
                 e.Handled = true;
                 return;
             }
-            if (int.TryParse(textbox.Text, out var value))
+            if (int.TryParse(textbox.Text, out int value))
             {
                 Value = value;
             }

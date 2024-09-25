@@ -2,9 +2,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:Eede.ViewModels.Pages"
+        xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.Pages"
         mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight=""
-        x:Class="Eede.Views.Pages.NewPictureWindow"
+        x:Class="Eede.Presentation.Views.Pages.NewPictureWindow"
         x:DataType="vm:NewPictureWindowViewModel"
         WindowStartupLocation="CenterOwner"
         Title="Eede New File">

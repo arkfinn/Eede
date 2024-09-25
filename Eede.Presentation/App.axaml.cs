@@ -1,9 +1,7 @@
-﻿using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Eede.Presentation.ViewModels.Pages;
-using Eede.ViewModels.Pages;
-using Eede.Views.Pages;
+using Eede.Presentation.Views.Pages;
 
 namespace Eede.Presentation;
 

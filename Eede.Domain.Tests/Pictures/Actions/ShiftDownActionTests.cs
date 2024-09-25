@@ -1,11 +1,8 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Pictures.Actions;
+using NUnit.Framework;
 
-namespace Eede.Domain.Pictures.Actions;
+namespace Eede.Domain.Tests.Pictures.Actions;
 
 [TestFixture]
 internal class ShiftDownActionTests
@@ -13,10 +10,10 @@ internal class ShiftDownActionTests
     [TestCaseSource(nameof(ExecuteCases))]
     public void TestExecute(byte[] beforeData, byte[] exceptedData)
     {
-        var before = Picture.Create(new PictureSize(4, 4), beforeData);
-        var excepted = Picture.Create(new PictureSize(4, 4), exceptedData);
-        var action = new ShiftDownAction(before);
-        var after = action.Execute();
+        Picture before = Picture.Create(new PictureSize(4, 4), beforeData);
+        Picture excepted = Picture.Create(new PictureSize(4, 4), exceptedData);
+        ShiftDownAction action = new(before);
+        Picture after = action.Execute();
 
         Assert.That(after.CloneImage(), Is.EqualTo(excepted.CloneImage()));
 

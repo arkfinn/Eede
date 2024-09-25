@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data;
 using Dock.Model.Avalonia.Controls;
-using Eede.Common.Enums;
+using Eede.Presentation.Common.Enums;
 using Eede.Views.Pages;
 using System;
 using System.Windows.Input;

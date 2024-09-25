@@ -2,10 +2,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
-using Eede.Domain.DrawStyles;
 using Eede.Domain.Scales;
 
-namespace Eede.Views.Navigation
+namespace Eede.Presentation.Views.Navigation
 {
     public partial class MagnificationMenu : UserControl
     {
@@ -24,7 +23,7 @@ namespace Eede.Views.Navigation
             get => GetValue(MagnificationProperty);
             set
             {
-                SetValue(MagnificationProperty, value);
+                _ = SetValue(MagnificationProperty, value);
                 UpdateChecked();
             }
         }

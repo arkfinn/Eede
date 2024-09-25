@@ -2,34 +2,33 @@
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Eede.Application.Pictures;
+using Eede.Domain.Files;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
-using Eede.Common.Enums;
+using Eede.Presentation.Common.Enums;
+using Eede.Presentation.Common.Services;
+using Eede.Presentation.Events;
+using Eede.Presentation.Files;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
-using System.Web;
-using Eede.Presentation.Files;
-using Eede.Domain.Files;
-using Eede.Presentation.Events;
-using Eede.Presentation.Common.Services;
 
-namespace Eede.ViewModels.DataDisplay
+namespace Eede.Presentation.ViewModels.DataDisplay
 {
     public class DockPictureViewModel : ViewModelBase
     {
 
         public static DockPictureViewModel FromFile(BitmapFile file)
         {
-            var vm = new DockPictureViewModel();
+            DockPictureViewModel vm = new();
             vm.Initialize(file);
             return vm;
         }
 
         public static DockPictureViewModel FromSize(PictureSize size)
         {
-            var vm = new DockPictureViewModel();
+            DockPictureViewModel vm = new();
             vm.Initialize(new BitmapFile(
                 new WriteableBitmap(new PixelSize(size.Width, size.Height), new Vector(96, 96), PixelFormat.Bgra8888),
                 FilePath.Empty()));
@@ -50,13 +49,13 @@ namespace Eede.ViewModels.DataDisplay
             OnClosing = ReactiveCommand.Create(ExecuteClosing);
             MinCursorSize = new PictureSize(32, 32);
             CursorSize = new PictureSize(32, 32);
-            this.WhenAnyValue(x => x.CursorSize).Subscribe(size =>
+            _ = this.WhenAnyValue(x => x.CursorSize).Subscribe(size =>
             {
                 CursorArea = HalfBoxArea.Create(size, new Position(0, 0));
             });
             Enabled = true;
             Closable = true;
-            this.WhenAnyValue(x => x.Edited).Subscribe(_ =>
+            _ = this.WhenAnyValue(x => x.Edited).Subscribe(_ =>
             {
                 Closable = !Edited;
             });
@@ -75,7 +74,7 @@ namespace Eede.ViewModels.DataDisplay
         public void Initialize(BitmapFile file)
         {
             Bitmap = file.Bitmap;
-            var isEmpty = file.Path.IsEmpty();
+            bool isEmpty = file.Path.IsEmpty();
             Path = isEmpty ? FilePath.Empty() : file.Path;
             Subject = isEmpty ? "新しいファイル" : file.Path.Path;
             Edited = false;
@@ -92,20 +91,17 @@ namespace Eede.ViewModels.DataDisplay
 
         public void ExecuteClosing()
         {
-            if (!Edited) return;
-            switch (SaveAlertResult)
+            if (!Edited)
             {
-                case SaveAlertResult.Cancel:
-                    Closable = false;
-                    break;
-                case SaveAlertResult.Save:
-                    //Save();
-                    Closable = true;
-                    break;
-                default:
-                    Closable = true;
-                    break;
+                return;
             }
+
+            Closable = SaveAlertResult switch
+            {
+                SaveAlertResult.Cancel => false,
+                SaveAlertResult.Save => true,//Save();
+                _ => true,
+            };
         }
 
         public ReactiveCommand<PictureArea, Unit> OnPicturePush { get; }

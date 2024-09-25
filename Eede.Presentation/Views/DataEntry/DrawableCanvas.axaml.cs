@@ -6,7 +6,7 @@ using Eede.Domain.Positions;
 using System;
 using System.Windows.Input;
 
-namespace Eede.Views.DataEntry
+namespace Eede.Presentation.Views.DataEntry
 {
     public partial class DrawableCanvas : UserControl
     {
@@ -90,8 +90,8 @@ namespace Eede.Views.DataEntry
         //private bool IsRightButtonPressing = false;
         private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            var pos = e.GetPosition(this.canvas);
-            var pointer = e.GetCurrentPoint(this.canvas).Properties;
+            Point pos = e.GetPosition(canvas);
+            PointerPointProperties pointer = e.GetCurrentPoint(canvas).Properties;
             if (pointer.IsLeftButtonPressed)
             {
                 PointerLeftButtonPressedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
@@ -106,8 +106,8 @@ namespace Eede.Views.DataEntry
 
         private void OnCvanvasPointerMoved(object? sender, PointerEventArgs e)
         {
-            var pos = e.GetPosition(this.canvas);
-            if (IsLeftButtonPressing && e.GetCurrentPoint(this.canvas).Properties.IsRightButtonPressed)
+            Point pos = e.GetPosition(canvas);
+            if (IsLeftButtonPressing && e.GetCurrentPoint(canvas).Properties.IsRightButtonPressed)
             {
                 PointerRightButtonPressedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
                 IsLeftButtonPressing = false;
@@ -119,7 +119,7 @@ namespace Eede.Views.DataEntry
         {
             if (IsLeftButtonPressing)
             {
-                var pos = e.GetPosition(this.canvas);
+                Point pos = e.GetPosition(canvas);
                 PointerLeftButtonReleasedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
             }
             IsLeftButtonPressing = false;

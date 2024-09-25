@@ -14,9 +14,9 @@ internal class PictureAction
 
     public byte[] Process(PictureSize destSize, Func<Position, Position> process)
     {
-        var height = destSize.Height;
-        var width = destSize.Width;
-        var stride = width * 4;
+        int height = destSize.Height;
+        int width = destSize.Width;
+        int stride = width * 4;
         byte[] destPixels = new byte[stride * height];
 
         for (int y = 0; y < height; y++)
@@ -40,7 +40,7 @@ internal class PictureAction
 
     public Picture ProcessResult(PictureSize destSize, Func<Position, Position> process)
     {
-        var pixels = Process(destSize, process);
+        byte[] pixels = Process(destSize, process);
         return Picture.Create(destSize, pixels);
     }
 }

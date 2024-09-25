@@ -2,9 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:Eede.Views.DataEntry"
+             xmlns:local="clr-namespace:Eede.Presentation.Views.DataEntry"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Eede.Views.DataEntry.GradationPicker">
+             x:Class="Eede.Presentation.Views.DataEntry.GradationPicker">
   <Grid>
     <Grid.Styles>
       <StyleInclude Source="/Styles/Styles.axaml" />
@@ -31,7 +31,7 @@
              Width="24" Height="24"
              FontSize="10"
              Padding="2 4"
-             TextAlignment="Center" 
+             TextAlignment="Center"
              HorizontalAlignment="Center">0</TextBox>
   </Grid>
 </UserControl>

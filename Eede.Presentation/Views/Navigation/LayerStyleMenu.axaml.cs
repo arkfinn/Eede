@@ -2,11 +2,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
-using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 
-namespace Eede.Views.Navigation
+namespace Eede.Presentation.Views.Navigation
 {
     public partial class LayerStyleMenu : UserControl
     {

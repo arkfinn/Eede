@@ -13,8 +13,8 @@ namespace Eede.Domain.Pictures.Actions
 
         public Picture Execute()
         {
-            var action = new PictureAction(Source);
-            return action.ProcessResult(Source.Size,Offset);
+            PictureAction action = new(Source);
+            return action.ProcessResult(Source.Size, Offset);
         }
 
         private Position Offset(Position p)

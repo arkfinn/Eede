@@ -1,9 +1,7 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
 using System;
-using System.Collections.Generic;
 
 namespace Eede.Domain.Tests.Positions
 {

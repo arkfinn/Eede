@@ -1,22 +1,14 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using Avalonia.Styling;
-using Avalonia.Threading;
-using Avalonia.VisualTree;
-using Eede.Common.Enums;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.ViewModels.Pages;
-using Eede.ViewModels.Pages;
-using Microsoft.VisualBasic;
 using ReactiveUI;
 using System;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace Eede.Views.Pages;
+namespace Eede.Presentation.Views.Pages;
 
 public partial class MainView : ReactiveUserControl<MainViewModel>
 {
@@ -33,7 +25,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             }
             AddHandler(DragDrop.DragOverEvent, viewModel.DragOverPicture);
             AddHandler(DragDrop.DropEvent, viewModel.DropPicture);
-            this.BindInteraction(
+            _ = this.BindInteraction(
                 viewModel,
                 vm => vm.ShowCreateNewPictureModal, DoShowCreateNewFileWindowAsync);
         };
@@ -43,8 +35,12 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
 
     public void OnClickThemeSelect(object sender, SelectionChangedEventArgs e)
     {
-        var app = Avalonia.Application.Current;
-        if (app is null) return;
+        Avalonia.Application app = Avalonia.Application.Current;
+        if (app is null)
+        {
+            return;
+        }
+
         switch (ThemeSelect?.SelectedIndex)
         {
             case 0:
@@ -58,16 +54,16 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
 
     private async Task DoShowCreateNewFileWindowAsync(IInteractionContext<NewPictureWindowViewModel, NewPictureWindowViewModel> interaction)
     {
-        var dialog = new NewPictureWindow()
+        NewPictureWindow dialog = new()
         {
             DataContext = interaction.Input,
             Width = 300,
             Height = 350
         };
-        interaction.Input.Close = new Action(() => dialog.Close());
+        interaction.Input.Close = new Action(dialog.Close);
 
-        var currentWindow = (Window)VisualRoot;
-        await dialog.ShowDialog<NewPictureWindowViewModel>(currentWindow);
+        Window currentWindow = (Window)VisualRoot;
+        _ = await dialog.ShowDialog<NewPictureWindowViewModel>(currentWindow);
         interaction.SetOutput(interaction.Input);
     }
 }

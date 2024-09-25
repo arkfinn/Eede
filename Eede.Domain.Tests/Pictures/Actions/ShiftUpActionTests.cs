@@ -1,12 +1,8 @@
-﻿using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Pictures.Actions;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Eede.Domain.Pictures.Actions
+namespace Eede.Domain.Tests.Pictures.Actions
 {
     [TestFixture]
     internal class ShiftUpActionTests
@@ -14,10 +10,10 @@ namespace Eede.Domain.Pictures.Actions
         [TestCaseSource(nameof(ExecuteCases))]
         public void TestExecute(byte[] beforeData, byte[] exceptedData)
         {
-            var before = Picture.Create(new PictureSize(4, 4), beforeData);
-            var excepted = Picture.Create(new PictureSize(4, 4), exceptedData);
-            var action = new ShiftUpAction(before);
-            var after = action.Execute();
+            Picture before = Picture.Create(new PictureSize(4, 4), beforeData);
+            Picture excepted = Picture.Create(new PictureSize(4, 4), exceptedData);
+            ShiftUpAction action = new(before);
+            Picture after = action.Execute();
 
             Assert.That(after.CloneImage(), Is.EqualTo(excepted.CloneImage()));
 
@@ -32,7 +28,7 @@ namespace Eede.Domain.Pictures.Actions
                     1,2,3,4,0,1,2,3,0,1,2,3,0,1,2,3,
                     1,2,3,4,0,1,2,3,0,1,2,3,0,1,2,3,
                     0,1,2,3,1,2,3,4,1,2,3,4,1,2,3,4,
-                }, 
+                },
                 new byte[] {
                     1,2,3,4,0,1,2,3,0,1,2,3,0,1,2,3,
                     1,2,3,4,0,1,2,3,0,1,2,3,0,1,2,3,
@@ -47,7 +43,7 @@ namespace Eede.Domain.Pictures.Actions
                     0,1,2,3,0,1,2,3,0,1,2,3,1,2,3,4,
                     1,2,3,4,1,2,3,4,1,2,3,4,0,1,2,3,
                     1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,
-                }, 
+                },
                 new byte[] {
                     0,1,2,3,0,1,2,3,0,1,2,3,1,2,3,4,
                     1,2,3,4,1,2,3,4,1,2,3,4,0,1,2,3,

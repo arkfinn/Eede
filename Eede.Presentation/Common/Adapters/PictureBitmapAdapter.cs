@@ -3,14 +3,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Eede.Domain.Pictures;
 using System;
-using System.Collections.Generic;
-using System.IO.MemoryMappedFiles;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections;
 
 namespace Eede.Presentation.Common.Adapters;
 
@@ -39,7 +32,7 @@ public class PictureBitmapAdapter
     {
         Vector dpi = new(96, 96);
         WriteableBitmap bitmap = new(new PixelSize(width, height), dpi, PixelFormat.Bgra8888);
-        using (var frameBuffer = bitmap.Lock())
+        using (ILockedFramebuffer frameBuffer = bitmap.Lock())
         {
             Marshal.Copy(rgbPixelData, 0, frameBuffer.Address, rgbPixelData.Length);
         }

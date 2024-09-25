@@ -10,7 +10,7 @@ namespace Eede.Domain.Tests.Files
         public void FilePathTest()
         {
             FilePath path = new(@"Files\test\test.png");
-            Assert.AreEqual(@"Files\test\test.png", path.Path);
+            Assert.That(path.Path, Is.EqualTo(@"Files\test\test.png"));
         }
 
         [TestCase(false, @"Files\test\test.png")]
@@ -18,7 +18,7 @@ namespace Eede.Domain.Tests.Files
         public void IsEmptyTest(bool expected, string path)
         {
             FilePath p = new(path);
-            Assert.AreEqual(expected, p.IsEmpty());
+            Assert.That(p.IsEmpty(), Is.EqualTo(expected));
         }
     }
 }

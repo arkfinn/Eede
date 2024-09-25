@@ -9,22 +9,22 @@ namespace Eede.Domain.Tests.Colors
         [Test]
         public void EqualsTest()
         {
-            Assert.AreEqual(HsvColor.FromHsv(1, 2, 3), HsvColor.FromHsv(1, 2, 3));
+            Assert.That(HsvColor.FromHsv(1, 2, 3), Is.EqualTo(HsvColor.FromHsv(1, 2, 3)));
         }
 
         [Test]
         public void TestCreate()
         {
             HsvColor hsv = new(1, 2, 3);
-            Assert.AreEqual(1, hsv.Hue);
-            Assert.AreEqual(2, hsv.Saturation);
-            Assert.AreEqual(3, hsv.Value);
+            Assert.That(hsv.Hue, Is.EqualTo(1));
+            Assert.That(hsv.Saturation, Is.EqualTo(2));
+            Assert.That(hsv.Value, Is.EqualTo(3));
         }
 
         [Test]
         public void GetHashCodeTest()
         {
-            Assert.AreEqual(HsvColor.FromHsv(1, 2, 3).GetHashCode(), HsvColor.FromHsv(1, 2, 3).GetHashCode());
+            Assert.That(HsvColor.FromHsv(1, 2, 3).GetHashCode(), Is.EqualTo(HsvColor.FromHsv(1, 2, 3).GetHashCode()));
         }
     }
 }

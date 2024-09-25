@@ -2,7 +2,7 @@
 
 using Avalonia;
 using Avalonia.ReactiveUI;
-using Eede;
+using Eede.Presentation;
 
 namespace AvaloniaApplication1.Desktop;
 

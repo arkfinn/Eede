@@ -2,20 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Media.Imaging;
-using Eede.Application.Drawings;
-using Eede.Domain.Colors;
-using Eede.Domain.Drawings;
-using Eede.Domain.DrawStyles;
-using Eede.Domain.ImageBlenders;
-using Eede.Domain.ImageTransfers;
-using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
-using Eede.Domain.Scales;
-using Eede.Services;
-using Eede.ViewModels.DataEntry;
 using System;
-using System.Runtime.InteropServices;
 using System.Windows.Input;
 
 namespace Eede.Views.DataEntry

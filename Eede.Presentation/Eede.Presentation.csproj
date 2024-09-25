@@ -2,14 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <UseWindowsForms>True</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RootNamespace>Eede</RootNamespace>
     <DebugType>embedded</DebugType>
+    <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaXaml Remove="obj\**" />
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -72,20 +79,20 @@
 
   <ItemGroup>
 
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.10" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.1.3" Condition="'$(Configuration)' == 'Debug'" />
 
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.1.3" />
 
-    <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.3" />
 
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.3" />
 
-    <PackageReference Include="Avalonia.Win32.Interoperability" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Win32.Interoperability" Version="11.1.3" />
 
-    <PackageReference Include="Dock.Avalonia" Version="11.0.0.7" />
+    <PackageReference Include="Dock.Avalonia" Version="11.1.0.1" />
 
-    <PackageReference Include="Dock.Model.Avalonia" Version="11.0.0.7" />
-    <PackageReference Include="ReactiveProperty" Version="9.5.0" />
+    <PackageReference Include="Dock.Model.Avalonia" Version="11.1.0.1" />
+    <PackageReference Include="ReactiveUI" Version="20.1.52" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
 
   </ItemGroup>
@@ -95,28 +102,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Ui\AvaloniaWrapper\DataDisplay\PictureFrame.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Update="Ui\AvaloniaWrapper\DataEntry\ColorPicker.cs" />
     <Compile Update="Views\DataEntry\DrawableCanvas.axaml.cs">
       <DependentUpon>DrawableCanvas.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\DataEntry\PaletteForm.axaml.cs">
       <DependentUpon>PaletteForm.axaml</DependentUpon>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <Compile Update="Views\Pages\NewPictureWindow.axaml.cs">
+      <DependentUpon>NewPictureWindow.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

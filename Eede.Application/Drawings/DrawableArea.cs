@@ -39,8 +39,8 @@ namespace Eede.Application.Drawings
             Picture source = buffer.Fetch();
             // 表示上のサイズ・ポジション DisplaySize DisplayPosition
             MagnifiedSize displaySize = Magnify(source.Size);
-            PaintBackgroundLayer backgroundLayer = new(Background);
-            backgroundLayer.Paint(g);
+            //PaintBackgroundLayer backgroundLayer = new(Background);
+            //backgroundLayer.Paint(g);
 
             if (!buffer.IsDrawing() && PositionHistory != null)
             {
@@ -53,8 +53,8 @@ namespace Eede.Application.Drawings
                 bufferLayer.Paint(g);
             }
 
-            PaintGridLayer gridLayer = new(displaySize, Magnify(GridSize));
-            gridLayer.Paint(g);
+            //PaintGridLayer gridLayer = new(displaySize, Magnify(GridSize));
+            //gridLayer.Paint(g);
         }
 
         public Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)

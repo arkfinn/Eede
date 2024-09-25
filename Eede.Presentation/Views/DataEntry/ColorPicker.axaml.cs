@@ -3,15 +3,12 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using DynamicData;
-using Eede.Application.Drawings;
 using Eede.Domain.Colors;
-using Eede.Domain.DrawStyles;
-using Eede.Domain.Scales;
+using Eede.Presentation.Views.DataEntry;
 using System;
 using HsvColor = Avalonia.Media.HsvColor;
 
-namespace Eede.Views.DataEntry
+namespace Eede.Presentation.Views.DataEntry
 {
     public partial class ColorPicker : UserControl
     {
@@ -31,7 +28,7 @@ namespace Eede.Views.DataEntry
             pickerG.ValueChanged += PickerValueChanged;
             pickerB.ValueChanged += PickerValueChanged;
 
-            this.GetObservable(NowColorProperty).Subscribe(_ =>
+            _ = this.GetObservable(NowColorProperty).Subscribe(_ =>
             {
                 UpdateGradationColor();
                 UpdatePicker(NowColor);
@@ -39,7 +36,7 @@ namespace Eede.Views.DataEntry
         }
 
         public static readonly StyledProperty<ArgbColor> NowColorProperty =
-            AvaloniaProperty.Register<DrawableCanvas, ArgbColor>(nameof(ArgbColor), new ArgbColor(255, 0, 0, 0), defaultBindingMode:BindingMode.TwoWay);
+            AvaloniaProperty.Register<DrawableCanvas, ArgbColor>(nameof(ArgbColor), new ArgbColor(255, 0, 0, 0), defaultBindingMode: BindingMode.TwoWay);
         public ArgbColor NowColor
         {
             get => GetValue(NowColorProperty);
@@ -101,7 +98,7 @@ namespace Eede.Views.DataEntry
                     break;
 
                 case ColorPickerMode.HSV:
-                    var color = HsvColor.FromHsv(pickerR.Value, (double)pickerG.Value / pickerG.MaxValue, (double)pickerB.Value / pickerB.MaxValue).ToRgb();
+                    Color color = HsvColor.FromHsv(pickerR.Value, (double)pickerG.Value / pickerG.MaxValue, (double)pickerB.Value / pickerB.MaxValue).ToRgb();
                     NowColor = new ArgbColor((byte)pickerA.Value, color.R, color.G, color.B);
                     break;
 

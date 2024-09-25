@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Eede.Common.Drawings;
+using Eede.Presentation.Common.Drawings;
 using System;
 
-namespace Eede.Views.Navigation
+namespace Eede.Presentation.Views.Navigation
 {
     public partial class DrawStyleMenu : UserControl
     {
@@ -21,7 +21,7 @@ namespace Eede.Views.Navigation
             get => GetValue(DrawStyleProperty);
             set
             {
-                SetValue(DrawStyleProperty, value);
+                _ = SetValue(DrawStyleProperty, value);
                 UpdateChecked();
                 DrawStyleChanged?.Invoke(GetValue(DrawStyleProperty));
             }

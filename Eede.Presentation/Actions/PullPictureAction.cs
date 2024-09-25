@@ -2,7 +2,7 @@
 using Eede.Domain.Systems;
 using System;
 
-namespace Eede.Actions
+namespace Eede.Presentation.Actions
 {
     internal class PullPictureAction : IUndoItem
     {

@@ -1,7 +1,8 @@
-﻿using Eede.Domain.Positions;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Positions;
 using NUnit.Framework;
 
-namespace Eede.Domain.Pictures
+namespace Eede.Domain.Tests.Pictures
 {
     [TestFixture]
     public class PictureAreaTests

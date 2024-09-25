@@ -4,7 +4,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
 
-namespace Eede.ViewModels.Pages
+namespace Eede.Presentation.ViewModels.Pages
 {
     public class NewPictureWindowViewModel : ViewModelBase
     {

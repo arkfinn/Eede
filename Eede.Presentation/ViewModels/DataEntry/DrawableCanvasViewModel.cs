@@ -11,13 +11,13 @@ using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
 using Eede.Presentation.Common.Adapters;
-using Eede.Services;
+using Eede.Presentation.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
 
-namespace Eede.ViewModels.DataEntry;
+namespace Eede.Presentation.ViewModels.DataEntry;
 
 public class DrawableCanvasViewModel : ViewModelBase
 {
@@ -50,19 +50,19 @@ public class DrawableCanvasViewModel : ViewModelBase
         Picture picture = Picture.CreateEmpty(new PictureSize((int)defaultBoxSize.Width, (int)defaultBoxSize.Height));
         SetPicture(picture);
 
-        this.WhenAnyValue(x => x.ImageBlender, x => x.PenColor, x => x.PenSize)
+        _ = this.WhenAnyValue(x => x.ImageBlender, x => x.PenColor, x => x.PenSize)
             .Subscribe(x => PenStyle = new(ImageBlender, PenColor, PenSize));
 
-        this.WhenAnyValue(x => x.Magnification)
+        _ = this.WhenAnyValue(x => x.Magnification)
             .Subscribe(x =>
             {
                 DrawableArea = DrawableArea.UpdateMagnification(Magnification);
                 UpdateImage();
             });
 
-        this.WhenAnyValue(x => x.ImageTransfer)
+        _ = this.WhenAnyValue(x => x.ImageTransfer)
             .Subscribe(x => UpdateImage());
-        this.WhenAnyValue(x => x.SelectingArea, x => x.Magnification)
+        _ = this.WhenAnyValue(x => x.SelectingArea, x => x.Magnification)
             .Subscribe(area =>
             {
                 if (SelectingArea != null)
@@ -96,7 +96,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             {
                 _bitmap?.Dispose();
             }
-            this.RaiseAndSetIfChanged(ref _bitmap, value);
+            _ = this.RaiseAndSetIfChanged(ref _bitmap, value);
         }
     }
 
@@ -108,14 +108,14 @@ public class DrawableCanvasViewModel : ViewModelBase
     private Picture Picture = null;
 
     public ReactiveCommand<ArgbColor, Unit> OnColorPicked { get; }
-    public event EventHandler<ColorPickedEventArgs>? ColorPicked;
+    public event EventHandler<ColorPickedEventArgs> ColorPicked;
     private void ExecuteColorPicked(ArgbColor color)
     {
         ColorPicked?.Invoke(this, new ColorPickedEventArgs(color));
     }
 
     public ReactiveCommand<Picture, Unit> OnDrew { get; }
-    public event Action<Picture, Picture>? Drew;
+    public event Action<Picture, Picture> Drew;
     private void ExecuteDrew(Picture previous)
     {
         Drew?.Invoke(previous, Picture);
@@ -160,7 +160,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         }
         else
         {
-            var newColor = DrawableArea.PickColor(PictureBuffer.Fetch(), pos);
+            ArgbColor newColor = DrawableArea.PickColor(PictureBuffer.Fetch(), pos);
             ExecuteColorPicked(newColor);
         }
     }
@@ -188,7 +188,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         }
         Picture previous = PictureBuffer.Previous;
 
-        DrawingResult result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position((int)pos.X, (int)pos.Y), IsShifted);
+        DrawingResult result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(pos.X, pos.Y), IsShifted);
         PictureBuffer = result.PictureBuffer.Clone();
         DrawableArea = result.DrawableArea;
 

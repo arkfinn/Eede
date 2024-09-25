@@ -2,19 +2,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:Eede.Views.Navigation"
-             xmlns:buttons="clr-namespace:Eede.Views.General.Buttons"
-             xmlns:p="clr-namespace:Eede.Common.Pictures.Actions"
+             xmlns:local="clr-namespace:Eede.Presentation.Views.Navigation"
+             xmlns:buttons="clr-namespace:Eede.Presentation.Views.General.Buttons"
+             xmlns:p="clr-namespace:Eede.Presentation.Common.Pictures.Actions"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="24"
-             x:Class="Eede.Views.Navigation.PictureActionMenu"
+             x:Class="Eede.Presentation.Views.Navigation.PictureActionMenu"
              >
   <Grid>
     <Grid.Styles>
       <StyleInclude Source="/Styles/Styles.axaml" />
     </Grid.Styles>
     <StackPanel Orientation="Vertical" >
-      <Button Classes="tool"  
+      <Button Classes="tool"
                     Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
                     CommandParameter="{ x:Static p:PictureActions.ShiftUp }" >
         <Image Source="/Assets/Tools/tool_shift_up.png" Stretch="None" />

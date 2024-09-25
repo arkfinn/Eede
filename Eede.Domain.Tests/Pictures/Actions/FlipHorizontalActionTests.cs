@@ -1,6 +1,8 @@
-﻿using NUnit.Framework;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Pictures.Actions;
+using NUnit.Framework;
 
-namespace Eede.Domain.Pictures.Actions;
+namespace Eede.Domain.Tests.Pictures.Actions;
 
 [TestFixture]
 internal class FlipHorizontalActionTests
@@ -8,10 +10,10 @@ internal class FlipHorizontalActionTests
     [TestCaseSource(nameof(ExecuteCases))]
     public void TestExecute(byte[] beforeData, byte[] exceptedData)
     {
-        var before = Picture.Create(new PictureSize(4, 4), beforeData);
-        var excepted = Picture.Create(new PictureSize(4, 4), exceptedData);
-        var action = new FlipHorizontalAction(before);
-        var after = action.Execute();
+        Picture before = Picture.Create(new PictureSize(4, 4), beforeData);
+        Picture excepted = Picture.Create(new PictureSize(4, 4), exceptedData);
+        FlipHorizontalAction action = new(before);
+        Picture after = action.Execute();
 
         Assert.That(after.CloneImage(), Is.EqualTo(excepted.CloneImage()));
 
@@ -33,7 +35,7 @@ internal class FlipHorizontalActionTests
                 0,1,2,3,0,1,2,3,0,1,2,3,1,2,3,4,
                 1,2,3,4,1,2,3,4,1,2,3,4,0,1,2,3,
             }
-        } 
+        }
     };
 }
 

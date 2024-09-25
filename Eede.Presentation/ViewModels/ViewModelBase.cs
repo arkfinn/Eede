@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace Eede.ViewModels;
+namespace Eede.Presentation.ViewModels;
 
 public class ViewModelBase : ReactiveObject
 {

@@ -5,7 +5,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using System;
 
-namespace Eede.Views.DataEntry
+namespace Eede.Presentation.Views.DataEntry
 {
     public partial class PenWidthSelector : UserControl
     {
@@ -13,7 +13,7 @@ namespace Eede.Views.DataEntry
         {
             InitializeComponent();
 
-            this.GetObservable(PenWidthProperty).Subscribe(_ =>
+            _ = this.GetObservable(PenWidthProperty).Subscribe(_ =>
             {
                 UpdatePenWidthTextBox();
             });

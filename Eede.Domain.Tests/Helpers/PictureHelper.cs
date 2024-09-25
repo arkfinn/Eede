@@ -10,7 +10,7 @@ namespace Eede.Domain.Tests.Helpers
         public static Picture ReadBitmap(string path)
         {
             // .net8.0-windowsを指定してる限り当面windows依存とする
-            var bitmap = new Bitmap(path);
+            Bitmap bitmap = new(path);
             BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
             byte[] bytes = new byte[Math.Abs(bmpData.Stride) * bitmap.Height];
             System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, bytes, 0, bytes.Length);

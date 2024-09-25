@@ -1,13 +1,8 @@
-﻿using Eede.Domain.Pictures.Actions;
-using Eede.Domain.Pictures;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.Pictures.Actions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net.NetworkInformation;
 
-namespace Eede.Common.Pictures.Actions
+namespace Eede.Presentation.Common.Pictures.Actions
 {
     public enum PictureActions
     {

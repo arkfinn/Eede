@@ -9,4 +9,8 @@
     <ProjectReference Include="..\Eede.Application\Eede.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pictures\" />
+  </ItemGroup>
+
 </Project>

@@ -10,7 +10,7 @@ namespace Eede.Domain.Pictures
     public class Picture
     {
         private const int COLOR_32BIT = 4;
-
+        private const int PixelSizeInBytes = COLOR_32BIT;
 
         public static Picture Create(PictureSize size, byte[] imageData)
         {
@@ -64,20 +64,20 @@ namespace Eede.Domain.Pictures
 
         public Picture CutOut(PictureArea area)
         {
-            int destinationStride = area.Width * COLOR_32BIT;
-            int length = Math.Min((Width - area.X) * COLOR_32BIT, destinationStride);
-            int destinationX = area.X * COLOR_32BIT;
-            byte[] cutImageData = new byte[destinationStride * area.Height];
+            int destinationStride = area.Width * PixelSizeInBytes;
+            int length = Math.Min((Width - area.X) * PixelSizeInBytes, destinationStride);
+            int destinationX = area.X * PixelSizeInBytes;
+            byte[] cutoutImageData = new byte[destinationStride * area.Height];
 
-            for (int i = 0; i < area.Height; i++)
+            for (int y = 0; y < area.Height; y++)
             {
-                if (area.Y + i >= Height) break;
-                int sourceStartIndex = destinationX + ((area.Y + i) * Stride);
-                int destinationStartIndex = i * destinationStride;
-                Array.Copy(ImageData, sourceStartIndex, cutImageData, destinationStartIndex, length);
+                if (area.Y + y >= Height) break;
+                int sourceStartIndex = destinationX + ((area.Y + y) * Stride);
+                int destinationStartIndex = y * destinationStride;
+                Array.Copy(ImageData, sourceStartIndex, cutoutImageData, destinationStartIndex, length);
             }
 
-            return Create(area.Size, cutImageData);
+            return Create(area.Size, cutoutImageData);
         }
 
         public Picture Transfer(IImageTransfer transfer)

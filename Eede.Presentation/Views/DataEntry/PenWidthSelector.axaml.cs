@@ -3,10 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Eede.Domain.Colors;
-using Eede.Domain.DrawStyles;
 using System;
-using System.Drawing;
 
 namespace Eede.Views.DataEntry
 {
@@ -18,8 +15,7 @@ namespace Eede.Views.DataEntry
 
             this.GetObservable(PenWidthProperty).Subscribe(_ =>
             {
-                var penWidth = PenWidth;
-                textBox1.Text = penWidth.ToString();
+                UpdatePenWidthTextBox();
             });
         }
 
@@ -28,17 +24,22 @@ namespace Eede.Views.DataEntry
         public int PenWidth
         {
             get => GetValue(PenWidthProperty);
-            set => SetValue(PenWidthProperty, Math.Min(Math.Max(1, value), 30));
+            set => SetValue(PenWidthProperty, ClampPenWidth(value));
+        }
+
+        private void UpdatePenWidthTextBox()
+        {
+            textBox1.Text = PenWidth.ToString();
         }
 
         public void OnTextInput(object sender, TextInputEventArgs args)
         {
-            if (!int.TryParse(args.Text, out int result))
+            if (!int.TryParse(args.Text, out _))
             {
                 args.Handled = true;
                 return;
             }
-            if (result is not (>= '0' and <= '9'))
+            if (!char.IsDigit(args.Text[0]))
             {
                 args.Handled = true;
             }
@@ -46,12 +47,12 @@ namespace Eede.Views.DataEntry
 
         public void PenWidthUp(object sender, RoutedEventArgs args)
         {
-            PenWidth = PenWidth - 1;
+            PenWidth--;
         }
 
         public void PenWidthDown(object sender, RoutedEventArgs args)
         {
-            PenWidth = PenWidth + 1;
+            PenWidth++;
         }
 
         public void PenWidth1px(object sender, RoutedEventArgs args)
@@ -67,6 +68,11 @@ namespace Eede.Views.DataEntry
         public void PenWidth6px(object sender, RoutedEventArgs args)
         {
             PenWidth = 6;
+        }
+
+        private static int ClampPenWidth(int value)
+        {
+            return Math.Min(Math.Max(1, value), 30);
         }
     }
 }

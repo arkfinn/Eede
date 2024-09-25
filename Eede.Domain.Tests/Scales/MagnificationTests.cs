@@ -20,19 +20,19 @@ namespace Eede.Domain.Tests.Scales
         public void MagnifyTest()
         {
             Magnification m = new(4);
-            Assert.AreEqual(12, m.Magnify(3));
+            Assert.That(m.Magnify(3), Is.EqualTo(12));
         }
 
         [Test]
         public void EqualsTest()
         {
-            Assert.AreEqual(new Magnification(4), new Magnification(4));
+            Assert.That(new Magnification(4), Is.EqualTo(new Magnification(4)));
         }
 
         [Test]
         public void GetHashCodeTest()
         {
-            Assert.AreEqual(new Magnification(4).GetHashCode(), new Magnification(4).GetHashCode());
+            Assert.That(new Magnification(4).GetHashCode(), Is.EqualTo(new Magnification(4).GetHashCode()));
         }
     }
 }

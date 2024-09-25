@@ -1,16 +1,17 @@
 ﻿namespace Eede.Domain.Files
 {
-    public class FilePath
+    public class FilePath(string filePath)
     {
-        public readonly string Path;
-        public FilePath(string filePath)
-        {
-            Path = filePath;
-        }
+        public readonly string Path = filePath;
 
         public bool IsEmpty()
         {
             return Path == "";
+        }
+
+        public static FilePath Empty()
+        {
+            return new FilePath("");
         }
     }
 }

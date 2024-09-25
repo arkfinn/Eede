@@ -10,28 +10,28 @@ namespace Eede.Domain.Tests.Positions
         public void PositionTest()
         {
             Position p = new(1, 2);
-            Assert.AreEqual(1, p.X);
-            Assert.AreEqual(2, p.Y);
+            Assert.That(p.X, Is.EqualTo(1));
+            Assert.That(p.Y, Is.EqualTo(2));
         }
 
         [Test]
         public void PositionCreateFromPoint()
         {
             Position p = new(1, 2);
-            Assert.AreEqual(1, p.X);
-            Assert.AreEqual(2, p.Y);
+            Assert.That(p.X, Is.EqualTo(1));
+            Assert.That(p.Y, Is.EqualTo(2));
         }
 
         [Test]
         public void GetHashCodeTest()
         {
-            Assert.AreEqual(new Position(1, 2), new Position(1, 2));
+            Assert.That(new Position(1, 2), Is.EqualTo(new Position(1, 2)));
         }
 
         [Test]
         public void ToPointTest()
         {
-            Assert.AreEqual(new Position(1, 2).GetHashCode(), new Position(1, 2).GetHashCode());
+            Assert.That(new Position(1, 2).GetHashCode(), Is.EqualTo(new Position(1, 2).GetHashCode()));
         }
     }
 }

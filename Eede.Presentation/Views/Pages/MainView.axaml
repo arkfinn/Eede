@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:Eede.ViewModels.Pages"
+             xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.Pages"
              xmlns:local="clr-namespace:Eede.Views.Pages"
              xmlns:navi="clr-namespace:Eede.Views.Navigation"
              xmlns:entry="clr-namespace:Eede.Views.DataEntry"
@@ -100,6 +100,12 @@
           <Panel DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal" Margin="2">
               <Button Classes="tool"
+                      ToolTip.Tip="新規作成(N)"
+                      HotKey="N"
+                      Command="{Binding CreateNewPictureCommand}">
+                <Image Source="/Assets/Tools/file_new.png" Stretch="None" />
+              </Button>
+              <Button Classes="tool"
                       ToolTip.Tip="開く(O)"
                       HotKey="O"
                       Command="{Binding LoadPictureCommand}"
@@ -109,7 +115,8 @@
               <Button Classes="tool"
                 ToolTip.Tip="保存(Ctrl+S)"
                 HotKey="Ctrl+S"
-                Command="{Binding SavePictureCommand}">
+                Command="{Binding SavePictureCommand}"
+                CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
                 <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
               </Button>
               <Panel Classes="horizontal-separator" />

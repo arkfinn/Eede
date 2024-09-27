@@ -68,15 +68,21 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
         public void Save(StorageService storage)
         {
-            PictureSave?.Invoke(this, new PictureSaveEventArgs(new BitmapFile(Bitmap, Path), storage));
+            if (PictureSave == null)
+            {
+                return;
+            }
+            var args = new PictureSaveEventArgs(new BitmapFile(Bitmap, Path), storage);
+            PictureSave.Invoke(this, args);
+            Initialize(args.File);
         }
 
         public void Initialize(BitmapFile file)
         {
             Bitmap = file.Bitmap;
-            bool isEmpty = file.Path.IsEmpty();
-            Path = isEmpty ? FilePath.Empty() : file.Path;
-            Subject = isEmpty ? "新しいファイル" : file.Path.Path;
+            var isNewFile = file.IsNewFile();
+            Path = isNewFile ? FilePath.Empty() : file.Path;
+            Subject = isNewFile ? "新しいファイル" : file.GetPathString();
             Edited = false;
         }
 

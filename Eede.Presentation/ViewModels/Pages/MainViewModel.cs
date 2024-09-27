@@ -15,6 +15,7 @@ using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Drawings;
 using Eede.Presentation.Common.Pictures.Actions;
 using Eede.Presentation.Common.Services;
+using Eede.Presentation.Events;
 using Eede.Presentation.Files;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
@@ -153,6 +154,7 @@ public class MainViewModel : ViewModelBase
 
     private void ExecuteUndo()
     {
+        //UseUndoてきな
         UndoSystem = UndoSystem.Undo();
     }
 
@@ -216,50 +218,12 @@ public class MainViewModel : ViewModelBase
 
     private async void ExecuteLoadPicture(StorageService storage)
     {
-        FilePickerOpenOptions options = new()
-        {
-            AllowMultiple = false,
-            FileTypeFilter = GetImageFileTypes(),
-            //        Title = Title,
-        };
-        IReadOnlyList<IStorageFile> result = await storage.StorageProvider.OpenFilePickerAsync(options);
-
-        if (result == null || result.Count == 0)
+        Uri result = await storage.OpenFilePickerAsync();
+        if (result == null)
         {
             return;
         }
-        Uri uri = result[0].Path;
-        Pictures.Add(OpenPicture(uri));
-    }
-
-    private static List<FilePickerFileType> GetImageFileTypes()
-    {
-        return
-        [
-            new("All Images")
-            {
-                Patterns = ["*.png", "*.bmp"],
-                AppleUniformTypeIdentifiers = ["public.image"],
-                MimeTypes = ["image/*"]
-            },
-            new("PNG Image")
-            {
-                Patterns = ["*.png"],
-                AppleUniformTypeIdentifiers = ["public.png"],
-                MimeTypes = ["image/png"]
-            },
-            new("BMP Image")
-            {
-                Patterns = ["*.bmp"],
-                AppleUniformTypeIdentifiers = ["public.bmp"],
-                MimeTypes = ["image/bmp"]
-            },
-            new("All")
-            {
-                Patterns = ["*.*"],
-                MimeTypes = ["*/*"]
-            }
-        ];
+        Pictures.Add(OpenPicture(result));
     }
 
     private readonly BitmapFileReader BitmapFileReader = new();
@@ -271,40 +235,10 @@ public class MainViewModel : ViewModelBase
 
     private DockPictureViewModel SetupDockPicture(DockPictureViewModel vm)
     {
-        vm.PicturePush += PushToDrawArea;
-        vm.PicturePull += PullFromDrawArea;
+        vm.PicturePush += OnPushToDrawArea;
+        vm.PicturePull += OnPullFromDrawArea;
+        vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
-        vm.PictureSave += async (sender, args) =>
-        {
-            BitmapFile file = args.File;
-            if (file.Path.IsEmpty())
-            {
-                FilePickerSaveOptions options = new()
-                {
-
-                };
-                IStorageFile result = await args.Storage.StorageProvider.SaveFilePickerAsync(options);
-
-                if (result == null /*|| result.Count == 0)*/)
-                {
-                    return;
-                }
-                Uri uri = result.Path;
-
-                string fullPath = HttpUtility.UrlDecode(uri.AbsolutePath);
-                file.Bitmap.Save(fullPath);
-                BitmapFile updatedFile = new(
-                    file.Bitmap,
-                    new FilePath(fullPath));
-                vm.Initialize(updatedFile);
-            }
-            else
-            {
-                string fullPath = file.Path.Path;
-                file.Bitmap.Save(fullPath);
-                vm.Initialize(file);
-            }
-        };
         return vm;
     }
 
@@ -329,7 +263,30 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private void PushToDrawArea(object sender, PicturePushEventArgs args)
+    private async void OnPictureSave(object sender, PictureSaveEventArgs e)
+    {
+        BitmapFile file = e.File;
+        string fullPath;
+
+        if (file.IsNewFile())
+        {
+            Uri result = await e.Storage.SaveFilePickerAsync();
+            if (result == null)
+            {
+                return;
+            }
+            fullPath = HttpUtility.UrlDecode(result.AbsolutePath);
+        }
+        else
+        {
+            fullPath = file.GetPathString();
+        }
+
+        file.Bitmap.Save(fullPath);
+        e.UpdateFile(file with { Path = new FilePath(fullPath) });
+    }
+
+    private void OnPushToDrawArea(object sender, PicturePushEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {
@@ -351,7 +308,7 @@ public class MainViewModel : ViewModelBase
         CursorSize = picture.Size;
     }
 
-    private void PullFromDrawArea(object sender, PicturePullEventArgs args)
+    private void OnPullFromDrawArea(object sender, PicturePullEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {

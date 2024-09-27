@@ -3,9 +3,9 @@ using Eede.Domain.Files;
 
 namespace Eede.Presentation.Files
 {
-    public class BitmapFile(Bitmap bitmap, FilePath fullPath)
+    public record BitmapFile(Bitmap Bitmap, FilePath Path)
     {
-        public readonly Bitmap Bitmap = bitmap;
-        public readonly FilePath Path = fullPath;
+        public bool IsNewFile() => Path.IsEmpty();
+        public string GetPathString() => Path.Path;
     }
 }

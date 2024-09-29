@@ -24,6 +24,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -87,6 +88,9 @@ public class MainViewModel : ViewModelBase
     public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; }
     public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
 
+    public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; }
+    public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; }
+
 
     public MainViewModel()
     {
@@ -129,8 +133,8 @@ public class MainViewModel : ViewModelBase
         DrawableCanvasViewModel.Drew += (previous, now) =>
         {
             UndoSystem = UndoSystem.Add(new UndoItem(
-                new Action(() => { SetPicture(previous); }),
-                new Action(() => { SetPicture(now); })));
+                new Action(() => { SetPictureToDrawArea(previous); }),
+                new Action(() => { SetPictureToDrawArea(now); })));
         };
 
         UndoCommand = ReactiveCommand.Create(ExecuteUndo, this.WhenAnyValue(
@@ -149,12 +153,14 @@ public class MainViewModel : ViewModelBase
 
         ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
         CreateNewPictureCommand = ReactiveCommand.Create(ExecuteCreateNewPicture);
+
+        LoadPaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteLoadPalette);
+        SavePaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteSavePalette);
     }
 
 
     private void ExecuteUndo()
     {
-        //UseUndoてきな
         UndoSystem = UndoSystem.Undo();
     }
 
@@ -296,13 +302,13 @@ public class MainViewModel : ViewModelBase
         Picture from = adapter.ConvertToPicture(vm.Bitmap).CutOut(args.Rect);
         Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
         UndoSystem = UndoSystem.Add(new UndoItem(
-            new Action(() => { SetPicture(previous); }),
-            new Action(() => { SetPicture(from); })));
+            new Action(() => { SetPictureToDrawArea(previous); }),
+            new Action(() => { SetPictureToDrawArea(from); })));
 
-        SetPicture(from);
+        SetPictureToDrawArea(from);
     }
 
-    private void SetPicture(Picture picture)
+    private void SetPictureToDrawArea(Picture picture)
     {
         DrawableCanvasViewModel.SetPicture(picture);
         CursorSize = picture.Size;
@@ -344,9 +350,9 @@ public class MainViewModel : ViewModelBase
             updatedPicture = actionType.Execute(previous);
         }
         UndoSystem = UndoSystem.Add(new UndoItem(
-                   new Action(() => { SetPicture(previous); }),
-                   new Action(() => { SetPicture(updatedPicture); })));
-        SetPicture(updatedPicture);
+                   new Action(() => { SetPictureToDrawArea(previous); }),
+                   new Action(() => { SetPictureToDrawArea(updatedPicture); })));
+        SetPictureToDrawArea(updatedPicture);
     }
 
     private IDrawStyle ExecuteUpdateDrawStyle(DrawStyles drawStyle)
@@ -373,5 +379,92 @@ public class MainViewModel : ViewModelBase
         PenColor = TempPalette.Get(number);
     }
     #endregion
+    private async void ExecuteLoadPalette(StorageService storage)
+    {
+        FilePickerOpenOptions options = new()
+        {
+            AllowMultiple = false,
+            FileTypeFilter = [
+                 new("Palette File")
+                 {
+                    Patterns = ["*.pal", "*.act"],
+                    MimeTypes = ["image/*"]
+                 },
+                 new("Palette File (RGBA)")
+                 {
+                    Patterns = ["*.pal"],
+                 },
+                  new("Palette File (RGB)")
+                 {
+                    Patterns = ["*.act"],
+                 },
+            ]
+            //        Title = Title,
+        };
+
+        IReadOnlyList<IStorageFile> result = await storage.StorageProvider.OpenFilePickerAsync(options);
+        if (result == null || result.Count == 0)
+        {
+            return;
+        }
+
+        string filePath = HttpUtility.UrlDecode(result[0].Path.AbsolutePath);
+
+        FileInfo fileInfo = new(filePath);
+        long fileSize = fileInfo.Length;
+
+        bool hasAlpha = fileSize == 1024; // RGBA形式の場合は1024バイト
+        int colorCount = 256; // 256色
+
+        ArgbColor[] palette = new ArgbColor[colorCount];
+
+        // ファイルをバイナリモードで開く
+        using (FileStream fs = new(filePath, FileMode.Open, FileAccess.Read))
+        using (BinaryReader reader = new(fs))
+        {
+            for (int i = 0; i < colorCount; i++)
+            {
+                byte r = reader.ReadByte();
+                byte g = reader.ReadByte();
+                byte b = reader.ReadByte();
+                byte a = hasAlpha ? reader.ReadByte() : (byte)255; // Alphaがない場合は255（完全不透明）
+
+                // ArgbColor構造体に格納
+                palette[i] = new ArgbColor(a, r, g, b);
+            }
+        }
+
+        TempPalette = Palette.FromColors(palette);
+    }
+
+    private async void ExecuteSavePalette(StorageService storage)
+    {
+        FilePickerSaveOptions options = new()
+        {
+            SuggestedFileName = "palette",
+            DefaultExtension = "pal", // デフォルトの拡張子を設定
+            FileTypeChoices = [
+                 new("Palette File (RGBA)")
+                 {
+                    Patterns = ["*.pal"],
+                 },
+            ]
+        };
+        IStorageFile result = await storage.StorageProvider.SaveFilePickerAsync(options);
+        if (result == null)
+        {
+            return;
+        }
+
+        await using Stream stream = await result.OpenWriteAsync();
+
+        TempPalette.ForEach((color, no) =>
+        {
+            stream.WriteByte(color.Red);
+            stream.WriteByte(color.Green);
+            stream.WriteByte(color.Blue);
+            stream.WriteByte(color.Alpha);
+        });
+    }
 
 }

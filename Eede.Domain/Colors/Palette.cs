@@ -25,7 +25,12 @@ public class Palette
         {
             colorArray[i] = new ArgbColor(0, 0, 0, 0);
         }
-        return new Palette(colorArray.ToImmutableList());
+        return FromColors(colorArray);
+    }
+
+    public static Palette FromColors(ArgbColor[] colors)
+    {
+        return new Palette([.. colors]);
     }
 
     public ArgbColor Get(int index)

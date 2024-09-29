@@ -1,6 +1,4 @@
 ﻿using Eede.Domain.Positions;
-using Eede.Domain.Scales;
-using System;
 
 namespace Eede.Domain.Pictures.Actions;
 
@@ -15,14 +13,14 @@ public class ShiftDownAction
 
     public Picture Execute()
     {
-        var action = new PictureAction(Source);
+        PictureAction action = new(Source);
         return action.ProcessResult(Source.Size, Offset);
     }
 
     private Position Offset(Position p)
     {
-        var offsetY = p.Y - 1;
-        var newY = offsetY < 0 ? Source.Height + offsetY : offsetY;
+        int offsetY = p.Y - 1;
+        int newY = offsetY < 0 ? Source.Height + offsetY : offsetY;
         return new Position(p.X, newY);
     }
 }

@@ -11,12 +11,12 @@ using Eede.Presentation.Common.Adapters;
 using System;
 using System.Windows.Input;
 
-namespace Eede.Views.DataEntry;
+namespace Eede.Presentation.Views.DataEntry;
 
 public partial class PaletteForm : UserControl
 {
-    const int CELL_WIDTH = 17;
-    const int CELL_HEIGHT = 11;
+    private const int CELL_WIDTH = 17;
+    private const int CELL_HEIGHT = 11;
 
     public static readonly StyledProperty<Palette> PaletteProperty =
         AvaloniaProperty.Register<PaletteForm, Palette>(nameof(Palette), Palette.Create());
@@ -57,7 +57,7 @@ public partial class PaletteForm : UserControl
         image.Source = PaletteBitmap;
         Refresh();
 
-        this.GetObservable(PaletteProperty).Subscribe(_ =>
+        _ = this.GetObservable(PaletteProperty).Subscribe(_ =>
         {
             Refresh();
         });
@@ -66,7 +66,7 @@ public partial class PaletteForm : UserControl
 
     }
 
-    private Picture PaletteBuffer;
+    private readonly Picture PaletteBuffer;
     public Bitmap PaletteBitmap;
 
     private void Refresh()
@@ -75,8 +75,8 @@ public partial class PaletteForm : UserControl
         Palette.ForEach((color, index) =>
         {
             Drawer drawer = new(Buffer, new PenStyle(new DirectImageBlender(), color, 1));
-            int x = (index % 16) * CELL_WIDTH;
-            int y = (index / 16) * CELL_HEIGHT;
+            int x = index % 16 * CELL_WIDTH;
+            int y = index / 16 * CELL_HEIGHT;
             // TODO: DrawRectangle‚ª–³‚¢‚Ì‚Å
             Buffer = drawer.DrawFillEllipse(new Position(x, y), new Position(x + CELL_WIDTH, y + CELL_HEIGHT));
         });
@@ -88,9 +88,9 @@ public partial class PaletteForm : UserControl
 
     private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        var pos = e.GetPosition(this.image);
-        int number = (int)(pos.X / CELL_WIDTH) + (((int)(pos.Y / CELL_HEIGHT) * 16));
-        var pointer = e.GetCurrentPoint(this.image).Properties;
+        Point pos = e.GetPosition(image);
+        int number = (int)(pos.X / CELL_WIDTH) + ((int)(pos.Y / CELL_HEIGHT) * 16);
+        PointerPointProperties pointer = e.GetCurrentPoint(image).Properties;
         if (pointer.IsLeftButtonPressed)
         {
             PointerLeftButtonPressedCommand?.Execute(number);

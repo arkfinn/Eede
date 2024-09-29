@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Files;
-using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.ImageBlenders;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Tests.Helpers;

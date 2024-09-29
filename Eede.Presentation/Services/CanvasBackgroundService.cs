@@ -1,7 +1,7 @@
 ﻿using Eede.Application.PaintLayers;
 using System.Drawing;
 
-namespace Eede.Services
+namespace Eede.Presentation.Services
 {
     internal class CanvasBackgroundService : ICanvasBackgroundService
     {

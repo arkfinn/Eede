@@ -1,12 +1,7 @@
-﻿using Avalonia;
-using Avalonia.Input;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
+﻿using Avalonia.Input;
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
-using Eede.Common.Drawings;
-using Eede.Common.Pictures.Actions;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.Files;
@@ -17,30 +12,29 @@ using Eede.Domain.Scales;
 using Eede.Domain.Systems;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
+using Eede.Presentation.Common.Drawings;
+using Eede.Presentation.Common.Pictures.Actions;
 using Eede.Presentation.Common.Services;
+using Eede.Presentation.Events;
 using Eede.Presentation.Files;
-using Eede.Presentation.Files.Pictures;
-using Eede.ViewModels;
-using Eede.ViewModels.DataDisplay;
-using Eede.ViewModels.DataEntry;
-using Eede.ViewModels.Pages;
+using Eede.Presentation.ViewModels.DataDisplay;
+using Eede.Presentation.ViewModels.DataEntry;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Security.Policy;
 using System.Web;
-using static System.Windows.Forms.Design.AxImporter;
 
 namespace Eede.Presentation.ViewModels.Pages;
 
 public class MainViewModel : ViewModelBase
 {
-    public ObservableCollection<DockPictureViewModel> Pictures { get; } = new ObservableCollection<DockPictureViewModel>();
+    public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
     public DrawableCanvasViewModel DrawableCanvasViewModel { get; } = new DrawableCanvasViewModel();
 
     public Magnification Magnification
@@ -94,39 +88,42 @@ public class MainViewModel : ViewModelBase
     public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; }
     public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
 
+    public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; }
+    public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; }
+
 
     public MainViewModel()
     {
         ImageTransfer = new DirectImageTransfer();
         PenColor = DrawableCanvasViewModel.PenColor;
         PullBlender = new DirectImageBlender();
-        this.WhenAnyValue(x => x.PenColor).BindTo(this, x => x.DrawableCanvasViewModel.PenColor);
-        MinCursorSizeList = new()
-        {
+        _ = this.WhenAnyValue(x => x.PenColor).BindTo(this, x => x.DrawableCanvasViewModel.PenColor);
+        MinCursorSizeList =
+        [
             8, 16, 24, 32, 48, 64
-        };
+        ];
         MinCursorWidth = 32;
         MinCursorHeight = 32;
-        this.WhenAnyValue(x => x.MinCursorWidth, x => x.MinCursorHeight)
+        _ = this.WhenAnyValue(x => x.MinCursorWidth, x => x.MinCursorHeight)
             .Subscribe(x =>
             {
                 PictureSize size = new(MinCursorWidth, MinCursorHeight);
-                foreach (var vm in Pictures)
+                foreach (DockPictureViewModel vm in Pictures)
                 {
                     vm.MinCursorSize = size;
                 }
             });
 
-        this.WhenAnyValue(x => x.CursorSize)
+        _ = this.WhenAnyValue(x => x.CursorSize)
            .Subscribe(size =>
            {
-               foreach (var vm in Pictures)
+               foreach (DockPictureViewModel vm in Pictures)
                {
                    vm.CursorSize = size;
                }
            });
         DrawStyle = DrawStyles.Free;
-        this.WhenAnyValue(x => x.DrawStyle).Subscribe(drawStyle => DrawableCanvasViewModel.DrawStyle = ExecuteUpdateDrawStyle(drawStyle));
+        _ = this.WhenAnyValue(x => x.DrawStyle).Subscribe(drawStyle => DrawableCanvasViewModel.DrawStyle = ExecuteUpdateDrawStyle(drawStyle));
 
         DrawableCanvasViewModel.ColorPicked += (sender, args) =>
         {
@@ -136,8 +133,8 @@ public class MainViewModel : ViewModelBase
         DrawableCanvasViewModel.Drew += (previous, now) =>
         {
             UndoSystem = UndoSystem.Add(new UndoItem(
-                new Action(() => { SetPicture(previous); }),
-                new Action(() => { SetPicture(now); })));
+                new Action(() => { SetPictureToDrawArea(previous); }),
+                new Action(() => { SetPictureToDrawArea(now); })));
         };
 
         UndoCommand = ReactiveCommand.Create(ExecuteUndo, this.WhenAnyValue(
@@ -156,6 +153,9 @@ public class MainViewModel : ViewModelBase
 
         ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
         CreateNewPictureCommand = ReactiveCommand.Create(ExecuteCreateNewPicture);
+
+        LoadPaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteLoadPalette);
+        SavePaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteSavePalette);
     }
 
 
@@ -174,129 +174,84 @@ public class MainViewModel : ViewModelBase
         e.DragEffects = DragDropEffects.None;
         e.Handled = false;
 
-        if (e.Data is not IDataObject dataObject) return;
-        if (dataObject.GetDataFormats().Contains(DataFormats.Files) == false) return;
-        var files = dataObject.GetFiles();
+        if (e.Data is not IDataObject dataObject)
+        {
+            return;
+        }
+
+        if (dataObject.GetDataFormats().Contains(DataFormats.Files) == false)
+        {
+            return;
+        }
+
+        IEnumerable<IStorageItem> files = dataObject.GetFiles();
         // TODO: 拡張子チェックしたい
         // ?.Where(file=> file.Path.);
-        if (files is null) return;
+        if (files is null)
+        {
+            return;
+        }
+
         e.DragEffects = DragDropEffects.Copy;
         e.Handled = true;
     }
 
     public void DropPicture(object sender, DragEventArgs e)
     {
-        if (e.Data is not IDataObject dataObject) return;
-        if (dataObject.GetDataFormats().Contains(DataFormats.Files) == false) return;
-        var files = dataObject.GetFiles();
+        if (e.Data is not IDataObject dataObject)
+        {
+            return;
+        }
+
+        if (dataObject.GetDataFormats().Contains(DataFormats.Files) == false)
+        {
+            return;
+        }
+
+        IEnumerable<IStorageItem> files = dataObject.GetFiles();
         // TODO: 拡張子チェックしたい
         // ?.Where(file=> file.Path.);
-        if (files is null) return;
+        if (files is null)
+        {
+            return;
+        }
 
-        foreach (var file in files)
+        foreach (IStorageItem file in files)
         {
             Pictures.Add(OpenPicture(file.Path));
         }
     }
 
-    async void ExecuteLoadPicture(StorageService storage)
+    private async void ExecuteLoadPicture(StorageService storage)
     {
-        var options = new FilePickerOpenOptions
-        {
-            AllowMultiple = false,
-            FileTypeFilter = GetImageFileTypes(),
-            //        Title = Title,
-        };
-        var result = await storage.StorageProvider.OpenFilePickerAsync(options);
-
-        if (result == null || result.Count == 0)
+        Uri result = await storage.OpenFilePickerAsync();
+        if (result == null)
         {
             return;
         }
-        var uri = result[0].Path;
-        Pictures.Add(OpenPicture(uri));
-    }
-
-    private static List<FilePickerFileType> GetImageFileTypes()
-    {
-        return new List<FilePickerFileType>
-        {
-            new("All Images")
-            {
-                Patterns = ["*.png", "*.bmp"],
-                AppleUniformTypeIdentifiers = ["public.image"],
-                MimeTypes = ["image/*"]
-            },
-            new("PNG Image")
-            {
-                Patterns = ["*.png"],
-                AppleUniformTypeIdentifiers = ["public.png"],
-                MimeTypes = ["image/png"]
-            },
-            new("BMP Image")
-            {
-                Patterns = ["*.bmp"],
-                AppleUniformTypeIdentifiers = ["public.bmp"],
-                MimeTypes = ["image/bmp"]
-            },
-            new("All")
-            {
-                Patterns = ["*.*"],
-                MimeTypes = ["*/*"]
-            }
-        };
+        Pictures.Add(OpenPicture(result));
     }
 
     private readonly BitmapFileReader BitmapFileReader = new();
     private DockPictureViewModel OpenPicture(Uri path)
     {
-        var vm = DockPictureViewModel.FromFile(BitmapFileReader.Read(path));
+        DockPictureViewModel vm = DockPictureViewModel.FromFile(BitmapFileReader.Read(path));
         return SetupDockPicture(vm);
     }
 
     private DockPictureViewModel SetupDockPicture(DockPictureViewModel vm)
     {
-        vm.PicturePush += PushToDrawArea;
-        vm.PicturePull += PullFromDrawArea;
+        vm.PicturePush += OnPushToDrawArea;
+        vm.PicturePull += OnPullFromDrawArea;
+        vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
-        vm.PictureSave += async (sender, args) =>
-        {
-            var file = args.File;
-            if (file.Path.IsEmpty())
-            {
-                var options = new FilePickerSaveOptions
-                {
-
-                };
-                var result = await args.Storage.StorageProvider.SaveFilePickerAsync(options);
-
-                if (result == null /*|| result.Count == 0)*/)
-                {
-                    return;
-                }
-                var uri = result.Path;
-
-                var fullPath = HttpUtility.UrlDecode(uri.AbsolutePath);
-                file.Bitmap.Save(fullPath);
-                var updatedFile = new BitmapFile(
-                    file.Bitmap,
-                    new FilePath(fullPath));
-                vm.Initialize(updatedFile);
-            }
-            else
-            {
-                var fullPath = file.Path.Path;
-                file.Bitmap.Save(fullPath);
-                vm.Initialize(file);
-            }
-        };
         return vm;
     }
 
     private async void ExecuteCreateNewPicture()
     {
-        var store = new NewPictureWindowViewModel();
-        var result = await ShowCreateNewPictureModal.Handle(store);
+        NewPictureWindowViewModel store = new();
+        NewPictureWindowViewModel result = await ShowCreateNewPictureModal.Handle(store);
         if (result.Result)
         {
             Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size)));
@@ -314,7 +269,30 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private void PushToDrawArea(object sender, PicturePushEventArgs args)
+    private async void OnPictureSave(object sender, PictureSaveEventArgs e)
+    {
+        BitmapFile file = e.File;
+        string fullPath;
+
+        if (file.IsNewFile())
+        {
+            Uri result = await e.Storage.SaveFilePickerAsync();
+            if (result == null)
+            {
+                return;
+            }
+            fullPath = HttpUtility.UrlDecode(result.AbsolutePath);
+        }
+        else
+        {
+            fullPath = file.GetPathString();
+        }
+
+        file.Bitmap.Save(fullPath);
+        e.UpdateFile(file with { Path = new FilePath(fullPath) });
+    }
+
+    private void OnPushToDrawArea(object sender, PicturePushEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {
@@ -324,19 +302,19 @@ public class MainViewModel : ViewModelBase
         Picture from = adapter.ConvertToPicture(vm.Bitmap).CutOut(args.Rect);
         Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
         UndoSystem = UndoSystem.Add(new UndoItem(
-            new Action(() => { SetPicture(previous); }),
-            new Action(() => { SetPicture(from); })));
+            new Action(() => { SetPictureToDrawArea(previous); }),
+            new Action(() => { SetPictureToDrawArea(from); })));
 
-        SetPicture(from);
+        SetPictureToDrawArea(from);
     }
 
-    private void SetPicture(Picture picture)
+    private void SetPictureToDrawArea(Picture picture)
     {
         DrawableCanvasViewModel.SetPicture(picture);
         CursorSize = picture.Size;
     }
 
-    private void PullFromDrawArea(object sender, PicturePullEventArgs args)
+    private void OnPullFromDrawArea(object sender, PicturePullEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {
@@ -344,14 +322,14 @@ public class MainViewModel : ViewModelBase
             return;
         }
         PictureBitmapAdapter adapter = new();
-        var previous = vm.Bitmap;
+        Avalonia.Media.Imaging.Bitmap previous = vm.Bitmap;
 
-        var now = adapter.ConvertToBitmap(
+        Avalonia.Media.Imaging.Bitmap now = adapter.ConvertToBitmap(
             adapter.ConvertToPicture(vm.Bitmap).Blend(PullBlender, DrawableCanvasViewModel.PictureBuffer.Previous, args.Position));
 
         UndoSystem = UndoSystem.Add(new UndoItem(
-           new Action(() => { if (vm.Enabled) vm.Bitmap = previous; }),
-           new Action(() => { if (vm.Enabled) vm.Bitmap = now; })));
+           new Action(() => { if (vm.Enabled) { vm.Bitmap = previous; } }),
+           new Action(() => { if (vm.Enabled) { vm.Bitmap = now; } })));
         vm.Bitmap = now;
     }
 
@@ -372,9 +350,9 @@ public class MainViewModel : ViewModelBase
             updatedPicture = actionType.Execute(previous);
         }
         UndoSystem = UndoSystem.Add(new UndoItem(
-                   new Action(() => { SetPicture(previous); }),
-                   new Action(() => { SetPicture(updatedPicture); })));
-        SetPicture(updatedPicture);
+                   new Action(() => { SetPictureToDrawArea(previous); }),
+                   new Action(() => { SetPictureToDrawArea(updatedPicture); })));
+        SetPictureToDrawArea(updatedPicture);
     }
 
     private IDrawStyle ExecuteUpdateDrawStyle(DrawStyles drawStyle)
@@ -401,5 +379,92 @@ public class MainViewModel : ViewModelBase
         PenColor = TempPalette.Get(number);
     }
     #endregion
+    private async void ExecuteLoadPalette(StorageService storage)
+    {
+        FilePickerOpenOptions options = new()
+        {
+            AllowMultiple = false,
+            FileTypeFilter = [
+                 new("Palette File")
+                 {
+                    Patterns = ["*.pal", "*.act"],
+                    MimeTypes = ["image/*"]
+                 },
+                 new("Palette File (RGBA)")
+                 {
+                    Patterns = ["*.pal"],
+                 },
+                  new("Palette File (RGB)")
+                 {
+                    Patterns = ["*.act"],
+                 },
+            ]
+            //        Title = Title,
+        };
+
+        IReadOnlyList<IStorageFile> result = await storage.StorageProvider.OpenFilePickerAsync(options);
+        if (result == null || result.Count == 0)
+        {
+            return;
+        }
+
+        string filePath = HttpUtility.UrlDecode(result[0].Path.AbsolutePath);
+
+        FileInfo fileInfo = new(filePath);
+        long fileSize = fileInfo.Length;
+
+        bool hasAlpha = fileSize == 1024; // RGBA形式の場合は1024バイト
+        int colorCount = 256; // 256色
+
+        ArgbColor[] palette = new ArgbColor[colorCount];
+
+        // ファイルをバイナリモードで開く
+        using (FileStream fs = new(filePath, FileMode.Open, FileAccess.Read))
+        using (BinaryReader reader = new(fs))
+        {
+            for (int i = 0; i < colorCount; i++)
+            {
+                byte r = reader.ReadByte();
+                byte g = reader.ReadByte();
+                byte b = reader.ReadByte();
+                byte a = hasAlpha ? reader.ReadByte() : (byte)255; // Alphaがない場合は255（完全不透明）
+
+                // ArgbColor構造体に格納
+                palette[i] = new ArgbColor(a, r, g, b);
+            }
+        }
+
+        TempPalette = Palette.FromColors(palette);
+    }
+
+    private async void ExecuteSavePalette(StorageService storage)
+    {
+        FilePickerSaveOptions options = new()
+        {
+            SuggestedFileName = "palette",
+            DefaultExtension = "pal", // デフォルトの拡張子を設定
+            FileTypeChoices = [
+                 new("Palette File (RGBA)")
+                 {
+                    Patterns = ["*.pal"],
+                 },
+            ]
+        };
+        IStorageFile result = await storage.StorageProvider.SaveFilePickerAsync(options);
+        if (result == null)
+        {
+            return;
+        }
+
+        await using Stream stream = await result.OpenWriteAsync();
+
+        TempPalette.ForEach((color, no) =>
+        {
+            stream.WriteByte(color.Red);
+            stream.WriteByte(color.Green);
+            stream.WriteByte(color.Blue);
+            stream.WriteByte(color.Alpha);
+        });
+    }
 
 }

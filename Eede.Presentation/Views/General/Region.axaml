@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="32" d:DesignHeight="32"
-             x:Class="Eede.Views.General.Region">
+             x:Class="Eede.Presentation.Views.General.Region">
   <Panel>
     <Panel.Styles>
       <Style Selector="Rectangle.upper">
@@ -19,7 +19,7 @@
         </Style.Animations>
       </Style>
     </Panel.Styles>
-    
+
     <Rectangle VerticalAlignment="Stretch"
                HorizontalAlignment="Stretch"
                Stroke="Yellow" StrokeThickness="1" />

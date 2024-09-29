@@ -1,6 +1,4 @@
 ﻿using Eede.Domain.Positions;
-using Eede.Domain.Scales;
-using System;
 
 namespace Eede.Domain.Pictures.Actions;
 
@@ -15,14 +13,14 @@ public class ShiftRightAction
 
     public Picture Execute()
     {
-        var action = new PictureAction(Source);
+        PictureAction action = new(Source);
         return action.ProcessResult(Source.Size, Offset);
     }
 
     private Position Offset(Position p)
     {
-        var offsetX = p.X - 1;
-        var newX = offsetX < 0 ? Source.Width + offsetX : offsetX;
+        int offsetX = p.X - 1;
+        int newX = offsetX < 0 ? Source.Width + offsetX : offsetX;
         return new Position(newX, p.Y);
     }
 }

@@ -7,12 +7,11 @@ using Avalonia.Threading;
 using Eede.Application.Pictures;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
-using Eede.ViewModels.DataDisplay;
-using ReactiveUI;
+using Eede.Presentation.ViewModels.DataDisplay;
 using System;
 using System.Windows.Input;
 
-namespace Eede.Views.DataEntry
+namespace Eede.Presentation.Views.DataEntry
 {
     public partial class PictureContainer : UserControl
     {
@@ -29,24 +28,16 @@ namespace Eede.Views.DataEntry
 
         private DockPictureViewModel? FetchViewModel()
         {
-            if (DataContext is DockPictureViewModel vm)
-            {
-                return vm;
-            }
-            if (DataContext is StyledElement e)
-            {
-                return e.DataContext as DockPictureViewModel;
-            }
-            return null;
+            return DataContext is DockPictureViewModel vm ? vm : DataContext is StyledElement e ? e.DataContext as DockPictureViewModel : null;
         }
         private void PictureContainer_DataContextChanged(object? sender, EventArgs e)
         {
-            var vm = FetchViewModel();
+            DockPictureViewModel vm = FetchViewModel();
             if (vm == null)
             {
                 return;
             }
-            var bitmap = vm.Bitmap;
+            Avalonia.Media.Imaging.Bitmap bitmap = vm.Bitmap;
 
             CanvasSize = new PictureSize((int)bitmap.Size.Width, (int)bitmap.Size.Height);
 
@@ -56,20 +47,20 @@ namespace Eede.Views.DataEntry
             canvas.Width = bitmap.Size.Width;
             canvas.Height = bitmap.Size.Height;
             ImageBrush canvasBrush = new();
-            canvasBrush.Bind(ImageBrush.SourceProperty, new Binding
+            _ = canvasBrush.Bind(ImageBrush.SourceProperty, new Binding
             {
                 Source = vm,
                 Path = nameof(vm.Bitmap)
             });
             canvas.Background = canvasBrush;
             MinCursorSize = vm.MinCursorSize;
-            this.Bind(MinCursorSizeProperty, new Binding
+            _ = Bind(MinCursorSizeProperty, new Binding
             {
                 Source = vm,
                 Path = nameof(vm.MinCursorSize)
             });
             CursorArea = vm.CursorArea;
-            this.Bind(CursorAreaProperty, new Binding
+            _ = Bind(CursorAreaProperty, new Binding
             {
                 Source = vm,
                 Path = nameof(vm.CursorArea)
@@ -88,9 +79,9 @@ namespace Eede.Views.DataEntry
         {
             Dispatcher.UIThread.Post(() =>
             {
-                var cursorArea = GetNowCursorArea();
-                var grid = cursorArea.GridPosition;
-                var size = cursorArea.BoxSize;
+                HalfBoxArea cursorArea = GetNowCursorArea();
+                Position grid = cursorArea.GridPosition;
+                PictureSize size = cursorArea.BoxSize;
 
                 cursor.Width = size.Width;
                 cursor.Height = size.Height;
@@ -152,7 +143,7 @@ namespace Eede.Views.DataEntry
         public event EventHandler<PicturePullEventArgs> PicturePulled;
         public event EventHandler<PicturePushEventArgs> PicturePushed;
 
-        private PictureSize CanvasSize = new PictureSize(32, 32);
+        private PictureSize CanvasSize = new(32, 32);
 
 
 
@@ -163,7 +154,7 @@ namespace Eede.Views.DataEntry
                 return;
             }
 
-            switch (e.GetCurrentPoint(this.canvas).Properties.PointerUpdateKind)
+            switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonPressed:
                     if (!IsSelecting)
@@ -177,7 +168,7 @@ namespace Eede.Views.DataEntry
                 case PointerUpdateKind.RightButtonPressed:
                     // ”ÍˆÍ‘I‘ðŠJŽn
                     IsSelecting = true;
-                    SelectingArea = HalfBoxArea.Create(MinCursorSize, PointToPosition(e.GetPosition(this.canvas)));
+                    SelectingArea = HalfBoxArea.Create(MinCursorSize, PointToPosition(e.GetPosition(canvas)));
                     break;
             }
             UpdateCursor();
@@ -185,7 +176,7 @@ namespace Eede.Views.DataEntry
 
         private void OnPointerMoved(object? sender, PointerEventArgs e)
         {
-            Position nowPosition = PointToPosition(e.GetPosition(this.canvas));
+            Position nowPosition = PointToPosition(e.GetPosition(canvas));
             if (IsSelecting)
             {
                 SelectingArea = SelectingArea.UpdatePosition(nowPosition, CanvasSize);
@@ -200,7 +191,7 @@ namespace Eede.Views.DataEntry
 
         private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
-            switch (e.GetCurrentPoint(this.canvas).Properties.PointerUpdateKind)
+            switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonReleased:
                     break;

@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Dock.Model.Core;
 using System.Collections;
 
-namespace Eede.Views.DataDisplay
+namespace Eede.Presentation.Views.DataDisplay
 {
     public partial class PictureFrame : UserControl
     {
@@ -15,9 +15,9 @@ namespace Eede.Views.DataDisplay
         public static readonly DirectProperty<PictureFrame, IList?> PicturesProperty =
             AvaloniaProperty.RegisterDirect<PictureFrame, IList?>(
                 nameof(Pictures),
-                o => o.Pictures, 
+                o => o.Pictures,
                 (o, v) => o.Pictures = v);
-        
+
         private IList? pictures;
         public IList? Pictures
         {
@@ -27,7 +27,7 @@ namespace Eede.Views.DataDisplay
 
         public static readonly DirectProperty<PictureFrame, IDockable?> ActiveDockableProperty =
             AvaloniaProperty.RegisterDirect<PictureFrame, IDockable?>(
-                nameof(ActiveDockable), 
+                nameof(ActiveDockable),
                 o => o.ActiveDockable,
                 (o, v) => o.ActiveDockable = v);
 

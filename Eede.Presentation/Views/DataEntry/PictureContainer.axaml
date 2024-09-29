@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:general="clr-namespace:Eede.Views.General"
-             xmlns:vm="clr-namespace:Eede.ViewModels.DataDisplay"
+             xmlns:general="clr-namespace:Eede.Presentation.Views.General"
+             xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.DataDisplay"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Eede.Views.DataEntry.PictureContainer"
+             x:Class="Eede.Presentation.Views.DataEntry.PictureContainer"
              x:DataType="vm:DockPictureViewModel"
             >
   <Design.DataContext>
@@ -37,10 +37,9 @@
                         AlignmentX="Left"/>
           </Panel.Background>
           <Panel x:Name="canvas">
-
-            <general:Region x:Name="cursor" 
+            <general:Region x:Name="cursor"
                             HorizontalAlignment="Left"
-                            VerticalAlignment="Top"/>
+                            VerticalAlignment="Top" />
 
           </Panel>
         </Panel>

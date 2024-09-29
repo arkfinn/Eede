@@ -1,19 +1,11 @@
 ﻿namespace Eede.Domain.Colors
 {
-    public class ArgbColor
+    public class ArgbColor(byte alpha, byte red, byte green, byte blue)
     {
-        public readonly byte Alpha;
-        public readonly byte Red;
-        public readonly byte Green;
-        public readonly byte Blue;
-
-        public ArgbColor(byte alpha, byte red, byte green, byte blue)
-        {
-            Alpha = alpha;
-            Blue = blue;
-            Green = green;
-            Red = red;
-        }
+        public readonly byte Alpha = alpha;
+        public readonly byte Red = red;
+        public readonly byte Green = green;
+        public readonly byte Blue = blue;
 
         public bool EqualsRgb(ArgbColor other)
         {

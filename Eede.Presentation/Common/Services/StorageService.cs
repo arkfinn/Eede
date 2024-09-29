@@ -61,7 +61,7 @@ namespace Eede.Presentation.Common.Services
             };
             IStorageFile result = await StorageProvider.SaveFilePickerAsync(options);
 
-            return result == null ? null : result.Path;
+            return result?.Path;
         }
     }
 }

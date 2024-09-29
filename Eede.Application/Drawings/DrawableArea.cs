@@ -60,7 +60,7 @@ namespace Eede.Application.Drawings
         public Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
         {
             Picture source = buffer.Fetch();
-            var picture = source;
+            Picture picture = source;
             // 表示上のサイズ・ポジション DisplaySize DisplayPosition
             MagnifiedSize displaySize = Magnify(source.Size);
             //PaintBackgroundLayer backgroundLayer = new(Background);

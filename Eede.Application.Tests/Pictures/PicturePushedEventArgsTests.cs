@@ -3,7 +3,6 @@ using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using NUnit.Framework;
 using System;
-using System.Drawing;
 
 namespace Eede.Application.Tests.Pictures
 {

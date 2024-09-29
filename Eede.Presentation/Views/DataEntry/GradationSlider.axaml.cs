@@ -4,11 +4,9 @@ using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
-using Eede.Domain.Positions;
 using System;
-using System.Collections.Generic;
 
-namespace Eede.Views.DataEntry
+namespace Eede.Presentation.Views.DataEntry
 {
     public class GradationSlider : TemplatedControl
     {
@@ -23,9 +21,9 @@ namespace Eede.Views.DataEntry
         }
 
         private readonly Polygon TickPolygon;
-        private Size SliderSize = new Size(0, 0);
+        private Size SliderSize = new(0, 0);
 
-        public event EventHandler<ValueChangedEventArgs>? ValueChanged;
+        public event EventHandler<ValueChangedEventArgs> ValueChanged;
         public int MaxValue { set; get; } = 255;
         public int MinValue { get; set; } = 0;
 
@@ -35,7 +33,7 @@ namespace Eede.Views.DataEntry
             get => _value;
             set
             {
-                var newValue = Math.Min(Math.Max(MinValue, value), MaxValue);
+                int newValue = Math.Min(Math.Max(MinValue, value), MaxValue);
                 if (newValue == _value)
                 {
                     return;
@@ -46,8 +44,8 @@ namespace Eede.Views.DataEntry
             }
         }
 
-        private Color[]? _gradationColor = null;
-        public Color[]? GradationColor
+        private Color[] _gradationColor = null;
+        public Color[] GradationColor
         {
             set
             {
@@ -120,13 +118,13 @@ namespace Eede.Views.DataEntry
 
         private void DrawGradation(DrawingContext context)
         {
-            var brush = CreateBrush();
+            IBrush brush = CreateBrush();
             context.FillRectangle(brush, new Rect(TickPolygon.Width / 2, TickPolygon.Height / 2, SliderSize.Width, SliderSize.Height));
         }
 
         private IBrush CreateBrush()
         {
-            GradientStops gradientStops = new GradientStops();
+            GradientStops gradientStops = [];
 
             if (GradationColor == null || GradationColor.Length < 2)
             {
@@ -135,7 +133,7 @@ namespace Eede.Views.DataEntry
             }
             else
             {
-                var offset = 1.0f / (GradationColor.Length - 1);
+                float offset = 1.0f / (GradationColor.Length - 1);
                 for (int i = 0; i < GradationColor.Length; i++)
                 {
                     gradientStops.Add(new GradientStop
@@ -157,7 +155,7 @@ namespace Eede.Views.DataEntry
         {
             Pen p = IsActive() ? new(Brushes.Brown, 1) : new(Brushes.Black, 1);
 
-            context.DrawRectangle(p, new Rect(TickPolygon.Width / 2 + 0.5, TickPolygon.Height / 2, SliderSize.Width, SliderSize.Height));
+            context.DrawRectangle(p, new Rect((TickPolygon.Width / 2) + 0.5, TickPolygon.Height / 2, SliderSize.Width, SliderSize.Height));
         }
 
         private bool IsActive()
@@ -170,26 +168,26 @@ namespace Eede.Views.DataEntry
             Dispatcher.UIThread.Post(() =>
             {
                 double yPosition = (MaxValue - (Value - MinValue)) / (double)(MaxValue - MinValue) * SliderSize.Height;
-                TickPolygon.Margin = new Thickness(TickPolygon.Width , yPosition, 0, 0);
+                TickPolygon.Margin = new Thickness(TickPolygon.Width, yPosition, 0, 0);
             });
 
         }
 
         ////リサイズ時、グラデーションの再描画
-        private void OnLayoutUpdated(object? sender, EventArgs e)
+        private void OnLayoutUpdated(object sender, EventArgs e)
         {
             // これいらないかもしれない
             InvalidateVisual();
         }
 
         private bool mouseDown = false;
-        private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
+        private void OnPointerPressed(object sender, PointerPressedEventArgs e)
         {
             UpdateValueByPositionY(e.GetPosition(this).Y);
             mouseDown = true;
         }
 
-        private void OnPointerMoved(object? sender, PointerEventArgs e)
+        private void OnPointerMoved(object sender, PointerEventArgs e)
         {
             if (mouseDown != true)
             {
@@ -200,22 +198,22 @@ namespace Eede.Views.DataEntry
         private void UpdateValueByPositionY(double value)
         {
             Console.WriteLine($"Height: {Height}, TickPolygon.Height: {TickPolygon.Height}, Mouse Y: {value}");
-            Value = (int)(MaxValue - ((value - TickPolygon.Height / 2) / (Height - TickPolygon.Height) * (MaxValue - MinValue)));
+            Value = (int)(MaxValue - ((value - (TickPolygon.Height / 2)) / (Height - TickPolygon.Height) * (MaxValue - MinValue)));
         }
 
-        private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
+        private void OnPointerReleased(object sender, PointerReleasedEventArgs e)
         {
             mouseDown = false;
         }
 
         private bool activeFlag = false;
-        private void OnPointerEntered(object? sender, PointerEventArgs e)
+        private void OnPointerEntered(object sender, PointerEventArgs e)
         {
             activeFlag = true;
             InvalidateVisual();
         }
 
-        private void OnPointerExited(object? sender, PointerEventArgs e)
+        private void OnPointerExited(object sender, PointerEventArgs e)
         {
             activeFlag = false;
             InvalidateVisual();

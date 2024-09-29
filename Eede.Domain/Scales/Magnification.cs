@@ -15,13 +15,13 @@ namespace Eede.Domain.Scales
             {
                 throw new ArgumentOutOfRangeException("Magnification needs more than 0");
             }
-            this.Value = magnification;
+            Value = magnification;
         }
 
         public override bool Equals(object obj)
         {
             return obj is Magnification magnification &&
-                   this.Value == magnification.Value;
+                   Value == magnification.Value;
         }
 
         public override int GetHashCode()

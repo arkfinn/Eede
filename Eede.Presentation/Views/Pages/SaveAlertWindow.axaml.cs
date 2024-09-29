@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Eede.Common.Enums;
+using Eede.Presentation.Common.Enums;
 
 namespace Eede.Views.Pages
 {

@@ -1,12 +1,10 @@
-﻿using Eede.Application.Pictures;
-using Eede.Domain.Colors;
-using Eede.Domain.Pictures;
+﻿using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using NUnit.Framework;
 using System;
 using System.Drawing;
 
-namespace Eede.Domain.Pictures
+namespace Eede.Domain.Tests.Pictures
 {
     [TestFixture]
     public class PictureTests
@@ -44,7 +42,7 @@ namespace Eede.Domain.Pictures
         {
             _ = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                var source = Picture.Create(new PictureSize(10, 10), new byte[10 * 4 * 10]);
+                Picture source = Picture.Create(new PictureSize(10, 10), new byte[10 * 4 * 10]);
                 _ = source.PickColor(new Position(10, 10));
             });
         }
@@ -76,8 +74,8 @@ namespace Eede.Domain.Pictures
         public void CutOutErrorTest()
         {
             // 画像自体のサイズより大きいカットサイズを指定する場合、余りは空白で埋める
-            var picture = Picture.Create(new PictureSize(2, 2), new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8 });
-            var after = picture.CutOut(new PictureArea(new Position(0, 0), new PictureSize(4, 4)));
+            Picture picture = Picture.Create(new PictureSize(2, 2), new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8 });
+            Picture after = picture.CutOut(new PictureArea(new Position(0, 0), new PictureSize(4, 4)));
             Assert.That(after.CloneImage(), Is.EqualTo(new byte[]
             {
                 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0,

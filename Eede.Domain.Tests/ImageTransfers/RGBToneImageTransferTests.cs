@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Files;
-using Eede.Domain.ImageTransfers;
+﻿using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Scales;
 using Eede.Domain.Tests.Helpers;

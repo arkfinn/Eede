@@ -1,4 +1,4 @@
-﻿namespace Eede.Common.Enums
+﻿namespace Eede.Presentation.Common.Enums
 {
     public enum SaveAlertResult
     {

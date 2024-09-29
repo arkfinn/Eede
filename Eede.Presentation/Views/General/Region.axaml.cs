@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace Eede.Views.General
+namespace Eede.Presentation.Views.General
 {
     public partial class Region : UserControl
     {

@@ -3,13 +3,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.Pages"
-             xmlns:local="clr-namespace:Eede.Views.Pages"
-             xmlns:navi="clr-namespace:Eede.Views.Navigation"
-             xmlns:entry="clr-namespace:Eede.Views.DataEntry"
-             xmlns:display="clr-namespace:Eede.Views.DataDisplay"
+             xmlns:local="clr-namespace:Eede.Presentation.Views.Pages"
+             xmlns:navi="clr-namespace:Eede.Presentation.Views.Navigation"
+             xmlns:entry="clr-namespace:Eede.Presentation.Views.DataEntry"
+             xmlns:display="clr-namespace:Eede.Presentation.Views.DataDisplay"
              
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
-             x:Class="Eede.Views.Pages.MainView"
+             x:Class="Eede.Presentation.Views.Pages.MainView"
              x:DataType="vm:MainViewModel"
              DragDrop.AllowDrop="True">
   <Design.DataContext>
@@ -63,13 +63,28 @@
 
                       </Style>
                     </TabItem.Styles>
-                    <entry:PaletteForm Margin="4 2 4 8"
-                                       BorderBrush="Black"
-                                       BorderThickness="1"
-                                       Palette="{Binding TempPalette}"
-                                       PointerLeftButtonPressedCommand="{Binding GetPaletteColorCommand}"
-                                       PointerRightButtonPressedCommand="{Binding PutPaletteColorCommand}"
+                    <WrapPanel>
+                      <entry:PaletteForm Margin="4 2 4 8"
+                                         BorderBrush="Black"
+                                         BorderThickness="1"
+                                         Palette="{Binding TempPalette}"
+                                         PointerLeftButtonPressedCommand="{Binding GetPaletteColorCommand}"
+                                         PointerRightButtonPressedCommand="{Binding PutPaletteColorCommand}"
                                        />
+                      <StackPanel Orientation="Vertical" >
+                        <Button ToolTip.Tip="パレットを開く"
+                                Command="{Binding LoadPaletteCommand}"
+                                CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+                          <Image Source="/Assets/Tools/file_open.png" Stretch="None" />
+                        </Button>
+
+                        <Button ToolTip.Tip="パレットを保存する"
+                                Command="{Binding SavePaletteCommand}"
+                                CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+                          <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
+                        </Button>
+                      </StackPanel>
+                    </WrapPanel>
                   </TabItem>
                 </TabControl>
               </Panel>

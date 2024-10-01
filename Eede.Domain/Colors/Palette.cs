@@ -6,7 +6,7 @@ namespace Eede.Domain.Colors;
 
 public class Palette
 {
-    private const int MAX_LENGTH = 256;
+    public const int MAX_LENGTH = 256;
     private readonly ImmutableList<ArgbColor> Colors;
 
     private Palette(ImmutableList<ArgbColor> colors)

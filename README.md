@@ -1,15 +1,19 @@
 ﻿# Eede - Excellent Expert Dot Editor
-[![.NET Core Desktop CI](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-ci.yml/badge.svg)](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-ci.yml)
+[![Release](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-release.yml/badge.svg)](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-release.yml)
 
 ## 概要
 Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描くための専用ツールです。
 
 ##  必要条件
 
+### 動作環境
+- Windows
 - .NET 8.0  以上
+
+### 開発環境
 - Visual Studio 2022  以上
 
-##  インストール
+##  Eedeのインストールと実行
 
 [![Download](https://img.shields.io/badge/Download-Windows-blue?logo=github)](https://github.com/arkfinn/Eede/releases/latest/download/eede.zip)
 
@@ -48,8 +52,7 @@ Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描く�
 ### 機能
 
 - パレット機能
-    - パレットの保存・自動読み込み
-- 新規ファイル作成を実装
+    - 前回パレットの自動保存・読み込み
 - グリッド表示を実装
 - 他のペンタイプの実装
     - 円（塗りつぶしあり・なし）
@@ -64,4 +67,9 @@ Eede(Excellent Expart Dot Editor)は、32ビットRGBAのドット絵を描く�
 - 子ウィンドウの拡大縮小機能
 - 自動アンチエイリアスの実装
 - アニメーション確認ウィンドウ
+
+### 対応環境
+
+- クロスプラットフォーム対応
+
 

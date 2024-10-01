@@ -2,6 +2,7 @@
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
+using Eede.Application.UseCase.Colors;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.Files;
@@ -409,32 +410,10 @@ public class MainViewModel : ViewModelBase
         }
 
         string filePath = HttpUtility.UrlDecode(result[0].Path.AbsolutePath);
+        var reader = new FindPaletteFileReaderUseCase().Execute(filePath);
 
-        FileInfo fileInfo = new(filePath);
-        long fileSize = fileInfo.Length;
-
-        bool hasAlpha = fileSize == 1024; // RGBA形式の場合は1024バイト
-        int colorCount = 256; // 256色
-
-        ArgbColor[] palette = new ArgbColor[colorCount];
-
-        // ファイルをバイナリモードで開く
-        using (FileStream fs = new(filePath, FileMode.Open, FileAccess.Read))
-        using (BinaryReader reader = new(fs))
-        {
-            for (int i = 0; i < colorCount; i++)
-            {
-                byte r = reader.ReadByte();
-                byte g = reader.ReadByte();
-                byte b = reader.ReadByte();
-                byte a = hasAlpha ? reader.ReadByte() : (byte)255; // Alphaがない場合は255（完全不透明）
-
-                // ArgbColor構造体に格納
-                palette[i] = new ArgbColor(a, r, g, b);
-            }
-        }
-
-        TempPalette = Palette.FromColors(palette);
+        using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read);
+        TempPalette = new LoadPaletteFileUseCase(reader).Execute(fs);
     }
 
     private async void ExecuteSavePalette(StorageService storage)

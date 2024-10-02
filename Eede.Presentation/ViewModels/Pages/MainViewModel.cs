@@ -1,4 +1,5 @@
 ﻿using Avalonia.Input;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
@@ -319,14 +320,13 @@ public class MainViewModel : ViewModelBase
     {
         if (sender is not DockPictureViewModel vm)
         {
-
             return;
         }
         PictureBitmapAdapter adapter = new();
-        Avalonia.Media.Imaging.Bitmap previous = vm.Bitmap;
-
-        Avalonia.Media.Imaging.Bitmap now = adapter.ConvertToBitmap(
-            adapter.ConvertToPicture(vm.Bitmap).Blend(PullBlender, DrawableCanvasViewModel.PictureBuffer.Previous, args.Position));
+        Bitmap previous = vm.Bitmap;
+        Bitmap now = adapter.ConvertToBitmap(
+            adapter.ConvertToPicture(vm.Bitmap)
+                .Blend(PullBlender, DrawableCanvasViewModel.PictureBuffer.Previous, args.Position));
 
         UndoSystem = UndoSystem.Add(new UndoItem(
            new Action(() => { if (vm.Enabled) { vm.Bitmap = previous; } }),
@@ -388,12 +388,12 @@ public class MainViewModel : ViewModelBase
             FileTypeFilter = [
                  new("Palette File")
                  {
-                    Patterns = ["*.pal", "*.act"],
+                    Patterns = ["*.aact", "*.act"],
                     MimeTypes = ["image/*"]
                  },
                  new("Palette File (RGBA)")
                  {
-                    Patterns = ["*.pal"],
+                    Patterns = ["*.aact"],
                  },
                   new("Palette File (RGB)")
                  {
@@ -410,7 +410,7 @@ public class MainViewModel : ViewModelBase
         }
 
         string filePath = HttpUtility.UrlDecode(result[0].Path.AbsolutePath);
-        var reader = new FindPaletteFileReaderUseCase().Execute(filePath);
+        IPaletteFileReader reader = new FindPaletteFileReaderUseCase().Execute(filePath);
 
         using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read);
         TempPalette = new LoadPaletteFileUseCase(reader).Execute(fs);
@@ -421,11 +421,11 @@ public class MainViewModel : ViewModelBase
         FilePickerSaveOptions options = new()
         {
             SuggestedFileName = "palette",
-            DefaultExtension = "pal", // デフォルトの拡張子を設定
+            DefaultExtension = "aact", // デフォルトの拡張子を設定
             FileTypeChoices = [
                  new("Palette File (RGBA)")
                  {
-                    Patterns = ["*.pal"],
+                    Patterns = ["*.aact"],
                  },
             ]
         };
@@ -436,14 +436,6 @@ public class MainViewModel : ViewModelBase
         }
 
         await using Stream stream = await result.OpenWriteAsync();
-
-        TempPalette.ForEach((color, no) =>
-        {
-            stream.WriteByte(color.Red);
-            stream.WriteByte(color.Green);
-            stream.WriteByte(color.Blue);
-            stream.WriteByte(color.Alpha);
-        });
+        new SavePaletteFileUseCase(new AlphaActFileWriter()).Execute(stream, TempPalette);
     }
-
 }

@@ -13,6 +13,6 @@ public class FindPaletteFileReaderUseCase
         {
             return new ActFileReader();
         }
-        return extension == ".pal" ? (IPaletteFileReader)new PaletteFileReader() : throw new ArgumentException(extension);
+        return extension == ".aact" ? (IPaletteFileReader)new AlphaActFileReader() : throw new ArgumentException(extension);
     }
 }

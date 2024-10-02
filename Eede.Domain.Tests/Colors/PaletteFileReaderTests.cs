@@ -23,7 +23,7 @@ internal class PaletteFileReaderTests
             }
 
             using MemoryStream memoryStream = new(mockPaletteFile);
-            PaletteFileReader paletteReader = new(); // クラス名に応じて変更
+            AlphaActFileReader paletteReader = new(); // クラス名に応じて変更
 
             // Act: メソッドを実行してパレットを読み込む
             Palette result = paletteReader.Read(memoryStream);
@@ -46,7 +46,7 @@ internal class PaletteFileReaderTests
             // Arrange: 不完全なパレットデータを準備
             byte[] invalidPaletteFile = new byte[1000]; // 必要なバイト数よりも少ない
             using MemoryStream memoryStream = new(invalidPaletteFile);
-            PaletteFileReader paletteReader = new(); // クラス名に応じて変更
+            AlphaActFileReader paletteReader = new(); // クラス名に応じて変更
 
             // Act & Assert: EndOfStreamExceptionがスローされることを確認
             Assert.That(() => paletteReader.Read(memoryStream), Throws.InstanceOf<EndOfStreamException>());

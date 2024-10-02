@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Eede.Domain.Colors;
 
-public class PaletteFileReader : IPaletteFileReader
+public class AlphaActFileReader : IPaletteFileReader
 {
     public Palette Read(Stream fileStream)
     {

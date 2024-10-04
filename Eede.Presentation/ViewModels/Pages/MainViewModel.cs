@@ -1,4 +1,5 @@
 ﻿using Avalonia.Input;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
@@ -24,7 +25,6 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -75,8 +75,6 @@ public class MainViewModel : ViewModelBase
 
     [Reactive] public UndoSystem UndoSystem { get; private set; }
 
-    [Reactive] public Palette TempPalette { get; set; }
-
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
     public ReactiveCommand<StorageService, Unit> LoadPictureCommand { get; }
@@ -91,6 +89,7 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; }
     public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; }
 
+    public PaletteContainerViewModel PaletteContainerViewModel { get; } = new PaletteContainerViewModel();
 
     public MainViewModel()
     {
@@ -147,15 +146,11 @@ public class MainViewModel : ViewModelBase
         SavePictureCommand = ReactiveCommand.Create<StorageService>(ExecuteSavePicture);
         PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
 
-        TempPalette = Palette.Create();
-        PutPaletteColorCommand = ReactiveCommand.Create<int>(ExecutePutPaletteColor);
-        GetPaletteColorCommand = ReactiveCommand.Create<int>(ExecuteGetPaletteColor);
-
         ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
         CreateNewPictureCommand = ReactiveCommand.Create(ExecuteCreateNewPicture);
 
-        LoadPaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteLoadPalette);
-        SavePaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteSavePalette);
+        PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;
+        PaletteContainerViewModel.OnFetchColor += OnFetchPaletteColor;
     }
 
 
@@ -318,14 +313,13 @@ public class MainViewModel : ViewModelBase
     {
         if (sender is not DockPictureViewModel vm)
         {
-
             return;
         }
         PictureBitmapAdapter adapter = new();
-        Avalonia.Media.Imaging.Bitmap previous = vm.Bitmap;
-
-        Avalonia.Media.Imaging.Bitmap now = adapter.ConvertToBitmap(
-            adapter.ConvertToPicture(vm.Bitmap).Blend(PullBlender, DrawableCanvasViewModel.PictureBuffer.Previous, args.Position));
+        Bitmap previous = vm.Bitmap;
+        Bitmap now = adapter.ConvertToBitmap(
+            adapter.ConvertToPicture(vm.Bitmap)
+                .Blend(PullBlender, DrawableCanvasViewModel.PictureBuffer.Previous, args.Position));
 
         UndoSystem = UndoSystem.Add(new UndoItem(
            new Action(() => { if (vm.Enabled) { vm.Bitmap = previous; } }),
@@ -368,103 +362,13 @@ public class MainViewModel : ViewModelBase
         };
     }
 
-    #region パレット
-    private void ExecutePutPaletteColor(int number)
+    private ArgbColor OnApplyPaletteColor()
     {
-        TempPalette = TempPalette.Set(number, PenColor);
+        return PenColor;
     }
 
-    private void ExecuteGetPaletteColor(int number)
+    private void OnFetchPaletteColor(ArgbColor color)
     {
-        PenColor = TempPalette.Get(number);
+        PenColor = color;
     }
-    #endregion
-    private async void ExecuteLoadPalette(StorageService storage)
-    {
-        FilePickerOpenOptions options = new()
-        {
-            AllowMultiple = false,
-            FileTypeFilter = [
-                 new("Palette File")
-                 {
-                    Patterns = ["*.pal", "*.act"],
-                    MimeTypes = ["image/*"]
-                 },
-                 new("Palette File (RGBA)")
-                 {
-                    Patterns = ["*.pal"],
-                 },
-                  new("Palette File (RGB)")
-                 {
-                    Patterns = ["*.act"],
-                 },
-            ]
-            //        Title = Title,
-        };
-
-        IReadOnlyList<IStorageFile> result = await storage.StorageProvider.OpenFilePickerAsync(options);
-        if (result == null || result.Count == 0)
-        {
-            return;
-        }
-
-        string filePath = HttpUtility.UrlDecode(result[0].Path.AbsolutePath);
-
-        FileInfo fileInfo = new(filePath);
-        long fileSize = fileInfo.Length;
-
-        bool hasAlpha = fileSize == 1024; // RGBA形式の場合は1024バイト
-        int colorCount = 256; // 256色
-
-        ArgbColor[] palette = new ArgbColor[colorCount];
-
-        // ファイルをバイナリモードで開く
-        using (FileStream fs = new(filePath, FileMode.Open, FileAccess.Read))
-        using (BinaryReader reader = new(fs))
-        {
-            for (int i = 0; i < colorCount; i++)
-            {
-                byte r = reader.ReadByte();
-                byte g = reader.ReadByte();
-                byte b = reader.ReadByte();
-                byte a = hasAlpha ? reader.ReadByte() : (byte)255; // Alphaがない場合は255（完全不透明）
-
-                // ArgbColor構造体に格納
-                palette[i] = new ArgbColor(a, r, g, b);
-            }
-        }
-
-        TempPalette = Palette.FromColors(palette);
-    }
-
-    private async void ExecuteSavePalette(StorageService storage)
-    {
-        FilePickerSaveOptions options = new()
-        {
-            SuggestedFileName = "palette",
-            DefaultExtension = "pal", // デフォルトの拡張子を設定
-            FileTypeChoices = [
-                 new("Palette File (RGBA)")
-                 {
-                    Patterns = ["*.pal"],
-                 },
-            ]
-        };
-        IStorageFile result = await storage.StorageProvider.SaveFilePickerAsync(options);
-        if (result == null)
-        {
-            return;
-        }
-
-        await using Stream stream = await result.OpenWriteAsync();
-
-        TempPalette.ForEach((color, no) =>
-        {
-            stream.WriteByte(color.Red);
-            stream.WriteByte(color.Green);
-            stream.WriteByte(color.Blue);
-            stream.WriteByte(color.Alpha);
-        });
-    }
-
 }

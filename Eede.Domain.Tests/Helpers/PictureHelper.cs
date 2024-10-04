@@ -17,5 +17,16 @@ namespace Eede.Domain.Tests.Helpers
             bitmap.UnlockBits(bmpData);
             return Picture.Create(new PictureSize(bitmap.Width, bitmap.Height), bytes);
         }
+
+        public static void WriteBitmap(string path, Picture picture)
+        {
+            // .net8.0-windowsを指定してる限り当面windows依存とする
+            Bitmap bitmap = new(picture.Width, picture.Height);
+            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+            byte[] bytes = picture.CloneImage();
+            System.Runtime.InteropServices.Marshal.Copy(bytes, 0, bmpData.Scan0, bytes.Length);
+            bitmap.UnlockBits(bmpData);
+            bitmap.Save(path);
+        }
     }
 }

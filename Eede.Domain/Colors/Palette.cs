@@ -33,12 +33,12 @@ public class Palette
         return new Palette([.. colors]);
     }
 
-    public ArgbColor Get(int index)
+    public ArgbColor Fetch(int index)
     {
         return Colors[index];
     }
 
-    public Palette Set(int index, ArgbColor value)
+    public Palette Apply(int index, ArgbColor value)
     {
         return new Palette(Colors.SetItem(index, value));
     }

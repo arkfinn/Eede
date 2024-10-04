@@ -63,32 +63,13 @@
 
                       </Style>
                     </TabItem.Styles>
-                    <WrapPanel>
-                      <entry:PaletteForm Margin="4 2 4 8"
-                                         BorderBrush="Black"
-                                         BorderThickness="1"
-                                         Palette="{Binding TempPalette}"
-                                         PointerLeftButtonPressedCommand="{Binding GetPaletteColorCommand}"
-                                         PointerRightButtonPressedCommand="{Binding PutPaletteColorCommand}"
-                                       />
-                      <StackPanel Orientation="Vertical" >
-                        <Button ToolTip.Tip="パレットを開く"
-                                Command="{Binding LoadPaletteCommand}"
-                                CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
-                          <Image Source="/Assets/Tools/file_open.png" Stretch="None" />
-                        </Button>
-
-                        <Button ToolTip.Tip="パレットを保存する"
-                                Command="{Binding SavePaletteCommand}"
-                                CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
-                          <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
-                        </Button>
-                      </StackPanel>
-                    </WrapPanel>
+                    <entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
+                                            StorageService="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
+                                            Margin="4 2 4 8"/>
                   </TabItem>
                 </TabControl>
               </Panel>
-              <Panel  Margin="0" Width="100" />
+              <Panel Margin="0" Width="100" />
             </StackPanel>
           </Panel>
 

@@ -28,7 +28,7 @@ public class ActFileReaderTests
         // Assert
         for (int i = 0; i < 256; i++)
         {
-            ArgbColor color = result.Get(i);
+            ArgbColor color = result.Fetch(i);
             Assert.That(color.Alpha, Is.EqualTo(255));             // Alphaは常に255
             Assert.That(color.Red, Is.EqualTo((byte)i));         // Rの値を確認
             Assert.That(color.Green, Is.EqualTo((byte)(255 - i))); // Gの値を確認

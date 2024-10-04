@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.DataEntry"
+             xmlns:local="clr-namespace:Eede.Presentation.Views.DataEntry"
+             mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
+             x:DataType="vm:PaletteContainerViewModel"
+             x:Class="Eede.Presentation.Views.DataEntry.PaletteContainer">
+  <WrapPanel>
+    <local:PaletteForm BorderBrush="Black"
+                       BorderThickness="1"
+                       Palette="{Binding Palette}"
+                       PointerLeftButtonPressedCommand="{Binding FetchColorCommand}"
+                       PointerRightButtonPressedCommand="{Binding ApplyColorCommand}" />
+    <StackPanel Orientation="Vertical" Margin="4 0">
+      <Button ToolTip.Tip="パレットを開く"
+              Command="{Binding LoadPaletteCommand}"
+              CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
+        <Image Source="/Assets/Tools/file_open.png" Stretch="None" />
+      </Button>
+
+      <Button ToolTip.Tip="パレットを保存する"
+              Command="{Binding SavePaletteCommand}"
+              CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
+        <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
+      </Button>
+    </StackPanel>
+  </WrapPanel>
+</UserControl>

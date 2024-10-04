@@ -89,11 +89,12 @@
 
     <PackageReference Include="Avalonia.Win32.Interoperability" Version="11.1.3" />
 
-    <PackageReference Include="Dock.Avalonia" Version="11.1.0.1" />
+    <PackageReference Include="Dock.Avalonia" Version="11.1.0.3" />
 
-    <PackageReference Include="Dock.Model.Avalonia" Version="11.1.0.1" />
-    <PackageReference Include="ReactiveUI" Version="20.1.52" />
+    <PackageReference Include="Dock.Model.Avalonia" Version="11.1.0.3" />
+    <PackageReference Include="ReactiveUI" Version="20.1.63" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
 
   </ItemGroup>
 
@@ -104,6 +105,9 @@
   <ItemGroup>
     <Compile Update="Views\DataEntry\DrawableCanvas.axaml.cs">
       <DependentUpon>DrawableCanvas.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\DataEntry\PaletteContainer.axaml.cs">
+      <DependentUpon>PaletteContainer.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\DataEntry\PaletteForm.axaml.cs">
       <DependentUpon>PaletteForm.axaml</DependentUpon>

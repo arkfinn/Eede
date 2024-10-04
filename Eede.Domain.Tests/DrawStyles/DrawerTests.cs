@@ -22,25 +22,69 @@ namespace Eede.Domain.Tests.DrawStyles
             Assert.That(dst.CloneImage(), Is.EqualTo(expected.CloneImage()));
         }
 
-        [Test()]
-        public void DrawEllipseTest()
+        [TestCase(10, 10, 14, 14, @"DrawStyles\test\ellipse1.png")]
+        [TestCase(10, 10, 15, 15, @"DrawStyles\test\ellipse2.png")]
+        public void DrawEllipseTest(int fx, int fy, int tx, int ty, string expectedImagePath)
         {
+            // Arrange
             Picture src = ReadPicture(@"DrawStyles\test\base.png");
             Drawer drawer = new(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
-            Picture dst = drawer.DrawEllipse(new Position(5, 5), new Position(10, 10));
-            // dstBmp.Save(@"DrawStyles\test\ellipse1.png", ImageFormat.Png);
-            Picture expected = ReadPicture(@"DrawStyles\test\ellipse1.png");
+
+            // Act
+            Picture dst = drawer.DrawEllipse(new Position(fx, fy), new Position(tx, ty));
+            //PictureHelper.WriteBitmap(@"DrawStyles\test\ellipse_test.png", dst);
+
+            // Assert
+            Picture expected = ReadPicture(expectedImagePath);
             Assert.That(dst.CloneImage(), Is.EqualTo(expected.CloneImage()));
         }
 
-        [Test()]
-        public void DrawFillEllipseTest()
+        [TestCase(5, 5, 9, 9, @"DrawStyles\test\fillEllipse1.png")]
+        [TestCase(5, 5, 10, 10, @"DrawStyles\test\fillEllipse2.png")]
+        public void DrawFillEllipseTest(int fx, int fy, int tx, int ty, string expectedImagePath)
         {
+            // Arrange
             Picture src = ReadPicture(@"DrawStyles\test\base.png");
             Drawer drawer = new(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
-            Picture dst = drawer.DrawFillEllipse(new Position(5, 5), new Position(10, 10));
-            // dstBmp.Save(@"DrawStyles\test\fillEllipse1.png", ImageFormat.Png);
-            Picture expected = ReadPicture(@"DrawStyles\test\fillEllipse1.png");
+
+            // Act
+            Picture dst = drawer.DrawFillEllipse(new Position(fx, fy), new Position(tx, ty));
+            //PictureHelper.WriteBitmap(@"DrawStyles\test\fillEllipse_test.png", dst);
+
+            // Assert
+            Picture expected = ReadPicture(expectedImagePath);
+            Assert.That(dst.CloneImage(), Is.EqualTo(expected.CloneImage()));
+        }
+
+        [Test]
+        public void DrawRectangleTest()
+        {
+            // Arrange
+            Picture src = ReadPicture(@"DrawStyles\test\base.png");
+            Drawer drawer = new(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
+
+            // Act
+            Picture dst = drawer.DrawRectangle(new(10, 10), new(15, 15));
+            //PictureHelper.WriteBitmap(@"DrawStyles\test\test.png", dst);
+
+            // Assert
+            Picture expected = ReadPicture(@"DrawStyles\test\rectangle1.png");
+            Assert.That(dst.CloneImage(), Is.EqualTo(expected.CloneImage()));
+        }
+
+        [Test]
+        public void DrawFillRectangleTest()
+        {
+            // Arrange
+            Picture src = ReadPicture(@"DrawStyles\test\base.png");
+            Drawer drawer = new(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
+
+            // Act
+            Picture dst = drawer.DrawFillRectangle(new(10, 10), new(15, 15));
+            // PictureHelper.WriteBitmap(@"DrawStyles\test\test.png", dst);
+
+            // Assert
+            Picture expected = ReadPicture(@"DrawStyles\test\fillRectangle1.png");
             Assert.That(dst.CloneImage(), Is.EqualTo(expected.CloneImage()));
         }
 
@@ -48,5 +92,6 @@ namespace Eede.Domain.Tests.DrawStyles
         {
             return PictureHelper.ReadBitmap(path);
         }
+
     }
 }

@@ -6,7 +6,7 @@ namespace Eede.Domain.Colors;
 
 public class Palette
 {
-    private const int MAX_LENGTH = 256;
+    public const int MAX_LENGTH = 256;
     private readonly ImmutableList<ArgbColor> Colors;
 
     private Palette(ImmutableList<ArgbColor> colors)
@@ -33,12 +33,12 @@ public class Palette
         return new Palette([.. colors]);
     }
 
-    public ArgbColor Get(int index)
+    public ArgbColor Fetch(int index)
     {
         return Colors[index];
     }
 
-    public Palette Set(int index, ArgbColor value)
+    public Palette Apply(int index, ArgbColor value)
     {
         return new Palette(Colors.SetItem(index, value));
     }

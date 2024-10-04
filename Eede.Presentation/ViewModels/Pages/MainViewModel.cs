@@ -3,7 +3,6 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
-using Eede.Application.UseCase.Colors;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.Files;
@@ -26,7 +25,6 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -77,8 +75,6 @@ public class MainViewModel : ViewModelBase
 
     [Reactive] public UndoSystem UndoSystem { get; private set; }
 
-    [Reactive] public Palette TempPalette { get; set; }
-
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
     public ReactiveCommand<StorageService, Unit> LoadPictureCommand { get; }
@@ -93,6 +89,7 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; }
     public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; }
 
+    public PaletteContainerViewModel PaletteContainerViewModel { get; } = new PaletteContainerViewModel();
 
     public MainViewModel()
     {
@@ -149,15 +146,11 @@ public class MainViewModel : ViewModelBase
         SavePictureCommand = ReactiveCommand.Create<StorageService>(ExecuteSavePicture);
         PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
 
-        TempPalette = Palette.Create();
-        PutPaletteColorCommand = ReactiveCommand.Create<int>(ExecutePutPaletteColor);
-        GetPaletteColorCommand = ReactiveCommand.Create<int>(ExecuteGetPaletteColor);
-
         ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
         CreateNewPictureCommand = ReactiveCommand.Create(ExecuteCreateNewPicture);
 
-        LoadPaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteLoadPalette);
-        SavePaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteSavePalette);
+        PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;
+        PaletteContainerViewModel.OnFetchColor += OnFetchPaletteColor;
     }
 
 
@@ -369,73 +362,13 @@ public class MainViewModel : ViewModelBase
         };
     }
 
-    #region パレット
-    private void ExecutePutPaletteColor(int number)
+    private ArgbColor OnApplyPaletteColor()
     {
-        TempPalette = TempPalette.Set(number, PenColor);
+        return PenColor;
     }
 
-    private void ExecuteGetPaletteColor(int number)
+    private void OnFetchPaletteColor(ArgbColor color)
     {
-        PenColor = TempPalette.Get(number);
-    }
-    #endregion
-    private async void ExecuteLoadPalette(StorageService storage)
-    {
-        FilePickerOpenOptions options = new()
-        {
-            AllowMultiple = false,
-            FileTypeFilter = [
-                 new("Palette File")
-                 {
-                    Patterns = ["*.aact", "*.act"],
-                    MimeTypes = ["image/*"]
-                 },
-                 new("Palette File (RGBA)")
-                 {
-                    Patterns = ["*.aact"],
-                 },
-                  new("Palette File (RGB)")
-                 {
-                    Patterns = ["*.act"],
-                 },
-            ]
-            //        Title = Title,
-        };
-
-        IReadOnlyList<IStorageFile> result = await storage.StorageProvider.OpenFilePickerAsync(options);
-        if (result == null || result.Count == 0)
-        {
-            return;
-        }
-
-        string filePath = HttpUtility.UrlDecode(result[0].Path.AbsolutePath);
-        IPaletteFileReader reader = new FindPaletteFileReaderUseCase().Execute(filePath);
-
-        using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read);
-        TempPalette = new LoadPaletteFileUseCase(reader).Execute(fs);
-    }
-
-    private async void ExecuteSavePalette(StorageService storage)
-    {
-        FilePickerSaveOptions options = new()
-        {
-            SuggestedFileName = "palette",
-            DefaultExtension = "aact", // デフォルトの拡張子を設定
-            FileTypeChoices = [
-                 new("Palette File (RGBA)")
-                 {
-                    Patterns = ["*.aact"],
-                 },
-            ]
-        };
-        IStorageFile result = await storage.StorageProvider.SaveFilePickerAsync(options);
-        if (result == null)
-        {
-            return;
-        }
-
-        await using Stream stream = await result.OpenWriteAsync();
-        new SavePaletteFileUseCase(new AlphaActFileWriter()).Execute(stream, TempPalette);
+        PenColor = color;
     }
 }

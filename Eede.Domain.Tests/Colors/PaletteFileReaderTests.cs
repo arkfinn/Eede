@@ -32,7 +32,7 @@ internal class PaletteFileReaderTests
             // 各色の値を確認
             for (int i = 0; i < 256; i++)
             {
-                ArgbColor color = result.Get(i);
+                ArgbColor color = result.Fetch(i);
                 Assert.That(color.Red, Is.EqualTo((byte)i));         // Rの値
                 Assert.That(color.Green, Is.EqualTo((byte)(255 - i))); // Gの値
                 Assert.That(color.Blue, Is.EqualTo((byte)(i / 2)));   // Bの値

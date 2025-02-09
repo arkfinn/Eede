@@ -6,106 +6,13 @@
 
 ### 1.1 ビジネス要件
 
-- ユーザーは選択した領域を視覚的なフィードバックを得ながら移動できる
+- ユーザーは選択した領域の画像を視覚的なフィードバックを得ながら移動できる
 - 移動操作はUndo/Redoに対応
 - 画像領域の境界を超えた場合の適切な処理
-- 移動中のパフォーマンスを考慮した実装
 
-## 2. ドメインモデル拡張
+## 2. ユースケース詳細設計
 
-### 2.1 新規コンポーネント
-
-#### DraggableRegionSelector（集約ルート）
-
-```
-Eede.Domain/DrawStyles/DraggableRegionSelector.cs
-```
-
-- RegionSelector を拡張したドメインサービス
-- 値オブジェクトとしてのドラッグ状態管理
-- ドメインイベントによる状態変更通知
-- 不変条件：
-  - 選択領域は画像範囲内に制限
-  - ドラッグ状態の整合性保持
-
-```csharp
-public sealed class DragState
-{
-    public Position StartPosition { get; }
-    public Position CurrentPosition { get; }
-    public bool IsDragging { get; }
-
-    private DragState(Position start, Position current, bool isDragging)
-    {
-        StartPosition = start;
-        CurrentPosition = current;
-        IsDragging = isDragging;
-    }
-
-    public static DragState Create(Position start)
-    {
-        // 値オブジェクトとしてのファクトリメソッド
-        if (start == null)
-            throw new DomainException("開始位置が無効です");
-
-        return new DragState(start, start, true);
-    }
-
-    public DragState WithNewPosition(Position newPosition)
-    {
-        // イミュータブルな状態更新
-        return new DragState(StartPosition, newPosition, IsDragging);
-    }
-}
-```
-
-#### SelectionMoveAction
-
-```
-Eede.Domain/Pictures/Actions/SelectionMoveAction.cs
-```
-
-- 不変条件を持つドメインアクション
-- コマンドパターンによるUndo/Redo実装
-- Value Objectによる座標・領域の表現
-- トランザクション境界の明確な定義
-
-### 2.2 既存コンポーネントの拡張
-
-#### DrawingBuffer
-
-- インターフェース定義による疎結合
-- メモリ効率を考慮した一時バッファー管理
-- スレッドセーフな実装
-- パフォーマンスモニタリング機能
-
-```csharp
-public interface IDrawingBuffer
-{
-    Result<Unit> StoreTemporary(PictureArea area, DrawingBuffer content);
-    Result<DrawingBuffer> RetrieveTemporary(PictureArea area);
-    void ClearTemporary();
-    IMemoryMetrics GetMemoryMetrics();
-}
-
-public interface IMemoryMetrics
-{
-    long CurrentUsage { get; }
-    long PeakUsage { get; }
-    IEnumerable<MemoryAllocationEvent> AllocationHistory { get; }
-}
-```
-
-#### PositionHistory
-
-- 値オブジェクトとしての座標履歴
-- イミュータブルな実装
-- パフォーマンスを考慮した履歴管理
-- 履歴の自動最適化機能
-
-## 3. ユースケース詳細設計
-
-### 3.1 状態遷移とイベント
+### 2.1 状態遷移とイベント
 
 ```mermaid
 stateDiagram-v2
@@ -118,8 +25,6 @@ stateDiagram-v2
     Completed --> [*]: 操作完了
 
     note right of Moving
-        - パフォーマンス監視
-        - メモリ使用量の最適化
         - 境界チェック
     end note
 ```
@@ -129,22 +34,20 @@ stateDiagram-v2
 1. 選択状態
    - DomainEvent: RegionSelected
    - Validation: 選択領域の境界チェック
-   - パフォーマンス: 選択領域サイズの制限
 
 2. ドラッグ開始
    - DomainEvent: DragStarted
    - Validation: マウス位置の有効性検証
    - 最適化: 必要最小限の画像データ保存
-   - メモリ監視: 使用量のトラッキング開始
 
 3. ドラッグ中
    - DomainEvent: DragProgressing
    - パフォーマンス: 描画更新の最適化
    - エラー処理: 境界外への移動制限
-   - メモリ管理: 不要データの解放
 
 4. ドロップ
    - DomainEvent: DragCompleted
+   - 指定位置への選択範囲の画像情報の移動
    - トランザクション: 状態の一貫性保持
    - UndoSystem: 操作履歴の最適化
    - リソース解放: 一時データの適切な破棄

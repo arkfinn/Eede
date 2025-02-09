@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Drawings;
@@ -21,6 +22,20 @@ namespace Eede.Presentation.ViewModels.DataEntry;
 
 public class DrawableCanvasViewModel : ViewModelBase
 {
+    [Reactive] public Color BackgroundColor { get; set; }
+    [Reactive] public Magnification Magnification { get; set; }
+    [Reactive] public IDrawStyle DrawStyle { get; set; }
+    [Reactive] public IImageBlender ImageBlender { get; set; }
+    [Reactive] public ArgbColor PenColor { get; set; }
+    [Reactive] public int PenSize { get; set; }
+    [Reactive] public PenStyle PenStyle { get; set; }
+    [Reactive] public IImageTransfer ImageTransfer { get; set; }
+    [Reactive] public bool IsShifted { get; set; }
+    [Reactive] public bool IsRegionSelecting { get; set; }
+    [Reactive] public PictureArea SelectingArea { get; set; }
+    [Reactive] public Thickness SelectingThickness { get; set; }
+    [Reactive] public PictureSize SelectingSize { get; set; }
+
     public DrawableCanvasViewModel()
     {
         Magnification = new Magnification(4);
@@ -73,18 +88,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             });
     }
 
-    [Reactive] public Magnification Magnification { get; set; }
-    [Reactive] public IDrawStyle DrawStyle { get; set; }
-    [Reactive] public IImageBlender ImageBlender { get; set; }
-    [Reactive] public ArgbColor PenColor { get; set; }
-    [Reactive] public int PenSize { get; set; }
-    [Reactive] public PenStyle PenStyle { get; set; }
-    [Reactive] public IImageTransfer ImageTransfer { get; set; }
-    [Reactive] public bool IsShifted { get; set; }
-    [Reactive] public bool IsRegionSelecting { get; set; }
-    [Reactive] public PictureArea SelectingArea { get; set; }
-    [Reactive] public Thickness SelectingThickness { get; set; }
-    [Reactive] public PictureSize SelectingSize { get; set; }
+
 
     private Bitmap _bitmap;
     public Bitmap MyBitmap

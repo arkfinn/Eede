@@ -7,7 +7,7 @@
              xmlns:navi="clr-namespace:Eede.Presentation.Views.Navigation"
              xmlns:entry="clr-namespace:Eede.Presentation.Views.DataEntry"
              xmlns:display="clr-namespace:Eede.Presentation.Views.DataDisplay"
-             
+
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
              x:Class="Eede.Presentation.Views.Pages.MainView"
              x:DataType="vm:MainViewModel"
@@ -86,6 +86,7 @@
             <DockPanel LastChildFill="True" >
 
               <entry:DrawableCanvas DockPanel.Dock="Bottom"
+                                    Background="{Binding BackgroundColor}"
                                     DataContext="{Binding DrawableCanvasViewModel}"/>
             </DockPanel>
           </ScrollViewer>

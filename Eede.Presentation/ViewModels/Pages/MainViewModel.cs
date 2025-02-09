@@ -1,4 +1,5 @@
 ﻿using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
@@ -36,6 +37,12 @@ public class MainViewModel : ViewModelBase
 {
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
     public DrawableCanvasViewModel DrawableCanvasViewModel { get; } = new DrawableCanvasViewModel();
+
+    public Color BackgroundColor
+    {
+        get => DrawableCanvasViewModel.BackgroundColor;
+        set => DrawableCanvasViewModel.BackgroundColor = value;
+    }
 
     public Magnification Magnification
     {
@@ -95,6 +102,7 @@ public class MainViewModel : ViewModelBase
     {
         ImageTransfer = new DirectImageTransfer();
         PenColor = DrawableCanvasViewModel.PenColor;
+        BackgroundColor = Color.Parse("#00000000");
         PullBlender = new DirectImageBlender();
         _ = this.WhenAnyValue(x => x.PenColor).BindTo(this, x => x.DrawableCanvasViewModel.PenColor);
         MinCursorSizeList =

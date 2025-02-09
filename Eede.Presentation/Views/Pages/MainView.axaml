@@ -78,6 +78,33 @@
               <navi:DrawStyleMenu Margin="2" DrawStyle="{Binding DrawStyle}" />
               <entry:PenWidthSelector Margin="2" PenWidth="{Binding PenWidth}"/>
               <entry:ColorPicker Margin="2" NowColor="{Binding PenColor}"/>
+              <StackPanel Orientation="Horizontal" Margin="2">
+                <Panel VerticalAlignment="Center">
+                  <TextBlock Margin="4" Text="背景色" />
+                </Panel>
+                <Border Background="Gray"
+                    BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="2"
+                    Padding="0" Margin="4">
+                  <Panel Width="32" Height="24">
+                    <Panel.Background>
+                      <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+                        Stretch="None"
+                        TileMode="Tile"
+                        SourceRect="0,0,16,16"
+                        DestinationRect="0,0,16,16"
+                        AlignmentY="Top"
+                        AlignmentX="Left"/>
+                    </Panel.Background>
+                    <Panel Width="32" Height="24">
+                      <Panel.Background>
+                        <SolidColorBrush Color="{Binding BackgroundColor}"/>
+                      </Panel.Background>
+                    </Panel>
+                  </Panel>
+                </Border>
+              </StackPanel>
             </StackPanel>
           </Panel>
 

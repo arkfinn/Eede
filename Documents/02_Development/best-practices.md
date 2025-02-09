@@ -92,6 +92,57 @@ public async Task SaveImageAsync(string path)
 
 ## 4. テストのベストプラクティス
 
+### 4.0 テスト駆動開発（TDD）
+
+#### Red-Green-Refactorサイクル
+
+TDDは以下の3ステップを繰り返すことで品質の高いコードを開発する手法です：
+
+1. Red: 失敗するテストを書く
+2. Green: テストが通る最小限の実装を行う
+3. Refactor: コードをリファクタリングする
+
+```csharp
+// 1. Red: まず失敗するテストを書く
+[Test]
+public void CalculateArea_WithPositiveRadius_ReturnsCorrectArea()
+{
+    var circle = new Circle(5);
+    Assert.That(circle.CalculateArea(), Is.EqualTo(78.54));
+}
+
+// 2. Green: テストが通る最小限の実装
+public class Circle
+{
+    private readonly double _radius;
+
+    public Circle(double radius)
+    {
+        _radius = radius;
+    }
+
+    public double CalculateArea()
+    {
+        return Math.PI * _radius * _radius;
+    }
+}
+
+// 3. Refactor: 必要に応じてコードを改善
+```
+
+#### TDDの利点
+
+- 設計の改善：テストファーストで考えることで、より良い設計が導かれる
+- バグの早期発見：問題を早い段階で特定できる
+- 回帰テストの自動的な作成：変更による影響を素早く検出
+- ドキュメントとしての価値：テストが実行可能な仕様として機能
+
+#### TDDの実践ガイドライン
+
+- 小さな単位で実装：一度に1つの機能に集中
+- テストケースは明確に：テストの意図が分かりやすいように命名
+- 過剰なモック使用を避ける：必要最小限のモックに留める
+
 ### 4.1 単体テスト
 
 - テストは独立して実行可能に

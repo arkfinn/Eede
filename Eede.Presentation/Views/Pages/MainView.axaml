@@ -7,7 +7,7 @@
              xmlns:navi="clr-namespace:Eede.Presentation.Views.Navigation"
              xmlns:entry="clr-namespace:Eede.Presentation.Views.DataEntry"
              xmlns:display="clr-namespace:Eede.Presentation.Views.DataDisplay"
-
+             xmlns:general="clr-namespace:Eede.Presentation.Views.General"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
              x:Class="Eede.Presentation.Views.Pages.MainView"
              x:DataType="vm:MainViewModel"
@@ -80,14 +80,14 @@
               <entry:ColorPicker Margin="2" NowColor="{Binding PenColor}"/>
               <StackPanel Orientation="Horizontal" Margin="2">
                 <Panel VerticalAlignment="Center">
-                  <TextBlock Margin="4" Text="背景色" />
+                  <TextBlock Margin="4" Text="現在色" />
                 </Panel>
                 <Border Background="Gray"
                     BorderBrush="Gray"
                     BorderThickness="1"
                     CornerRadius="2"
                     Padding="0" Margin="4">
-                  <Panel Width="32" Height="24">
+                  <Panel Width="32" Height="20">
                     <Panel.Background>
                       <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
                         Stretch="None"
@@ -97,13 +97,21 @@
                         AlignmentY="Top"
                         AlignmentX="Left"/>
                     </Panel.Background>
-                    <Panel Width="32" Height="24">
+                    <Panel Width="32" Height="20">
                       <Panel.Background>
-                        <SolidColorBrush Color="{Binding BackgroundColor}"/>
+                        <SolidColorBrush Color="{Binding NowPenColor}"/>
                       </Panel.Background>
                     </Panel>
                   </Panel>
                 </Border>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Margin="2">
+                <Panel VerticalAlignment="Center">
+                  <TextBlock Margin="4" Text="背景色" />
+                </Panel>
+                <general:ColorSampleButton SampleColor="{Binding BackgroundColor}"
+                                           PutCommand="{Binding PutBackgroundColorCommand}"
+                                           GetCommand="{Binding GetBackgroundColorCommand}"/>
               </StackPanel>
             </StackPanel>
           </Panel>

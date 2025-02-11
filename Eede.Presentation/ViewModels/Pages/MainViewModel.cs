@@ -38,11 +38,7 @@ public class MainViewModel : ViewModelBase
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
     public DrawableCanvasViewModel DrawableCanvasViewModel { get; } = new DrawableCanvasViewModel();
 
-    public Color BackgroundColor
-    {
-        get => DrawableCanvasViewModel.BackgroundColor;
-        set => DrawableCanvasViewModel.BackgroundColor = value;
-    }
+    [Reactive] public Color BackgroundColor { get; set; }
 
     public Magnification Magnification
     {
@@ -65,6 +61,8 @@ public class MainViewModel : ViewModelBase
     }
 
     [Reactive] public ArgbColor PenColor { get; set; }
+    [Reactive] public Color NowPenColor { get; set; }
+    [Reactive] public Color SampleColor { get; set; }
 
     public int PenWidth
     {
@@ -95,15 +93,20 @@ public class MainViewModel : ViewModelBase
 
     public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; }
     public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; }
-
+    public ReactiveCommand<Unit, Unit> PutBackgroundColorCommand { get; }
+    public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; }
     public PaletteContainerViewModel PaletteContainerViewModel { get; } = new PaletteContainerViewModel();
 
     public MainViewModel()
     {
         ImageTransfer = new DirectImageTransfer();
-        PenColor = DrawableCanvasViewModel.PenColor;
-        BackgroundColor = Color.Parse("#00000000");
+        BackgroundColor = Color.FromArgb(0, 0, 0, 0);
+        _ = this.WhenAnyValue(x => x.BackgroundColor).BindTo(this, x => x.DrawableCanvasViewModel.BackgroundColor);
         PullBlender = new DirectImageBlender();
+        PenColor = DrawableCanvasViewModel.PenColor;
+        _ = this.WhenAnyValue(x => x.PenColor)
+            .Select(x => Color.FromArgb(x.Alpha, x.Red, x.Green, x.Blue))
+            .BindTo(this, x => x.NowPenColor);
         _ = this.WhenAnyValue(x => x.PenColor).BindTo(this, x => x.DrawableCanvasViewModel.PenColor);
         MinCursorSizeList =
         [
@@ -157,10 +160,18 @@ public class MainViewModel : ViewModelBase
         ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
         CreateNewPictureCommand = ReactiveCommand.Create(ExecuteCreateNewPicture);
 
+        PutBackgroundColorCommand = ReactiveCommand.Create(() =>
+        {
+            BackgroundColor = NowPenColor;
+        });
+        GetBackgroundColorCommand = ReactiveCommand.Create(() =>
+        {
+            PenColor = new ArgbColor(BackgroundColor.A, BackgroundColor.R, BackgroundColor.G, BackgroundColor.B);
+        });
+
         PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;
         PaletteContainerViewModel.OnFetchColor += OnFetchPaletteColor;
     }
-
 
     private void ExecuteUndo()
     {

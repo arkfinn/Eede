@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Eede.Presentation.Views.General"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Eede.Presentation.Views.General.ColorSampleButton">
+  <Border Background="Gray"
+        BorderBrush="Gray"
+        BorderThickness="1"
+        CornerRadius="2"
+        Padding="0" Margin="4">
+    <Panel Width="32" Height="20">
+      <Panel.Background>
+        <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+          Stretch="None"
+          TileMode="Tile"
+          SourceRect="0,0,16,16"
+          DestinationRect="0,0,16,16"
+          AlignmentY="Top"
+          AlignmentX="Left"/>
+      </Panel.Background>
+      <Panel Width="32"
+             Height="20"
+             PointerPressed="OnPointerPressed">
+        <Panel.Background>
+          <SolidColorBrush Color="{Binding $parent[local:ColorSampleButton].SampleColor}"/>
+        </Panel.Background>
+      </Panel>
+    </Panel>
+  </Border>
+</UserControl>

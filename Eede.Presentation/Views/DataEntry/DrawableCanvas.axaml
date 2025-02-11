@@ -41,6 +41,12 @@
                       AlignmentY="Top"
                       AlignmentX="Left"/>
         </Panel.Background>
+        <Panel Width="{Binding MyBitmap.PixelSize.Width}"
+              Height="{Binding MyBitmap.PixelSize.Height}" >
+          <Panel.Background>
+            <SolidColorBrush Color="{Binding BackgroundColor}"/>
+          </Panel.Background>
+        </Panel>
         <Image x:Name="canvas"
                Stretch="None"
                Focusable="True"

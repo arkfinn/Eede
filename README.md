@@ -1,10 +1,11 @@
 ﻿# Eede - Excellent Expert Dot Editor
-
-[![Release](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-release.yml/badge.svg)](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-release.yml)
+[![.NET Core Desktop CI](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-ci.yml/badge.svg?branch=master)](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-ci.yml)
+![](https://img.shields.io/github/license/arkfinn/Eede)
+![](https://img.shields.io/github/v/release/arkfinn/Eede)
 
 ## 概要
 
-Eede(Excellent Expart Dot Editor)は、32 ビット RGBA のドット絵を描くための専用ツールです。
+Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描くための専用ツールです。
 
 ## 必要条件
 

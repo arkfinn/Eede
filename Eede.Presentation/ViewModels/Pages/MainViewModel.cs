@@ -4,18 +4,19 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
+using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
+using Eede.Domain.Pictures.Actions;
 using Eede.Domain.Scales;
 using Eede.Domain.Systems;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Drawings;
-using Eede.Presentation.Common.Pictures.Actions;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
@@ -313,13 +314,16 @@ public class MainViewModel : ViewModelBase
             return;
         }
         PictureBitmapAdapter adapter = new();
-        Picture from = adapter.ConvertToPicture(vm.Bitmap).CutOut(args.Rect);
-        Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
-        UndoSystem = UndoSystem.Add(new UndoItem(
-            new Action(() => { SetPictureToDrawArea(previous); }),
-            new Action(() => { SetPictureToDrawArea(from); })));
+        PictureEditingUseCase.EditResult result = PictureEditingUseCase.PushToCanvas(
+            DrawableCanvasViewModel.PictureBuffer.Previous,
+            adapter.ConvertToPicture(vm.Bitmap),
+            args.Rect);
 
-        SetPictureToDrawArea(from);
+        UndoSystem = UndoSystem.Add(new UndoItem(
+            new Action(() => { SetPictureToDrawArea(result.Previous); }),
+            new Action(() => { SetPictureToDrawArea(result.Updated); })));
+
+        SetPictureToDrawArea(result.Updated);
     }
 
     private void SetPictureToDrawArea(Picture picture)
@@ -335,37 +339,34 @@ public class MainViewModel : ViewModelBase
             return;
         }
         PictureBitmapAdapter adapter = new();
+        PictureEditingUseCase.EditResult result = PictureEditingUseCase.PullFromCanvas(
+            adapter.ConvertToPicture(vm.Bitmap),
+            DrawableCanvasViewModel.PictureBuffer.Previous,
+            args.Position,
+            PullBlender);
+
         Bitmap previous = vm.Bitmap;
-        Bitmap now = adapter.ConvertToBitmap(
-            adapter.ConvertToPicture(vm.Bitmap)
-                .Blend(PullBlender, DrawableCanvasViewModel.PictureBuffer.Previous, args.Position));
+        Bitmap now = adapter.ConvertToBitmap(result.Updated);
 
         UndoSystem = UndoSystem.Add(new UndoItem(
            new Action(() => { if (vm.Enabled) { vm.Bitmap = previous; } }),
            new Action(() => { if (vm.Enabled) { vm.Bitmap = now; } })));
+
         vm.Bitmap = now;
     }
 
     private void ExecutePictureAction(PictureActions actionType)
     {
-        Picture previous = DrawableCanvasViewModel.PictureBuffer.Previous;
-
-        Picture updatedPicture;
-        if (DrawableCanvasViewModel.IsRegionSelecting)
-        {
-            Picture region = previous.CutOut(DrawableCanvasViewModel.SelectingArea);
-            Picture updatedRegion = actionType.Execute(region);
-            DirectImageBlender blender = new();
-            updatedPicture = blender.Blend(updatedRegion, previous, DrawableCanvasViewModel.SelectingArea.Position);
-        }
-        else
-        {
-            updatedPicture = actionType.Execute(previous);
-        }
+        PictureEditingUseCase.EditResult result = PictureEditingUseCase.ExecuteAction(
+            DrawableCanvasViewModel.PictureBuffer.Previous,
+            actionType,
+            DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null
+        );
         UndoSystem = UndoSystem.Add(new UndoItem(
-                   new Action(() => { SetPictureToDrawArea(previous); }),
-                   new Action(() => { SetPictureToDrawArea(updatedPicture); })));
-        SetPictureToDrawArea(updatedPicture);
+         new Action(() => { SetPictureToDrawArea(result.Previous); }),
+         new Action(() => { SetPictureToDrawArea(result.Updated); })));
+
+        SetPictureToDrawArea(result.Updated);
     }
 
     private IDrawStyle ExecuteUpdateDrawStyle(DrawStyles drawStyle)

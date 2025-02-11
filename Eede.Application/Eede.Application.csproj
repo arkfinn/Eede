@@ -6,20 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Pictures\PictureFile.cs~RF38f2ef46.TMP" />
-    <None Remove="UseCase\Colors\SavePaletteFileUseCase.cs~RF328aeb67.TMP" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="9.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Eede.Domain\Eede.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="UseCase\Pictures\" />
   </ItemGroup>
 
 </Project>

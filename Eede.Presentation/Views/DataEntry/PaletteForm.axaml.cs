@@ -52,8 +52,7 @@ public partial class PaletteForm : UserControl
         panel.Height = height;
         image.Width = width;
         image.Height = height;
-        PictureBitmapAdapter adapter = new();
-        PaletteBitmap = adapter.ConvertToBitmap(PaletteBuffer);
+        PaletteBitmap = PictureBitmapAdapter.ConvertToBitmap(PaletteBuffer);
         image.Source = PaletteBitmap;
         Refresh();
 
@@ -79,9 +78,8 @@ public partial class PaletteForm : UserControl
             int y = index / 16 * CELL_HEIGHT;
             Buffer = drawer.DrawFillRectangle(new Position(x, y), new Position(x + CELL_WIDTH - 1, y + CELL_HEIGHT - 1));
         });
-        PictureBitmapAdapter adapter = new();
         PaletteBitmap?.Dispose();
-        PaletteBitmap = adapter.ConvertToBitmap(Buffer);
+        PaletteBitmap = PictureBitmapAdapter.ConvertToBitmap(Buffer);
         image.Source = PaletteBitmap;
     }
 

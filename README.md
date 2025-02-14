@@ -27,8 +27,6 @@ Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描�
 
 ## コントリビューション
 
-## コントリビューション
-
 プロジェクトへの貢献をお待ちしております。以下の手順で開発に参加してください。
 
 1. 新機能の追加やバグ修正を行う前に、まず Issue を作成して提案内容を共有してください。
@@ -49,7 +47,7 @@ Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描�
 
 ## 今後の改善点
 
-### バグ
+### 既知のバグ
 
 - 一度でも Document を Close した後に他の Document を移動すると Dock が表示されなくなる不具合
 - Document を開いた際に CursorArea が必ず 32x32 になる不具合

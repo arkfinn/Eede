@@ -5,6 +5,7 @@ using Eede.Application.Pictures;
 using Eede.Domain.Files;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
+using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Enums;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
@@ -35,7 +36,8 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             return vm;
         }
 
-        [Reactive] public Bitmap Bitmap { get; set; }
+        [Reactive] public Picture PictureBuffer { get; set; }
+        [Reactive] public Bitmap PremultipliedBitmap { get; set; }
         [Reactive] public PictureSize MinCursorSize { get; set; }
         [Reactive] public PictureSize CursorSize { get; set; }
         [Reactive] public HalfBoxArea CursorArea { get; set; }
@@ -62,6 +64,10 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             Initialize(new BitmapFile(
                 new WriteableBitmap(new PixelSize(32, 32), new Vector(96, 96), PixelFormat.Bgra8888),
                 FilePath.Empty()));
+            _ = this.WhenAnyValue(x => x.PictureBuffer).Subscribe(_ =>
+            {
+                PremultipliedBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
+            });
         }
 
         public event EventHandler<PictureSaveEventArgs> PictureSave;
@@ -72,14 +78,15 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             {
                 return;
             }
-            var args = new PictureSaveEventArgs(new BitmapFile(Bitmap, Path), storage);
+            var bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
+            var args = new PictureSaveEventArgs(new BitmapFile(bitmap, Path), storage);
             PictureSave.Invoke(this, args);
             Initialize(args.File);
         }
 
         public void Initialize(BitmapFile file)
         {
-            Bitmap = file.Bitmap;
+            PictureBuffer = PictureBitmapAdapter.ConvertToPicture(file.Bitmap);
             var isNewFile = file.IsNewFile();
             Path = isNewFile ? FilePath.Empty() : file.Path;
             Subject = isNewFile ? "新しいファイル" : file.GetPathString();

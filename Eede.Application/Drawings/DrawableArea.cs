@@ -7,7 +7,6 @@ using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
 using Eede.Domain.Sizes;
-using System.Drawing;
 
 namespace Eede.Application.Drawings
 {
@@ -32,29 +31,6 @@ namespace Eede.Application.Drawings
         private MagnifiedSize Magnify(PictureSize size)
         {
             return new MagnifiedSize(size, Magnification);
-        }
-
-        public void Paint(Graphics g, DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
-        {
-            Picture source = buffer.Fetch();
-            // 表示上のサイズ・ポジション DisplaySize DisplayPosition
-            MagnifiedSize displaySize = Magnify(source.Size);
-            //PaintBackgroundLayer backgroundLayer = new(Background);
-            //backgroundLayer.Paint(g);
-
-            if (!buffer.IsDrawing() && PositionHistory != null)
-            {
-                CursorLayer cursorLayer = new(displaySize, source, penStyle, PositionHistory.Now, imageTransfer);
-                cursorLayer.Paint(g);
-            }
-            else
-            {
-                PaintBufferLayer bufferLayer = new(displaySize, source, imageTransfer);
-                bufferLayer.Paint(g);
-            }
-
-            //PaintGridLayer gridLayer = new(displaySize, Magnify(GridSize));
-            //gridLayer.Paint(g);
         }
 
         public Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)

@@ -37,11 +37,10 @@ namespace Eede.Presentation.Views.DataEntry
             {
                 return;
             }
-            Avalonia.Media.Imaging.Bitmap bitmap = vm.Bitmap;
+            Avalonia.Media.Imaging.Bitmap bitmap = vm.PremultipliedBitmap;
 
             CanvasSize = new PictureSize((int)bitmap.Size.Width, (int)bitmap.Size.Height);
 
-            // Dockable‚Í“Æ©‚ÌDataContext‚ğŠ„‚è“–‚Ä‚ç‚ê‚é‚Ì‚Åè“®‚Å’l‚Ì•ÏX‚âƒoƒCƒ“ƒfƒBƒ“ƒO‚ğs‚¤
             background.Width = bitmap.Size.Width;
             background.Height = bitmap.Size.Height;
             canvas.Width = bitmap.Size.Width;
@@ -50,7 +49,7 @@ namespace Eede.Presentation.Views.DataEntry
             _ = canvasBrush.Bind(ImageBrush.SourceProperty, new Binding
             {
                 Source = vm,
-                Path = nameof(vm.Bitmap)
+                Path = nameof(vm.PremultipliedBitmap)
             });
             canvas.Background = canvasBrush;
             MinCursorSize = vm.MinCursorSize;
@@ -166,7 +165,7 @@ namespace Eede.Presentation.Views.DataEntry
                     break;
 
                 case PointerUpdateKind.RightButtonPressed:
-                    // ”ÍˆÍ‘I‘ğŠJn
+                    // ï¿½ÍˆÍ‘Iï¿½ï¿½ï¿½Jï¿½n
                     IsSelecting = true;
                     SelectingArea = HalfBoxArea.Create(MinCursorSize, PointToPosition(e.GetPosition(canvas)));
                     break;
@@ -197,7 +196,7 @@ namespace Eede.Presentation.Views.DataEntry
                     break;
 
                 case PointerUpdateKind.RightButtonReleased:
-                    // ”ÍˆÍ‘I‘ğ‚µ‚Ä‚é‚Æ‚«
+                    // ï¿½ÍˆÍ‘Iï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½Æ‚ï¿½
                     if (IsSelecting)
                     {
                         PictureArea area = SelectingArea.CreateRealArea(SelectingArea.BoxSize);

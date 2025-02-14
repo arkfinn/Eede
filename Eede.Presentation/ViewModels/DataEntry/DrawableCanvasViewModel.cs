@@ -135,7 +135,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     {
         Picture = DrawableArea.Painted(PictureBuffer, PenStyle, ImageTransfer);
         PictureBitmapAdapter adapter = new();
-        MyBitmap = adapter.ConvertToBitmap(Picture);
+        MyBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(Picture);
     }
 
     public ReactiveCommand<Position, Unit> DrawBeginCommand { get; }

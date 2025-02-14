@@ -316,7 +316,7 @@ public class MainViewModel : ViewModelBase
         PictureBitmapAdapter adapter = new();
         PictureEditingUseCase.EditResult result = PictureEditingUseCase.PushToCanvas(
             DrawableCanvasViewModel.PictureBuffer.Previous,
-            adapter.ConvertToPicture(vm.Bitmap),
+            vm.PictureBuffer,
             args.Rect);
 
         UndoSystem = UndoSystem.Add(new UndoItem(
@@ -338,21 +338,17 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        PictureBitmapAdapter adapter = new();
         PictureEditingUseCase.EditResult result = PictureEditingUseCase.PullFromCanvas(
-            adapter.ConvertToPicture(vm.Bitmap),
+            vm.PictureBuffer,
             DrawableCanvasViewModel.PictureBuffer.Previous,
             args.Position,
             PullBlender);
 
-        Bitmap previous = vm.Bitmap;
-        Bitmap now = adapter.ConvertToBitmap(result.Updated);
-
         UndoSystem = UndoSystem.Add(new UndoItem(
-           new Action(() => { if (vm.Enabled) { vm.Bitmap = previous; } }),
-           new Action(() => { if (vm.Enabled) { vm.Bitmap = now; } })));
+           new Action(() => { if (vm.Enabled) { vm.PictureBuffer = result.Previous; } }),
+           new Action(() => { if (vm.Enabled) { vm.PictureBuffer = result.Updated; } })));
 
-        vm.Bitmap = now;
+        vm.PictureBuffer = result.Updated;
     }
 
     private void ExecutePictureAction(PictureActions actionType)

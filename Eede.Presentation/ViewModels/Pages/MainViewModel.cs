@@ -1,6 +1,5 @@
 ﻿using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
@@ -27,6 +26,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -245,13 +245,35 @@ public class MainViewModel : ViewModelBase
             return;
         }
         Pictures.Add(OpenPicture(result));
+
     }
 
-    private readonly BitmapFileReader BitmapFileReader = new();
     private DockPictureViewModel OpenPicture(Uri path)
     {
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(BitmapFileReader.Read(path));
+        DockPictureViewModel vm = DockPictureViewModel.FromFile(ReadBitmapFile(path));
         return SetupDockPicture(vm);
+    }
+
+    private BitmapFile ReadBitmapFile(Uri path)
+    {
+        // uriの拡張子により分岐する
+        string extension = path.AbsoluteUri[path.AbsoluteUri.LastIndexOf('.')..].ToLower();
+        switch (extension)
+        {
+            case ".arv":
+            case ".ARV":
+                string fullPath = HttpUtility.UrlDecode(path.AbsolutePath);
+
+                using (FileStream fs = new(fullPath, FileMode.Open, FileAccess.Read))
+                {
+                    ArvFileReader reader = new();
+                    Picture picture = reader.Read(fs);
+                    return new BitmapFile(PictureBitmapAdapter.ConvertToBitmap(picture), new FilePath(fullPath));
+                }
+            default:
+                return new BitmapFileReader().Read(path);
+        }
+
     }
 
     private DockPictureViewModel SetupDockPicture(DockPictureViewModel vm)

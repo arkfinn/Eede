@@ -170,18 +170,23 @@ public void LoadImage_WithInvalidPath_ThrowsFileNotFoundException()
 
 ### 8.2 テストの構造
 
-- Arrange-Act-Assert パターンを使用
+- Given-When-Then パターンを使用
 
 ```csharp
-// Arrange
-var path = "invalid/path";
-var loader = new ImageLoader();
+[Test]
+public void Add_TwoNumbers_ReturnsSum()
+{
+    // Given
+    var calculator = new Calculator();
+    calculator.Enter(5);
 
-// Act
-var action = () => loader.LoadImage(path);
+    // When
+    calculator.Enter(3);
+    calculator.PressAdd();
 
-// Assert
-action.Should().Throw<FileNotFoundException>();
+    // Then
+    Assert.That(calculator.Display, Is.EqualTo(8));
+}
 ```
 
 ## 9. バージョン管理

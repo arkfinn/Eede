@@ -29,7 +29,7 @@ namespace Eede.Presentation.Common.Services
             [
                 new("All Images")
                 {
-                    Patterns = ["*.png", "*.bmp"],
+                    Patterns = ["*.png", "*.bmp", "*.arv"],
                     AppleUniformTypeIdentifiers = ["public.image"],
                     MimeTypes = ["image/*"]
                 },
@@ -44,6 +44,12 @@ namespace Eede.Presentation.Common.Services
                     Patterns = ["*.bmp"],
                     AppleUniformTypeIdentifiers = ["public.bmp"],
                     MimeTypes = ["image/bmp"]
+                },
+                new("ARV Image")
+                {
+                    Patterns = ["*.arv"],
+                    AppleUniformTypeIdentifiers = ["public.arv"],
+                    MimeTypes = ["image/arv"]
                 },
                 new("All")
                 {

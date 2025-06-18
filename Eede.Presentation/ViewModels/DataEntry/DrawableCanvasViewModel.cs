@@ -4,7 +4,7 @@ using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Drawings;
 using Eede.Domain.Colors;
-using Eede.Domain.Drawings;
+using Eede.Domain.Drawing;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
@@ -127,7 +127,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     public void SetPicture(Picture source)
     {
-        PictureBuffer = new DrawingBuffer(source);
+        PictureBuffer = ContextFactory.Create(source);
         UpdateImage();
     }
 

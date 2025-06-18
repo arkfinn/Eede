@@ -1,6 +1,6 @@
 ﻿using Eede.Application.PaintLayers;
 using Eede.Domain.Colors;
-using Eede.Domain.Drawings;
+using Eede.Domain.Drawing;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;

@@ -60,35 +60,28 @@ namespace Eede.Domain.Positions
 
         public HalfBoxArea UpdatePosition(Position location, PictureSize limit)
         {
-            int locationX = Math.Max(0, location.X);
-            int newWidth = LimittedDistance(StartPosition.X, locationX, DefaultBoxSize.Width, GridSize.Width, limit.Width);
-            int newX = Math.Min(locationX, StartPosition.X);
+            int minX = Math.Min(StartPosition.X, location.X);
+            int maxX = Math.Max(StartPosition.X, location.X);
+            int minY = Math.Min(StartPosition.Y, location.Y);
+            int maxY = Math.Max(StartPosition.Y, location.Y);
 
-            int locationY = Math.Max(0, location.Y);
-            int newHeight = LimittedDistance(StartPosition.Y, locationY, DefaultBoxSize.Height, GridSize.Height, limit.Height);
-            int newY = Math.Min(locationY, StartPosition.Y);
+            // 新しいRealPositionを計算 (常に0以上)
+            int newRealX = Math.Max(0, ArrangeTo(minX, GridSize.Width));
+            int newRealY = Math.Max(0, ArrangeTo(minY, GridSize.Height));
 
-            return With(new PictureSize(newWidth, newHeight), new Position(newX, newY), DefaultBoxSize, StartPosition);
+            // 新しいBoxSizeを計算
+            int newBoxWidth = ArrangeTo(maxX, GridSize.Width) - newRealX + DefaultBoxSize.Width;
+            int newBoxHeight = ArrangeTo(maxY, GridSize.Height) - newRealY + DefaultBoxSize.Height;
+
+            return With(new PictureSize(newBoxWidth, newBoxHeight), new Position(newRealX, newRealY), DefaultBoxSize, StartPosition);
         }
 
         private int ArrangeTo(int value, int gridLength)
         {
-            return value - (value % gridLength);
-        }
-
-        private int LimittedDistance(int startValue, int nowValue, int cursorLength, int gridLength, int limitLength)
-        {
-            int startGrid = ArrangeTo(startValue, gridLength);
-            return Math.Min(
-                cursorLength + ArrangeFromDistance(nowValue - startGrid, gridLength),
-                limitLength - ArrangeTo(startValue, gridLength)
-            );
-        }
-
-        private int ArrangeFromDistance(int distance, int gridLength)
-        {
-            // マイナス方向に広がる場合、元のサイズプラスマイナス方向分とする。
-            return distance < 0 ? ArrangeTo(Math.Abs(distance) + gridLength - 1, gridLength) : ArrangeTo(distance, gridLength);
+            // value を gridLength の倍数に切り捨てる
+            // C# の % 演算子は負の数に対して負の結果を返すため、調整が必要
+            int remainder = value % gridLength;
+            return remainder < 0 ? 0 : value - remainder;
         }
 
         public HalfBoxArea Move(Position localPosition)

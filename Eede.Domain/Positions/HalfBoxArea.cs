@@ -1,40 +1,59 @@
-﻿using Eede.Domain.Pictures;
-using System;
+﻿using System;
+using Eede.Domain.Pictures;
 
 namespace Eede.Domain.Positions
 {
+    /// <summary>
+    /// 半分のボックス領域を表すクラス。
+    /// グリッドシステムに基づいた位置とサイズを管理します。
+    /// </summary>
     public class HalfBoxArea
     {
+        /// <summary>
+        /// ボックスのサイズ。
+        /// </summary>
         public readonly PictureSize BoxSize;
+        /// <summary>
+        /// グリッド座標系における位置。
+        /// </summary>
         public readonly Position GridPosition;
+        /// <summary>
+        /// 実際のピクセル座標系における位置。
+        /// </summary>
         public readonly Position RealPosition;
+
         private readonly PictureSize DefaultBoxSize;
         private readonly PictureSize GridSize;
         private readonly Position StartPosition;
 
-        public static HalfBoxArea Create(PictureSize boxSize, Position localPosition)
+        /// <summary>
+        /// HalfBoxAreaの新しいインスタンスを生成します。
+        /// このメソッドは、defaultBoxSizeとstartPositionがboxSizeとlocalPositionと同じ初期値を持つ場合に利用されます。
+        /// </summary>
+        public static HalfBoxArea Create(Position localPosition, PictureSize boxSize)
         {
-            return With(boxSize, localPosition, boxSize, localPosition);
+            // GridSizeはdefaultBoxSizeから計算されるため、ここではdefaultBoxSizeをboxSizeとして渡す
+            PictureSize gridSize = new(boxSize.Width / 2, boxSize.Height / 2);
+            return With(localPosition, boxSize, boxSize, localPosition, gridSize);
         }
 
-        private static HalfBoxArea With(PictureSize boxSize, Position localPosition, PictureSize defaultBoxSize, Position startPosition)
+        private static HalfBoxArea With(Position localPosition, PictureSize boxSize, PictureSize defaultBoxSize, Position startPosition, PictureSize gridSize)
         {
-            PictureSize BoxSize = new(boxSize.Width, boxSize.Height);
-            PictureSize GridSize = new(defaultBoxSize.Width / 2, defaultBoxSize.Height / 2);
+            PictureSize newBoxSize = new(boxSize.Width, boxSize.Height);
             // gridSize上の位置
-            Position Position = new(
-                localPosition.X / GridSize.Width,
-                localPosition.Y / GridSize.Height
+            Position gridPosition = new(
+                localPosition.X / gridSize.Width,
+                localPosition.Y / gridSize.Height
             );
             // gridSize上の位置を実際の座標に変換した位置
-            Position RealPosition = new(
-                Position.X * GridSize.Width,
-                Position.Y * GridSize.Height
+            Position realPosition = new(
+                gridPosition.X * gridSize.Width,
+                gridPosition.Y * gridSize.Height
             );
 
-            Position StartPosition = new(startPosition.X, startPosition.Y);
+            Position newStartPosition = new(startPosition.X, startPosition.Y);
 
-            return new HalfBoxArea(BoxSize, Position, RealPosition, defaultBoxSize, GridSize, StartPosition);
+            return new HalfBoxArea(newBoxSize, gridPosition, realPosition, defaultBoxSize, newStartPosition, gridSize);
         }
 
         private HalfBoxArea(
@@ -42,14 +61,14 @@ namespace Eede.Domain.Positions
             Position gridPosition,
             Position realPosition,
             PictureSize defaultBoxSize,
-            PictureSize gridSize,
-            Position startPosition)
+            Position startPosition,
+            PictureSize gridSize)
         {
             BoxSize = boxSize;
             GridPosition = gridPosition;
             RealPosition = realPosition;
             DefaultBoxSize = defaultBoxSize;
-            GridSize = gridSize;
+            GridSize = gridSize; // コンストラクタで受け取る
             StartPosition = startPosition;
         }
 
@@ -58,40 +77,53 @@ namespace Eede.Domain.Positions
             return new PictureArea(RealPosition, size);
         }
 
-        public HalfBoxArea UpdatePosition(Position location, PictureSize limit)
+        public HalfBoxArea ResizeToLocation(Position location)
         {
-            int minX = Math.Min(StartPosition.X, location.X);
-            int maxX = Math.Max(StartPosition.X, location.X);
-            int minY = Math.Min(StartPosition.Y, location.Y);
-            int maxY = Math.Max(StartPosition.Y, location.Y);
+            BoundingBoxCoordinates coordinates = CalculateBoundingBoxCoordinates(location);
+            PictureArea boxArea = CalculateBoxDimensions(coordinates);
 
-            // 新しいRealPositionを計算 (常に0以上)
-            int newRealX = Math.Max(0, ArrangeTo(minX, GridSize.Width));
-            int newRealY = Math.Max(0, ArrangeTo(minY, GridSize.Height));
-
-            // 新しいBoxSizeを計算
-            int newBoxWidth = ArrangeTo(maxX, GridSize.Width) - newRealX + DefaultBoxSize.Width;
-            int newBoxHeight = ArrangeTo(maxY, GridSize.Height) - newRealY + DefaultBoxSize.Height;
-
-            return With(new PictureSize(newBoxWidth, newBoxHeight), new Position(newRealX, newRealY), DefaultBoxSize, StartPosition);
+            return With(boxArea.Position, boxArea.Size, DefaultBoxSize, StartPosition, GridSize);
         }
 
-        private int ArrangeTo(int value, int gridLength)
+        private BoundingBoxCoordinates CalculateBoundingBoxCoordinates(Position location)
         {
-            // value を gridLength の倍数に切り捨てる
-            // C# の % 演算子は負の数に対して負の結果を返すため、調整が必要
-            int remainder = value % gridLength;
+            var minX = Math.Min(StartPosition.X, location.X);
+            var maxX = Math.Max(StartPosition.X, location.X);
+            var minY = Math.Min(StartPosition.Y, location.Y);
+            var maxY = Math.Max(StartPosition.Y, location.Y);
+            return new BoundingBoxCoordinates(minX, maxX, minY, maxY);
+        }
+
+        private PictureArea CalculateBoxDimensions(BoundingBoxCoordinates coordinates)
+        {
+            var realX = SnapToGrid(coordinates.MinX, GridSize.Width);
+            var realY = SnapToGrid(coordinates.MinY, GridSize.Height);
+            var boxWidth = SnapToGrid(coordinates.MaxX, GridSize.Width) - realX + DefaultBoxSize.Width;
+            var boxHeight = SnapToGrid(coordinates.MaxY, GridSize.Height) - realY + DefaultBoxSize.Height;
+            return new PictureArea(new Position(realX, realY), new PictureSize(boxWidth, boxHeight));
+        }
+
+        /// <summary>
+        /// 値をグリッドサイズにスナップします。
+        /// 負の値は0にスナップされます。
+        /// </summary>
+        private int SnapToGrid(int value, int gridSize)
+        {
+            int remainder = value % gridSize;
             return remainder < 0 ? 0 : value - remainder;
         }
 
         public HalfBoxArea Move(Position localPosition)
         {
-            return With(BoxSize, localPosition, DefaultBoxSize, localPosition);
+            return With(localPosition, BoxSize, DefaultBoxSize, localPosition, GridSize);
         }
 
-        public HalfBoxArea UpdateSize(PictureSize size)
+        private readonly struct BoundingBoxCoordinates(int minX, int maxX, int minY, int maxY)
         {
-            return With(BoxSize, RealPosition, size, StartPosition);
+            public readonly int MinX = minX;
+            public readonly int MaxX = maxX;
+            public readonly int MinY = minY;
+            public readonly int MaxY = maxY;
         }
     }
 }

@@ -130,7 +130,7 @@ namespace Eede.Presentation.Views.DataEntry
 
         public static readonly StyledProperty<HalfBoxArea> CursorAreaProperty =
             AvaloniaProperty.Register<PictureContainer, HalfBoxArea>(nameof(CursorArea),
-                HalfBoxArea.Create(new PictureSize(32, 32), new Position(0, 0)), defaultBindingMode: BindingMode.TwoWay);
+                HalfBoxArea.Create(new Position(0, 0), new PictureSize(32, 32)), defaultBindingMode: BindingMode.TwoWay);
         public HalfBoxArea CursorArea
         {
             get => GetValue(CursorAreaProperty);
@@ -138,7 +138,7 @@ namespace Eede.Presentation.Views.DataEntry
         }
 
         private bool IsSelecting = false;
-        private HalfBoxArea SelectingArea = HalfBoxArea.Create(new PictureSize(32, 32), new Position(0, 0));
+        private HalfBoxArea SelectingArea = HalfBoxArea.Create(new Position(0, 0), new PictureSize(32, 32));
         public event EventHandler<PicturePullEventArgs> PicturePulled;
         public event EventHandler<PicturePushEventArgs> PicturePushed;
 
@@ -165,9 +165,8 @@ namespace Eede.Presentation.Views.DataEntry
                     break;
 
                 case PointerUpdateKind.RightButtonPressed:
-                    // �͈͑I���J�n
                     IsSelecting = true;
-                    SelectingArea = HalfBoxArea.Create(MinCursorSize, PointToPosition(e.GetPosition(canvas)));
+                    SelectingArea = HalfBoxArea.Create(PointToPosition(e.GetPosition(canvas)), MinCursorSize);
                     break;
             }
             UpdateCursor();
@@ -178,7 +177,7 @@ namespace Eede.Presentation.Views.DataEntry
             Position nowPosition = PointToPosition(e.GetPosition(canvas));
             if (IsSelecting)
             {
-                SelectingArea = SelectingArea.UpdatePosition(nowPosition, CanvasSize);
+                SelectingArea = SelectingArea.ResizeToLocation(nowPosition);
             }
             else
             {
@@ -196,7 +195,6 @@ namespace Eede.Presentation.Views.DataEntry
                     break;
 
                 case PointerUpdateKind.RightButtonReleased:
-                    // �͈͑I�����Ă�Ƃ�
                     if (IsSelecting)
                     {
                         PictureArea area = SelectingArea.CreateRealArea(SelectingArea.BoxSize);

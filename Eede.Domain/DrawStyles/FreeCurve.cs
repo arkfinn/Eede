@@ -1,4 +1,4 @@
-﻿using Eede.Domain.Drawings;
+﻿using Eede.Domain.Drawing;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 
@@ -21,7 +21,7 @@ namespace Eede.Domain.DrawStyles
 
         public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {
-            return buffer.DecideDrawing(buffer.Fetch());
+            return ContextFactory.Create(buffer.Fetch());
         }
 
         private Picture Draw(Drawer drawer, PositionHistory positionHistory)

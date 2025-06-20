@@ -53,7 +53,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             CursorSize = new PictureSize(32, 32);
             _ = this.WhenAnyValue(x => x.CursorSize).Subscribe(size =>
             {
-                CursorArea = HalfBoxArea.Create(size, new Position(0, 0));
+                CursorArea = HalfBoxArea.Create(new Position(0, 0), size);
             });
             Enabled = true;
             Closable = true;

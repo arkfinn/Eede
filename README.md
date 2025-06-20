@@ -49,10 +49,7 @@ Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描�
 
 ### 既知のバグ
 
-- 一度でも Document を Close した後に他の Document を移動すると Dock が表示されなくなる不具合
-- Document を開いた際に CursorArea が必ず 32x32 になる不具合
-- 右から左・下から上に動かした場合の範囲選択の動作がときどきおかしい不具合
-- 無限アンドゥできるためにメモリをいつか使い果たす仕様
+[Issues](https://github.com/arkfinn/Eede/issues)を参照ください。
 
 ### デザイン
 

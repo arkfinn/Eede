@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using Eede.Application.Pictures;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
+using Eede.Presentation.Common.SelectionStates;
 using Eede.Presentation.ViewModels.DataDisplay;
 using System;
 using System.Windows.Input;
@@ -25,11 +26,11 @@ namespace Eede.Presentation.Views.DataEntry
             canvas.PointerExited += OnPointerExited;
         }
 
-
         private DockPictureViewModel? FetchViewModel()
         {
             return DataContext is DockPictureViewModel vm ? vm : DataContext is StyledElement e ? e.DataContext as DockPictureViewModel : null;
         }
+
         private void PictureContainer_DataContextChanged(object? sender, EventArgs e)
         {
             DockPictureViewModel vm = FetchViewModel();
@@ -66,6 +67,7 @@ namespace Eede.Presentation.Views.DataEntry
             });
             PicturePushAction = vm.OnPicturePush;
             PicturePullAction = vm.OnPicturePull;
+            SelectionState = new NormalCursorState(CursorArea, CursorArea);
         }
 
         public override void Render(DrawingContext context)
@@ -90,7 +92,7 @@ namespace Eede.Presentation.Views.DataEntry
 
         private HalfBoxArea GetNowCursorArea()
         {
-            return IsSelecting ? SelectingArea : CursorArea;
+            return SelectionState.GetCurrentArea();
         }
 
         private bool _visibleCursor = false;
@@ -137,14 +139,11 @@ namespace Eede.Presentation.Views.DataEntry
             set => SetValue(CursorAreaProperty, value);
         }
 
-        private bool IsSelecting = false;
-        private HalfBoxArea SelectingArea = HalfBoxArea.Create(new Position(0, 0), new PictureSize(32, 32));
+        private ISelectionState SelectionState;
         public event EventHandler<PicturePullEventArgs> PicturePulled;
         public event EventHandler<PicturePushEventArgs> PicturePushed;
 
         private PictureSize CanvasSize = new(32, 32);
-
-
 
         private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
@@ -156,34 +155,25 @@ namespace Eede.Presentation.Views.DataEntry
             switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonPressed:
-                    if (!IsSelecting)
-                    {
-                        //var picture = BringPictureBuffer();
-                        //PicturePulled?.Invoke(this, new PicturePullEventArgs(picture, CursorArea.RealPosition));
-                        PicturePullAction?.Execute(CursorArea.RealPosition);
-                    }
+                    SelectionState.HandlePointerLeftButtonPressed(PicturePullAction);
                     break;
 
                 case PointerUpdateKind.RightButtonPressed:
-                    IsSelecting = true;
-                    SelectingArea = HalfBoxArea.Create(PointToPosition(e.GetPosition(canvas)), MinCursorSize);
+                    OnPointerRightButtonPressed(PointToPosition(e.GetPosition(canvas)));
                     break;
             }
             UpdateCursor();
         }
 
+        private void OnPointerRightButtonPressed(Position nowPosition)
+        {
+            SelectionState = SelectionState.HandlePointerRightButtonPressed(nowPosition, MinCursorSize);
+        }
+
         private void OnPointerMoved(object? sender, PointerEventArgs e)
         {
             Position nowPosition = PointToPosition(e.GetPosition(canvas));
-            if (IsSelecting)
-            {
-                SelectingArea = SelectingArea.ResizeToLocation(nowPosition);
-            }
-            else
-            {
-                VisibleCursor = CanvasSize.Contains(nowPosition);
-                CursorArea = CursorArea.Move(nowPosition);
-            }
+            (VisibleCursor, CursorArea) = SelectionState.HandlePointerMoved(VisibleCursor, nowPosition, CanvasSize);
             UpdateCursor();
         }
 
@@ -195,17 +185,14 @@ namespace Eede.Presentation.Views.DataEntry
                     break;
 
                 case PointerUpdateKind.RightButtonReleased:
-                    if (IsSelecting)
-                    {
-                        PictureArea area = SelectingArea.CreateRealArea(SelectingArea.BoxSize);
-                        //Rectangle rect = new(area.X, area.Y, area.Width, area.Height);
-                        //PicturePushed?.Invoke(this, new PicturePushEventArgs(picture, area));
-                        PicturePushAction?.Execute(area);
-                        CursorArea = SelectingArea;
-                        IsSelecting = false;
-                    }
+                    OnPointerRightButtonReleased();
                     break;
             }
+        }
+
+        private void OnPointerRightButtonReleased()
+        {
+            (CursorArea, SelectionState) = SelectionState.HandlePointerRightButtonReleased(PicturePushAction);
         }
 
         private void OnPointerExited(object? sender, PointerEventArgs e)
@@ -220,4 +207,3 @@ namespace Eede.Presentation.Views.DataEntry
         }
     }
 }
-

@@ -1,6 +1,10 @@
 ﻿using Avalonia.Media.Imaging;
+using Eede.Application.Pictures;
 using Eede.Domain.Files;
+using Eede.Domain.Pictures;
+using Eede.Presentation.Common.Adapters;
 using System;
+using System.IO;
 using System.Web;
 
 namespace Eede.Presentation.Files
@@ -9,8 +13,30 @@ namespace Eede.Presentation.Files
     {
         public BitmapFile Read(Uri path)
         {
-            string fullPath = HttpUtility.UrlDecode(path.AbsolutePath);
-            return new BitmapFile(new Bitmap(fullPath), new FilePath(fullPath));
+            try
+            {
+                string decodedPath = HttpUtility.UrlDecode(path.AbsolutePath);
+                FilePath filePath = new(decodedPath);
+                string extension = filePath.GetExtension();
+
+                switch (extension.ToLowerInvariant())
+                {
+                    case ".arv":
+                        using (FileStream fs = new(filePath.ToString(), FileMode.Open, FileAccess.Read))
+                        {
+                            ArvFileReader reader = new();
+                            Picture picture = reader.Read(fs);
+                            return new BitmapFile(PictureBitmapAdapter.ConvertToBitmap(picture), filePath);
+                        }
+                    default:
+                        return new BitmapFile(new Bitmap(filePath.ToString()), filePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading image file: {ex.Message}");
+                return null;
+            }
         }
     }
 }

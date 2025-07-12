@@ -26,7 +26,6 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -266,31 +265,7 @@ public class MainViewModel : ViewModelBase
 
     private BitmapFile ReadBitmapFile(Uri path)
     {
-        try
-        {
-            // uriの拡張子により分岐する
-            string extension = Path.GetExtension(path.LocalPath);
-            switch (extension.ToLowerInvariant()) // ToLowerInvariant() を使用してカルチャに依存しない比較を行う
-            {
-                case ".arv":
-                    string fullPath = path.LocalPath;
-
-                    using (FileStream fs = new(fullPath, FileMode.Open, FileAccess.Read))
-                    {
-                        ArvFileReader reader = new();
-                        Picture picture = reader.Read(fs);
-                        return new BitmapFile(PictureBitmapAdapter.ConvertToBitmap(picture), new FilePath(fullPath));
-                    }
-                default:
-                    return new BitmapFileReader().Read(path);
-            }
-        }
-        catch (Exception ex)
-        {
-            // TODO: エラーロギングやユーザーへの通知
-            Console.WriteLine($"Error reading bitmap file: {ex.Message}");
-            return null; // エラーが発生した場合はnullを返す
-        }
+        return new BitmapFileReader().Read(path);
     }
 
     private DockPictureViewModel SetupDockPicture(DockPictureViewModel vm)
@@ -328,7 +303,7 @@ public class MainViewModel : ViewModelBase
         BitmapFile file = e.File;
         string fullPath;
 
-        if (file.IsNewFile())
+        if (file.ShouldPromptForSaveAs())
         {
             Uri result = await e.Storage.SaveFilePickerAsync();
             if (result == null)
@@ -343,7 +318,7 @@ public class MainViewModel : ViewModelBase
         }
 
         file.Bitmap.Save(fullPath);
-        e.UpdateFile(file with { Path = new FilePath(fullPath) });
+        e.UpdateFile(file.WithFilePath(new FilePath(fullPath)));
     }
 
     private void OnPushToDrawArea(object sender, PicturePushEventArgs args)

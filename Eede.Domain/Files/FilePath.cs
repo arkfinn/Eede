@@ -2,7 +2,7 @@
 {
     public class FilePath(string filePath)
     {
-        public readonly string Path = filePath;
+        private readonly string Path = filePath;
 
         public bool IsEmpty()
         {
@@ -12,6 +12,16 @@
         public static FilePath Empty()
         {
             return new FilePath("");
+        }
+
+        public string GetExtension()
+        {
+            return System.IO.Path.GetExtension(Path).ToLower();
+        }
+
+        public override string ToString()
+        {
+            return Path;
         }
     }
 }

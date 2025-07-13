@@ -253,17 +253,17 @@ public class MainViewModel : ViewModelBase
 
     private DockPictureViewModel OpenPicture(Uri path)
     {
-        BitmapFile bitmapFile = ReadBitmapFile(path);
-        if (bitmapFile == null)
+        IImageFile imageFile = ReadBitmapFile(path);
+        if (imageFile == null)
         {
             // エラーが発生した場合、またはファイルが読み込めなかった場合はnullを返す
             return null;
         }
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(bitmapFile);
+        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile);
         return SetupDockPicture(vm);
     }
 
-    private BitmapFile ReadBitmapFile(Uri path)
+    private IImageFile ReadBitmapFile(Uri path)
     {
         return new BitmapFileReader().Read(path);
     }
@@ -300,7 +300,7 @@ public class MainViewModel : ViewModelBase
 
     private async void OnPictureSave(object sender, PictureSaveEventArgs e)
     {
-        BitmapFile file = e.File;
+        IImageFile file = e.File;
         string fullPath;
 
         if (file.ShouldPromptForSaveAs())

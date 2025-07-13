@@ -20,7 +20,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
     public class DockPictureViewModel : ViewModelBase
     {
 
-        public static DockPictureViewModel FromFile(BitmapFile file)
+        public static DockPictureViewModel FromFile(IImageFile file)
         {
             DockPictureViewModel vm = new();
             vm.Initialize(file);
@@ -30,9 +30,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public static DockPictureViewModel FromSize(PictureSize size)
         {
             DockPictureViewModel vm = new();
-            vm.Initialize(new BitmapFile(
-                new WriteableBitmap(new PixelSize(size.Width, size.Height), new Vector(96, 96), PixelFormat.Bgra8888),
-                FilePath.Empty()));
+            vm.Initialize(BitmapFileReader.CreateEmptyBitmapFile(size));
             return vm;
         }
 
@@ -43,6 +41,8 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public HalfBoxArea CursorArea { get; set; }
         [Reactive] public bool Enabled { get; set; }
         [Reactive] public bool Closable { get; set; }
+
+        [Reactive] public IImageFile ImageFile { get; private set; }
 
         public DockPictureViewModel()
         {
@@ -61,9 +61,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             {
                 Closable = !Edited;
             });
-            Initialize(new BitmapFile(
-                new WriteableBitmap(new PixelSize(32, 32), new Vector(96, 96), PixelFormat.Bgra8888),
-                FilePath.Empty()));
+            Initialize(BitmapFileReader.CreateEmptyBitmapFile(new PictureSize(32, 32)));
             _ = this.WhenAnyValue(x => x.PictureBuffer).Subscribe(_ =>
             {
                 PremultipliedBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
@@ -79,23 +77,23 @@ namespace Eede.Presentation.ViewModels.DataDisplay
                 return;
             }
             var bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
-            var args = new PictureSaveEventArgs(new BitmapFile(bitmap, Path), storage);
+            var args = new PictureSaveEventArgs(ImageFile.WithBitmap(bitmap), storage);
             PictureSave.Invoke(this, args);
             Initialize(args.File);
         }
 
-        public void Initialize(BitmapFile file)
+        public void Initialize(IImageFile file)
         {
+            ImageFile = file;
             PictureBuffer = PictureBitmapAdapter.ConvertToPicture(file.Bitmap);
-            var isNewFile = file.IsNewFile();
-            Path = isNewFile ? FilePath.Empty() : file.Path;
-            Subject = isNewFile ? "新しいファイル" : file.GetPathString();
+            Subject = file.Subject();
+
             Edited = false;
         }
 
         [Reactive] public bool Edited { get; set; }
 
-        private FilePath Path = FilePath.Empty();
+
 
         [Reactive] public string Subject { get; private set; }
         [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
@@ -142,3 +140,5 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         }
     }
 }
+
+

@@ -29,6 +29,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.Pages;
 
@@ -298,27 +299,31 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private async void OnPictureSave(object sender, PictureSaveEventArgs e)
+    private async Task OnPictureSave(object sender, PictureSaveEventArgs e)
     {
-        IImageFile file = e.File;
-        string fullPath;
-
-        if (file.ShouldPromptForSaveAs())
+        await Task.Run(async () =>
         {
-            Uri result = await e.Storage.SaveFilePickerAsync();
-            if (result == null)
+            IImageFile file = e.File;
+            string fullPath;
+
+            if (file.ShouldPromptForSaveAs())
             {
-                return;
+                Uri result = await e.Storage.SaveFilePickerAsync();
+                if (result == null)
+                {
+                    return;
+                }
+                fullPath = result.LocalPath;
             }
-            fullPath = result.LocalPath;
-        }
-        else
-        {
-            fullPath = file.GetPathString();
-        }
+            else
+            {
+                fullPath = file.GetPathString();
+            }
 
-        file.Bitmap.Save(fullPath);
-        e.UpdateFile(file.WithFilePath(new FilePath(fullPath)));
+            file.Bitmap.Save(fullPath);
+            e.UpdateFile(file.WithFilePath(new FilePath(fullPath)));
+        })
+            .ConfigureAwait(false);
     }
 
     private void OnPushToDrawArea(object sender, PicturePushEventArgs args)

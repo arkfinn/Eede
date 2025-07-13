@@ -14,6 +14,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.DataDisplay
 {
@@ -68,9 +69,10 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             });
         }
 
-        public event EventHandler<PictureSaveEventArgs> PictureSave;
+        public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
+        public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
 
-        public void Save(StorageService storage)
+        public async void Save(StorageService storage)
         {
             if (PictureSave == null)
             {
@@ -78,7 +80,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             }
             var bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
             var args = new PictureSaveEventArgs(ImageFile.WithBitmap(bitmap), storage);
-            PictureSave.Invoke(this, args);
+            await PictureSave.Invoke(this, args);
             Initialize(args.File);
         }
 

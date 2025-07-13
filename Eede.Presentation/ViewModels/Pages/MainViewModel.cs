@@ -26,11 +26,10 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Web;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.Pages;
 
@@ -74,7 +73,7 @@ public class MainViewModel : ViewModelBase
     [Reactive] public IImageBlender PullBlender { get; set; }
     [Reactive] public IDockable ActiveDockable { get; set; }
 
-    [Reactive] public List<int> MinCursorSizeList { get; set; }
+    [Reactive] public ObservableCollection<int> MinCursorSizeList { get; set; }
     [Reactive] public int MinCursorWidth { get; set; }
     [Reactive] public int MinCursorHeight { get; set; }
     [Reactive] public PictureSize CursorSize { get; set; }
@@ -109,10 +108,7 @@ public class MainViewModel : ViewModelBase
             .Select(x => Color.FromArgb(x.Alpha, x.Red, x.Green, x.Blue))
             .BindTo(this, x => x.NowPenColor);
         _ = this.WhenAnyValue(x => x.PenColor).BindTo(this, x => x.DrawableCanvasViewModel.PenColor);
-        MinCursorSizeList =
-        [
-            8, 16, 24, 32, 48, 64
-        ];
+        MinCursorSizeList = new ObservableCollection<int>([8, 16, 24, 32, 48, 64]);
         MinCursorWidth = 32;
         MinCursorHeight = 32;
         _ = this.WhenAnyValue(x => x.MinCursorWidth, x => x.MinCursorHeight)
@@ -233,7 +229,11 @@ public class MainViewModel : ViewModelBase
 
         foreach (IStorageItem file in files)
         {
-            Pictures.Add(OpenPicture(file.Path));
+            DockPictureViewModel newPicture = OpenPicture(file.Path);
+            if (newPicture != null)
+            {
+                Pictures.Add(newPicture);
+            }
         }
     }
 
@@ -244,36 +244,29 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        Pictures.Add(OpenPicture(result));
+        DockPictureViewModel newPicture = OpenPicture(result);
+        if (newPicture != null)
+        {
+            Pictures.Add(newPicture);
+        }
 
     }
 
     private DockPictureViewModel OpenPicture(Uri path)
     {
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(ReadBitmapFile(path));
+        IImageFile imageFile = ReadBitmapFile(path);
+        if (imageFile == null)
+        {
+            // エラーが発生した場合、またはファイルが読み込めなかった場合はnullを返す
+            return null;
+        }
+        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile);
         return SetupDockPicture(vm);
     }
 
-    private BitmapFile ReadBitmapFile(Uri path)
+    private IImageFile ReadBitmapFile(Uri path)
     {
-        // uriの拡張子により分岐する
-        string extension = path.AbsoluteUri[path.AbsoluteUri.LastIndexOf('.')..].ToLower();
-        switch (extension)
-        {
-            case ".arv":
-            case ".ARV":
-                string fullPath = HttpUtility.UrlDecode(path.AbsolutePath);
-
-                using (FileStream fs = new(fullPath, FileMode.Open, FileAccess.Read))
-                {
-                    ArvFileReader reader = new();
-                    Picture picture = reader.Read(fs);
-                    return new BitmapFile(PictureBitmapAdapter.ConvertToBitmap(picture), new FilePath(fullPath));
-                }
-            default:
-                return new BitmapFileReader().Read(path);
-        }
-
+        return new BitmapFileReader().Read(path);
     }
 
     private DockPictureViewModel SetupDockPicture(DockPictureViewModel vm)
@@ -306,27 +299,10 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private async void OnPictureSave(object sender, PictureSaveEventArgs e)
+    private async Task OnPictureSave(object sender, PictureSaveEventArgs e)
     {
-        BitmapFile file = e.File;
-        string fullPath;
-
-        if (file.IsNewFile())
-        {
-            Uri result = await e.Storage.SaveFilePickerAsync();
-            if (result == null)
-            {
-                return;
-            }
-            fullPath = HttpUtility.UrlDecode(result.AbsolutePath);
-        }
-        else
-        {
-            fullPath = file.GetPathString();
-        }
-
-        file.Bitmap.Save(fullPath);
-        e.UpdateFile(file with { Path = new FilePath(fullPath) });
+        IImageFile updatedFile = await e.File.SaveAsync(e.Storage);
+        e.UpdateFile(updatedFile);
     }
 
     private void OnPushToDrawArea(object sender, PicturePushEventArgs args)
@@ -396,7 +372,7 @@ public class MainViewModel : ViewModelBase
             DrawStyles.Free => new FreeCurve(),
             DrawStyles.Line => new Line(),
             DrawStyles.Fill => new Fill(),
-            _ => throw new ArgumentException(null, nameof(drawStyle)),
+            _ => throw new ArgumentOutOfRangeException(nameof(drawStyle), $"Unknown DrawStyle: {drawStyle}"),
         };
     }
 

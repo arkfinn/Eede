@@ -10,7 +10,7 @@ namespace Eede.Domain.Tests.Files
         public void FilePathTest()
         {
             FilePath path = new(@"Files\test\test.png");
-            Assert.That(path.Path, Is.EqualTo(@"Files\test\test.png"));
+            Assert.That(path.ToString(), Is.EqualTo(@"Files\test\test.png"));
         }
 
         [TestCase(false, @"Files\test\test.png")]

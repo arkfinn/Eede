@@ -63,7 +63,15 @@ namespace Eede.Presentation.Common.Services
         {
             FilePickerSaveOptions options = new()
             {
-
+                FileTypeChoices =
+                [
+                    new("PNG Image")
+                    {
+                        Patterns = ["*.png"],
+                        AppleUniformTypeIdentifiers = ["public.png"],
+                        MimeTypes = ["image/png"]
+                    }
+                ]
             };
             IStorageFile result = await StorageProvider.SaveFilePickerAsync(options);
 

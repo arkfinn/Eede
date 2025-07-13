@@ -301,29 +301,8 @@ public class MainViewModel : ViewModelBase
 
     private async Task OnPictureSave(object sender, PictureSaveEventArgs e)
     {
-        await Task.Run(async () =>
-        {
-            IImageFile file = e.File;
-            string fullPath;
-
-            if (file.ShouldPromptForSaveAs())
-            {
-                Uri result = await e.Storage.SaveFilePickerAsync();
-                if (result == null)
-                {
-                    return;
-                }
-                fullPath = result.LocalPath;
-            }
-            else
-            {
-                fullPath = file.GetPathString();
-            }
-
-            file.Bitmap.Save(fullPath);
-            e.UpdateFile(file.WithFilePath(new FilePath(fullPath)));
-        })
-            .ConfigureAwait(false);
+        IImageFile updatedFile = await e.File.SaveAsync(e.Storage);
+        e.UpdateFile(updatedFile);
     }
 
     private void OnPushToDrawArea(object sender, PicturePushEventArgs args)

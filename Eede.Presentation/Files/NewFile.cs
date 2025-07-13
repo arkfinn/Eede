@@ -1,27 +1,25 @@
-using System;
-using System.Windows.Forms;
 using Avalonia.Media.Imaging;
 using Eede.Domain.Files;
-using Eede.Domain.Pictures;
-using Eede.Presentation.Common.Adapters; // 追加
+using Eede.Presentation.Common.Services; // 追加
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.Files
 {
-    public record NewFile(Bitmap Bitmap) : IImageFile
+    public record NewFile(Bitmap Bitmap) : AbstractImageFile(Bitmap, FilePath.Empty())
     {
-        public FilePath Path { get; } = FilePath.Empty();
-        public bool IsNewFile() => true; // 新規ファイルは常に新規である
-        public string GetPathString() => "";
-        public bool ShouldPromptForSaveAs() => true; // 新規ファイルは常に名前を付けて保存を促す
-        public IImageFile WithFilePath(FilePath filePath)
+        public override IImageFile WithFilePath(FilePath filePath)
         {
-            if (filePath.IsEmpty() || filePath.GetExtension() != ".png")
-            {
-                throw new ArgumentException("新規ファイルはPNG形式でなければなりません。");
-            }
-            return new PngFile(Bitmap, filePath);
+            return CreatePngFileWithCheck(Bitmap, filePath);
         }
-        public IImageFile WithBitmap(Bitmap bitmap) => this with { Bitmap = bitmap };
-        public string Subject() => "新しいファイル"; // 新規ファイルのサブジェクトは固定
+
+        public override string Subject()
+        {
+            return "新しいファイル"; // 新規ファイルのサブジェクトは固定
+        }
+
+        public override async Task<IImageFile> SaveAsync(StorageService storage)
+        {
+            return await SaveWithFilePickerAsync(storage);
+        }
     }
 }

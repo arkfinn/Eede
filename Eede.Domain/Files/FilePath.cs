@@ -16,7 +16,7 @@
 
         public string GetExtension()
         {
-            return System.IO.Path.GetExtension(Path);
+            return System.IO.Path.GetExtension(Path).ToLower();
         }
 
         public override string ToString()

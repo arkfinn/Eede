@@ -8,7 +8,9 @@ public class PictureSaveEventArgs(IImageFile file, StorageService storage) : Eve
 {
     public readonly StorageService Storage = storage;
     public IImageFile File { get; private set; } = file;
+    public bool IsCanceled { get; private set; } = false;
 
     public void UpdateFile(IImageFile file) => File = file;
+    public void Cancel() => IsCanceled = true;
 }
 

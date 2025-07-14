@@ -16,6 +16,7 @@ using Eede.Domain.Systems;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Drawings;
+using Eede.Presentation.Common.Models;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
@@ -301,8 +302,16 @@ public class MainViewModel : ViewModelBase
 
     private async Task OnPictureSave(object sender, PictureSaveEventArgs e)
     {
-        IImageFile updatedFile = await e.File.SaveAsync(e.Storage);
-        e.UpdateFile(updatedFile);
+        SaveImageResult saveResult = await e.File.SaveAsync(e.Storage);
+        if (saveResult.IsCanceled)
+        {
+            e.Cancel();
+            return;
+        }
+        if (saveResult.IsSaved)
+        {
+            e.UpdateFile(saveResult.File);
+        }
     }
 
     private void OnPushToDrawArea(object sender, PicturePushEventArgs args)

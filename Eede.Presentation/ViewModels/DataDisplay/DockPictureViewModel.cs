@@ -81,7 +81,10 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             var bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
             var args = new PictureSaveEventArgs(ImageFile.WithBitmap(bitmap), storage);
             await PictureSave.Invoke(this, args);
-            Initialize(args.File);
+            if (!args.IsCanceled)
+            {
+                Initialize(args.File);
+            }
         }
 
         public void Initialize(IImageFile file)

@@ -40,7 +40,7 @@
       </Grid.RowDefinitions>
       <StackPanel Grid.Row="2"
                   Orientation="Horizontal" >
-        <TextBlock Text="無題"/>
+        <TextBlock Text="{Binding FileName}"/>
         <TextBlock Text="への変更内容を保存しますか？"/>
       </StackPanel>
     </Grid>
@@ -49,14 +49,14 @@
                 Grid.Column="1"
                 Grid.ColumnSpan="3"
                 HorizontalAlignment="Right">
-      
-      <Button Content="上書き保存(S)"
+
+      <Button Content="保存する(S)"
               Click="OnSave" />
       <Button Content="保存しない(N)"
               Click="OnNoSave" />
       <Button Content="キャンセル"
               Click="OnCancel" />
-              
+
     </StackPanel>
   </Grid>
 </Window>

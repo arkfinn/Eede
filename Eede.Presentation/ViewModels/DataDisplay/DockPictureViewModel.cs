@@ -42,6 +42,9 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public HalfBoxArea CursorArea { get; set; }
         [Reactive] public bool Enabled { get; set; }
         [Reactive] public bool Closable { get; set; }
+        [Reactive] public string Subject { get; private set; }
+        [Reactive] public string Title { get; private set; }
+        [Reactive] public bool Edited { get; set; }
 
         [Reactive] public IImageFile ImageFile { get; private set; }
 
@@ -61,6 +64,10 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             _ = this.WhenAnyValue(x => x.Edited).Subscribe(_ =>
             {
                 Closable = !Edited;
+            });
+            _ = this.WhenAnyValue(x => x.Subject, x => x.Edited).Subscribe(_ =>
+            {
+                Title = Edited ? "●" + Subject : Subject;
             });
             Initialize(BitmapFileReader.CreateEmptyBitmapFile(new PictureSize(32, 32)));
             _ = this.WhenAnyValue(x => x.PictureBuffer).Subscribe(_ =>
@@ -96,11 +103,9 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             Edited = false;
         }
 
-        [Reactive] public bool Edited { get; set; }
 
 
 
-        [Reactive] public string Subject { get; private set; }
         [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
 
         public ReactiveCommand<Unit, Unit> OnClosing { get; }
@@ -111,11 +116,15 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             {
                 return;
             }
+            if (SaveAlertResult == SaveAlertResult.Save)
+            {
+                // Save();
+            }
 
             Closable = SaveAlertResult switch
             {
                 SaveAlertResult.Cancel => false,
-                SaveAlertResult.Save => true,//Save();
+                SaveAlertResult.Save => true,
                 _ => true,
             };
         }
@@ -135,7 +144,6 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             if (!Edited)
             {
                 Edited = true;
-                Subject = "●" + Subject;
             }
         }
 

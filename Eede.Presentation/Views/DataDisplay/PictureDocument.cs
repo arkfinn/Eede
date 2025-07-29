@@ -47,6 +47,13 @@ namespace Eede.Presentation.Views.DataDisplay
             set => SetValue(IsNewFileProperty, value);
         }
 
+        public static readonly StyledProperty<string> SubjectProperty =
+            AvaloniaProperty.Register<PictureDocument, string>(nameof(Subject), "");
+        public string Subject
+        {
+            get => GetValue(SubjectProperty);
+            set => SetValue(SubjectProperty, value);
+        }
 
         public override bool OnClose()
         {
@@ -61,7 +68,7 @@ namespace Eede.Presentation.Views.DataDisplay
 
         private async void OpenSaveAlertDialog()
         {
-            SaveAlertWindow window = new(Title);
+            SaveAlertWindow window = new(Subject);
 
             Window mainWindow = ((IClassicDesktopStyleApplicationLifetime)Avalonia.Application.Current.ApplicationLifetime).MainWindow;
 

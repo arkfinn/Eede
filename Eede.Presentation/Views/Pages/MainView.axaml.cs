@@ -28,6 +28,8 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             _ = this.BindInteraction(
                 viewModel,
                 vm => vm.ShowCreateNewPictureModal, DoShowCreateNewFileWindowAsync);
+
+            viewModel.StorageService = StorageService;
         };
     }
 

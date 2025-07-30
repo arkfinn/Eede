@@ -80,6 +80,7 @@ public class MainViewModel : ViewModelBase
     [Reactive] public PictureSize CursorSize { get; set; }
 
     [Reactive] public UndoSystem UndoSystem { get; private set; }
+    [Reactive] public StorageService StorageService { get; set; }
 
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
@@ -295,14 +296,14 @@ public class MainViewModel : ViewModelBase
         {
             if (doc.DataContext is DockPictureViewModel vm)
             {
-                vm.Save(storage);
+                vm.Save();
             }
         }
     }
 
     private async Task OnPictureSave(object sender, PictureSaveEventArgs e)
     {
-        SaveImageResult saveResult = await e.File.SaveAsync(e.Storage);
+        SaveImageResult saveResult = await e.File.SaveAsync(StorageService);
         if (saveResult.IsCanceled)
         {
             e.Cancel();

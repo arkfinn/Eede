@@ -1,20 +1,21 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Eede.Application.Pictures;
+using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Files;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
-using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Enums;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
-using Eede.Presentation.Files;
+using Eede.Application.Pictures;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
 using System.Threading.Tasks;
+using Eede.Presentation.Files;
+using Eede.Presentation.Common.Adapters;
 
 namespace Eede.Presentation.ViewModels.DataDisplay
 {
@@ -23,14 +24,14 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
         public static DockPictureViewModel FromFile(IImageFile file)
         {
-            DockPictureViewModel vm = new();
+            var vm = new DockPictureViewModel();
             vm.Initialize(file);
             return vm;
         }
 
         public static DockPictureViewModel FromSize(PictureSize size)
         {
-            DockPictureViewModel vm = new();
+            var vm = new DockPictureViewModel();
             vm.Initialize(BitmapFileReader.CreateEmptyBitmapFile(size));
             return vm;
         }
@@ -45,7 +46,6 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public string Subject { get; private set; }
         [Reactive] public string Title { get; private set; }
         [Reactive] public bool Edited { get; set; }
-
         [Reactive] public IImageFile ImageFile { get; private set; }
 
         public DockPictureViewModel()
@@ -71,22 +71,22 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             });
             Initialize(BitmapFileReader.CreateEmptyBitmapFile(new PictureSize(32, 32)));
             _ = this.WhenAnyValue(x => x.PictureBuffer).Subscribe(_ =>
-            {
-                PremultipliedBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
-            });
+             {
+                 PremultipliedBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
+             });
         }
 
         public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
         public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
 
-        public async void Save(StorageService storage)
+        public async void Save()
         {
             if (PictureSave == null)
             {
                 return;
             }
             var bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
-            var args = new PictureSaveEventArgs(ImageFile.WithBitmap(bitmap), storage);
+            var args = new PictureSaveEventArgs(ImageFile.WithBitmap(bitmap));
             await PictureSave.Invoke(this, args);
             if (!args.IsCanceled)
             {
@@ -118,7 +118,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             }
             if (SaveAlertResult == SaveAlertResult.Save)
             {
-                // Save();
+                Save();
             }
 
             Closable = SaveAlertResult switch

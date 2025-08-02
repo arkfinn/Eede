@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using Eede.Application.Pictures;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
+using Eede.Domain.Sizes;
 using Eede.Presentation.Common.SelectionStates;
 using Eede.Presentation.ViewModels.DataDisplay;
 using System;

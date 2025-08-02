@@ -11,6 +11,7 @@ using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
+using Eede.Domain.Sizes;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
 using ReactiveUI;

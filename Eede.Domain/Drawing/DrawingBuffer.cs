@@ -5,7 +5,7 @@ namespace Eede.Domain.Drawing
     internal interface IContext
     {
         bool IsDrawing();
-        public Picture Fetch();
+        Picture Fetch();
     }
 
     internal class Active(Picture now) : IContext

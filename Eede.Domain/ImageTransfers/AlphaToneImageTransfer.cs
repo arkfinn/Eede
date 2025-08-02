@@ -1,4 +1,5 @@
-﻿using Eede.Domain.Pictures;
+﻿using Eede.Domain.Sizes;
+using Eede.Domain.Pictures;
 using Eede.Domain.Scales;
 
 namespace Eede.Domain.ImageTransfers

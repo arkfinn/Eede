@@ -1,6 +1,6 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.Scales;
 using Eede.Domain.Sizes;
+using Eede.Domain.Scales;
+using Eede.Domain.Pictures;
 using NUnit.Framework;
 using System;
 

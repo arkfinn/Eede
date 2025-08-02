@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.Scales;
+﻿using Eede.Domain.Scales;
 using System;
 
 namespace Eede.Domain.Sizes

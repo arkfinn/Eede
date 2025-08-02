@@ -1,5 +1,6 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;
+using Eede.Domain.Sizes;
 using NUnit.Framework;
 
 namespace Eede.Domain.Tests.Pictures.Actions;

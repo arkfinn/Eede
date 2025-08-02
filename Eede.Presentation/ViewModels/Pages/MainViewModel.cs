@@ -1,4 +1,4 @@
-﻿using Avalonia.Input;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
@@ -11,6 +11,7 @@ using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;
 using Eede.Domain.Scales;
+using Eede.Domain.Sizes;
 using Eede.Domain.Systems;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;

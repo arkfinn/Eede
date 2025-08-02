@@ -64,7 +64,7 @@ namespace Eede.Presentation.Views.DataDisplay
                 CloseAction?.Invoke();
                 return base.OnClose();
             }
-            OpenSaveAlertDialog(this);
+            _ = OpenSaveAlertDialog(this);
             return false;
         }
 

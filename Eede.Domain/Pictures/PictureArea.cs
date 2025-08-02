@@ -3,7 +3,7 @@ using System;
 
 namespace Eede.Domain.Pictures
 {
-    public class PictureArea
+    public record PictureArea
     {
         public readonly Position Position;
         public readonly PictureSize Size;

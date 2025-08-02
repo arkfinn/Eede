@@ -23,10 +23,11 @@ namespace Eede.Domain.ImageTransfers
                     int srcX = magnification.Minify(x);
                     int fromPos = (srcX * 4) + srcOffset;
 
-                    destPixels[pos + 0] = src[fromPos + 0];
-                    destPixels[pos + 1] = src[fromPos + 1];
-                    destPixels[pos + 2] = src[fromPos + 2];
-                    destPixels[pos + 3] = src[fromPos + 3];
+                    var srcSpan = src.AsSpan();
+                    destPixels[pos + 0] = srcSpan[fromPos + 0];
+                    destPixels[pos + 1] = srcSpan[fromPos + 1];
+                    destPixels[pos + 2] = srcSpan[fromPos + 2];
+                    destPixels[pos + 3] = srcSpan[fromPos + 3];
                 }
             }
             return Picture.Create(new PictureSize(destWidth, destHeight), destPixels);

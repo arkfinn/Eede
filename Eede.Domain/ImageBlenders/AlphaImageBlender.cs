@@ -26,7 +26,8 @@ namespace Eede.Domain.ImageBlenders
                     int fromPos = ((x - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
 
                     // 転送元がアルファ0なら転送しない
-                    byte fromA = from[fromPos + 3];
+                    var fromSpan = from.AsSpan();
+                    byte fromA = fromSpan[fromPos + 3];
                     if (fromA == 0)
                     {
                         continue;
@@ -35,9 +36,9 @@ namespace Eede.Domain.ImageBlenders
                     byte toA = toPixels[toPos + 3];
                     if (toA == 0)
                     {
-                        toPixels[toPos + 0] = from[fromPos + 0];
-                        toPixels[toPos + 1] = from[fromPos + 1];
-                        toPixels[toPos + 2] = from[fromPos + 2];
+                        toPixels[toPos + 0] = fromSpan[fromPos + 0];
+                        toPixels[toPos + 1] = fromSpan[fromPos + 1];
+                        toPixels[toPos + 2] = fromSpan[fromPos + 2];
                         toPixels[toPos + 3] = fromA;
                         continue;
                     }
@@ -51,9 +52,9 @@ namespace Eede.Domain.ImageBlenders
                         continue;
                     }
                     decimal blendedAlpha = toAlpha * (1 - fromAlpha);
-                    toPixels[toPos + 0] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 0] * blendedAlpha) + (from[fromPos + 0] * fromAlpha), alpha), 0.5m);
-                    toPixels[toPos + 1] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 1] * blendedAlpha) + (from[fromPos + 1] * fromAlpha), alpha), 0.5m);
-                    toPixels[toPos + 2] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 2] * blendedAlpha) + (from[fromPos + 2] * fromAlpha), alpha), 0.5m);
+                    toPixels[toPos + 0] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 0] * blendedAlpha) + (fromSpan[fromPos + 0] * fromAlpha), alpha), 0.5m);
+                    toPixels[toPos + 1] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 1] * blendedAlpha) + (fromSpan[fromPos + 1] * fromAlpha), alpha), 0.5m);
+                    toPixels[toPos + 2] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 2] * blendedAlpha) + (fromSpan[fromPos + 2] * fromAlpha), alpha), 0.5m);
                 }
             }
 

@@ -25,7 +25,7 @@ namespace Eede.Domain.ImageBlenders
                     int toPos = (x * 4) + (to.Stride * y);
                     int fromPos = ((x - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
 
-                    toPixels[toPos + 3] = from[fromPos + 3];
+                    toPixels[toPos + 3] = from.AsSpan()[fromPos + 3];
                 }
             }
             return Picture.Create(to.Size, toPixels);

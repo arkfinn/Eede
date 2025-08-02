@@ -29,10 +29,11 @@ internal class PictureAction
                 Position offset = process(new Position(x, y));
                 int offsetY = Source.Stride * offset.Y;
                 int fromPos = (offset.X * 4) + offsetY;
-                destPixels[pos + 0] = Source[fromPos + 0];
-                destPixels[pos + 1] = Source[fromPos + 1];
-                destPixels[pos + 2] = Source[fromPos + 2];
-                destPixels[pos + 3] = Source[fromPos + 3];
+                var sourceSpan = Source.AsSpan();
+                destPixels[pos + 0] = sourceSpan[fromPos + 0];
+                destPixels[pos + 1] = sourceSpan[fromPos + 1];
+                destPixels[pos + 2] = sourceSpan[fromPos + 2];
+                destPixels[pos + 3] = sourceSpan[fromPos + 3];
             }
         }
         return destPixels;

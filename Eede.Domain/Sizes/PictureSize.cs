@@ -1,12 +1,12 @@
-﻿using Eede.Domain.Positions;
+using Eede.Domain.Positions;
 using System;
 
-namespace Eede.Domain.Pictures
+namespace Eede.Domain.Sizes
 {
-    public class PictureSize
+    public readonly record struct PictureSize
     {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public int Width { get; }
+        public int Height { get; }
 
         public PictureSize(int width, int height)
         {

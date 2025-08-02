@@ -4,6 +4,7 @@ using Avalonia.Platform;
 using Eede.Application.Pictures;
 using Eede.Domain.Files;
 using Eede.Domain.Pictures;
+using Eede.Domain.Sizes;
 using Eede.Presentation.Common.Adapters;
 using System;
 using System.IO;

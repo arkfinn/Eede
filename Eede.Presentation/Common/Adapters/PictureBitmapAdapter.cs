@@ -2,6 +2,7 @@
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Eede.Domain.Pictures;
+using Eede.Domain.Sizes;
 using System;
 using System.Runtime.InteropServices;
 

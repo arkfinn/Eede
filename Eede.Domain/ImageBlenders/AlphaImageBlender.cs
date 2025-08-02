@@ -26,7 +26,7 @@ namespace Eede.Domain.ImageBlenders
                     int fromPos = ((x - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
 
                     // 転送元がアルファ0なら転送しない
-                    var fromSpan = from.AsSpan();
+                    ReadOnlySpan<byte> fromSpan = from.AsSpan();
                     byte fromA = fromSpan[fromPos + 3];
                     if (fromA == 0)
                     {

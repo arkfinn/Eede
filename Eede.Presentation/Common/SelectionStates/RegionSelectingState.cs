@@ -1,5 +1,6 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
+using Eede.Domain.Sizes;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Common.SelectionStates

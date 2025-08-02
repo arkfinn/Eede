@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Pictures;
-using System;
+﻿using System;
 
 namespace Eede.Domain.Pictures.Actions
 {

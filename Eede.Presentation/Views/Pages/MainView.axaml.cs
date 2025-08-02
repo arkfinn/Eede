@@ -6,6 +6,9 @@ using Eede.Presentation.Common.Services;
 using Eede.Presentation.ViewModels.Pages;
 using ReactiveUI;
 using System;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.Views.Pages;
@@ -31,6 +34,39 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
 
             viewModel.StorageService = StorageService;
         };
+
+        this.WhenActivated(disposables =>
+        {
+            if (TopLevel.GetTopLevel(this) is not Window window) return;
+
+            // ViewModelのInteractionを購読し、通知が来たらウィンドウを閉じる
+            ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
+            {
+                window.Close();
+                interaction.SetOutput(Unit.Default);
+            }).DisposeWith(disposables);
+
+
+            // WindowのClosingイベントをObservableに変換
+            Observable.FromEventPattern<EventHandler<WindowClosingEventArgs>, WindowClosingEventArgs>(
+                handler => window.Closing += handler,
+                handler => window.Closing -= handler)
+                .Subscribe(args =>
+                {
+                    // ViewModelが既にクローズを確定している場合は、何もしないで通過させる
+                    if (ViewModel.IsCloseConfirmed)
+                    {
+                        return;
+                    }
+
+                    // イベントをキャンセルして、ViewModelに処理を委譲する
+                    args.EventArgs.Cancel = true;
+
+                    // ViewModelのコマンドを実行
+                    ViewModel.RequestCloseCommand.Execute().Subscribe();
+
+                }).DisposeWith(disposables);
+        });
     }
 
     public StorageService StorageService { get; private set; }

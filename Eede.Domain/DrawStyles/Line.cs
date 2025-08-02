@@ -6,7 +6,7 @@ using System;
 namespace Eede.Domain.DrawStyles
 {
     // 実装内容を再検討する
-    public class Line : IDrawStyle
+    public record Line : IDrawStyle
     {
         public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {

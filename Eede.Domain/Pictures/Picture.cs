@@ -7,7 +7,7 @@ using System;
 
 namespace Eede.Domain.Pictures
 {
-    public class Picture
+    public record Picture
     {
         private const int COLOR_32BIT = 4;
         private const int PixelSizeInBytes = COLOR_32BIT;

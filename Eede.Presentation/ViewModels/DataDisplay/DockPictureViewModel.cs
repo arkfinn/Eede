@@ -153,7 +153,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
         private Picture BringPictureBuffer()
         {
-            return Picture.CreateEmpty(new PictureSize(64, 64));
+            return PictureBuffer;
         }
     }
 }

@@ -1,21 +1,16 @@
-﻿using Avalonia;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using Eede.Application.UseCase.Pictures;
-using Eede.Domain.Files;
+﻿using Avalonia.Media.Imaging;
+using Eede.Application.Pictures;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
+using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Enums;
-using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
-using Eede.Application.Pictures;
+using Eede.Presentation.Files;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
 using System.Threading.Tasks;
-using Eede.Presentation.Files;
-using Eede.Presentation.Common.Adapters;
 
 namespace Eede.Presentation.ViewModels.DataDisplay
 {
@@ -24,14 +19,14 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
         public static DockPictureViewModel FromFile(IImageFile file)
         {
-            var vm = new DockPictureViewModel();
+            DockPictureViewModel vm = new();
             vm.Initialize(file);
             return vm;
         }
 
         public static DockPictureViewModel FromSize(PictureSize size)
         {
-            var vm = new DockPictureViewModel();
+            DockPictureViewModel vm = new();
             vm.Initialize(BitmapFileReader.CreateEmptyBitmapFile(size));
             return vm;
         }
@@ -47,12 +42,20 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public string Title { get; private set; }
         [Reactive] public bool Edited { get; set; }
         [Reactive] public IImageFile ImageFile { get; private set; }
+        [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
+        public ReactiveCommand<Unit, bool> OnClosing { get; }
+        public ReactiveCommand<Unit, bool> CloseCommand { get; }
+        public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
+        public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
+        public event AsyncEventHandler<EventArgs> RequestClose;
 
         public DockPictureViewModel()
         {
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
-            OnClosing = ReactiveCommand.Create(ExecuteClosing);
+            OnClosing = ReactiveCommand.CreateFromTask(ExecuteClosing);
+            CloseCommand = ReactiveCommand.CreateFromTask(ExecuteClose);
+
             MinCursorSize = new PictureSize(32, 32);
             CursorSize = new PictureSize(32, 32);
             _ = this.WhenAnyValue(x => x.CursorSize).Subscribe(size =>
@@ -76,22 +79,20 @@ namespace Eede.Presentation.ViewModels.DataDisplay
              });
         }
 
-        public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
-        public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
-
-        public async void Save()
+        public async Task Save()
         {
             if (PictureSave == null)
             {
                 return;
             }
-            var bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
-            var args = new PictureSaveEventArgs(ImageFile.WithBitmap(bitmap));
+            Bitmap bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
+            PictureSaveEventArgs args = new(ImageFile.WithBitmap(bitmap));
             await PictureSave.Invoke(this, args);
             if (!args.IsCanceled)
             {
                 Initialize(args.File);
             }
+
         }
 
         public void Initialize(IImageFile file)
@@ -103,22 +104,22 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             Edited = false;
         }
 
+        public async Task<bool> ExecuteClose()
+        {
+            await RequestClose?.Invoke(this, EventArgs.Empty);
+            return Closable;
+        }
 
 
-
-        [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
-
-        public ReactiveCommand<Unit, Unit> OnClosing { get; }
-
-        public void ExecuteClosing()
+        public async Task<bool> ExecuteClosing()
         {
             if (!Edited)
             {
-                return;
+                return true;
             }
             if (SaveAlertResult == SaveAlertResult.Save)
             {
-                Save();
+                await Save();
             }
 
             Closable = SaveAlertResult switch
@@ -127,7 +128,10 @@ namespace Eede.Presentation.ViewModels.DataDisplay
                 SaveAlertResult.Save => true,
                 _ => true,
             };
+
+            return Closable;
         }
+
 
         public ReactiveCommand<PictureArea, Unit> OnPicturePush { get; }
         public event EventHandler<PicturePushEventArgs> PicturePush;

@@ -85,6 +85,7 @@ namespace Eede.Presentation.Views.DataDisplay
                             Path = nameof(vm.Title)
                         });
                         document.Factory = Factory;
+                        vm.RequestClose += document.OpenSaveAlertDialog;
 
                         Factory?.AddDockable(this, document);
                         Factory?.SetActiveDockable(document);

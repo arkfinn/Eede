@@ -6,6 +6,7 @@ using Dock.Model.Avalonia.Controls;
 using Eede.Presentation.Common.Enums;
 using Eede.Views.Pages;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Views.DataDisplay
@@ -55,6 +56,7 @@ namespace Eede.Presentation.Views.DataDisplay
             set => SetValue(SubjectProperty, value);
         }
 
+
         public override bool OnClose()
         {
             if (Closable)
@@ -62,11 +64,11 @@ namespace Eede.Presentation.Views.DataDisplay
                 CloseAction?.Invoke();
                 return base.OnClose();
             }
-            OpenSaveAlertDialog();
+            OpenSaveAlertDialog(this);
             return false;
         }
 
-        private async void OpenSaveAlertDialog()
+        public async Task OpenSaveAlertDialog(object sender, EventArgs e = null)
         {
             SaveAlertWindow window = new(Subject);
 

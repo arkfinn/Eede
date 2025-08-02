@@ -6,7 +6,6 @@ using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
-using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
@@ -99,6 +98,20 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; }
     public PaletteContainerViewModel PaletteContainerViewModel { get; } = new PaletteContainerViewModel();
 
+
+    // Viewにウィンドウを閉じるよう通知するためのInteraction
+    public Interaction<Unit, Unit> CloseWindowInteraction { get; }
+
+    // Viewからのクローズ要求を受け取るためのコマンド
+    public ReactiveCommand<Unit, Unit> RequestCloseCommand { get; }
+
+    private bool _isCloseConfirmed;
+    public bool IsCloseConfirmed
+    {
+        get => _isCloseConfirmed;
+        private set => this.RaiseAndSetIfChanged(ref _isCloseConfirmed, value);
+    }
+
     public MainViewModel()
     {
         ImageTransfer = new DirectImageTransfer();
@@ -170,6 +183,9 @@ public class MainViewModel : ViewModelBase
 
         PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;
         PaletteContainerViewModel.OnFetchColor += OnFetchPaletteColor;
+
+        CloseWindowInteraction = new Interaction<Unit, Unit>();
+        RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
     }
 
     private void ExecuteUndo()
@@ -296,7 +312,7 @@ public class MainViewModel : ViewModelBase
         {
             if (doc.DataContext is DockPictureViewModel vm)
             {
-                vm.Save();
+                _ = vm.Save();
             }
         }
     }
@@ -394,5 +410,36 @@ public class MainViewModel : ViewModelBase
     private void OnFetchPaletteColor(ArgbColor color)
     {
         PenColor = color;
+    }
+
+    private async Task RequestCloseAsync()
+    {
+        // 二重実行を防止
+        if (IsCloseConfirmed)
+        {
+            return;
+        }
+
+        try
+        {
+
+            // 各PictureViewModelのクローズ確認処理を実行
+            foreach (DockPictureViewModel picture in Pictures.ToList())
+            {
+                // ここは前回提案の通り、コマンドがboolを返す設計が望ましい
+                bool canClosePicture = await picture.CloseCommand.Execute();
+                if (!canClosePicture)
+                {
+                    return; // ユーザーがキャンセルしたため、処理を中断
+                }
+            }
+
+            IsCloseConfirmed = true;
+            // すべての確認が通ったら、Interactionを通じてViewに通知
+            _ = await CloseWindowInteraction.Handle(Unit.Default);
+        }
+        finally
+        {
+        }
     }
 }

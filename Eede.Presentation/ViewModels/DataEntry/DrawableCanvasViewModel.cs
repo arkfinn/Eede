@@ -151,7 +151,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
         DrawingResult result = DrawableArea.DrawStart(DrawStyle, PenStyle, PictureBuffer, pos, IsShifted);
-        PictureBuffer = result.PictureBuffer.Clone();
+        PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
         UpdateImage();
     }
@@ -171,7 +171,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void ExecuteDrawCancelAction()
     {
         DrawingResult result = DrawableArea.DrawCancel(PictureBuffer);
-        PictureBuffer = result.PictureBuffer.Clone();
+        PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
         UpdateImage();
     }
@@ -179,7 +179,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void ExecuteDrawingAction(Position pos)
     {
         DrawingResult result = DrawableArea.Move(DrawStyle, PenStyle, PictureBuffer, pos, IsShifted);
-        PictureBuffer = result.PictureBuffer.Clone();
+        PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
         UpdateImage();
     }
@@ -193,7 +193,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         Picture previous = PictureBuffer.Previous;
 
         DrawingResult result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(pos.X, pos.Y), IsShifted);
-        PictureBuffer = result.PictureBuffer.Clone();
+        PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
 
         Drew?.Invoke(previous, PictureBuffer.Previous);

@@ -22,7 +22,7 @@ namespace Eede.Domain.ImageTransfers
                     int pos = (x * 4) + destOffset;
                     int srcX = magnification.Minify(x);
                     int fromPos = (srcX * 4) + srcOffset;
-                    byte alpha = src[fromPos + 3];
+                    byte alpha = src.AsSpan()[fromPos + 3];
 
                     destPixels[pos + 0] = alpha;
                     destPixels[pos + 1] = alpha;

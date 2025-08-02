@@ -1,6 +1,6 @@
 ﻿namespace Eede.Domain.Colors
 {
-    public class ArgbColor(byte alpha, byte red, byte green, byte blue)
+    public record ArgbColor(byte alpha, byte red, byte green, byte blue)
     {
         public readonly byte Alpha = alpha;
         public readonly byte Red = red;

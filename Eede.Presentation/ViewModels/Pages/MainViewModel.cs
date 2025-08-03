@@ -15,7 +15,6 @@ using Eede.Domain.Sizes;
 using Eede.Domain.Systems;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Common.Drawings;
 using Eede.Presentation.Common.Models;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
@@ -47,7 +46,7 @@ public class MainViewModel : ViewModelBase
         set => DrawableCanvasViewModel.Magnification = value;
     }
 
-    [Reactive] public DrawStyles DrawStyle { get; set; }
+    [Reactive] public DrawStyleType DrawStyle { get; set; }
 
     public IImageBlender ImageBlender
     {
@@ -145,7 +144,7 @@ public class MainViewModel : ViewModelBase
                    vm.CursorSize = size;
                }
            });
-        DrawStyle = DrawStyles.Free;
+        DrawStyle = DrawStyleType.FreeCurve;
         _ = this.WhenAnyValue(x => x.DrawStyle).Subscribe(drawStyle => DrawableCanvasViewModel.DrawStyle = ExecuteUpdateDrawStyle(drawStyle));
 
         DrawableCanvasViewModel.ColorPicked += (sender, args) =>
@@ -390,15 +389,15 @@ public class MainViewModel : ViewModelBase
         SetPictureToDrawArea(result.Updated);
     }
 
-    private IDrawStyle ExecuteUpdateDrawStyle(DrawStyles drawStyle)
+    private IDrawStyle ExecuteUpdateDrawStyle(DrawStyleType drawStyle)
     {
         DrawableCanvasViewModel.IsRegionSelecting = false;
         return drawStyle switch
         {
-            DrawStyles.RegionSelect => DrawableCanvasViewModel.SetupRegionSelector(),
-            DrawStyles.Free => new FreeCurve(),
-            DrawStyles.Line => new Line(),
-            DrawStyles.Fill => new Fill(),
+            DrawStyleType.RegionSelect => DrawableCanvasViewModel.SetupRegionSelector(),
+            DrawStyleType.FreeCurve => new FreeCurve(),
+            DrawStyleType.Line => new Line(),
+            DrawStyleType.Fill => new Fill(),
             _ => throw new ArgumentOutOfRangeException(nameof(drawStyle), $"Unknown DrawStyle: {drawStyle}"),
         };
     }

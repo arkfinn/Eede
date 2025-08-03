@@ -8,10 +8,14 @@
              xmlns:entry="clr-namespace:Eede.Presentation.Views.DataEntry"
              xmlns:display="clr-namespace:Eede.Presentation.Views.DataDisplay"
              xmlns:general="clr-namespace:Eede.Presentation.Views.General"
+             xmlns:converters="using:Eede.Presentation.Common.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
              x:Class="Eede.Presentation.Views.Pages.MainView"
              x:DataType="vm:MainViewModel"
              DragDrop.AllowDrop="True">
+  <UserControl.Resources>
+    <converters:BackgroundColorConverter x:Key="BackgroundColorConverter"/>
+  </UserControl.Resources>
   <Design.DataContext>
     <!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -109,7 +113,7 @@
                 <Panel VerticalAlignment="Center">
                   <TextBlock Margin="4" Text="背景色" />
                 </Panel>
-                <general:ColorSampleButton SampleColor="{Binding BackgroundColor}"
+                <general:ColorSampleButton SampleColor="{Binding CurrentBackgroundColor, Converter={StaticResource BackgroundColorConverter}}"
                                            PutCommand="{Binding PutBackgroundColorCommand}"
                                            GetCommand="{Binding GetBackgroundColorCommand}"/>
               </StackPanel>

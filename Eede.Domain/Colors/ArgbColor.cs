@@ -1,12 +1,7 @@
 ﻿namespace Eede.Domain.Colors
 {
-    public record ArgbColor(byte alpha, byte red, byte green, byte blue)
+    public readonly record struct ArgbColor(byte Alpha, byte Red, byte Green, byte Blue)
     {
-        public readonly byte Alpha = alpha;
-        public readonly byte Red = red;
-        public readonly byte Green = green;
-        public readonly byte Blue = blue;
-
         public bool EqualsRgb(ArgbColor other)
         {
             return Red == other.Red

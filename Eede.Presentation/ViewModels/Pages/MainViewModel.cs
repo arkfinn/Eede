@@ -38,7 +38,7 @@ public class MainViewModel : ViewModelBase
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
     public DrawableCanvasViewModel DrawableCanvasViewModel { get; } = new DrawableCanvasViewModel();
 
-    [Reactive] public Color BackgroundColor { get; set; }
+    [Reactive] public BackgroundColor CurrentBackgroundColor { get; set; }
 
     public Magnification Magnification
     {
@@ -115,8 +115,10 @@ public class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         ImageTransfer = new DirectImageTransfer();
-        BackgroundColor = Color.FromArgb(0, 0, 0, 0);
-        _ = this.WhenAnyValue(x => x.BackgroundColor).BindTo(this, x => x.DrawableCanvasViewModel.BackgroundColor);
+        CurrentBackgroundColor = BackgroundColor.Default;
+        _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
+            .Select(bg => Color.FromArgb(bg.Value.Alpha, bg.Value.Red, bg.Value.Green, bg.Value.Blue)) // ドメインオブジェクトからAvalonia Colorへ変換
+            .BindTo(this, x => x.DrawableCanvasViewModel.BackgroundColor);
         PullBlender = new DirectImageBlender();
         PenColor = DrawableCanvasViewModel.PenColor;
         _ = this.WhenAnyValue(x => x.PenColor)
@@ -174,11 +176,11 @@ public class MainViewModel : ViewModelBase
 
         PutBackgroundColorCommand = ReactiveCommand.Create(() =>
         {
-            BackgroundColor = NowPenColor;
+            CurrentBackgroundColor = new BackgroundColor(new ArgbColor(NowPenColor.A, NowPenColor.R, NowPenColor.G, NowPenColor.B));
         });
         GetBackgroundColorCommand = ReactiveCommand.Create(() =>
         {
-            PenColor = new ArgbColor(BackgroundColor.A, BackgroundColor.R, BackgroundColor.G, BackgroundColor.B);
+            PenColor = CurrentBackgroundColor.Value;
         });
 
         PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;

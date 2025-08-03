@@ -3,15 +3,26 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Eede.Domain.DrawStyles;
 using System;
+using System.Reactive;
+using ReactiveUI;
 
 namespace Eede.Presentation.Views.Navigation
 {
     public partial class DrawStyleMenu : UserControl
     {
+        public ReactiveCommand<DrawStyleType, Unit> UpdateDrawStyleCommand { get; }
+
         public DrawStyleMenu()
         {
             InitializeComponent();
-            UpdateChecked();
+
+            // コマンドの初期化
+            UpdateDrawStyleCommand = ReactiveCommand.Create<DrawStyleType>(style =>
+            {
+                DrawStyle = style;
+            });
+
+            UpdateChecked(); // 初期状態のUIを設定
         }
 
         public static readonly StyledProperty<DrawStyleType> DrawStyleProperty =
@@ -27,30 +38,10 @@ namespace Eede.Presentation.Views.Navigation
             }
         }
 
-        public void SetDrawStyleRegionSelector(object sender, RoutedEventArgs e)
-        {
-            DrawStyle = DrawStyleType.RegionSelect;
-        }
-
-        public void SetDrawStyleFreeCurve(object sender, RoutedEventArgs e)
-        {
-            DrawStyle = DrawStyleType.FreeCurve;
-        }
-
-        public void SetDrawStyleLine(object sender, RoutedEventArgs e)
-        {
-            DrawStyle = DrawStyleType.Line;
-        }
-
-        public void SetDrawStyleFill(object sender, RoutedEventArgs e)
-        {
-            DrawStyle = DrawStyleType.Fill;
-        }
-
         private void UpdateChecked()
         {
             ButtonRegionSelector.IsChecked = DrawStyle == DrawStyleType.RegionSelect;
-            ButtonFreeVurve.IsChecked = DrawStyle == DrawStyleType.FreeCurve;
+            ButtonFreeCurve.IsChecked = DrawStyle == DrawStyleType.FreeCurve;
             ButtonLine.IsChecked = DrawStyle == DrawStyleType.Line;
             ButtonFill.IsChecked = DrawStyle == DrawStyleType.Fill;
         }

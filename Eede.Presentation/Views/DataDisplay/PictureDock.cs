@@ -59,7 +59,8 @@ namespace Eede.Presentation.Views.DataDisplay
                         {
                             DataContext = vm,
                             CanFloat = false,
-                            Title = vm.Subject,
+                            Title = vm.Title,
+                            Subject = vm.Subject,
                             Content = DocumentTemplate.Content
                         };
                         _ = document.Bind(PictureDocument.ClosingActionProperty, new Binding
@@ -81,9 +82,10 @@ namespace Eede.Presentation.Views.DataDisplay
                         _ = document.Bind(TitleProperty, new Binding
                         {
                             Source = vm,
-                            Path = nameof(vm.Subject)
+                            Path = nameof(vm.Title)
                         });
                         document.Factory = Factory;
+                        vm.RequestClose += document.OpenSaveAlertDialog;
 
                         Factory?.AddDockable(this, document);
                         Factory?.SetActiveDockable(document);

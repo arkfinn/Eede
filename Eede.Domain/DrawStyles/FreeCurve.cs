@@ -4,7 +4,7 @@ using Eede.Domain.Positions;
 
 namespace Eede.Domain.DrawStyles
 {
-    public class FreeCurve : IDrawStyle
+    public record FreeCurve : IDrawStyle
     {
 
         public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)

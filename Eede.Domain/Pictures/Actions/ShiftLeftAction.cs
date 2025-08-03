@@ -1,4 +1,5 @@
 ﻿using Eede.Domain.Positions;
+using Eede.Domain.Pictures;
 
 namespace Eede.Domain.Pictures.Actions;
 

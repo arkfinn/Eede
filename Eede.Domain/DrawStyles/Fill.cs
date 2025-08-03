@@ -4,7 +4,7 @@ using Eede.Domain.Positions;
 namespace Eede.Domain.DrawStyles
 {
     // 実装内容を再検討する
-    public class Fill : IDrawStyle
+    public record Fill : IDrawStyle
     {
         public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
         {

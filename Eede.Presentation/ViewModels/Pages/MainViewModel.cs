@@ -1,4 +1,4 @@
-﻿using Avalonia.Input;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Dock.Model.Core;
@@ -6,16 +6,16 @@ using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
-using Eede.Domain.Files;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;
 using Eede.Domain.Scales;
+using Eede.Domain.Sizes;
 using Eede.Domain.Systems;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Common.Drawings;
+using Eede.Presentation.Common.Models;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
@@ -38,7 +38,7 @@ public class MainViewModel : ViewModelBase
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
     public DrawableCanvasViewModel DrawableCanvasViewModel { get; } = new DrawableCanvasViewModel();
 
-    [Reactive] public Color BackgroundColor { get; set; }
+    [Reactive] public BackgroundColor CurrentBackgroundColor { get; set; }
 
     public Magnification Magnification
     {
@@ -46,7 +46,7 @@ public class MainViewModel : ViewModelBase
         set => DrawableCanvasViewModel.Magnification = value;
     }
 
-    [Reactive] public DrawStyles DrawStyle { get; set; }
+    [Reactive] public DrawStyleType DrawStyle { get; set; }
 
     public IImageBlender ImageBlender
     {
@@ -79,6 +79,7 @@ public class MainViewModel : ViewModelBase
     [Reactive] public PictureSize CursorSize { get; set; }
 
     [Reactive] public UndoSystem UndoSystem { get; private set; }
+    [Reactive] public StorageService StorageService { get; set; }
 
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
@@ -97,11 +98,26 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; }
     public PaletteContainerViewModel PaletteContainerViewModel { get; } = new PaletteContainerViewModel();
 
+
+    // Viewにウィンドウを閉じるよう通知するためのInteraction
+    public Interaction<Unit, Unit> CloseWindowInteraction { get; }
+
+    // Viewからのクローズ要求を受け取るためのコマンド
+    public ReactiveCommand<Unit, Unit> RequestCloseCommand { get; }
+
+    private bool _isCloseConfirmed;
+    public bool IsCloseConfirmed
+    {
+        get => _isCloseConfirmed;
+        private set => this.RaiseAndSetIfChanged(ref _isCloseConfirmed, value);
+    }
+
     public MainViewModel()
     {
         ImageTransfer = new DirectImageTransfer();
-        BackgroundColor = Color.FromArgb(0, 0, 0, 0);
-        _ = this.WhenAnyValue(x => x.BackgroundColor).BindTo(this, x => x.DrawableCanvasViewModel.BackgroundColor);
+        CurrentBackgroundColor = BackgroundColor.Default;
+        _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
+            .BindTo(this, x => x.DrawableCanvasViewModel.BackgroundColor);
         PullBlender = new DirectImageBlender();
         PenColor = DrawableCanvasViewModel.PenColor;
         _ = this.WhenAnyValue(x => x.PenColor)
@@ -129,7 +145,7 @@ public class MainViewModel : ViewModelBase
                    vm.CursorSize = size;
                }
            });
-        DrawStyle = DrawStyles.Free;
+        DrawStyle = DrawStyleType.FreeCurve;
         _ = this.WhenAnyValue(x => x.DrawStyle).Subscribe(drawStyle => DrawableCanvasViewModel.DrawStyle = ExecuteUpdateDrawStyle(drawStyle));
 
         DrawableCanvasViewModel.ColorPicked += (sender, args) =>
@@ -159,15 +175,18 @@ public class MainViewModel : ViewModelBase
 
         PutBackgroundColorCommand = ReactiveCommand.Create(() =>
         {
-            BackgroundColor = NowPenColor;
+            CurrentBackgroundColor = new BackgroundColor(new ArgbColor(NowPenColor.A, NowPenColor.R, NowPenColor.G, NowPenColor.B));
         });
         GetBackgroundColorCommand = ReactiveCommand.Create(() =>
         {
-            PenColor = new ArgbColor(BackgroundColor.A, BackgroundColor.R, BackgroundColor.G, BackgroundColor.B);
+            PenColor = CurrentBackgroundColor.Value;
         });
 
         PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;
         PaletteContainerViewModel.OnFetchColor += OnFetchPaletteColor;
+
+        CloseWindowInteraction = new Interaction<Unit, Unit>();
+        RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
     }
 
     private void ExecuteUndo()
@@ -294,15 +313,23 @@ public class MainViewModel : ViewModelBase
         {
             if (doc.DataContext is DockPictureViewModel vm)
             {
-                vm.Save(storage);
+                _ = vm.Save();
             }
         }
     }
 
     private async Task OnPictureSave(object sender, PictureSaveEventArgs e)
     {
-        IImageFile updatedFile = await e.File.SaveAsync(e.Storage);
-        e.UpdateFile(updatedFile);
+        SaveImageResult saveResult = await e.File.SaveAsync(StorageService);
+        if (saveResult.IsCanceled)
+        {
+            e.Cancel();
+            return;
+        }
+        if (saveResult.IsSaved)
+        {
+            e.UpdateFile(saveResult.File);
+        }
     }
 
     private void OnPushToDrawArea(object sender, PicturePushEventArgs args)
@@ -363,15 +390,15 @@ public class MainViewModel : ViewModelBase
         SetPictureToDrawArea(result.Updated);
     }
 
-    private IDrawStyle ExecuteUpdateDrawStyle(DrawStyles drawStyle)
+    private IDrawStyle ExecuteUpdateDrawStyle(DrawStyleType drawStyle)
     {
         DrawableCanvasViewModel.IsRegionSelecting = false;
         return drawStyle switch
         {
-            DrawStyles.RegionSelect => DrawableCanvasViewModel.SetupRegionSelector(),
-            DrawStyles.Free => new FreeCurve(),
-            DrawStyles.Line => new Line(),
-            DrawStyles.Fill => new Fill(),
+            DrawStyleType.RegionSelect => DrawableCanvasViewModel.SetupRegionSelector(),
+            DrawStyleType.FreeCurve => new FreeCurve(),
+            DrawStyleType.Line => new Line(),
+            DrawStyleType.Fill => new Fill(),
             _ => throw new ArgumentOutOfRangeException(nameof(drawStyle), $"Unknown DrawStyle: {drawStyle}"),
         };
     }
@@ -384,5 +411,36 @@ public class MainViewModel : ViewModelBase
     private void OnFetchPaletteColor(ArgbColor color)
     {
         PenColor = color;
+    }
+
+    private async Task RequestCloseAsync()
+    {
+        // 二重実行を防止
+        if (IsCloseConfirmed)
+        {
+            return;
+        }
+
+        try
+        {
+
+            // 各PictureViewModelのクローズ確認処理を実行
+            foreach (DockPictureViewModel picture in Pictures.ToList())
+            {
+                // ここは前回提案の通り、コマンドがboolを返す設計が望ましい
+                bool canClosePicture = await picture.CloseCommand.Execute();
+                if (!canClosePicture)
+                {
+                    return; // ユーザーがキャンセルしたため、処理を中断
+                }
+            }
+
+            IsCloseConfirmed = true;
+            // すべての確認が通ったら、Interactionを通じてViewに通知
+            _ = await CloseWindowInteraction.Handle(Unit.Default);
+        }
+        finally
+        {
+        }
     }
 }

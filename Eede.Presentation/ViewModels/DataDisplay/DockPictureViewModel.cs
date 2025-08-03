@@ -1,13 +1,10 @@
-﻿using Avalonia;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
+﻿using Avalonia.Media.Imaging;
 using Eede.Application.Pictures;
-using Eede.Domain.Files;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
+using Eede.Domain.Sizes;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Enums;
-using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
 using ReactiveUI;
@@ -42,14 +39,24 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public HalfBoxArea CursorArea { get; set; }
         [Reactive] public bool Enabled { get; set; }
         [Reactive] public bool Closable { get; set; }
-
+        [Reactive] public string Subject { get; private set; }
+        [Reactive] public string Title { get; private set; }
+        [Reactive] public bool Edited { get; set; }
         [Reactive] public IImageFile ImageFile { get; private set; }
+        [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
+        public ReactiveCommand<Unit, bool> OnClosing { get; }
+        public ReactiveCommand<Unit, bool> CloseCommand { get; }
+        public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
+        public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
+        public event AsyncEventHandler<EventArgs> RequestClose;
 
         public DockPictureViewModel()
         {
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
-            OnClosing = ReactiveCommand.Create(ExecuteClosing);
+            OnClosing = ReactiveCommand.CreateFromTask(ExecuteClosing);
+            CloseCommand = ReactiveCommand.CreateFromTask(ExecuteClose);
+
             MinCursorSize = new PictureSize(32, 32);
             CursorSize = new PictureSize(32, 32);
             _ = this.WhenAnyValue(x => x.CursorSize).Subscribe(size =>
@@ -62,26 +69,31 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             {
                 Closable = !Edited;
             });
+            _ = this.WhenAnyValue(x => x.Subject, x => x.Edited).Subscribe(_ =>
+            {
+                Title = Edited ? "●" + Subject : Subject;
+            });
             Initialize(BitmapFileReader.CreateEmptyBitmapFile(new PictureSize(32, 32)));
             _ = this.WhenAnyValue(x => x.PictureBuffer).Subscribe(_ =>
-            {
-                PremultipliedBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
-            });
+             {
+                 PremultipliedBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
+             });
         }
 
-        public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
-        public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
-
-        public async void Save(StorageService storage)
+        public async Task Save()
         {
             if (PictureSave == null)
             {
                 return;
             }
-            var bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
-            var args = new PictureSaveEventArgs(ImageFile.WithBitmap(bitmap), storage);
+            Bitmap bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
+            PictureSaveEventArgs args = new(ImageFile.WithBitmap(bitmap));
             await PictureSave.Invoke(this, args);
-            Initialize(args.File);
+            if (!args.IsCanceled)
+            {
+                Initialize(args.File);
+            }
+
         }
 
         public void Initialize(IImageFile file)
@@ -93,29 +105,34 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             Edited = false;
         }
 
-        [Reactive] public bool Edited { get; set; }
+        public async Task<bool> ExecuteClose()
+        {
+            await RequestClose?.Invoke(this, EventArgs.Empty);
+            return Closable;
+        }
 
 
-
-        [Reactive] public string Subject { get; private set; }
-        [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
-
-        public ReactiveCommand<Unit, Unit> OnClosing { get; }
-
-        public void ExecuteClosing()
+        public async Task<bool> ExecuteClosing()
         {
             if (!Edited)
             {
-                return;
+                return true;
+            }
+            if (SaveAlertResult == SaveAlertResult.Save)
+            {
+                await Save();
             }
 
             Closable = SaveAlertResult switch
             {
                 SaveAlertResult.Cancel => false,
-                SaveAlertResult.Save => true,//Save();
+                SaveAlertResult.Save => true,
                 _ => true,
             };
+
+            return Closable;
         }
+
 
         public ReactiveCommand<PictureArea, Unit> OnPicturePush { get; }
         public event EventHandler<PicturePushEventArgs> PicturePush;
@@ -132,13 +149,12 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             if (!Edited)
             {
                 Edited = true;
-                Subject = "●" + Subject;
             }
         }
 
         private Picture BringPictureBuffer()
         {
-            return Picture.CreateEmpty(new PictureSize(64, 64));
+            return PictureBuffer;
         }
     }
 }

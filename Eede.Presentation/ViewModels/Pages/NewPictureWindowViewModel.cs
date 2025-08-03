@@ -1,4 +1,5 @@
 ﻿using Eede.Domain.Pictures;
+using Eede.Domain.Sizes;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;

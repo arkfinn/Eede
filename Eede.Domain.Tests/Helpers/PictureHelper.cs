@@ -1,4 +1,5 @@
 ﻿using Eede.Domain.Pictures;
+using Eede.Domain.Sizes;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;

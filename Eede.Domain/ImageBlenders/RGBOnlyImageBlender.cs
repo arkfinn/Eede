@@ -25,9 +25,10 @@ namespace Eede.Domain.ImageBlenders
                     int toPos = (x * 4) + (to.Stride * y);
                     int fromPos = ((x - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
 
-                    toPixels[toPos + 0] = from[fromPos + 0];
-                    toPixels[toPos + 1] = from[fromPos + 1];
-                    toPixels[toPos + 2] = from[fromPos + 2];
+                    ReadOnlySpan<byte> fromSpan = from.AsSpan();
+                    toPixels[toPos + 0] = fromSpan[fromPos + 0];
+                    toPixels[toPos + 1] = fromSpan[fromPos + 1];
+                    toPixels[toPos + 2] = fromSpan[fromPos + 2];
                 }
             }
 

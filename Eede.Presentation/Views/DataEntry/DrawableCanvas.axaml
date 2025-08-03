@@ -3,8 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:general="using:Eede.Presentation.Views.General"
-             xmlns:converters="using:Avalonia.Controls.Converters"
              xmlns:vm="using:Eede.Presentation.ViewModels.DataEntry"
+             xmlns:converters="using:Eede.Presentation.Common.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Presentation.Views.DataEntry.DrawableCanvas"
              x:DataType="vm:DrawableCanvasViewModel"
@@ -14,6 +14,9 @@
              PointerMovedCommand="{Binding DrawingCommand}"
              PointerLeftButtonReleasedCommand="{Binding DrawEndCommand}"
              PointerLeaveCommand="{Binding CanvasLeaveCommand}">
+  <UserControl.Resources>
+    <converters:BackgroundColorConverter x:Key="BackgroundColorConverter"/>
+  </UserControl.Resources>
   <Design.DataContext>
     <vm:DrawableCanvasViewModel />
   </Design.DataContext>
@@ -44,7 +47,7 @@
         <Panel Width="{Binding MyBitmap.PixelSize.Width}"
               Height="{Binding MyBitmap.PixelSize.Height}" >
           <Panel.Background>
-            <SolidColorBrush Color="{Binding BackgroundColor}"/>
+            <SolidColorBrush Color="{Binding BackgroundColor, Converter={StaticResource BackgroundColorConverter}}"/>
           </Panel.Background>
         </Panel>
         <Image x:Name="canvas"

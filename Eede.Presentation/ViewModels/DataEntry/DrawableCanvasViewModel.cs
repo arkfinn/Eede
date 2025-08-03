@@ -23,7 +23,7 @@ namespace Eede.Presentation.ViewModels.DataEntry;
 
 public class DrawableCanvasViewModel : ViewModelBase
 {
-    [Reactive] public Color BackgroundColor { get; set; }
+    [Reactive] public BackgroundColor BackgroundColor { get; set; }
     [Reactive] public Magnification Magnification { get; set; }
     [Reactive] public IDrawStyle DrawStyle { get; set; }
     [Reactive] public IImageBlender ImageBlender { get; set; }

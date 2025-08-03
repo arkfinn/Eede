@@ -3,13 +3,8 @@ using System;
 
 namespace Eede.Application.Colors
 {
-    public class ColorPickedEventArgs : EventArgs
+    public class ColorPickedEventArgs(ArgbColor newColor) : EventArgs
     {
-        public ColorPickedEventArgs(ArgbColor newColor)
-        {
-            NewColor = newColor ?? throw new ArgumentNullException(nameof(newColor));
-        }
-
-        public readonly ArgbColor NewColor;
+        public readonly ArgbColor NewColor = newColor;
     }
 }

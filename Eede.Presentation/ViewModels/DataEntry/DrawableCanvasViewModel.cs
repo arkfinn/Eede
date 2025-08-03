@@ -11,6 +11,7 @@ using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
+using Eede.Domain.Sizes;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
 using ReactiveUI;
@@ -22,7 +23,7 @@ namespace Eede.Presentation.ViewModels.DataEntry;
 
 public class DrawableCanvasViewModel : ViewModelBase
 {
-    [Reactive] public Color BackgroundColor { get; set; }
+    [Reactive] public BackgroundColor BackgroundColor { get; set; }
     [Reactive] public Magnification Magnification { get; set; }
     [Reactive] public IDrawStyle DrawStyle { get; set; }
     [Reactive] public IImageBlender ImageBlender { get; set; }
@@ -151,7 +152,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
         DrawingResult result = DrawableArea.DrawStart(DrawStyle, PenStyle, PictureBuffer, pos, IsShifted);
-        PictureBuffer = result.PictureBuffer.Clone();
+        PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
         UpdateImage();
     }
@@ -171,7 +172,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void ExecuteDrawCancelAction()
     {
         DrawingResult result = DrawableArea.DrawCancel(PictureBuffer);
-        PictureBuffer = result.PictureBuffer.Clone();
+        PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
         UpdateImage();
     }
@@ -179,7 +180,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void ExecuteDrawingAction(Position pos)
     {
         DrawingResult result = DrawableArea.Move(DrawStyle, PenStyle, PictureBuffer, pos, IsShifted);
-        PictureBuffer = result.PictureBuffer.Clone();
+        PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
         UpdateImage();
     }
@@ -193,7 +194,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         Picture previous = PictureBuffer.Previous;
 
         DrawingResult result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(pos.X, pos.Y), IsShifted);
-        PictureBuffer = result.PictureBuffer.Clone();
+        PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
 
         Drew?.Invoke(previous, PictureBuffer.Previous);

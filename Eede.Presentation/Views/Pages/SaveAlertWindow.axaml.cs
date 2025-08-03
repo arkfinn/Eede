@@ -6,12 +6,15 @@ namespace Eede.Views.Pages
 {
     public partial class SaveAlertWindow : Window
     {
-        public SaveAlertWindow()
+        public SaveAlertWindow(string fileName = "無題")
         {
             InitializeComponent();
+            FileName = fileName;
+            DataContext = this;
         }
 
         public SaveAlertResult Result { get; private set; } = SaveAlertResult.Cancel;
+        public string FileName { get; }
 
         public void OnSave(object sender, RoutedEventArgs e)
         {

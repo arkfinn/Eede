@@ -1,5 +1,5 @@
 ﻿using Eede.Domain.Colors;
-using Eede.Domain.Pictures;
+using Eede.Domain.Sizes;
 using System;
 using System.IO;
 

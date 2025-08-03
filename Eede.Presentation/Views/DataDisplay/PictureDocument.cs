@@ -6,6 +6,7 @@ using Dock.Model.Avalonia.Controls;
 using Eede.Presentation.Common.Enums;
 using Eede.Views.Pages;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Views.DataDisplay
@@ -39,6 +40,22 @@ namespace Eede.Presentation.Views.DataDisplay
             set => SetValue(SaveAlertResultProperty, value);
         }
 
+        public static readonly StyledProperty<bool> IsNewFileProperty =
+            AvaloniaProperty.Register<PictureDocument, bool>(nameof(IsNewFile), true);
+        public bool IsNewFile
+        {
+            get => GetValue(IsNewFileProperty);
+            set => SetValue(IsNewFileProperty, value);
+        }
+
+        public static readonly StyledProperty<string> SubjectProperty =
+            AvaloniaProperty.Register<PictureDocument, string>(nameof(Subject), "");
+        public string Subject
+        {
+            get => GetValue(SubjectProperty);
+            set => SetValue(SubjectProperty, value);
+        }
+
 
         public override bool OnClose()
         {
@@ -47,13 +64,13 @@ namespace Eede.Presentation.Views.DataDisplay
                 CloseAction?.Invoke();
                 return base.OnClose();
             }
-            OpenSaveAlertDialog();
+            _ = OpenSaveAlertDialog(this);
             return false;
         }
 
-        private async void OpenSaveAlertDialog()
+        public async Task OpenSaveAlertDialog(object sender, EventArgs e = null)
         {
-            SaveAlertWindow window = new();
+            SaveAlertWindow window = new(Subject);
 
             Window mainWindow = ((IClassicDesktopStyleApplicationLifetime)Avalonia.Application.Current.ApplicationLifetime).MainWindow;
 

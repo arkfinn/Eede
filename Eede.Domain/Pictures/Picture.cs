@@ -1,13 +1,14 @@
-﻿using Eede.Domain.Colors;
+using Eede.Domain.Colors;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Positions;
+using Eede.Domain.Sizes;
 using Eede.Domain.Scales;
 using System;
 
 namespace Eede.Domain.Pictures
 {
-    public class Picture
+    public record Picture
     {
         private const int COLOR_32BIT = 4;
         private const int PixelSizeInBytes = COLOR_32BIT;
@@ -40,7 +41,10 @@ namespace Eede.Domain.Pictures
         public int Height => Size.Height;
         public int Length => ImageData.Length;
 
-        public byte this[int i] => ImageData[i];
+        public ReadOnlySpan<byte> AsSpan()
+        {
+            return new ReadOnlySpan<byte>(ImageData);
+        }
 
         public byte[] CloneImage()
         {
@@ -55,11 +59,12 @@ namespace Eede.Domain.Pictures
             }
 
             int index = (pos.X * COLOR_32BIT) + (Stride * pos.Y);
+            var span = AsSpan();
             return new ArgbColor(
-                this[index + 3],
-                this[index + 2],
-                this[index + 1],
-                this[index]);
+                span[index + 3],
+                span[index + 2],
+                span[index + 1],
+                span[index]);
         }
 
         public Picture CutOut(PictureArea area)
@@ -68,6 +73,8 @@ namespace Eede.Domain.Pictures
             int length = Math.Min((Width - area.X) * PixelSizeInBytes, destinationStride);
             int destinationX = area.X * PixelSizeInBytes;
             byte[] cutoutImageData = new byte[destinationStride * area.Height];
+            var sourceSpan = AsSpan();
+            var destinationSpan = new Span<byte>(cutoutImageData);
 
             for (int y = 0; y < area.Height; y++)
             {
@@ -78,7 +85,7 @@ namespace Eede.Domain.Pictures
 
                 int sourceStartIndex = destinationX + ((area.Y + y) * Stride);
                 int destinationStartIndex = y * destinationStride;
-                Array.Copy(ImageData, sourceStartIndex, cutoutImageData, destinationStartIndex, length);
+                sourceSpan.Slice(sourceStartIndex, length).CopyTo(destinationSpan.Slice(destinationStartIndex, length));
             }
 
             return Create(area.Size, cutoutImageData);

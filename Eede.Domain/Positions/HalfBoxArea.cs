@@ -1,4 +1,5 @@
 ﻿using System;
+using Eede.Domain.Sizes;
 using Eede.Domain.Pictures;
 
 namespace Eede.Domain.Positions

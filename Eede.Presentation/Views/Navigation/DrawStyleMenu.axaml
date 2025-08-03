@@ -5,7 +5,7 @@
              xmlns:local="clr-namespace:Eede.Presentation.Views.Navigation"
              xmlns:buttons="clr-namespace:Eede.Presentation.Views.General.Buttons"
              xmlns:c="clr-namespace:Eede.Presentation.Common.Converters"
-             xmlns:p="clr-namespace:Eede.Presentation.Common.Drawings"
+             xmlns:p="using:Eede.Domain.DrawStyles"
              mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="450"
              x:Class="Eede.Presentation.Views.Navigation.DrawStyleMenu">
   <Grid>
@@ -16,16 +16,24 @@
       <WrapPanel.Resources>
         <c:BitmapConverter x:Key="bitmapConverter" />
       </WrapPanel.Resources>
-      <ToggleButton x:Name="ButtonRegionSelector" Classes="tool" Click="SetDrawStyleRegionSelector" >
+      <ToggleButton x:Name="ButtonRegionSelector" Classes="tool"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.RegionSelect}" >
         <Image Source="/Assets/Tools/pen_region.png" Stretch="None" />
       </ToggleButton>
-      <ToggleButton x:Name="ButtonFreeVurve" Classes="tool" Click="SetDrawStyleFreeCurve" >
+      <ToggleButton x:Name="ButtonFreeCurve" Classes="tool"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.FreeCurve}" >
         <Image Source="/Assets/Tools/pen_free.png" Stretch="None" />
       </ToggleButton>
-      <ToggleButton x:Name="ButtonLine" Classes="tool" Click="SetDrawStyleLine" >
+      <ToggleButton x:Name="ButtonLine" Classes="tool"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.Line}" >
         <Image Source="/Assets/Tools/pen_line.png" Stretch="None" />
       </ToggleButton>
-      <ToggleButton x:Name="ButtonFill" Classes="tool" Click="SetDrawStyleFill" >
+      <ToggleButton x:Name="ButtonFill" Classes="tool"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.Fill}" >
         <Image Source="/Assets/Tools/pen_fill.png" Stretch="None" />
       </ToggleButton>
     </WrapPanel>

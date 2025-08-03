@@ -3,9 +3,9 @@ using System.Collections.Immutable;
 
 namespace Eede.Domain.Systems
 {
-    public sealed class UndoSystem : IDisposable
+    public sealed record UndoSystem : IDisposable
     {
-        public UndoSystem() : this(ImmutableStack<IUndoItem>.Empty, ImmutableStack<IUndoItem>.Empty)
+        public UndoSystem() : this([], [])
         {
         }
 
@@ -35,7 +35,7 @@ namespace Eede.Domain.Systems
         public UndoSystem Add(IUndoItem item)
         {
             DisposeRedoList();
-            return new UndoSystem(UndoList.Push(item), ImmutableStack<IUndoItem>.Empty);
+            return new UndoSystem(UndoList.Push(item), []);
         }
 
         public bool CanUndo()

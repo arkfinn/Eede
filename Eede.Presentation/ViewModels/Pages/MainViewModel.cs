@@ -117,7 +117,6 @@ public class MainViewModel : ViewModelBase
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
-            .Select(bg => Color.FromArgb(bg.Value.Alpha, bg.Value.Red, bg.Value.Green, bg.Value.Blue)) // ドメインオブジェクトからAvalonia Colorへ変換
             .BindTo(this, x => x.DrawableCanvasViewModel.BackgroundColor);
         PullBlender = new DirectImageBlender();
         PenColor = DrawableCanvasViewModel.PenColor;

@@ -3,27 +3,12 @@ using System;
 
 namespace Eede.Domain.Positions
 {
-    public class MinifiedPosition
+    public class MinifiedPosition(Position position, Magnification magnification)
     {
-        public readonly Magnification Magnification;
+        public readonly Magnification Magnification = magnification;
 
-        public int X { get; }
-        public int Y { get; }
-
-        public MinifiedPosition(Position position, Magnification magnification)
-        {
-            if (position == null)
-            {
-                throw new ArgumentNullException(nameof(position));
-            }
-            if (magnification == null)
-            {
-                throw new ArgumentNullException(nameof(magnification));
-            }
-            X = magnification.Minify(position.X);
-            Y = magnification.Minify(position.Y);
-            Magnification = magnification;
-        }
+        public int X { get; } = magnification.Minify(position.X);
+        public int Y { get; } = magnification.Minify(position.Y);
 
         public Position ToPosition()
         {

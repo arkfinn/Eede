@@ -9,22 +9,25 @@ public class PictureEditingUseCase
 {
     public record EditResult(Picture Previous, Picture Updated);
 
-    public static EditResult ExecuteAction(Picture source, PictureActions action, PictureArea selectedRegion = null)
+    public static EditResult ExecuteAction(Picture source, PictureActions action)
     {
         Picture previous = source;
         Picture updated;
 
-        if (selectedRegion != null)
-        {
-            Picture region = previous.CutOut(selectedRegion);
-            Picture updatedRegion = action.Execute(region);
-            DirectImageBlender blender = new();
-            updated = blender.Blend(updatedRegion, previous, selectedRegion.Position);
-        }
-        else
-        {
-            updated = action.Execute(previous);
-        }
+        updated = action.Execute(previous);
+
+        return new EditResult(previous, updated);
+    }
+
+    public static EditResult ExecuteAction(Picture source, PictureActions action, PictureArea selectedRegion)
+    {
+        Picture previous = source;
+        Picture updated;
+
+        Picture region = previous.CutOut(selectedRegion);
+        Picture updatedRegion = action.Execute(region);
+        DirectImageBlender blender = new();
+        updated = blender.Blend(updatedRegion, previous, selectedRegion.Position);
 
         return new EditResult(previous, updated);
     }

@@ -10,7 +10,7 @@ namespace Eede.Domain.Positions
 
         public PositionHistory(Position start)
         {
-            Start = start ?? throw new ArgumentNullException(nameof(start));
+            Start = start;
             Last = start;
             Now = start;
         }

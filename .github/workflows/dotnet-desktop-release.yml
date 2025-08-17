@@ -1,3 +1,5 @@
+permissions:
+  contents: write
 name: .NET Core Desktop Release
 
 on:

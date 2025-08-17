@@ -378,10 +378,13 @@ public class MainViewModel : ViewModelBase
 
     private void ExecutePictureAction(PictureActions actionType)
     {
-        PictureEditingUseCase.EditResult result = PictureEditingUseCase.ExecuteAction(
+        PictureEditingUseCase.EditResult result = DrawableCanvasViewModel.IsRegionSelecting ? PictureEditingUseCase.ExecuteAction(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType,
-            DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null
+            DrawableCanvasViewModel.SelectingArea
+        ) : PictureEditingUseCase.ExecuteAction(
+            DrawableCanvasViewModel.PictureBuffer.Previous,
+            actionType
         );
         UndoSystem = UndoSystem.Add(new UndoItem(
          new Action(() => { SetPictureToDrawArea(result.Previous); }),

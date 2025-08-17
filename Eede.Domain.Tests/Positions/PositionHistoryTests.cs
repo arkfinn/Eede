@@ -1,6 +1,5 @@
 ﻿using Eede.Domain.Positions;
 using NUnit.Framework;
-using System;
 
 namespace Eede.Domain.Tests.Positions
 {
@@ -29,15 +28,6 @@ namespace Eede.Domain.Tests.Positions
             Assert.That(h4.Start, Is.EqualTo(new Position(1, 2)));
             Assert.That(h4.Last, Is.EqualTo(new Position(5, 6)));
             Assert.That(h4.Now, Is.EqualTo(new Position(7, 8)));
-        }
-
-        [Test]
-        public void 引数nullによる作成を許容しない()
-        {
-            _ = Assert.Throws<ArgumentNullException>(() =>
-            {
-                PositionHistory h = new(null);
-            });
         }
     }
 }

@@ -1,5 +1,8 @@
 name: .NET Core Desktop CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ "master" ]

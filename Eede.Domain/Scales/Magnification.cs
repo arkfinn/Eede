@@ -2,7 +2,7 @@
 
 namespace Eede.Domain.Scales
 {
-    public record Magnification
+    public readonly record struct Magnification
     {
         public readonly float Value;
 

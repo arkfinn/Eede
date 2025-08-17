@@ -4,7 +4,7 @@ using System;
 
 namespace Eede.Domain.Pictures
 {
-    public record PictureArea
+    public readonly record struct PictureArea
     {
         public readonly Position Position;
         public readonly PictureSize Size;

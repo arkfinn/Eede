@@ -27,15 +27,5 @@ namespace Eede.Application.Tests.Pictures
                 PicturePullEventArgs h = new(null, new Position(2, 2));
             });
         }
-
-        [Test]
-        public void 引数positionについてnullによる作成を許可しない()
-        {
-            _ = Assert.Throws<ArgumentNullException>(() =>
-            {
-                Picture b = Picture.CreateEmpty(new PictureSize(1, 1));
-                PicturePullEventArgs h = new(b, null);
-            });
-        }
     }
 }

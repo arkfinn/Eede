@@ -1,6 +1,6 @@
 ﻿namespace Eede.Domain.Positions
 {
-    public record Position
+    public readonly record struct Position
     {
         public readonly int X;
         public readonly int Y;

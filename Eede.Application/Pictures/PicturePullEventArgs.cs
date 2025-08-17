@@ -2,17 +2,11 @@
 using Eede.Domain.Positions;
 using System;
 
-namespace Eede.Application.Pictures
-{
-    public class PicturePullEventArgs : EventArgs
-    {
-        public PicturePullEventArgs(Picture graphics, Position position)
-        {
-            Picture = graphics ?? throw new ArgumentNullException(nameof(graphics));
-            Position = position ?? throw new ArgumentNullException(nameof(position));
-        }
+namespace Eede.Application.Pictures;
 
-        public readonly Picture Picture;
-        public readonly Position Position;
-    }
+public class PicturePullEventArgs(Picture graphics, Position position) : EventArgs
+{
+    public readonly Picture Picture = graphics ?? throw new ArgumentNullException(nameof(graphics));
+    public readonly Position Position = position;
 }
+

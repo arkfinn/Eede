@@ -107,6 +107,10 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
         public async Task<bool> ExecuteClose()
         {
+            if (!Edited)
+            {
+                return true;
+            }
             await RequestClose?.Invoke(this, EventArgs.Empty);
             return Closable;
         }

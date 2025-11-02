@@ -1,6 +1,6 @@
-﻿using Eede.Domain.Colors;
-using Eede.Domain.DrawStyles;
+﻿using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
+using Eede.Domain.Palettes;
 using NUnit.Framework;
 using System;
 

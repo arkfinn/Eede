@@ -3,9 +3,9 @@ using Eede.Infrastructure.Palettes.Persistence.ActFileFormat;
 using NUnit.Framework;
 using System.IO;
 
-namespace Eede.Domain.Tests.Colors;
+namespace Eede.Infrastructure.Tests.Palettes.Persistance.ActFileFormat;
 
-internal class PaletteFileReaderTests
+internal class AlphaActFileReaderTests
 {
     [TestFixture]
     public class PaletteReaderTests
@@ -18,9 +18,9 @@ internal class PaletteFileReaderTests
             for (int i = 0; i < 256; i++)
             {
                 mockPaletteFile[i * 4] = (byte)i;        // R
-                mockPaletteFile[(i * 4) + 1] = (byte)(255 - i);  // G
-                mockPaletteFile[(i * 4) + 2] = (byte)(i / 2);    // B
-                mockPaletteFile[(i * 4) + 3] = (byte)(i + 50);   // A
+                mockPaletteFile[i * 4 + 1] = (byte)(255 - i);  // G
+                mockPaletteFile[i * 4 + 2] = (byte)(i / 2);    // B
+                mockPaletteFile[i * 4 + 3] = (byte)(i + 50);   // A
             }
 
             using MemoryStream memoryStream = new(mockPaletteFile);

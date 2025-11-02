@@ -8,6 +8,7 @@ using Eede.Domain.Colors;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
+using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;
 using Eede.Domain.Scales;

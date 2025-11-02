@@ -1,4 +1,4 @@
-﻿namespace Eede.Domain.Colors
+﻿namespace Eede.Domain.Palettes
 {
     public readonly record struct ArgbColor(byte Alpha, byte Red, byte Green, byte Blue)
     {

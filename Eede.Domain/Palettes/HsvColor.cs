@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Eede.Domain.Colors
+namespace Eede.Domain.Palettes
 {
     public sealed class HsvColor
     {
@@ -74,10 +74,10 @@ namespace Eede.Domain.Colors
 
             int Hi = (int)Math.Floor((double)h / 60) % 6;
 
-            float f = ((float)h / 60) - Hi;
-            float p = (float)Value / 255 * (1 - ((float)Saturation / 255));
-            float q = (float)Value / 255 * (1 - (f * ((float)Saturation / 255)));
-            float t = (float)Value / 255 * (1 - ((1 - f) * ((float)Saturation / 255)));
+            float f = (float)h / 60 - Hi;
+            float p = (float)Value / 255 * (1 - (float)Saturation / 255);
+            float q = (float)Value / 255 * (1 - f * ((float)Saturation / 255));
+            float t = (float)Value / 255 * (1 - (1 - f) * ((float)Saturation / 255));
 
             p *= 255;
             q *= 255;
@@ -106,9 +106,9 @@ namespace Eede.Domain.Colors
         public override int GetHashCode()
         {
             int hashCode = -1397884734;
-            hashCode = (hashCode * -1521134295) + Hue.GetHashCode();
-            hashCode = (hashCode * -1521134295) + Saturation.GetHashCode();
-            hashCode = (hashCode * -1521134295) + Value.GetHashCode();
+            hashCode = hashCode * -1521134295 + Hue.GetHashCode();
+            hashCode = hashCode * -1521134295 + Saturation.GetHashCode();
+            hashCode = hashCode * -1521134295 + Value.GetHashCode();
             return hashCode;
         }
     }

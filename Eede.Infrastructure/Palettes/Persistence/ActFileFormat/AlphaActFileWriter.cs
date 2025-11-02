@@ -1,6 +1,7 @@
-﻿using System.IO;
+﻿using Eede.Domain.Palettes;
+using System.IO;
 
-namespace Eede.Domain.Colors;
+namespace Eede.Infrastructure.Palettes.Persistence.ActFileFormat;
 
 public class AlphaActFileWriter
 {

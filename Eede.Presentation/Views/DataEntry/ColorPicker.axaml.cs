@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using Eede.Domain.Colors;
+using Eede.Domain.Palettes;
 using Eede.Presentation.Views.DataEntry;
 using System;
 using HsvColor = Avalonia.Media.HsvColor;

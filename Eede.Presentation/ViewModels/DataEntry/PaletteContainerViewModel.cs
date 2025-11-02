@@ -1,6 +1,7 @@
 ﻿using Avalonia.Platform.Storage;
-using Eede.Application.UseCase.Colors;
-using Eede.Domain.Colors;
+using Eede.Domain.Palettes;
+using Eede.Infrastructure.Palettes.Persistence;
+using Eede.Infrastructure.Palettes.Persistence.ActFileFormat;
 using Eede.Presentation.Common.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -86,10 +87,7 @@ public class PaletteContainerViewModel : ViewModelBase
         }
 
         string filePath = HttpUtility.UrlDecode(result[0].Path.AbsolutePath);
-        IPaletteFileReader reader = new FindPaletteFileReaderUseCase().Execute(filePath);
-
-        using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read);
-        Palette = new LoadPaletteFileUseCase(reader).Execute(fs);
+        Palette = new PaletteRepository().Find(filePath);
     }
 
     private async void ExecuteSavePalette(StorageService storage)
@@ -112,6 +110,6 @@ public class PaletteContainerViewModel : ViewModelBase
         }
 
         await using Stream stream = await result.OpenWriteAsync();
-        new SavePaletteFileUseCase(new AlphaActFileWriter()).Execute(stream, Palette);
+        new AlphaActFileWriter().Write(stream, Palette);
     }
 }

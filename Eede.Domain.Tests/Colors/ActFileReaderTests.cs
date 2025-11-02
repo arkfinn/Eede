@@ -1,4 +1,5 @@
-﻿using Eede.Domain.Colors;
+﻿using Eede.Domain.Palettes;
+using Eede.Infrastructure.Palettes.Persistence.ActFileFormat;
 using NUnit.Framework;
 using System.IO;
 

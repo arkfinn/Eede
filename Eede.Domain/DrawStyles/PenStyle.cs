@@ -1,5 +1,5 @@
-﻿using Eede.Domain.Colors;
-using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.ImageBlenders;
+using Eede.Domain.Palettes;
 using System;
 
 namespace Eede.Domain.DrawStyles

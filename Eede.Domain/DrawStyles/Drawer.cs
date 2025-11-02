@@ -1,4 +1,4 @@
-﻿using Eede.Domain.Colors;
+﻿using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using System;

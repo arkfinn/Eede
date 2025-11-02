@@ -1,8 +1,8 @@
 ﻿using Eede.Application.PaintLayers;
-using Eede.Domain.Colors;
 using Eede.Domain.Drawing;
 using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageTransfers;
+using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;

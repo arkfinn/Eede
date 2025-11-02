@@ -3,24 +3,12 @@ using System;
 
 namespace Eede.Domain.Sizes
 {
-    public class MagnifiedSize
+    public class MagnifiedSize(PictureSize size, Magnification magnification)
     {
-        public readonly Magnification Magnification;
+        public readonly Magnification Magnification = magnification;
 
-        public readonly int Width;
-        public readonly int Height;
-        public readonly PictureSize BaseSize;
-
-        public MagnifiedSize(PictureSize size, Magnification magnification)
-        {
-            if (magnification == null)
-            {
-                throw new ArgumentNullException(nameof(magnification));
-            }
-            Width = magnification.Magnify(size.Width);
-            Height = magnification.Magnify(size.Height);
-            Magnification = magnification;
-            BaseSize = size;
-        }
+        public readonly int Width = magnification.Magnify(size.Width);
+        public readonly int Height = magnification.Magnify(size.Height);
+        public readonly PictureSize BaseSize = size;
     }
 }

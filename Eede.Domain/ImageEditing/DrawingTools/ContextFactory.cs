@@ -1,6 +1,6 @@
 using Eede.Domain.Pictures;
 
-namespace Eede.Domain.Drawing
+namespace Eede.Domain.ImageEditing.DrawingTools
 {
     public static class ContextFactory
     {

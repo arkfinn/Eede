@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Drawing;
-using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Palettes;

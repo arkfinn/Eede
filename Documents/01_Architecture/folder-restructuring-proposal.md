@@ -22,8 +22,8 @@
 | :---------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------- |
 | `Drawing/`        | `ImageEditing/DrawingTools/`           | 描画バッファ管理は、描画ツール群の一部。                                                         |
 | `DrawStyles/`     | `ImageEditing/DrawingTools/`           | 描画ツール群は`ImageEditing`コンテキストのサブドメインを形成。                                   |
-| `ImageBlenders/`  | `ImageEditing/ImageBlenders/`          | 画像合成ロジックは`ImageEditing`コンテキストのサブドメインを形成。                               |
-| `ImageTransfers/` | `ImageEditing/ImageTransfers/`         | 画像変換ロジックは`ImageEditing`コンテキストのサブドメインを形成。                               |
+| `ImageBlenders/`  | `ImageEditing/Blending/`               | 画像合成（Blending）は`ImageEditing`コンテキストのサブドメインを形成。                           |
+| `ImageTransfers/` | `ImageEditing/Transformation/`         | 画像変換（Transformation）は`ImageEditing`コンテキストのサブドメインを形成。                     |
 | `Pictures/`       | `ImageEditing/`                        | `Picture`値オブジェクトは画像編集の核。                                                          |
 | `Positions/`      | `ImageEditing/` および `SharedKernel/` | `Position`は共有するが、`HalfBoxArea`などは画像編集に特化。                                      |
 | `Sizes/`          | `ImageEditing/` および `SharedKernel/` | `PictureSize`は共有するが、`MagnifiedSize`などは画像編集に特化。                                 |
@@ -52,10 +52,10 @@ Eede.Domain/
 │   │   ├── ContextFactory.cs
 │   │   ├── IDrawStyle.cs
 │   │   └── ...
-│   ├── ImageBlenders/          // Sub-domain: Blending Logics
+│   ├── Blending/               // Sub-domain: Blending Logics
 │   │   ├── IImageBlender.cs
 │   │   └── ...
-│   └── ImageTransfers/         // Sub-domain: Transformation Logics
+│   └── Transformation/         // Sub-domain: Transformation Logics
 │       ├── IImageTransfer.cs
 │       └── ...
 ├── Palettes/

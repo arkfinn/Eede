@@ -1,6 +1,4 @@
-﻿using Eede.Domain.Drawing;
-
-namespace Eede.Domain.ImageEditing.DrawingTools;
+﻿namespace Eede.Domain.ImageEditing.DrawingTools;
 
 
 // 実装内容を再検討する

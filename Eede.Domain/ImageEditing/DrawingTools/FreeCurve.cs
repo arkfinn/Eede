@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Drawing;
-using Eede.Domain.Pictures;
+﻿using Eede.Domain.Pictures;
 
 namespace Eede.Domain.ImageEditing.DrawingTools;
 

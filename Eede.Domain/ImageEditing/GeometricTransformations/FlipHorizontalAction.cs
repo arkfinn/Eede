@@ -1,12 +1,12 @@
 ﻿using Eede.Domain.SharedKernel;
 
-namespace Eede.Domain.Pictures.Actions;
+namespace Eede.Domain.ImageEditing.GeometricTransformations;
 
-public class ShiftRightAction
+public class FlipHorizontalAction
 {
     private readonly Picture Source;
 
-    public ShiftRightAction(Picture source)
+    public FlipHorizontalAction(Picture source)
     {
         Source = source;
     }
@@ -19,8 +19,6 @@ public class ShiftRightAction
 
     private Position Offset(Position p)
     {
-        int offsetX = p.X - 1;
-        int newX = offsetX < 0 ? Source.Width + offsetX : offsetX;
-        return new Position(newX, p.Y);
+        return new Position(Source.Width - 1 - p.X, p.Y);
     }
 }

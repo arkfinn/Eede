@@ -3,7 +3,6 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
-using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
 
 namespace Eede.Application.Drawings

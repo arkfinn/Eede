@@ -1,8 +1,7 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.SharedKernel;
+﻿using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 
-namespace Eede.Domain.Tests.Pictures
+namespace Eede.Domain.Tests.SharedKernel
 {
     [TestFixture]
     public class PictureAreaTests

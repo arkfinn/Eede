@@ -1,6 +1,5 @@
 ﻿using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Transformation;
-using Eede.Domain.Pictures;
 using Eede.Domain.Tests.Helpers;
 using NUnit.Framework;
 
@@ -17,7 +16,7 @@ public class AlphaToneImageTransferTests
 
         Picture data = src.Transfer(transfer, new Magnification(2));
 
-        // dst.Save(@"ImageEditing\Transformation\test\alpha.png", ImageFormat.Png);
+        // dst.Save(@"ImageTransfers\test\alpha.png", ImageFormat.Png);
         Picture expected = ReadPicture(@"ImageEditing\Transformation\test\alpha.png");
         Assert.That(data.CloneImage(), Is.EqualTo(expected.CloneImage()));
     }

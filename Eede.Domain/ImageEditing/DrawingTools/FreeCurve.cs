@@ -1,6 +1,4 @@
-﻿using Eede.Domain.Pictures;
-
-namespace Eede.Domain.ImageEditing.DrawingTools;
+﻿namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public record FreeCurve : IDrawStyle
 {

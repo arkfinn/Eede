@@ -1,9 +1,9 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.Pictures.Actions;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 
-namespace Eede.Domain.Tests.Pictures.Actions;
+namespace Eede.Domain.Tests.ImageEditing.GeometricTransformations;
 
 [TestFixture]
 internal class ShiftDownActionTests

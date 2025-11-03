@@ -1,13 +1,12 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.SharedKernel;
+﻿using Eede.Domain.SharedKernel;
 
-namespace Eede.Domain.Pictures.Actions;
+namespace Eede.Domain.ImageEditing.GeometricTransformations;
 
-public class ShiftLeftAction
+public class ShiftRightAction
 {
     private readonly Picture Source;
 
-    public ShiftLeftAction(Picture source)
+    public ShiftRightAction(Picture source)
     {
         Source = source;
     }
@@ -20,8 +19,8 @@ public class ShiftLeftAction
 
     private Position Offset(Position p)
     {
-        int offsetX = p.X + 1;
-        int newX = offsetX >= Source.Width ? offsetX - Source.Width : offsetX;
+        int offsetX = p.X - 1;
+        int newX = offsetX < 0 ? Source.Width + offsetX : offsetX;
         return new Position(newX, p.Y);
     }
 }

@@ -1,12 +1,12 @@
 ﻿using Eede.Domain.SharedKernel;
 
-namespace Eede.Domain.Pictures.Actions;
+namespace Eede.Domain.ImageEditing.GeometricTransformations;
 
-public class ShiftDownAction
+public class ShiftUpAction
 {
     private readonly Picture Source;
 
-    public ShiftDownAction(Picture source)
+    public ShiftUpAction(Picture source)
     {
         Source = source;
     }
@@ -19,8 +19,8 @@ public class ShiftDownAction
 
     private Position Offset(Position p)
     {
-        int offsetY = p.Y - 1;
-        int newY = offsetY < 0 ? Source.Height + offsetY : offsetY;
+        int offsetY = p.Y + 1;
+        int newY = offsetY >= Source.Height ? offsetY - Source.Height : offsetY;
         return new Position(p.X, newY);
     }
 }

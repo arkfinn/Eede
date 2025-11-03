@@ -1,9 +1,10 @@
-﻿using Eede.Domain.Palettes;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using System;
 using System.IO;
 
-namespace Eede.Domain.Pictures
+namespace Eede.Infrastructure.ImageEditing.Persistence.ArvFileFormat
 {
     public class ArvFileReader
     {
@@ -94,7 +95,7 @@ namespace Eede.Domain.Pictures
         private ArgbColor[] CreatePalette(byte[] paletteBytes, int arvColorPlanes)
         {
             ArgbColor[] palette = new ArgbColor[16];
-            for (int colorIndex = 0; colorIndex < (1 << arvColorPlanes); colorIndex++)
+            for (int colorIndex = 0; colorIndex < 1 << arvColorPlanes; colorIndex++)
             {
                 palette[colorIndex] = GetColorFromPaletteBytes(paletteBytes, colorIndex);
             }

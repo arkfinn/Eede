@@ -1,5 +1,4 @@
 ﻿using System;
-using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
 
 namespace Eede.Domain.ImageEditing

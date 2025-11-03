@@ -1,6 +1,4 @@
-﻿using Eede.Domain.Pictures;
-
-namespace Eede.Domain.ImageEditing.Transformation;
+﻿namespace Eede.Domain.ImageEditing.Transformation;
 
 public interface IImageTransfer
 {

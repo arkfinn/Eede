@@ -1,6 +1,4 @@
-﻿using Eede.Domain.Drawing;
-
-namespace Eede.Domain.ImageEditing.DrawingTools;
+﻿namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public interface IDrawStyle
 {

@@ -2,7 +2,6 @@
 using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Drawings;
-using Eede.Domain.Drawing;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;

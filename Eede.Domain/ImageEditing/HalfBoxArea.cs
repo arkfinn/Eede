@@ -2,7 +2,7 @@
 using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
 
-namespace Eede.Domain.Positions
+namespace Eede.Domain.ImageEditing
 {
     /// <summary>
     /// 半分のボックス領域を表すクラス。

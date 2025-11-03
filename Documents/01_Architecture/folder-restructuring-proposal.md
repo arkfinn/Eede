@@ -196,3 +196,16 @@ Eede.Presentation/
 3.  **過剰な階層化の防止**: ネームスペースが不必要に深くなることを防ぎ、可読性と開発効率を維持します。
 
 これにより、形式的なルールに固執するのではなく、DDDの原則とプロジェクトの指針に基づいた、実用的で保守性の高いフォルダ構造を実現します。
+
+### 8.4. 詳細分類: `Pictures` フォルダ
+
+`Eede.Domain/Pictures` フォルダには、画像に関する多様な責務のクラスが混在していた。ルールに基づき、以下のように各クラスの移動先を判断する。
+
+| 元のクラス (`Eede.Domain/Pictures`) | 提案する移動先（名前空間） | 理由 |
+| :--- | :--- | :--- |
+| `Picture.cs` | `Eede.Domain.ImageEditing` | 画像のデータ保持に加え、`Blend`や`CutOut`など画像編集の振る舞いを持つ、コンテキストの核となるドメインオブジェクトであるため。 |
+| `PictureArea.cs` | `Eede.Domain.SharedKernel` | `Position`と`Size`で構成される領域の概念は、他のコンテキストでも再利用可能な「真に普遍的」な値オブジェクトであるため。 |
+| `ArvFileReader.cs` | `Eede.Infrastructure` 層 | 特定のファイル形式（`.arv`）の読み込みロジックであり、永続化の責務を担う `Infrastructure` 層へ移動すべき。 |
+| `RleDecoder.cs` | `Eede.Infrastructure` 層 | RLE圧縮の展開ロジックであり、特定の技術的実装。`ArvFileReader`と共に `Infrastructure` 層へ移動すべき。 |
+| `Actions/` (フォルダ全体) | `Eede.Domain.ImageEditing.Actions` | 「反転」「回転」など、`Picture`に対する具体的な編集操作を行うコマンド群であり、`ImageEditing`コンテキストのサブドメインを形成するため。 |
+

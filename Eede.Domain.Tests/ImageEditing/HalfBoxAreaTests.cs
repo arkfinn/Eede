@@ -1,11 +1,10 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.Positions;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
-using Eede.Domain.Sizes;
 using NUnit.Framework;
 using System;
 
-namespace Eede.Domain.Tests.Positions
+namespace Eede.Domain.Tests.ImageEditing
 {
     [TestFixture]
     public class HalfBoxAreaTests

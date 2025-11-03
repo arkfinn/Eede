@@ -1,9 +1,9 @@
 ﻿using Eede.Application.Pictures;
+using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
-using Eede.Domain.Sizes;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 

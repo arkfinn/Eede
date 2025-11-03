@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using System;
 
-namespace Eede.Domain.Tests.Scales
+namespace Eede.Domain.Tests.ImageEditing
 {
     [TestFixture]
     public class MagnificationTests

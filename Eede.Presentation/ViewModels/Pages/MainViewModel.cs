@@ -12,7 +12,7 @@ using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;
 using Eede.Domain.Scales;
-using Eede.Domain.Sizes;
+using Eede.Domain.SharedKernel;
 using Eede.Domain.Systems;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;

@@ -1,5 +1,5 @@
-﻿using Eede.Domain.Sizes;
-using Eede.Domain.Pictures;
+﻿using Eede.Domain.Pictures;
+using Eede.Domain.SharedKernel;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;

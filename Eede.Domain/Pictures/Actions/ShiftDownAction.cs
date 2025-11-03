@@ -1,4 +1,4 @@
-﻿using Eede.Domain.Positions;
+﻿using Eede.Domain.SharedKernel;
 
 namespace Eede.Domain.Pictures.Actions;
 

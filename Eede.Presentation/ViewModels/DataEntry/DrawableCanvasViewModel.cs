@@ -1,5 +1,4 @@
 ﻿using Avalonia;
-using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Drawings;
@@ -10,9 +9,8 @@ using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
-using Eede.Domain.Positions;
 using Eede.Domain.Scales;
-using Eede.Domain.Sizes;
+using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
 using ReactiveUI;
@@ -136,7 +134,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void UpdateImage()
     {
         Picture = DrawableArea.Painted(PictureBuffer, PenStyle, ImageTransfer);
-        PictureBitmapAdapter adapter = new();
+        _ = new PictureBitmapAdapter();
         MyBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(Picture);
     }
 

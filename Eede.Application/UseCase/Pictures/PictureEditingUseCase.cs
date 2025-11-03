@@ -1,7 +1,7 @@
 ﻿using Eede.Domain.ImageBlenders;
 using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;
-using Eede.Domain.Positions;
+using Eede.Domain.SharedKernel;
 
 namespace Eede.Application.UseCase.Pictures;
 

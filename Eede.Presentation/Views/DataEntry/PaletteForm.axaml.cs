@@ -6,7 +6,7 @@ using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
-using Eede.Domain.Positions;
+using Eede.Domain.SharedKernel;
 using Eede.Domain.Sizes;
 using Eede.Presentation.Common.Adapters;
 using System;

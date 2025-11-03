@@ -1,8 +1,7 @@
-using Eede.Domain.Positions;
-using Eede.Domain.Sizes;
+using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 
-namespace Eede.Domain.Tests.Sizes
+namespace Eede.Domain.Tests.SharedKernel
 {
     public class PictureSizeTests
     {

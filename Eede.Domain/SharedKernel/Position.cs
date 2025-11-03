@@ -1,4 +1,4 @@
-﻿namespace Eede.Domain.Positions
+﻿namespace Eede.Domain.SharedKernel
 {
     public readonly record struct Position
     {

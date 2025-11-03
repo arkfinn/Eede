@@ -1,7 +1,6 @@
-using Eede.Domain.Positions;
 using System;
 
-namespace Eede.Domain.Sizes
+namespace Eede.Domain.SharedKernel
 {
     public readonly record struct PictureSize
     {

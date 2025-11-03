@@ -1,6 +1,6 @@
-﻿using Eede.Domain.Sizes;
-using Eede.Domain.Pictures;
+﻿using Eede.Domain.Pictures;
 using Eede.Domain.Scales;
+using Eede.Domain.SharedKernel;
 
 namespace Eede.Domain.ImageTransfers
 {
@@ -24,7 +24,7 @@ namespace Eede.Domain.ImageTransfers
                     int srcX = magnification.Minify(x);
                     int fromPos = (srcX * 4) + srcOffset;
 
-                    var srcSpan = src.AsSpan();
+                    System.ReadOnlySpan<byte> srcSpan = src.AsSpan();
                     destPixels[pos + 0] = srcSpan[fromPos + 0];
                     destPixels[pos + 1] = srcSpan[fromPos + 1];
                     destPixels[pos + 2] = srcSpan[fromPos + 2];

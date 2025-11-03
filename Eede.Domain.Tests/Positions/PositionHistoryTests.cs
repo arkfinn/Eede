@@ -1,4 +1,5 @@
 ﻿using Eede.Domain.Positions;
+using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 
 namespace Eede.Domain.Tests.Positions

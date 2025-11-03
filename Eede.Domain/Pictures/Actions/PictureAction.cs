@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Positions;
-using Eede.Domain.Sizes;
+﻿using Eede.Domain.SharedKernel;
 using System;
 
 namespace Eede.Domain.Pictures.Actions;

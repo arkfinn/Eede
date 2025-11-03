@@ -1,4 +1,4 @@
-﻿using Eede.Domain.ImageTransfers;
+﻿using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Pictures;
 using Eede.Domain.Sizes;
 

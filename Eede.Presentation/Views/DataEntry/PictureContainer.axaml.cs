@@ -6,7 +6,6 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
-using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.SelectionStates;
 using Eede.Presentation.ViewModels.DataDisplay;

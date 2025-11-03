@@ -1,7 +1,7 @@
 ﻿using Eede.Domain.SharedKernel;
 using System;
 
-namespace Eede.Domain.Pictures.Actions;
+namespace Eede.Domain.ImageEditing.GeometricTransformations;
 
 internal class PictureAction
 {

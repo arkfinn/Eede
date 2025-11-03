@@ -1,5 +1,4 @@
 ﻿using Eede.Domain.ImageEditing;
-using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 using System;

@@ -1,5 +1,4 @@
 ﻿using Eede.Domain.Palettes;
-using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
 using System;
 using System.Collections.Generic;

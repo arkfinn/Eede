@@ -1,6 +1,6 @@
-﻿using Eede.Domain.ImageEditing.Blending;
-using Eede.Domain.Pictures;
-using Eede.Domain.Pictures.Actions;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Blending;
+using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.SharedKernel;
 
 namespace Eede.Application.UseCase.Pictures;

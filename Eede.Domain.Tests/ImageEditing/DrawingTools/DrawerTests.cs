@@ -1,7 +1,7 @@
-﻿using Eede.Domain.ImageEditing.Blending;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Palettes;
-using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
 using Eede.Domain.Tests.Helpers;
 using NUnit.Framework;

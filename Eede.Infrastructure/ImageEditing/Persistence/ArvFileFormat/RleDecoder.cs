@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace Eede.Domain.Pictures
+namespace Eede.Infrastructure.ImageEditing.Persistence.ArvFileFormat
 {
     public class RleDecoder
     {
@@ -26,9 +26,9 @@ namespace Eede.Domain.Pictures
         {
             ThrowIfEndOfStream();
             byte currentByteValue = _reader.ReadByte();
-            (byte repeatCount, int newLastDecodedByte) rleInfo = GetRleInfo(currentByteValue);
-            _lastDecodedByte = rleInfo.newLastDecodedByte;
-            return FillPlaneData(planeData, currentPlaneAddress, currentByteValue, rleInfo.repeatCount, vramPlaneSize);
+            (byte repeatCount, int newLastDecodedByte) = GetRleInfo(currentByteValue);
+            _lastDecodedByte = newLastDecodedByte;
+            return FillPlaneData(planeData, currentPlaneAddress, currentByteValue, repeatCount, vramPlaneSize);
         }
 
         private void ThrowIfEndOfStream()
@@ -51,11 +51,7 @@ namespace Eede.Domain.Pictures
         private byte ReadRepeatCount()
         {
             byte repeatCount = _reader.ReadByte();
-            if (repeatCount == 0)
-            {
-                return 255;
-            }
-            return (byte)(repeatCount - 1);
+            return repeatCount == 0 ? (byte)255 : (byte)(repeatCount - 1);
         }
 
         private int FillPlaneData(byte[] planeData, int currentPlaneAddress, byte currentByteValue, byte repeatCount, int vramPlaneSize)

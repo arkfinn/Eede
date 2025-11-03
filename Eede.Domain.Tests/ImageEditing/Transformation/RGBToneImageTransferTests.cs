@@ -1,6 +1,5 @@
 ﻿using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Transformation;
-using Eede.Domain.Pictures;
 using Eede.Domain.Tests.Helpers;
 using NUnit.Framework;
 

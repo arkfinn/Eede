@@ -1,57 +1,57 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:Eede.Presentation.Views.Navigation"
-             xmlns:buttons="clr-namespace:Eede.Presentation.Views.General.Buttons"
-             xmlns:p="using:Eede.Domain.Pictures.Actions"
-             mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="24"
-             x:Class="Eede.Presentation.Views.Navigation.PictureActionMenu"
-             >
-  <Grid>
-    <Grid.Styles>
-      <StyleInclude Source="/Styles/Styles.axaml" />
-    </Grid.Styles>
-    <StackPanel Orientation="Vertical" >
-      <Button Classes="tool"
-                    Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
-                    CommandParameter="{ x:Static p:PictureActions.ShiftUp }" >
-        <Image Source="/Assets/Tools/tool_shift_up.png" Stretch="None" />
-      </Button>
-      <Button Classes="tool"
-                    Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
-                    CommandParameter="{ x:Static p:PictureActions.ShiftRight }" >
-        <Image Source="/Assets/Tools/tool_shift_right.png" Stretch="None" />
-      </Button>
-      <Button Classes="tool"
-                    Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
-                    CommandParameter="{ x:Static p:PictureActions.ShiftLeft }" >
-        <Image Source="/Assets/Tools/tool_shift_left.png" Stretch="None" />
-      </Button>
-      <Button Classes="tool"
-                    Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
-                    CommandParameter="{ x:Static p:PictureActions.ShiftDown }" >
-        <Image Source="/Assets/Tools/tool_shift_down.png" Stretch="None" />
-      </Button>
-      <Panel Classes="vertical-separator" />
-      <Button Classes="tool"
-              Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
-              CommandParameter="{ x:Static p:PictureActions.FlipHorizontal }" >
-        <Image Source="/Assets/Tools/tool_flip_horizontal.png" Stretch="None" />
-      </Button>
-      <Button Classes="tool"
-        Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
-        CommandParameter="{ x:Static p:PictureActions.FlipVertical }" >
-        <Image Source="/Assets/Tools/tool_flip_vertical.png" Stretch="None" />
-      </Button>
-      <Panel Classes="vertical-separator" />
-      <Button
-                 Classes="tool"
-                 Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
-                 CommandParameter="{ x:Static p:PictureActions.RotateRight }" >
-        <Image Source="/Assets/Tools/tool_rotate_right.png" Stretch="None" />
-      </Button>
-    </StackPanel>
-  </Grid>
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:local="clr-namespace:Eede.Presentation.Views.Navigation"
+			 xmlns:buttons="clr-namespace:Eede.Presentation.Views.General.Buttons"
+			 xmlns:p="using:Eede.Domain.ImageEditing.GeometricTransformations"
+			 mc:Ignorable="d"
+			 d:DesignHeight="450" d:DesignWidth="24"
+			 x:Class="Eede.Presentation.Views.Navigation.PictureActionMenu"
+			 >
+	<Grid>
+		<Grid.Styles>
+			<StyleInclude Source="/Styles/Styles.axaml" />
+		</Grid.Styles>
+		<StackPanel Orientation="Vertical" >
+			<Button Classes="tool"
+					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+					CommandParameter="{ x:Static p:PictureActions.ShiftUp }" >
+				<Image Source="/Assets/Tools/tool_shift_up.png" Stretch="None" />
+			</Button>
+			<Button Classes="tool"
+					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+					CommandParameter="{ x:Static p:PictureActions.ShiftRight }" >
+				<Image Source="/Assets/Tools/tool_shift_right.png" Stretch="None" />
+			</Button>
+			<Button Classes="tool"
+					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+					CommandParameter="{ x:Static p:PictureActions.ShiftLeft }" >
+				<Image Source="/Assets/Tools/tool_shift_left.png" Stretch="None" />
+			</Button>
+			<Button Classes="tool"
+					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+					CommandParameter="{ x:Static p:PictureActions.ShiftDown }" >
+				<Image Source="/Assets/Tools/tool_shift_down.png" Stretch="None" />
+			</Button>
+			<Panel Classes="vertical-separator" />
+			<Button Classes="tool"
+					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+					CommandParameter="{ x:Static p:PictureActions.FlipHorizontal }" >
+				<Image Source="/Assets/Tools/tool_flip_horizontal.png" Stretch="None" />
+			</Button>
+			<Button Classes="tool"
+					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+					CommandParameter="{ x:Static p:PictureActions.FlipVertical }" >
+				<Image Source="/Assets/Tools/tool_flip_vertical.png" Stretch="None" />
+			</Button>
+			<Panel Classes="vertical-separator" />
+			<Button
+			Classes="tool"
+			Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+			CommandParameter="{ x:Static p:PictureActions.RotateRight }" >
+				<Image Source="/Assets/Tools/tool_rotate_right.png" Stretch="None" />
+			</Button>
+		</StackPanel>
+	</Grid>
 </UserControl>

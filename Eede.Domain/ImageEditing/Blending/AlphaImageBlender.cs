@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.SharedKernel;
+﻿using Eede.Domain.SharedKernel;
 using System;
 
 namespace Eede.Domain.ImageEditing.Blending;

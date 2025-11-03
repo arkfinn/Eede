@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Eede.Domain.Scales
+namespace Eede.Domain.ImageEditing
 {
     public readonly record struct Magnification
     {

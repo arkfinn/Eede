@@ -1,4 +1,4 @@
-﻿using Eede.Domain.Scales;
+﻿using Eede.Domain.ImageEditing;
 using NUnit.Framework;
 using System;
 

@@ -1,6 +1,6 @@
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using Eede.Domain.Colors;
+using Eede.Domain.ImageEditing;
 using Eede.Domain.Palettes;
 using System;
 using System.Globalization;

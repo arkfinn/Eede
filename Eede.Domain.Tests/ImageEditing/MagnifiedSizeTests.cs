@@ -1,9 +1,9 @@
-using Eede.Domain.Scales;
+using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using Eede.Domain.Sizes;
 using NUnit.Framework;
 
-namespace Eede.Domain.Tests.Sizes
+namespace Eede.Domain.Tests.ImageEditing
 {
     [TestFixture]
     public class MagnifiedSizeTests

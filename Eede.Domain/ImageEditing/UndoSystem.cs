@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 
-namespace Eede.Domain.Systems
+namespace Eede.Domain.ImageEditing
 {
     public sealed record UndoSystem : IDisposable
     {

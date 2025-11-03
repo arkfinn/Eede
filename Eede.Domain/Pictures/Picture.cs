@@ -1,9 +1,9 @@
 using Eede.Domain.ImageBlenders;
 using Eede.Domain.ImageTransfers;
-using Eede.Domain.Scales;
 using System;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
+using Eede.Domain.ImageEditing;
 
 namespace Eede.Domain.Pictures
 {

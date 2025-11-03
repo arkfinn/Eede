@@ -20,31 +20,31 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="DrawStyles\test\base.png">
+    <None Update="ImageEditing\DrawingTools\test\base.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DrawStyles\test\ellipse1.png">
+    <None Update="ImageEditing\DrawingTools\test\ellipse1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DrawStyles\test\ellipse2.png">
+    <None Update="ImageEditing\DrawingTools\test\ellipse2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DrawStyles\test\fillEllipse1.png">
+    <None Update="ImageEditing\DrawingTools\test\fillEllipse1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DrawStyles\test\fillEllipse2.png">
+    <None Update="ImageEditing\DrawingTools\test\fillEllipse2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DrawStyles\test\fillRectangle1.png">
+    <None Update="ImageEditing\DrawingTools\test\fillRectangle1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DrawStyles\test\freeCurve1.png">
+    <None Update="ImageEditing\DrawingTools\test\freeCurve1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DrawStyles\test\point1.png">
+    <None Update="ImageEditing\DrawingTools\test\point1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DrawStyles\test\rectangle1.png">
+    <None Update="ImageEditing\DrawingTools\test\rectangle1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ImageBlenders\test\alpha_base.png">

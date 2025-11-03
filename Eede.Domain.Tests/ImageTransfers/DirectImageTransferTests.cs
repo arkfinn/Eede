@@ -1,6 +1,6 @@
-﻿using Eede.Domain.ImageTransfers;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
-using Eede.Domain.Scales;
 using Eede.Domain.Tests.Helpers;
 using NUnit.Framework;
 

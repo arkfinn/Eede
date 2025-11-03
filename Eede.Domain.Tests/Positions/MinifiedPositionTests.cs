@@ -1,5 +1,5 @@
-﻿using Eede.Domain.Positions;
-using Eede.Domain.Scales;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.Positions;
 using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 

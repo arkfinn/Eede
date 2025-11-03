@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Eede.Domain.Systems
+namespace Eede.Domain.ImageEditing
 {
     public interface IUndoItem : IDisposable
     {

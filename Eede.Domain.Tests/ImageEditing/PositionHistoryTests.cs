@@ -1,8 +1,8 @@
-﻿using Eede.Domain.Positions;
+﻿using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 
-namespace Eede.Domain.Tests.Positions
+namespace Eede.Domain.Tests.ImageEditing
 {
     [TestFixture]
     public class PositionHistoryTests

@@ -4,7 +4,7 @@ using Eede.Domain.SharedKernel;
 using System;
 using System.Collections.Generic;
 
-namespace Eede.Domain.DrawStyles;
+namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public class Drawer(Picture drawingPicture, PenStyle penCase)
 {
@@ -47,12 +47,12 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             int x2 = to.X;
             int y2 = to.Y;
             /* 二点間の距離 */
-            int dx = (x2 > x1) ? x2 - x1 : x1 - x2;
-            int dy = (y2 > y1) ? y2 - y1 : y1 - y2;
+            int dx = x2 > x1 ? x2 - x1 : x1 - x2;
+            int dy = y2 > y1 ? y2 - y1 : y1 - y2;
 
             /* 二点の方向 */
-            int sx = (x2 > x1) ? 1 : -1;
-            int sy = (y2 > y1) ? 1 : -1;
+            int sx = x2 > x1 ? 1 : -1;
+            int sy = y2 > y1 ? 1 : -1;
 
             int cx = x1;
             int cy = y1;

@@ -1,10 +1,10 @@
-﻿using Eede.Domain.DrawStyles;
-using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.ImageBlenders;
+using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Palettes;
 using NUnit.Framework;
 using System;
 
-namespace Eede.Domain.Tests.DrawStyles
+namespace Eede.Domain.Tests.ImageEditing.DrawingTools
 {
     [TestFixture()]
     public class PenStyleTests

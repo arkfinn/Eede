@@ -1,6 +1,4 @@
-using System;
-
-namespace Eede.Domain
+namespace Eede.Domain.ImageEditing
 {
     public class ImageCanvas
     {

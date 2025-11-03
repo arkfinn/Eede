@@ -1,10 +1,10 @@
-﻿using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
 using Eede.Domain.Tests.Helpers;
 using NUnit.Framework;
 
-namespace Eede.Domain.Tests.ImageBlenders;
+namespace Eede.Domain.Tests.ImageEditing.Blending;
 
 [TestFixture]
 public class AlphaImageBlenderTests
@@ -12,27 +12,27 @@ public class AlphaImageBlenderTests
     [Test]
     public void TestBlend()
     {
-        Picture src = ReadPicture(@"ImageBlenders\test\blend.png");
+        Picture src = ReadPicture(@"ImageEditing\Blending\test\blend.png");
         AlphaImageBlender blender = new();
-        Picture dst = ReadPicture(@"ImageBlenders\test\base.png");
+        Picture dst = ReadPicture(@"ImageEditing\Blending\test\base.png");
 
         Picture result = dst.Blend(blender, src, new Position(0, 0));
 
-        // result.ToImage().Save(@"ImageBlenders\test\alpha_blend.png", ImageFormat.Png);
-        Picture expected = ReadPicture(@"ImageBlenders\test\alpha_blend.png");
+        // result.ToImage().Save(@"ImageEditing\Blending\test\alpha_blend.png", ImageFormat.Png);
+        Picture expected = ReadPicture(@"ImageEditing\Blending\test\alpha_blend.png");
         Assert.That(result.CloneImage(), Is.EqualTo(expected.CloneImage()));
     }
 
     [Test]
     public void TestBlend2()
     {
-        Picture src = ReadPicture(@"ImageBlenders\test\alpha_rect.png");
+        Picture src = ReadPicture(@"ImageEditing\Blending\test\alpha_rect.png");
         AlphaImageBlender blender = new();
-        Picture dst = ReadPicture(@"ImageBlenders\test\alpha_base.png");
+        Picture dst = ReadPicture(@"ImageEditing\Blending\test\alpha_base.png");
 
         Picture result = dst.Blend(blender, src, new Position(0, 0));
 
-        Picture expected = ReadPicture(@"ImageBlenders\test\alpha_rect.png");
+        Picture expected = ReadPicture(@"ImageEditing\Blending\test\alpha_rect.png");
         Assert.That(result.CloneImage(), Is.EqualTo(expected.CloneImage()));
     }
 

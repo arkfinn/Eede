@@ -47,28 +47,28 @@
     <None Update="ImageEditing\DrawingTools\test\rectangle1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageBlenders\test\alpha_base.png">
+    <None Update="ImageEditing\Blending\test\alpha_base.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageBlenders\test\alpha_blend.png">
+    <None Update="ImageEditing\Blending\test\alpha_blend.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageBlenders\test\alpha_only_blend.png">
+    <None Update="ImageEditing\Blending\test\alpha_only_blend.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageBlenders\test\alpha_rect.png">
+    <None Update="ImageEditing\Blending\test\alpha_rect.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageBlenders\test\base.png">
+    <None Update="ImageEditing\Blending\test\base.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageBlenders\test\blend.png">
+    <None Update="ImageEditing\Blending\test\blend.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageBlenders\test\direct_blend.png">
+    <None Update="ImageEditing\Blending\test\direct_blend.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageBlenders\test\rgb_blend.png">
+    <None Update="ImageEditing\Blending\test\rgb_blend.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ImageTransfers\test\alpha.png">

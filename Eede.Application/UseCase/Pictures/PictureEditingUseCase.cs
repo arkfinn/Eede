@@ -1,4 +1,4 @@
-﻿using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;
 using Eede.Domain.SharedKernel;

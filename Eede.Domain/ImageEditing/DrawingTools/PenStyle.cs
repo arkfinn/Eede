@@ -1,4 +1,4 @@
-﻿using Eede.Domain.ImageBlenders;
+﻿using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.Palettes;
 using System;
 

@@ -1,8 +1,7 @@
-﻿using Eede.Domain.ImageEditing;
-using Eede.Domain.SharedKernel;
+﻿using Eede.Domain.SharedKernel;
 using System;
 
-namespace Eede.Domain.Sizes
+namespace Eede.Domain.ImageEditing
 {
     public class MagnifiedSize(PictureSize size, Magnification magnification)
     {

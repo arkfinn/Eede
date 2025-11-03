@@ -4,9 +4,7 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
-using Eede.Domain.Positions;
 using Eede.Domain.SharedKernel;
-using Eede.Domain.Sizes;
 
 namespace Eede.Application.Drawings
 {

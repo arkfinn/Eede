@@ -1,6 +1,5 @@
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
-using Eede.Domain.Sizes;
 using NUnit.Framework;
 
 namespace Eede.Domain.Tests.ImageEditing

@@ -1,5 +1,5 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.Positions;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;
 using System.Windows.Input;
 

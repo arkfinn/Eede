@@ -17,8 +17,8 @@ public class AlphaToneImageTransferTests
 
         Picture data = src.Transfer(transfer, new Magnification(2));
 
-        // dst.Save(@"ImageTransfers\test\alpha.png", ImageFormat.Png);
-        Picture expected = ReadPicture(@"ImageTransfers\test\alpha.png");
+        // dst.Save(@"ImageEditing\Transformation\test\alpha.png", ImageFormat.Png);
+        Picture expected = ReadPicture(@"ImageEditing\Transformation\test\alpha.png");
         Assert.That(data.CloneImage(), Is.EqualTo(expected.CloneImage()));
     }
 

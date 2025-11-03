@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
-using Eede.Domain.ImageBlenders;
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageTransfers;
 
 namespace Eede.Presentation.Views.Navigation

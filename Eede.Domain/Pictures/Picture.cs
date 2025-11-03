@@ -1,9 +1,9 @@
-using Eede.Domain.ImageBlenders;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageTransfers;
-using System;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
-using Eede.Domain.ImageEditing;
+using System;
 
 namespace Eede.Domain.Pictures
 {
@@ -58,7 +58,7 @@ namespace Eede.Domain.Pictures
             }
 
             int index = (pos.X * COLOR_32BIT) + (Stride * pos.Y);
-            var span = AsSpan();
+            ReadOnlySpan<byte> span = AsSpan();
             return new ArgbColor(
                 span[index + 3],
                 span[index + 2],
@@ -72,8 +72,8 @@ namespace Eede.Domain.Pictures
             int length = Math.Min((Width - area.X) * PixelSizeInBytes, destinationStride);
             int destinationX = area.X * PixelSizeInBytes;
             byte[] cutoutImageData = new byte[destinationStride * area.Height];
-            var sourceSpan = AsSpan();
-            var destinationSpan = new Span<byte>(cutoutImageData);
+            ReadOnlySpan<byte> sourceSpan = AsSpan();
+            Span<byte> destinationSpan = new(cutoutImageData);
 
             for (int y = 0; y < area.Height; y++)
             {

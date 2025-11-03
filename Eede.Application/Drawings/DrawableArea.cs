@@ -6,6 +6,7 @@ using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
 using Eede.Domain.Scales;
+using Eede.Domain.SharedKernel;
 using Eede.Domain.Sizes;
 
 namespace Eede.Application.Drawings

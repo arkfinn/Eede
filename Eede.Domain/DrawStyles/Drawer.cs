@@ -1,6 +1,6 @@
 ﻿using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
-using Eede.Domain.Positions;
+using Eede.Domain.SharedKernel;
 using System;
 using System.Collections.Generic;
 

@@ -1,5 +1,5 @@
 ﻿using Eede.Domain.Palettes;
-using Eede.Domain.Sizes;
+using Eede.Domain.SharedKernel;
 using System;
 using System.IO;
 
@@ -17,17 +17,17 @@ namespace Eede.Domain.Pictures
 
         private Picture ReadPictureData(BinaryReader reader)
         {
-            (int width, int height, byte[] arvHeaderFlags) header = ReadHeader(reader);
-            ArgbColor[] palette = ReadPalette(reader, header.arvHeaderFlags, ArvColorPlanes);
-            return ReadBody(reader, header.width, header.height, palette, header.arvHeaderFlags, ArvColorPlanes);
+            (int width, int height, byte[] arvHeaderFlags) = ReadHeader(reader);
+            ArgbColor[] palette = ReadPalette(reader, arvHeaderFlags, ArvColorPlanes);
+            return ReadBody(reader, width, height, palette, arvHeaderFlags, ArvColorPlanes);
         }
 
         private (int width, int height, byte[] arvHeaderFlags) ReadHeader(BinaryReader reader)
         {
             byte[] arvHeaderFlags = ReadHeaderFlags(reader);
-            (int width, int height) dimensions = ReadDimensions(reader);
+            (int width, int height) = ReadDimensions(reader);
             SkipBytes(reader, 12);
-            return (dimensions.width, dimensions.height, arvHeaderFlags);
+            return (width, height, arvHeaderFlags);
         }
 
         private byte[] ReadHeaderFlags(BinaryReader reader)

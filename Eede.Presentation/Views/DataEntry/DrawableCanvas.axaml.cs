@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
-using Eede.Domain.Positions;
+using Eede.Domain.SharedKernel;
 using System;
 using System.Windows.Input;
 

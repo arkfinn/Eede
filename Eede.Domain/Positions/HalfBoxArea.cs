@@ -1,6 +1,6 @@
 ﻿using System;
-using Eede.Domain.Sizes;
 using Eede.Domain.Pictures;
+using Eede.Domain.SharedKernel;
 
 namespace Eede.Domain.Positions
 {

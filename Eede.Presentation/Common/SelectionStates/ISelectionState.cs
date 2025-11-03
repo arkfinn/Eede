@@ -1,6 +1,6 @@
 ﻿using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
-using Eede.Domain.Sizes;
+using Eede.Domain.SharedKernel;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Common.SelectionStates

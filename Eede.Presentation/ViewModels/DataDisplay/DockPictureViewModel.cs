@@ -2,7 +2,7 @@
 using Eede.Application.Pictures;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;
-using Eede.Domain.Sizes;
+using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Enums;
 using Eede.Presentation.Events;

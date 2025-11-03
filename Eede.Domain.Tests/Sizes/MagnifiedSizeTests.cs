@@ -1,4 +1,5 @@
 using Eede.Domain.Scales;
+using Eede.Domain.SharedKernel;
 using Eede.Domain.Sizes;
 using NUnit.Framework;
 

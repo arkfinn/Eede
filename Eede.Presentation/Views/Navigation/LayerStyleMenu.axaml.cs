@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Eede.Domain.ImageEditing.Blending;
-using Eede.Domain.ImageTransfers;
+using Eede.Domain.ImageEditing.Transformation;
 
 namespace Eede.Presentation.Views.Navigation
 {

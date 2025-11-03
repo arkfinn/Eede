@@ -71,16 +71,16 @@
     <None Update="ImageEditing\Blending\test\rgb_blend.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageTransfers\test\alpha.png">
+    <None Update="ImageEditing\Transformation\test\alpha.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageTransfers\test\blend.png">
+    <None Update="ImageEditing\Transformation\test\blend.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageTransfers\test\direct.png">
+    <None Update="ImageEditing\Transformation\test\direct.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ImageTransfers\test\rgb.png">
+    <None Update="ImageEditing\Transformation\test\rgb.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

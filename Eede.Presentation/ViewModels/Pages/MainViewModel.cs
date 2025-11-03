@@ -7,7 +7,7 @@ using Eede.Application.UseCase.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
-using Eede.Domain.ImageTransfers;
+using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
 using Eede.Domain.Pictures.Actions;

@@ -1,7 +1,7 @@
 ﻿using Eede.Application.PaintLayers;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
-using Eede.Domain.ImageTransfers;
+using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
 using Eede.Domain.Positions;

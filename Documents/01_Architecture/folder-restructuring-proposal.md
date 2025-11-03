@@ -20,10 +20,10 @@
 
 | 既存フォルダ      | 提案する移動先                         | 理由                                                                                             |
 | :---------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| `Drawing/`        | `ImageEditing/`                        | 描画は画像編集の中核機能。                                                                       |
-| `DrawStyles/`     | `ImageEditing/`                        | 同上。                                                                                           |
-| `ImageBlenders/`  | `ImageEditing/`                        | 同上。                                                                                           |
-| `ImageTransfers/` | `ImageEditing/`                        | 同上。                                                                                           |
+| `Drawing/`        | `ImageEditing/DrawingTools/`           | 描画バッファ管理は、描画ツール群の一部。                                                         |
+| `DrawStyles/`     | `ImageEditing/DrawingTools/`           | 描画ツール群は`ImageEditing`コンテキストのサブドメインを形成。                                   |
+| `ImageBlenders/`  | `ImageEditing/ImageBlenders/`          | 画像合成ロジックは`ImageEditing`コンテキストのサブドメインを形成。                               |
+| `ImageTransfers/` | `ImageEditing/ImageTransfers/`         | 画像変換ロジックは`ImageEditing`コンテキストのサブドメインを形成。                               |
 | `Pictures/`       | `ImageEditing/`                        | `Picture`値オブジェクトは画像編集の核。                                                          |
 | `Positions/`      | `ImageEditing/` および `SharedKernel/` | `Position`は共有するが、`HalfBoxArea`などは画像編集に特化。                                      |
 | `Sizes/`          | `ImageEditing/` および `SharedKernel/` | `PictureSize`は共有するが、`MagnifiedSize`などは画像編集に特化。                                 |
@@ -44,9 +44,12 @@ Eede.Domain/
 │   ├── PictureArea.cs
 │   ├── HalfBoxArea.cs
 │   ├── UndoSystem.cs
+│   ├── IUndoItem.cs
 │   ├── PositionHistory.cs
 │   ├── Magnification.cs
-│   ├── DrawStyles/             // Sub-domain: Drawing Tools
+│   ├── DrawingTools/           // Sub-domain: Drawing Tools
+│   │   ├── DrawingBuffer.cs
+│   │   ├── ContextFactory.cs
 │   │   ├── IDrawStyle.cs
 │   │   └── ...
 │   ├── ImageBlenders/          // Sub-domain: Blending Logics

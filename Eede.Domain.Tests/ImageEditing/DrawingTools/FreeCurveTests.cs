@@ -1,14 +1,14 @@
 ﻿using Eede.Domain.Drawing;
-using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
-using Eede.Domain.Positions;
 using Eede.Domain.SharedKernel;
 using Eede.Domain.Tests.Helpers;
 using NUnit.Framework;
 
-namespace Eede.Domain.Tests.DrawStyles
+namespace Eede.Domain.Tests.ImageEditing.DrawingTools
 {
     [TestFixture()]
     public class FreeCurveTests
@@ -16,7 +16,7 @@ namespace Eede.Domain.Tests.DrawStyles
         [Test()]
         public void DrawTest()
         {
-            Picture src = ReadPicture(@"DrawStyles\test\base.png");
+            Picture src = ReadPicture(@"ImageEditing\DrawingTools\test\base.png");
             DrawingBuffer buffer = new(src);
             PenStyle penStyle = new(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
             FreeCurve tool = new();
@@ -28,8 +28,8 @@ namespace Eede.Domain.Tests.DrawStyles
             DrawingBuffer process3 = tool.Drawing(process2, penStyle, pos3, false);
             DrawingBuffer dst = tool.DrawEnd(process3, penStyle, pos3, false);
 
-            //　dstBmp.Save(@"DrawStyles\test\freeCurve1_.png", ImageFormat.Png);
-            Picture expected = ReadPicture(@"DrawStyles\test\freeCurve1.png");
+            //　dstBmp.Save(@"ImageEditing\DrawingTools\test\freeCurve1_.png", ImageFormat.Png);
+            Picture expected = ReadPicture(@"ImageEditing\DrawingTools\test\freeCurve1.png");
             Assert.That(dst.Fetch().CloneImage(), Is.EqualTo(expected.CloneImage()));
         }
 

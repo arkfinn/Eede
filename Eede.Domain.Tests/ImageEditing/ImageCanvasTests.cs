@@ -1,7 +1,7 @@
+using Eede.Domain.ImageEditing;
 using NUnit.Framework;
-using Eede.Domain;
 
-namespace Eede.Domain.Tests.Systems
+namespace Eede.Domain.Tests.ImageEditing
 {
     [TestFixture]
     public class ImageCanvasTests
@@ -11,7 +11,7 @@ namespace Eede.Domain.Tests.Systems
         {
             // Arrange
             // Act
-            var canvas = new ImageCanvas();
+            ImageCanvas canvas = new();
 
             // Assert
             Assert.That(canvas.IsDirty, Is.False);

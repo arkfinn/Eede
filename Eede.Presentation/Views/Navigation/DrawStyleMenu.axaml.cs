@@ -1,10 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Eede.Domain.DrawStyles;
+using Eede.Domain.ImageEditing.DrawingTools;
+using ReactiveUI;
 using System;
 using System.Reactive;
-using ReactiveUI;
 
 namespace Eede.Presentation.Views.Navigation
 {

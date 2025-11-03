@@ -1,7 +1,7 @@
 ﻿using Eede.Domain.SharedKernel;
 using System;
 
-namespace Eede.Domain.Positions
+namespace Eede.Domain.ImageEditing
 {
     public class PositionHistory
     {

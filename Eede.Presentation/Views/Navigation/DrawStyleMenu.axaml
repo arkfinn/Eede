@@ -5,7 +5,7 @@
              xmlns:local="clr-namespace:Eede.Presentation.Views.Navigation"
              xmlns:buttons="clr-namespace:Eede.Presentation.Views.General.Buttons"
              xmlns:c="clr-namespace:Eede.Presentation.Common.Converters"
-             xmlns:p="using:Eede.Domain.DrawStyles"
+             xmlns:p="using:Eede.Domain.ImageEditing.DrawingTools"
              mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="450"
              x:Class="Eede.Presentation.Views.Navigation.DrawStyleMenu">
   <Grid>

@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
-using Eede.Domain.Scales;
+using Eede.Domain.ImageEditing;
 
 namespace Eede.Presentation.Views.Navigation
 {

@@ -1,5 +1,5 @@
 ﻿using Eede.Application.Pictures;
-using Eede.Domain.DrawStyles;
+using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Pictures;
 using Eede.Domain.SharedKernel;

@@ -1,6 +1,6 @@
 using Eede.Domain.Palettes;
 
-namespace Eede.Domain.Colors;
+namespace Eede.Domain.ImageEditing;
 
 public readonly record struct BackgroundColor(ArgbColor Value)
 {

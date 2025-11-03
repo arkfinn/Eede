@@ -2,14 +2,13 @@
 using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Drawings;
-using Eede.Domain.Colors;
 using Eede.Domain.Drawing;
-using Eede.Domain.DrawStyles;
 using Eede.Domain.ImageBlenders;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageTransfers;
 using Eede.Domain.Palettes;
 using Eede.Domain.Pictures;
-using Eede.Domain.Scales;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;

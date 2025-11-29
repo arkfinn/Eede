@@ -4,43 +4,45 @@ using System.Windows.Input;
 
 namespace Eede.Presentation.Common.SelectionStates
 {
-    internal class NormalCursorState(HalfBoxArea cursorArea, HalfBoxArea selectingArea) : ISelectionState
+    internal class NormalCursorState : ISelectionState
     {
-        private HalfBoxArea CursorArea = cursorArea;
-        private HalfBoxArea SelectingArea = selectingArea;
+        private HalfBoxArea _selectingArea;
+        private HalfBoxArea _cursorArea;
 
-        public HalfBoxArea GetCurrentArea()
+        public NormalCursorState(HalfBoxArea initialSelectingArea)
         {
-            return CursorArea;
+            _selectingArea = initialSelectingArea;
         }
 
-        public void HandlePointerLeftButtonPressed(ICommand picturePullAction)
+        public void HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, ICommand picturePullAction)
         {
-            picturePullAction?.Execute(CursorArea.RealPosition);
+            picturePullAction?.Execute(cursorArea.RealPosition);
+            _cursorArea = cursorArea;
         }
 
-        public ISelectionState HandlePointerRightButtonPressed(Position nowPosition, PictureSize minCursorSize)
+        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize)
         {
-            SelectingArea = HalfBoxArea.Create(nowPosition, minCursorSize);
-            return BeginRegionSelection();
-
+            _cursorArea = cursorArea;
+            HalfBoxArea selectingArea = HalfBoxArea.Create(nowPosition, minCursorSize);
+            return (BeginRegionSelection(cursorArea, selectingArea), cursorArea);
         }
 
-        public (bool, HalfBoxArea) HandlePointerMoved(bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+        public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
         {
             bool newVisibleCursor = canvasSize.Contains(nowPosition);
-            CursorArea = CursorArea.Move(nowPosition);
-            return (newVisibleCursor, CursorArea);
+            HalfBoxArea newCursorArea = cursorArea.Move(nowPosition);
+            _cursorArea = newCursorArea;
+            return (newVisibleCursor, newCursorArea);
         }
 
-        public (HalfBoxArea, ISelectionState) HandlePointerRightButtonReleased(ICommand PicturePushAction)
+        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction)
         {
-            return (CursorArea, this);
+            return (this, cursorArea);
         }
 
-        private RegionSelectingState BeginRegionSelection()
+        private RegionSelectingState BeginRegionSelection(HalfBoxArea cursorArea, HalfBoxArea selectingArea)
         {
-            return new RegionSelectingState(CursorArea, SelectingArea);
+            return new RegionSelectingState(cursorArea, selectingArea);
         }
     }
 }

@@ -6,10 +6,9 @@ namespace Eede.Presentation.Common.SelectionStates
 {
     internal interface ISelectionState
     {
-        HalfBoxArea GetCurrentArea();
-        void HandlePointerLeftButtonPressed(ICommand picturePullAction);
-        ISelectionState HandlePointerRightButtonPressed(Position nowPosition, PictureSize minCursorSize);
-        (bool, HalfBoxArea) HandlePointerMoved(bool visibleCursor, Position nowPosition, PictureSize canvasSize);
-        (HalfBoxArea, ISelectionState) HandlePointerRightButtonReleased(ICommand PicturePushAction);
+        void HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, ICommand picturePullAction);
+        (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize);
+        (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize);
+        (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction);
     }
 }

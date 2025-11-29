@@ -6,6 +6,7 @@ using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Enums;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
+using Eede.Presentation.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -17,16 +18,16 @@ namespace Eede.Presentation.ViewModels.DataDisplay
     public class DockPictureViewModel : ViewModelBase
     {
 
-        public static DockPictureViewModel FromFile(IImageFile file)
+        public static DockPictureViewModel FromFile(IImageFile file, GlobalState globalState)
         {
-            DockPictureViewModel vm = new();
+            DockPictureViewModel vm = new(globalState);
             vm.Initialize(file);
             return vm;
         }
 
-        public static DockPictureViewModel FromSize(PictureSize size)
+        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState)
         {
-            DockPictureViewModel vm = new();
+            DockPictureViewModel vm = new(globalState);
             vm.Initialize(BitmapFileReader.CreateEmptyBitmapFile(size));
             return vm;
         }
@@ -35,7 +36,6 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public Bitmap PremultipliedBitmap { get; set; }
         [Reactive] public PictureSize MinCursorSize { get; set; }
         [Reactive] public PictureSize CursorSize { get; set; }
-        [Reactive] public HalfBoxArea CursorArea { get; set; }
         [Reactive] public bool Enabled { get; set; }
         [Reactive] public bool Closable { get; set; }
         [Reactive] public string Subject { get; private set; }
@@ -48,9 +48,11 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
         public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
         public event AsyncEventHandler<EventArgs> RequestClose;
+        public GlobalState GlobalState { get; }
 
-        public DockPictureViewModel()
+        public DockPictureViewModel(GlobalState globalState)
         {
+            GlobalState = globalState;
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
             OnClosing = ReactiveCommand.CreateFromTask(ExecuteClosing);
@@ -58,10 +60,6 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
             MinCursorSize = new PictureSize(32, 32);
             CursorSize = new PictureSize(32, 32);
-            _ = this.WhenAnyValue(x => x.CursorSize).Subscribe(size =>
-            {
-                CursorArea = HalfBoxArea.Create(new Position(0, 0), size);
-            });
             Enabled = true;
             Closable = true;
             _ = this.WhenAnyValue(x => x.Edited).Subscribe(_ =>
@@ -161,5 +159,3 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         }
     }
 }
-
-

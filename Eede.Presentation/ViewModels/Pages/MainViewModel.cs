@@ -17,6 +17,7 @@ using Eede.Presentation.Common.Models;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
+using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using ReactiveUI;
@@ -110,8 +111,11 @@ public class MainViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _isCloseConfirmed, value);
     }
 
-    public MainViewModel()
+    private GlobalState _state;
+
+    public MainViewModel(GlobalState State)
     {
+        _state = State;
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
@@ -277,7 +281,7 @@ public class MainViewModel : ViewModelBase
             // エラーが発生した場合、またはファイルが読み込めなかった場合はnullを返す
             return null;
         }
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile);
+        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile, _state);
         return SetupDockPicture(vm);
     }
 
@@ -301,7 +305,7 @@ public class MainViewModel : ViewModelBase
         NewPictureWindowViewModel result = await ShowCreateNewPictureModal.Handle(store);
         if (result.Result)
         {
-            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size)));
+            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state)));
         }
     }
 

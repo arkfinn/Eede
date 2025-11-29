@@ -16,6 +16,10 @@ namespace Eede.Presentation.Views.DataEntry
 {
     public partial class PictureContainer : UserControl
     {
+        private ISelectionState _selectionState;
+        private DockPictureViewModel? _viewModel;
+        private bool _visibleCursor = false;
+
         public PictureContainer()
         {
             InitializeComponent();
@@ -33,12 +37,12 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void PictureContainer_DataContextChanged(object? sender, EventArgs e)
         {
-            DockPictureViewModel vm = FetchViewModel();
-            if (vm == null)
+            _viewModel = FetchViewModel();
+            if (_viewModel == null)
             {
                 return;
             }
-            Avalonia.Media.Imaging.Bitmap bitmap = vm.PremultipliedBitmap;
+            Avalonia.Media.Imaging.Bitmap bitmap = _viewModel.PremultipliedBitmap;
 
             CanvasSize = new PictureSize((int)bitmap.Size.Width, (int)bitmap.Size.Height);
 
@@ -49,25 +53,22 @@ namespace Eede.Presentation.Views.DataEntry
             ImageBrush canvasBrush = new();
             _ = canvasBrush.Bind(ImageBrush.SourceProperty, new Binding
             {
-                Source = vm,
-                Path = nameof(vm.PremultipliedBitmap)
+                Source = _viewModel,
+                Path = nameof(_viewModel.PremultipliedBitmap)
             });
             canvas.Background = canvasBrush;
-            MinCursorSize = vm.MinCursorSize;
+            MinCursorSize = _viewModel.MinCursorSize;
             _ = Bind(MinCursorSizeProperty, new Binding
             {
-                Source = vm,
-                Path = nameof(vm.MinCursorSize)
+                Source = _viewModel,
+                Path = nameof(_viewModel.MinCursorSize)
             });
-            CursorArea = vm.CursorArea;
-            _ = Bind(CursorAreaProperty, new Binding
-            {
-                Source = vm,
-                Path = nameof(vm.CursorArea)
-            });
-            PicturePushAction = vm.OnPicturePush;
-            PicturePullAction = vm.OnPicturePull;
-            SelectionState = new NormalCursorState(CursorArea, CursorArea);
+            PicturePushAction = _viewModel.OnPicturePush;
+            PicturePullAction = _viewModel.OnPicturePull;
+
+            // SelectionState の初期化: GlobalState.CursorArea を初期値として使用
+            var initialCursorArea = _viewModel.GlobalState.CursorArea;
+            _selectionState = new NormalCursorState(initialCursorArea);
         }
 
         public override void Render(DrawingContext context)
@@ -80,7 +81,9 @@ namespace Eede.Presentation.Views.DataEntry
         {
             Dispatcher.UIThread.Post(() =>
             {
-                HalfBoxArea cursorArea = GetNowCursorArea();
+                if (_viewModel == null) return;
+
+                HalfBoxArea cursorArea = _viewModel.GlobalState.CursorArea;
                 Position grid = cursorArea.GridPosition;
                 PictureSize size = cursorArea.BoxSize;
 
@@ -90,12 +93,6 @@ namespace Eede.Presentation.Views.DataEntry
             });
         }
 
-        private HalfBoxArea GetNowCursorArea()
-        {
-            return SelectionState.GetCurrentArea();
-        }
-
-        private bool _visibleCursor = false;
         public bool VisibleCursor
         {
             get => _visibleCursor;
@@ -130,16 +127,6 @@ namespace Eede.Presentation.Views.DataEntry
             set => SetValue(MinCursorSizeProperty, value);
         }
 
-        public static readonly StyledProperty<HalfBoxArea> CursorAreaProperty =
-            AvaloniaProperty.Register<PictureContainer, HalfBoxArea>(nameof(CursorArea),
-                HalfBoxArea.Create(new Position(0, 0), new PictureSize(32, 32)), defaultBindingMode: BindingMode.TwoWay);
-        public HalfBoxArea CursorArea
-        {
-            get => GetValue(CursorAreaProperty);
-            set => SetValue(CursorAreaProperty, value);
-        }
-
-        private ISelectionState SelectionState;
         public event EventHandler<PicturePullEventArgs> PicturePulled;
         public event EventHandler<PicturePushEventArgs> PicturePushed;
 
@@ -147,15 +134,16 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            if (!VisibleCursor)
+            if (!VisibleCursor || _viewModel == null)
             {
                 return;
             }
 
+            var currentCursorArea = _viewModel.GlobalState.CursorArea;
             switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonPressed:
-                    SelectionState.HandlePointerLeftButtonPressed(PicturePullAction);
+                    _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, PicturePullAction);
                     break;
 
                 case PointerUpdateKind.RightButtonPressed:
@@ -167,32 +155,45 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerRightButtonPressed(Position nowPosition)
         {
-            SelectionState = SelectionState.HandlePointerRightButtonPressed(nowPosition, MinCursorSize);
+            if (_viewModel == null) return;
+            var (newState, newArea) = _selectionState.HandlePointerRightButtonPressed(_viewModel.GlobalState.CursorArea, nowPosition, MinCursorSize);
+            _selectionState = newState;
+            _viewModel.GlobalState.CursorArea = newArea;
+            UpdateCursor();
         }
 
         private void OnPointerMoved(object? sender, PointerEventArgs e)
         {
+            if (_viewModel == null) return;
+
             Position nowPosition = PointToPosition(e.GetPosition(canvas));
-            (VisibleCursor, CursorArea) = SelectionState.HandlePointerMoved(VisibleCursor, nowPosition, CanvasSize);
+            var (newVisible, newArea) = _selectionState.HandlePointerMoved(_viewModel.GlobalState.CursorArea, VisibleCursor, nowPosition, CanvasSize);
+            VisibleCursor = newVisible;
+            _viewModel.GlobalState.CursorArea = newArea;
             UpdateCursor();
         }
 
         private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
+            if (!VisibleCursor || _viewModel == null) return;
+
             switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonReleased:
                     break;
 
                 case PointerUpdateKind.RightButtonReleased:
-                    OnPointerRightButtonReleased();
+                    OnPointerRightButtonReleased(_viewModel);
                     break;
             }
         }
 
-        private void OnPointerRightButtonReleased()
+        private void OnPointerRightButtonReleased(DockPictureViewModel vm)
         {
-            (CursorArea, SelectionState) = SelectionState.HandlePointerRightButtonReleased(PicturePushAction);
+            var (newState, newArea) = _selectionState.HandlePointerRightButtonReleased(vm.GlobalState.CursorArea, PicturePushAction);
+            _selectionState = newState;
+            vm.GlobalState.CursorArea = newArea;
+            UpdateCursor();
         }
 
         private void OnPointerExited(object? sender, PointerEventArgs e)

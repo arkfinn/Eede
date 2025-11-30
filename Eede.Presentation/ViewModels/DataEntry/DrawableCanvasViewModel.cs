@@ -10,6 +10,7 @@ using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
+using Eede.Presentation.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -33,8 +34,11 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public Thickness SelectingThickness { get; set; }
     [Reactive] public PictureSize SelectingSize { get; set; }
 
-    public DrawableCanvasViewModel()
+    private readonly GlobalState _globalState;
+
+    public DrawableCanvasViewModel(GlobalState globalState)
     {
+        _globalState = globalState;
         Magnification = new Magnification(4);
         DrawStyle = new FreeCurve();
         ImageBlender = new DirectImageBlender();
@@ -56,10 +60,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         DrawEndCommand = ReactiveCommand.Create<Position>(ExecuteDrawEndAction);
         CanvasLeaveCommand = ReactiveCommand.Create(ExecuteCanvasLeaveAction);
 
-        Size defaultBoxSize = new(32, 32); //GlobalSetting.Instance().BoxSize;
+        // Size defaultBoxSize = new(32, 32); //GlobalSetting.Instance().BoxSize;
         PictureSize gridSize = new(16, 16);
         DrawableArea = new(CanvasBackgroundService.Instance, new Magnification(1), gridSize, null);
-        Picture picture = Picture.CreateEmpty(new PictureSize((int)defaultBoxSize.Width, (int)defaultBoxSize.Height));
+        Picture picture = Picture.CreateEmpty(_globalState.BoxSize);
         SetPicture(picture);
 
         _ = this.WhenAnyValue(x => x.ImageBlender, x => x.PenColor, x => x.PenSize)

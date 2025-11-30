@@ -1,51 +1,49 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.Positions;
-using Eede.Domain.Sizes;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.SharedKernel;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Common.SelectionStates
 {
-    internal class RegionSelectingState(HalfBoxArea cursorArea, HalfBoxArea selectingArea) : ISelectionState
+    internal class RegionSelectingState : ISelectionState
     {
-        private HalfBoxArea CursorArea = cursorArea;
-        private HalfBoxArea SelectingArea = selectingArea;
+        private HalfBoxArea _cursorArea;
+        private HalfBoxArea _selectingArea;
 
-        public HalfBoxArea GetCurrentArea()
+        public RegionSelectingState(HalfBoxArea cursorArea, HalfBoxArea selectingArea)
         {
-            return SelectingArea;
+            _cursorArea = cursorArea;
+            _selectingArea = selectingArea;
         }
 
-        public void HandlePointerLeftButtonPressed(ICommand picturePullAction)
+        public void HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, ICommand picturePullAction)
         {
-            // 選択中の左クリック - 選択をキャンセルまたは確定する場合の処理
-            // 現在のコードでは何もしない
+            // 何もしない
         }
 
-        public ISelectionState HandlePointerRightButtonPressed(Position nowPosition, PictureSize minCursorSize)
+        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize)
         {
-            return this; // すでに選択中なので、状態を変えない
+            return (this, cursorArea);
         }
 
-        public (bool, HalfBoxArea) HandlePointerMoved(bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+        public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
         {
-            SelectingArea = SelectingArea.ResizeToLocation(nowPosition);
-            // 戻り値は受け取った時点から変更しない
-            return (visibleCursor, CursorArea);
+            _selectingArea = _selectingArea.ResizeToLocation(nowPosition);
+            return (visibleCursor, _selectingArea);
         }
 
-        public (HalfBoxArea, ISelectionState) HandlePointerRightButtonReleased(ICommand PicturePushAction)
+        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand PicturePushAction)
         {
-            PictureArea area = SelectingArea.CreateRealArea(SelectingArea.BoxSize);
+            PictureArea area = _selectingArea.CreateRealArea(_selectingArea.BoxSize);
             PicturePushAction?.Execute(area);
-            CursorArea = SelectingArea;
+            _cursorArea = _selectingArea; // 選択範囲をCursorAreaに設定
             NormalCursorState newSelectionState = EndRegionSelection();
 
-            return (CursorArea, newSelectionState);
+            return (newSelectionState, _cursorArea);
         }
 
         private NormalCursorState EndRegionSelection()
         {
-            return new NormalCursorState(CursorArea, SelectingArea);
+            return new NormalCursorState(_cursorArea);
         }
     }
 }

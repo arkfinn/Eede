@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <DebugType>embedded</DebugType>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
 </Project>

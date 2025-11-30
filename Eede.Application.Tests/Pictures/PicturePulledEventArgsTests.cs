@@ -1,6 +1,6 @@
 ﻿using Eede.Application.Pictures;
-using Eede.Domain.Pictures;
-using Eede.Domain.Sizes;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 using System;
 
@@ -13,7 +13,7 @@ namespace Eede.Application.Tests.Pictures
         public void PicturePulledEventArgsTest()
         {
             Picture b = Picture.CreateEmpty(new PictureSize(10, 10));
-            PicturePushEventArgs p = new(b, new PictureArea(new Domain.Positions.Position(2, 2), new PictureSize(3, 3)));
+            PicturePushEventArgs p = new(b, new PictureArea(new Position(2, 2), new PictureSize(3, 3)));
             Picture image = p.CutOutImage();
 
             Assert.That(Tuple.Create(image.Size.Width, image.Size.Height), Is.EqualTo(Tuple.Create(3, 3)));
@@ -24,7 +24,7 @@ namespace Eede.Application.Tests.Pictures
         {
             _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                PicturePushEventArgs p = new(null, new PictureArea(new Domain.Positions.Position(2, 2), new PictureSize(3, 3)));
+                PicturePushEventArgs p = new(null, new PictureArea(new Position(2, 2), new PictureSize(3, 3)));
             });
         }
     }

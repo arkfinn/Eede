@@ -35,7 +35,7 @@ namespace Eede.Presentation.ViewModels.Pages;
 public class MainViewModel : ViewModelBase
 {
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
-    public DrawableCanvasViewModel DrawableCanvasViewModel { get; } = new DrawableCanvasViewModel();
+    public DrawableCanvasViewModel DrawableCanvasViewModel { get; }
 
     [Reactive] public BackgroundColor CurrentBackgroundColor { get; set; }
 
@@ -116,6 +116,7 @@ public class MainViewModel : ViewModelBase
     public MainViewModel(GlobalState State)
     {
         _state = State;
+        DrawableCanvasViewModel = new DrawableCanvasViewModel(State);
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)

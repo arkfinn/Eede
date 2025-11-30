@@ -1,19 +1,16 @@
 ﻿using Avalonia;
-using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Drawings;
-using Eede.Domain.Colors;
-using Eede.Domain.Drawing;
-using Eede.Domain.DrawStyles;
-using Eede.Domain.ImageBlenders;
-using Eede.Domain.ImageTransfers;
-using Eede.Domain.Pictures;
-using Eede.Domain.Positions;
-using Eede.Domain.Scales;
-using Eede.Domain.Sizes;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Blending;
+using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.Transformation;
+using Eede.Domain.Palettes;
+using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
+using Eede.Presentation.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -37,8 +34,11 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public Thickness SelectingThickness { get; set; }
     [Reactive] public PictureSize SelectingSize { get; set; }
 
-    public DrawableCanvasViewModel()
+    private readonly GlobalState _globalState;
+
+    public DrawableCanvasViewModel(GlobalState globalState)
     {
+        _globalState = globalState;
         Magnification = new Magnification(4);
         DrawStyle = new FreeCurve();
         ImageBlender = new DirectImageBlender();
@@ -60,10 +60,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         DrawEndCommand = ReactiveCommand.Create<Position>(ExecuteDrawEndAction);
         CanvasLeaveCommand = ReactiveCommand.Create(ExecuteCanvasLeaveAction);
 
-        Size defaultBoxSize = new(32, 32); //GlobalSetting.Instance().BoxSize;
+        // Size defaultBoxSize = new(32, 32); //GlobalSetting.Instance().BoxSize;
         PictureSize gridSize = new(16, 16);
         DrawableArea = new(CanvasBackgroundService.Instance, new Magnification(1), gridSize, null);
-        Picture picture = Picture.CreateEmpty(new PictureSize((int)defaultBoxSize.Width, (int)defaultBoxSize.Height));
+        Picture picture = Picture.CreateEmpty(_globalState.BoxSize);
         SetPicture(picture);
 
         _ = this.WhenAnyValue(x => x.ImageBlender, x => x.PenColor, x => x.PenSize)
@@ -135,7 +135,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void UpdateImage()
     {
         Picture = DrawableArea.Painted(PictureBuffer, PenStyle, ImageTransfer);
-        PictureBitmapAdapter adapter = new();
+        _ = new PictureBitmapAdapter();
         MyBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(Picture);
     }
 

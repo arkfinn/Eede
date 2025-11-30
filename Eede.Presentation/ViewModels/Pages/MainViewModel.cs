@@ -4,21 +4,20 @@ using Avalonia.Platform.Storage;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
-using Eede.Domain.Colors;
-using Eede.Domain.DrawStyles;
-using Eede.Domain.ImageBlenders;
-using Eede.Domain.ImageTransfers;
-using Eede.Domain.Pictures;
-using Eede.Domain.Pictures.Actions;
-using Eede.Domain.Scales;
-using Eede.Domain.Sizes;
-using Eede.Domain.Systems;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Blending;
+using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.GeometricTransformations;
+using Eede.Domain.ImageEditing.Transformation;
+using Eede.Domain.Palettes;
+using Eede.Domain.SharedKernel;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
+using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using ReactiveUI;
@@ -36,7 +35,7 @@ namespace Eede.Presentation.ViewModels.Pages;
 public class MainViewModel : ViewModelBase
 {
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
-    public DrawableCanvasViewModel DrawableCanvasViewModel { get; } = new DrawableCanvasViewModel();
+    public DrawableCanvasViewModel DrawableCanvasViewModel { get; }
 
     [Reactive] public BackgroundColor CurrentBackgroundColor { get; set; }
 
@@ -112,8 +111,12 @@ public class MainViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _isCloseConfirmed, value);
     }
 
-    public MainViewModel()
+    private GlobalState _state;
+
+    public MainViewModel(GlobalState State)
     {
+        _state = State;
+        DrawableCanvasViewModel = new DrawableCanvasViewModel(State);
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
@@ -279,7 +282,7 @@ public class MainViewModel : ViewModelBase
             // エラーが発生した場合、またはファイルが読み込めなかった場合はnullを返す
             return null;
         }
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile);
+        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile, _state);
         return SetupDockPicture(vm);
     }
 
@@ -303,7 +306,7 @@ public class MainViewModel : ViewModelBase
         NewPictureWindowViewModel result = await ShowCreateNewPictureModal.Handle(store);
         if (result.Result)
         {
-            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size)));
+            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state)));
         }
     }
 

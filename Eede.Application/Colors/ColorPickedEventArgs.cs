@@ -1,4 +1,4 @@
-﻿using Eede.Domain.Colors;
+﻿using Eede.Domain.Palettes;
 using System;
 
 namespace Eede.Application.Colors

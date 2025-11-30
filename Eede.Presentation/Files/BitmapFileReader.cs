@@ -1,10 +1,10 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Eede.Application.Pictures;
 using Eede.Domain.Files;
-using Eede.Domain.Pictures;
-using Eede.Domain.Sizes;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.SharedKernel;
+using Eede.Infrastructure.ImageEditing.Persistence.ArvFileFormat;
 using Eede.Presentation.Common.Adapters;
 using System;
 using System.IO;

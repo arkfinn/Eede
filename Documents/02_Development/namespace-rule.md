@@ -6,14 +6,14 @@
 
 - **CompanyName（会社名または組織名）**: あなたが所属する組織の名前。例：`Microsoft`, `Google`
 - **ProductName（製品名）**: プロジェクトやアプリケーション名。例：`Office`, `Maps`, `Azure`
-- **Category（カテゴリ）**: 機能や技術を表す部分。例：`Data`, `Security`, `Web`
+- **Category（カテゴリ）**: **ビジネス上の関心事や境界づけられたコンテキスト**を表す部分。技術的なレイヤー（例: `Web`, `Data`）や、ビジネス上の活動（例: `ImageEditing`, `Payments`）が該当します。
 
 **良い例：**
 
-- `Contoso.Commerce.Data`
-- `AdventureWorks.Management.Services`
+- `Contoso.Commerce.Payments`
+- `AdventureWorks.Management.Reporting`
 
-※Eede プロジェクトでは、Eede.Layer.Category のようにしています。
+※Eede プロジェクトでは、`Eede.Layer.Category` のように構成しています。
 
 #### **2. 大文字と小文字の使い分け**
 
@@ -58,7 +58,7 @@
 - **名前空間が肥大化する**: プロジェクト全体で`ValueObjects`, `Services`, `Repositories`のような名前空間を作成すると、関連性の薄いクラスが一箇所に集まり、コードの探索性が低下します。
 - **役割の変更に対応しにくい**: クラスの役割が変わった場合、名前空間も変更する必要が生じ、リファクタリングが複雑になります。
 
-**良い例：**
+**良い例（コンテキストベースの命名）：**
 
 - `Contoso.Commerce.Orders`
 - `Contoso.Commerce.Products`
@@ -66,13 +66,12 @@
 
 これらの名前空間には、注文に関連する`Order`エンティティや`OrderId`値オブジェクト、`OrderService`などが含まれます。これにより、コードがドメインごとに整理され、見通しが良くなります。
 
-**悪い例：**
+**悪い例（役割ベースの命名）：**
 
 - `Contoso.Commerce.ValueObjects`
 - `Contoso.Commerce.Entities`
 - `Contoso.Commerce.Services`
 
----
 
 ### **その他の注意点**
 

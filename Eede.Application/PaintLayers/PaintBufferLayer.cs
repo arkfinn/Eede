@@ -1,6 +1,5 @@
-﻿using Eede.Domain.ImageTransfers;
-using Eede.Domain.Pictures;
-using Eede.Domain.Sizes;
+﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Transformation;
 
 namespace Eede.Application.PaintLayers
 {

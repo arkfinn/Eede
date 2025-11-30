@@ -1,5 +1,4 @@
-﻿using Eede.Domain.Pictures;
-using Eede.Domain.Systems;
+﻿using Eede.Domain.ImageEditing;
 using System;
 
 namespace Eede.Presentation.Actions

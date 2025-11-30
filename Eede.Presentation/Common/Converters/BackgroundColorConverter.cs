@@ -1,6 +1,7 @@
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using Eede.Domain.Colors;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.Palettes;
 using System;
 using System.Globalization;
 
@@ -16,7 +17,7 @@ public class BackgroundColorConverter : IValueConverter
     {
         if (value is BackgroundColor backgroundColor)
         {
-            var argbColor = backgroundColor.Value;
+            ArgbColor argbColor = backgroundColor.Value;
             return Color.FromArgb(argbColor.Alpha, argbColor.Red, argbColor.Green, argbColor.Blue);
         }
         return null;
@@ -26,11 +27,10 @@ public class BackgroundColorConverter : IValueConverter
     {
         if (value is Color color)
         {
-            var argbColor = new ArgbColor(color.A, color.R, color.G, color.B);
+            ArgbColor argbColor = new(color.A, color.R, color.G, color.B);
             return new BackgroundColor(argbColor);
         }
         return null;
     }
 }
 
-#nullable disable

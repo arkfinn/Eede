@@ -16,4 +16,9 @@ public record Selection
         return Area.X <= position.X && position.X < Area.X + Area.Width &&
                Area.Y <= position.Y && position.Y < Area.Y + Area.Height;
     }
+
+    public Selection Move(int deltaX, int deltaY)
+    {
+        return new Selection(new PictureArea(new Position(Area.X + deltaX, Area.Y + deltaY), Area.Size));
+    }
 }

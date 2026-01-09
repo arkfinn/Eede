@@ -1,6 +1,6 @@
 # 選択範囲の移動機能 実装プラン
 
-## Phase 1: ドメインロジックの強化
+## Phase 1: ドメインロジックの強化 [checkpoint: 8759d7a]
 選択範囲の移動に伴う画像データの操作ロジックを `Picture` クラスおよび `Selection` 関連クラスに実装します。
 
 - [x] Task: `Selection` クラスの拡張 (はみ出し判定などの追加) (55eaf98)
@@ -9,7 +9,7 @@
 - [x] Task: `Picture` クラスへの移動用メソッドの追加 (05bc3b6)
     - [x] Write Tests
     - [x] Implement
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: ドメインロジック' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: ドメインロジック' (Protocol in workflow.md) (8759d7a)
 
 ## Phase 2: UI状態遷移の実装
 `ISelectionState` を使用したドラッグ移動の状態遷移ロジックを実装します。

@@ -3,9 +3,9 @@
 ## Phase 1: ドメインロジックの強化
 選択範囲の移動に伴う画像データの操作ロジックを `Picture` クラスおよび `Selection` 関連クラスに実装します。
 
-- [~] Task: `Selection` クラスの拡張 (はみ出し判定などの追加)
-    - [ ] Write Tests
-    - [ ] Implement
+- [x] Task: `Selection` クラスの拡張 (はみ出し判定などの追加) (55eaf98)
+    - [x] Write Tests
+    - [x] Implement
 - [ ] Task: `Picture` クラスへの移動用メソッドの追加
     - [ ] Write Tests
     - [ ] Implement

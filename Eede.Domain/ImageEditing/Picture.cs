@@ -114,4 +114,9 @@ public record Picture
     {
         return Size.Contains(position);
     }
+
+    public Picture Clear(PictureArea area)
+    {
+        return Blend(new DirectImageBlender(), CreateEmpty(area.Size), area.Position);
+    }
 }

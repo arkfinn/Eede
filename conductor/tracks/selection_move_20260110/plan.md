@@ -6,9 +6,9 @@
 - [x] Task: `Selection` クラスの拡張 (はみ出し判定などの追加) (55eaf98)
     - [x] Write Tests
     - [x] Implement
-- [ ] Task: `Picture` クラスへの移動用メソッドの追加
-    - [ ] Write Tests
-    - [ ] Implement
+- [x] Task: `Picture` クラスへの移動用メソッドの追加 (05bc3b6)
+    - [x] Write Tests
+    - [x] Implement
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: ドメインロジック' (Protocol in workflow.md)
 
 ## Phase 2: UI状態遷移の実装

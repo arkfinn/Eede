@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
+using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.SelectionStates;
 using Eede.Presentation.ViewModels.DataDisplay;
 using System;
@@ -65,6 +66,7 @@ namespace Eede.Presentation.Views.DataEntry
             });
             PicturePushAction = _viewModel.OnPicturePush;
             PicturePullAction = _viewModel.OnPicturePull;
+            PictureUpdateAction = _viewModel.OnPictureUpdate;
 
             // SelectionState の初期化: GlobalState.CursorArea を初期値として使用
             var initialCursorArea = _viewModel.GlobalState.CursorArea;
@@ -90,7 +92,25 @@ namespace Eede.Presentation.Views.DataEntry
                 cursor.Width = size.Width;
                 cursor.Height = size.Height;
                 cursor.Margin = new Thickness(cursorArea.RealPosition.X, cursorArea.RealPosition.Y, 0, 0);
+
+                UpdateSelectionPreview();
             });
+        }
+
+        private void UpdateSelectionPreview()
+        {
+            var info = _selectionState.GetSelectionPreviewInfo();
+            if (info == null)
+            {
+                selectionPreview.IsVisible = false;
+                return;
+            }
+
+            selectionPreview.IsVisible = true;
+            selectionPreview.Source = PictureBitmapAdapter.ConvertToPremultipliedBitmap(info.Pixels);
+            selectionPreview.Width = info.Pixels.Width;
+            selectionPreview.Height = info.Pixels.Height;
+            selectionPreview.Margin = new Thickness(info.Position.X, info.Position.Y, 0, 0);
         }
 
         public bool VisibleCursor
@@ -119,6 +139,14 @@ namespace Eede.Presentation.Views.DataEntry
             set => SetValue(PicturePullActionProperty, value);
         }
 
+        public static readonly StyledProperty<ICommand?> PictureUpdateActionProperty =
+            AvaloniaProperty.Register<PictureContainer, ICommand?>(nameof(PictureUpdateAction));
+        public ICommand? PictureUpdateAction
+        {
+            get => GetValue(PictureUpdateActionProperty);
+            set => SetValue(PictureUpdateActionProperty, value);
+        }
+
         public static readonly StyledProperty<PictureSize> MinCursorSizeProperty =
             AvaloniaProperty.Register<PictureContainer, PictureSize>(nameof(MinCursorSize), new PictureSize(32, 32));
         public PictureSize MinCursorSize
@@ -143,7 +171,11 @@ namespace Eede.Presentation.Views.DataEntry
             switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonPressed:
-                    _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, PicturePullAction);
+                    _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, () =>
+                    {
+                        PicturePullAction?.Execute(currentCursorArea.RealPosition);
+                        return _viewModel.PictureBuffer;
+                    });
                     break;
 
                 case PointerUpdateKind.RightButtonPressed:
@@ -180,6 +212,7 @@ namespace Eede.Presentation.Views.DataEntry
             switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonReleased:
+                    _selectionState = _selectionState.HandlePointerLeftButtonReleased(_viewModel.GlobalState.CursorArea, PicturePushAction, PictureUpdateAction);
                     break;
 
                 case PointerUpdateKind.RightButtonReleased:

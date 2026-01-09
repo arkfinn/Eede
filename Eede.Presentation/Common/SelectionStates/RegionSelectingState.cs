@@ -1,5 +1,7 @@
 ﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
+using System;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Common.SelectionStates
@@ -15,9 +17,14 @@ namespace Eede.Presentation.Common.SelectionStates
             _selectingArea = selectingArea;
         }
 
-        public void HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, ICommand picturePullAction)
+        public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Func<Picture> getPicture)
         {
-            // 何もしない
+            return this;
+        }
+
+        public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction, ICommand pictureUpdateAction)
+        {
+            return this;
         }
 
         public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize)
@@ -31,19 +38,21 @@ namespace Eede.Presentation.Common.SelectionStates
             return (visibleCursor, _selectingArea);
         }
 
-        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand PicturePushAction)
+        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction)
         {
-            PictureArea area = _selectingArea.CreateRealArea(_selectingArea.BoxSize);
-            PicturePushAction?.Execute(area);
-            _cursorArea = _selectingArea; // 選択範囲をCursorAreaに設定
-            NormalCursorState newSelectionState = EndRegionSelection();
-
+            SelectedState newSelectionState = EndRegionSelection();
             return (newSelectionState, _cursorArea);
         }
 
-        private NormalCursorState EndRegionSelection()
+        public SelectionPreviewInfo GetSelectionPreviewInfo()
         {
-            return new NormalCursorState(_cursorArea);
+            return null;
+        }
+
+        private SelectedState EndRegionSelection()
+        {
+            var area = _cursorArea.CreateRealArea(_cursorArea.BoxSize);
+            return new SelectedState(new Selection(area));
         }
     }
 }

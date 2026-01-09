@@ -55,6 +55,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             GlobalState = globalState;
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
+            OnPictureUpdate = ReactiveCommand.Create<Picture>(ExecutePictureUpdate);
             OnClosing = ReactiveCommand.CreateFromTask(ExecuteClosing);
             CloseCommand = ReactiveCommand.CreateFromTask(ExecuteClose);
 
@@ -134,6 +135,17 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             return Closable;
         }
 
+
+        public ReactiveCommand<Picture, Unit> OnPictureUpdate { get; }
+        public event EventHandler<PictureUpdateEventArgs> PictureUpdate;
+        private void ExecutePictureUpdate(Picture picture)
+        {
+            PictureUpdate?.Invoke(this, new PictureUpdateEventArgs(picture));
+            if (!Edited)
+            {
+                Edited = true;
+            }
+        }
 
         public ReactiveCommand<PictureArea, Unit> OnPicturePush { get; }
         public event EventHandler<PicturePushEventArgs> PicturePush;

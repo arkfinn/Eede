@@ -295,6 +295,7 @@ public class MainViewModel : ViewModelBase
     {
         vm.PicturePush += OnPushToDrawArea;
         vm.PicturePull += OnPullFromDrawArea;
+        vm.PictureUpdate += OnPictureUpdate;
         vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
         return vm;
@@ -358,6 +359,22 @@ public class MainViewModel : ViewModelBase
     {
         DrawableCanvasViewModel.SetPicture(picture);
         CursorSize = picture.Size;
+    }
+
+    private void OnPictureUpdate(object sender, PictureUpdateEventArgs args)
+    {
+        if (sender is not DockPictureViewModel vm)
+        {
+            return;
+        }
+        var previous = vm.PictureBuffer;
+        var updated = args.Updated;
+
+        UndoSystem = UndoSystem.Add(new UndoItem(
+           new Action(() => { if (vm.Enabled) { vm.PictureBuffer = previous; } }),
+           new Action(() => { if (vm.Enabled) { vm.PictureBuffer = updated; } })));
+
+        vm.PictureBuffer = updated;
     }
 
     private void OnPullFromDrawArea(object sender, PicturePullEventArgs args)

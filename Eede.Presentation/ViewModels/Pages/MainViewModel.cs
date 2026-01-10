@@ -156,11 +156,35 @@ public class MainViewModel : ViewModelBase
             PenColor = args.NewColor;
         };
         UndoSystem = new();
-        DrawableCanvasViewModel.Drew += (previous, now) =>
+        DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea) =>
         {
             UndoSystem = UndoSystem.Add(new UndoItem(
-                new Action(() => { SetPictureToDrawArea(previous); }),
-                new Action(() => { SetPictureToDrawArea(now); })));
+                new Action(() =>
+                {
+                    SetPictureToDrawArea(previous);
+                    if (previousArea != null)
+                    {
+                        DrawableCanvasViewModel.SelectingArea = previousArea.Value;
+                        DrawableCanvasViewModel.IsRegionSelecting = true;
+                    }
+                    else
+                    {
+                        DrawableCanvasViewModel.IsRegionSelecting = false;
+                    }
+                }),
+                new Action(() =>
+                {
+                    SetPictureToDrawArea(now);
+                    if (nowArea != null)
+                    {
+                        DrawableCanvasViewModel.SelectingArea = nowArea.Value;
+                        DrawableCanvasViewModel.IsRegionSelecting = true;
+                    }
+                    else
+                    {
+                        DrawableCanvasViewModel.IsRegionSelecting = false;
+                    }
+                })));
         };
 
         UndoCommand = ReactiveCommand.Create(ExecuteUndo, this.WhenAnyValue(
@@ -398,17 +422,34 @@ public class MainViewModel : ViewModelBase
 
     private void ExecutePictureAction(PictureActions actionType)
     {
-        PictureEditingUseCase.EditResult result = DrawableCanvasViewModel.IsRegionSelecting ? PictureEditingUseCase.ExecuteAction(
+        PictureArea? area = DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null;
+        PictureEditingUseCase.EditResult result = area.HasValue ? PictureEditingUseCase.ExecuteAction(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType,
-            DrawableCanvasViewModel.SelectingArea
+            area.Value
         ) : PictureEditingUseCase.ExecuteAction(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType
         );
         UndoSystem = UndoSystem.Add(new UndoItem(
-         new Action(() => { SetPictureToDrawArea(result.Previous); }),
-         new Action(() => { SetPictureToDrawArea(result.Updated); })));
+         new Action(() =>
+         {
+             SetPictureToDrawArea(result.Previous);
+             if (area.HasValue)
+             {
+                 DrawableCanvasViewModel.SelectingArea = area.Value;
+                 DrawableCanvasViewModel.IsRegionSelecting = true;
+             }
+         }),
+         new Action(() =>
+         {
+             SetPictureToDrawArea(result.Updated);
+             if (area.HasValue)
+             {
+                 DrawableCanvasViewModel.SelectingArea = area.Value;
+                 DrawableCanvasViewModel.IsRegionSelecting = true;
+             }
+         })));
 
         SetPictureToDrawArea(result.Updated);
     }

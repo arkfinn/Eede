@@ -4,9 +4,9 @@ using Eede.Domain.SharedKernel;
 using System;
 using System.Windows.Input;
 
-namespace Eede.Presentation.Common.SelectionStates
+namespace Eede.Application.Common.SelectionStates
 {
-    internal class RegionSelectingState : ISelectionState
+    public class RegionSelectingState : ISelectionState
     {
         private HalfBoxArea _cursorArea;
         private HalfBoxArea _selectingArea;
@@ -17,17 +17,17 @@ namespace Eede.Presentation.Common.SelectionStates
             _selectingArea = selectingArea;
         }
 
-        public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Func<Picture> getPicture)
+        public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand pullAction, Func<Picture> getPicture, ICommand updateAction)
         {
             return this;
         }
 
-        public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction, ICommand pictureUpdateAction)
+        public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand picturePushAction, ICommand pictureUpdateAction)
         {
             return this;
         }
 
-        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize)
+        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, ICommand pictureUpdateAction)
         {
             return (this, cursorArea);
         }
@@ -41,7 +41,7 @@ namespace Eede.Presentation.Common.SelectionStates
         public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction)
         {
             SelectedState newSelectionState = EndRegionSelection();
-            return (newSelectionState, _cursorArea);
+            return (newSelectionState, _selectingArea);
         }
 
         public SelectionPreviewInfo GetSelectionPreviewInfo()
@@ -49,9 +49,14 @@ namespace Eede.Presentation.Common.SelectionStates
             return null;
         }
 
+        public SelectionCursor GetCursor(Position mousePosition)
+        {
+            return SelectionCursor.Default;
+        }
+
         private SelectedState EndRegionSelection()
         {
-            var area = _cursorArea.CreateRealArea(_cursorArea.BoxSize);
+            var area = _selectingArea.CreateRealArea(_selectingArea.BoxSize);
             return new SelectedState(new Selection(area));
         }
     }

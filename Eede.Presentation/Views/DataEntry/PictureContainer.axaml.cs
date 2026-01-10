@@ -8,7 +8,7 @@ using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Common.SelectionStates;
+using Eede.Application.Common.SelectionStates;
 using Eede.Presentation.ViewModels.DataDisplay;
 using System;
 using System.Windows.Input;
@@ -167,19 +167,19 @@ namespace Eede.Presentation.Views.DataEntry
                 return;
             }
 
-            var currentCursorArea = _viewModel.GlobalState.CursorArea;
+            var nowPosition = PointToPosition(e.GetPosition(canvas));
+            var currentCursorArea = _viewModel.GlobalState.CursorArea.Move(nowPosition);
             switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonPressed:
-                    _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, () =>
-                    {
-                        PicturePullAction?.Execute(currentCursorArea.RealPosition);
-                        return _viewModel.PictureBuffer;
-                    });
+                    // ドックエリアでは移動機能は不要なため、常に転送（Pull）を実行する
+                    PicturePullAction?.Execute(currentCursorArea.RealPosition);
+                    // 状態は NormalCursorState にリセット/維持する
+                    _selectionState = new NormalCursorState(currentCursorArea);
                     break;
 
                 case PointerUpdateKind.RightButtonPressed:
-                    OnPointerRightButtonPressed(PointToPosition(e.GetPosition(canvas)));
+                    OnPointerRightButtonPressed(nowPosition);
                     break;
             }
             UpdateCursor();
@@ -188,8 +188,21 @@ namespace Eede.Presentation.Views.DataEntry
         private void OnPointerRightButtonPressed(Position nowPosition)
         {
             if (_viewModel == null) return;
-            var (newState, newArea) = _selectionState.HandlePointerRightButtonPressed(_viewModel.GlobalState.CursorArea, nowPosition, MinCursorSize);
-            _selectionState = newState;
+            // ドックエリアでは移動のための SelectedState 遷移は不要
+            var (newState, newArea) = _selectionState.HandlePointerRightButtonPressed(_viewModel.GlobalState.CursorArea, nowPosition, MinCursorSize, PictureUpdateAction);
+            
+            // もし遷移先が移動機能関連の状態なら、NormalCursorState に戻すか、
+            // そもそもドックエリアでの右クリック選択を無効化する。
+            // 従来の範囲選択（点線が出るだけ）は維持したい場合は、SelectedState への遷移のみを抑制する。
+            if (newState is SelectedState || newState is DraggingState)
+            {
+                _selectionState = new NormalCursorState(newArea);
+            }
+            else
+            {
+                _selectionState = newState;
+            }
+            
             _viewModel.GlobalState.CursorArea = newArea;
             UpdateCursor();
         }
@@ -209,10 +222,11 @@ namespace Eede.Presentation.Views.DataEntry
         {
             if (!VisibleCursor || _viewModel == null) return;
 
+            var nowPosition = PointToPosition(e.GetPosition(canvas));
             switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonReleased:
-                    _selectionState = _selectionState.HandlePointerLeftButtonReleased(_viewModel.GlobalState.CursorArea, PicturePushAction, PictureUpdateAction);
+                    _selectionState = _selectionState.HandlePointerLeftButtonReleased(_viewModel.GlobalState.CursorArea, nowPosition, PicturePushAction, PictureUpdateAction);
                     break;
 
                 case PointerUpdateKind.RightButtonReleased:
@@ -224,7 +238,19 @@ namespace Eede.Presentation.Views.DataEntry
         private void OnPointerRightButtonReleased(DockPictureViewModel vm)
         {
             var (newState, newArea) = _selectionState.HandlePointerRightButtonReleased(vm.GlobalState.CursorArea, PicturePushAction);
-            _selectionState = newState;
+            
+            // 範囲選択（RegionSelectingState）が終わった直後に、作業エリアへ転送を実行する
+            if (_selectionState is RegionSelectingState && newState is SelectedState)
+            {
+                PicturePushAction?.Execute(newArea.CreateRealArea(newArea.BoxSize));
+                // 移動状態には遷移させず、NormalCursorState に戻す
+                _selectionState = new NormalCursorState(newArea);
+            }
+            else
+            {
+                _selectionState = newState;
+            }
+
             vm.GlobalState.CursorArea = newArea;
             UpdateCursor();
         }

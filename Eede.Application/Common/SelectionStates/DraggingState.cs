@@ -5,33 +5,35 @@ using Eede.Domain.SharedKernel;
 using System;
 using System.Windows.Input;
 
-namespace Eede.Presentation.Common.SelectionStates;
+namespace Eede.Application.Common.SelectionStates;
 
-internal class DraggingState : ISelectionState
+public class DraggingState : ISelectionState
 {
+    public readonly Picture OriginalPicture;
     private readonly SelectionContent _content;
     private readonly Position _startPosition;
     private Position _currentPosition;
-    private readonly Picture _originalPicture;
 
     public DraggingState(SelectionContent content, Position startPosition, Picture originalPicture)
     {
         _content = content;
         _startPosition = startPosition;
         _currentPosition = startPosition;
-        _originalPicture = originalPicture;
+        OriginalPicture = originalPicture;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Func<Picture> getPicture)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand pullAction, Func<Picture> getPicture, ICommand updateAction)
     {
         return this;
     }
 
-    public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction, ICommand pictureUpdateAction)
+    public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand picturePushAction, ICommand pictureUpdateAction)
     {
+        _currentPosition = mousePosition;
+        
         var blender = new DirectImageBlender();
         var empty = Picture.CreateEmpty(_content.OriginalSelection.Area.Size);
-        var pictureAfterClear = blender.Blend(empty, _originalPicture, _content.OriginalSelection.Area.Position);
+        var pictureAfterClear = blender.Blend(empty, OriginalPicture, _content.OriginalSelection.Area.Position);
 
         var finalArea = GetCurrentArea();
         var finalPicture = blender.Blend(_content.Image, pictureAfterClear, finalArea.Position);
@@ -41,9 +43,10 @@ internal class DraggingState : ISelectionState
         return new SelectedState(new Selection(finalArea));
     }
 
-    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize)
+    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, ICommand pictureUpdateAction)
     {
-        return (this, cursorArea);
+        pictureUpdateAction?.Execute(OriginalPicture);
+        return (new SelectedState(_content.OriginalSelection), cursorArea);
     }
 
     public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
@@ -63,6 +66,11 @@ internal class DraggingState : ISelectionState
     public SelectionPreviewInfo GetSelectionPreviewInfo()
     {
         return new SelectionPreviewInfo(_content.Image, GetCurrentArea().Position);
+    }
+
+    public SelectionCursor GetCursor(Position mousePosition)
+    {
+        return SelectionCursor.Move;
     }
 
     private PictureArea GetCurrentArea()

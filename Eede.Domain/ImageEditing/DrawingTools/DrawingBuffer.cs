@@ -1,4 +1,6 @@
-﻿namespace Eede.Domain.ImageEditing.DrawingTools
+﻿using System;
+
+namespace Eede.Domain.ImageEditing.DrawingTools
 {
     internal interface IContext
     {
@@ -45,16 +47,16 @@
 
         public DrawingBuffer(Picture previous)
         {
-            Previous = previous;
+            Previous = previous ?? throw new ArgumentNullException(nameof(previous));
             Drawing = null;
-            Context = new Idle(previous);
+            Context = new Idle(Previous);
 
         }
 
         private DrawingBuffer(Picture previous, Picture drawing)
         {
-            Previous = previous;
-            Drawing = drawing;
+            Previous = previous ?? throw new ArgumentNullException(nameof(previous));
+            Drawing = drawing ?? throw new ArgumentNullException(nameof(drawing));
             Context = new Active(drawing);
         }
 
@@ -92,5 +94,9 @@
             return new DrawingBuffer(Previous, Drawing, Context);
         }
 
+        public DrawingBuffer Reset(Picture picture)
+        {
+            return new DrawingBuffer(picture);
+        }
     }
 }

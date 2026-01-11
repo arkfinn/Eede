@@ -4,7 +4,7 @@
 アニメーションの定義とグリッド設定を支えるドメインモデルを構築します。
 
 - [x] 7477a08 Task: Create `AnimationPattern` and `AnimationFrame` Domain Models (Eede.Domain)
-- [ ] Task: Implement Serialization for Animation Patterns (JSON)
+- [x] 57e4412 Task: Implement Serialization for Animation Patterns (JSON)
 - [ ] Task: Add GridSettings to AnimationPattern model
 - [ ] Task: Write Unit Tests for Sequence Manipulation (Add, Move, Delete frames)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation' (Protocol in workflow.md)

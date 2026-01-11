@@ -1,0 +1,64 @@
+using Eede.Domain.Animations;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.SharedKernel;
+using System;
+using System.Windows.Input;
+
+namespace Eede.Application.Common.SelectionStates
+{
+    public class AnimationEditingState : ISelectionState
+    {
+        private readonly ICommand _addFrameCommand;
+        private readonly GridSettings _grid;
+        private readonly PictureSize _imageSize;
+
+        public AnimationEditingState(ICommand addFrameCommand, GridSettings grid, PictureSize imageSize)
+        {
+            _addFrameCommand = addFrameCommand;
+            _grid = grid;
+            _imageSize = imageSize;
+        }
+
+        public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand pullAction, Func<Picture> getPicture, ICommand updateAction)
+        {
+            int index = _grid.CalculateCellIndex(cursorArea.RealPosition, _imageSize);
+            if (index >= 0)
+            {
+                _addFrameCommand?.Execute(index);
+            }
+            return this;
+        }
+
+        public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand picturePushAction, ICommand pictureUpdateAction)
+        {
+            return this;
+        }
+
+        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, ICommand pictureUpdateAction)
+        {
+            return (this, cursorArea);
+        }
+
+        public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+        {
+            bool newVisibleCursor = canvasSize.Contains(nowPosition);
+            HalfBoxArea newCursorArea = cursorArea.Move(nowPosition);
+            return (newVisibleCursor, newCursorArea);
+        }
+
+        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction)
+        {
+            return (this, cursorArea);
+        }
+
+        public SelectionPreviewInfo GetSelectionPreviewInfo()
+        {
+            return null;
+        }
+
+        public SelectionCursor GetCursor(Position mousePosition)
+        {
+            return SelectionCursor.Default;
+        }
+    }
+}

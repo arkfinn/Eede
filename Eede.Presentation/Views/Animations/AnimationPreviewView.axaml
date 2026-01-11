@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Eede.Presentation.ViewModels.Animations"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="450"
+             x:Class="Eede.Presentation.Views.Animations.AnimationPreviewView"
+             x:DataType="vm:AnimationViewModel">
+  <Design.DataContext>
+    <!-- TODO: Add design time data context -->
+  </Design.DataContext>
+
+  <DockPanel LastChildFill="True">
+    <TextBlock DockPanel.Dock="Top" Text="Animation Preview" Classes="header" Margin="4"/>
+    
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="4">
+      <ComboBox ItemsSource="{Binding Patterns}"
+                SelectedItem="{Binding SelectedPattern}"
+                HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Name}"/>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      
+      <Button Command="{Binding TogglePlayCommand}" HorizontalAlignment="Stretch">
+        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+          <TextBlock Text="{Binding IsPlaying, Converter={StaticResource PlayPauseTextConverter}, FallbackValue='Play'}"/>
+        </StackPanel>
+      </Button>
+    </StackPanel>
+
+    <Border BorderBrush="Gray" BorderThickness="1" Margin="4">
+      <Panel Background="DarkGray">
+        <Image Source="/Assets/Tiles/InvisibleBackground.png"
+               Stretch="None" TileMode="Tile" />
+        <TextBlock Text="[Preview Image Placeholder]" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Foreground="White"/>
+      </Panel>
+    </Border>
+  </DockPanel>
+</UserControl>

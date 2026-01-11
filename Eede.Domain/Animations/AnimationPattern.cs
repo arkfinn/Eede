@@ -8,16 +8,18 @@ public class AnimationPattern
 {
     public string Name { get; }
     public IReadOnlyList<AnimationFrame> Frames { get; }
+    public GridSettings Grid { get; }
 
     [JsonConstructor]
-    public AnimationPattern(string name, IReadOnlyList<AnimationFrame> frames)
+    public AnimationPattern(string name, IReadOnlyList<AnimationFrame> frames, GridSettings grid)
     {
         Name = name;
         Frames = frames.ToList();
+        Grid = grid;
     }
 
-    public AnimationPattern(string name, IEnumerable<AnimationFrame> frames)
-        : this(name, frames.ToList())
+    public AnimationPattern(string name, IEnumerable<AnimationFrame> frames, GridSettings grid)
+        : this(name, frames.ToList(), grid)
     {
     }
 }

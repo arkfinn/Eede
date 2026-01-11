@@ -31,10 +31,10 @@ public class AnimationEditingStateTests
         var addFrameCommand = new MockCommand();
         var grid = new GridSettings(new PictureSize(16, 16), new Position(0, 0), 0);
         var state = new AnimationEditingState(addFrameCommand, grid, new PictureSize(64, 64));
-        
+
         var cursorArea = HalfBoxArea.Create(new Position(16, 16), new PictureSize(16, 16));
         state.HandlePointerLeftButtonPressed(cursorArea, new Position(16, 16), null, null, null);
-        
+
         Assert.That(addFrameCommand.Executed, Is.True);
         // 64 / 16 = 4 columns. (16, 16) is col 1, row 1. Index = 1 * 4 + 1 = 5.
         Assert.That(addFrameCommand.Parameter, Is.EqualTo(5));

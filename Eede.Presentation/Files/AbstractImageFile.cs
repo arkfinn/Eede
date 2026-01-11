@@ -15,7 +15,7 @@ namespace Eede.Presentation.Files
 
         public abstract IImageFile WithFilePath(FilePath filePath);
 
-        public abstract Task<SaveImageResult> SaveAsync(StorageService storage);
+        public abstract Task<SaveImageResult> SaveAsync(IStorageService storage);
 
         // 共通のWithFilePathロジック（PNG変換）
         protected IImageFile CreatePngFileWithCheck(Bitmap bitmap, FilePath filePath)
@@ -28,9 +28,9 @@ namespace Eede.Presentation.Files
         }
 
         // 共通のSaveAsyncロジック（ファイルピッカーと保存）
-        protected async Task<SaveImageResult> SaveWithFilePickerAsync(StorageService storage)
+        protected async Task<SaveImageResult> SaveWithFilePickerAsync(IStorageService storage)
         {
-            Uri result = await storage.SaveFilePickerAsync();
+            Uri? result = await storage.SaveFilePickerAsync();
             if (result == null)
             {
                 return SaveImageResult.Canceled(); // キャンセルされた場合

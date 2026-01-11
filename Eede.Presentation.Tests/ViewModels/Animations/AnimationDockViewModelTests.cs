@@ -1,5 +1,6 @@
 using Eede.Application.Animations;
 using Eede.Domain.Animations;
+using Eede.Presentation.Common.Services;
 using Eede.Presentation.ViewModels.Animations;
 using Moq;
 
@@ -12,7 +13,7 @@ public class AnimationDockViewModelTests
     {
         var mockService = new Mock<IAnimationService>();
         mockService.Setup(x => x.Patterns).Returns(new List<AnimationPattern>());
-        var animationViewModel = new AnimationViewModel(mockService.Object);
+        var animationViewModel = new AnimationViewModel(mockService.Object, new Mock<IFileSystem>().Object);
         
         var dockViewModel = new AnimationDockViewModel(animationViewModel);
 

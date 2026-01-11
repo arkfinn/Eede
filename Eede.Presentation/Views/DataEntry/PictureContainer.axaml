@@ -44,6 +44,9 @@
             <general:Region x:Name="cursor"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top" />
+            <general:GridView x:Name="gridOverlay"
+                              HorizontalAlignment="Left"
+                              VerticalAlignment="Top" />
 
           </Panel>
         </Panel>

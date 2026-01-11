@@ -1,5 +1,6 @@
 using Eede.Domain.SharedKernel;
 using System;
+using System.Text.Json.Serialization;
 
 namespace Eede.Domain.Animations;
 

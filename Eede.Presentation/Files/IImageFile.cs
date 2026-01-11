@@ -12,6 +12,6 @@ namespace Eede.Presentation.Files
         IImageFile WithFilePath(FilePath filePath);
         IImageFile WithBitmap(Bitmap bitmap);
         string Subject();
-        Task<SaveImageResult> SaveAsync(StorageService storage);
+        Task<SaveImageResult> SaveAsync(IStorageService storage);
     }
 }

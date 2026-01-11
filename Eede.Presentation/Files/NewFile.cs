@@ -18,7 +18,7 @@ namespace Eede.Presentation.Files
             return "新しいファイル"; // 新規ファイルのサブジェクトは固定
         }
 
-        public override async Task<SaveImageResult> SaveAsync(StorageService storage)
+        public override async Task<SaveImageResult> SaveAsync(IStorageService storage)
         {
             return await SaveWithFilePickerAsync(storage);
         }

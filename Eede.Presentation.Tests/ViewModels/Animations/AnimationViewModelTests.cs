@@ -1,5 +1,6 @@
 using Eede.Application.Animations;
 using Eede.Domain.Animations;
+using Eede.Presentation.Common.Services;
 using Eede.Presentation.ViewModels.Animations;
 using Microsoft.Reactive.Testing;
 using Moq;
@@ -27,7 +28,7 @@ public class AnimationViewModelTests
         {
             RxApp.MainThreadScheduler = scheduler;
             
-            var viewModel = new AnimationViewModel(mockService.Object);
+            var viewModel = new AnimationViewModel(mockService.Object, new Mock<IFileSystem>().Object);
             viewModel.Patterns.Add(pattern);
             viewModel.SelectedPattern = pattern;
 
@@ -71,7 +72,7 @@ public class AnimationViewModelTests
             new AnimationFrame(20, 100)
         }, new GridSettings(new(32, 32), new(0, 0), 0));
 
-        var viewModel = new AnimationViewModel(mockService.Object);
+        var viewModel = new AnimationViewModel(mockService.Object, new Mock<IFileSystem>().Object);
         viewModel.Patterns.Add(pattern);
         viewModel.SelectedPattern = pattern;
 

@@ -8,9 +8,13 @@ public class PlayPauseTextConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is bool isPlaying)
+        if (value is bool isTrue)
         {
-            return isPlaying ? "Stop" : "Play";
+            if (parameter?.ToString() == "arrow")
+            {
+                return isTrue ? "▼" : "▲";
+            }
+            return isTrue ? "Stop" : "Play";
         }
         return "Play";
     }

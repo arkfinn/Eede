@@ -27,20 +27,20 @@ UIとロジックを繋ぐViewModelを実装し、プレビューエンジンの
 - [x] 111ea05 Task: Write Unit Tests for Preview frame calculation logic
 - [x] 9c676ed Task: Conductor - User Manual Verification 'Phase 3: ViewModels' (Protocol in workflow.md)
 
-## Phase 4: UI Implementation (Avalonia & Dock)
+## Phase 4: UI Implementation (Avalonia & Dock) [checkpoint: cef7495]
 実際のUIコンポーネントを作成し、レイアウトに組み込みます。
 
 - [x] cef7495 Task: Create `AnimationPreviewView` (Right Sidebar)
-- [x] 4c1dad5 Task: Create `AnimationSequencerView` (Bottom Footer) with Drag & Drop support
-- [ ] Task: Update Default Layout in `Eede.Presentation` to include new panels
-- [ ] Task: Add "Animation Mode" toggle button to the main toolbar
-- [ ] Task: Implement Grid Overlay rendering on the main canvas
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: UI' (Protocol in workflow.md)
+- [x] 4c1dad5 Task: Create `AnimationSequencerView` (Right Sidebar / Vertical)
+- [x] cef7495 Task: Update Layout in `Eede.Presentation` to include new panels
+- [x] cef7495 Task: Add "Animation Mode" toggle button to the Animation Panel
+- [x] cef7495 Task: Implement Grid Overlay rendering on the dock pictures
+- [x] cef7495 Task: Conductor - User Manual Verification 'Phase 4: UI' (Protocol in workflow.md)
 
 ## Phase 5: Integration & Polish
 インポート/エクスポート機能の完成と、全体的なUXの調整を行います。
 
-- [ ] Task: Implement Export/Import UI (File Dialogs)
+- [~] Task: Implement Export/Import UI (File Dialogs)
 - [ ] Task: Ensure Tab Switching updates Preview image but maintains Animation state
 - [ ] Task: Final UI Polish (Icons, Tooltips, Spacing)
 - [ ] Task: Comprehensive Integration Testing

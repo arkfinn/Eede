@@ -12,7 +12,7 @@
 ## Phase 2: Application Services & State Pattern
 アニメーション編集モードのロジックと、アプリケーション全体で共有するサービスを実装します。
 
-- [ ] Task: Define `IAnimationService` for global pattern management
+- [x] f99d37b Task: Define `IAnimationService` for global pattern management
 - [ ] Task: Implement `AnimationEditingState` in `Eede.Application` (State Pattern)
 - [ ] Task: Write Tests for `AnimationEditingState` (Coordinate to CellIndex conversion)
 - [ ] Task: Implement Canvas overlay for Grid display when in Animation Mode

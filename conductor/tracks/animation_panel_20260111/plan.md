@@ -30,7 +30,7 @@ UIとロジックを繋ぐViewModelを実装し、プレビューエンジンの
 ## Phase 4: UI Implementation (Avalonia & Dock)
 実際のUIコンポーネントを作成し、レイアウトに組み込みます。
 
-- [ ] Task: Create `AnimationPreviewView` (Right Sidebar)
+- [x] cef7495 Task: Create `AnimationPreviewView` (Right Sidebar)
 - [ ] Task: Create `AnimationSequencerView` (Bottom Footer) with Drag & Drop support
 - [ ] Task: Update Default Layout in `Eede.Presentation` to include new panels
 - [ ] Task: Add "Animation Mode" toggle button to the main toolbar

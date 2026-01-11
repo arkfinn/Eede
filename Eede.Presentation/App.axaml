@@ -8,6 +8,7 @@
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="/Styles/Colors/DefaultTheme.axaml"/>
       </ResourceDictionary.MergedDictionaries>
+      <converters:PlayPauseTextConverter x:Key="PlayPauseTextConverter" xmlns:converters="using:Eede.Presentation.Common.Converters"/>
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>

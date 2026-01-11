@@ -18,6 +18,8 @@ public class AnimationViewModel : ViewModelBase
 
     [Reactive] public bool IsPlaying { get; set; }
     [Reactive] public int CurrentFrameIndex { get; set; }
+    private readonly ObservableAsPropertyHelper<AnimationFrame?> _currentFrame;
+    public AnimationFrame? CurrentFrame => _currentFrame.Value;
 
     public ReactiveCommand<string, Unit> CreatePatternCommand { get; }
     public ReactiveCommand<Unit, Unit> RemovePatternCommand { get; }
@@ -74,6 +76,12 @@ public class AnimationViewModel : ViewModelBase
 
         this.WhenAnyValue(x => x.SelectedPattern)
             .Subscribe(_ => CurrentFrameIndex = 0);
+
+        _currentFrame = this.WhenAnyValue(x => x.SelectedPattern, x => x.CurrentFrameIndex)
+            .Select(x => (x.Item1 != null && x.Item2 >= 0 && x.Item2 < x.Item1.Frames.Count)
+                ? x.Item1.Frames[x.Item2]
+                : null)
+            .ToProperty(this, x => x.CurrentFrame);
 
         this.WhenAnyValue(x => x.IsPlaying, x => x.SelectedPattern)
             .Select(x => x.Item1 && x.Item2 != null && x.Item2.Frames.Count > 0)

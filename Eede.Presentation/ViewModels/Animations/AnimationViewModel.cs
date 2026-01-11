@@ -2,6 +2,7 @@ using Eede.Application.Animations;
 using Eede.Domain.Animations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -21,6 +22,7 @@ public class AnimationViewModel : ViewModelBase
     public ReactiveCommand<string, Unit> CreatePatternCommand { get; }
     public ReactiveCommand<Unit, Unit> RemovePatternCommand { get; }
     public ReactiveCommand<int, Unit> AddFrameCommand { get; }
+    public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
 
     public AnimationViewModel(IAnimationService animationService)
     {
@@ -64,6 +66,33 @@ public class AnimationViewModel : ViewModelBase
                 UpdatePattern(newPattern);
             }
         }, canExecute);
+
+        TogglePlayCommand = ReactiveCommand.Create(() =>
+        {
+            IsPlaying = !IsPlaying;
+        }, canExecute);
+
+        this.WhenAnyValue(x => x.SelectedPattern)
+            .Subscribe(_ => CurrentFrameIndex = 0);
+
+        this.WhenAnyValue(x => x.IsPlaying, x => x.SelectedPattern)
+            .Select(x => x.Item1 && x.Item2 != null && x.Item2.Frames.Count > 0)
+            .Select(playing => playing 
+                ? Observable.Defer(() =>
+                {
+                    var frame = SelectedPattern!.Frames[CurrentFrameIndex % SelectedPattern.Frames.Count];
+                    return Observable.Timer(TimeSpan.FromMilliseconds(frame.Duration), RxApp.MainThreadScheduler);
+                }).Repeat()
+                : Observable.Empty<long>())
+            .Switch()
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ =>
+            {
+                if (SelectedPattern != null && SelectedPattern.Frames.Count > 0)
+                {
+                    CurrentFrameIndex = (CurrentFrameIndex + 1) % SelectedPattern.Frames.Count;
+                }
+            });
     }
 
     private void UpdatePattern(AnimationPattern newPattern)

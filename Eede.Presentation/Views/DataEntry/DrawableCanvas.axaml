@@ -8,6 +8,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Presentation.Views.DataEntry.DrawableCanvas"
              x:DataType="vm:DrawableCanvasViewModel"
+             Cursor="{Binding ActiveCursor}"
              IsShifted="{Binding IsShifted}"
              PointerLeftButtonPressedCommand="{Binding DrawBeginCommand}"
              PointerRightButtonPressedCommand="{Binding PointerRightButtonPressedCommand}"
@@ -16,6 +17,8 @@
              PointerLeaveCommand="{Binding CanvasLeaveCommand}">
   <UserControl.Resources>
     <converters:BackgroundColorConverter x:Key="BackgroundColorConverter"/>
+    <converters:PictureToBitmapConverter x:Key="PictureToBitmapConverter"/>
+    <converters:MagnificationToDoubleConverter x:Key="MagnificationToDoubleConverter"/>
   </UserControl.Resources>
   <Design.DataContext>
     <vm:DrawableCanvasViewModel />

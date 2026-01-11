@@ -32,7 +32,15 @@ namespace Eede.Application.Drawings
 
         public Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
         {
+            if (buffer == null)
+            {
+                return null;
+            }
             Picture source = buffer.Fetch();
+            if (source == null)
+            {
+                return null;
+            }
             Picture picture = source;
             // 表示上のサイズ・ポジション DisplaySize DisplayPosition
             MagnifiedSize displaySize = Magnify(source.Size);
@@ -138,6 +146,10 @@ namespace Eede.Application.Drawings
 
         public DrawingResult DrawCancel(DrawingBuffer picture)
         {
+            if (picture == null)
+            {
+                return new DrawingResult(null, this);
+            }
             return new DrawingResult(picture.CancelDrawing(), ClearPositionHistory());
         }
 

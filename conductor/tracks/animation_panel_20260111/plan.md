@@ -9,14 +9,14 @@
 - [x] b8f8cee Task: Write Unit Tests for Sequence Manipulation (Add, Move, Delete frames)
 - [x] 73d4af3 Task: Conductor - User Manual Verification 'Phase 1: Foundation' (Protocol in workflow.md)
 
-## Phase 2: Application Services & State Pattern
+## Phase 2: Application Services & State Pattern [checkpoint: bd007a0]
 アニメーション編集モードのロジックと、アプリケーション全体で共有するサービスを実装します。
 
 - [x] f99d37b Task: Define `IAnimationService` for global pattern management
 - [x] 9fb4bb9 Task: Implement `AnimationEditingState` in `Eede.Application` (State Pattern)
 - [x] 9fb4bb9 Task: Write Tests for `AnimationEditingState` (Coordinate to CellIndex conversion)
 - [x] a439e77 Task: Implement Canvas overlay for Grid display when in Animation Mode
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Logic' (Protocol in workflow.md)
+- [x] bd007a0 Task: Conductor - User Manual Verification 'Phase 2: Logic' (Protocol in workflow.md)
 
 ## Phase 3: ViewModels & Data Binding
 UIとロジックを繋ぐViewModelを実装し、プレビューエンジンの基礎を作ります。

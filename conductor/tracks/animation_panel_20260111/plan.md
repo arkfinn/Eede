@@ -18,14 +18,14 @@
 - [x] a439e77 Task: Implement Canvas overlay for Grid display when in Animation Mode
 - [x] bd007a0 Task: Conductor - User Manual Verification 'Phase 2: Logic' (Protocol in workflow.md)
 
-## Phase 3: ViewModels & Data Binding
+## Phase 3: ViewModels & Data Binding [checkpoint: 9c676ed]
 UIとロジックを繋ぐViewModelを実装し、プレビューエンジンの基礎を作ります。
 
 - [x] 2d54e4c Task: Create `AnimationViewModel` for the Sequencer and Preview
 - [x] 625fbdb Task: Implement Preview Timer logic (Frame switching based on Duration)
 - [x] eef9027 Task: Create `AnimationDockViewModel` for Dock.Avalonia integration
 - [x] 111ea05 Task: Write Unit Tests for Preview frame calculation logic
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: ViewModels' (Protocol in workflow.md)
+- [x] 9c676ed Task: Conductor - User Manual Verification 'Phase 3: ViewModels' (Protocol in workflow.md)
 
 ## Phase 4: UI Implementation (Avalonia & Dock)
 実際のUIコンポーネントを作成し、レイアウトに組み込みます。

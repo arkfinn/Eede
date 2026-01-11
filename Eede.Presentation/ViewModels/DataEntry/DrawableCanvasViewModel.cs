@@ -4,6 +4,7 @@ using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Common.SelectionStates;
 using Eede.Application.Drawings;
+using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
@@ -44,6 +45,8 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public PictureSize RawPreviewSize { get; set; }
     [Reactive] public Bitmap MagnifiedPreviewBitmap { get; set; }
     [Reactive] public Cursor ActiveCursor { get; set; }
+    [Reactive] public bool IsAnimationMode { get; set; }
+    [Reactive] public GridSettings GridSettings { get; set; }
 
     private ISelectionState _selectionState;
     private readonly ReactiveCommand<Picture, Unit> InternalUpdateCommand;

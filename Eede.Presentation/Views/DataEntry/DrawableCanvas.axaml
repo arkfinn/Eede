@@ -65,6 +65,13 @@
                         Margin="{Binding SelectingThickness}"
                         Width="{Binding SelectingSize.Width}"
                         Height="{Binding SelectingSize.Height}" />
+        <general:GridView IsVisible="{Binding IsAnimationMode}"
+                          GridSettings="{Binding GridSettings}"
+                          Magnification="{Binding Magnification}"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Top"
+                          Width="{Binding MyBitmap.PixelSize.Width}"
+                          Height="{Binding MyBitmap.PixelSize.Height}" />
 
       </Panel>
     </Panel>

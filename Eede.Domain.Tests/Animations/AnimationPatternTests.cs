@@ -41,4 +41,27 @@ public class AnimationPatternTests
         
         Assert.That(pattern.Frames.Count, Is.EqualTo(1));
     }
+
+    [Test]
+    public void SerializationTest()
+    {
+        var frames = new List<AnimationFrame>
+        {
+            new AnimationFrame(0, 100),
+            new AnimationFrame(1, 200)
+        };
+        var pattern = new AnimationPattern("Run", frames);
+        
+        var json = System.Text.Json.JsonSerializer.Serialize(pattern);
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<AnimationPattern>(json);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(deserialized, Is.Not.Null);
+            Assert.That(deserialized!.Name, Is.EqualTo("Run"));
+            Assert.That(deserialized.Frames.Count, Is.EqualTo(2));
+            Assert.That(deserialized.Frames[0].CellIndex, Is.EqualTo(0));
+            Assert.That(deserialized.Frames[1].Duration, Is.EqualTo(200));
+        });
+    }
 }

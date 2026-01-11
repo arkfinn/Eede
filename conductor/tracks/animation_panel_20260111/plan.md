@@ -31,7 +31,7 @@ UIとロジックを繋ぐViewModelを実装し、プレビューエンジンの
 実際のUIコンポーネントを作成し、レイアウトに組み込みます。
 
 - [x] cef7495 Task: Create `AnimationPreviewView` (Right Sidebar)
-- [ ] Task: Create `AnimationSequencerView` (Bottom Footer) with Drag & Drop support
+- [x] 4c1dad5 Task: Create `AnimationSequencerView` (Bottom Footer) with Drag & Drop support
 - [ ] Task: Update Default Layout in `Eede.Presentation` to include new panels
 - [ ] Task: Add "Animation Mode" toggle button to the main toolbar
 - [ ] Task: Implement Grid Overlay rendering on the main canvas

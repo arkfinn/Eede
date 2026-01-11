@@ -2,36 +2,49 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:Eede.Presentation.ViewModels.Animations"
-             xmlns:anim="using:Eede.Domain.Animations"
+             xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.Animations"
+             xmlns:anim="clr-namespace:Eede.Domain.Animations;assembly=Eede.Domain"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="150"
              x:Class="Eede.Presentation.Views.Animations.AnimationSequencerView"
-             x:DataType="vm:AnimationViewModel">
+             x:DataType="vm:AnimationViewModel"
+             x:Name="root">
   <Grid RowDefinitions="Auto, *">
     <TextBlock Grid.Row="0" Text="Sequencer" Classes="header" Margin="4"/>
     
-    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-      <ItemsControl ItemsSource="{Binding SelectedPattern.Frames}">
-        <ItemsControl.ItemsPanel>
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+      <ListBox ItemsSource="{Binding SelectedPattern.Frames}" 
+               Background="Transparent" BorderThickness="0"
+               Padding="0">
+        <ListBox.ItemsPanel>
           <ItemsPanelTemplate>
-            <StackPanel Orientation="Horizontal" Spacing="2" Margin="4"/>
+            <StackPanel Orientation="Vertical" Spacing="2" Margin="4"/>
           </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+          </Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
           <DataTemplate x:DataType="anim:AnimationFrame">
-            <Border BorderBrush="Gray" BorderThickness="1" Width="48" Height="64">
-              <StackPanel>
-                <Panel Background="DarkGray" Height="40">
+            <Border BorderBrush="Gray" BorderThickness="1" Height="32" x:Name="FrameBorder">
+              <Grid ColumnDefinitions="30, *, 30">
+                <Panel Grid.Column="0" Background="DarkGray">
                   <TextBlock Text="{Binding CellIndex}" 
                              HorizontalAlignment="Center" VerticalAlignment="Center" 
-                             FontSize="10"/>
+                             FontSize="12"/>
                 </Panel>
-                <TextBox Text="{Binding Duration}" FontSize="10" Height="20" Padding="2" BorderThickness="0,1,0,0"/>
-              </StackPanel>
+                <TextBlock Grid.Column="1" Text="Frame" FontSize="10" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <Button Grid.Column="2" Content="×" Padding="0"
+                        Command="{Binding #root.ViewModel.RemoveFrameAtCommand}"
+                        CommandParameter="{Binding .}"
+                        ToolTip.Tip="削除"
+                        Background="Transparent" BorderThickness="0" Foreground="Red" FontWeight="Bold"/>
+              </Grid>
             </Border>
           </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
+        </ListBox.ItemTemplate>
+      </ListBox>
     </ScrollViewer>
   </Grid>
 </UserControl>

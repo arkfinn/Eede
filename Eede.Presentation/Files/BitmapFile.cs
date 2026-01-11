@@ -13,7 +13,7 @@ namespace Eede.Presentation.Files
             return CreatePngFileWithCheck(Bitmap, filePath);
         }
 
-        public override async Task<SaveImageResult> SaveAsync(StorageService storage)
+        public override async Task<SaveImageResult> SaveAsync(IStorageService storage)
         {
             return await SaveWithFilePickerAsync(storage);
         }

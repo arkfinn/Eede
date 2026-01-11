@@ -14,7 +14,7 @@ namespace Eede.Presentation.Files
             return this with { Path = filePath };
         }
 
-        public override async Task<SaveImageResult> SaveAsync(StorageService storage)
+        public override async Task<SaveImageResult> SaveAsync(IStorageService storage)
         {
             string fullPath = Path.ToString();
             try

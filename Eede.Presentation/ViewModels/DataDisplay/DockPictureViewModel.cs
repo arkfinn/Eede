@@ -7,6 +7,7 @@ using Eede.Presentation.Common.Enums;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
 using Eede.Presentation.Settings;
+using Eede.Presentation.ViewModels.Animations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -18,16 +19,16 @@ namespace Eede.Presentation.ViewModels.DataDisplay
     public class DockPictureViewModel : ViewModelBase
     {
 
-        public static DockPictureViewModel FromFile(IImageFile file, GlobalState globalState)
+        public static DockPictureViewModel FromFile(IImageFile file, GlobalState globalState, AnimationViewModel animationViewModel)
         {
-            DockPictureViewModel vm = new(globalState);
+            DockPictureViewModel vm = new(globalState, animationViewModel);
             vm.Initialize(file);
             return vm;
         }
 
-        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState)
+        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState, AnimationViewModel animationViewModel)
         {
-            DockPictureViewModel vm = new(globalState);
+            DockPictureViewModel vm = new(globalState, animationViewModel);
             vm.Initialize(BitmapFileReader.CreateEmptyBitmapFile(size));
             return vm;
         }
@@ -49,10 +50,12 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
         public event AsyncEventHandler<EventArgs> RequestClose;
         public GlobalState GlobalState { get; }
+        public AnimationViewModel AnimationViewModel { get; }
 
-        public DockPictureViewModel(GlobalState globalState)
+        public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel)
         {
             GlobalState = globalState;
+            AnimationViewModel = animationViewModel;
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
             OnPictureUpdate = ReactiveCommand.Create<Picture>(ExecutePictureUpdate);

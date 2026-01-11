@@ -22,7 +22,7 @@
 UIとロジックを繋ぐViewModelを実装し、プレビューエンジンの基礎を作ります。
 
 - [x] 2d54e4c Task: Create `AnimationViewModel` for the Sequencer and Preview
-- [ ] Task: Implement Preview Timer logic (Frame switching based on Duration)
+- [x] 625fbdb Task: Implement Preview Timer logic (Frame switching based on Duration)
 - [ ] Task: Create `AnimationDockViewModel` for Dock.Avalonia integration
 - [ ] Task: Write Unit Tests for Preview frame calculation logic
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: ViewModels' (Protocol in workflow.md)

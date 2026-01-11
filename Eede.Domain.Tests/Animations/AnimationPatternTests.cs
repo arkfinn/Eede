@@ -72,4 +72,95 @@ public class AnimationPatternTests
             Assert.That(deserialized.Grid, Is.EqualTo(grid));
         });
     }
+
+    [Test]
+    public void AddFrameTest()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var pattern = new AnimationPattern("Test", new List<AnimationFrame>(), grid);
+        var frame = new AnimationFrame(0, 100);
+        
+        var newPattern = pattern.AddFrame(frame);
+        
+        Assert.That(newPattern.Frames.Count, Is.EqualTo(1));
+        Assert.That(newPattern.Frames[0], Is.EqualTo(frame));
+        Assert.That(newPattern.Grid, Is.EqualTo(grid));
+    }
+
+    [Test]
+    public void RemoveFrameTest()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var frames = new List<AnimationFrame> { new AnimationFrame(0, 100), new AnimationFrame(1, 100) };
+        var pattern = new AnimationPattern("Test", frames, grid);
+        
+        var newPattern = pattern.RemoveFrame(0);
+        
+        Assert.That(newPattern.Frames.Count, Is.EqualTo(1));
+        Assert.That(newPattern.Frames[0].CellIndex, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void MoveFrameTest()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var frames = new List<AnimationFrame> { 
+            new AnimationFrame(0, 100), 
+            new AnimationFrame(1, 100),
+            new AnimationFrame(2, 100)
+        };
+        var pattern = new AnimationPattern("Test", frames, grid);
+        
+        // Move index 0 to index 2 (end)
+        var newPattern = pattern.MoveFrame(0, 2);
+        
+        Assert.That(newPattern.Frames[0].CellIndex, Is.EqualTo(1));
+        Assert.That(newPattern.Frames[1].CellIndex, Is.EqualTo(2));
+        Assert.That(newPattern.Frames[2].CellIndex, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void UpdateFrameTest()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var frames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
+        var pattern = new AnimationPattern("Test", frames, grid);
+        var newFrame = new AnimationFrame(0, 200);
+
+        var newPattern = pattern.UpdateFrame(0, newFrame);
+
+        Assert.That(newPattern.Frames[0].Duration, Is.EqualTo(200));
+    }
+
+    [Test]
+    public void RemoveFrameWithInvalidIndexTest()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var frames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
+        var pattern = new AnimationPattern("Test", frames, grid);
+
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.RemoveFrame(1));
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.RemoveFrame(-1));
+    }
+
+    [Test]
+    public void MoveFrameWithInvalidIndexTest()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var frames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
+        var pattern = new AnimationPattern("Test", frames, grid);
+
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, 2));
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(-1, 0));
+    }
+
+    [Test]
+    public void UpdateFrameWithInvalidIndexTest()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var frames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
+        var pattern = new AnimationPattern("Test", frames, grid);
+
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.UpdateFrame(1, new AnimationFrame(0, 200)));
+    }
 }

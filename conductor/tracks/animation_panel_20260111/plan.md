@@ -40,7 +40,7 @@ UIとロジックを繋ぐViewModelを実装し、プレビューエンジンの
 ## Phase 5: Integration & Polish
 インポート/エクスポート機能の完成と、全体的なUXの調整を行います。
 
-- [~] Task: Implement Export/Import UI (File Dialogs)
+- [x] 8465b7c Task: Implement Export/Import UI (File Dialogs)
 - [ ] Task: Ensure Tab Switching updates Preview image but maintains Animation state
 - [ ] Task: Final UI Polish (Icons, Tooltips, Spacing)
 - [ ] Task: Comprehensive Integration Testing

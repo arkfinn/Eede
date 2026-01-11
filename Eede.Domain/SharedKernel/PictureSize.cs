@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace Eede.Domain.SharedKernel
 {
@@ -7,6 +8,7 @@ namespace Eede.Domain.SharedKernel
         public int Width { get; }
         public int Height { get; }
 
+        [JsonConstructor]
         public PictureSize(int width, int height)
         {
             if (width < 0 || height < 0)

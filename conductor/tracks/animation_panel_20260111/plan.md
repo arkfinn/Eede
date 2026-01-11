@@ -13,8 +13,8 @@
 アニメーション編集モードのロジックと、アプリケーション全体で共有するサービスを実装します。
 
 - [x] f99d37b Task: Define `IAnimationService` for global pattern management
-- [ ] Task: Implement `AnimationEditingState` in `Eede.Application` (State Pattern)
-- [ ] Task: Write Tests for `AnimationEditingState` (Coordinate to CellIndex conversion)
+- [x] 9fb4bb9 Task: Implement `AnimationEditingState` in `Eede.Application` (State Pattern)
+- [x] 9fb4bb9 Task: Write Tests for `AnimationEditingState` (Coordinate to CellIndex conversion)
 - [ ] Task: Implement Canvas overlay for Grid display when in Animation Mode
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Logic' (Protocol in workflow.md)
 

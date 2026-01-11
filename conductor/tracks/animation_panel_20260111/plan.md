@@ -6,7 +6,7 @@
 - [x] 7477a08 Task: Create `AnimationPattern` and `AnimationFrame` Domain Models (Eede.Domain)
 - [x] 57e4412 Task: Implement Serialization for Animation Patterns (JSON)
 - [x] 7246b9d Task: Add GridSettings to AnimationPattern model
-- [ ] Task: Write Unit Tests for Sequence Manipulation (Add, Move, Delete frames)
+- [x] b8f8cee Task: Write Unit Tests for Sequence Manipulation (Add, Move, Delete frames)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation' (Protocol in workflow.md)
 
 ## Phase 2: Application Services & State Pattern

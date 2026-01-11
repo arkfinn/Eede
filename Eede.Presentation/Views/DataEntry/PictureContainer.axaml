@@ -37,6 +37,10 @@
                         AlignmentX="Left"/>
           </Panel.Background>
           <Panel x:Name="canvas">
+            <Image x:Name="selectionPreview"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   IsVisible="False" />
             <general:Region x:Name="cursor"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top" />

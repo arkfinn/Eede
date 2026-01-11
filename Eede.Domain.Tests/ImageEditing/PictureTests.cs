@@ -81,9 +81,22 @@ namespace Eede.Domain.Tests.ImageEditing
                 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0,
                 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            }));
-
-        }
-    }
-}
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            }));
+                
+                        }
+                
+                        [Test]
+                        public void ClearTest()
+                        {
+                            Picture picture = Picture.Create(new PictureSize(2, 2), new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8 });
+                            Picture after = picture.Clear(new PictureArea(new Position(0, 0), new PictureSize(1, 1)));
+                            Assert.That(after.CloneImage(), Is.EqualTo(new byte[]
+                            {
+                                0, 0, 0, 0, 5, 6, 7, 8,
+                                1, 2, 3, 4, 5, 6, 7, 8
+                            }));
+                        }
+                    }
+                }
+                

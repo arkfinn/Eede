@@ -1,10 +1,11 @@
 ﻿using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
+using System;
 using System.Windows.Input;
 
-namespace Eede.Presentation.Common.SelectionStates
+namespace Eede.Application.Common.SelectionStates
 {
-    internal class NormalCursorState : ISelectionState
+    public class NormalCursorState : ISelectionState
     {
         private HalfBoxArea _selectingArea;
         private HalfBoxArea _cursorArea;
@@ -14,13 +15,19 @@ namespace Eede.Presentation.Common.SelectionStates
             _selectingArea = initialSelectingArea;
         }
 
-        public void HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, ICommand picturePullAction)
+        public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand pullAction, Func<Picture> getPicture, ICommand updateAction)
         {
-            picturePullAction?.Execute(cursorArea.RealPosition);
+            pullAction?.Execute(cursorArea.RealPosition);
             _cursorArea = cursorArea;
+            return this;
         }
 
-        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize)
+        public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand picturePushAction, ICommand pictureUpdateAction)
+        {
+            return this;
+        }
+
+        public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, ICommand pictureUpdateAction)
         {
             _cursorArea = cursorArea;
             HalfBoxArea selectingArea = HalfBoxArea.Create(nowPosition, minCursorSize);
@@ -38,6 +45,16 @@ namespace Eede.Presentation.Common.SelectionStates
         public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction)
         {
             return (this, cursorArea);
+        }
+
+        public SelectionPreviewInfo GetSelectionPreviewInfo()
+        {
+            return null;
+        }
+
+        public SelectionCursor GetCursor(Position mousePosition)
+        {
+            return SelectionCursor.Default;
         }
 
         private RegionSelectingState BeginRegionSelection(HalfBoxArea cursorArea, HalfBoxArea selectingArea)

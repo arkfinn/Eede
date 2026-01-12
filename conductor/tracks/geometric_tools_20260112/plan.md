@@ -1,6 +1,6 @@
 # Implementation Plan - 図形ツール（四角・丸）の実装
 
-## Phase 1: 四角形ツール（枠線・塗りつぶし）の実装とリリース
+## Phase 1: 四角形ツール（枠線・塗りつぶし）の実装とリリース [checkpoint: 8c52def]
 - [x] Task: 四角形・塗りつぶし四角形用のアイコン作成 (`pen_rect.png`, `pen_rect_fill.png`) 5ee5669
 - [x] Task: `Rectangle` (枠線) ツールのドメインロジック実装 (TDD) cc261f5
 - [x] Task: `FilledRectangle` (塗りつぶし) ツールのドメインロジック実装 (TDD) 07759ea

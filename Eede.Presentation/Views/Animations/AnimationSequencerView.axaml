@@ -34,11 +34,11 @@
                              HorizontalAlignment="Center" VerticalAlignment="Center" 
                              FontSize="12"/>
                 </Panel>
-                <TextBlock Grid.Column="1" Text="Frame" FontSize="10" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                <Button Grid.Column="2" Content="×" Padding="0"
+                <TextBlock Grid.Column="1" Text="{Binding Duration, StringFormat='{}{0}ms'}" FontSize="10" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <Button Grid.Column="2" Content="✕" Padding="0"
                         Command="{Binding #root.ViewModel.RemoveFrameAtCommand}"
                         CommandParameter="{Binding .}"
-                        ToolTip.Tip="削除"
+                        ToolTip.Tip="フレーム削除"
                         Background="Transparent" BorderThickness="0" Foreground="Red" FontWeight="Bold"/>
               </Grid>
             </Border>

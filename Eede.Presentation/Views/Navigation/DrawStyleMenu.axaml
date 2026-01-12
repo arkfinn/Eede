@@ -17,21 +17,25 @@
         <c:BitmapConverter x:Key="bitmapConverter" />
       </WrapPanel.Resources>
       <ToggleButton x:Name="ButtonRegionSelector" Classes="tool"
+                    ToolTip.Tip="領域選択"
                     Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{x:Static p:DrawStyleType.RegionSelect}" >
         <Image Source="/Assets/Tools/pen_region.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonFreeCurve" Classes="tool"
+                    ToolTip.Tip="自由曲線"
                     Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{x:Static p:DrawStyleType.FreeCurve}" >
         <Image Source="/Assets/Tools/pen_free.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonLine" Classes="tool"
+                    ToolTip.Tip="直線"
                     Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{x:Static p:DrawStyleType.Line}" >
         <Image Source="/Assets/Tools/pen_line.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonFill" Classes="tool"
+                    ToolTip.Tip="塗りつぶし"
                     Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{x:Static p:DrawStyleType.Fill}" >
         <Image Source="/Assets/Tools/pen_fill.png" Stretch="None" />

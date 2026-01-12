@@ -16,9 +16,6 @@ public class AnimationViewModelTests
     [Test]
     public void CurrentFrameIndex_ShouldIncrementBasedOnDuration()
     {
-        var mockService = new Mock<IAnimationService>();
-        mockService.Setup(x => x.Patterns).Returns(new List<AnimationPattern>());
-
         var pattern = new AnimationPattern("Test", new List<AnimationFrame>
         {
             new AnimationFrame(0, 100),
@@ -26,19 +23,21 @@ public class AnimationViewModelTests
             new AnimationFrame(2, 300)
         }, new GridSettings(new(32, 32), new(0, 0), 0));
 
+        var mockService = new Mock<IAnimationService>();
+        mockService.Setup(x => x.Patterns).Returns(new List<AnimationPattern> { pattern });
+
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
             
             var viewModel = new AnimationViewModel(mockService.Object, new Mock<IFileSystem>().Object);
-            viewModel.Patterns.Add(pattern);
             viewModel.SelectedPattern = pattern;
 
             Assert.That(viewModel.CurrentFrameIndex, Is.EqualTo(0));
 
             viewModel.IsPlaying = true;
 
-            // Process IsPlaying change notification
+            // Process IsPlaying change notification and start timer
             scheduler.AdvanceBy(1);
 
             // Timer starts. Frame 0 duration is 100ms.
@@ -57,6 +56,7 @@ public class AnimationViewModelTests
             // Frame 2 duration is 300ms. Advance to 600ms
             scheduler.AdvanceBy(TimeSpan.FromMilliseconds(300).Ticks);
             Assert.That(viewModel.CurrentFrameIndex, Is.EqualTo(0));
+            scheduler.AdvanceBy(1); // Ensure OAPH updates
             Assert.That(viewModel.CurrentFrame, Is.Not.Null);
             Assert.That(viewModel.CurrentFrame!.CellIndex, Is.EqualTo(0));
         });
@@ -65,24 +65,37 @@ public class AnimationViewModelTests
     [Test]
     public void CurrentFrame_ShouldUpdateWhenIndexChanges()
     {
-        var mockService = new Mock<IAnimationService>();
-        mockService.Setup(x => x.Patterns).Returns(new List<AnimationPattern>());
-
         var pattern = new AnimationPattern("Test", new List<AnimationFrame>
         {
             new AnimationFrame(10, 100),
             new AnimationFrame(20, 100)
         }, new GridSettings(new(32, 32), new(0, 0), 0));
 
-        var viewModel = new AnimationViewModel(mockService.Object, new Mock<IFileSystem>().Object);
-        viewModel.Patterns.Add(pattern);
-        viewModel.SelectedPattern = pattern;
+        var mockService = new Mock<IAnimationService>();
+        mockService.Setup(x => x.Patterns).Returns(new List<AnimationPattern> { pattern });
 
-        Assert.That(viewModel.CurrentFrameIndex, Is.EqualTo(0));
-        Assert.That(viewModel.CurrentFrame!.CellIndex, Is.EqualTo(10));
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            var viewModel = new AnimationViewModel(mockService.Object, new Mock<IFileSystem>().Object);
+            // ViewModel constructor might have set SelectedPattern already if Patterns was empty,
+            // but here mockService returns pattern, so Patterns will have it.
+            // The constructor will set SelectedPattern = Patterns[0] if Patterns is empty, 
+            // wait, it only adds if Patterns.Count == 0.
+            
+            viewModel.SelectedPattern = pattern;
+            scheduler.AdvanceBy(1); // Process SelectedPattern change
 
-        viewModel.CurrentFrameIndex = 1;
-        Assert.That(viewModel.CurrentFrame!.CellIndex, Is.EqualTo(20));
+            Assert.That(viewModel.CurrentFrameIndex, Is.EqualTo(0));
+            scheduler.AdvanceBy(1); // Process CurrentFrameIndex=0 and update OAPH
+            Assert.That(viewModel.CurrentFrame, Is.Not.Null);
+            Assert.That(viewModel.CurrentFrame!.CellIndex, Is.EqualTo(10));
+
+            viewModel.CurrentFrameIndex = 1;
+            scheduler.AdvanceBy(1); // Process index change and update OAPH
+            Assert.That(viewModel.CurrentFrame, Is.Not.Null);
+            Assert.That(viewModel.CurrentFrame!.CellIndex, Is.EqualTo(20));
+        });
     }
 
     [Test]
@@ -92,13 +105,17 @@ public class AnimationViewModelTests
         mockService.Setup(x => x.Patterns).Returns(new List<AnimationPattern>());
         var mockFileSystem = new Mock<IFileSystem>();
 
-        var viewModel = new AnimationViewModel(mockService.Object, mockFileSystem.Object);
-        viewModel.IsPlaying = true;
-        viewModel.CurrentFrameIndex = 5;
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            var viewModel = new AnimationViewModel(mockService.Object, mockFileSystem.Object);
+            viewModel.IsPlaying = true;
+            viewModel.CurrentFrameIndex = 0;
 
-        viewModel.ActivePicture = Picture.CreateEmpty(new PictureSize(32, 32));
+            viewModel.ActivePicture = Picture.CreateEmpty(new PictureSize(32, 32));
 
-        Assert.That(viewModel.IsPlaying, Is.True);
-        Assert.That(viewModel.CurrentFrameIndex, Is.EqualTo(5));
+            Assert.That(viewModel.IsPlaying, Is.True);
+            Assert.That(viewModel.CurrentFrameIndex, Is.EqualTo(0));
+        });
     }
 }

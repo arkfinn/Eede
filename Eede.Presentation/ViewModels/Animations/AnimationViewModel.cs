@@ -63,7 +63,7 @@ public class AnimationViewModel : ViewModelBase
             .Select(x => (x.Item1 != null && x.Item2 >= 0 && x.Item2 < x.Item1.Frames.Count)
                 ? x.Item1.Frames[x.Item2]
                 : null)
-            .ToProperty(this, x => x.CurrentFrame);
+            .ToProperty(this, x => x.CurrentFrame, scheduler: RxApp.MainThreadScheduler);
 
         GridWidth = 32;
         GridHeight = 32;
@@ -257,7 +257,14 @@ public class AnimationViewModel : ViewModelBase
                     _ => true,
                     _ => 0, // インクリメントはSubscribe内で行うためダミー
                     _ => 0, // 同上
-                    _ => TimeSpan.FromMilliseconds(SelectedPattern!.Frames[CurrentFrameIndex].Duration),
+                    _ =>
+                    {
+                        if (SelectedPattern == null || CurrentFrameIndex < 0 || CurrentFrameIndex >= SelectedPattern.Frames.Count)
+                        {
+                            return TimeSpan.FromMilliseconds(100);
+                        }
+                        return TimeSpan.FromMilliseconds(SelectedPattern.Frames[CurrentFrameIndex].Duration);
+                    },
                     RxApp.MainThreadScheduler
                 );
             })

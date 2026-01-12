@@ -37,7 +37,7 @@ UIとロジックを繋ぐViewModelを実装し、プレビューエンジンの
 - [x] cef7495 Task: Implement Grid Overlay rendering on the dock pictures
 - [x] cef7495 Task: Conductor - User Manual Verification 'Phase 4: UI' (Protocol in workflow.md)
 
-## Phase 5: Integration & Polish
+## Phase 5: Integration & Polish [checkpoint: 991c5af]
 インポート/エクスポート機能の完成と、全体的なUXの調整を行います。
 
 - [x] 8465b7c Task: Implement Export/Import UI (File Dialogs)

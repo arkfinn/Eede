@@ -82,7 +82,8 @@ public class MainViewModel : ViewModelBase
 
     [Reactive] public UndoSystem UndoSystem { get; private set; }
     [Reactive] public StorageService StorageService { get; set; }
-    [Reactive] public bool IsAnimationPanelExpanded { get; set; } = true;
+    [Reactive] public Cursor? AnimationCursor { get; set; }
+    [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
 
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
@@ -235,6 +236,10 @@ public class MainViewModel : ViewModelBase
         PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;
         PaletteContainerViewModel.OnFetchColor += OnFetchPaletteColor;
 
+        this.WhenAnyValue(x => x.IsAnimationPanelExpanded)
+            .Where(expanded => !expanded)
+            .Subscribe(_ => AnimationViewModel.IsAnimationMode = false);
+
         CloseWindowInteraction = new Interaction<Unit, Unit>();
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
     }
@@ -345,6 +350,7 @@ public class MainViewModel : ViewModelBase
         vm.PictureUpdate += OnPictureUpdate;
         vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
+        _ = this.WhenAnyValue(x => x.AnimationCursor).BindTo(vm, x => x.AnimationCursor);
         return vm;
     }
 

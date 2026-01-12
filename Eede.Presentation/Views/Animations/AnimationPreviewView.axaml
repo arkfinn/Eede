@@ -1,136 +1,169 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:Eede.Presentation.ViewModels.Animations"
-             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="450"
-             x:Class="Eede.Presentation.Views.Animations.AnimationPreviewView"
-             x:DataType="vm:AnimationViewModel">
-  <Design.DataContext>
-    <!-- TODO: Add design time data context -->
-  </Design.DataContext>
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:Eede.Presentation.ViewModels.Animations"
+			 mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="450"
+			 x:Class="Eede.Presentation.Views.Animations.AnimationPreviewView"
+			 x:DataType="vm:AnimationViewModel">
+	<Design.DataContext>
+		<!-- TODO: Add design time data context -->
+	</Design.DataContext>
 
-  <DockPanel LastChildFill="True">
-    <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="8">
-      <!-- Section: Editing Mode -->
-      <ToggleButton IsChecked="{Binding IsAnimationMode}"
-                    HorizontalAlignment="Stretch"
-                    Height="32">
-        <ToggleButton.Styles>
-          <Style Selector="ToggleButton">
-            <Setter Property="Content" Value="アニメーション編集モード"/>
-            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
-          </Style>
-          <Style Selector="ToggleButton:checked">
-            <Setter Property="Content" Value="● アニメーション編集モード (ON)"/>
-            <Setter Property="Background" Value="#FF4444"/>
-            <Setter Property="Foreground" Value="White"/>
-          </Style>
-        </ToggleButton.Styles>
-      </ToggleButton>
+	<DockPanel LastChildFill="True">
+		<StackPanel DockPanel.Dock="Top" Spacing="8" Margin="8">
+			<StackPanel.Styles>
+				<Style Selector="ToggleButton.attention">
+					<Style.Animations>
+						<Animation Duration="0:0:1" IterationCount="2">
+							<KeyFrame Cue="0%">
+								<Setter Property="Opacity" Value="1.0"/>
+							</KeyFrame>
+							<KeyFrame Cue="50%">
+								<Setter Property="Opacity" Value="0.3"/>
+							</KeyFrame>
+							<KeyFrame Cue="100%">
+								<Setter Property="Opacity" Value="1.0"/>
+							</KeyFrame>
+						</Animation>
+					</Style.Animations>
+				</Style>
+			</StackPanel.Styles>
 
-      <Separator Margin="0,2"/>
-      
-      <!-- Section: Pattern Management -->
-      <StackPanel Spacing="4">
-        <TextBlock Text="Pattern Select" FontSize="11" FontWeight="Bold"/>
-        <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto">
-          <ComboBox Grid.Column="0" ItemsSource="{Binding Patterns}"
-                    SelectedItem="{Binding SelectedPattern}"
-                    HorizontalAlignment="Stretch" VerticalAlignment="Center">
-            <ComboBox.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding Name}"/>
-              </DataTemplate>
-            </ComboBox.ItemTemplate>
-          </ComboBox>
-          <Button Grid.Column="1" Classes="tool" ToolTip.Tip="新規パターン" 
-                  Command="{Binding CreatePatternCommand}"
-                  CommandParameter="New Pattern"
-                  Margin="2,0,0,0">
-            <Image Source="/Assets/Tools/file_new.png" Width="16" Height="16" />
-          </Button>
-          <Button Grid.Column="2" Classes="tool" ToolTip.Tip="パターン削除" 
-                  Command="{Binding RemovePatternCommand}"
-                  Margin="2,0,0,0">
-            <TextBlock Text="✕" Width="16" Height="16" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="Red"/>
-          </Button>
-          <Button Grid.Column="3" Classes="tool" ToolTip.Tip="読み込み" 
-                  Command="{Binding ImportCommand}"
-                  CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                  Margin="2,0,0,0">
-            <Image Source="/Assets/Tools/file_open.png" Width="16" Height="16" />
-          </Button>
-          <Button Grid.Column="4" Classes="tool" ToolTip.Tip="保存" 
-                  Command="{Binding ExportCommand}"
-                  CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                  Margin="2,0,0,0">
-            <Image Source="/Assets/Tools/file_save.png" Width="16" Height="16" />
-          </Button>
-        </Grid>
-      </StackPanel>
+			<!-- Section: Editing Mode -->
+			<ToggleButton IsChecked="{Binding IsAnimationMode}"
+						  Classes="attention"
+						  HorizontalAlignment="Stretch"
+						  Height="36">
+				<ToggleButton.Styles>
+					<Style Selector="ToggleButton">
+						<Setter Property="Content">
+							<Template>
+								<StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+									<Image Source="/Assets/Tools/tool_animation_record.png" Width="16" Height="16"/>
+									<TextBlock Text="アニメーション編集モード" VerticalAlignment="Center"/>
+								</StackPanel>
+							</Template>
+						</Setter>
+						<Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
+					</Style>
+					<Style Selector="ToggleButton:checked">
+						<Setter Property="Content">
+							<Template>
+								<StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+									<Image Source="/Assets/Tools/tool_animation_record.png" Width="16" Height="16"/>
+									<TextBlock Text="アニメーション編集モード" VerticalAlignment="Center"/>
+								</StackPanel>
+							</Template>
+						</Setter>
+						<Setter Property="Background" Value="#FF4444"/>
+						<Setter Property="Foreground" Value="White"/>
+					</Style>
+				</ToggleButton.Styles>
+			</ToggleButton>
 
-      <Separator Margin="0,2"/>
+			<Separator Margin="0,2"/>
 
-      <!-- Section: Grid Settings -->
-      <StackPanel Spacing="4">
-        <TextBlock Text="Grid Settings" FontSize="11" FontWeight="Bold"/>
-        <Grid ColumnDefinitions="*, 8, *">
-          <StackPanel Grid.Column="0">
-            <TextBlock Text="Width" FontSize="10"/>
-            <ComboBox ItemsSource="{Binding GridSizeList}" 
-                      SelectedItem="{Binding GridWidth}" 
-                      HorizontalAlignment="Stretch" Height="28"/>
-          </StackPanel>
-          <StackPanel Grid.Column="2">
-            <TextBlock Text="Height" FontSize="10"/>
-            <ComboBox ItemsSource="{Binding GridSizeList}" 
-                      SelectedItem="{Binding GridHeight}" 
-                      HorizontalAlignment="Stretch" Height="28"/>
-          </StackPanel>
-        </Grid>
-      </StackPanel>
+			<!-- Section: Pattern Management -->
+			<StackPanel Spacing="4">
+				<TextBlock Text="Pattern Select" FontSize="11" FontWeight="Bold"/>
+				<Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto">
+					<ComboBox Grid.Column="0" ItemsSource="{Binding Patterns}"
+							  SelectedItem="{Binding SelectedPattern}"
+							  HorizontalAlignment="Stretch" VerticalAlignment="Center">
+						<ComboBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding Name}"/>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+					<Button Grid.Column="1" Classes="tool" ToolTip.Tip="新規パターン"
+							Command="{Binding CreatePatternCommand}"
+							CommandParameter="New Pattern"
+							Margin="2,0,0,0">
+						<Image Source="/Assets/Tools/file_new.png" Width="16" Height="16" />
+					</Button>
+					<Button Grid.Column="2" Classes="tool" ToolTip.Tip="パターン削除"
+							Command="{Binding RemovePatternCommand}"
+							Margin="2,0,0,0">
+						<TextBlock Text="✕" Width="16" Height="16" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="Red"/>
+					</Button>
+					<Button Grid.Column="3" Classes="tool" ToolTip.Tip="読み込み"
+							Command="{Binding ImportCommand}"
+							CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+							Margin="2,0,0,0">
+						<Image Source="/Assets/Tools/file_open.png" Width="16" Height="16" />
+					</Button>
+					<Button Grid.Column="4" Classes="tool" ToolTip.Tip="保存"
+							Command="{Binding ExportCommand}"
+							CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+							Margin="2,0,0,0">
+						<Image Source="/Assets/Tools/file_save.png" Width="16" Height="16" />
+					</Button>
+				</Grid>
+			</StackPanel>
 
-      <Separator Margin="0,2"/>
+			<Separator Margin="0,2"/>
 
-      <!-- Section: Playback -->
-      <Button Command="{Binding TogglePlayCommand}" HorizontalAlignment="Stretch" Height="40">
-        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-          <Path Fill="White" 
-                Data="M 0,0 L 12,8 L 0,16 Z" 
-                IsVisible="{Binding !IsPlaying}"
-                VerticalAlignment="Center"/>
-          <Rectangle Fill="White" Width="12" Height="16"
-                     IsVisible="{Binding IsPlaying}"
-                     VerticalAlignment="Center">
-            <Rectangle.OpacityMask>
-              <VisualBrush Stretch="None">
-                <VisualBrush.Visual>
-                  <Grid ColumnDefinitions="4, 4, 4">
-                    <Rectangle Grid.Column="0" Fill="Black" Width="4"/>
-                    <Rectangle Grid.Column="2" Fill="Black" Width="4"/>
-                  </Grid>
-                </VisualBrush.Visual>
-              </VisualBrush>
-            </Rectangle.OpacityMask>
-          </Rectangle>
-          <TextBlock Text="{Binding IsPlaying, Converter={StaticResource PlayPauseTextConverter}, FallbackValue='Play'}"
-                     VerticalAlignment="Center" FontWeight="Bold"/>
-        </StackPanel>
-      </Button>
-    </StackPanel>
+			<!-- Section: Grid Settings -->
+			<StackPanel Spacing="4">
+				<TextBlock Text="Grid Settings" FontSize="11" FontWeight="Bold"/>
+				<Grid ColumnDefinitions="*, 8, *">
+					<StackPanel Grid.Column="0">
+						<TextBlock Text="Width" FontSize="10"/>
+						<ComboBox ItemsSource="{Binding GridSizeList}"
+								  SelectedItem="{Binding GridWidth}"
+								  HorizontalAlignment="Stretch" Height="28"/>
+					</StackPanel>
+					<StackPanel Grid.Column="2">
+						<TextBlock Text="Height" FontSize="10"/>
+						<ComboBox ItemsSource="{Binding GridSizeList}"
+								  SelectedItem="{Binding GridHeight}"
+								  HorizontalAlignment="Stretch" Height="28"/>
+					</StackPanel>
+				</Grid>
+			</StackPanel>
 
-    <Border BorderBrush="Gray" BorderThickness="1" Margin="8" MinHeight="120" CornerRadius="4">
-      <Panel Background="DarkGray">
-        <Panel.Background>
-          <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
-                      Stretch="None" TileMode="Tile" 
-                      SourceRect="0,0,16,16" DestinationRect="0,0,16,16"/>
-        </Panel.Background>
-        <Image Source="{Binding PreviewBitmap}"
-               Stretch="Uniform"
-               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-      </Panel>
-    </Border>
-  </DockPanel>
+			<Separator Margin="0,2"/>
+
+			<!-- Section: Playback -->
+			<Button Command="{Binding TogglePlayCommand}" HorizontalAlignment="Stretch" Height="40">
+				<StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+					<Path Fill="White"
+						  Data="M 0,0 L 12,8 L 0,16 Z"
+						  IsVisible="{Binding !IsPlaying}"
+						  VerticalAlignment="Center"/>
+					<Rectangle Fill="White" Width="12" Height="16"
+							   IsVisible="{Binding IsPlaying}"
+							   VerticalAlignment="Center">
+						<Rectangle.OpacityMask>
+							<VisualBrush Stretch="None">
+								<VisualBrush.Visual>
+									<Grid ColumnDefinitions="4, 4, 4">
+										<Rectangle Grid.Column="0" Fill="Black" Width="4"/>
+										<Rectangle Grid.Column="2" Fill="Black" Width="4"/>
+									</Grid>
+								</VisualBrush.Visual>
+							</VisualBrush>
+						</Rectangle.OpacityMask>
+					</Rectangle>
+					<TextBlock Text="{Binding IsPlaying, Converter={StaticResource PlayPauseTextConverter}, FallbackValue='Play'}"
+							   VerticalAlignment="Center" FontWeight="Bold"/>
+				</StackPanel>
+			</Button>
+		</StackPanel>
+
+		<Border BorderBrush="Gray" BorderThickness="1" Margin="8" MinHeight="120" CornerRadius="4">
+			<Panel Background="DarkGray">
+				<Panel.Background>
+					<ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+								Stretch="None" TileMode="Tile"
+								SourceRect="0,0,16,16" DestinationRect="0,0,16,16"/>
+				</Panel.Background>
+				<Image Source="{Binding PreviewBitmap}"
+					   Stretch="Uniform"
+					   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+			</Panel>
+		</Border>
+	</DockPanel>
 </UserControl>

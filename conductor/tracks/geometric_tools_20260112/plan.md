@@ -9,7 +9,7 @@
 
 
 ## Phase 2: 円形ツール（枠線・塗りつぶし）の実装とリリース
-- [ ] Task: 円形・塗りつぶし円形用のアイコン作成 (`pen_ellipse.png`, `pen_ellipse_fill.png`)
+- [x] Task: 円形・塗りつぶし円形用のアイコン作成 (`pen_ellipse.png`, `pen_ellipse_fill.png`) ce49593
 - [ ] Task: `Ellipse` (枠線) ツールのドメインロジック実装 (TDD)
 - [ ] Task: `FilledEllipse` (塗りつぶし) ツールのドメインロジック実装 (TDD)
 - [ ] Task: 円形ツール群をUI (ツールバー) に統合し、描画可能にする

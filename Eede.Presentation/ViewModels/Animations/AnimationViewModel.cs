@@ -81,7 +81,8 @@ public class AnimationViewModel : ViewModelBase
             {
                 new AnimationFrame(0, 100),
                 new AnimationFrame(1, 100),
-                new AnimationFrame(2, 100)
+                new AnimationFrame(2, 100),
+                new AnimationFrame(1, 100)
             }, new GridSettings(new PictureSize(GridWidth, GridHeight), new Position(0, 0), 0));
             _animationService.Add(testPattern);
             Patterns.Add(testPattern);

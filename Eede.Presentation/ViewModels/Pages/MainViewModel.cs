@@ -20,6 +20,8 @@ using Eede.Presentation.Files;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
+using Eede.Presentation.ViewModels.Animations;
+using Eede.Application.Animations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -36,6 +38,7 @@ public class MainViewModel : ViewModelBase
 {
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
     public DrawableCanvasViewModel DrawableCanvasViewModel { get; }
+    public AnimationViewModel AnimationViewModel { get; }
 
     [Reactive] public BackgroundColor CurrentBackgroundColor { get; set; }
 
@@ -79,11 +82,13 @@ public class MainViewModel : ViewModelBase
 
     [Reactive] public UndoSystem UndoSystem { get; private set; }
     [Reactive] public StorageService StorageService { get; set; }
+    [Reactive] public Cursor? AnimationCursor { get; set; }
+    [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
 
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
-    public ReactiveCommand<StorageService, Unit> LoadPictureCommand { get; }
-    public ReactiveCommand<StorageService, Unit> SavePictureCommand { get; }
+    public ReactiveCommand<IStorageService, Unit> LoadPictureCommand { get; }
+    public ReactiveCommand<IStorageService, Unit> SavePictureCommand { get; }
     public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; }
     public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; }
     public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; }
@@ -113,10 +118,11 @@ public class MainViewModel : ViewModelBase
 
     private GlobalState _state;
 
-    public MainViewModel(GlobalState State)
+    public MainViewModel(GlobalState State, IAnimationService animationService)
     {
         _state = State;
-        DrawableCanvasViewModel = new DrawableCanvasViewModel(State);
+        AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
+        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand);
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
@@ -155,6 +161,24 @@ public class MainViewModel : ViewModelBase
         {
             PenColor = args.NewColor;
         };
+
+        _ = this.WhenAnyValue(x => x.AnimationViewModel.IsAnimationMode)
+            .BindTo(this, x => x.DrawableCanvasViewModel.IsAnimationMode);
+
+        _ = this.WhenAnyValue(x => x.AnimationViewModel.SelectedPattern)
+            .Where(x => x != null)
+            .Subscribe(x =>
+            {
+                DrawableCanvasViewModel.GridSettings = x!.Grid;
+            });
+
+        this.WhenAnyValue(x => x.ActiveDockable)
+            .Select(active => active is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm
+                ? vm.WhenAnyValue(x => x.PictureBuffer)
+                : Observable.Return<Picture?>(null))
+            .Switch()
+            .BindTo(this, x => x.AnimationViewModel.ActivePicture);
+
         UndoSystem = new();
         DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea) =>
         {
@@ -193,8 +217,8 @@ public class MainViewModel : ViewModelBase
         RedoCommand = ReactiveCommand.Create(ExecuteRedo, this.WhenAnyValue(
            x => x.UndoSystem,
            (undoSystem) => undoSystem.CanRedo()));
-        LoadPictureCommand = ReactiveCommand.Create<StorageService>(ExecuteLoadPicture);
-        SavePictureCommand = ReactiveCommand.Create<StorageService>(ExecuteSavePicture);
+        LoadPictureCommand = ReactiveCommand.Create<IStorageService>(ExecuteLoadPicture);
+        SavePictureCommand = ReactiveCommand.Create<IStorageService>(ExecuteSavePicture);
         PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
 
         ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
@@ -211,6 +235,10 @@ public class MainViewModel : ViewModelBase
 
         PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;
         PaletteContainerViewModel.OnFetchColor += OnFetchPaletteColor;
+
+        this.WhenAnyValue(x => x.IsAnimationPanelExpanded)
+            .Where(expanded => !expanded)
+            .Subscribe(_ => AnimationViewModel.IsAnimationMode = false);
 
         CloseWindowInteraction = new Interaction<Unit, Unit>();
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
@@ -283,14 +311,14 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private async void ExecuteLoadPicture(StorageService storage)
+    private async void ExecuteLoadPicture(IStorageService storage)
     {
-        Uri result = await storage.OpenFilePickerAsync();
+        Uri? result = await storage.OpenFilePickerAsync();
         if (result == null)
         {
             return;
         }
-        DockPictureViewModel newPicture = OpenPicture(result);
+        DockPictureViewModel? newPicture = OpenPicture(result);
         if (newPicture != null)
         {
             Pictures.Add(newPicture);
@@ -298,19 +326,19 @@ public class MainViewModel : ViewModelBase
 
     }
 
-    private DockPictureViewModel OpenPicture(Uri path)
+    private DockPictureViewModel? OpenPicture(Uri path)
     {
-        IImageFile imageFile = ReadBitmapFile(path);
+        IImageFile? imageFile = ReadBitmapFile(path);
         if (imageFile == null)
         {
             // エラーが発生した場合、またはファイルが読み込めなかった場合はnullを返す
             return null;
         }
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile, _state);
+        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile, _state, AnimationViewModel);
         return SetupDockPicture(vm);
     }
 
-    private IImageFile ReadBitmapFile(Uri path)
+    private IImageFile? ReadBitmapFile(Uri path)
     {
         return new BitmapFileReader().Read(path);
     }
@@ -322,6 +350,7 @@ public class MainViewModel : ViewModelBase
         vm.PictureUpdate += OnPictureUpdate;
         vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
+        _ = this.WhenAnyValue(x => x.AnimationCursor).BindTo(vm, x => x.AnimationCursor);
         return vm;
     }
 
@@ -331,11 +360,11 @@ public class MainViewModel : ViewModelBase
         NewPictureWindowViewModel result = await ShowCreateNewPictureModal.Handle(store);
         if (result.Result)
         {
-            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state)));
+            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state, AnimationViewModel)));
         }
     }
 
-    private void ExecuteSavePicture(StorageService storage)
+    private void ExecuteSavePicture(IStorageService storage)
     {
         if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc)
         {
@@ -463,6 +492,10 @@ public class MainViewModel : ViewModelBase
             DrawStyleType.FreeCurve => new FreeCurve(),
             DrawStyleType.Line => new Line(),
             DrawStyleType.Fill => new Fill(),
+            DrawStyleType.Rectangle => new Rectangle(),
+            DrawStyleType.FilledRectangle => new FilledRectangle(),
+            DrawStyleType.Ellipse => new Ellipse(),
+            DrawStyleType.FilledEllipse => new FilledEllipse(),
             _ => throw new ArgumentOutOfRangeException(nameof(drawStyle), $"Unknown DrawStyle: {drawStyle}"),
         };
     }

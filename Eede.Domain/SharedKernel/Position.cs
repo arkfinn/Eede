@@ -1,10 +1,13 @@
-﻿namespace Eede.Domain.SharedKernel
+﻿using System.Text.Json.Serialization;
+
+namespace Eede.Domain.SharedKernel
 {
     public readonly record struct Position
     {
-        public readonly int X;
-        public readonly int Y;
+        public int X { get; }
+        public int Y { get; }
 
+        [JsonConstructor]
         public Position(int x, int y)
         {
             X = x;

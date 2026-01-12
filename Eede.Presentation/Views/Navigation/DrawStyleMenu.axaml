@@ -17,24 +17,52 @@
         <c:BitmapConverter x:Key="bitmapConverter" />
       </WrapPanel.Resources>
       <ToggleButton x:Name="ButtonRegionSelector" Classes="tool"
+                    ToolTip.Tip="領域選択"
                     Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{x:Static p:DrawStyleType.RegionSelect}" >
         <Image Source="/Assets/Tools/pen_region.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonFreeCurve" Classes="tool"
+                    ToolTip.Tip="自由曲線"
                     Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{x:Static p:DrawStyleType.FreeCurve}" >
         <Image Source="/Assets/Tools/pen_free.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonLine" Classes="tool"
+                    ToolTip.Tip="直線"
                     Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{x:Static p:DrawStyleType.Line}" >
         <Image Source="/Assets/Tools/pen_line.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonFill" Classes="tool"
+                    ToolTip.Tip="塗りつぶし"
                     Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{x:Static p:DrawStyleType.Fill}" >
         <Image Source="/Assets/Tools/pen_fill.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonRect" Classes="tool"
+                    ToolTip.Tip="矩形"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.Rectangle}" >
+        <Image Source="/Assets/Tools/pen_rect.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonRectFill" Classes="tool"
+                    ToolTip.Tip="矩形（塗りつぶし）"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" >
+        <Image Source="/Assets/Tools/pen_rect_fill.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonEllipse" Classes="tool"
+                    ToolTip.Tip="円"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.Ellipse}" >
+        <Image Source="/Assets/Tools/pen_ellipse.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonEllipseFill" Classes="tool"
+                    ToolTip.Tip="円（塗りつぶし）"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.FilledEllipse}" >
+        <Image Source="/Assets/Tools/pen_ellipse_fill.png" Stretch="None" />
       </ToggleButton>
     </WrapPanel>
   </Grid>

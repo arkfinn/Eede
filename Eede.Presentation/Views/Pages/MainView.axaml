@@ -1,177 +1,228 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.Pages"
-             xmlns:local="clr-namespace:Eede.Presentation.Views.Pages"
-             xmlns:navi="clr-namespace:Eede.Presentation.Views.Navigation"
-             xmlns:entry="clr-namespace:Eede.Presentation.Views.DataEntry"
-             xmlns:display="clr-namespace:Eede.Presentation.Views.DataDisplay"
-             xmlns:general="clr-namespace:Eede.Presentation.Views.General"
-             xmlns:converters="using:Eede.Presentation.Common.Converters"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
-             x:Class="Eede.Presentation.Views.Pages.MainView"
-             x:DataType="vm:MainViewModel"
-             DragDrop.AllowDrop="True">
-  <UserControl.Resources>
-    <converters:BackgroundColorConverter x:Key="BackgroundColorConverter"/>
-  </UserControl.Resources>
-  <Design.DataContext>
-    <!-- This only sets the DataContext for the previewer in an IDE,
-         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-    <vm:MainViewModel StorageService="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}" />
-  </Design.DataContext>
-  <Panel Background="Transparent">
-    <Panel.Styles>
-      <StyleInclude Source="/Styles/Styles.axaml" />
-    </Panel.Styles>
-    <DockPanel LastChildFill="True">
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.Pages"
+			 xmlns:local="clr-namespace:Eede.Presentation.Views.Pages"
+			 xmlns:navi="clr-namespace:Eede.Presentation.Views.Navigation"
+			 xmlns:entry="clr-namespace:Eede.Presentation.Views.DataEntry"
+			 xmlns:display="clr-namespace:Eede.Presentation.Views.DataDisplay"
+			 xmlns:general="clr-namespace:Eede.Presentation.Views.General"
+			 xmlns:animations="clr-namespace:Eede.Presentation.Views.Animations"
+			 xmlns:converters="using:Eede.Presentation.Common.Converters"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
+			 x:Class="Eede.Presentation.Views.Pages.MainView"
+			 x:DataType="vm:MainViewModel"
+			 DragDrop.AllowDrop="True">
+	<UserControl.Resources>
+		<converters:BackgroundColorConverter x:Key="BackgroundColorConverter"/>
+	</UserControl.Resources>
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+		to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<vm:MainViewModel StorageService="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}" />
+	</Design.DataContext>
+	<Panel Background="Transparent">
+		<Panel.Styles>
+			<StyleInclude Source="/Styles/Styles.axaml" />
+		</Panel.Styles>
+		<DockPanel LastChildFill="True">
 
-      <Grid ColumnDefinitions="*, 4, *" DockPanel.Dock="Bottom">
-        <DockPanel Grid.Column="0" LastChildFill="True">
-          <Panel DockPanel.Dock="Top" >
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Center"
-                        Margin="2">
-              <Button Classes="tool" Command="{Binding UndoCommand}">
-                <Image Source="/Assets/Tools/tool_undo.png" Stretch="None" />
-              </Button>
-              <Button Classes="tool" Command="{Binding RedoCommand}">
-                <Image Source="/Assets/Tools/tool_redo.png" Stretch="None" />
-              </Button>
-              <Panel Classes="horizontal-separator" />
-              <navi:LayerStyleMenu ImageTransfer="{Binding ImageTransfer}"
-                                   ImageBlender="{Binding ImageBlender}"/>
-              <Panel Classes="horizontal-separator" />
-              <navi:MagnificationMenu Magnification="{Binding Magnification}"/>
-            </StackPanel>
-          </Panel>
+			<Grid ColumnDefinitions="*, 4, *" DockPanel.Dock="Bottom">
+				<DockPanel Grid.Column="0" LastChildFill="True">
+					<Panel DockPanel.Dock="Top" >
+						<StackPanel Orientation="Horizontal"
+									HorizontalAlignment="Center"
+									Margin="2">
+							<Button Classes="tool" Command="{Binding UndoCommand}">
+								<Image Source="/Assets/Tools/tool_undo.png" Stretch="None" />
+							</Button>
+							<Button Classes="tool" Command="{Binding RedoCommand}">
+								<Image Source="/Assets/Tools/tool_redo.png" Stretch="None" />
+							</Button>
+							<Panel Classes="horizontal-separator" />
+							<navi:LayerStyleMenu ImageTransfer="{Binding ImageTransfer}"
+												 ImageBlender="{Binding ImageBlender}"/>
+							<Panel Classes="horizontal-separator" />
+							<navi:MagnificationMenu Magnification="{Binding Magnification}"/>
+						</StackPanel>
+					</Panel>
 
-          <Panel DockPanel.Dock="Right" Margin="2" Width="24">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-              <navi:PictureActionMenu Command="{Binding PictureActionCommand}"/>
-              <Separator/>
-            </StackPanel>
-          </Panel>
+					<Panel DockPanel.Dock="Right" Margin="2" Width="24">
+						<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+							<navi:PictureActionMenu Command="{Binding PictureActionCommand}"/>
+							<Separator/>
+						</StackPanel>
+					</Panel>
 
-          <Panel DockPanel.Dock="Bottom" Background="Transparent">
-            <StackPanel Orientation="Horizontal">
-              <Panel>
-                <TabControl>
-                  <TabItem Header="一時パレット">
-                    <TabItem.Styles>
-                      <Style Selector="TabItem">
-                        <Setter Property="FontSize" Value="12"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
-                        <Setter Property="MinHeight" Value="24"/>
+					<Panel DockPanel.Dock="Bottom" Background="Transparent">
+						<StackPanel Orientation="Horizontal">
+							<Panel>
+								<TabControl>
+									<TabItem Header="一時パレット">
+										<TabItem.Styles>
+											<Style Selector="TabItem">
+												<Setter Property="FontSize" Value="12"/>
+												<Setter Property="FontWeight" Value="Bold"/>
+												<Setter Property="MinHeight" Value="24"/>
 
-                      </Style>
-                    </TabItem.Styles>
-                    <entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
-                                            StorageService="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
-                                            Margin="4 2 4 8"/>
-                  </TabItem>
-                </TabControl>
-              </Panel>
-              <Panel Margin="0" Width="100" />
-            </StackPanel>
-          </Panel>
+											</Style>
+										</TabItem.Styles>
+										<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
+																StorageService="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
+																Margin="4 2 4 8"/>
+									</TabItem>
+								</TabControl>
+							</Panel>
+							<Panel Margin="0" Width="100" />
+						</StackPanel>
+					</Panel>
 
-          <Panel DockPanel.Dock="Left" Margin="0" Width="100">
-            <StackPanel Orientation="Vertical">
-              <navi:DrawStyleMenu Margin="2" DrawStyle="{Binding DrawStyle}" />
-              <entry:PenWidthSelector Margin="2" PenWidth="{Binding PenWidth}"/>
-              <entry:ColorPicker Margin="2" NowColor="{Binding PenColor}"/>
-              <StackPanel Orientation="Horizontal" Margin="2">
-                <Panel VerticalAlignment="Center">
-                  <TextBlock Margin="4" Text="現在色" />
-                </Panel>
-                <Border Background="Gray"
-                    BorderBrush="Gray"
-                    BorderThickness="1"
-                    CornerRadius="2"
-                    Padding="0" Margin="4">
-                  <Panel Width="32" Height="20">
-                    <Panel.Background>
-                      <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
-                        Stretch="None"
-                        TileMode="Tile"
-                        SourceRect="0,0,16,16"
-                        DestinationRect="0,0,16,16"
-                        AlignmentY="Top"
-                        AlignmentX="Left"/>
-                    </Panel.Background>
-                    <Panel Width="32" Height="20">
-                      <Panel.Background>
-                        <SolidColorBrush Color="{Binding NowPenColor}"/>
-                      </Panel.Background>
-                    </Panel>
-                  </Panel>
-                </Border>
-              </StackPanel>
-              <StackPanel Orientation="Horizontal" Margin="2">
-                <Panel VerticalAlignment="Center">
-                  <TextBlock Margin="4" Text="背景色" />
-                </Panel>
-                <general:ColorSampleButton SampleColor="{Binding CurrentBackgroundColor, Converter={StaticResource BackgroundColorConverter}}"
-                                           PutCommand="{Binding PutBackgroundColorCommand}"
-                                           GetCommand="{Binding GetBackgroundColorCommand}"/>
-              </StackPanel>
-            </StackPanel>
-          </Panel>
+					<Panel DockPanel.Dock="Left" Margin="0" Width="100">
+						<StackPanel Orientation="Vertical">
+							<navi:DrawStyleMenu Margin="2" DrawStyle="{Binding DrawStyle}" />
+							<entry:PenWidthSelector Margin="2" PenWidth="{Binding PenWidth}"/>
+							<entry:ColorPicker Margin="2" NowColor="{Binding PenColor}"/>
+							<StackPanel Orientation="Horizontal" Margin="2">
+								<Panel VerticalAlignment="Center">
+									<TextBlock Margin="4" Text="現在色" />
+								</Panel>
+								<Border Background="Gray"
+										BorderBrush="Gray"
+										BorderThickness="1"
+										CornerRadius="2"
+										Padding="0" Margin="4">
+									<Panel Width="32" Height="20">
+										<Panel.Background>
+											<ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+														Stretch="None"
+														TileMode="Tile"
+														SourceRect="0,0,16,16"
+														DestinationRect="0,0,16,16"
+														AlignmentY="Top"
+														AlignmentX="Left"/>
+										</Panel.Background>
+										<Panel Width="32" Height="20">
+											<Panel.Background>
+												<SolidColorBrush Color="{Binding NowPenColor}"/>
+											</Panel.Background>
+										</Panel>
+									</Panel>
+								</Border>
+							</StackPanel>
+							<StackPanel Orientation="Horizontal" Margin="2">
+								<Panel VerticalAlignment="Center">
+									<TextBlock Margin="4" Text="背景色" />
+								</Panel>
+								<general:ColorSampleButton SampleColor="{Binding CurrentBackgroundColor, Converter={StaticResource BackgroundColorConverter}}"
+														   PutCommand="{Binding PutBackgroundColorCommand}"
+														   GetCommand="{Binding GetBackgroundColorCommand}"/>
+							</StackPanel>
+						</StackPanel>
+					</Panel>
 
 
-          <ScrollViewer DockPanel.Dock="Top" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
-            <DockPanel LastChildFill="True" >
+					<ScrollViewer DockPanel.Dock="Top" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
+						<DockPanel LastChildFill="True" >
 
-              <entry:DrawableCanvas DockPanel.Dock="Bottom"
-                                    Background="{Binding BackgroundColor}"
-                                    DataContext="{Binding DrawableCanvasViewModel}"/>
-            </DockPanel>
-          </ScrollViewer>
+							<entry:DrawableCanvas DockPanel.Dock="Bottom"
+												  Background="{Binding BackgroundColor}"
+												  DataContext="{Binding DrawableCanvasViewModel}"/>
+						</DockPanel>
+					</ScrollViewer>
 
-        </DockPanel>
-        <GridSplitter Grid.Column="1" Background="Black" ResizeDirection="Columns"/>
-        <DockPanel LastChildFill="True" Grid.Column="2">
-          <Panel DockPanel.Dock="Top">
-            <StackPanel Orientation="Horizontal" Margin="2">
-              <Button Classes="tool"
-                      ToolTip.Tip="新規作成(N)"
-                      HotKey="N"
-                      Command="{Binding CreateNewPictureCommand}">
-                <Image Source="/Assets/Tools/file_new.png" Stretch="None" />
-              </Button>
-              <Button Classes="tool"
-                      ToolTip.Tip="開く(O)"
-                      HotKey="O"
-                      Command="{Binding LoadPictureCommand}"
-                      CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
-                <Image Source="/Assets/Tools/file_open.png" Stretch="None" />
-              </Button>
-              <Button Classes="tool"
-                ToolTip.Tip="保存(Ctrl+S)"
-                HotKey="Ctrl+S"
-                Command="{Binding SavePictureCommand}"
-                CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
-                <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
-              </Button>
-              <Panel Classes="horizontal-separator" />
-              <ComboBox ItemsSource="{Binding MinCursorSizeList}"
-                SelectedItem="{Binding MinCursorWidth, Mode=TwoWay}"/>
-              <TextBlock VerticalAlignment="Center" Text=" x "/>
-              <ComboBox ItemsSource="{Binding MinCursorSizeList}"
-                        SelectedItem="{Binding MinCursorHeight, Mode=TwoWay}"/>
-              <Panel Classes="horizontal-separator" />
-              <ComboBox x:Name="ThemeSelect" SelectedIndex="0" SelectionChanged="OnClickThemeSelect">
-                <ComboBoxItem>Light</ComboBoxItem>
-                <ComboBoxItem>Dark</ComboBoxItem>
-              </ComboBox>
-            </StackPanel>
-          </Panel>
-          <display:PictureFrame Pictures="{Binding Pictures}"
-                                ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"/>
-        </DockPanel>
-      </Grid>
-    </DockPanel>
-  </Panel>
+				</DockPanel>
+				<GridSplitter Grid.Column="1" Background="Black" ResizeDirection="Columns"/>
+				<Grid Grid.Column="2" ColumnDefinitions="*, Auto" VerticalAlignment="Stretch">
+					<DockPanel Grid.Column="0" LastChildFill="True">
+						<Panel DockPanel.Dock="Top">
+							<StackPanel Orientation="Horizontal" Margin="2">
+								<Button Classes="tool"
+										ToolTip.Tip="新規作成(N)"
+										HotKey="N"
+										Command="{Binding CreateNewPictureCommand}">
+									<Image Source="/Assets/Tools/file_new.png" Stretch="None" />
+								</Button>
+								<Button Classes="tool"
+										ToolTip.Tip="開く(O)"
+										HotKey="O"
+										Command="{Binding LoadPictureCommand}"
+										CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+									<Image Source="/Assets/Tools/file_open.png" Stretch="None" />
+								</Button>
+								<Button Classes="tool"
+										ToolTip.Tip="保存(Ctrl+S)"
+										HotKey="Ctrl+S"
+										Command="{Binding SavePictureCommand}"
+										CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+									<Image Source="/Assets/Tools/file_save.png" Stretch="None" />
+								</Button>
+								<Panel Classes="horizontal-separator" />
+								<ComboBox ItemsSource="{Binding MinCursorSizeList}"
+										  SelectedItem="{Binding MinCursorWidth, Mode=TwoWay}"/>
+								<TextBlock VerticalAlignment="Center" Text=" x "/>
+								<ComboBox ItemsSource="{Binding MinCursorSizeList}"
+										  SelectedItem="{Binding MinCursorHeight, Mode=TwoWay}"/>
+								<Panel Classes="horizontal-separator" />
+								<ComboBox x:Name="ThemeSelect" SelectedIndex="0" SelectionChanged="OnClickThemeSelect">
+									<ComboBoxItem>Light</ComboBoxItem>
+									<ComboBoxItem>Dark</ComboBoxItem>
+								</ComboBox>
+							</StackPanel>
+						</Panel>
+						<display:PictureFrame Pictures="{Binding Pictures}"
+											  ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"/>
+					</DockPanel>
+
+					<!-- Collapsible Panel -->
+					<Grid Grid.Column="1" ColumnDefinitions="Auto, 24" VerticalAlignment="Stretch">
+						<!-- Content Area -->
+						<Border Grid.Column="0" Width="220" IsVisible="{Binding IsAnimationPanelExpanded}"
+								BorderBrush="{DynamicResource BaseBrush}" BorderThickness="1,0,0,0" Background="{DynamicResource RegionBrush}">
+							<Grid RowDefinitions="Auto, *">
+								<animations:AnimationPreviewView Grid.Row="0"
+																 DataContext="{Binding AnimationViewModel}"
+																 StorageService="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
+																 Width="220" />
+								<animations:AnimationSequencerView Grid.Row="1" DataContext="{Binding AnimationViewModel}" Width="220" />
+							</Grid>
+						</Border>
+
+						<!-- Slim Bar Button -->
+						<ToggleButton Grid.Column="1"
+									  IsChecked="{Binding IsAnimationPanelExpanded}"
+									  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+									  Padding="0"
+									  Background="{DynamicResource RegionBrush}"
+									  BorderBrush="{DynamicResource BaseBrush}"
+									  BorderThickness="1,0,0,0"
+									  CornerRadius="0">
+							<ToggleButton.Styles>
+								<Style Selector="ToggleButton">
+									<Setter Property="Template">
+										<ControlTemplate>
+											<Border Background="{TemplateBinding Background}"
+													BorderBrush="{TemplateBinding BorderBrush}"
+													BorderThickness="{TemplateBinding BorderThickness}">
+												<LayoutTransformControl HorizontalAlignment="Center" VerticalAlignment="Top">
+													<LayoutTransformControl.LayoutTransform>
+														<RotateTransform Angle="-90"/>
+													</LayoutTransformControl.LayoutTransform>
+													<StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0">
+														<TextBlock Text="Animation Panel" Foreground="{DynamicResource TextBrush}" FontSize="12" FontWeight="Bold"/>
+														<TextBlock Text="{Binding IsAnimationPanelExpanded, Converter={StaticResource PlayPauseTextConverter}, ConverterParameter='arrow'}"
+																   Foreground="{DynamicResource TextBrush}" FontSize="12"/>
+													</StackPanel>
+												</LayoutTransformControl>
+											</Border>
+										</ControlTemplate>
+									</Setter>
+								</Style>
+							</ToggleButton.Styles>
+						</ToggleButton>
+					</Grid>
+				</Grid>
+			</Grid>
+		</DockPanel>
+	</Panel>
 </UserControl>

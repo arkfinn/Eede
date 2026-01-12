@@ -4,6 +4,7 @@ using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Common.SelectionStates;
 using Eede.Application.Drawings;
+using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
@@ -18,6 +19,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
+using System.Windows.Input;
 
 namespace Eede.Presentation.ViewModels.DataEntry;
 
@@ -44,17 +46,22 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public PictureSize RawPreviewSize { get; set; }
     [Reactive] public Bitmap MagnifiedPreviewBitmap { get; set; }
     [Reactive] public Cursor ActiveCursor { get; set; }
+    [Reactive] public bool IsAnimationMode { get; set; }
+    [Reactive] public GridSettings GridSettings { get; set; }
 
     private ISelectionState _selectionState;
     private readonly ReactiveCommand<Picture, Unit> InternalUpdateCommand;
     private readonly PictureSize _gridSize;
 
     private readonly GlobalState _globalState;
+    private readonly ICommand _addFrameCommand;
 
-    public DrawableCanvasViewModel(GlobalState globalState)
+    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand)
     {
         _globalState = globalState;
+        _addFrameCommand = addFrameCommand;
         _gridSize = new(16, 16);
+        GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
         _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
 
@@ -69,8 +76,22 @@ public class DrawableCanvasViewModel : ViewModelBase
         SelectingThickness = new Thickness(0, 0, 0, 0);
         SelectingSize = new PictureSize(0, 0);
         ActiveCursor = Cursor.Default;
-        //UpdatePicture(Picture.CreateEmpty(new PictureSize(32, 32)));
 
+        this.WhenAnyValue(x => x.IsAnimationMode)
+            .Subscribe(isAnim =>
+            {
+                if (isAnim)
+                {
+                    _selectionState = new AnimationEditingState(_addFrameCommand, GridSettings, PictureBuffer?.Previous?.Size ?? new PictureSize(0, 0));
+                }
+                else
+                {
+                    _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
+                }
+                IsRegionSelecting = false;
+                PreviewPixels = null;
+                UpdateImage();
+            });
 
         OnColorPicked = ReactiveCommand.Create<ArgbColor>(ExecuteColorPicked);
         OnDrew = ReactiveCommand.Create<Picture>(ExecuteDrew);
@@ -204,6 +225,11 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private void UpdateImage()
     {
+        if (DrawableArea == null || PictureBuffer == null || PenStyle == null || ImageTransfer == null)
+        {
+            return;
+        }
+
         Picture = DrawableArea.Painted(PictureBuffer, PenStyle, ImageTransfer);
         if (Picture == null)
         {
@@ -280,6 +306,10 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private HalfBoxArea GetCurrentHalfBoxArea(Position pos)
     {
+        if (IsAnimationMode)
+        {
+            return HalfBoxArea.Create(Minify(pos), GridSettings.CellSize);
+        }
         return HalfBoxArea.Create(Minify(pos), _gridSize);
     }
 

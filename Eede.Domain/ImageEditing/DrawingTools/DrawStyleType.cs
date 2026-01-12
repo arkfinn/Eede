@@ -6,5 +6,9 @@ public enum DrawStyleType
     FreeCurve,
     Line,
     Fill,
+    Rectangle,
+    FilledRectangle,
+    Ellipse,
+    FilledEllipse,
 }
 

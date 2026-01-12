@@ -45,6 +45,8 @@ namespace Eede.Presentation.Views.Navigation
             ButtonFill.IsChecked = DrawStyle == DrawStyleType.Fill;
             ButtonRect.IsChecked = DrawStyle == DrawStyleType.Rectangle;
             ButtonRectFill.IsChecked = DrawStyle == DrawStyleType.FilledRectangle;
+            ButtonEllipse.IsChecked = DrawStyle == DrawStyleType.Ellipse;
+            ButtonEllipseFill.IsChecked = DrawStyle == DrawStyleType.FilledEllipse;
         }
 
         public event Action<DrawStyleType>? DrawStyleChanged;

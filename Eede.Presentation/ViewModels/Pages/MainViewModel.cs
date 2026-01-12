@@ -494,6 +494,8 @@ public class MainViewModel : ViewModelBase
             DrawStyleType.Fill => new Fill(),
             DrawStyleType.Rectangle => new Rectangle(),
             DrawStyleType.FilledRectangle => new FilledRectangle(),
+            DrawStyleType.Ellipse => new Ellipse(),
+            DrawStyleType.FilledEllipse => new FilledEllipse(),
             _ => throw new ArgumentOutOfRangeException(nameof(drawStyle), $"Unknown DrawStyle: {drawStyle}"),
         };
     }

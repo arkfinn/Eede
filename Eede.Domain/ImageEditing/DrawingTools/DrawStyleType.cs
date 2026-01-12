@@ -8,5 +8,7 @@ public enum DrawStyleType
     Fill,
     Rectangle,
     FilledRectangle,
+    Ellipse,
+    FilledEllipse,
 }
 

@@ -492,6 +492,8 @@ public class MainViewModel : ViewModelBase
             DrawStyleType.FreeCurve => new FreeCurve(),
             DrawStyleType.Line => new Line(),
             DrawStyleType.Fill => new Fill(),
+            DrawStyleType.Rectangle => new Rectangle(),
+            DrawStyleType.FilledRectangle => new FilledRectangle(),
             _ => throw new ArgumentOutOfRangeException(nameof(drawStyle), $"Unknown DrawStyle: {drawStyle}"),
         };
     }

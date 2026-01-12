@@ -40,6 +40,18 @@
                     CommandParameter="{x:Static p:DrawStyleType.Fill}" >
         <Image Source="/Assets/Tools/pen_fill.png" Stretch="None" />
       </ToggleButton>
+      <ToggleButton x:Name="ButtonRect" Classes="tool"
+                    ToolTip.Tip="矩形"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.Rectangle}" >
+        <Image Source="/Assets/Tools/pen_rect.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonRectFill" Classes="tool"
+                    ToolTip.Tip="矩形（塗りつぶし）"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" >
+        <Image Source="/Assets/Tools/pen_rect_fill.png" Stretch="None" />
+      </ToggleButton>
     </WrapPanel>
   </Grid>
 </UserControl>

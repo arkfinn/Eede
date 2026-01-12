@@ -5,7 +5,8 @@
 - [x] Task: `Rectangle` (枠線) ツールのドメインロジック実装 (TDD) cc261f5
 - [x] Task: `FilledRectangle` (塗りつぶし) ツールのドメインロジック実装 (TDD) 07759ea
 - [x] Task: 四角形ツール群をUI (ツールバー) に統合し、描画可能にする abbff2d
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: 四角形ツールの実装' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: 四角形ツールの実装' (Protocol in workflow.md) b0386f1
+
 
 ## Phase 2: 円形ツール（枠線・塗りつぶし）の実装とリリース
 - [ ] Task: 円形・塗りつぶし円形用のアイコン作成 (`pen_ellipse.png`, `pen_ellipse_fill.png`)

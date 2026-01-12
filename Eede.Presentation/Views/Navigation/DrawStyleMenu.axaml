@@ -52,6 +52,18 @@
                     CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" >
         <Image Source="/Assets/Tools/pen_rect_fill.png" Stretch="None" />
       </ToggleButton>
+      <ToggleButton x:Name="ButtonEllipse" Classes="tool"
+                    ToolTip.Tip="円"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.Ellipse}" >
+        <Image Source="/Assets/Tools/pen_ellipse.png" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="ButtonEllipseFill" Classes="tool"
+                    ToolTip.Tip="円（塗りつぶし）"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{x:Static p:DrawStyleType.FilledEllipse}" >
+        <Image Source="/Assets/Tools/pen_ellipse_fill.png" Stretch="None" />
+      </ToggleButton>
     </WrapPanel>
   </Grid>
 </UserControl>

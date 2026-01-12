@@ -8,6 +8,7 @@
 4. **High Code Coverage:** Aim for >80% code coverage for all modules
 5. **User Experience First:** Every decision should prioritize user experience
 6. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
+7. **Vertical Slices:** Plan phases as end-to-end functional increments (Vertical Slices) rather than horizontal technical layers. Each phase should deliver usable value that can be verified by the user.
 
 ## Task Workflow
 
@@ -19,7 +20,12 @@ All tasks follow a strict lifecycle:
 
 2. **Mark In Progress:** Before beginning work, edit `plan.md` and change the task from `[ ]` to `[~]`
 
-3. **Write Failing Tests (Red Phase):**
+3. **Analyze Context:**
+   - Before implementing, analyze existing code and assets to ensure consistency with project standards.
+   - **Example:** Check dimensions/format of existing icons before creating new ones.
+   - **Example:** Review naming conventions and patterns of similar classes.
+
+4. **Write Failing Tests (Red Phase):**
    - Create a new test file for the feature or bug fix.
    - Write one or more unit tests that clearly define the expected behavior and acceptance criteria for the task.
    - **CRITICAL:** Run the tests and confirm that they fail as expected. This is the "Red" phase of TDD. Do not proceed until you have failing tests.
@@ -151,6 +157,8 @@ Before marking any task complete, verify:
 ## Development Commands
 
 **AI AGENT INSTRUCTION: This section should be adapted to the project's specific language, framework, and build tools.**
+
+> **Critical Note on Assets:** When adding new resource files (images, icons, etc.), you MUST perform a **clean build** (`dotnet clean && dotnet build`) to ensure they are correctly embedded and recognized by the application.
 
 ### Setup
 ```bash

@@ -42,6 +42,6 @@ UIとロジックを繋ぐViewModelを実装し、プレビューエンジンの
 
 - [x] 8465b7c Task: Implement Export/Import UI (File Dialogs)
 - [x] 28eb7dc Task: Ensure Tab Switching updates Preview image but maintains Animation state
-- [ ] Task: Final UI Polish (Icons, Tooltips, Spacing)
+- [x] a3e3278 Task: Final UI Polish (Icons, Tooltips, Spacing)
 - [ ] Task: Comprehensive Integration Testing
 - [ ] Task: Conductor - User Manual Verification 'Phase 5: Integration' (Protocol in workflow.md)

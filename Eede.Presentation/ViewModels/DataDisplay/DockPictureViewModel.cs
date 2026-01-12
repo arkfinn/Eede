@@ -37,6 +37,8 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public Bitmap PremultipliedBitmap { get; set; }
         [Reactive] public PictureSize MinCursorSize { get; set; }
         [Reactive] public PictureSize CursorSize { get; set; }
+        [Reactive] public Avalonia.Input.Cursor ActiveCursor { get; set; }
+        [Reactive] public Avalonia.Input.Cursor? AnimationCursor { get; set; }
         [Reactive] public bool Enabled { get; set; }
         [Reactive] public bool Closable { get; set; }
         [Reactive] public string Subject { get; private set; }
@@ -64,8 +66,16 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
             MinCursorSize = new PictureSize(32, 32);
             CursorSize = new PictureSize(32, 32);
+            ActiveCursor = Avalonia.Input.Cursor.Default;
             Enabled = true;
             Closable = true;
+
+            this.WhenAnyValue(x => x.AnimationViewModel.IsAnimationMode, x => x.AnimationCursor)
+                .Subscribe(x =>
+                {
+                    ActiveCursor = x.Item1 ? (x.Item2 ?? Avalonia.Input.Cursor.Default) : Avalonia.Input.Cursor.Default;
+                });
+
             _ = this.WhenAnyValue(x => x.Edited).Subscribe(_ =>
             {
                 Closable = !Edited;

@@ -1,5 +1,8 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.ReactiveUI;
 using Avalonia.Styling;
 using Eede.Presentation.Common.Services;
@@ -33,14 +36,29 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
                 vm => vm.ShowCreateNewPictureModal, DoShowCreateNewFileWindowAsync);
 
             viewModel.StorageService = StorageService;
+
+            // Load Custom Cursor for Animation Mode
+            try
+            {
+                System.IO.Stream assetLoader = AssetLoader.Open(new Uri("avares://Eede.Presentation/Assets/Tools/tool_animation_record.png"));
+                Bitmap bitmap = new(assetLoader);
+                viewModel.AnimationCursor = new Cursor(bitmap, new PixelPoint(8, 8));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load animation cursor: {ex.Message}");
+            }
         };
 
-        this.WhenActivated(disposables =>
+        _ = this.WhenActivated(disposables =>
         {
-            if (TopLevel.GetTopLevel(this) is not Window window) return;
+            if (TopLevel.GetTopLevel(this) is not Window window)
+            {
+                return;
+            }
 
             // ViewModelのInteractionを購読し、通知が来たらウィンドウを閉じる
-            ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
+            _ = ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
             {
                 window.Close();
                 interaction.SetOutput(Unit.Default);
@@ -48,7 +66,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
 
 
             // WindowのClosingイベントをObservableに変換
-            Observable.FromEventPattern<EventHandler<WindowClosingEventArgs>, WindowClosingEventArgs>(
+            _ = Observable.FromEventPattern<EventHandler<WindowClosingEventArgs>, WindowClosingEventArgs>(
                 handler => window.Closing += handler,
                 handler => window.Closing -= handler)
                 .Subscribe(args =>
@@ -63,7 +81,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
                     args.EventArgs.Cancel = true;
 
                     // ViewModelのコマンドを実行
-                    ViewModel.RequestCloseCommand.Execute().Subscribe();
+                    _ = ViewModel.RequestCloseCommand.Execute().Subscribe();
 
                 }).DisposeWith(disposables);
         });

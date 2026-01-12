@@ -171,19 +171,12 @@ public class MainViewModel : ViewModelBase
                 DrawableCanvasViewModel.GridSettings = x!.Grid;
             });
 
-        _ = this.WhenAnyValue(x => x.ActiveDockable)
-            .Subscribe(active =>
-            {
-                if (active is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
-                {
-                    _ = vm.WhenAnyValue(x => x.PictureBuffer)
-                        .BindTo(this, x => x.AnimationViewModel.ActivePicture);
-                }
-                else
-                {
-                    AnimationViewModel.ActivePicture = null;
-                }
-            });
+        this.WhenAnyValue(x => x.ActiveDockable)
+            .Select(active => active is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm
+                ? vm.WhenAnyValue(x => x.PictureBuffer)
+                : Observable.Return<Picture?>(null))
+            .Switch()
+            .BindTo(this, x => x.AnimationViewModel.ActivePicture);
 
         UndoSystem = new();
         DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea) =>

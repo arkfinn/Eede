@@ -10,8 +10,10 @@ using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Application.Common.SelectionStates;
 using Eede.Presentation.ViewModels.DataDisplay;
+using ReactiveUI;
 using System;
 using System.Windows.Input;
+using Eede.Domain.Animations;
 
 namespace Eede.Presentation.Views.DataEntry
 {
@@ -70,7 +72,48 @@ namespace Eede.Presentation.Views.DataEntry
 
             // SelectionState の初期化: GlobalState.CursorArea を初期値として使用
             var initialCursorArea = _viewModel.GlobalState.CursorArea;
-            _selectionState = new NormalCursorState(initialCursorArea);
+            _selectionState = CreateInitialState();
+
+            _viewModel.AnimationViewModel.WhenAnyValue(x => x.IsAnimationMode)
+                .Subscribe(_ =>
+                {
+                    _selectionState = CreateInitialState();
+                    UpdateCursor();
+                });
+
+            // GridView のバインディング設定
+            gridOverlay.Magnification = new Magnification(1);
+            _ = gridOverlay.Bind(IsVisibleProperty, new Binding
+            {
+                Source = _viewModel.AnimationViewModel,
+                Path = nameof(_viewModel.AnimationViewModel.IsAnimationMode)
+            });
+            _ = gridOverlay.Bind(General.GridView.GridSettingsProperty, new Binding
+            {
+                Source = _viewModel.AnimationViewModel,
+                Path = "SelectedPattern.Grid"
+            });
+            _ = gridOverlay.Bind(WidthProperty, new Binding
+            {
+                Source = canvas,
+                Path = nameof(canvas.Width)
+            });
+            _ = gridOverlay.Bind(HeightProperty, new Binding
+            {
+                Source = canvas,
+                Path = nameof(canvas.Height)
+            });
+        }
+
+        private ISelectionState CreateInitialState()
+        {
+            if (_viewModel?.AnimationViewModel.IsAnimationMode == true)
+            {
+                var animVM = _viewModel.AnimationViewModel;
+                var currentGrid = new GridSettings(new PictureSize(animVM.GridWidth, animVM.GridHeight), new Position(0, 0), 0);
+                return new AnimationEditingState(animVM.AddFrameCommand, currentGrid, _viewModel.PictureBuffer.Size);
+            }
+            return new NormalCursorState(_viewModel!.GlobalState.CursorArea);
         }
 
         public override void Render(DrawingContext context)
@@ -86,6 +129,13 @@ namespace Eede.Presentation.Views.DataEntry
                 if (_viewModel == null) return;
 
                 HalfBoxArea cursorArea = _viewModel.GlobalState.CursorArea;
+                if (_viewModel.AnimationViewModel.IsAnimationMode)
+                {
+                    // アニメーションモード時はアニメーション設定のグリッドサイズを使用
+                    var animVM = _viewModel.AnimationViewModel;
+                    cursorArea = HalfBoxArea.Create(cursorArea.RealPosition, new PictureSize(animVM.GridWidth, animVM.GridHeight));
+                }
+
                 Position grid = cursorArea.GridPosition;
                 PictureSize size = cursorArea.BoxSize;
 
@@ -168,14 +218,33 @@ namespace Eede.Presentation.Views.DataEntry
             }
 
             var nowPosition = PointToPosition(e.GetPosition(canvas));
+
+            // アニメーションモード時はモードに応じたステートを再作成（グリッド設定の変更を反映するため）
+            if (_viewModel.AnimationViewModel.IsAnimationMode)
+            {
+                _selectionState = CreateInitialState();
+            }
+
             var currentCursorArea = _viewModel.GlobalState.CursorArea.Move(nowPosition);
+            if (_viewModel.AnimationViewModel.IsAnimationMode)
+            {
+                currentCursorArea = HalfBoxArea.Create(nowPosition, new PictureSize(_viewModel.AnimationViewModel.GridWidth, _viewModel.AnimationViewModel.GridHeight));
+            }
+
             switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
             {
                 case PointerUpdateKind.LeftButtonPressed:
-                    // ドックエリアでは移動機能は不要なため、常に転送（Pull）を実行する
-                    PicturePullAction?.Execute(currentCursorArea.RealPosition);
-                    // 状態は NormalCursorState にリセット/維持する
-                    _selectionState = new NormalCursorState(currentCursorArea);
+                    if (_viewModel.AnimationViewModel.IsAnimationMode)
+                    {
+                        _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, nowPosition, null, () => _viewModel.PictureBuffer, null);
+                    }
+                    else
+                    {
+                        // ドックエリアでは移動機能は不要なため、常に転送（Pull）を実行する
+                        PicturePullAction?.Execute(currentCursorArea.RealPosition);
+                        // 状態は NormalCursorState にリセット/維持する
+                        _selectionState = new NormalCursorState(currentCursorArea);
+                    }
                     break;
 
                 case PointerUpdateKind.RightButtonPressed:
@@ -188,21 +257,10 @@ namespace Eede.Presentation.Views.DataEntry
         private void OnPointerRightButtonPressed(Position nowPosition)
         {
             if (_viewModel == null) return;
-            // ドックエリアでは移動のための SelectedState 遷移は不要
+            // 範囲選択を開始するために、現在のステートに右クリックを通知
             var (newState, newArea) = _selectionState.HandlePointerRightButtonPressed(_viewModel.GlobalState.CursorArea, nowPosition, MinCursorSize, PictureUpdateAction);
-            
-            // もし遷移先が移動機能関連の状態なら、NormalCursorState に戻すか、
-            // そもそもドックエリアでの右クリック選択を無効化する。
-            // 従来の範囲選択（点線が出るだけ）は維持したい場合は、SelectedState への遷移のみを抑制する。
-            if (newState is SelectedState || newState is DraggingState)
-            {
-                _selectionState = new NormalCursorState(newArea);
-            }
-            else
-            {
-                _selectionState = newState;
-            }
-            
+
+            _selectionState = newState;
             _viewModel.GlobalState.CursorArea = newArea;
             UpdateCursor();
         }
@@ -212,7 +270,15 @@ namespace Eede.Presentation.Views.DataEntry
             if (_viewModel == null) return;
 
             Position nowPosition = PointToPosition(e.GetPosition(canvas));
-            var (newVisible, newArea) = _selectionState.HandlePointerMoved(_viewModel.GlobalState.CursorArea, VisibleCursor, nowPosition, CanvasSize);
+
+            var cursorArea = _viewModel.GlobalState.CursorArea;
+            if (_viewModel.AnimationViewModel.IsAnimationMode && _selectionState is not RegionSelectingState)
+            {
+                // アニメーションモード中で、かつ範囲選択中でない場合のみグリッドサイズを適用
+                cursorArea = HalfBoxArea.Create(nowPosition, new PictureSize(_viewModel.AnimationViewModel.GridWidth, _viewModel.AnimationViewModel.GridHeight));
+            }
+
+            var (newVisible, newArea) = _selectionState.HandlePointerMoved(cursorArea, VisibleCursor, nowPosition, CanvasSize);
             VisibleCursor = newVisible;
             _viewModel.GlobalState.CursorArea = newArea;
             UpdateCursor();
@@ -237,14 +303,16 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerRightButtonReleased(DockPictureViewModel vm)
         {
+            // 範囲選択状態からの遷移を確認
+            var isSelecting = _selectionState is RegionSelectingState;
             var (newState, newArea) = _selectionState.HandlePointerRightButtonReleased(vm.GlobalState.CursorArea, PicturePushAction);
-            
-            // 範囲選択（RegionSelectingState）が終わった直後に、作業エリアへ転送を実行する
-            if (_selectionState is RegionSelectingState && newState is SelectedState)
+
+            // 範囲選択が終わった直後なら、作業エリアへ転送を実行する
+            if (isSelecting && newState is SelectedState)
             {
                 PicturePushAction?.Execute(newArea.CreateRealArea(newArea.BoxSize));
-                // 移動状態には遷移させず、NormalCursorState に戻す
-                _selectionState = new NormalCursorState(newArea);
+                // ドックエリアでは移動状態（SelectedState）を維持せず、通常状態に戻す
+                _selectionState = CreateInitialState();
             }
             else
             {

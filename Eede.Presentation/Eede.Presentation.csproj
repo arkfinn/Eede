@@ -121,4 +121,13 @@
     <Resource Include="Assets\Tools\tool_shift_up.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AvaloniaResource Update="Assets\Tools\pen_rect.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Tools\pen_rect_fill.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AvaloniaResource>
+  </ItemGroup>
+
 </Project>

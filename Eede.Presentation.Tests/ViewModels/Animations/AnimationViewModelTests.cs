@@ -1,5 +1,7 @@
 using Eede.Application.Animations;
 using Eede.Domain.Animations;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.ViewModels.Animations;
 using Microsoft.Reactive.Testing;
@@ -81,5 +83,22 @@ public class AnimationViewModelTests
 
         viewModel.CurrentFrameIndex = 1;
         Assert.That(viewModel.CurrentFrame!.CellIndex, Is.EqualTo(20));
+    }
+
+    [Test]
+    public void ActivePicture_Change_ShouldNotResetAnimationState()
+    {
+        var mockService = new Mock<IAnimationService>();
+        mockService.Setup(x => x.Patterns).Returns(new List<AnimationPattern>());
+        var mockFileSystem = new Mock<IFileSystem>();
+
+        var viewModel = new AnimationViewModel(mockService.Object, mockFileSystem.Object);
+        viewModel.IsPlaying = true;
+        viewModel.CurrentFrameIndex = 5;
+
+        viewModel.ActivePicture = Picture.CreateEmpty(new PictureSize(32, 32));
+
+        Assert.That(viewModel.IsPlaying, Is.True);
+        Assert.That(viewModel.CurrentFrameIndex, Is.EqualTo(5));
     }
 }

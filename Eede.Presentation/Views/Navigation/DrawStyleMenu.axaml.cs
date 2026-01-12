@@ -43,6 +43,8 @@ namespace Eede.Presentation.Views.Navigation
             ButtonFreeCurve.IsChecked = DrawStyle == DrawStyleType.FreeCurve;
             ButtonLine.IsChecked = DrawStyle == DrawStyleType.Line;
             ButtonFill.IsChecked = DrawStyle == DrawStyleType.Fill;
+            ButtonRect.IsChecked = DrawStyle == DrawStyleType.Rectangle;
+            ButtonRectFill.IsChecked = DrawStyle == DrawStyleType.FilledRectangle;
         }
 
         public event Action<DrawStyleType>? DrawStyleChanged;

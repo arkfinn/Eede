@@ -505,6 +505,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             ExecuteInternalUpdate(cleared);
             IsRegionSelecting = false;
             _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
+            UpdateImage();
 
             Drew?.Invoke(previous, cleared, previousArea, null);
             System.Diagnostics.Debug.WriteLine("Cut executed successfully.");

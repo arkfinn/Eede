@@ -3,7 +3,7 @@
 ## Phase 1: Assessment and Safety Lockdown
 リファクタリングの安全性を確保するための準備と、ターゲットの精密な分析を行います。
 
-- [~] Task: Gitステータスの確認（クリーンな状態であることの保証）
+- [x] Task: Gitステータスの確認（クリーンな状態であることの保証） 885218b
 - [ ] Task: 巨大クラスおよび設計上の問題があるクラスの特定
     - ターゲット候補: `Eede.Presentation` 内の ViewModel (500行超を優先)
 - [ ] Task: **【安全性】ターゲットに対する仕様化テスト（Golden Master）の作成**

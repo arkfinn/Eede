@@ -85,6 +85,7 @@ public class MainViewModel : ViewModelBase
     [Reactive] public StorageService StorageService { get; set; }
     [Reactive] public Cursor? AnimationCursor { get; set; }
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
+    [Reactive] public bool HasClipboardPicture { get; set; } = false;
 
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
@@ -250,9 +251,22 @@ public class MainViewModel : ViewModelBase
         CloseWindowInteraction = new Interaction<Unit, Unit>();
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
 
-        CopyCommand = DrawableCanvasViewModel.CopyCommand;
-        CutCommand = DrawableCanvasViewModel.CutCommand;
-        PasteCommand = DrawableCanvasViewModel.PasteCommand;
+        var canCopyCut = this.WhenAnyValue(x => x.DrawStyle, x => x == DrawStyleType.RegionSelect);
+        CopyCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await DrawableCanvasViewModel.CopyCommand.Execute();
+            HasClipboardPicture = true;
+        }, canCopyCut);
+        CutCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await DrawableCanvasViewModel.CutCommand.Execute();
+            HasClipboardPicture = true;
+        }, canCopyCut);
+        PasteCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await DrawableCanvasViewModel.PasteCommand.Execute();
+            DrawStyle = DrawStyleType.RegionSelect;
+        }, this.WhenAnyValue(x => x.HasClipboardPicture));
     }
 
     private void ExecuteUndo()

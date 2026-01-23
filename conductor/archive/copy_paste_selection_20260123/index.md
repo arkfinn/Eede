@@ -5,6 +5,6 @@ This track implements the functionality to copy, cut, and paste images within a 
 The pasted image will remain in a selected state, allowing for further manipulation.
 
 ## Status
-- [ ] Planning
-- [ ] Implementation
-- [ ] Verification
+- [x] Planning
+- [x] Implementation
+- [x] Verification

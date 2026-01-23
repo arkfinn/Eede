@@ -1,0 +1,9 @@
+description = "Setup next backlog item."
+prompt = """
+1. `/conductor:newTrack @backlog.md を上から一つ対応する。`コマンドを使用する。
+2. コマンドによる確認事項はユーザーに確認する。
+3. トラックを作ったらbacklog.mdの該当行にチェックを入れる。
+4. `/conductor:implement`コマンドを使用する。
+5. コマンドによる確認事項はユーザーに確認する。
+6. implementの完了処理・振り返り学習までが完了したら次の指示を待つ。
+"""

@@ -58,10 +58,9 @@ All tasks follow a strict lifecycle:
 9. **Attach Task Summary with Git Notes:**
    - **Step 9.1: Get Commit Hash:** Obtain the hash of the *just-completed commit* (`git log -1 --format="%H"`).
    - **Step 9.2: Draft Note Content:** Create a detailed summary for the completed task. This should include the task name, a summary of changes, a list of all created/modified files, and the core "why" for the change.
-   - **Step 9.3: Attach Note:** Use the `git notes` command to attach the summary to the commit.
+   - **Step 9.3: Attach Note:** Use the `git notes` command. To avoid parsing issues with multi-line strings in shell tools, prefer a concise single-line summary or use a temporary file if a detailed report is required.
      ```bash
-     # The note content from the previous step is passed via the -m flag.
-     git notes add -m "<note content>" <commit_hash>
+     git notes add -m "Task: <name>. Summary: <concise summary>" <commit_hash>
      ```
 
 10. **Get and Record Task Commit SHA:**
@@ -69,8 +68,8 @@ All tasks follow a strict lifecycle:
     - **Step 10.2: Write Plan:** Write the updated content back to `plan.md`.
 
 11. **Commit Plan Update:**
-    - **Action:** Stage the modified `plan.md` file.
-    - **Action:** Commit this change with a descriptive message (e.g., `conductor(plan): Mark task 'Create user model' as complete`).
+    - **Action:** Stage the modified `plan.md` file using `git add <file>`.
+    - **Action:** Commit this change using a separate `git commit -m "<message>"` command to ensure reliable execution in the shell environment.
 
 ### Phase Completion Verification and Checkpointing Protocol
 
@@ -135,10 +134,12 @@ All tasks follow a strict lifecycle:
     -   **Step 7.3: Write Plan:** Write the updated content back to `plan.md`.
 
 9. **Commit Plan Update:**
-    - **Action:** Stage the modified `plan.md` file.
-    - **Action:** Commit this change with a descriptive message following the format `conductor(plan): Mark phase '<PHASE NAME>' as complete`.
+    - **Action:** Stage the modified `plan.md` file using `git add <file>`.
+    - **Action:** Commit this change using a separate `git commit -m "<message>"` command following the format `conductor(plan): Mark phase '<PHASE NAME>' as complete`.
 
 10.  **Announce Completion:** Inform the user that the phase is complete and the checkpoint has been created, with the detailed verification report attached as a git note.
+
+11. **Execute Learning Cycle:** Execute the `/learn` protocol to capture lessons learned and optimize documentation before moving to the next phase.
 
 ### Quality Gates
 
@@ -332,7 +333,32 @@ A task is complete when:
 3. Gather user feedback
 4. Plan next iteration
 
-## Continuous Improvement
+## Continuous Learning (/learn)
+
+The `/learn` command is the primary mechanism for project evolution. It consolidates retrospective analysis and documentation updates into a single, efficient workflow.
+
+### Triggers
+1.  **Post-Phase:** Executed automatically after the "Phase Completion Verification".
+2.  **Post-Track:** Executed automatically after a track reaches `[x]`.
+3.  **Ad-hoc:** Executed manually by the user or agent when substantial friction or new patterns are identified.
+
+### The /learn Protocol
+
+1.  **Reflect (Internal Monologue):**
+    *   Analyze the recent work context (Phase, Track, or specific task).
+    *   Identify **Friction Points** (commands failing, confused context, ambiguous specs).
+    *   Identify **Success Patterns** (efficient code structures, clear prompt patterns).
+
+2.  **Update Documentation (The "Fix"):**
+    *   **IF** the workflow was slow/buggy -> **Update `conductor/workflow.md`**.
+    *   **IF** code patterns were inconsistent -> **Update `conductor/code_styleguides/*.md`**.
+    *   **IF** architectural decisions changed -> **Update `conductor/tech-stack.md`**.
+    *   **IF** domain knowledge was gained -> **Update `conductor/product-guidelines.md` or `memory-bank/`**.
+
+3.  **Report:**
+    *   Provide a bulleted summary of *what was learned* and *what changed*.
+    *   *Example:* "Learned: The build command requires the `-NoProfile` flag on this system. Action: Updated `workflow.md` setup commands."
+
 
 - Review workflow weekly
 - Update based on pain points

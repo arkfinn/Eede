@@ -22,6 +22,7 @@ using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.Animations;
+using Eede.Application.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -117,12 +118,18 @@ public class MainViewModel : ViewModelBase
     }
 
     private GlobalState _state;
+    private readonly IClipboardService _clipboardService;
 
-    public MainViewModel(GlobalState State, IAnimationService animationService)
+    public ReactiveCommand<Unit, Unit> CopyCommand { get; }
+    public ReactiveCommand<Unit, Unit> CutCommand { get; }
+    public ReactiveCommand<Unit, Unit> PasteCommand { get; }
+
+    public MainViewModel(GlobalState State, IAnimationService animationService, IClipboardService clipboardService)
     {
         _state = State;
+        _clipboardService = clipboardService;
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
-        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand);
+        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService);
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
@@ -242,6 +249,10 @@ public class MainViewModel : ViewModelBase
 
         CloseWindowInteraction = new Interaction<Unit, Unit>();
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
+
+        CopyCommand = DrawableCanvasViewModel.CopyCommand;
+        CutCommand = DrawableCanvasViewModel.CutCommand;
+        PasteCommand = DrawableCanvasViewModel.PasteCommand;
     }
 
     private void ExecuteUndo()

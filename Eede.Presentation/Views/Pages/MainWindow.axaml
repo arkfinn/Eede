@@ -8,6 +8,12 @@
         x:Class="Eede.Presentation.Views.Pages.MainWindow"
         Icon="/Assets/logo.png"
         Title="Eede"
-        ExtendClientAreaToDecorationsHint="False">
+        ExtendClientAreaToDecorationsHint="False"
+        x:DataType="vm:MainViewModel">
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+C" Command="{Binding CopyCommand}" />
+    <KeyBinding Gesture="Ctrl+X" Command="{Binding CutCommand}" />
+    <KeyBinding Gesture="Ctrl+V" Command="{Binding PasteCommand}" />
+  </Window.KeyBindings>
   <pages:MainView />
 </Window>

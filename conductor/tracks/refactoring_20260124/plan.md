@@ -1,37 +1,37 @@
-# Implementation Plan: Legacy-Aware Codebase Refactoring
+# Implementation Plan: DDD-Driven Codebase Refactoring
 
 ## Phase 1: Assessment and Safety Lockdown
 リファクタリングの安全性を確保するための準備と、ターゲットの精密な分析を行います。
 
 - [x] Task: Gitステータスの確認（クリーンな状態であることの保証） 885218b
-- [x] Task: 巨大クラスおよび設計上の問題があるクラスの特定 7fb0b78
-    - ターゲット候補: `Eede.Presentation` 内の ViewModel (500行超を優先)
-- [ ] Task: **【安全性】ターゲットに対する仕様化テスト（Golden Master）の作成**
+- [x] Task: 巨大クラスおよび設計上の問題があるクラスの特定 c506fd1
+- [~] Task: **【安全性】ターゲットに対する仕様化テスト（Golden Master）の作成**
     - 既存の挙動（バグを含む）をブラックボックスとして記録し、リファクタリングによる予期せぬ変化を検知可能にする
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Assessment and Safety Lockdown' (Protocol in workflow.md)
 
-## Phase 2: Domain Discovery and Extraction
-ViewModel等の巨大クラスから、ビジネスロジックとドメイン知識を分離します。
+## Phase 2: Domain Model Reconstruction (DrawingSession)
+ViewModelからドメイン知識を奪い、豊かなドメインモデルを構築します。
 
-- [ ] Task: ドメイン探索: クラス内のロジックを「純粋な計算」と「I/O・状態変更」に分類
-- [ ] Task: Value Object / Entity の抽出
-    - 意味のある型を定義し、プリミティブ執着（Primitive Obsession）を排除
-- [ ] Task: ロジックの Domain/Application 層への移動
-    - `refactor-ddd-onion-complete` に基づき、依存関係を整理
-- [ ] Task: 古典派アプローチによる新規コンポーネントのユニットテスト作成
-    - 実装詳細ではなく振る舞いをテストし、リファクタリング耐性を最大化する
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Domain Discovery and Extraction' (Protocol in workflow.md)
+- [ ] Task: **`DrawingSession` 集約の導入**
+    - `PictureBuffer` と `UndoSystem` を統合し、描画操作と履歴管理の整合性を保証するエンティティを作成
+- [ ] Task: **`DrawingTool` の値オブジェクト化**
+    - `IDrawStyle` やペン設定を、ドメインルール（線の太さ、ブレンディング等）を持つドメインモデルへ再構成
+- [ ] Task: **`IPictureRepository` の定義**
+    - ファイルI/Oを技術詳細（Infrastructure）として分離し、ドメイン層に抽象を配置
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Domain Model Reconstruction' (Protocol in workflow.md)
 
-## Phase 3: Structural Refinement (Presentation & Infrastructure)
-Presentation層を薄く保ち、層間の結合度を下げます。
+## Phase 3: Decoupling Presentation Layer
+ViewModelを「UI状態の保持」と「ドメインモデルへの委譲」のみに特化させます。
 
-- [ ] Task: `refactor-five-lines-strategy` を用いた ViewModel のメソッド整理
-- [ ] Task: 依存性逆転の原則（DIP）の適用
-    - Infrastructure層への依存をインターフェース経由に抽象化
-- [ ] Task: 仕様化テスト（Phase 1で作成）の実行と、リファクタリング後の整合性確認
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Structural Refinement' (Protocol in workflow.md)
+- [ ] Task: **`DrawingSessionViewModel` への分割**
+    - `MainViewModel` から描画セッション固有の状態を分離
+- [ ] Task: **ビットマップ生成ロジックの Infrastructure 層への移動**
+    - `Picture` から `Bitmap` への変換を ViewModel から排除し、Infrastructure層の Adapter に隠蔽
+- [ ] Task: **描画イベントからドメインコマンドへの変換層の実装**
+    - `DrawableCanvasViewModel` の低レベルな座標計算ロジックを整理
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Decoupling Presentation Layer' (Protocol in workflow.md)
 
-## Phase 4: Verification and Consolidation
+## Phase 4: Final Verification and Cleanup
 最終的な品質確認と、得られた知見のドキュメント化を行います。
 
 - [ ] Task: 全テストスイートの実行とカバレッジ（目標80%）の確認

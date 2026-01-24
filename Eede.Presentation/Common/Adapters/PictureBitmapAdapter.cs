@@ -26,13 +26,32 @@ public class PictureBitmapAdapter
     // ViewModelからModelへの変換メソッド
     public static Picture ConvertToPicture(Bitmap bitmap)
     {
-        int stride = bitmap.PixelSize.Width * 4;
-        byte[] pixels = new byte[stride * bitmap.PixelSize.Height];
-        GCHandle pinnedArray = GCHandle.Alloc(pixels, GCHandleType.Pinned);
-        IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-        bitmap.CopyPixels(new PixelRect(0, 0, bitmap.PixelSize.Width, bitmap.PixelSize.Height), pointer, pixels.Length, stride);
-        pinnedArray.Free();
-        return Picture.Create(new PictureSize(bitmap.PixelSize.Width, bitmap.PixelSize.Height), pixels);
+        int width = bitmap.PixelSize.Width;
+        int height = bitmap.PixelSize.Height;
+        int stride = width * 4;
+        byte[] pixels = new byte[stride * height];
+
+        if (bitmap is WriteableBitmap wb)
+        {
+            using (var lockBuffer = wb.Lock())
+            {
+                Marshal.Copy(lockBuffer.Address, pixels, 0, pixels.Length);
+            }
+        }
+        else
+        {
+            GCHandle pinnedArray = GCHandle.Alloc(pixels, GCHandleType.Pinned);
+            try
+            {
+                IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+                bitmap.CopyPixels(new PixelRect(0, 0, width, height), pointer, pixels.Length, stride);
+            }
+            finally
+            {
+                pinnedArray.Free();
+            }
+        }
+        return Picture.Create(new PictureSize(width, height), pixels);
     }
 
 

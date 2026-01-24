@@ -24,7 +24,7 @@ ViewModelを「UI状態の保持」と「ドメインモデルへの委譲」の
 
 - [x] Task: **`DrawingSessionViewModel` への分割** 2269d1a
     - `MainViewModel` から描画セッション固有の状態を分離
-- [~] Task: **ビットマップ生成ロジックの Infrastructure 層への移動**
+- [x] Task: **ビットマップ生成ロジックの Infrastructure 層への移動** 75bb56b
     - `Picture` から `Bitmap` への変換を ViewModel から排除し、Infrastructure層の Adapter に隠蔽
 - [ ] Task: **描画イベントからドメインコマンドへの変換層の実装**
     - `DrawableCanvasViewModel` の低レベルな座標計算ロジックを整理

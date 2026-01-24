@@ -5,8 +5,7 @@
 
 - [x] Task: Gitステータスの確認（クリーンな状態であることの保証） 885218b
 - [x] Task: 巨大クラスおよび設計上の問題があるクラスの特定 c506fd1
-- [~] Task: **【安全性】ターゲットに対する仕様化テスト（Golden Master）の作成**
-    - 既存の挙動（バグを含む）をブラックボックスとして記録し、リファクタリングによる予期せぬ変化を検知可能にする
+- [x] Task: **【安全性】ターゲットに対する仕様化テスト（Golden Master）の作成** 13ecae6
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Assessment and Safety Lockdown' (Protocol in workflow.md)
 
 ## Phase 2: Domain Model Reconstruction (DrawingSession)

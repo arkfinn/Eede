@@ -8,7 +8,7 @@
 - [x] Task: **【安全性】ターゲットに対する仕様化テスト（Golden Master）の作成** 13ecae6
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Assessment and Safety Lockdown' (Protocol in workflow.md) 7b09cab
 
-## Phase 2: Domain Model Reconstruction (DrawingSession)
+## Phase 2: Domain Model Reconstruction (DrawingSession) [checkpoint: 2bd728c]
 ViewModelからドメイン知識を奪い、豊かなドメインモデルを構築します。
 
 - [x] Task: **`DrawingSession` 集約の導入** 5e93f25
@@ -17,7 +17,7 @@ ViewModelからドメイン知識を奪い、豊かなドメインモデルを�
     - `IDrawStyle` やペン設定を、ドメインルール（線の太さ、ブレンディング等）を持つドメインモデルへ再構成
 - [x] Task: **`IPictureRepository` の定義** 4c06b02
     - ファイルI/Oを技術詳細（Infrastructure）として分離し、ドメイン層に抽象を配置
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Domain Model Reconstruction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Domain Model Reconstruction' (Protocol in workflow.md) 2bd728c
 
 ## Phase 3: Decoupling Presentation Layer
 ViewModelを「UI状態の保持」と「ドメインモデルへの委譲」のみに特化させます。

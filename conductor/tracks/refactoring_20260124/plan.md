@@ -19,7 +19,7 @@ ViewModelからドメイン知識を奪い、豊かなドメインモデルを�
     - ファイルI/Oを技術詳細（Infrastructure）として分離し、ドメイン層に抽象を配置
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Domain Model Reconstruction' (Protocol in workflow.md) 2bd728c
 
-## Phase 3: Decoupling Presentation Layer
+## Phase 3: Decoupling Presentation Layer [checkpoint: 538ef0c]
 ViewModelを「UI状態の保持」と「ドメインモデルへの委譲」のみに特化させます。
 
 - [x] Task: **`DrawingSessionViewModel` への分割** 2269d1a
@@ -28,7 +28,7 @@ ViewModelを「UI状態の保持」と「ドメインモデルへの委譲」の
     - `Picture` から `Bitmap` への変換を ViewModel から排除し、Infrastructure層の Adapter に隠蔽
 - [x] Task: **描画イベントからドメインコマンドへの変換層の実装** 4416e34
     - `DrawableCanvasViewModel` の低レベルな座標計算ロジックを整理
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Decoupling Presentation Layer' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Decoupling Presentation Layer' (Protocol in workflow.md) 538ef0c
 
 ## Phase 4: Final Verification and Cleanup
 最終的な品質確認と、得られた知見のドキュメント化を行います。

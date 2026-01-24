@@ -8,12 +8,12 @@
 - **レイアウト管理:** Dock.Avalonia
 
 ## アーキテクチャ
-- **設計思想:** Domain-Driven Design (DDD)
-- **UI状態管理:** ステートパターンによる操作状態（通常、範囲選択中、移動中、アニメーション編集モードなど）の厳格な管理
+- **設計思想:** Domain-Driven Design (DDD) および オニオンアーキテクチャ
+- **UI状態管理:** ステートパターンによる操作状態の管理に加え、`DrawingSession` 集約による不変な描画履歴（Undo/Redo）管理を導入
 - **構造:** クリーンアーキテクチャに準拠したマルチプロジェクト構成
-  - `Eede.Core / Eede.Domain`: ドメインロジック、エンティティ、値オブジェクト
-  - `Eede.Application`: ユースケース、アプリケーションサービス
-  - `Eede.Infrastructure`: 外部ライブラリ依存、ファイルI/O
+  - `Eede.Core / Eede.Domain`: ドメインロジック、エンティティ、値オブジェクト（`DrawingTool` 等）
+  - `Eede.Application`: ユースケース、アプリケーションサービス（`ICanvasService` 等）
+  - `Eede.Infrastructure`: 技術詳細（`IPictureRepository` 実装、ファイルI/O）
   - `Eede.Presentation`: UI (Avalonia), ViewModels
 
 ## テスト

@@ -22,6 +22,7 @@ using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.Animations;
+using Eede.Application.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -84,6 +85,7 @@ public class MainViewModel : ViewModelBase
     [Reactive] public StorageService StorageService { get; set; }
     [Reactive] public Cursor? AnimationCursor { get; set; }
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
+    [Reactive] public bool HasClipboardPicture { get; set; } = false;
 
     public ReactiveCommand<Unit, Unit> UndoCommand { get; }
     public ReactiveCommand<Unit, Unit> RedoCommand { get; }
@@ -117,12 +119,18 @@ public class MainViewModel : ViewModelBase
     }
 
     private GlobalState _state;
+    private readonly IClipboardService _clipboardService;
 
-    public MainViewModel(GlobalState State, IAnimationService animationService)
+    public ReactiveCommand<Unit, Unit> CopyCommand { get; }
+    public ReactiveCommand<Unit, Unit> CutCommand { get; }
+    public ReactiveCommand<Unit, Unit> PasteCommand { get; }
+
+    public MainViewModel(GlobalState State, IAnimationService animationService, IClipboardService clipboardService)
     {
         _state = State;
+        _clipboardService = clipboardService;
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
-        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand);
+        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService);
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
@@ -242,6 +250,23 @@ public class MainViewModel : ViewModelBase
 
         CloseWindowInteraction = new Interaction<Unit, Unit>();
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
+
+        var canCopyCut = this.WhenAnyValue(x => x.DrawStyle, x => x == DrawStyleType.RegionSelect);
+        CopyCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await DrawableCanvasViewModel.CopyCommand.Execute();
+            HasClipboardPicture = true;
+        }, canCopyCut);
+        CutCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await DrawableCanvasViewModel.CutCommand.Execute();
+            HasClipboardPicture = true;
+        }, canCopyCut);
+        PasteCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await DrawableCanvasViewModel.PasteCommand.Execute();
+            DrawStyle = DrawStyleType.RegionSelect;
+        }, this.WhenAnyValue(x => x.HasClipboardPicture));
     }
 
     private void ExecuteUndo()

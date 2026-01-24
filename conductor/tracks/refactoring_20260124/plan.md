@@ -22,7 +22,7 @@ ViewModelからドメイン知識を奪い、豊かなドメインモデルを�
 ## Phase 3: Decoupling Presentation Layer
 ViewModelを「UI状態の保持」と「ドメインモデルへの委譲」のみに特化させます。
 
-- [ ] Task: **`DrawingSessionViewModel` への分割**
+- [~] Task: **`DrawingSessionViewModel` への分割**
     - `MainViewModel` から描画セッション固有の状態を分離
 - [ ] Task: **ビットマップ生成ロジックの Infrastructure 層への移動**
     - `Picture` から `Bitmap` への変換を ViewModel から排除し、Infrastructure層の Adapter に隠蔽

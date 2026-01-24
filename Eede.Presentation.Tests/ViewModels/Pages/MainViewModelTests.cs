@@ -40,7 +40,7 @@ public class MainViewModelTests
                 Assert.That(viewModel.Pictures, Is.Not.Null);
                 Assert.That(viewModel.DrawableCanvasViewModel, Is.Not.Null);
                 Assert.That(viewModel.AnimationViewModel, Is.Not.Null);
-                Assert.That(viewModel.UndoSystem, Is.Not.Null);
+                Assert.That(viewModel.DrawingSessionViewModel, Is.Not.Null);
             });
         });
     }

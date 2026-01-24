@@ -13,13 +13,15 @@ public class DraggingState : ISelectionState
     private readonly SelectionContent _content;
     private readonly Position _startPosition;
     private Position _currentPosition;
+    private readonly bool _isFloating;
 
-    public DraggingState(SelectionContent content, Position startPosition, Picture originalPicture)
+    public DraggingState(SelectionContent content, Position startPosition, Picture originalPicture, bool isFloating = false)
     {
         _content = content;
         _startPosition = startPosition;
         _currentPosition = startPosition;
         OriginalPicture = originalPicture;
+        _isFloating = isFloating;
     }
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand pullAction, Func<Picture> getPicture, ICommand updateAction)
@@ -32,8 +34,16 @@ public class DraggingState : ISelectionState
         _currentPosition = mousePosition;
         
         var blender = new DirectImageBlender();
-        var empty = Picture.CreateEmpty(_content.OriginalSelection.Area.Size);
-        var pictureAfterClear = blender.Blend(empty, OriginalPicture, _content.OriginalSelection.Area.Position);
+        Picture pictureAfterClear;
+        if (_isFloating)
+        {
+            pictureAfterClear = OriginalPicture;
+        }
+        else
+        {
+            var empty = Picture.CreateEmpty(_content.OriginalSelection.Area.Size);
+            pictureAfterClear = blender.Blend(empty, OriginalPicture, _content.OriginalSelection.Area.Position);
+        }
 
         var finalArea = GetCurrentArea();
         var finalPicture = blender.Blend(_content.Image, pictureAfterClear, finalArea.Position);

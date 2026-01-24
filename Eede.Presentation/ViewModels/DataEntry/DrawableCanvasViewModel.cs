@@ -19,7 +19,9 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Eede.Application.Services;
 
 namespace Eede.Presentation.ViewModels.DataEntry;
 
@@ -55,11 +57,17 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private readonly GlobalState _globalState;
     private readonly ICommand _addFrameCommand;
+    private readonly IClipboardService _clipboardService;
 
-    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand)
+    public ReactiveCommand<Unit, Unit> CopyCommand { get; }
+    public ReactiveCommand<Unit, Unit> CutCommand { get; }
+    public ReactiveCommand<Unit, Unit> PasteCommand { get; }
+
+    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService)
     {
         _globalState = globalState;
         _addFrameCommand = addFrameCommand;
+        _clipboardService = clipboardService;
         _gridSize = new(16, 16);
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
@@ -100,6 +108,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         DrawingCommand = ReactiveCommand.Create<Position>(ExecuteDrawingAction);
         DrawEndCommand = ReactiveCommand.Create<Position>(ExecuteDrawEndAction);
         CanvasLeaveCommand = ReactiveCommand.Create(ExecuteCanvasLeaveAction);
+
+        CopyCommand = ReactiveCommand.CreateFromTask(ExecuteCopyAction);
+        CutCommand = ReactiveCommand.CreateFromTask(ExecuteCutAction);
+        PasteCommand = ReactiveCommand.CreateFromTask(ExecutePasteAction);
 
         // Size defaultBoxSize = new(32, 32); //GlobalSetting.Instance().BoxSize;
         DrawableArea = new(CanvasBackgroundService.Instance, new Magnification(1), _gridSize, null);
@@ -440,5 +452,100 @@ public class DrawableCanvasViewModel : ViewModelBase
             _selectionState = new SelectedState(new Selection(SelectingArea));
         };
         return tool;
+    }
+
+    private async Task ExecuteCopyAction()
+    {
+        if (PictureBuffer == null) return;
+
+        try
+        {
+            Picture target;
+            if (IsRegionSelecting && SelectingArea.Width > 0 && SelectingArea.Height > 0)
+            {
+                target = PictureBuffer.Previous.CutOut(SelectingArea);
+            }
+            else
+            {
+                target = PictureBuffer.Previous;
+            }
+
+            await _clipboardService.CopyAsync(target);
+            System.Diagnostics.Debug.WriteLine("Copy executed successfully.");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Copy failed: {ex}");
+        }
+    }
+
+    private async Task ExecuteCutAction()
+    {
+        if (PictureBuffer == null) return;
+
+        try
+        {
+            Picture target;
+            Picture cleared;
+            Picture previous = PictureBuffer.Previous;
+            PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
+
+            if (IsRegionSelecting && SelectingArea.Width > 0 && SelectingArea.Height > 0)
+            {
+                target = previous.CutOut(SelectingArea);
+                cleared = previous.Clear(SelectingArea);
+            }
+            else
+            {
+                target = previous;
+                cleared = Picture.CreateEmpty(previous.Size);
+            }
+
+            await _clipboardService.CopyAsync(target);
+            ExecuteInternalUpdate(cleared);
+            IsRegionSelecting = false;
+            _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
+            UpdateImage();
+
+            Drew?.Invoke(previous, cleared, previousArea, null);
+            System.Diagnostics.Debug.WriteLine("Cut executed successfully.");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Cut failed: {ex}");
+        }
+    }
+
+    private async Task ExecutePasteAction()
+    {
+        System.Diagnostics.Debug.WriteLine("Paste command executed.");
+        if (PictureBuffer == null)
+        {
+            System.Diagnostics.Debug.WriteLine("PictureBuffer is null.");
+            return;
+        }
+
+        try
+        {
+            Picture pasted = await _clipboardService.GetPictureAsync();
+            if (pasted == null)
+            {
+                System.Diagnostics.Debug.WriteLine("Clipboard returned null picture.");
+                return;
+            }
+            System.Diagnostics.Debug.WriteLine($"Pasted picture size: {pasted.Size.Width}x{pasted.Size.Height}");
+
+            // ペースト位置を決定（とりあえず左上0,0。あるいはキャンバスの中央など）
+            Position pastePosition = new(0, 0);
+
+            _selectionState = new FloatingSelectionState(pasted, pastePosition, PictureBuffer.Previous);
+            IsRegionSelecting = true;
+            SelectingArea = new PictureArea(pastePosition, pasted.Size);
+            UpdateImage();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Paste failed: {ex}");
+        }
     }
 }

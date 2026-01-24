@@ -13,7 +13,7 @@ ViewModelからドメイン知識を奪い、豊かなドメインモデルを�
 
 - [x] Task: **`DrawingSession` 集約の導入** 5e93f25
     - `PictureBuffer` と `UndoSystem` を統合し、描画操作と履歴管理の整合性を保証するエンティティを作成
-- [~] Task: **`DrawingTool` の値オブジェクト化**
+- [x] Task: **`DrawingTool` の値オブジェクト化** 4a68528
     - `IDrawStyle` やペン設定を、ドメインルール（線の太さ、ブレンディング等）を持つドメインモデルへ再構成
 - [ ] Task: **`IPictureRepository` の定義**
     - ファイルI/Oを技術詳細（Infrastructure）として分離し、ドメイン層に抽象を配置

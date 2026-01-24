@@ -18,11 +18,11 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             DrawingBuffer buffer = new(src);
             PenStyle penStyle = new(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
             FreeCurve tool = new();
-            PositionHistory pos = new(new Position(5, 5));
+            CoordinateHistory pos = new(new CanvasCoordinate(5, 5));
             DrawingBuffer process = tool.DrawStart(buffer, penStyle, pos, false);
-            PositionHistory pos2 = pos.Update(new Position(8, 4));
+            CoordinateHistory pos2 = pos.Update(new CanvasCoordinate(8, 4));
             DrawingBuffer process2 = tool.Drawing(process, penStyle, pos2, false);
-            PositionHistory pos3 = pos2.Update(new Position(15, 18));
+            CoordinateHistory pos3 = pos2.Update(new CanvasCoordinate(15, 18));
             DrawingBuffer process3 = tool.Drawing(process2, penStyle, pos3, false);
             DrawingBuffer dst = tool.DrawEnd(process3, penStyle, pos3, false);
 

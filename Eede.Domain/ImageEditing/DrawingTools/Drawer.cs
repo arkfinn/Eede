@@ -11,6 +11,11 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
     private readonly PenStyle PenStyle = penCase;
 
+    public Picture DrawPoint(CanvasCoordinate coordinate)
+    {
+        return DrawPoint(coordinate.ToPosition());
+    }
+
     public Picture DrawPoint(Position position)
     {
         int x = position.X;
@@ -383,6 +388,11 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         }
     }
 
+    public Picture Fill(CanvasCoordinate from)
+    {
+        return Fill(from.ToPosition());
+    }
+
     public Picture Fill(Position from)
     {
         return DrawingPicture.Draw(dest =>
@@ -492,6 +502,11 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             }
             buffer.Push(new Position(leftX - 1, y));
         }
+    }
+
+    public bool Contains(CanvasCoordinate coordinate)
+    {
+        return Contains(coordinate.ToPosition());
     }
 
     public bool Contains(Position position)

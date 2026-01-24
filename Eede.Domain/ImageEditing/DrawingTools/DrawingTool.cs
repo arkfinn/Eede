@@ -17,19 +17,19 @@ namespace Eede.Domain.ImageEditing.DrawingTools
             PenStyle = penStyle ?? throw new ArgumentNullException(nameof(penStyle));
         }
 
-        public DrawingBuffer DrawStart(DrawingBuffer buffer, PositionHistory positionHistory, bool isShift)
+        public DrawingBuffer DrawStart(DrawingBuffer buffer, CoordinateHistory coordinateHistory, bool isShift)
         {
-            return Style.DrawStart(buffer, PenStyle, positionHistory, isShift);
+            return Style.DrawStart(buffer, PenStyle, coordinateHistory, isShift);
         }
 
-        public DrawingBuffer Drawing(DrawingBuffer buffer, PositionHistory positionHistory, bool isShift)
+        public DrawingBuffer Drawing(DrawingBuffer buffer, CoordinateHistory coordinateHistory, bool isShift)
         {
-            return Style.Drawing(buffer, PenStyle, positionHistory, isShift);
+            return Style.Drawing(buffer, PenStyle, coordinateHistory, isShift);
         }
 
-        public DrawingBuffer DrawEnd(DrawingBuffer buffer, PositionHistory positionHistory, bool isShift)
+        public DrawingBuffer DrawEnd(DrawingBuffer buffer, CoordinateHistory coordinateHistory, bool isShift)
         {
-            return Style.DrawEnd(buffer, PenStyle, positionHistory, isShift);
+            return Style.DrawEnd(buffer, PenStyle, coordinateHistory, isShift);
         }
 
         public DrawingTool WithColor(ArgbColor color)

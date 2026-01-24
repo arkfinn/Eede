@@ -4,6 +4,7 @@ using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataEntry;
+using Eede.Presentation.Common.Adapters;
 using Microsoft.Reactive.Testing;
 using Moq;
 using NUnit.Framework;
@@ -35,7 +36,7 @@ public class DrawableCanvasViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameCommand.Object, _mockClipboard.Object);
+            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameCommand.Object, _mockClipboard.Object, new AvaloniaBitmapAdapter());
             viewModel.SetPicture(Picture.CreateEmpty(new PictureSize(32, 32)));
             
             // 赤色で(10, 10)に描画
@@ -73,7 +74,7 @@ public class DrawableCanvasViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameCommand.Object, _mockClipboard.Object);
+            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameCommand.Object, _mockClipboard.Object, new AvaloniaBitmapAdapter());
             viewModel.SetPicture(Picture.CreateEmpty(new PictureSize(32, 32)));
             
             var initialMag = viewModel.Magnification.Value;

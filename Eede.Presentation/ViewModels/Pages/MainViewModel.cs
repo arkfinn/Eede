@@ -120,6 +120,7 @@ public class MainViewModel : ViewModelBase
 
     private GlobalState _state;
     private readonly IClipboardService _clipboardService;
+    private readonly IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> _bitmapAdapter;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
@@ -129,8 +130,9 @@ public class MainViewModel : ViewModelBase
     {
         _state = State;
         _clipboardService = clipboardService;
+        _bitmapAdapter = new AvaloniaBitmapAdapter();
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
-        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService);
+        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService, _bitmapAdapter);
         DrawingSessionViewModel = new DrawingSessionViewModel(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
@@ -324,7 +326,7 @@ public class MainViewModel : ViewModelBase
             // エラーが発生した場合、またはファイルが読み込めなかった場合はnullを返す
             return null;
         }
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile, _state, AnimationViewModel);
+        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile, _state, AnimationViewModel, _bitmapAdapter);
         return SetupDockPicture(vm);
     }
 
@@ -350,7 +352,7 @@ public class MainViewModel : ViewModelBase
         NewPictureWindowViewModel result = await ShowCreateNewPictureModal.Handle(store);
         if (result.Result)
         {
-            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state, AnimationViewModel)));
+            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state, AnimationViewModel, _bitmapAdapter)));
         }
     }
 
@@ -385,7 +387,6 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        PictureBitmapAdapter adapter = new();
         PictureEditingUseCase.EditResult result = PictureEditingUseCase.PushToCanvas(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             vm.PictureBuffer,

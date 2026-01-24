@@ -4,6 +4,7 @@ using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Common.SelectionStates;
 using Eede.Application.Drawings;
+using Eede.Application.Pictures;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
@@ -58,16 +59,18 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly GlobalState _globalState;
     private readonly ICommand _addFrameCommand;
     private readonly IClipboardService _clipboardService;
+    private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
     public ReactiveCommand<Unit, Unit> PasteCommand { get; }
 
-    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService)
+    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService, IBitmapAdapter<Bitmap> bitmapAdapter)
     {
         _globalState = globalState;
         _addFrameCommand = addFrameCommand;
         _clipboardService = clipboardService;
+        _bitmapAdapter = bitmapAdapter;
         _gridSize = new(16, 16);
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
@@ -169,8 +172,7 @@ public class DrawableCanvasViewModel : ViewModelBase
                     var previewBase = Picture.CreateEmpty(magnifiedPicture.Size);
                     var simulatedPreview = previewBase.Blend(new DirectImageBlender(), magnifiedPicture, new Position(0, 0));
                     
-                    _ = new PictureBitmapAdapter();
-                    MagnifiedPreviewBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(simulatedPreview);
+                    MagnifiedPreviewBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(simulatedPreview);
                 }
                 else
                 {
@@ -264,8 +266,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             PreviewPixels = null;
         }
 
-        _ = new PictureBitmapAdapter();
-        MyBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(Picture);
+        MyBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(Picture);
     }
 
     public ReactiveCommand<Position, Unit> DrawBeginCommand { get; }

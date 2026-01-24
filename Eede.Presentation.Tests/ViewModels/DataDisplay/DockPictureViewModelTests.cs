@@ -8,6 +8,7 @@ using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.Common.Services;
+using Eede.Presentation.Common.Adapters;
 using Moq;
 using NUnit.Framework;
 using Avalonia.Headless.NUnit;
@@ -42,7 +43,7 @@ public class DockPictureViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel);
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter());
             
             var mockFile = new Mock<IImageFile>();
             // 32x32の空のビットマップを作成
@@ -68,7 +69,7 @@ public class DockPictureViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel);
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter());
             
             var initialPicture = Picture.CreateEmpty(new PictureSize(32, 32));
             var mockFile = new Mock<IImageFile>();

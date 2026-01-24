@@ -29,7 +29,8 @@ namespace Eede.Presentation.Files
                         {
                             ArvFileReader reader = new();
                             Picture picture = reader.Read(fs);
-                            return new ArvFile(PictureBitmapAdapter.ConvertToBitmap(picture), filePath);
+                            var adapter = new AvaloniaBitmapAdapter();
+                            return new ArvFile(adapter.ConvertToBitmap(picture), filePath);
                         }
                     case ".png":
                         return new PngFile(new Bitmap(filePath.ToString()), filePath);

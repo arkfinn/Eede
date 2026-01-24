@@ -189,6 +189,9 @@ Before marking any task complete, verify:
 - Use appropriate test setup/teardown mechanisms (e.g., fixtures, beforeEach/afterEach).
 - Mock external dependencies.
 - Test both success and failure cases.
+- **Avalonia UI Testing:** For ViewModels or components depending on Avalonia services, use `Avalonia.Headless.NUnit` and ensure `TestAppBuilder` is correctly configured. 
+- **ReactiveUI Testing:** When using `TestScheduler`, remember to call `scheduler.AdvanceBy(1)` after property changes to trigger `WhenAnyValue` or `BindTo` observers.
+- **Bitmap Handling in Tests:** Avoid `CopyPixels` if possible; use `WriteableBitmap.Lock()` for cross-platform and headless compatibility.
 
 ### Integration Testing
 - Test complete user flows

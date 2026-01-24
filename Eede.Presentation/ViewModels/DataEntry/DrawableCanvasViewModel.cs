@@ -60,17 +60,19 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly ICommand _addFrameCommand;
     private readonly IClipboardService _clipboardService;
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
+    private readonly ICanvasService _canvasService;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
     public ReactiveCommand<Unit, Unit> PasteCommand { get; }
 
-    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService, IBitmapAdapter<Bitmap> bitmapAdapter)
+    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService, IBitmapAdapter<Bitmap> bitmapAdapter, ICanvasService canvasService)
     {
         _globalState = globalState;
         _addFrameCommand = addFrameCommand;
         _clipboardService = clipboardService;
         _bitmapAdapter = bitmapAdapter;
+        _canvasService = canvasService;
         _gridSize = new(16, 16);
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
@@ -278,7 +280,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void UpdateCursorSize(Position pos)
     {
         if (_selectionState == null) return;
-        var selectionCursor = _selectionState.GetCursor(Minify(pos));
+        var selectionCursor = _selectionState.GetCursor(_canvasService.Minify(pos, Magnification));
         ActiveCursor = selectionCursor switch
         {
             SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
@@ -296,8 +298,8 @@ public class DrawableCanvasViewModel : ViewModelBase
         UpdateCursorSize(pos);
 
         ISelectionState nextState = _selectionState.HandlePointerLeftButtonPressed(
-            GetCurrentHalfBoxArea(pos),
-            Minify(pos),
+            _canvasService.GetCurrentHalfBoxArea(pos, Magnification, IsAnimationMode, GridSettings, _gridSize),
+            _canvasService.Minify(pos, Magnification),
             null, // pullAction はここでは不要（またはダミー）
             () => PictureBuffer.Previous,
             InternalUpdateCommand);
@@ -317,23 +319,9 @@ public class DrawableCanvasViewModel : ViewModelBase
         UpdateImage();
     }
 
-    private HalfBoxArea GetCurrentHalfBoxArea(Position pos)
-    {
-        if (IsAnimationMode)
-        {
-            return HalfBoxArea.Create(Minify(pos), GridSettings.CellSize);
-        }
-        return HalfBoxArea.Create(Minify(pos), _gridSize);
-    }
-
-    private Position Minify(Position pos)
-    {
-        return new Position(Magnification.Minify(pos.X), Magnification.Minify(pos.Y));
-    }
-
     private void ExecutePonterRightButtonPressedAction(Position pos)
     {
-        (ISelectionState nextState, HalfBoxArea _) = _selectionState.HandlePointerRightButtonPressed(GetCurrentHalfBoxArea(pos), Minify(pos), _gridSize, InternalUpdateCommand);
+        (ISelectionState nextState, HalfBoxArea _) = _selectionState.HandlePointerRightButtonPressed(_canvasService.GetCurrentHalfBoxArea(pos, Magnification, IsAnimationMode, GridSettings, _gridSize), _canvasService.Minify(pos, Magnification), _gridSize, InternalUpdateCommand);
         if (_selectionState is DraggingState && nextState is SelectedState selected)
         {
             SelectingArea = selected.Selection.Area;
@@ -371,7 +359,12 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         UpdateCursorSize(pos);
 
-        (_, _) = _selectionState.HandlePointerMoved(GetCurrentHalfBoxArea(pos), true, Minify(pos), PictureBuffer.Previous.Size);
+        (bool visible, HalfBoxArea nextCursorArea) = _selectionState.HandlePointerMoved(
+            _canvasService.GetCurrentHalfBoxArea(pos, Magnification, IsAnimationMode, GridSettings, _gridSize),
+            true,
+            _canvasService.Minify(pos, Magnification),
+            PictureBuffer.Previous.Size);
+
         if (_selectionState is DraggingState)
         {
             DrawableArea = DrawableArea.Leave(PictureBuffer);
@@ -391,31 +384,39 @@ public class DrawableCanvasViewModel : ViewModelBase
         {
             return;
         }
-        if (_selectionState is DraggingState dragging)
+
+        var previous = PictureBuffer.Previous;
+        var previousArea = IsRegionSelecting ? (PictureArea?)SelectingArea : null;
+
+        ISelectionState nextState = _selectionState.HandlePointerLeftButtonReleased(
+            _canvasService.GetCurrentHalfBoxArea(pos, Magnification, IsAnimationMode, GridSettings, _gridSize),
+            _canvasService.Minify(pos, Magnification),
+            null, // picturePushAction
+            InternalUpdateCommand);
+
+        if (_selectionState is RegionSelectingState && nextState is SelectedState selected)
         {
-            var previous = dragging.OriginalPicture;
-            var previousArea = SelectingArea;
-            var nextState = _selectionState.HandlePointerLeftButtonReleased(GetCurrentHalfBoxArea(pos), Minify(pos), null, InternalUpdateCommand);
-            if (nextState is SelectedState selected)
-            {
-                SelectingArea = selected.Selection.Area;
-                IsRegionSelecting = true;
-                _selectionState = nextState;
-                UpdateImage();
-                Drew?.Invoke(previous, PictureBuffer.Previous, previousArea, SelectingArea);
-            }
-            else
-            {
-                _selectionState = nextState;
-                UpdateImage();
-            }
+            SelectingArea = selected.Selection.Area;
+            IsRegionSelecting = true;
+            _selectionState = nextState;
+            UpdateImage();
             return;
         }
+
+        if (_selectionState is DraggingState)
+        {
+            Drew?.Invoke(previous, PictureBuffer.Previous, previousArea, SelectingArea);
+            _selectionState = nextState;
+            UpdateImage();
+            return;
+        }
+        _selectionState = nextState;
 
         if (!PictureBuffer.IsDrawing())
         {
             return;
         }
+
         Picture previousImage = PictureBuffer.Previous;
 
         DrawingResult result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(pos.X, pos.Y), IsShifted);
@@ -439,7 +440,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         tool.OnDrawStart += (sender, args) =>
         {
             IsRegionSelecting = false;
-            _selectionState = new NormalCursorState(GetCurrentHalfBoxArea(args.Start));
+            _selectionState = new NormalCursorState(_canvasService.GetCurrentHalfBoxArea(args.Start, Magnification, IsAnimationMode, GridSettings, _gridSize));
         };
         tool.OnDrawing += (sender, args) =>
         {

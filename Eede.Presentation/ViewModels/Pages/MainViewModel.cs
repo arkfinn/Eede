@@ -81,14 +81,14 @@ public class MainViewModel : ViewModelBase
     [Reactive] public int MinCursorHeight { get; set; }
     [Reactive] public PictureSize CursorSize { get; set; }
 
-    [Reactive] public UndoSystem UndoSystem { get; private set; }
+    [Reactive] public DrawingSessionViewModel DrawingSessionViewModel { get; private set; }
     [Reactive] public StorageService StorageService { get; set; }
     [Reactive] public Cursor? AnimationCursor { get; set; }
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
     [Reactive] public bool HasClipboardPicture { get; set; } = false;
 
-    public ReactiveCommand<Unit, Unit> UndoCommand { get; }
-    public ReactiveCommand<Unit, Unit> RedoCommand { get; }
+    public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
+    public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
     public ReactiveCommand<IStorageService, Unit> LoadPictureCommand { get; }
     public ReactiveCommand<IStorageService, Unit> SavePictureCommand { get; }
     public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; }
@@ -131,6 +131,7 @@ public class MainViewModel : ViewModelBase
         _clipboardService = clipboardService;
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
         DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService);
+        DrawingSessionViewModel = new DrawingSessionViewModel(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
@@ -187,44 +188,12 @@ public class MainViewModel : ViewModelBase
             .Switch()
             .BindTo(this, x => x.AnimationViewModel.ActivePicture);
 
-        UndoSystem = new();
         DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea) =>
         {
-            UndoSystem = UndoSystem.Add(new UndoItem(
-                new Action(() =>
-                {
-                    SetPictureToDrawArea(previous);
-                    if (previousArea != null)
-                    {
-                        DrawableCanvasViewModel.SelectingArea = previousArea.Value;
-                        DrawableCanvasViewModel.IsRegionSelecting = true;
-                    }
-                    else
-                    {
-                        DrawableCanvasViewModel.IsRegionSelecting = false;
-                    }
-                }),
-                new Action(() =>
-                {
-                    SetPictureToDrawArea(now);
-                    if (nowArea != null)
-                    {
-                        DrawableCanvasViewModel.SelectingArea = nowArea.Value;
-                        DrawableCanvasViewModel.IsRegionSelecting = true;
-                    }
-                    else
-                    {
-                        DrawableCanvasViewModel.IsRegionSelecting = false;
-                    }
-                })));
+            // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
+            DrawingSessionViewModel.Push(now);
         };
 
-        UndoCommand = ReactiveCommand.Create(ExecuteUndo, this.WhenAnyValue(
-            x => x.UndoSystem,
-            (undoSystem) => undoSystem.CanUndo()));
-        RedoCommand = ReactiveCommand.Create(ExecuteRedo, this.WhenAnyValue(
-           x => x.UndoSystem,
-           (undoSystem) => undoSystem.CanRedo()));
         LoadPictureCommand = ReactiveCommand.Create<IStorageService>(ExecuteLoadPicture);
         SavePictureCommand = ReactiveCommand.Create<IStorageService>(ExecuteSavePicture);
         PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
@@ -267,16 +236,12 @@ public class MainViewModel : ViewModelBase
             await DrawableCanvasViewModel.PasteCommand.Execute();
             DrawStyle = DrawStyleType.RegionSelect;
         }, this.WhenAnyValue(x => x.HasClipboardPicture));
-    }
 
-    private void ExecuteUndo()
-    {
-        UndoSystem = UndoSystem.Undo();
-    }
-
-    private void ExecuteRedo()
-    {
-        UndoSystem = UndoSystem.Redo();
+        this.WhenAnyValue(x => x.DrawingSessionViewModel.CurrentSession)
+            .Subscribe(session =>
+            {
+                SetPictureToDrawArea(session.CurrentPicture);
+            });
     }
 
     public void DragOverPicture(object sender, DragEventArgs e)
@@ -426,11 +391,7 @@ public class MainViewModel : ViewModelBase
             vm.PictureBuffer,
             args.Rect);
 
-        UndoSystem = UndoSystem.Add(new UndoItem(
-            new Action(() => { SetPictureToDrawArea(result.Previous); }),
-            new Action(() => { SetPictureToDrawArea(result.Updated); })));
-
-        SetPictureToDrawArea(result.Updated);
+        DrawingSessionViewModel.Push(result.Updated);
     }
 
     private void SetPictureToDrawArea(Picture picture)
@@ -445,14 +406,8 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        var previous = vm.PictureBuffer;
-        var updated = args.Updated;
-
-        UndoSystem = UndoSystem.Add(new UndoItem(
-           new Action(() => { if (vm.Enabled) { vm.PictureBuffer = previous; } }),
-           new Action(() => { if (vm.Enabled) { vm.PictureBuffer = updated; } })));
-
-        vm.PictureBuffer = updated;
+        // TODO: DockPictureViewModel 側も DrawingSession を持つようにリファクタリング予定
+        vm.PictureBuffer = args.Updated;
     }
 
     private void OnPullFromDrawArea(object sender, PicturePullEventArgs args)
@@ -466,10 +421,6 @@ public class MainViewModel : ViewModelBase
             DrawableCanvasViewModel.PictureBuffer.Previous,
             args.Position,
             PullBlender);
-
-        UndoSystem = UndoSystem.Add(new UndoItem(
-           new Action(() => { if (vm.Enabled) { vm.PictureBuffer = result.Previous; } }),
-           new Action(() => { if (vm.Enabled) { vm.PictureBuffer = result.Updated; } })));
 
         vm.PictureBuffer = result.Updated;
     }
@@ -485,27 +436,8 @@ public class MainViewModel : ViewModelBase
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType
         );
-        UndoSystem = UndoSystem.Add(new UndoItem(
-         new Action(() =>
-         {
-             SetPictureToDrawArea(result.Previous);
-             if (area.HasValue)
-             {
-                 DrawableCanvasViewModel.SelectingArea = area.Value;
-                 DrawableCanvasViewModel.IsRegionSelecting = true;
-             }
-         }),
-         new Action(() =>
-         {
-             SetPictureToDrawArea(result.Updated);
-             if (area.HasValue)
-             {
-                 DrawableCanvasViewModel.SelectingArea = area.Value;
-                 DrawableCanvasViewModel.IsRegionSelecting = true;
-             }
-         })));
 
-        SetPictureToDrawArea(result.Updated);
+        DrawingSessionViewModel.Push(result.Updated);
     }
 
     private IDrawStyle ExecuteUpdateDrawStyle(DrawStyleType drawStyle)

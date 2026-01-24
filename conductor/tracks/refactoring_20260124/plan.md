@@ -15,7 +15,7 @@ ViewModelからドメイン知識を奪い、豊かなドメインモデルを�
     - `PictureBuffer` と `UndoSystem` を統合し、描画操作と履歴管理の整合性を保証するエンティティを作成
 - [x] Task: **`DrawingTool` の値オブジェクト化** 4a68528
     - `IDrawStyle` やペン設定を、ドメインルール（線の太さ、ブレンディング等）を持つドメインモデルへ再構成
-- [ ] Task: **`IPictureRepository` の定義**
+- [~] Task: **`IPictureRepository` の定義**
     - ファイルI/Oを技術詳細（Infrastructure）として分離し、ドメイン層に抽象を配置
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Domain Model Reconstruction' (Protocol in workflow.md)
 

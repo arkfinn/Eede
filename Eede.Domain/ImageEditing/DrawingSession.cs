@@ -58,7 +58,7 @@ namespace Eede.Domain.ImageEditing
         /// </summary>
         public DrawingSession Push(Picture nextPicture)
         {
-            if (nextPicture == Buffer.Previous) return this;
+            if (nextPicture == Buffer.Previous && !IsDrawing()) return this;
             return new DrawingSession(new DrawingBuffer(nextPicture), UndoStack.Push(Buffer.Previous), ImmutableStack<Picture>.Empty);
         }
 

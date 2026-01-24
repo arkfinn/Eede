@@ -22,6 +22,7 @@ using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.Animations;
+using Eede.Application.Drawings;
 using Eede.Application.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -132,7 +133,7 @@ public class MainViewModel : ViewModelBase
         _clipboardService = clipboardService;
         _bitmapAdapter = new AvaloniaBitmapAdapter();
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
-        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService, _bitmapAdapter, new Eede.Application.Drawings.CanvasService());
+        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService, _bitmapAdapter, new DrawActionUseCase());
         DrawingSessionViewModel = new DrawingSessionViewModel(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;

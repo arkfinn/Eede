@@ -3,28 +3,28 @@
 public record FreeCurve : IDrawStyle
 {
 
-    public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return buffer.UpdateDrawing(drawer.DrawPoint(positionHistory.Now));
+        return buffer.UpdateDrawing(drawer.DrawPoint(coordinateHistory.Now.ToPosition()));
     }
 
-    public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Fetch(), penStyle);
-        return buffer.UpdateDrawing(Draw(drawer, positionHistory));
+        return buffer.UpdateDrawing(Draw(drawer, coordinateHistory));
     }
 
-    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         return ContextFactory.Create(buffer.Fetch());
     }
 
-    private Picture Draw(Drawer drawer, PositionHistory positionHistory)
+    private Picture Draw(Drawer drawer, CoordinateHistory coordinateHistory)
     {
-        return drawer.Contains(positionHistory.Now)
-            ? drawer.DrawLine(positionHistory.Last, positionHistory.Now)
-            : drawer.Contains(positionHistory.Last) ? drawer.DrawLine(positionHistory.Now, positionHistory.Last) : drawer.DrawingPicture;
+        return drawer.Contains(coordinateHistory.Now.ToPosition())
+            ? drawer.DrawLine(coordinateHistory.Last.ToPosition(), coordinateHistory.Now.ToPosition())
+            : drawer.Contains(coordinateHistory.Last.ToPosition()) ? drawer.DrawLine(coordinateHistory.Now.ToPosition(), coordinateHistory.Last.ToPosition()) : drawer.DrawingPicture;
     }
 }
 

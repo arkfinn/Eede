@@ -4,9 +4,9 @@ namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public class RegionSelector : IDrawStyle
 {
-    public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
-        OnDrawStart?.Invoke(this, positionHistory);
+        OnDrawStart?.Invoke(this, coordinateHistory.ToPositionHistory());
         return buffer.UpdateDrawing(buffer.Previous);
     }
 
@@ -14,15 +14,15 @@ public class RegionSelector : IDrawStyle
     public event EventHandler<PositionHistory> OnDrawing;
     public event EventHandler<PositionHistory> OnDrawEnd;
 
-    public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
-        OnDrawing?.Invoke(this, positionHistory);
+        OnDrawing?.Invoke(this, coordinateHistory.ToPositionHistory());
         return buffer;
     }
 
-    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
-        OnDrawEnd?.Invoke(this, positionHistory);
+        OnDrawEnd?.Invoke(this, coordinateHistory.ToPositionHistory());
         return buffer.CancelDrawing();
     }
 }

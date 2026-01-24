@@ -60,19 +60,19 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly ICommand _addFrameCommand;
     private readonly IClipboardService _clipboardService;
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
-    private readonly ICanvasService _canvasService;
+    private readonly DrawActionUseCase _drawActionUseCase;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
     public ReactiveCommand<Unit, Unit> PasteCommand { get; }
 
-    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService, IBitmapAdapter<Bitmap> bitmapAdapter, ICanvasService canvasService)
+    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService, IBitmapAdapter<Bitmap> bitmapAdapter, DrawActionUseCase drawActionUseCase)
     {
         _globalState = globalState;
         _addFrameCommand = addFrameCommand;
         _clipboardService = clipboardService;
         _bitmapAdapter = bitmapAdapter;
-        _canvasService = canvasService;
+        _drawActionUseCase = drawActionUseCase;
         _gridSize = new(16, 16);
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
@@ -280,7 +280,8 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void UpdateCursorSize(Position pos)
     {
         if (_selectionState == null) return;
-        var selectionCursor = _selectionState.GetCursor(_canvasService.Minify(pos, Magnification));
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var selectionCursor = _selectionState.GetCursor(displayCoordinate.ToCanvas(Magnification).ToPosition());
         ActiveCursor = selectionCursor switch
         {
             SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
@@ -297,9 +298,14 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         UpdateCursorSize(pos);
 
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var currentArea = IsAnimationMode
+            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+
         ISelectionState nextState = _selectionState.HandlePointerLeftButtonPressed(
-            _canvasService.GetCurrentHalfBoxArea(pos, Magnification, IsAnimationMode, GridSettings, _gridSize),
-            _canvasService.Minify(pos, Magnification),
+            currentArea,
+            displayCoordinate.ToCanvas(Magnification).ToPosition(),
             null, // pullAction はここでは不要（またはダミー）
             () => PictureBuffer.Previous,
             InternalUpdateCommand);
@@ -321,7 +327,17 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private void ExecutePonterRightButtonPressedAction(Position pos)
     {
-        (ISelectionState nextState, HalfBoxArea _) = _selectionState.HandlePointerRightButtonPressed(_canvasService.GetCurrentHalfBoxArea(pos, Magnification, IsAnimationMode, GridSettings, _gridSize), _canvasService.Minify(pos, Magnification), _gridSize, InternalUpdateCommand);
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var currentArea = IsAnimationMode
+            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+
+        (ISelectionState nextState, HalfBoxArea _) = _selectionState.HandlePointerRightButtonPressed(
+            currentArea,
+            displayCoordinate.ToCanvas(Magnification).ToPosition(),
+            _gridSize,
+            InternalUpdateCommand);
+
         if (_selectionState is DraggingState && nextState is SelectedState selected)
         {
             SelectingArea = selected.Selection.Area;
@@ -359,10 +375,15 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         UpdateCursorSize(pos);
 
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var currentArea = IsAnimationMode
+            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+
         (bool visible, HalfBoxArea nextCursorArea) = _selectionState.HandlePointerMoved(
-            _canvasService.GetCurrentHalfBoxArea(pos, Magnification, IsAnimationMode, GridSettings, _gridSize),
+            currentArea,
             true,
-            _canvasService.Minify(pos, Magnification),
+            displayCoordinate.ToCanvas(Magnification).ToPosition(),
             PictureBuffer.Previous.Size);
 
         if (_selectionState is DraggingState)
@@ -388,9 +409,14 @@ public class DrawableCanvasViewModel : ViewModelBase
         var previous = PictureBuffer.Previous;
         var previousArea = IsRegionSelecting ? (PictureArea?)SelectingArea : null;
 
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var currentArea = IsAnimationMode
+            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+
         ISelectionState nextState = _selectionState.HandlePointerLeftButtonReleased(
-            _canvasService.GetCurrentHalfBoxArea(pos, Magnification, IsAnimationMode, GridSettings, _gridSize),
-            _canvasService.Minify(pos, Magnification),
+            currentArea,
+            displayCoordinate.ToCanvas(Magnification).ToPosition(),
             null, // picturePushAction
             InternalUpdateCommand);
 
@@ -440,7 +466,12 @@ public class DrawableCanvasViewModel : ViewModelBase
         tool.OnDrawStart += (sender, args) =>
         {
             IsRegionSelecting = false;
-            _selectionState = new NormalCursorState(_canvasService.GetCurrentHalfBoxArea(args.Start, Magnification, IsAnimationMode, GridSettings, _gridSize));
+            var displayCoordinate = new DisplayCoordinate(args.Start.X, args.Start.Y);
+            // 本来は args.Start は既にキャンバス座標のはずだが、既存の実装に合わせる
+            var currentArea = IsAnimationMode
+                ? HalfBoxArea.Create(args.Start, GridSettings.CellSize)
+                : HalfBoxArea.Create(args.Start, _gridSize);
+            _selectionState = new NormalCursorState(currentArea);
         };
         tool.OnDrawing += (sender, args) =>
         {

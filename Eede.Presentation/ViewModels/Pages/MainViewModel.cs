@@ -122,6 +122,7 @@ public class MainViewModel : ViewModelBase
 
     private readonly IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> _bitmapAdapter;
     private readonly IPictureRepository _pictureRepository;
+    private readonly IDrawStyleFactory _drawStyleFactory;
     private readonly SavePictureUseCase _savePictureUseCase;
     private readonly LoadPictureUseCase _loadPictureUseCase;
     private readonly GlobalState _state;
@@ -136,12 +137,14 @@ public class MainViewModel : ViewModelBase
         IAnimationService animationService,
         IClipboardService clipboardService,
         IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
-        IPictureRepository pictureRepository)
+        IPictureRepository pictureRepository,
+        IDrawStyleFactory drawStyleFactory)
     {
         _state = State;
         _clipboardService = clipboardService;
         _bitmapAdapter = bitmapAdapter;
         _pictureRepository = pictureRepository;
+        _drawStyleFactory = drawStyleFactory;
         _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
         _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
@@ -452,18 +455,12 @@ public class MainViewModel : ViewModelBase
     private IDrawStyle ExecuteUpdateDrawStyle(DrawStyleType drawStyle)
     {
         DrawableCanvasViewModel.IsRegionSelecting = false;
-        return drawStyle switch
+        var style = _drawStyleFactory.Create(drawStyle);
+        if (style is RegionSelector regionSelector)
         {
-            DrawStyleType.RegionSelect => DrawableCanvasViewModel.SetupRegionSelector(),
-            DrawStyleType.FreeCurve => new FreeCurve(),
-            DrawStyleType.Line => new Line(),
-            DrawStyleType.Fill => new Fill(),
-            DrawStyleType.Rectangle => new Rectangle(),
-            DrawStyleType.FilledRectangle => new FilledRectangle(),
-            DrawStyleType.Ellipse => new Ellipse(),
-            DrawStyleType.FilledEllipse => new FilledEllipse(),
-            _ => throw new ArgumentOutOfRangeException(nameof(drawStyle), $"Unknown DrawStyle: {drawStyle}"),
-        };
+            DrawableCanvasViewModel.SetupRegionSelector(regionSelector);
+        }
+        return style;
     }
 
     private ArgbColor OnApplyPaletteColor()

@@ -12,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Eede.Presentation.Common.Adapters;
 using Eede.Domain.ImageEditing;
 using Eede.Application.Pictures;
+using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Application.Drawings;
 using System;
 
 namespace Eede.Presentation;
@@ -55,6 +57,7 @@ public partial class App : Avalonia.Application
         services.AddSingleton<GlobalState>();
         services.AddSingleton<IAnimationService, AnimationService>();
         services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
+        services.AddSingleton<IDrawStyleFactory, DrawStyleFactory>();
 
         // Adapters / Infrastructure
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();

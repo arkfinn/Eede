@@ -26,6 +26,7 @@ public class MainViewModelCharacterizationTests
     private Mock<IClipboardService> _mockClipboardService;
     private Mock<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>> _mockBitmapAdapter;
     private Mock<IPictureRepository> _mockPictureRepository;
+    private Mock<IDrawStyleFactory> _mockDrawStyleFactory;
 
     [SetUp]
     public void Setup()
@@ -36,6 +37,12 @@ public class MainViewModelCharacterizationTests
         _mockClipboardService = new Mock<IClipboardService>();
         _mockBitmapAdapter = new Mock<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>>();
         _mockPictureRepository = new Mock<IPictureRepository>();
+        _mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
+
+        // 各ツールの生成をモック
+        _mockDrawStyleFactory.Setup(f => f.Create(DrawStyleType.FreeCurve)).Returns(new FreeCurve());
+        _mockDrawStyleFactory.Setup(f => f.Create(DrawStyleType.Line)).Returns(new Line());
+        _mockDrawStyleFactory.Setup(f => f.Create(DrawStyleType.RegionSelect)).Returns(new RegionSelector());
     }
 
     private MainViewModel CreateViewModel()
@@ -45,7 +52,8 @@ public class MainViewModelCharacterizationTests
             _mockAnimationService.Object,
             _mockClipboardService.Object,
             _mockBitmapAdapter.Object,
-            _mockPictureRepository.Object);
+            _mockPictureRepository.Object,
+            _mockDrawStyleFactory.Object);
     }
 
     [AvaloniaTest]
@@ -69,6 +77,10 @@ public class MainViewModelCharacterizationTests
             viewModel.DrawStyle = DrawStyleType.RegionSelect;
             scheduler.AdvanceBy(1);
             Assert.That(viewModel.DrawableCanvasViewModel.DrawStyle, Is.InstanceOf<RegionSelector>());
+
+            // Factory が各タイプで呼ばれたことを検証
+            _mockDrawStyleFactory.Verify(f => f.Create(DrawStyleType.Line), Times.Once);
+            _mockDrawStyleFactory.Verify(f => f.Create(DrawStyleType.RegionSelect), Times.Once);
         });
     }
 

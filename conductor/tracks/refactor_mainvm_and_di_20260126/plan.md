@@ -24,13 +24,13 @@ Microsoft.Extensions.DependencyInjection を導入し、ファイルI/Oの依存
 - [ ] Task: Phase 0 のテストを DI 経由の解決に変更し、挙動が変わらないことを確認
 - [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
-## Phase 2: ツール生成ロジックの Factory 化 (優先度2)
-IDrawStyle の生成ロジックを MainViewModel から分離します。
+## Phase 2: ツール生成ロジックの Factory 化 (優先度2) [checkpoint: c13c221]
+`IDrawStyle` の生成ロジックを `MainViewModel` から分離します。
 
-- [ ] Task: IDrawStyleFactory インターフェースと実装クラスの作成
-- [ ] Task: MainViewModel.ExecuteUpdateDrawStyle を Factory へ移譲
-- [ ] Task: ツール切り替え機能の単体テストを追加
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: `IDrawStyleFactory` インターフェースと実装クラスの作成
+- [x] Task: `MainViewModel.ExecuteUpdateDrawStyle` を Factory へ移譲
+- [x] Task: ツール切り替え機能の単体テストを追加
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: Push/Pull ロジックの UseCase 移譲 (優先度3)
 ViewModel 内に記述されているデータの加工・転送ロジックを Application 層へ移動します。

@@ -91,27 +91,27 @@ public class MainViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
-    public ReactiveCommand<IStorageService, Unit> LoadPictureCommand { get; }
-    public ReactiveCommand<IStorageService, Unit> SavePictureCommand { get; }
-    public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; }
-    public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; }
-    public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; }
+    public ReactiveCommand<IStorageService, Unit> LoadPictureCommand { get; private set; }
+    public ReactiveCommand<IStorageService, Unit> SavePictureCommand { get; private set; }
+    public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; private set; }
+    public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; private set; }
+    public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; private set; }
 
-    public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; }
-    public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
+    public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; private set; }
+    public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; private set; }
 
-    public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; }
-    public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; }
-    public ReactiveCommand<Unit, Unit> PutBackgroundColorCommand { get; }
-    public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; }
-    public PaletteContainerViewModel PaletteContainerViewModel { get; } = new PaletteContainerViewModel();
+    public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; private set; }
+    public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> PutBackgroundColorCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; private set; }
+    public PaletteContainerViewModel PaletteContainerViewModel { get; private set; }
 
 
     // Viewにウィンドウを閉じるよう通知するためのInteraction
-    public Interaction<Unit, Unit> CloseWindowInteraction { get; }
+    public Interaction<Unit, Unit> CloseWindowInteraction { get; private set; }
 
     // Viewからのクローズ要求を受け取るためのコマンド
-    public ReactiveCommand<Unit, Unit> RequestCloseCommand { get; }
+    public ReactiveCommand<Unit, Unit> RequestCloseCommand { get; private set; }
 
     private bool _isCloseConfirmed;
     public bool IsCloseConfirmed
@@ -129,9 +129,9 @@ public class MainViewModel : ViewModelBase
     private readonly GlobalState _state;
     private readonly IClipboardService _clipboardService;
 
-    public ReactiveCommand<Unit, Unit> CopyCommand { get; }
-    public ReactiveCommand<Unit, Unit> CutCommand { get; }
-    public ReactiveCommand<Unit, Unit> PasteCommand { get; }
+    public ReactiveCommand<Unit, Unit> CopyCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> CutCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> PasteCommand { get; private set; }
 
     public MainViewModel(
         GlobalState State,
@@ -153,6 +153,41 @@ public class MainViewModel : ViewModelBase
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
         DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService, _bitmapAdapter, new DrawActionUseCase());
         DrawingSessionViewModel = new DrawingSessionViewModel(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
+        PaletteContainerViewModel = new PaletteContainerViewModel();
+        InitializeConnections();
+    }
+
+    public MainViewModel(
+        GlobalState State,
+        IClipboardService clipboardService,
+        IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
+        IPictureRepository pictureRepository,
+        IDrawStyleFactory drawStyleFactory,
+        IPictureEditingUseCase pictureEditingUseCase,
+        DrawableCanvasViewModel drawableCanvasViewModel,
+        AnimationViewModel animationViewModel,
+        DrawingSessionViewModel drawingSessionViewModel,
+        PaletteContainerViewModel paletteContainerViewModel)
+    {
+        _state = State;
+        _clipboardService = clipboardService;
+        _bitmapAdapter = bitmapAdapter;
+        _pictureRepository = pictureRepository;
+        _drawStyleFactory = drawStyleFactory;
+        _pictureEditingUseCase = pictureEditingUseCase;
+        _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
+        _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
+
+        DrawableCanvasViewModel = drawableCanvasViewModel;
+        AnimationViewModel = animationViewModel;
+        DrawingSessionViewModel = drawingSessionViewModel;
+        PaletteContainerViewModel = paletteContainerViewModel;
+
+        InitializeConnections();
+    }
+
+    private void InitializeConnections()
+    {
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)

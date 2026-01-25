@@ -131,12 +131,17 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
     public ReactiveCommand<Unit, Unit> PasteCommand { get; }
 
-    public MainViewModel(GlobalState State, IAnimationService animationService, IClipboardService clipboardService)
+    public MainViewModel(
+        GlobalState State,
+        IAnimationService animationService,
+        IClipboardService clipboardService,
+        IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
+        IPictureRepository pictureRepository)
     {
         _state = State;
         _clipboardService = clipboardService;
-        _bitmapAdapter = new AvaloniaBitmapAdapter();
-        _pictureRepository = new PictureRepository(_bitmapAdapter);
+        _bitmapAdapter = bitmapAdapter;
+        _pictureRepository = pictureRepository;
         _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
         _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());

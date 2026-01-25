@@ -8,14 +8,17 @@ using System.Collections.Generic;
 using Eede.Domain.Animations;
 using Eede.Presentation.Services;
 using Eede.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Eede.Presentation.Common.Adapters;
+using Eede.Domain.ImageEditing;
+using Eede.Application.Pictures;
+using System;
 
 namespace Eede.Presentation;
 
 public partial class App : Avalonia.Application
 {
-    public static GlobalState State { get; } = new GlobalState();
-    private static readonly IAnimationService AnimationService = new AnimationService();
-    private static readonly IClipboardService ClipboardService = new AvaloniaClipboardService();
+    public IServiceProvider? Services { get; private set; }
 
     public override void Initialize()
     {
@@ -24,21 +27,40 @@ public partial class App : Avalonia.Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection);
+        Services = serviceCollection.BuildServiceProvider();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainViewModel(State, AnimationService, ClipboardService)
+                DataContext = Services.GetRequiredService<MainViewModel>()
             };
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
             singleViewPlatform.MainView = new MainView
             {
-                DataContext = new MainViewModel(State, AnimationService, ClipboardService)
+                DataContext = Services.GetRequiredService<MainViewModel>()
             };
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void ConfigureServices(IServiceCollection services)
+    {
+        // Core/Domain/Application Services
+        services.AddSingleton<GlobalState>();
+        services.AddSingleton<IAnimationService, AnimationService>();
+        services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
+
+        // Adapters / Infrastructure
+        services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();
+        services.AddSingleton<IPictureRepository, PictureRepository>();
+
+        // ViewModels
+        services.AddTransient<MainViewModel>();
     }
 }

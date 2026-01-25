@@ -124,6 +124,7 @@ public class MainViewModel : ViewModelBase
     private readonly IPictureRepository _pictureRepository;
     private readonly IDrawStyleFactory _drawStyleFactory;
     private readonly IPictureEditingUseCase _pictureEditingUseCase;
+    private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly SavePictureUseCase _savePictureUseCase;
     private readonly LoadPictureUseCase _loadPictureUseCase;
     private readonly GlobalState _state;
@@ -140,7 +141,8 @@ public class MainViewModel : ViewModelBase
         IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
         IPictureRepository pictureRepository,
         IDrawStyleFactory drawStyleFactory,
-        IPictureEditingUseCase pictureEditingUseCase)
+        IPictureEditingUseCase pictureEditingUseCase,
+        IDrawingSessionProvider drawingSessionProvider)
     {
         _state = State;
         _clipboardService = clipboardService;
@@ -148,11 +150,12 @@ public class MainViewModel : ViewModelBase
         _pictureRepository = pictureRepository;
         _drawStyleFactory = drawStyleFactory;
         _pictureEditingUseCase = pictureEditingUseCase;
+        _drawingSessionProvider = drawingSessionProvider;
         _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
         _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
         DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService, _bitmapAdapter, new DrawActionUseCase());
-        DrawingSessionViewModel = new DrawingSessionViewModel(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
+        DrawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
         PaletteContainerViewModel = new PaletteContainerViewModel();
         InitializeConnections();
     }
@@ -164,6 +167,7 @@ public class MainViewModel : ViewModelBase
         IPictureRepository pictureRepository,
         IDrawStyleFactory drawStyleFactory,
         IPictureEditingUseCase pictureEditingUseCase,
+        IDrawingSessionProvider drawingSessionProvider,
         DrawableCanvasViewModel drawableCanvasViewModel,
         AnimationViewModel animationViewModel,
         DrawingSessionViewModel drawingSessionViewModel,
@@ -175,6 +179,7 @@ public class MainViewModel : ViewModelBase
         _pictureRepository = pictureRepository;
         _drawStyleFactory = drawStyleFactory;
         _pictureEditingUseCase = pictureEditingUseCase;
+        _drawingSessionProvider = drawingSessionProvider;
         _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
         _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
 

@@ -19,16 +19,16 @@ namespace Eede.Presentation.ViewModels.DataDisplay
     public class DockPictureViewModel : ViewModelBase
     {
 
-        public static DockPictureViewModel FromFile(IImageFile file, GlobalState globalState, AnimationViewModel animationViewModel)
+        public static DockPictureViewModel FromFile(IImageFile file, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter)
         {
-            DockPictureViewModel vm = new(globalState, animationViewModel);
+            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter);
             vm.Initialize(file);
             return vm;
         }
 
-        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState, AnimationViewModel animationViewModel)
+        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter)
         {
-            DockPictureViewModel vm = new(globalState, animationViewModel);
+            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter);
             vm.Initialize(BitmapFileReader.CreateEmptyBitmapFile(size));
             return vm;
         }
@@ -53,11 +53,13 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public event AsyncEventHandler<EventArgs> RequestClose;
         public GlobalState GlobalState { get; }
         public AnimationViewModel AnimationViewModel { get; }
+        private readonly IBitmapAdapter<Bitmap> BitmapAdapter;
 
-        public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel)
+        public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter)
         {
             GlobalState = globalState;
             AnimationViewModel = animationViewModel;
+            BitmapAdapter = bitmapAdapter;
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
             OnPictureUpdate = ReactiveCommand.Create<Picture>(ExecutePictureUpdate);
@@ -87,7 +89,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             Initialize(BitmapFileReader.CreateEmptyBitmapFile(new PictureSize(32, 32)));
             _ = this.WhenAnyValue(x => x.PictureBuffer).Subscribe(_ =>
              {
-                 PremultipliedBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
+                 PremultipliedBitmap = BitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
              });
         }
 
@@ -97,7 +99,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             {
                 return;
             }
-            Bitmap bitmap = PictureBitmapAdapter.ConvertToBitmap(PictureBuffer);
+            Bitmap bitmap = BitmapAdapter.ConvertToBitmap(PictureBuffer);
             PictureSaveEventArgs args = new(ImageFile.WithBitmap(bitmap));
             await PictureSave.Invoke(this, args);
             if (!args.IsCanceled)
@@ -110,7 +112,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public void Initialize(IImageFile file)
         {
             ImageFile = file;
-            PictureBuffer = PictureBitmapAdapter.ConvertToPicture(file.Bitmap);
+            PictureBuffer = BitmapAdapter.ConvertToPicture(file.Bitmap);
             Subject = file.Subject();
 
             Edited = false;

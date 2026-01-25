@@ -458,3 +458,4 @@ memory-bank/*
 .rooignore
 .roomodes
 insert-variables.cmd
+.gemini/*

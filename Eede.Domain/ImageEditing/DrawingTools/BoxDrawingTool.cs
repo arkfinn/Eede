@@ -5,25 +5,25 @@ namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public abstract record BoxDrawingTool : IDrawStyle
 {
-    public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return buffer.UpdateDrawing(Draw(drawer, positionHistory, isShift));
+        return buffer.UpdateDrawing(Draw(drawer, coordinateHistory, isShift));
     }
 
-    public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return buffer.UpdateDrawing(Draw(drawer, positionHistory, isShift));
+        return buffer.UpdateDrawing(Draw(drawer, coordinateHistory, isShift));
     }
 
-    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return ContextFactory.Create(Draw(drawer, positionHistory, isShift));
+        return ContextFactory.Create(Draw(drawer, coordinateHistory, isShift));
     }
 
-    protected abstract Picture Draw(Drawer drawer, PositionHistory positionHistory, bool isShift);
+    protected abstract Picture Draw(Drawer drawer, CoordinateHistory coordinateHistory, bool isShift);
 
     protected Position CalculateShiftedPosition(Position start, Position end)
     {

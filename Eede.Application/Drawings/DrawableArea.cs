@@ -105,6 +105,15 @@ namespace Eede.Application.Drawings
             return history.Update(RealPositionOf(displayPosition).ToPosition());
         }
 
+        private CoordinateHistory ToCoordinateHistory(PositionHistory history)
+        {
+            if (history == null) return null;
+            var h = new CoordinateHistory(new CanvasCoordinate(history.Start.X, history.Start.Y));
+            h = h.Update(new CanvasCoordinate(history.Last.X, history.Last.Y));
+            h = h.Update(new CanvasCoordinate(history.Now.X, history.Now.Y));
+            return h;
+        }
+
         public DrawingResult DrawStart(IDrawStyle drawStyle, PenStyle penStyle, DrawingBuffer picture, Position displayPosition, bool isShift)
         {
             if (picture.IsDrawing())
@@ -118,7 +127,7 @@ namespace Eede.Application.Drawings
                 return new DrawingResult(picture, this);
             }
 
-            DrawingBuffer result = drawStyle.DrawStart(picture, penStyle, nextHistory, isShift);
+            DrawingBuffer result = drawStyle.DrawStart(picture, penStyle, ToCoordinateHistory(nextHistory), isShift);
             return new DrawingResult(result, UpdatePositionHistory(nextHistory));
         }
 
@@ -129,7 +138,7 @@ namespace Eede.Application.Drawings
             {
                 return new DrawingResult(picture, UpdatePositionHistory(nextHistory));
             }
-            DrawingBuffer result = drawStyle.Drawing(picture, penStyle, nextHistory, isShift);
+            DrawingBuffer result = drawStyle.Drawing(picture, penStyle, ToCoordinateHistory(nextHistory), isShift);
             return new DrawingResult(result, UpdatePositionHistory(nextHistory));
         }
 
@@ -140,7 +149,7 @@ namespace Eede.Application.Drawings
                 return new DrawingResult(picture, this);
             }
             PositionHistory nextHistory = NextPositionHistory(PositionHistory, displayPosition);
-            DrawingBuffer result = drawStyle.DrawEnd(picture, penStyle, nextHistory, isShift);
+            DrawingBuffer result = drawStyle.DrawEnd(picture, penStyle, ToCoordinateHistory(nextHistory), isShift);
             return new DrawingResult(result, ClearPositionHistory());
         }
 

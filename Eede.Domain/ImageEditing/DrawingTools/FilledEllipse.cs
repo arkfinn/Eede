@@ -4,9 +4,9 @@ namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public record FilledEllipse : BoxDrawingTool
 {
-    protected override Picture Draw(Drawer drawer, PositionHistory positionHistory, bool isShift)
+    protected override Picture Draw(Drawer drawer, CoordinateHistory coordinateHistory, bool isShift)
     {
-        Position to = isShift ? CalculateShiftedPosition(positionHistory.Start, positionHistory.Now) : positionHistory.Now;
-        return drawer.DrawFillEllipse(positionHistory.Start, to);
+        Position to = isShift ? CalculateShiftedPosition(coordinateHistory.Start.ToPosition(), coordinateHistory.Now.ToPosition()) : coordinateHistory.Now.ToPosition();
+        return drawer.DrawFillEllipse(coordinateHistory.Start.ToPosition(), to);
     }
 }

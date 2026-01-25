@@ -21,11 +21,11 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             FilledEllipse tool = new();
             
             // DrawerTests uses (5, 5) to (9, 9) for fillEllipse1.png
-            PositionHistory pos = new(new Position(5, 5));
+            CoordinateHistory pos = new(new CanvasCoordinate(5, 5));
             
             // Act
             DrawingBuffer startBuffer = tool.DrawStart(buffer, penStyle, pos, false);
-            PositionHistory endPos = pos.Update(new Position(9, 9));
+            CoordinateHistory endPos = pos.Update(new CanvasCoordinate(9, 9));
             DrawingBuffer endBuffer = tool.DrawEnd(startBuffer, penStyle, endPos, false);
 
             // Assert

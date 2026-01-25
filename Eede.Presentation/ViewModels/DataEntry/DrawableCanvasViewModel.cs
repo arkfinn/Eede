@@ -5,6 +5,7 @@ using Eede.Application.Colors;
 using Eede.Application.Common.SelectionStates;
 using Eede.Application.Drawings;
 using Eede.Application.Pictures;
+using Eede.Application.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
@@ -57,19 +58,24 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly PictureSize _gridSize;
 
     private readonly GlobalState _globalState;
-    private readonly ICommand _addFrameCommand;
+    private readonly IAddFrameProvider _addFrameProvider;
     private readonly IClipboardService _clipboardService;
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
-    private readonly DrawActionUseCase _drawActionUseCase;
+    private readonly IDrawActionUseCase _drawActionUseCase;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
     public ReactiveCommand<Unit, Unit> PasteCommand { get; }
 
-    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService, IBitmapAdapter<Bitmap> bitmapAdapter, DrawActionUseCase drawActionUseCase)
+    public DrawableCanvasViewModel(
+        GlobalState globalState,
+        IAddFrameProvider addFrameProvider,
+        IClipboardService clipboardService,
+        IBitmapAdapter<Bitmap> bitmapAdapter,
+        IDrawActionUseCase drawActionUseCase)
     {
         _globalState = globalState;
-        _addFrameCommand = addFrameCommand;
+        _addFrameProvider = addFrameProvider;
         _clipboardService = clipboardService;
         _bitmapAdapter = bitmapAdapter;
         _drawActionUseCase = drawActionUseCase;
@@ -95,7 +101,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             {
                 if (isAnim)
                 {
-                    _selectionState = new AnimationEditingState(_addFrameCommand, GridSettings, PictureBuffer?.Previous?.Size ?? new PictureSize(0, 0));
+                    _selectionState = new AnimationEditingState(_addFrameProvider, GridSettings, PictureBuffer?.Previous?.Size ?? new PictureSize(0, 0));
                 }
                 else
                 {

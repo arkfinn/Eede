@@ -15,14 +15,14 @@ MainViewModel からサブ ViewModel の生成知識を排除し、IDrawingSessi
 - [x] Task: 既存のテストが、この新しいコンストラクタ経由でもパスすることを確認
 - [x] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md)
 
-## Phase 1: IDrawingSessionProvider による状態の「外部化」
-アプリの心臓部である DrawingSession を、ViewModel の外へ安全に逃がします。
+## Phase 1: IDrawingSessionProvider による状態の「外部化」 [checkpoint: 3198d2b]
+アプリの心臓部である `DrawingSession` を、ViewModel の外へ安全に逃がします。
 
-- [ ] Task: IDrawingSessionProvider 実装。初期化時に「デフォルトのセッション」を生成する責務を持たせる
-- [ ] Task: DrawingSessionViewModel を、Provider を監視して自身のプロパティを更新する「薄い View 用アダプタ」に変更
-- [ ] Task: MainViewModel で保持していたセッション管理ロジックを Provider へ委譲
-- [ ] Task: テストを実行し、Undo/Redo の挙動が破壊されていないことを確認
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: `IDrawingSessionProvider` 実装。初期化時に「デフォルトのセッション」を生成する責務を持たせる
+- [x] Task: `DrawingSessionViewModel` を、Provider を監視して自身のプロパティを更新する「薄い View 用アダプタ」に変更
+- [x] Task: `MainViewModel` で保持していたセッション管理ロジックを Provider へ委譲
+- [x] Task: テストを実行し、Undo/Redo の挙動が破壊されていないことを確認
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2: サブ ViewModel の逐次的な DI 移行
 一気に行わず、1つずつ ViewModel を App.axaml.cs での管理に移行します。

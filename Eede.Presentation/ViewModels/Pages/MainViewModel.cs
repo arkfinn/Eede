@@ -136,32 +136,6 @@ public class MainViewModel : ViewModelBase
 
     public MainViewModel(
         GlobalState State,
-        IAnimationService animationService,
-        IClipboardService clipboardService,
-        IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
-        IPictureRepository pictureRepository,
-        IDrawStyleFactory drawStyleFactory,
-        IPictureEditingUseCase pictureEditingUseCase,
-        IDrawingSessionProvider drawingSessionProvider)
-    {
-        _state = State;
-        _clipboardService = clipboardService;
-        _bitmapAdapter = bitmapAdapter;
-        _pictureRepository = pictureRepository;
-        _drawStyleFactory = drawStyleFactory;
-        _pictureEditingUseCase = pictureEditingUseCase;
-        _drawingSessionProvider = drawingSessionProvider;
-        _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
-        _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
-        AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
-        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService, _bitmapAdapter, new DrawActionUseCase());
-        DrawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
-        PaletteContainerViewModel = new PaletteContainerViewModel();
-        InitializeConnections();
-    }
-
-    public MainViewModel(
-        GlobalState State,
         IClipboardService clipboardService,
         IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
         IPictureRepository pictureRepository,

@@ -20,7 +20,7 @@ using Eede.Presentation.Files;
 
 namespace Eede.Presentation.ViewModels.Animations;
 
-public class AnimationViewModel : ViewModelBase
+public class AnimationViewModel : ViewModelBase, IAddFrameProvider
 {
     private readonly IAnimationService _animationService;
     private readonly IFileSystem _fileSystem;
@@ -53,6 +53,11 @@ public class AnimationViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
     public ReactiveCommand<IStorageService, Unit> ExportCommand { get; }
     public ReactiveCommand<IStorageService, Unit> ImportCommand { get; }
+
+    public void AddFrame(int cellIndex)
+    {
+        AddFrameCommand.Execute(cellIndex).Subscribe();
+    }
 
     public AnimationViewModel(IAnimationService animationService, IFileSystem fileSystem)
     {

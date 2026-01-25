@@ -9,7 +9,7 @@ namespace Eede.Application.Drawings
     /// 描画操作（開始、移動、終了）のユースケース。
     /// ViewModel からの入力を受け取り、ドメインモデルを調整する。
     /// </summary>
-    public class DrawActionUseCase
+    public class DrawActionUseCase : IDrawActionUseCase
     {
         private CoordinateHistory History;
 

@@ -1,5 +1,6 @@
 using Eede.Application.Drawings;
 using Eede.Application.Services;
+using Eede.Application.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
@@ -19,14 +20,14 @@ namespace Eede.Presentation.Tests.ViewModels.DataEntry;
 public class DrawableCanvasViewModelTests
 {
     private Mock<IClipboardService> _mockClipboard;
-    private Mock<ICommand> _mockAddFrameCommand;
+    private Mock<IAddFrameProvider> _mockAddFrameProvider;
     private GlobalState _globalState;
 
     [SetUp]
     public void Setup()
     {
         _mockClipboard = new Mock<IClipboardService>();
-        _mockAddFrameCommand = new Mock<ICommand>();
+        _mockAddFrameProvider = new Mock<IAddFrameProvider>();
         _globalState = new GlobalState();
     }
 
@@ -37,7 +38,7 @@ public class DrawableCanvasViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameCommand.Object, _mockClipboard.Object, new AvaloniaBitmapAdapter(), new DrawActionUseCase());
+            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameProvider.Object, _mockClipboard.Object, new AvaloniaBitmapAdapter(), new DrawActionUseCase());
             viewModel.SetPicture(Picture.CreateEmpty(new PictureSize(32, 32)));
             
             // 赤色で(10, 10)に描画
@@ -75,7 +76,7 @@ public class DrawableCanvasViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameCommand.Object, _mockClipboard.Object, new AvaloniaBitmapAdapter(), new DrawActionUseCase());
+            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameProvider.Object, _mockClipboard.Object, new AvaloniaBitmapAdapter(), new DrawActionUseCase());
             viewModel.SetPicture(Picture.CreateEmpty(new PictureSize(32, 32)));
             
             var initialMag = viewModel.Magnification.Value;

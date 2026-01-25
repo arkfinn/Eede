@@ -1,5 +1,7 @@
 using Eede.Application.Animations;
 using Eede.Application.Services;
+using Eede.Application.Pictures;
+using Eede.Domain.ImageEditing;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Pages;
 using Moq;
@@ -17,6 +19,8 @@ public class MainViewModelTests
     private GlobalState _globalState;
     private Mock<IAnimationService> _mockAnimationService;
     private Mock<IClipboardService> _mockClipboardService;
+    private Mock<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>> _mockBitmapAdapter;
+    private Mock<IPictureRepository> _mockPictureRepository;
 
     [SetUp]
     public void Setup()
@@ -25,6 +29,18 @@ public class MainViewModelTests
         _mockAnimationService = new Mock<IAnimationService>();
         _mockAnimationService.Setup(s => s.Patterns).Returns(new System.Collections.Generic.List<Eede.Domain.Animations.AnimationPattern>());
         _mockClipboardService = new Mock<IClipboardService>();
+        _mockBitmapAdapter = new Mock<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>>();
+        _mockPictureRepository = new Mock<IPictureRepository>();
+    }
+
+    private MainViewModel CreateViewModel()
+    {
+        return new MainViewModel(
+            _globalState,
+            _mockAnimationService.Object,
+            _mockClipboardService.Object,
+            _mockBitmapAdapter.Object,
+            _mockPictureRepository.Object);
     }
 
     [AvaloniaTest]
@@ -33,7 +49,7 @@ public class MainViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new MainViewModel(_globalState, _mockAnimationService.Object, _mockClipboardService.Object);
+            var viewModel = CreateViewModel();
 
             Assert.Multiple(() =>
             {
@@ -51,7 +67,7 @@ public class MainViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new MainViewModel(_globalState, _mockAnimationService.Object, _mockClipboardService.Object);
+            var viewModel = CreateViewModel();
 
             // 初期状態ではUndo/Redo不可
             Assert.That(((System.Windows.Input.ICommand)viewModel.UndoCommand).CanExecute(null), Is.False);

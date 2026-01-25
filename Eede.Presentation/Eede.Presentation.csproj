@@ -92,6 +92,8 @@
     <PackageReference Include="Dock.Avalonia" Version="11.2.0" />
 
     <PackageReference Include="Dock.Model.Avalonia" Version="11.2.0" />
+
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="ReactiveUI" Version="20.1.63" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
     <PackageReference Include="System.Text.Json" Version="9.0.1" />

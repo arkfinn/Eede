@@ -467,9 +467,8 @@ public class DrawableCanvasViewModel : ViewModelBase
     }
 
 
-    public RegionSelector SetupRegionSelector()
+    public void SetupRegionSelector(RegionSelector tool)
     {
-        RegionSelector tool = new();
         tool.OnDrawStart += (sender, args) =>
         {
             IsRegionSelecting = false;
@@ -491,7 +490,6 @@ public class DrawableCanvasViewModel : ViewModelBase
             IsRegionSelecting = true;
             _selectionState = new SelectedState(new Selection(SelectingArea));
         };
-        return tool;
     }
 
     private async Task ExecuteCopyAction()

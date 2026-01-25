@@ -83,6 +83,11 @@ public class DraggingState : ISelectionState
         return SelectionCursor.Move;
     }
 
+    public PictureArea? GetSelectingArea()
+    {
+        return GetCurrentArea();
+    }
+
     private PictureArea GetCurrentArea()
     {
         int deltaX = _currentPosition.X - _startPosition.X;

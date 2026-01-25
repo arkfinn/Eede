@@ -54,6 +54,11 @@ namespace Eede.Application.Common.SelectionStates
             return SelectionCursor.Default;
         }
 
+        public PictureArea? GetSelectingArea()
+        {
+            return _selectingArea.CreateRealArea(_selectingArea.BoxSize);
+        }
+
         private SelectedState EndRegionSelection()
         {
             var area = _selectingArea.CreateRealArea(_selectingArea.BoxSize);

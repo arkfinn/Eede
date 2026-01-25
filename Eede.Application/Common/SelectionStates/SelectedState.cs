@@ -71,4 +71,9 @@ public class SelectedState : ISelectionState
     {
         return Selection.Contains(mousePosition) ? SelectionCursor.Move : SelectionCursor.Default;
     }
+
+    public PictureArea? GetSelectingArea()
+    {
+        return Selection.Area;
+    }
 }

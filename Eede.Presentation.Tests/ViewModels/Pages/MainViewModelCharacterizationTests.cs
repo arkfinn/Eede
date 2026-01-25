@@ -16,6 +16,9 @@ using Eede.Domain.SharedKernel;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Palettes;
 using Eede.Application.UseCase.Pictures;
+using Eede.Presentation.ViewModels.DataEntry;
+using Eede.Presentation.ViewModels.Animations;
+using Eede.Presentation.Common.Services;
 
 namespace Eede.Presentation.Tests.ViewModels.Pages;
 
@@ -124,6 +127,80 @@ public class MainViewModelCharacterizationTests
 
             // Undo が実行可能になる
             Assert.That(((System.Windows.Input.ICommand)viewModel.UndoCommand).CanExecute(null), Is.True);
+        });
+    }
+
+    [AvaloniaTest]
+    public void AnimationMode_Sync_Test()
+    {
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            var viewModel = CreateViewModel();
+
+            // 初期状態は false
+            Assert.That(viewModel.DrawableCanvasViewModel.IsAnimationMode, Is.False);
+
+            // アニメーションモードを ON に
+            viewModel.AnimationViewModel.IsAnimationMode = true;
+            scheduler.AdvanceBy(1);
+
+            // DrawableCanvasViewModel に伝播することを確認
+            Assert.That(viewModel.DrawableCanvasViewModel.IsAnimationMode, Is.True);
+        });
+    }
+
+    [AvaloniaTest]
+    public void PaletteColor_Fetch_Sync_Test()
+    {
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            var viewModel = CreateViewModel();
+            var expectedColor = viewModel.PaletteContainerViewModel.Palette.Fetch(0);
+
+            // パレットの0番目の色を取得する操作をシミュレート
+            viewModel.PaletteContainerViewModel.FetchColorCommand.Execute(0).Subscribe();
+            scheduler.AdvanceBy(1);
+
+            // MainViewModel の PenColor に反映されることを確認
+            Assert.That(viewModel.PenColor, Is.EqualTo(expectedColor));
+        });
+    }
+
+    [AvaloniaTest]
+    public void External_Injection_Constructor_Test()
+    {
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+
+            // 各サブ ViewModel を個別に作成
+            var drawableCanvasViewModel = new DrawableCanvasViewModel(
+                _globalState, null, _mockClipboardService.Object, _mockBitmapAdapter.Object, new Eede.Application.Drawings.DrawActionUseCase());
+            var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Moq.Mock<IFileSystem>().Object);
+            var drawingSessionViewModel = new DrawingSessionViewModel(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
+            var paletteContainerViewModel = new PaletteContainerViewModel();
+
+            // 新しいコンストラクタ（接合部）を使用して MainViewModel を生成
+            var viewModel = new MainViewModel(
+                _globalState,
+                _mockClipboardService.Object,
+                _mockBitmapAdapter.Object,
+                _mockPictureRepository.Object,
+                _mockDrawStyleFactory.Object,
+                _mockPictureEditingUseCase.Object,
+                drawableCanvasViewModel,
+                animationViewModel,
+                drawingSessionViewModel,
+                paletteContainerViewModel
+            );
+
+            // 同期機能が働いているか確認（アニメーションモード）
+            Assert.That(viewModel.DrawableCanvasViewModel.IsAnimationMode, Is.False);
+            animationViewModel.IsAnimationMode = true;
+            scheduler.AdvanceBy(1);
+            Assert.That(viewModel.DrawableCanvasViewModel.IsAnimationMode, Is.True);
         });
     }
 }

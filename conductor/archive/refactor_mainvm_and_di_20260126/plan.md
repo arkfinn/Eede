@@ -32,10 +32,10 @@ Microsoft.Extensions.DependencyInjection を導入し、ファイルI/Oの依存
 - [x] Task: ツール切り替え機能の単体テストを追加
 - [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
-## Phase 3: Push/Pull ロジックの UseCase 移譲 (優先度3)
+## Phase 3: Push/Pull ロジックの UseCase 移譲 (優先度3) [checkpoint: 0ed57be]
 ViewModel 内に記述されているデータの加工・転送ロジックを Application 層へ移動します。
 
-- [ ] Task: OnPushToDrawArea および OnPullFromDrawArea のロジックを PictureEditingUseCase または新規 UseCase へ整理
-- [ ] Task: ViewModel は UseCase を呼び出すだけの薄い実装に変更
-- [ ] Task: 全てのテスト（Phase 0 を含む）を実行し、最終的な整合性を確認
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: `OnPushToDrawArea` および `OnPullFromDrawArea` のロジックを `PictureEditingUseCase` または新規 UseCase へ整理
+- [x] Task: ViewModel は UseCase を呼び出すだけの薄い実装に変更
+- [x] Task: 全てのテスト（Phase 0 を含む）を実行し、最終的な整合性を確認
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)

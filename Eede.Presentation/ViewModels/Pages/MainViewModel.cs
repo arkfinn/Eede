@@ -123,6 +123,7 @@ public class MainViewModel : ViewModelBase
     private readonly IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> _bitmapAdapter;
     private readonly IPictureRepository _pictureRepository;
     private readonly IDrawStyleFactory _drawStyleFactory;
+    private readonly IPictureEditingUseCase _pictureEditingUseCase;
     private readonly SavePictureUseCase _savePictureUseCase;
     private readonly LoadPictureUseCase _loadPictureUseCase;
     private readonly GlobalState _state;
@@ -138,13 +139,15 @@ public class MainViewModel : ViewModelBase
         IClipboardService clipboardService,
         IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
         IPictureRepository pictureRepository,
-        IDrawStyleFactory drawStyleFactory)
+        IDrawStyleFactory drawStyleFactory,
+        IPictureEditingUseCase pictureEditingUseCase)
     {
         _state = State;
         _clipboardService = clipboardService;
         _bitmapAdapter = bitmapAdapter;
         _pictureRepository = pictureRepository;
         _drawStyleFactory = drawStyleFactory;
+        _pictureEditingUseCase = pictureEditingUseCase;
         _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
         _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
@@ -398,7 +401,7 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        PictureEditingUseCase.EditResult result = PictureEditingUseCase.PushToCanvas(
+        PictureEditingUseCase.EditResult result = _pictureEditingUseCase.PushToCanvas(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             vm.PictureBuffer,
             args.Rect);
@@ -428,7 +431,7 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        PictureEditingUseCase.EditResult result = PictureEditingUseCase.PullFromCanvas(
+        PictureEditingUseCase.EditResult result = _pictureEditingUseCase.PullFromCanvas(
             vm.PictureBuffer,
             DrawableCanvasViewModel.PictureBuffer.Previous,
             args.Position,
@@ -440,11 +443,11 @@ public class MainViewModel : ViewModelBase
     private void ExecutePictureAction(PictureActions actionType)
     {
         PictureArea? area = DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null;
-        PictureEditingUseCase.EditResult result = area.HasValue ? PictureEditingUseCase.ExecuteAction(
+        PictureEditingUseCase.EditResult result = area.HasValue ? _pictureEditingUseCase.ExecuteAction(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType,
             area.Value
-        ) : PictureEditingUseCase.ExecuteAction(
+        ) : _pictureEditingUseCase.ExecuteAction(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType
         );

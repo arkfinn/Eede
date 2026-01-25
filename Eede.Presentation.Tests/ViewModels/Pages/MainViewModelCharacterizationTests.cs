@@ -15,6 +15,7 @@ using System;
 using Eede.Domain.SharedKernel;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Palettes;
+using Eede.Application.UseCase.Pictures;
 
 namespace Eede.Presentation.Tests.ViewModels.Pages;
 
@@ -27,6 +28,7 @@ public class MainViewModelCharacterizationTests
     private Mock<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>> _mockBitmapAdapter;
     private Mock<IPictureRepository> _mockPictureRepository;
     private Mock<IDrawStyleFactory> _mockDrawStyleFactory;
+    private Mock<IPictureEditingUseCase> _mockPictureEditingUseCase;
 
     [SetUp]
     public void Setup()
@@ -38,6 +40,7 @@ public class MainViewModelCharacterizationTests
         _mockBitmapAdapter = new Mock<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>>();
         _mockPictureRepository = new Mock<IPictureRepository>();
         _mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
+        _mockPictureEditingUseCase = new Mock<IPictureEditingUseCase>();
 
         // 各ツールの生成をモック
         _mockDrawStyleFactory.Setup(f => f.Create(DrawStyleType.FreeCurve)).Returns(new FreeCurve());
@@ -53,7 +56,8 @@ public class MainViewModelCharacterizationTests
             _mockClipboardService.Object,
             _mockBitmapAdapter.Object,
             _mockPictureRepository.Object,
-            _mockDrawStyleFactory.Object);
+            _mockDrawStyleFactory.Object,
+            _mockPictureEditingUseCase.Object);
     }
 
     [AvaloniaTest]

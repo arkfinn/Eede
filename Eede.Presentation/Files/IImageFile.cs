@@ -9,6 +9,7 @@ namespace Eede.Presentation.Files
     public interface IImageFile
     {
         Bitmap Bitmap { get; }
+        FilePath Path { get; }
         IImageFile WithFilePath(FilePath filePath);
         IImageFile WithBitmap(Bitmap bitmap);
         string Subject();

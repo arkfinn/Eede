@@ -7,13 +7,13 @@ MainViewModel からサブ ViewModel の生成知識を排除し、IDrawingSessi
 - **依存関係の反転 (DIP)**: サブ ViewModel 群を直接注入する前に、まず DrawingSession の「所有権」を ViewModel から Provider へ安全に移動させる。
 - **仕様化テストの維持**: 移行中、常に MainViewModel の仕様化テストをパスさせ続け、壊れた瞬間を即座に特定する。
 
-## Phase 0: 追加の仕様化テストと接合部の準備
+## Phase 0: 追加の仕様化テストと接合部の準備 [checkpoint: f6bbb08]
 変更前の挙動をより厳密に固定し、リファクタリング用の「入り口」を作ります。
 
-- [ ] Task: サブ ViewModel 間の状態同期（アニメーション ⇔ キャンバス等）を網羅するテストを追加
-- [ ] Task: MainViewModel に、サブ ViewModel 群を引数に取る「オーバーロードされたコンストラクタ」を作成 (接合部の作成)
-- [ ] Task: 既存のテストが、この新しいコンストラクタ経由でもパスすることを確認
-- [ ] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md)
+- [x] Task: サブ ViewModel 間の状態同期（アニメーション ⇔ キャンバス等）を網羅するテストを追加
+- [x] Task: `MainViewModel` に、サブ ViewModel 群を引数に取る「オーバーロードされたコンストラクタ」を作成 (接合部の作成)
+- [x] Task: 既存のテストが、この新しいコンストラクタ経由でもパスすることを確認
+- [x] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md)
 
 ## Phase 1: IDrawingSessionProvider による状態の「外部化」
 アプリの心臓部である DrawingSession を、ViewModel の外へ安全に逃がします。

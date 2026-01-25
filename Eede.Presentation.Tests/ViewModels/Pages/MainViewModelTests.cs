@@ -1,9 +1,10 @@
 using Eede.Application.Animations;
 using Eede.Application.Services;
 using Eede.Application.Pictures;
-using Eede.Domain.ImageEditing;
 using Eede.Application.UseCase.Pictures;
+using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.SharedKernel;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Pages;
 using Moq;
@@ -25,6 +26,7 @@ public class MainViewModelTests
     private Mock<IPictureRepository> _mockPictureRepository;
     private Mock<IDrawStyleFactory> _mockDrawStyleFactory;
     private Mock<IPictureEditingUseCase> _mockPictureEditingUseCase;
+    private Mock<IDrawingSessionProvider> _mockDrawingSessionProvider;
 
     [SetUp]
     public void Setup()
@@ -37,6 +39,9 @@ public class MainViewModelTests
         _mockPictureRepository = new Mock<IPictureRepository>();
         _mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
         _mockPictureEditingUseCase = new Mock<IPictureEditingUseCase>();
+        _mockDrawingSessionProvider = new Mock<IDrawingSessionProvider>();
+        _mockDrawingSessionProvider.Setup(p => p.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
+
         // Default behavior for factory
         _mockDrawStyleFactory.Setup(f => f.Create(It.IsAny<DrawStyleType>())).Returns(new FreeCurve());
     }
@@ -50,7 +55,8 @@ public class MainViewModelTests
             _mockBitmapAdapter.Object,
             _mockPictureRepository.Object,
             _mockDrawStyleFactory.Object,
-            _mockPictureEditingUseCase.Object);
+            _mockPictureEditingUseCase.Object,
+            _mockDrawingSessionProvider.Object);
     }
 
     [AvaloniaTest]

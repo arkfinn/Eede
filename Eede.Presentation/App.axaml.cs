@@ -60,6 +60,7 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
         services.AddSingleton<IDrawStyleFactory, DrawStyleFactory>();
         services.AddSingleton<IPictureEditingUseCase, PictureEditingUseCase>();
+        services.AddSingleton<IDrawingSessionProvider, DrawingSessionProvider>();
 
         // Adapters / Infrastructure
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();

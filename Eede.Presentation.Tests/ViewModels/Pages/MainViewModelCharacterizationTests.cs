@@ -32,6 +32,7 @@ public class MainViewModelCharacterizationTests
     private Mock<IPictureRepository> _mockPictureRepository;
     private Mock<IDrawStyleFactory> _mockDrawStyleFactory;
     private Mock<IPictureEditingUseCase> _mockPictureEditingUseCase;
+    private IDrawingSessionProvider _drawingSessionProvider;
 
     [SetUp]
     public void Setup()
@@ -44,6 +45,7 @@ public class MainViewModelCharacterizationTests
         _mockPictureRepository = new Mock<IPictureRepository>();
         _mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
         _mockPictureEditingUseCase = new Mock<IPictureEditingUseCase>();
+        _drawingSessionProvider = new DrawingSessionProvider();
 
         // 各ツールの生成をモック
         _mockDrawStyleFactory.Setup(f => f.Create(DrawStyleType.FreeCurve)).Returns(new FreeCurve());
@@ -60,7 +62,8 @@ public class MainViewModelCharacterizationTests
             _mockBitmapAdapter.Object,
             _mockPictureRepository.Object,
             _mockDrawStyleFactory.Object,
-            _mockPictureEditingUseCase.Object);
+            _mockPictureEditingUseCase.Object,
+            _drawingSessionProvider);
     }
 
     [AvaloniaTest]
@@ -179,7 +182,7 @@ public class MainViewModelCharacterizationTests
             var drawableCanvasViewModel = new DrawableCanvasViewModel(
                 _globalState, null, _mockClipboardService.Object, _mockBitmapAdapter.Object, new Eede.Application.Drawings.DrawActionUseCase());
             var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Moq.Mock<IFileSystem>().Object);
-            var drawingSessionViewModel = new DrawingSessionViewModel(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
+            var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
             var paletteContainerViewModel = new PaletteContainerViewModel();
 
             // 新しいコンストラクタ（接合部）を使用して MainViewModel を生成
@@ -190,6 +193,7 @@ public class MainViewModelCharacterizationTests
                 _mockPictureRepository.Object,
                 _mockDrawStyleFactory.Object,
                 _mockPictureEditingUseCase.Object,
+                _drawingSessionProvider,
                 drawableCanvasViewModel,
                 animationViewModel,
                 drawingSessionViewModel,

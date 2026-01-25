@@ -1,3 +1,4 @@
+using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -8,14 +9,22 @@ namespace Eede.Presentation.ViewModels.Pages
 {
     public class DrawingSessionViewModel : ViewModelBase
     {
+        private readonly IDrawingSessionProvider _provider;
+
         [Reactive] public DrawingSession CurrentSession { get; private set; }
 
         public ReactiveCommand<Unit, Unit> UndoCommand { get; }
         public ReactiveCommand<Unit, Unit> RedoCommand { get; }
 
-        public DrawingSessionViewModel(DrawingSession initialSession)
+        public DrawingSessionViewModel(IDrawingSessionProvider provider)
         {
-            CurrentSession = initialSession ?? throw new ArgumentNullException(nameof(initialSession));
+            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
+            CurrentSession = _provider.CurrentSession;
+
+            _provider.SessionChanged += (newSession) =>
+            {
+                CurrentSession = newSession;
+            };
 
             UndoCommand = ReactiveCommand.Create(ExecuteUndo, this.WhenAnyValue(
                 x => x.CurrentSession,
@@ -28,17 +37,17 @@ namespace Eede.Presentation.ViewModels.Pages
 
         private void ExecuteUndo()
         {
-            CurrentSession = CurrentSession.Undo();
+            _provider.Update(CurrentSession.Undo());
         }
 
         private void ExecuteRedo()
         {
-            CurrentSession = CurrentSession.Redo();
+            _provider.Update(CurrentSession.Redo());
         }
 
         public void Push(Picture picture)
         {
-            CurrentSession = CurrentSession.Push(picture);
+            _provider.Update(CurrentSession.Push(picture));
         }
     }
 }

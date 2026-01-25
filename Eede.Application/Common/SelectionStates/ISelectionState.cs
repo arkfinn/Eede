@@ -16,6 +16,7 @@ namespace Eede.Application.Common.SelectionStates
         (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand picturePushAction);
         SelectionPreviewInfo GetSelectionPreviewInfo();
         SelectionCursor GetCursor(Position mousePosition);
+        PictureArea? GetSelectingArea();
     }
 
     public enum SelectionCursor

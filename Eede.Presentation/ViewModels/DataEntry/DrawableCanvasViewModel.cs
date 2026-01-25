@@ -4,6 +4,7 @@ using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
 using Eede.Application.Common.SelectionStates;
 using Eede.Application.Drawings;
+using Eede.Application.Pictures;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
@@ -58,16 +59,20 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly GlobalState _globalState;
     private readonly ICommand _addFrameCommand;
     private readonly IClipboardService _clipboardService;
+    private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
+    private readonly DrawActionUseCase _drawActionUseCase;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
     public ReactiveCommand<Unit, Unit> PasteCommand { get; }
 
-    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService)
+    public DrawableCanvasViewModel(GlobalState globalState, ICommand addFrameCommand, IClipboardService clipboardService, IBitmapAdapter<Bitmap> bitmapAdapter, DrawActionUseCase drawActionUseCase)
     {
         _globalState = globalState;
         _addFrameCommand = addFrameCommand;
         _clipboardService = clipboardService;
+        _bitmapAdapter = bitmapAdapter;
+        _drawActionUseCase = drawActionUseCase;
         _gridSize = new(16, 16);
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
@@ -169,8 +174,7 @@ public class DrawableCanvasViewModel : ViewModelBase
                     var previewBase = Picture.CreateEmpty(magnifiedPicture.Size);
                     var simulatedPreview = previewBase.Blend(new DirectImageBlender(), magnifiedPicture, new Position(0, 0));
                     
-                    _ = new PictureBitmapAdapter();
-                    MagnifiedPreviewBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(simulatedPreview);
+                    MagnifiedPreviewBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(simulatedPreview);
                 }
                 else
                 {
@@ -264,8 +268,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             PreviewPixels = null;
         }
 
-        _ = new PictureBitmapAdapter();
-        MyBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(Picture);
+        MyBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(Picture);
     }
 
     public ReactiveCommand<Position, Unit> DrawBeginCommand { get; }
@@ -277,7 +280,8 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void UpdateCursorSize(Position pos)
     {
         if (_selectionState == null) return;
-        var selectionCursor = _selectionState.GetCursor(Minify(pos));
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var selectionCursor = _selectionState.GetCursor(displayCoordinate.ToCanvas(Magnification).ToPosition());
         ActiveCursor = selectionCursor switch
         {
             SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
@@ -294,9 +298,14 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         UpdateCursorSize(pos);
 
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var currentArea = IsAnimationMode
+            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+
         ISelectionState nextState = _selectionState.HandlePointerLeftButtonPressed(
-            GetCurrentHalfBoxArea(pos),
-            Minify(pos),
+            currentArea,
+            displayCoordinate.ToCanvas(Magnification).ToPosition(),
             null, // pullAction はここでは不要（またはダミー）
             () => PictureBuffer.Previous,
             InternalUpdateCommand);
@@ -316,23 +325,19 @@ public class DrawableCanvasViewModel : ViewModelBase
         UpdateImage();
     }
 
-    private HalfBoxArea GetCurrentHalfBoxArea(Position pos)
-    {
-        if (IsAnimationMode)
-        {
-            return HalfBoxArea.Create(Minify(pos), GridSettings.CellSize);
-        }
-        return HalfBoxArea.Create(Minify(pos), _gridSize);
-    }
-
-    private Position Minify(Position pos)
-    {
-        return new Position(Magnification.Minify(pos.X), Magnification.Minify(pos.Y));
-    }
-
     private void ExecutePonterRightButtonPressedAction(Position pos)
     {
-        (ISelectionState nextState, HalfBoxArea _) = _selectionState.HandlePointerRightButtonPressed(GetCurrentHalfBoxArea(pos), Minify(pos), _gridSize, InternalUpdateCommand);
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var currentArea = IsAnimationMode
+            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+
+        (ISelectionState nextState, HalfBoxArea _) = _selectionState.HandlePointerRightButtonPressed(
+            currentArea,
+            displayCoordinate.ToCanvas(Magnification).ToPosition(),
+            _gridSize,
+            InternalUpdateCommand);
+
         if (_selectionState is DraggingState && nextState is SelectedState selected)
         {
             SelectingArea = selected.Selection.Area;
@@ -370,7 +375,17 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         UpdateCursorSize(pos);
 
-        (_, _) = _selectionState.HandlePointerMoved(GetCurrentHalfBoxArea(pos), true, Minify(pos), PictureBuffer.Previous.Size);
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var currentArea = IsAnimationMode
+            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+
+        (bool visible, HalfBoxArea nextCursorArea) = _selectionState.HandlePointerMoved(
+            currentArea,
+            true,
+            displayCoordinate.ToCanvas(Magnification).ToPosition(),
+            PictureBuffer.Previous.Size);
+
         if (_selectionState is DraggingState)
         {
             DrawableArea = DrawableArea.Leave(PictureBuffer);
@@ -390,31 +405,44 @@ public class DrawableCanvasViewModel : ViewModelBase
         {
             return;
         }
-        if (_selectionState is DraggingState dragging)
+
+        var previous = PictureBuffer.Previous;
+        var previousArea = IsRegionSelecting ? (PictureArea?)SelectingArea : null;
+
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var currentArea = IsAnimationMode
+            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+
+        ISelectionState nextState = _selectionState.HandlePointerLeftButtonReleased(
+            currentArea,
+            displayCoordinate.ToCanvas(Magnification).ToPosition(),
+            null, // picturePushAction
+            InternalUpdateCommand);
+
+        if (_selectionState is RegionSelectingState && nextState is SelectedState selected)
         {
-            var previous = dragging.OriginalPicture;
-            var previousArea = SelectingArea;
-            var nextState = _selectionState.HandlePointerLeftButtonReleased(GetCurrentHalfBoxArea(pos), Minify(pos), null, InternalUpdateCommand);
-            if (nextState is SelectedState selected)
-            {
-                SelectingArea = selected.Selection.Area;
-                IsRegionSelecting = true;
-                _selectionState = nextState;
-                UpdateImage();
-                Drew?.Invoke(previous, PictureBuffer.Previous, previousArea, SelectingArea);
-            }
-            else
-            {
-                _selectionState = nextState;
-                UpdateImage();
-            }
+            SelectingArea = selected.Selection.Area;
+            IsRegionSelecting = true;
+            _selectionState = nextState;
+            UpdateImage();
             return;
         }
+
+        if (_selectionState is DraggingState)
+        {
+            Drew?.Invoke(previous, PictureBuffer.Previous, previousArea, SelectingArea);
+            _selectionState = nextState;
+            UpdateImage();
+            return;
+        }
+        _selectionState = nextState;
 
         if (!PictureBuffer.IsDrawing())
         {
             return;
         }
+
         Picture previousImage = PictureBuffer.Previous;
 
         DrawingResult result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(pos.X, pos.Y), IsShifted);
@@ -438,7 +466,12 @@ public class DrawableCanvasViewModel : ViewModelBase
         tool.OnDrawStart += (sender, args) =>
         {
             IsRegionSelecting = false;
-            _selectionState = new NormalCursorState(GetCurrentHalfBoxArea(args.Start));
+            var displayCoordinate = new DisplayCoordinate(args.Start.X, args.Start.Y);
+            // 本来は args.Start は既にキャンバス座標のはずだが、既存の実装に合わせる
+            var currentArea = IsAnimationMode
+                ? HalfBoxArea.Create(args.Start, GridSettings.CellSize)
+                : HalfBoxArea.Create(args.Start, _gridSize);
+            _selectionState = new NormalCursorState(currentArea);
         };
         tool.OnDrawing += (sender, args) =>
         {

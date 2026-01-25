@@ -6,28 +6,28 @@ namespace Eede.Domain.ImageEditing.DrawingTools;
 // 実装内容を再検討する
 public record Line : IDrawStyle
 {
-    public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return buffer.UpdateDrawing(drawer.DrawPoint(positionHistory.Now));
+        return buffer.UpdateDrawing(drawer.DrawPoint(coordinateHistory.Now.ToPosition()));
     }
 
-    public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return buffer.UpdateDrawing(Draw(drawer, positionHistory, isShift));
+        return buffer.UpdateDrawing(Draw(drawer, coordinateHistory, isShift));
     }
 
-    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, PositionHistory positionHistory, bool isShift)
+    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return ContextFactory.Create(Draw(drawer, positionHistory, isShift));
+        return ContextFactory.Create(Draw(drawer, coordinateHistory, isShift));
     }
 
-    private Picture Draw(Drawer drawer, PositionHistory positionHistory, bool isShift)
+    private Picture Draw(Drawer drawer, CoordinateHistory coordinateHistory, bool isShift)
     {
-        Position to = isShift ? CalculateShiftedPosition(positionHistory.Start, positionHistory.Now) : positionHistory.Now;
-        return drawer.DrawLine(positionHistory.Start, to);
+        Position to = isShift ? CalculateShiftedPosition(coordinateHistory.Start.ToPosition(), coordinateHistory.Now.ToPosition()) : coordinateHistory.Now.ToPosition();
+        return drawer.DrawLine(coordinateHistory.Start.ToPosition(), to);
     }
 
     private Position CalculateShiftedPosition(Position beginPos, Position endPos)

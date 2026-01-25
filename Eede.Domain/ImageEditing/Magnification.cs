@@ -21,5 +21,15 @@ namespace Eede.Domain.ImageEditing
         {
             return (int)(value / Value);
         }
+
+        public float Scale(float value)
+        {
+            return value * Value;
+        }
+
+        public float Unscale(float value)
+        {
+            return value / Value;
+        }
     }
 }

@@ -21,11 +21,11 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             Ellipse tool = new();
             
             // DrawerTests uses (10, 10) to (14, 14) for ellipse1.png
-            PositionHistory pos = new(new Position(10, 10));
+            CoordinateHistory pos = new(new CanvasCoordinate(10, 10));
             
             // Act
             DrawingBuffer startBuffer = tool.DrawStart(buffer, penStyle, pos, false);
-            PositionHistory endPos = pos.Update(new Position(14, 14));
+            CoordinateHistory endPos = pos.Update(new CanvasCoordinate(14, 14));
             DrawingBuffer endBuffer = tool.DrawEnd(startBuffer, penStyle, endPos, false);
 
             // Assert

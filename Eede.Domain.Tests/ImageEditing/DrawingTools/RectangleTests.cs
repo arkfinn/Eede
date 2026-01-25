@@ -22,12 +22,12 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             Rectangle tool = new();
             
             // Start at (10, 10)
-            PositionHistory pos = new(new Position(10, 10));
+            CoordinateHistory pos = new(new CanvasCoordinate(10, 10));
             
             // Act
             DrawingBuffer startBuffer = tool.DrawStart(buffer, penStyle, pos, false);
             // Move to (15, 15)
-            PositionHistory endPos = pos.Update(new Position(15, 15));
+            CoordinateHistory endPos = pos.Update(new CanvasCoordinate(15, 15));
             DrawingBuffer endBuffer = tool.DrawEnd(startBuffer, penStyle, endPos, false);
 
             // Assert

@@ -1,3 +1,4 @@
+using Eede.Application.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
@@ -8,13 +9,13 @@ namespace Eede.Application.Common.SelectionStates
 {
     public class AnimationEditingState : ISelectionState
     {
-        private readonly ICommand _addFrameCommand;
+        private readonly IAddFrameProvider _addFrameProvider;
         private readonly GridSettings _grid;
         private readonly PictureSize _imageSize;
 
-        public AnimationEditingState(ICommand addFrameCommand, GridSettings grid, PictureSize imageSize)
+        public AnimationEditingState(IAddFrameProvider addFrameProvider, GridSettings grid, PictureSize imageSize)
         {
-            _addFrameCommand = addFrameCommand;
+            _addFrameProvider = addFrameProvider;
             _grid = grid;
             _imageSize = imageSize;
         }
@@ -24,7 +25,7 @@ namespace Eede.Application.Common.SelectionStates
             int index = _grid.CalculateCellIndex(cursorArea.RealPosition, _imageSize);
             if (index >= 0)
             {
-                _addFrameCommand?.Execute(index);
+                _addFrameProvider?.AddFrame(index);
             }
             return this;
         }

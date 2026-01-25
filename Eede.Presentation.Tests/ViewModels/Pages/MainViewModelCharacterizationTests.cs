@@ -16,6 +16,7 @@ using Eede.Domain.SharedKernel;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Palettes;
 using Eede.Application.UseCase.Pictures;
+using Eede.Application.Drawings;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.Common.Services;
@@ -33,6 +34,7 @@ public class MainViewModelCharacterizationTests
     private Mock<IDrawStyleFactory> _mockDrawStyleFactory;
     private Mock<IPictureEditingUseCase> _mockPictureEditingUseCase;
     private IDrawingSessionProvider _drawingSessionProvider;
+    private Mock<IDrawActionUseCase> _mockDrawActionUseCase;
 
     [SetUp]
     public void Setup()
@@ -46,6 +48,7 @@ public class MainViewModelCharacterizationTests
         _mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
         _mockPictureEditingUseCase = new Mock<IPictureEditingUseCase>();
         _drawingSessionProvider = new DrawingSessionProvider();
+        _mockDrawActionUseCase = new Mock<IDrawActionUseCase>();
 
         // 各ツールの生成をモック
         _mockDrawStyleFactory.Setup(f => f.Create(DrawStyleType.FreeCurve)).Returns(new FreeCurve());
@@ -55,15 +58,23 @@ public class MainViewModelCharacterizationTests
 
     private MainViewModel CreateViewModel()
     {
+        var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Mock<IFileSystem>().Object);
+        var drawableCanvasViewModel = new DrawableCanvasViewModel(_globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object);
+        var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
+        var paletteContainerViewModel = new PaletteContainerViewModel();
+
         return new MainViewModel(
             _globalState,
-            _mockAnimationService.Object,
             _mockClipboardService.Object,
             _mockBitmapAdapter.Object,
             _mockPictureRepository.Object,
             _mockDrawStyleFactory.Object,
             _mockPictureEditingUseCase.Object,
-            _drawingSessionProvider);
+            _drawingSessionProvider,
+            drawableCanvasViewModel,
+            animationViewModel,
+            drawingSessionViewModel,
+            paletteContainerViewModel);
     }
 
     [AvaloniaTest]
@@ -179,9 +190,9 @@ public class MainViewModelCharacterizationTests
             RxApp.MainThreadScheduler = scheduler;
 
             // 各サブ ViewModel を個別に作成
-            var drawableCanvasViewModel = new DrawableCanvasViewModel(
-                _globalState, null, _mockClipboardService.Object, _mockBitmapAdapter.Object, new Eede.Application.Drawings.DrawActionUseCase());
             var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Moq.Mock<IFileSystem>().Object);
+            var drawableCanvasViewModel = new DrawableCanvasViewModel(
+                _globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object);
             var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
             var paletteContainerViewModel = new PaletteContainerViewModel();
 

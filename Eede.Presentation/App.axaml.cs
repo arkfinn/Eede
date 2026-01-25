@@ -12,9 +12,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Eede.Presentation.Common.Adapters;
 using Eede.Domain.ImageEditing;
 using Eede.Application.Pictures;
+using Eede.Presentation.ViewModels.Animations;
+using Eede.Presentation.Common.Services;
+using Eede.Presentation.Files;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Application.Drawings;
 using Eede.Application.UseCase.Pictures;
+using Eede.Presentation.ViewModels.DataEntry;
 using System;
 
 namespace Eede.Presentation;
@@ -61,12 +65,19 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IDrawStyleFactory, DrawStyleFactory>();
         services.AddSingleton<IPictureEditingUseCase, PictureEditingUseCase>();
         services.AddSingleton<IDrawingSessionProvider, DrawingSessionProvider>();
+        services.AddSingleton<IFileSystem, RealFileSystem>();
+        services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();
 
         // Adapters / Infrastructure
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();
         services.AddSingleton<IPictureRepository, PictureRepository>();
 
         // ViewModels
+        services.AddTransient<PaletteContainerViewModel>();
+        services.AddSingleton<AnimationViewModel>();
+        services.AddSingleton<IAddFrameProvider>(sp => sp.GetRequiredService<AnimationViewModel>());
+        services.AddTransient<DrawableCanvasViewModel>();
+        services.AddTransient<DrawingSessionViewModel>();
         services.AddTransient<MainViewModel>();
     }
 }

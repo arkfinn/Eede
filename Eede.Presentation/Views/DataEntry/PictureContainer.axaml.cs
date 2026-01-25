@@ -111,7 +111,7 @@ namespace Eede.Presentation.Views.DataEntry
             {
                 var animVM = _viewModel.AnimationViewModel;
                 var currentGrid = new GridSettings(new PictureSize(animVM.GridWidth, animVM.GridHeight), new Position(0, 0), 0);
-                return new AnimationEditingState(animVM.AddFrameCommand, currentGrid, _viewModel.PictureBuffer.Size);
+                return new AnimationEditingState(animVM, currentGrid, _viewModel.PictureBuffer.Size);
             }
             return new NormalCursorState(_viewModel!.GlobalState.CursorArea);
         }

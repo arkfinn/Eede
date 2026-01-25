@@ -14,12 +14,14 @@ public class RGBOnlyImageBlender : IImageBlender
     {
         byte[] toPixels = to.CloneImage();
 
+        int startY = Math.Max(0, toPosition.Y);
+        int startX = Math.Max(0, toPosition.X);
         int maxY = Math.Min(toPosition.Y + from.Height, to.Height);
         int maxX = Math.Min(toPosition.X + from.Width, to.Width);
 
-        for (int y = toPosition.Y; y < maxY; y++)
+        for (int y = startY; y < maxY; y++)
         {
-            for (int x = toPosition.X; x < maxX; x++)
+            for (int x = startX; x < maxX; x++)
             {
                 int toPos = (x * 4) + (to.Stride * y);
                 int fromPos = ((x - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));

@@ -1,5 +1,7 @@
-﻿using Avalonia.Media.Imaging;
+using Avalonia.Media.Imaging;
 using Eede.Application.Pictures;
+using Eede.Application.UseCase.Pictures;
+using Eede.Domain.Files;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
@@ -12,6 +14,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.DataDisplay
@@ -19,17 +22,17 @@ namespace Eede.Presentation.ViewModels.DataDisplay
     public class DockPictureViewModel : ViewModelBase
     {
 
-        public static DockPictureViewModel FromFile(IImageFile file, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter)
+        public static DockPictureViewModel FromFile(Picture picture, FilePath filePath, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, SavePictureUseCase saveUseCase, LoadPictureUseCase loadUseCase)
         {
-            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter);
-            vm.Initialize(file);
+            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, saveUseCase, loadUseCase);
+            vm.Initialize(picture, filePath);
             return vm;
         }
 
-        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter)
+        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, SavePictureUseCase saveUseCase, LoadPictureUseCase loadUseCase)
         {
-            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter);
-            vm.Initialize(BitmapFileReader.CreateEmptyBitmapFile(size));
+            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, saveUseCase, loadUseCase);
+            vm.Initialize(Picture.CreateEmpty(size), FilePath.Empty());
             return vm;
         }
 
@@ -44,7 +47,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public string Subject { get; private set; }
         [Reactive] public string Title { get; private set; }
         [Reactive] public bool Edited { get; set; }
-        [Reactive] public IImageFile ImageFile { get; private set; }
+        [Reactive] public FilePath FilePath { get; private set; }
         [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
         public ReactiveCommand<Unit, bool> OnClosing { get; }
         public ReactiveCommand<Unit, bool> CloseCommand { get; }
@@ -54,12 +57,17 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public GlobalState GlobalState { get; }
         public AnimationViewModel AnimationViewModel { get; }
         private readonly IBitmapAdapter<Bitmap> BitmapAdapter;
+        private readonly SavePictureUseCase SavePictureUseCase;
+        private readonly LoadPictureUseCase LoadPictureUseCase;
 
-        public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter)
+        public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, SavePictureUseCase savePictureUseCase, LoadPictureUseCase loadPictureUseCase)
         {
             GlobalState = globalState;
             AnimationViewModel = animationViewModel;
             BitmapAdapter = bitmapAdapter;
+            SavePictureUseCase = savePictureUseCase;
+            LoadPictureUseCase = loadPictureUseCase;
+
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
             OnPictureUpdate = ReactiveCommand.Create<Picture>(ExecutePictureUpdate);
@@ -72,22 +80,48 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             Enabled = true;
             Closable = true;
 
+            SetupObservations();
+            Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
+        }
+
+        private void SetupObservations()
+        {
+            SetupAnimationCursorObservation();
+            SetupEditStateObservation();
+            SetupTitleObservation();
+            SetupBitmapObservation();
+        }
+
+        private void SetupAnimationCursorObservation()
+        {
             this.WhenAnyValue(x => x.AnimationViewModel.IsAnimationMode, x => x.AnimationCursor)
                 .Subscribe(x =>
                 {
                     ActiveCursor = x.Item1 ? (x.Item2 ?? Avalonia.Input.Cursor.Default) : Avalonia.Input.Cursor.Default;
                 });
+        }
 
+        private void SetupEditStateObservation()
+        {
             _ = this.WhenAnyValue(x => x.Edited).Subscribe(_ =>
             {
                 Closable = !Edited;
             });
+        }
+
+        private void SetupTitleObservation()
+        {
             _ = this.WhenAnyValue(x => x.Subject, x => x.Edited).Subscribe(_ =>
             {
                 Title = Edited ? "●" + Subject : Subject;
             });
-            Initialize(BitmapFileReader.CreateEmptyBitmapFile(new PictureSize(32, 32)));
-            _ = this.WhenAnyValue(x => x.PictureBuffer).Subscribe(_ =>
+        }
+
+        private void SetupBitmapObservation()
+        {
+            _ = this.WhenAnyValue(x => x.PictureBuffer)
+                .Where(x => x != null)
+                .Subscribe(_ =>
              {
                  PremultipliedBitmap = BitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
              });
@@ -95,25 +129,29 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
         public async Task Save()
         {
-            if (PictureSave == null)
-            {
-                return;
-            }
-            Bitmap bitmap = BitmapAdapter.ConvertToBitmap(PictureBuffer);
-            PictureSaveEventArgs args = new(ImageFile.WithBitmap(bitmap));
+            if (PictureSave == null) return;
+            PictureSaveEventArgs args = CreateSaveEventArgs();
             await PictureSave.Invoke(this, args);
-            if (!args.IsCanceled)
-            {
-                Initialize(args.File);
-            }
-
+            HandleSaveResult(args);
         }
 
-        public void Initialize(IImageFile file)
+        private PictureSaveEventArgs CreateSaveEventArgs()
         {
-            ImageFile = file;
-            PictureBuffer = BitmapAdapter.ConvertToPicture(file.Bitmap);
-            Subject = file.Subject();
+            Bitmap bitmap = BitmapAdapter.ConvertToBitmap(PictureBuffer);
+            return new PictureSaveEventArgs(new BitmapFile(bitmap, FilePath));
+        }
+
+        private void HandleSaveResult(PictureSaveEventArgs args)
+        {
+            if (args.IsCanceled) return;
+            Initialize(BitmapAdapter.ConvertToPicture(args.File.Bitmap), args.File.Path);
+        }
+
+        public void Initialize(Picture picture, FilePath path)
+        {
+            FilePath = path;
+            PictureBuffer = picture;
+            Subject = path.ToString();
 
             Edited = false;
         }
@@ -131,23 +169,27 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
         public async Task<bool> ExecuteClosing()
         {
-            if (!Edited)
-            {
-                return true;
-            }
+            if (!Edited) return true;
+            await AutoSaveIfNeeded();
+            UpdateClosableState();
+            return Closable;
+        }
+
+        private async Task AutoSaveIfNeeded()
+        {
             if (SaveAlertResult == SaveAlertResult.Save)
             {
                 await Save();
             }
+        }
 
+        private void UpdateClosableState()
+        {
             Closable = SaveAlertResult switch
             {
                 SaveAlertResult.Cancel => false,
-                SaveAlertResult.Save => true,
                 _ => true,
             };
-
-            return Closable;
         }
 
 

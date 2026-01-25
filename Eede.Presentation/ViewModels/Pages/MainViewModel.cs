@@ -4,6 +4,7 @@ using Avalonia.Platform.Storage;
 using Dock.Model.Core;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
+using Eede.Domain.Files;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
@@ -119,9 +120,12 @@ public class MainViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _isCloseConfirmed, value);
     }
 
-    private GlobalState _state;
-    private readonly IClipboardService _clipboardService;
     private readonly IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> _bitmapAdapter;
+    private readonly IPictureRepository _pictureRepository;
+    private readonly SavePictureUseCase _savePictureUseCase;
+    private readonly LoadPictureUseCase _loadPictureUseCase;
+    private readonly GlobalState _state;
+    private readonly IClipboardService _clipboardService;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
@@ -132,6 +136,9 @@ public class MainViewModel : ViewModelBase
         _state = State;
         _clipboardService = clipboardService;
         _bitmapAdapter = new AvaloniaBitmapAdapter();
+        _pictureRepository = new PictureRepository(_bitmapAdapter);
+        _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
+        _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
         AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
         DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService, _bitmapAdapter, new DrawActionUseCase());
         DrawingSessionViewModel = new DrawingSessionViewModel(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
@@ -274,7 +281,7 @@ public class MainViewModel : ViewModelBase
         e.Handled = true;
     }
 
-    public void DropPicture(object sender, DragEventArgs e)
+    public async void DropPicture(object sender, DragEventArgs e)
     {
         if (e.Data is not IDataObject dataObject)
         {
@@ -296,7 +303,7 @@ public class MainViewModel : ViewModelBase
 
         foreach (IStorageItem file in files)
         {
-            DockPictureViewModel newPicture = OpenPicture(file.Path);
+            DockPictureViewModel? newPicture = await OpenPicture(file.Path);
             if (newPicture != null)
             {
                 Pictures.Add(newPicture);
@@ -311,7 +318,7 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        DockPictureViewModel? newPicture = OpenPicture(result);
+        DockPictureViewModel? newPicture = await OpenPicture(result);
         if (newPicture != null)
         {
             Pictures.Add(newPicture);
@@ -319,21 +326,16 @@ public class MainViewModel : ViewModelBase
 
     }
 
-    private DockPictureViewModel? OpenPicture(Uri path)
+    private async Task<DockPictureViewModel?> OpenPicture(Uri path)
     {
-        IImageFile? imageFile = ReadBitmapFile(path);
-        if (imageFile == null)
+        FilePath filePath = new(path.LocalPath);
+        Picture picture = await _loadPictureUseCase.ExecuteAsync(filePath);
+        if (picture == null)
         {
-            // エラーが発生した場合、またはファイルが読み込めなかった場合はnullを返す
             return null;
         }
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(imageFile, _state, AnimationViewModel, _bitmapAdapter);
+        DockPictureViewModel vm = DockPictureViewModel.FromFile(picture, filePath, _state, AnimationViewModel, _bitmapAdapter, _savePictureUseCase, _loadPictureUseCase);
         return SetupDockPicture(vm);
-    }
-
-    private IImageFile? ReadBitmapFile(Uri path)
-    {
-        return new BitmapFileReader().Read(path);
     }
 
     private DockPictureViewModel SetupDockPicture(DockPictureViewModel vm)
@@ -353,7 +355,7 @@ public class MainViewModel : ViewModelBase
         NewPictureWindowViewModel result = await ShowCreateNewPictureModal.Handle(store);
         if (result.Result)
         {
-            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state, AnimationViewModel, _bitmapAdapter)));
+            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state, AnimationViewModel, _bitmapAdapter, _savePictureUseCase, _loadPictureUseCase)));
         }
     }
 

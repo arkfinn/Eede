@@ -1,6 +1,8 @@
 using Eede.Application.Animations;
 using Eede.Application.Services;
+using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Animations;
+using Eede.Domain.Files;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Files;
@@ -17,6 +19,8 @@ using ReactiveUI.Testing;
 using ReactiveUI;
 using Avalonia.Media.Imaging;
 using System.IO;
+using System.Threading.Tasks;
+using System;
 
 namespace Eede.Presentation.Tests.ViewModels.DataDisplay;
 
@@ -26,6 +30,9 @@ public class DockPictureViewModelTests
     private Mock<IAnimationService> _mockAnimationService;
     private Mock<IFileSystem> _mockFileSystem;
     private AnimationViewModel _animationViewModel;
+    private Mock<IPictureRepository> _mockPictureRepository;
+    private SavePictureUseCase _savePictureUseCase;
+    private LoadPictureUseCase _loadPictureUseCase;
 
     [SetUp]
     public void Setup()
@@ -35,6 +42,9 @@ public class DockPictureViewModelTests
         _mockAnimationService.Setup(s => s.Patterns).Returns(new System.Collections.Generic.List<AnimationPattern>());
         _mockFileSystem = new Mock<IFileSystem>();
         _animationViewModel = new AnimationViewModel(_mockAnimationService.Object, _mockFileSystem.Object);
+        _mockPictureRepository = new Mock<IPictureRepository>();
+        _savePictureUseCase = new SavePictureUseCase(_mockPictureRepository.Object);
+        _loadPictureUseCase = new LoadPictureUseCase(_mockPictureRepository.Object);
     }
 
     [AvaloniaTest]
@@ -43,19 +53,17 @@ public class DockPictureViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter());
-            
-            var mockFile = new Mock<IImageFile>();
-            // 32x32の空のビットマップを作成
-            var bitmap = new WriteableBitmap(new Avalonia.PixelSize(32, 32), new Avalonia.Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
-            mockFile.Setup(f => f.Bitmap).Returns(bitmap);
-            mockFile.Setup(f => f.Subject()).Returns("TestImage");
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _savePictureUseCase, _loadPictureUseCase);
 
-            viewModel.Initialize(mockFile.Object);
+            var size = new PictureSize(32, 32);
+            var picture = Picture.CreateEmpty(size);
+            var path = new FilePath("TestImage.png");
+
+            viewModel.Initialize(picture, path);
 
             Assert.Multiple(() =>
             {
-                Assert.That(viewModel.Subject, Is.EqualTo("TestImage"));
+                Assert.That(viewModel.Subject, Is.EqualTo("TestImage.png"));
                 Assert.That(viewModel.Edited, Is.False);
                 Assert.That(viewModel.PictureBuffer.Size.Width, Is.EqualTo(32));
                 Assert.That(viewModel.PictureBuffer.Size.Height, Is.EqualTo(32));
@@ -69,18 +77,14 @@ public class DockPictureViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter());
-            
-            var initialPicture = Picture.CreateEmpty(new PictureSize(32, 32));
-            var mockFile = new Mock<IImageFile>();
-            var bitmap = new WriteableBitmap(new Avalonia.PixelSize(32, 32), new Avalonia.Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
-            mockFile.Setup(f => f.Bitmap).Returns(bitmap);
-            viewModel.Initialize(mockFile.Object);
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _savePictureUseCase, _loadPictureUseCase);
+
+            var initialSize = new PictureSize(32, 32);
+            viewModel.Initialize(Picture.CreateEmpty(initialSize), new FilePath("test.png"));
 
             Assert.That(viewModel.Edited, Is.False);
 
             var updatedPicture = Picture.CreateEmpty(new PictureSize(32, 32));
-            // 本来は何か描画されているはずだが、ここでは空で。
             viewModel.OnPictureUpdate.Execute(updatedPicture).Subscribe();
             scheduler.AdvanceBy(1);
 
@@ -90,6 +94,37 @@ public class DockPictureViewModelTests
                 Assert.That(viewModel.PictureBuffer.Size, Is.EqualTo(updatedPicture.Size));
                 Assert.That(viewModel.PictureBuffer.Length, Is.EqualTo(updatedPicture.Length));
             });
+        });
+    }
+
+    [AvaloniaTest]
+    public void Characterization_Save()
+    {
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _savePictureUseCase, _loadPictureUseCase);
+
+            var mockFile = new Mock<IImageFile>();
+            var bitmap = new WriteableBitmap(new Avalonia.PixelSize(32, 32), new Avalonia.Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+            mockFile.Setup(f => f.Bitmap).Returns(bitmap);
+            mockFile.Setup(f => f.Path).Returns(new FilePath("test.png"));
+            mockFile.Setup(f => f.WithBitmap(It.IsAny<Bitmap>())).Returns(mockFile.Object);
+
+            viewModel.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), new FilePath("test.png"));
+            viewModel.Edited = true;
+
+            bool saveEventCalled = false;
+            viewModel.PictureSave += async (sender, args) =>
+            {
+                saveEventCalled = true;
+                await Task.CompletedTask;
+            };
+
+            viewModel.Save().Wait();
+
+            Assert.That(saveEventCalled, Is.True);
+            Assert.That(viewModel.Edited, Is.False, "Save successful should reset Edited flag");
         });
     }
 }

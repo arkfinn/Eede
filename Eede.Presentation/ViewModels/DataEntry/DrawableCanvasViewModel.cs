@@ -61,6 +61,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly PictureSize _gridSize;
     private ISelectionState _selectionState;
+    private PictureArea? _operationInitialSelectingArea;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
@@ -346,6 +347,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
 
+        _operationInitialSelectingArea = SelectingArea;
         UpdateCursorSize(pos);
 
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
@@ -496,7 +498,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
 
-        Drew?.Invoke(previousImage, PictureBuffer.Previous, null, null);
+        Drew?.Invoke(previousImage, PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea);
         UpdateImage();
     }
 

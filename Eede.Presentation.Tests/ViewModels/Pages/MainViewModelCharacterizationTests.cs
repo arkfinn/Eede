@@ -183,6 +183,37 @@ public class MainViewModelCharacterizationTests
     }
 
     [AvaloniaTest]
+    public void Undo_After_Move_Should_Restore_SelectingArea_Test()
+    {
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            var viewModel = CreateViewModel();
+            var initialArea = new PictureArea(new Position(0, 0), new PictureSize(10, 10));
+            var nextArea = new PictureArea(new Position(10, 10), new PictureSize(10, 10));
+
+            // 1. 初期状態を設定（範囲選択中とする）
+            viewModel.DrawableCanvasViewModel.SelectingArea = initialArea;
+            viewModel.DrawStyle = DrawStyleType.RegionSelect;
+            scheduler.AdvanceBy(1);
+
+            // 2. 移動操作（Push）をシミュレート
+            // ※ 現状の Push は Picture のみを受け取っているため、ここでは単に Push を呼ぶ
+            var nextPicture = Picture.CreateEmpty(new PictureSize(32, 32));
+            viewModel.DrawableCanvasViewModel.OnDrew.Execute(nextPicture).Subscribe();
+            viewModel.DrawableCanvasViewModel.SelectingArea = nextArea;
+            scheduler.AdvanceBy(1);
+
+            // 3. アンドゥ実行
+            viewModel.UndoCommand.Execute().Subscribe();
+            scheduler.AdvanceBy(1);
+
+            // 4. 検証: SelectingArea が初期状態に戻っているべき（現在は失敗するはず）
+            Assert.That(viewModel.DrawableCanvasViewModel.SelectingArea, Is.EqualTo(initialArea));
+        });
+    }
+
+    [AvaloniaTest]
     public void External_Injection_Constructor_Test()
     {
         new TestScheduler().With(scheduler =>

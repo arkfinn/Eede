@@ -82,4 +82,31 @@ public class DrawingSessionTests
             Assert.That(s2.CanUndo(), Is.True);
         });
     }
+
+    [Test]
+    public void DrawingSession_Undo_Restores_SelectingArea()
+    {
+        // Arrange
+        var initialArea = new PictureArea(new Position(0, 0), new PictureSize(10, 10));
+        var session = new DrawingSession(_initialPicture, initialArea); // このコンストラクタは未実装
+        
+        var nextPicture = Picture.CreateEmpty(_size);
+        var nextArea = new PictureArea(new Position(5, 5), new PictureSize(15, 15));
+        
+        // Act
+        var updatedSession = session.Push(nextPicture, nextArea); // この引数は未実装
+        
+        // Assert: Push後の状態
+        Assert.That(updatedSession.CurrentSelectingArea, Is.EqualTo(nextArea));
+        
+        // Act: Undo実行
+        var undoneSession = updatedSession.Undo();
+        
+        // Assert: Undo後の状態が復元されていること
+        Assert.Multiple(() =>
+        {
+            Assert.That(undoneSession.CurrentPicture, Is.EqualTo(_initialPicture));
+            Assert.That(undoneSession.CurrentSelectingArea, Is.EqualTo(initialArea));
+        });
+    }
 }

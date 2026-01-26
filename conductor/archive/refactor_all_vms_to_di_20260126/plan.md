@@ -24,19 +24,19 @@ MainViewModel からサブ ViewModel の生成知識を排除し、IDrawingSessi
 - [x] Task: テストを実行し、Undo/Redo の挙動が破壊されていないことを確認
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
-## Phase 2: サブ ViewModel の逐次的な DI 移行
-一気に行わず、1つずつ ViewModel を App.axaml.cs での管理に移行します。
+## Phase 2: サブ ViewModel の逐次的な DI 移行 [checkpoint: f661036]
+一気に行わず、1つずつ ViewModel を `App.axaml.cs` での管理に移行します。
 
-- [ ] Task: PaletteContainerViewModel を DI 化し、MainViewModel への注入に切り替える
-- [ ] Task: AnimationViewModel を DI 化（ファイルシステム等の依存も整理）
-- [ ] Task: DrawableCanvasViewModel を DI 化（これが最難関のため最後に実施）
-- [ ] Task: 各ステップで MainViewModel の仕様化テストを実行し、デグレを防止
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: `PaletteContainerViewModel` を DI 化し、`MainViewModel` への注入に切り替える
+- [x] Task: `AnimationViewModel` を DI 化（ファイルシステム等の依存も整理）
+- [x] Task: `DrawableCanvasViewModel` を DI 化（これが最難関のため最後に実施）
+- [x] Task: 各ステップで `MainViewModel` の仕様化テストを実行し、デグレを防止
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
-## Phase 3: 接合部のクリーンアップと DI コンテナの完全統合
+## Phase 3: 接合部のクリーンアップと DI コンテナの完全統合 [checkpoint: f661036]
 仮設のコンストラクタを削除し、設計図（DI登録）を完成させます。
 
-- [ ] Task: MainViewModel の古い（引数の少ない）コンストラクタを削除
-- [ ] Task: App.axaml.cs で全ての ViewModel 登録を AddTransient / AddSingleton に整理
-- [ ] Task: テストプロジェクトも DI を用いた解決に統一し、保守性を向上
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: `MainViewModel` の古い（引数の少ない）コンストラクタを削除
+- [x] Task: `App.axaml.cs` で全ての ViewModel 登録を `AddTransient` / `AddSingleton` に整理
+- [x] Task: テストプロジェクトも DI を用いた解決に統一し、保守性を向上
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)

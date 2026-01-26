@@ -39,46 +39,66 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public IImageTransfer ImageTransfer { get; set; }
     [Reactive] public bool IsShifted { get; set; }
     [Reactive] public bool IsRegionSelecting { get; set; }
-    [Reactive] public PictureArea SelectingArea { get; set; }
+    [Reactive] public PictureArea? SelectingArea { get; set; }
     [Reactive] public Thickness SelectingThickness { get; set; }
     [Reactive] public PictureSize SelectingSize { get; set; }
-    [Reactive] public Picture PreviewPixels { get; set; }
     [Reactive] public Position PreviewPosition { get; set; }
+    [Reactive] public Picture? PreviewPixels { get; set; }
     [Reactive] public Thickness PreviewThickness { get; set; }
     [Reactive] public PictureSize PreviewSize { get; set; }
     [Reactive] public Thickness RawPreviewThickness { get; set; }
     [Reactive] public PictureSize RawPreviewSize { get; set; }
-    [Reactive] public Bitmap MagnifiedPreviewBitmap { get; set; }
-    [Reactive] public Cursor ActiveCursor { get; set; }
+    [Reactive] public Bitmap? MagnifiedPreviewBitmap { get; set; }
     [Reactive] public bool IsAnimationMode { get; set; }
     [Reactive] public GridSettings GridSettings { get; set; }
-
-    private ISelectionState _selectionState;
-    private readonly ReactiveCommand<Picture, Unit> InternalUpdateCommand;
-    private readonly PictureSize _gridSize;
+    [Reactive] public Cursor ActiveCursor { get; set; }
 
     private readonly GlobalState _globalState;
     private readonly IAddFrameProvider _addFrameProvider;
     private readonly IClipboardService _clipboardService;
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
     private readonly IDrawActionUseCase _drawActionUseCase;
+    private readonly IDrawingSessionProvider _drawingSessionProvider;
+    private readonly PictureSize _gridSize;
+    private ISelectionState _selectionState;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
     public ReactiveCommand<Unit, Unit> PasteCommand { get; }
+    public ReactiveCommand<Picture, Unit> InternalUpdateCommand { get; }
 
     public DrawableCanvasViewModel(
         GlobalState globalState,
         IAddFrameProvider addFrameProvider,
         IClipboardService clipboardService,
         IBitmapAdapter<Bitmap> bitmapAdapter,
-        IDrawActionUseCase drawActionUseCase)
+        IDrawActionUseCase drawActionUseCase,
+        IDrawingSessionProvider drawingSessionProvider)
     {
         _globalState = globalState;
         _addFrameProvider = addFrameProvider;
         _clipboardService = clipboardService;
         _bitmapAdapter = bitmapAdapter;
         _drawActionUseCase = drawActionUseCase;
+        _drawingSessionProvider = drawingSessionProvider;
+
+        this.WhenAnyValue(x => x.SelectingArea)
+            .Subscribe(area =>
+            {
+                if (_drawingSessionProvider.CurrentSession != null && _drawingSessionProvider.CurrentSession.CurrentSelectingArea != area)
+                {
+                    _drawingSessionProvider.Update(_drawingSessionProvider.CurrentSession.UpdateSelectingArea(area));
+                }
+            });
+
+        _drawingSessionProvider.SessionChanged += (session) =>
+        {
+            if (SelectingArea != session.CurrentSelectingArea)
+            {
+                SelectingArea = session.CurrentSelectingArea;
+                UpdateImage();
+            }
+        };
         _gridSize = new(16, 16);
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
@@ -154,10 +174,15 @@ public class DrawableCanvasViewModel : ViewModelBase
         _ = this.WhenAnyValue(x => x.SelectingArea, x => x.Magnification, (area, mag) => (area, mag))
             .Subscribe(x =>
             {
-                if (x.area != null)
+                if (x.area.HasValue)
                 {
-                    SelectingThickness = new Thickness(x.mag.Magnify(x.area.X), x.mag.Magnify(x.area.Y), 0, 0);
-                    SelectingSize = new PictureSize(x.mag.Magnify(x.area.Width), x.mag.Magnify(x.area.Height));
+                    SelectingThickness = new Thickness(x.mag.Magnify(x.area.Value.X), x.mag.Magnify(x.area.Value.Y), 0, 0);
+                    SelectingSize = new PictureSize(x.mag.Magnify(x.area.Value.Width), x.mag.Magnify(x.area.Value.Height));
+                }
+                else
+                {
+                    SelectingThickness = new Thickness(0, 0, 0, 0);
+                    SelectingSize = new PictureSize(0, 0);
                 }
             });
 
@@ -442,11 +467,12 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
 
-        if (_selectionState is DraggingState)
+        if (_selectionState is DraggingState draggingState)
         {
+            var originalArea = draggingState.GetOriginalArea();
             _selectionState = nextState;
             UpdateImage();
-            Drew?.Invoke(previous, PictureBuffer.Previous, previousArea, SelectingArea);
+            Drew?.Invoke(previous, PictureBuffer.Previous, originalArea, SelectingArea);
             return;
         }
         _selectionState = nextState;
@@ -494,7 +520,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         {
             SelectingArea = PictureArea.FromPosition(args.Start, args.Now, PictureBuffer.Previous.Size);
             IsRegionSelecting = true;
-            _selectionState = new SelectedState(new Selection(SelectingArea));
+            _selectionState = new SelectedState(new Selection(SelectingArea.Value));
         };
     }
 
@@ -505,9 +531,9 @@ public class DrawableCanvasViewModel : ViewModelBase
         try
         {
             Picture target;
-            if (IsRegionSelecting && SelectingArea.Width > 0 && SelectingArea.Height > 0)
+            if (IsRegionSelecting && SelectingArea.HasValue && SelectingArea.Value.Width > 0 && SelectingArea.Value.Height > 0)
             {
-                target = PictureBuffer.Previous.CutOut(SelectingArea);
+                target = PictureBuffer.Previous.CutOut(SelectingArea.Value);
             }
             else
             {
@@ -534,10 +560,10 @@ public class DrawableCanvasViewModel : ViewModelBase
             Picture previous = PictureBuffer.Previous;
             PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
 
-            if (IsRegionSelecting && SelectingArea.Width > 0 && SelectingArea.Height > 0)
+            if (IsRegionSelecting && SelectingArea.HasValue && SelectingArea.Value.Width > 0 && SelectingArea.Value.Height > 0)
             {
-                target = previous.CutOut(SelectingArea);
-                cleared = previous.Clear(SelectingArea);
+                target = previous.CutOut(SelectingArea.Value);
+                cleared = previous.Clear(SelectingArea.Value);
             }
             else
             {

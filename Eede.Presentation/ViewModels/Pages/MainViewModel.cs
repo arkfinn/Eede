@@ -226,7 +226,7 @@ public class MainViewModel : ViewModelBase
         DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea) =>
         {
             // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
-            DrawingSessionViewModel.Push(now);
+            DrawingSessionViewModel.Push(now, nowArea, previousArea);
         };
 
         LoadPictureCommand = ReactiveCommand.Create<IStorageService>(ExecuteLoadPicture);
@@ -420,7 +420,7 @@ public class MainViewModel : ViewModelBase
             vm.PictureBuffer,
             args.Rect);
 
-        DrawingSessionViewModel.Push(result.Updated);
+        DrawingSessionViewModel.Push(result.Updated, result.SelectingArea, DrawableCanvasViewModel.SelectingArea);
     }
 
     private void SetPictureToDrawArea(Picture picture)
@@ -466,7 +466,7 @@ public class MainViewModel : ViewModelBase
             actionType
         );
 
-        DrawingSessionViewModel.Push(result.Updated);
+        DrawingSessionViewModel.Push(result.Updated, result.SelectingArea, DrawableCanvasViewModel.SelectingArea);
     }
 
     private IDrawStyle ExecuteUpdateDrawStyle(DrawStyleType drawStyle)

@@ -1,4 +1,5 @@
 using Eede.Application.Common.SelectionStates;
+using Eede.Application.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
@@ -11,32 +12,30 @@ namespace Eede.Application.Tests.Common.SelectionStates;
 [TestFixture]
 public class AnimationEditingStateTests
 {
-    private class MockCommand : ICommand
+    private class MockAddFrameProvider : IAddFrameProvider
     {
         public bool Executed { get; private set; }
-        public object Parameter { get; private set; }
-        public event EventHandler CanExecuteChanged;
+        public int Parameter { get; private set; }
 
-        public bool CanExecute(object parameter) => true;
-        public void Execute(object parameter)
+        public void AddFrame(int cellIndex)
         {
             Executed = true;
-            Parameter = parameter;
+            Parameter = cellIndex;
         }
     }
 
     [Test]
     public void LeftClickShouldExecuteAddFrameCommand()
     {
-        var addFrameCommand = new MockCommand();
+        var provider = new MockAddFrameProvider();
         var grid = new GridSettings(new PictureSize(16, 16), new Position(0, 0), 0);
-        var state = new AnimationEditingState(addFrameCommand, grid, new PictureSize(64, 64));
+        var state = new AnimationEditingState(provider, grid, new PictureSize(64, 64));
 
         var cursorArea = HalfBoxArea.Create(new Position(16, 16), new PictureSize(16, 16));
         state.HandlePointerLeftButtonPressed(cursorArea, new Position(16, 16), null, null, null);
 
-        Assert.That(addFrameCommand.Executed, Is.True);
+        Assert.That(provider.Executed, Is.True);
         // 64 / 16 = 4 columns. (16, 16) is col 1, row 1. Index = 1 * 4 + 1 = 5.
-        Assert.That(addFrameCommand.Parameter, Is.EqualTo(5));
+        Assert.That(provider.Parameter, Is.EqualTo(5));
     }
 }

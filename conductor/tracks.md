@@ -13,3 +13,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: 全 ViewModel の DI 移行と DrawingSession 管理の洗練（接合部を用いた段階的移行）**
 *Link: [./tracks/refactor_all_vms_to_di_20260126/](./tracks/refactor_all_vms_to_di_20260126/)*
+
+---
+
+- [ ] **Track: 範囲選択ツールのドラッグ移動後におけるアンドゥ時の不整合修正**
+*Link: [./tracks/fix_selection_undo_inconsistency_20260126/](./fix_selection_undo_inconsistency_20260126/)*

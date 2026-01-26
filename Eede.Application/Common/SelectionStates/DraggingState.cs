@@ -88,6 +88,11 @@ public class DraggingState : ISelectionState
         return GetCurrentArea();
     }
 
+    public PictureArea GetOriginalArea()
+    {
+        return _content.OriginalSelection.Area;
+    }
+
     private PictureArea GetCurrentArea()
     {
         int deltaX = _currentPosition.X - _startPosition.X;

@@ -70,7 +70,10 @@ public class MainViewModelTests
             drawableCanvasViewModel,
             animationViewModel,
             drawingSessionViewModel,
-            paletteContainerViewModel);
+            paletteContainerViewModel,
+            null!,
+            null!,
+            null!);
     }
 
     [AvaloniaTest]

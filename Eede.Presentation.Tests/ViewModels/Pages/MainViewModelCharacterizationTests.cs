@@ -74,7 +74,10 @@ public class MainViewModelCharacterizationTests
             drawableCanvasViewModel,
             animationViewModel,
             drawingSessionViewModel,
-            paletteContainerViewModel);
+            paletteContainerViewModel,
+            null!,
+            null!,
+            null!);
     }
 
     [AvaloniaTest]
@@ -248,7 +251,10 @@ public class MainViewModelCharacterizationTests
                 drawableCanvasViewModel,
                 animationViewModel,
                 drawingSessionViewModel,
-                paletteContainerViewModel
+                paletteContainerViewModel,
+                null!,
+                null!,
+                null!
             );
 
             // 同期機能が働いているか確認（アニメーションモード）

@@ -6,15 +6,20 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] [Refactoring DockPictureViewModel (DDD & Safe Refactor)](archive/refactor_dock_vm_20260125/index.md)
 ---
 
-- [ ] **Track: MainViewModel ‚ÌƒNƒŠ[ƒ“‰»‚Æ DI ƒRƒ“ƒeƒi‚Ì“±“üiA>C>B‚Ì‡‚ÅÀ{j**
+- [ ] **Track: MainViewModel ï¿½ÌƒNï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DI ï¿½Rï¿½ï¿½ï¿½eï¿½iï¿½Ì“ï¿½ï¿½ï¿½ï¿½iA>C>Bï¿½Ìï¿½ï¿½Åï¿½ï¿½{ï¿½j**
 *Link: [./tracks/refactor_mainvm_and_di_20260126/](./tracks/refactor_mainvm_and_di_20260126/)*
 
 ---
 
-- [ ] **Track: ‘S ViewModel ‚Ì DI ˆÚs‚Æ DrawingSession ŠÇ—‚Ìô—ûiÚ‡•”‚ğ—p‚¢‚½’iŠK“IˆÚsj**
+- [ ] **Track: ï¿½S ViewModel ï¿½ï¿½ DI ï¿½Úsï¿½ï¿½ DrawingSession ï¿½Ç—ï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½iï¿½Úï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½iï¿½Kï¿½Iï¿½Úsï¿½j**
 *Link: [./tracks/refactor_all_vms_to_di_20260126/](./tracks/refactor_all_vms_to_di_20260126/)*
 
 ---
 
-- [ ] **Track: ”ÍˆÍ‘I‘ğƒc[ƒ‹‚Ìƒhƒ‰ƒbƒOˆÚ“®Œã‚É‚¨‚¯‚éƒAƒ“ƒhƒD‚Ì•s®‡C³**
+- [ ] **Track: ï¿½ÍˆÍ‘Iï¿½ï¿½ï¿½cï¿½[ï¿½ï¿½ï¿½Ìƒhï¿½ï¿½ï¿½bï¿½Oï¿½Ú“ï¿½ï¿½ï¿½É‚ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½hï¿½Dï¿½ï¿½ï¿½Ì•sï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½**
 *Link: [./tracks/fix_selection_undo_inconsistency_20260126/](./fix_selection_undo_inconsistency_20260126/)*
+
+---
+
+- [x] **Track: ViewLocatorå°å…¥ã«ã‚ˆã‚‹DIè‡ªå‹•è§£æ±ºã¨Dock.Avaloniaã®çµ±åˆ**
+*Link: [./tracks/setup_view_locator_20260127/](./tracks/setup_view_locator_20260127/)*

@@ -15,11 +15,14 @@
   - `Eede.Application`: ユースケース（`DrawActionUseCase`, `SavePictureUseCase`, `LoadPictureUseCase` 等）、アプリケーションサービス
   - `Eede.Infrastructure`: 技術詳細（`IPictureRepository` 実装、ファイルI/O）
   - `Eede.Presentation`: UI (Avalonia), ViewModels, アダプター（`PictureRepository` 実装）
+- **依存関係管理:** `Microsoft.Extensions.DependencyInjection` を採用し、`App.axaml.cs` でサービスと ViewModel を一括登録。コンストラクタ注入による疎結合な設計を徹底。
 
 ## テスト
 - **フレームワーク:** NUnit
 - **カバレッジ計測:** coverlet.collector
 
 ## その他ライブラリ
+- **Microsoft.Extensions.DependencyInjection:** DI コンテナによる依存関係管理
+  - `ViewLocator` および `ServiceResolveExtension` を介して、XAML 側で ViewModel を自動解決する仕組みを導入
 - **Fody (ReactiveUI.Fody):** INotifyPropertyChanged の自動実装
 - **System.Text.Json:** JSON シリアライズ

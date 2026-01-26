@@ -25,6 +25,7 @@ using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -129,6 +130,7 @@ public class MainViewModel : ViewModelBase
     private readonly LoadPictureUseCase _loadPictureUseCase;
     private readonly GlobalState _state;
     private readonly IClipboardService _clipboardService;
+    private readonly IServiceProvider _services;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; private set; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; private set; }
@@ -145,7 +147,10 @@ public class MainViewModel : ViewModelBase
         DrawableCanvasViewModel drawableCanvasViewModel,
         AnimationViewModel animationViewModel,
         DrawingSessionViewModel drawingSessionViewModel,
-        PaletteContainerViewModel paletteContainerViewModel)
+        PaletteContainerViewModel paletteContainerViewModel,
+        SavePictureUseCase savePictureUseCase,
+        LoadPictureUseCase loadPictureUseCase,
+        IServiceProvider services)
     {
         _state = State;
         _clipboardService = clipboardService;
@@ -154,8 +159,9 @@ public class MainViewModel : ViewModelBase
         _drawStyleFactory = drawStyleFactory;
         _pictureEditingUseCase = pictureEditingUseCase;
         _drawingSessionProvider = drawingSessionProvider;
-        _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
-        _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
+        _savePictureUseCase = savePictureUseCase;
+        _loadPictureUseCase = loadPictureUseCase;
+        _services = services;
 
         DrawableCanvasViewModel = drawableCanvasViewModel;
         AnimationViewModel = animationViewModel;
@@ -359,7 +365,8 @@ public class MainViewModel : ViewModelBase
         {
             return null;
         }
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(picture, filePath, _state, AnimationViewModel, _bitmapAdapter, _savePictureUseCase, _loadPictureUseCase);
+        DockPictureViewModel vm = _services.GetRequiredService<DockPictureViewModel>();
+        vm.Initialize(picture, filePath);
         return SetupDockPicture(vm);
     }
 
@@ -376,11 +383,13 @@ public class MainViewModel : ViewModelBase
 
     private async void ExecuteCreateNewPicture()
     {
-        NewPictureWindowViewModel store = new();
+        NewPictureWindowViewModel store = _services.GetRequiredService<NewPictureWindowViewModel>();
         NewPictureWindowViewModel result = await ShowCreateNewPictureModal.Handle(store);
         if (result.Result)
         {
-            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state, AnimationViewModel, _bitmapAdapter, _savePictureUseCase, _loadPictureUseCase)));
+            DockPictureViewModel vm = _services.GetRequiredService<DockPictureViewModel>();
+            vm.Initialize(Picture.CreateEmpty(result.Size), FilePath.Empty());
+            Pictures.Add(SetupDockPicture(vm));
         }
     }
 

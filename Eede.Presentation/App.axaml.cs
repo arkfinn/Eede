@@ -19,13 +19,14 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Application.Drawings;
 using Eede.Application.UseCase.Pictures;
 using Eede.Presentation.ViewModels.DataEntry;
+using Eede.Presentation.ViewModels.DataDisplay;
 using System;
 
 namespace Eede.Presentation;
 
 public partial class App : Avalonia.Application
 {
-    public IServiceProvider? Services { get; private set; }
+    public static IServiceProvider? Services { get; private set; }
 
     public override void Initialize()
     {
@@ -40,17 +41,11 @@ public partial class App : Avalonia.Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = Services.GetRequiredService<MainViewModel>()
-            };
+            desktop.MainWindow = new MainWindow();
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
-            singleViewPlatform.MainView = new MainView
-            {
-                DataContext = Services.GetRequiredService<MainViewModel>()
-            };
+            singleViewPlatform.MainView = new MainView();
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -71,13 +66,19 @@ public partial class App : Avalonia.Application
         // Adapters / Infrastructure
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();
         services.AddSingleton<IPictureRepository, PictureRepository>();
+        services.AddSingleton<SavePictureUseCase>();
+        services.AddSingleton<LoadPictureUseCase>();
 
         // ViewModels
+        services.AddSingleton<InjectableDockFactory>();
         services.AddTransient<PaletteContainerViewModel>();
         services.AddSingleton<AnimationViewModel>();
         services.AddSingleton<IAddFrameProvider>(sp => sp.GetRequiredService<AnimationViewModel>());
+        services.AddTransient<AnimationDockViewModel>();
         services.AddTransient<DrawableCanvasViewModel>();
         services.AddTransient<DrawingSessionViewModel>();
         services.AddTransient<MainViewModel>();
+        services.AddTransient<NewPictureWindowViewModel>();
+        services.AddTransient<DockPictureViewModel>();
     }
 }

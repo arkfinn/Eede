@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Dock.Model.Core;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections;
 
 namespace Eede.Presentation.Views.DataDisplay
@@ -10,6 +11,11 @@ namespace Eede.Presentation.Views.DataDisplay
         public PictureFrame()
         {
             InitializeComponent();
+            var factory = App.Services?.GetService<InjectableDockFactory>();
+            if (factory != null)
+            {
+                DockControl.Factory = factory;
+            }
         }
 
         public static readonly DirectProperty<PictureFrame, IList?> PicturesProperty =

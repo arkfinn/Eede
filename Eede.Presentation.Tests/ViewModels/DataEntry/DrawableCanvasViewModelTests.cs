@@ -153,4 +153,58 @@ public class DrawableCanvasViewModelTests
             });
         });
     }
+
+    [AvaloniaTest]
+    public void Undo_ShouldRestoreSelectionState()
+    {
+        // バグ再現テスト
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            
+            var mockSessionProvider = new Mock<IDrawingSessionProvider>();
+            
+            // CurrentSessionプロパティの挙動を定義する変数を容易
+            DrawingSession currentSession = null;
+            mockSessionProvider.Setup(x => x.CurrentSession).Returns(() => currentSession);
+
+            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameProvider.Object, _mockClipboard.Object, new AvaloniaBitmapAdapter(), new DrawActionUseCase(), mockSessionProvider.Object);
+            viewModel.Magnification = new Magnification(1);
+            var imageSize = new PictureSize(32, 32);
+            var initialPicture = Picture.CreateEmpty(imageSize);
+            viewModel.SetPicture(initialPicture);
+
+            // 1. 初期状態: 選択範囲を作成 (10, 10) - (20, 20)
+            var selector = new RegionSelector();
+            viewModel.DrawStyle = selector;
+            viewModel.SetupRegionSelector(selector);
+            viewModel.DrawBeginCommand.Execute(new Position(10, 10)).Subscribe();
+            viewModel.DrawEndCommand.Execute(new Position(20, 20)).Subscribe();
+
+            var originalArea = viewModel.SelectingArea.Value; 
+            var originalSession = new DrawingSession(initialPicture, originalArea);
+            
+            // セッション更新をシミュレート
+            currentSession = originalSession;
+            mockSessionProvider.Raise(x => x.SessionChanged += null, originalSession);
+            
+            Assert.That(viewModel.SelectingArea, Is.EqualTo(originalArea));
+
+            // 2. 移動操作 (15,15) -> (25,25)
+            viewModel.DrawBeginCommand.Execute(new Position(15, 15)).Subscribe();
+            viewModel.DrawingCommand.Execute(new Position(25, 25)).Subscribe();
+            viewModel.DrawEndCommand.Execute(new Position(25, 25)).Subscribe();
+
+            var movedArea = viewModel.SelectingArea.Value;
+            Assert.That(movedArea.X, Is.EqualTo(20));
+
+            // 3. Undo実行 (元のセッションが通知される)
+            currentSession = originalSession;
+            mockSessionProvider.Raise(x => x.SessionChanged += null, originalSession);
+
+            // 期待値: 選択範囲が元の位置 (10, 10) に戻っていること
+            Assert.That(viewModel.SelectingArea.Value, Is.EqualTo(originalArea), 
+                $"Undo should restore SelectingArea to original position ({originalArea.X},{originalArea.Y}) but was ({viewModel.SelectingArea.Value.X},{viewModel.SelectingArea.Value.Y})");
+        });
+    }
 }

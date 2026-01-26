@@ -96,6 +96,14 @@ public class DrawableCanvasViewModel : ViewModelBase
             if (SelectingArea != session.CurrentSelectingArea)
             {
                 SelectingArea = session.CurrentSelectingArea;
+                if (SelectingArea.HasValue)
+                {
+                    _selectionState = new SelectedState(new Selection(SelectingArea.Value));
+                }
+                else
+                {
+                    _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
+                }
                 UpdateImage();
             }
         };

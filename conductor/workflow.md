@@ -31,8 +31,8 @@ All tasks follow a strict lifecycle:
 
 3. **Analyze Context:**
    - Before implementing, analyze existing code and assets to ensure consistency with project standards.
-   - **Example:** Check dimensions/format of existing icons before creating new ones.
-   - **Example:** Review naming conventions and patterns of similar classes.
+   - **Check Test Environment:** UIやDIに関わる変更を行う場合、`Eede.Presentation.Tests\TestAppBuilder.cs` 等のテスト初期化コードが適切（`.UseReactiveUI()`等が含まれているか）か確認する。
+   - **Encoding Awareness:** 日本語を含むファイルを操作する際は文字化けを防ぐため、常に UTF-8 エンコーディングを明示する。
 
 4. **Write Failing Tests (Red Phase):**
    - Create a new test file for the feature or bug fix.
@@ -64,10 +64,10 @@ All tasks follow a strict lifecycle:
    - Propose a clear, concise commit message e.g, `feat(ui): Create basic HTML structure for calculator`.
    - Perform the commit.
 
-9. **Attach Task Summary with Git Notes:**
+9. **Attach Task Summary with Git Notes (CRITICAL):**
    - **Step 9.1: Get Commit Hash:** Obtain the hash of the *just-completed commit* (`git log -1 --format="%H"`).
-   - **Step 9.2: Draft Note Content:** Create a detailed summary for the completed task. This should include the task name, a summary of changes, a list of all created/modified files, and the core "why" for the change.
-   - **Step 9.3: Attach Note:** Use the `git notes` command. To avoid parsing issues with multi-line strings in shell tools, prefer a concise single-line summary or use a temporary file if a detailed report is required.
+   - **Step 9.2: Draft Note Content:** Create a detailed summary for the completed task.
+   - **Step 9.3: Attach Note:** 履歴管理とふりかえりのため、**タスクごとに必ず** `git notes` を実行する。
      ```bash
      git notes add -m "Task: <name>. Summary: <concise summary>" <commit_hash>
      ```

@@ -1,5 +1,6 @@
 using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
+using Eede.Domain.SharedKernel;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -45,9 +46,9 @@ namespace Eede.Presentation.ViewModels.Pages
             _provider.Update(CurrentSession.Redo());
         }
 
-        public void Push(Picture picture)
+        public void Push(Picture picture, PictureArea? selectingArea = null, PictureArea? previousArea = null)
         {
-            _provider.Update(CurrentSession.Push(picture));
+            _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea));
         }
     }
 }

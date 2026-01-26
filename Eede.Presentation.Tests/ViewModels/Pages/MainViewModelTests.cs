@@ -55,7 +55,7 @@ public class MainViewModelTests
     private MainViewModel CreateViewModel()
     {
         var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Mock<IFileSystem>().Object);
-        var drawableCanvasViewModel = new DrawableCanvasViewModel(_globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object);
+        var drawableCanvasViewModel = new DrawableCanvasViewModel(_globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object, _mockDrawingSessionProvider.Object);
         var drawingSessionViewModel = new DrawingSessionViewModel(_mockDrawingSessionProvider.Object);
         var paletteContainerViewModel = new PaletteContainerViewModel();
 

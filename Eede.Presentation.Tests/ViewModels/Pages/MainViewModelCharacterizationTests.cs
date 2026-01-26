@@ -59,7 +59,7 @@ public class MainViewModelCharacterizationTests
     private MainViewModel CreateViewModel()
     {
         var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Mock<IFileSystem>().Object);
-        var drawableCanvasViewModel = new DrawableCanvasViewModel(_globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object);
+        var drawableCanvasViewModel = new DrawableCanvasViewModel(_globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object, _drawingSessionProvider);
         var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
         var paletteContainerViewModel = new PaletteContainerViewModel();
 
@@ -195,14 +195,23 @@ public class MainViewModelCharacterizationTests
             // 1. 初期状態を設定（範囲選択中とする）
             viewModel.DrawableCanvasViewModel.SelectingArea = initialArea;
             viewModel.DrawStyle = DrawStyleType.RegionSelect;
+            // 選択範囲が決定したことを履歴に刻む（画像は変わっていないが、SelectingArea を確定させる）
+            _drawingSessionProvider.Update(_drawingSessionProvider.CurrentSession.UpdateSelectingArea(initialArea));
             scheduler.AdvanceBy(1);
 
             // 2. 移動操作（Push）をシミュレート
-            // ※ 現状の Push は Picture のみを受け取っているため、ここでは単に Push を呼ぶ
-            var nextPicture = Picture.CreateEmpty(new PictureSize(32, 32));
-            viewModel.DrawableCanvasViewModel.OnDrew.Execute(nextPicture).Subscribe();
+            // 実際の移動ツールでは、移動後の座標で Push される
             viewModel.DrawableCanvasViewModel.SelectingArea = nextArea;
+            var nextPicture = Picture.CreateEmpty(new PictureSize(32, 32));
+            
+            // 手動で Drew イベントを発火させ、移動前の座標 (initialArea) を渡す
+            var method = viewModel.DrawableCanvasViewModel.GetType().GetField("Drew", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var eventDelegate = (MulticastDelegate)method.GetValue(viewModel.DrawableCanvasViewModel);
+            eventDelegate.DynamicInvoke(null, nextPicture, (PictureArea?)initialArea, (PictureArea?)nextArea);
+            
             scheduler.AdvanceBy(1);
+
+            // この時点で、履歴の最新(Current)は nextArea、Undoスタックのトップは initialArea になっているはず
 
             // 3. アンドゥ実行
             viewModel.UndoCommand.Execute().Subscribe();
@@ -223,7 +232,7 @@ public class MainViewModelCharacterizationTests
             // 各サブ ViewModel を個別に作成
             var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Moq.Mock<IFileSystem>().Object);
             var drawableCanvasViewModel = new DrawableCanvasViewModel(
-                _globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object);
+                _globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object, _drawingSessionProvider);
             var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
             var paletteContainerViewModel = new PaletteContainerViewModel();
 

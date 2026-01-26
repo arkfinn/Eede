@@ -67,14 +67,23 @@ namespace Eede.Domain.ImageEditing
         /// <summary>
         /// 新しい画像データを確定させ、履歴に追加する。
         /// </summary>
-        public DrawingSession Push(Picture nextPicture, PictureArea? nextArea = null)
+        public DrawingSession Push(Picture nextPicture, PictureArea? nextArea = null, PictureArea? previousArea = null)
         {
+            var areaToStore = previousArea ?? SelectingArea;
             if (nextPicture == Buffer.Previous && nextArea == SelectingArea && !IsDrawing()) return this;
             return new DrawingSession(
                 new DrawingBuffer(nextPicture),
                 nextArea,
-                UndoStack.Push(new HistoryItem(Buffer.Previous, SelectingArea)),
+                UndoStack.Push(new HistoryItem(Buffer.Previous, areaToStore)),
                 ImmutableStack<HistoryItem>.Empty);
+        }
+
+        /// <summary>
+        /// 現在の選択範囲を更新した新しいセッションを返す。履歴には追加されない。
+        /// </summary>
+        public DrawingSession UpdateSelectingArea(PictureArea? area)
+        {
+            return new DrawingSession(Buffer, area, UndoStack, RedoStack);
         }
 
         public DrawingSession Undo()

@@ -9,9 +9,9 @@ DrawingSession の履歴管理に選択範囲のメタデータを追加し、UI
 ## Phase 0: 準備とバグ再現テスト
 現在の不具合をコードレベルで再現し、修正後のパスを保証します。
 
-- [ ] Task: Eede.Domain.Tests に DrawingSession の履歴管理（選択範囲保持）に関するテストを追加
-- [ ] Task: Eede.Presentation.Tests で、アンドゥ時に SelectingArea が更新されない現在の挙動を確認するテストを追加（現在は失敗するはず）
-- [ ] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md)
+- [x] Task: Eede.Domain.Tests に DrawingSession の履歴管理（選択範囲保持）に関するテストを追加
+- [x] Task: Eede.Presentation.Tests で、アンドゥ時に SelectingArea が更新されない現在の挙動を確認するテストを追加（現在は失敗するはず）
+- [x] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md)
 
 ## Phase 1: DrawingSession の拡張 (Domain) [checkpoint: 38b10a6]
 履歴スタックに選択範囲の情報を含めるようにデータ構造を修正します。
@@ -23,17 +23,17 @@ DrawingSession の履歴管理に選択範囲のメタデータを追加し、UI
 - [x] Task: Phase 0 のドメインテストをパスさせる
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
-## Phase 2: UseCase と Provider の更新 (Application)
+## Phase 2: UseCase と Provider の更新 (Application) [checkpoint: e48e681]
 ドメイン層の変更をアプリケーション層へ反映します。
 
-- [ ] Task: IDrawingSessionProvider および実装クラスを更新し、セッション更新時に選択範囲も考慮するように修正
-- [ ] Task: IPictureEditingUseCase (および実装) の各メソッドで、更新後の選択範囲を DrawingSession に渡せるように拡張
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: `IDrawingSessionProvider` および実装クラスを更新し、セッション更新時に選択範囲も考慮するように修正
+- [x] Task: `IPictureEditingUseCase` (および実装) の各メソッドで、更新後の選択範囲を `DrawingSession` に渡せるように拡張
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: ViewModel の同期と最終確認 (Presentation)
 UI側のプロパティをセッション状態と同期させます。
 
-- [ ] Task: DrawableCanvasViewModel で DrawingSessionProvider.SessionChanged を購読し、SelectingArea を同期
-- [ ] Task: DrawingSessionViewModel からの Push 時に、現在の SelectingArea を含めるように修正
-- [ ] Task: 全てのテスト（Phase 0 の再現テスト含む）を実行し、修正を確認
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: DrawableCanvasViewModel で DrawingSessionProvider.SessionChanged を購読し、SelectingArea を同期
+- [x] Task: DrawingSessionViewModel からの Push 時に、現在の SelectingArea を含めるように修正
+- [x] Task: 全てのテスト（Phase 0 の再現テスト含む）を実行し、修正を確認
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)

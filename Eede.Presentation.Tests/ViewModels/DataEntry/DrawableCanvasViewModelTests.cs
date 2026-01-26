@@ -207,4 +207,48 @@ public class DrawableCanvasViewModelTests
                 $"Undo should restore SelectingArea to original position ({originalArea.X},{originalArea.Y}) but was ({viewModel.SelectingArea.Value.X},{viewModel.SelectingArea.Value.Y})");
         });
     }
+
+    [AvaloniaTest]
+    public void RegionSelect_ShouldPreserveSelectionAfterDrawEnd()
+    {
+        // 範囲選択ツールで選択を確定した際、SelectingAreaがクリアされずに維持されるかテスト
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            
+            var mockSessionProvider = new Mock<IDrawingSessionProvider>();
+            DrawingSession currentSession = null;
+            mockSessionProvider.Setup(x => x.CurrentSession).Returns(() => currentSession);
+            // Updateが呼ばれたら、そのセッションをSessionChangedで通知する（MainViewModelの動作を模倣）
+            mockSessionProvider.Setup(x => x.Update(It.IsAny<DrawingSession>()))
+                .Callback<DrawingSession>(s => {
+                    currentSession = s;
+                    mockSessionProvider.Raise(x => x.SessionChanged += null, s);
+                });
+
+            var viewModel = new DrawableCanvasViewModel(_globalState, _mockAddFrameProvider.Object, _mockClipboard.Object, new AvaloniaBitmapAdapter(), new DrawActionUseCase(), mockSessionProvider.Object);
+            viewModel.Magnification = new Magnification(1);
+            viewModel.SetPicture(Picture.CreateEmpty(new PictureSize(32, 32)));
+
+            // 1. 範囲選択モード
+            var selector = new RegionSelector();
+            viewModel.DrawStyle = selector;
+            viewModel.SetupRegionSelector(selector);
+
+            // 2. 範囲選択操作
+            viewModel.DrawBeginCommand.Execute(new Position(5, 5)).Subscribe();
+            viewModel.DrawingCommand.Execute(new Position(15, 15)).Subscribe();
+            
+            // 3. 確定 (Mouse Up)
+            viewModel.DrawEndCommand.Execute(new Position(15, 15)).Subscribe();
+
+            // 期待値: SelectingArea が (5, 5, 10, 10) で維持されていること
+            Assert.Multiple(() =>
+            {
+                Assert.That(viewModel.SelectingArea, Is.Not.Null, "SelectingArea should not be null after DrawEnd");
+                Assert.That(viewModel.SelectingArea.Value.X, Is.EqualTo(5));
+                Assert.That(viewModel.SelectingArea.Value.Width, Is.EqualTo(10));
+            });
+        });
+    }
 }

@@ -47,7 +47,7 @@ namespace Eede.Application.Drawings
             var resultBuffer = tool.DrawEnd(new DrawingBuffer(session.PreviousPicture), History, isShift);
             History = null;
 
-            return session.Push(resultBuffer.Fetch());
+            return session.Push(resultBuffer.Fetch(), session.CurrentSelectingArea);
         }
     }
 }

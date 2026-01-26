@@ -13,15 +13,15 @@ DrawingSession の履歴管理に選択範囲のメタデータを追加し、UI
 - [ ] Task: Eede.Presentation.Tests で、アンドゥ時に SelectingArea が更新されない現在の挙動を確認するテストを追加（現在は失敗するはず）
 - [ ] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md)
 
-## Phase 1: DrawingSession の拡張 (Domain)
+## Phase 1: DrawingSession の拡張 (Domain) [checkpoint: 38b10a6]
 履歴スタックに選択範囲の情報を含めるようにデータ構造を修正します。
 
-- [ ] Task: 履歴アイテムを保持するための内部レコード HistoryItem(Picture Picture, PictureArea? SelectingArea) を定義
-- [ ] Task: UndoStack / RedoStack の型を ImmutableStack<HistoryItem> に変更
-- [ ] Task: Push, Undo, Redo メソッドを HistoryItem を扱うように修正
-- [ ] Task: CurrentSelectingArea プロパティを追加し、現在のセッションにおける選択範囲を公開
-- [ ] Task: Phase 0 のドメインテストをパスさせる
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: 履歴アイテムを保持するための内部レコード `HistoryItem(Picture Picture, PictureArea? SelectingArea)` を定義
+- [x] Task: `UndoStack` / `RedoStack` の型を `ImmutableStack<HistoryItem>` に変更
+- [x] Task: `Push`, `Undo`, `Redo` メソッドを `HistoryItem` を扱うように修正
+- [x] Task: `CurrentSelectingArea` プロパティを追加し、現在のセッションにおける選択範囲を公開
+- [x] Task: Phase 0 のドメインテストをパスさせる
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2: UseCase と Provider の更新 (Application)
 ドメイン層の変更をアプリケーション層へ反映します。

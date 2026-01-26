@@ -7,7 +7,7 @@ namespace Eede.Application.UseCase.Pictures;
 
 public class PictureEditingUseCase : IPictureEditingUseCase
 {
-    public record EditResult(Picture Previous, Picture Updated);
+    public record EditResult(Picture Previous, Picture Updated, PictureArea? SelectingArea);
 
     public EditResult ExecuteAction(Picture source, PictureActions action)
     {
@@ -16,7 +16,7 @@ public class PictureEditingUseCase : IPictureEditingUseCase
 
         updated = action.Execute(previous);
 
-        return new EditResult(previous, updated);
+        return new EditResult(previous, updated, null);
     }
 
     public EditResult ExecuteAction(Picture source, PictureActions action, PictureArea selectedRegion)
@@ -29,20 +29,20 @@ public class PictureEditingUseCase : IPictureEditingUseCase
         DirectImageBlender blender = new();
         updated = blender.Blend(updatedRegion, previous, selectedRegion.Position);
 
-        return new EditResult(previous, updated);
+        return new EditResult(previous, updated, selectedRegion);
     }
 
     public EditResult PushToCanvas(Picture source, Picture from, PictureArea rect)
     {
         Picture previous = source;
         Picture updated = from.CutOut(rect);
-        return new EditResult(previous, updated);
+        return new EditResult(previous, updated, rect);
     }
 
     public EditResult PullFromCanvas(Picture target, Picture source, Position position, IImageBlender blender)
     {
         Picture previous = target;
         Picture updated = target.Blend(blender, source, position);
-        return new EditResult(previous, updated);
+        return new EditResult(previous, updated, null);
     }
 }

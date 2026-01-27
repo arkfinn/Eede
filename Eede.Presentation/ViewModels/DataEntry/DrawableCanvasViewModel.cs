@@ -384,14 +384,17 @@ public class DrawableCanvasViewModel : ViewModelBase
             IsShifted,
             InternalUpdateCommand);
 
-        PictureBuffer = _interactionSession.Buffer;
-
         if (_interactionSession.SelectionState is DraggingState)
         {
+            // DraggingStateへの遷移時、InternalUpdateCommandによってPictureBufferが更新されているため、
+            // セッション内のBufferも最新のものに同期させる。
+            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, _interactionSession.SelectionState);
             DrawableArea = DrawableArea.Leave(PictureBuffer);
             UpdateImage();
             return;
         }
+
+        PictureBuffer = _interactionSession.Buffer;
 
         DrawingResult result = DrawableArea.DrawStart(DrawStyle, PenStyle, PictureBuffer, pos, IsShifted);
         PictureBuffer = result.PictureBuffer;
@@ -507,6 +510,13 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         if (_interactionSession.SelectionState is DraggingState draggingState)
         {
+            var info = draggingState.GetSelectionPreviewInfo();
+            if (info != null)
+            {
+                var blendedPicture = PictureBuffer.Previous.Blend(new DirectImageBlender(), info.Pixels, info.Position);
+                PictureBuffer = PictureBuffer.Reset(blendedPicture);
+            }
+
             var originalArea = draggingState.GetOriginalArea();
             _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
             UpdateImage();

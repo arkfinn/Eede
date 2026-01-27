@@ -1,19 +1,16 @@
-namespace Eede.Domain.SharedKernel
+using Eede.Domain.ImageEditing;
+
+namespace Eede.Domain.SharedKernel;
+
+/// <summary>
+/// キャンバス上のピクセル座標を表す Value Object。
+/// </summary>
+public readonly record struct CanvasCoordinate(int X, int Y)
 {
-    public readonly record struct CanvasCoordinate
+    public Position ToPosition() => new(X, Y);
+
+    public DisplayCoordinate ToDisplay(Magnification magnification)
     {
-        public int X { get; }
-        public int Y { get; }
-
-        public CanvasCoordinate(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        public Position ToPosition()
-        {
-            return new Position(X, Y);
-        }
+        return new DisplayCoordinate(magnification.Magnify(X), magnification.Magnify(Y));
     }
 }

@@ -23,6 +23,7 @@ namespace Eede.Presentation.Views.DataEntry
         private DockPictureViewModel? _viewModel;
         private bool _visibleCursor = false;
         private HalfBoxArea _localCursorArea;
+        private PictureSize _cursorSize = new(32, 32);
 
         public PictureContainer()
         {
@@ -73,8 +74,11 @@ namespace Eede.Presentation.Views.DataEntry
             PicturePullAction = _viewModel.OnPicturePull;
             PictureUpdateAction = _viewModel.OnPictureUpdate;
 
+            // 初期カーソルサイズの設定
+            _cursorSize = _viewModel.GlobalState.BoxSize;
+
             // SelectionState の初期化
-            _localCursorArea = HalfBoxArea.Create(new Position(0, 0), _viewModel.GlobalState.BoxSize);
+            _localCursorArea = HalfBoxArea.Create(new Position(0, 0), _cursorSize);
             _selectionState = CreateInitialState();
 
             _viewModel.AnimationViewModel.WhenAnyValue(x => x.IsAnimationMode)
@@ -235,9 +239,8 @@ namespace Eede.Presentation.Views.DataEntry
                 _selectionState = CreateInitialState();
             }
 
-            // ドックエリアではメインキャンバスの CursorArea ではなく、
-            // 常にドックの等倍基準 (GlobalState.BoxSize) で判定する
-            var currentCursorArea = HalfBoxArea.Create(nowPosition, _viewModel.GlobalState.BoxSize);
+            // ドックエリアでは _cursorSize を使用して判定する
+            var currentCursorArea = HalfBoxArea.Create(nowPosition, _cursorSize);
             if (_viewModel.AnimationViewModel.IsAnimationMode)
             {
                 currentCursorArea = HalfBoxArea.Create(nowPosition, new PictureSize(_viewModel.AnimationViewModel.GridWidth, _viewModel.AnimationViewModel.GridHeight));
@@ -271,8 +274,8 @@ namespace Eede.Presentation.Views.DataEntry
         {
             if (_viewModel == null) return;
 
-            // ドックエリアの等倍基準で現在のカーソル領域を作成
-            var currentCursorArea = HalfBoxArea.Create(nowPosition, _viewModel.GlobalState.BoxSize);
+            // ドックエリアでは _cursorSize を使用してカーソル領域を作成
+            var currentCursorArea = HalfBoxArea.Create(nowPosition, _cursorSize);
 
             // 範囲選択を開始するために、現在のステートに右クリックを通知
             var (newState, newArea) = _selectionState.HandlePointerRightButtonPressed(currentCursorArea, nowPosition, MinCursorSize, PictureUpdateAction);
@@ -288,8 +291,8 @@ namespace Eede.Presentation.Views.DataEntry
 
             Position nowPosition = PointToPosition(e.GetPosition(canvas));
 
-            // ドックエリア基準のカーソル領域を作成（等倍サイズ）
-            var cursorArea = HalfBoxArea.Create(nowPosition, _viewModel.GlobalState.BoxSize);
+            // ドックエリア基準のカーソル領域を作成（_cursorSizeを使用）
+            var cursorArea = HalfBoxArea.Create(nowPosition, _cursorSize);
 
             if (_viewModel.AnimationViewModel.IsAnimationMode && _selectionState is not RegionSelectingState)
             {
@@ -336,22 +339,33 @@ namespace Eede.Presentation.Views.DataEntry
                     PicturePushAction?.Execute(finalArea.Value);
                     // 作業エリア側の選択状態も同期させる
                     vm.GlobalState.CursorArea = HalfBoxArea.Create(finalArea.Value.Position, finalArea.Value.Size);
+                    
+                    // 次回のカーソルサイズのためにサイズを保存
+                    _cursorSize = finalArea.Value.Size;
                 }
                 else
                 {
                     // 単なる右クリックの場合、スナップされた位置から固定サイズで転送
                     PicturePushAction?.Execute(new PictureArea(newArea.RealPosition, MinCursorSize));
                     vm.GlobalState.CursorArea = newArea;
+                    // 必要ならここでも _cursorSize を MinCursorSize にリセットする？
+                    // いや、前回の選択サイズを維持するなら変更しないほうがいいかもしれないが、
+                    // クリックだけなら MinCursorSize を使うのが自然か。
+                    // とりあえず今回は「選択完了後」の話なので、クリック時の挙動は変えない。
                 }
-                // 範囲選択の結果（SelectedState または NormalCursorState）を反映する
-                _selectionState = newState;
+                // 状態をリセットする（マウス追従と次の選択開始のため）
+                _selectionState = CreateInitialState();
             }
             else
             {
                 _selectionState = newState;
             }
 
-            _localCursorArea = newArea;
+            // リセット後の状態に合わせて _localCursorArea を再計算
+            // HandlePointerRightButtonReleased が返す newArea は古いサイズ（ドラッグ開始時の32x32など）の可能性があるため
+            // 新しい _cursorSize で作り直す
+            _localCursorArea = HalfBoxArea.Create(_localCursorArea.RealPosition, _cursorSize);
+
             UpdateCursor();
         }
 

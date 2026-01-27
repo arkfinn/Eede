@@ -47,8 +47,7 @@ public class DrawableCanvasViewModelTests
             _clipboardServiceMock.Object,
             _bitmapAdapterMock.Object,
             _drawActionUseCaseMock.Object,
-            _drawingSessionProviderMock.Object,
-            _canvasViewCalculator);
+            _drawingSessionProviderMock.Object);
     }
 
     [AvaloniaTest]

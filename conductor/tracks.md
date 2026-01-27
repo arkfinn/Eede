@@ -21,4 +21,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./tracks/fix_selection_undo_inconsistency_20260126/](./fix_selection_undo_inconsistency_20260126/)*
 
 ---
+
+- [~] **Track: DrawableCanvasViewModel の責務分離：UI状態と相互作用ロジックの整理**
+*Link: [./tracks/refactor_drawable_canvas_vm_20260127/](./tracks/refactor_drawable_canvas_vm_20260127/)*
 ---

@@ -68,12 +68,6 @@ public class RegionSelectingState : ISelectionState
         // マウスの生座標から暫定的な矩形を作成
         var rawArea = PictureArea.FromPosition(_startPosition, _nowPosition, new PictureSize(int.MaxValue, int.MaxValue));
 
-        // ドラッグ距離が極めて短い（遊びの範囲内）場合は null を返し、Container 側で 32x32 クリックとして処理させる
-        if (rawArea.Width <= 4 && rawArea.Height <= 4)
-        {
-            return null;
-        }
-
         // グリッドサイズ（スナップ単位）を算出（通常は 16x16）
         int gridSizeW = _minSize.Width / 2;
         int gridSizeH = _minSize.Height / 2;

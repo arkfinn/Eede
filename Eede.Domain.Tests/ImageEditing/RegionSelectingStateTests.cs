@@ -10,7 +10,7 @@ public class RegionSelectingStateTests
     private readonly PictureSize _minSize = new(32, 32);
 
     [Test]
-    public void GetSelectingArea_Should_Return_Null_When_Drag_Is_Too_Small()
+    public void GetSelectingArea_Should_Return_Valid_Area_Even_If_Drag_Is_Small()
     {
         var start = new Position(10, 10);
         var now = new Position(13, 13);
@@ -18,7 +18,9 @@ public class RegionSelectingStateTests
 
         var area = state.GetSelectingArea();
 
-        Assert.That(area, Is.Null, "遊びの範囲内のドラッグは範囲選択とみなすべきではありません。");
+        Assert.That(area, Is.Not.Null, "遊びの判定を削除したため、わずかなドラッグでも範囲選択が有効になるべきです。");
+        Assert.That(area.Value.Width, Is.EqualTo(32)); // 最小サイズが適用される
+        Assert.That(area.Value.Height, Is.EqualTo(32));
     }
 
     [Test]

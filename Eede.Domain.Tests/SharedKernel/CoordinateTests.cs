@@ -20,5 +20,19 @@ namespace Eede.Domain.Tests.SharedKernel
                 Assert.That(canvas.Y, Is.EqualTo(100));
             });
         }
+
+        [Test]
+        public void ToDisplayTest()
+        {
+            var canvas = new CanvasCoordinate(50, 100);
+            var mag = new Magnification(2.0f);
+            var display = canvas.ToDisplay(mag);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(display.X, Is.EqualTo(100));
+                Assert.That(display.Y, Is.EqualTo(200));
+            });
+        }
     }
 }

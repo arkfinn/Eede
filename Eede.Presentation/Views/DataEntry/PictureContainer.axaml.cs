@@ -343,8 +343,8 @@ namespace Eede.Presentation.Views.DataEntry
                     PicturePushAction?.Execute(new PictureArea(newArea.RealPosition, MinCursorSize));
                     vm.GlobalState.CursorArea = newArea;
                 }
-                // ドックエリアでは移動状態（SelectedState）を維持せず、通常状態に戻す
-                _selectionState = CreateInitialState();
+                // 範囲選択の結果（SelectedState または NormalCursorState）を反映する
+                _selectionState = newState;
             }
             else
             {

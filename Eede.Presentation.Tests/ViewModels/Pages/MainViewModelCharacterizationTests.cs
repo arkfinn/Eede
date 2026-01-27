@@ -59,7 +59,16 @@ public class MainViewModelCharacterizationTests
     private MainViewModel CreateViewModel()
     {
         var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Mock<IFileSystem>().Object);
-        var drawableCanvasViewModel = new DrawableCanvasViewModel(_globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object, _drawingSessionProvider);
+        var drawableCanvasViewModel = new DrawableCanvasViewModel(
+            _globalState,
+            animationViewModel,
+            _mockClipboardService.Object,
+            _mockBitmapAdapter.Object,
+            _mockDrawActionUseCase.Object,
+            _drawingSessionProvider,
+            new CopySelectionUseCase(_mockClipboardService.Object),
+            new CutSelectionUseCase(_mockClipboardService.Object),
+            new PasteFromClipboardUseCase(_mockClipboardService.Object));
         var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
         var paletteContainerViewModel = new PaletteContainerViewModel();
 
@@ -235,7 +244,15 @@ public class MainViewModelCharacterizationTests
             // 各サブ ViewModel を個別に作成
             var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Moq.Mock<IFileSystem>().Object);
             var drawableCanvasViewModel = new DrawableCanvasViewModel(
-                _globalState, animationViewModel, _mockClipboardService.Object, _mockBitmapAdapter.Object, _mockDrawActionUseCase.Object, _drawingSessionProvider);
+                _globalState,
+                animationViewModel,
+                _mockClipboardService.Object,
+                _mockBitmapAdapter.Object,
+                _mockDrawActionUseCase.Object,
+                _drawingSessionProvider,
+                new CopySelectionUseCase(_mockClipboardService.Object),
+                new CutSelectionUseCase(_mockClipboardService.Object),
+                new PasteFromClipboardUseCase(_mockClipboardService.Object));
             var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
             var paletteContainerViewModel = new PaletteContainerViewModel();
 

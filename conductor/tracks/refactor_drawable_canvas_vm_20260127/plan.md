@@ -27,7 +27,7 @@
 - [x] Task: ViewModel のコマンドから各 UseCase を呼び出すように変更 [780eb1a]
 - [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
-## Phase 3: 相互作用ロジックのドメイン返却 (Domain層)
+## Phase 3: 相互作用ロジックのドメイン返却 (Domain層) [checkpoint: 1a1b46a]
 マウスイベントと状態遷移をドメイン集約へ移動します。
 
 - [x] Task: `CanvasInteractionSession` 集約の設計と実装 [30ea136]

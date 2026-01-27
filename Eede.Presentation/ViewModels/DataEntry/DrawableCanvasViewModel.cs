@@ -378,6 +378,8 @@ public class DrawableCanvasViewModel : ViewModelBase
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
         var canvasCoordinate = displayCoordinate.ToCanvas(Magnification);
 
+        var initialBuffer = PictureBuffer;
+
         _interactionSession = _interactionSession.PointerBegin(
             canvasCoordinate,
             PenStyle,
@@ -394,9 +396,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
 
-        PictureBuffer = _interactionSession.Buffer;
-
-        DrawingResult result = DrawableArea.DrawStart(DrawStyle, PenStyle, PictureBuffer, pos, IsShifted);
+        DrawingResult result = DrawableArea.DrawStart(DrawStyle, PenStyle, initialBuffer, pos, IsShifted);
         PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
         // セッションの状態を同期

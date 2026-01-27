@@ -7,7 +7,7 @@
     - 自由線描画、範囲選択、座標変換の現状の挙動をテストコードで固定する。
 - [ ] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md)
 
-## Phase 1: 空間 Value Object の抽出と座標変換の隠蔽
+## Phase 1: 空間 Value Object の抽出と座標変換の隠蔽 [checkpoint: 92be9e1]
 「空間の型による分離」パターンを適用し、手動の座標計算を排除します。
 
 - [x] Task: `CanvasCoordinate` (ピクセル単位) と `DisplayCoordinate` (UI単位) Value Object の作成 [3c6a01d]
@@ -15,7 +15,7 @@
     - `Magnification` を受け取って相互変換するメソッドを実装。
 - [x] Task: ViewModel 内の座標計算を新 VO へ移行 [5e3789b]
     - `DrawableCanvasViewModel` 内の `Magnification.Magnify` 等の直接呼び出しを VO のメソッドに置き換える。
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2: 編集ユースケースの抽出 (Application層)
 手続き的な編集コマンドを UseCase へ移動し、1クラス1メソッド化します。

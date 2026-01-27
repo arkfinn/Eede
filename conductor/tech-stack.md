@@ -10,6 +10,7 @@
 ## アーキテクチャ
 - **設計思想:** Domain-Driven Design (DDD) および オニオンアーキテクチャ
 - **UI状態管理:** ステートパターンによる操作状態の管理に加え、`DrawingSession` 集約による不変な描画履歴（Undo/Redo）管理を導入
+- **ViewModel 設計:** 肥大化した ViewModel に対しては Humble Object パターンを適用し、UI 型に依存しない計算ロジックを分離（`CanvasViewCalculator` 等）することで、テスト可能性と保守性を向上させる。
 - **構造:** オニオンアーキテクチャに準拠したマルチプロジェクト構成
   - `Eede.Core / Eede.Domain`: ドメインロジック、集約（`DrawingSession`）、値オブジェクト（`DrawingTool`, `DisplayCoordinate`, `CanvasCoordinate` 等）
   - `Eede.Application`: ユースケース（`DrawActionUseCase`, `SavePictureUseCase`, `LoadPictureUseCase` 等）、アプリケーションサービス

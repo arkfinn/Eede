@@ -7,12 +7,11 @@ namespace Eede.Domain.ImageEditing.SelectionStates;
 
 public class NormalCursorState : ISelectionState
 {
-    private HalfBoxArea _selectingArea;
     private HalfBoxArea _cursorArea;
 
-    public NormalCursorState(HalfBoxArea initialSelectingArea)
+    public NormalCursorState(HalfBoxArea cursorArea)
     {
-        _selectingArea = initialSelectingArea;
+        _cursorArea = cursorArea;
     }
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
@@ -30,8 +29,7 @@ public class NormalCursorState : ISelectionState
     public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, ICommand? pictureUpdateAction)
     {
         _cursorArea = cursorArea;
-        HalfBoxArea selectingArea = HalfBoxArea.Create(nowPosition, minCursorSize);
-        return (BeginRegionSelection(cursorArea, selectingArea), cursorArea);
+        return (new RegionSelectingState(nowPosition, nowPosition, minCursorSize), cursorArea);
     }
 
     public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
@@ -60,10 +58,5 @@ public class NormalCursorState : ISelectionState
     public PictureArea? GetSelectingArea()
     {
         return null;
-    }
-
-    private RegionSelectingState BeginRegionSelection(HalfBoxArea cursorArea, HalfBoxArea selectingArea)
-    {
-        return new RegionSelectingState(cursorArea, selectingArea);
     }
 }

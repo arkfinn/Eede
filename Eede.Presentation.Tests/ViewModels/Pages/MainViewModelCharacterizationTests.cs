@@ -19,6 +19,7 @@ using Eede.Application.UseCase.Pictures;
 using Eede.Application.Drawings;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
+using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.Common.Services;
 
 namespace Eede.Presentation.Tests.ViewModels.Pages;
@@ -231,6 +232,47 @@ public class MainViewModelCharacterizationTests
 
             // 4. 検証: SelectingArea が初期状態に戻っているべき（現在は失敗するはず）
             Assert.That(viewModel.DrawableCanvasViewModel.SelectingArea, Is.EqualTo(initialArea));
+        });
+    }
+
+    [AvaloniaTest]
+    public void Dock_Selection_Should_Not_Affect_Canvas_Frame_When_Not_RegionSelect_Tool_Test()
+    {
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            var viewModel = CreateViewModel();
+
+            // 1. 作業エリア側のツールを「自由曲線（ペン）」に設定
+            viewModel.DrawStyle = DrawStyleType.FreeCurve;
+            Assert.That(viewModel.DrawableCanvasViewModel.IsRegionSelecting, Is.False);
+
+            // 2. ドックエリアの ViewModel を作成
+            var dockVM = new DockPictureViewModel(
+                _globalState,
+                viewModel.AnimationViewModel,
+                _mockBitmapAdapter.Object,
+                null!,
+                null!
+            );
+            var dummyPicture = Picture.CreateEmpty(new PictureSize(100, 100));
+            viewModel.DrawableCanvasViewModel.SetPicture(dummyPicture);
+            _mockPictureEditingUseCase.Setup(u => u.PushToCanvas(It.IsAny<Picture>(), It.IsAny<Picture>(), It.IsAny<PictureArea>()))
+                .Returns(new PictureEditingUseCase.EditResult(dummyPicture, dummyPicture, null));
+
+            // MainViewModel の購読ロジックを登録（SetupDockPicture をシミュレート）
+            var privateSetupMethod = viewModel.GetType().GetMethod("SetupDockPicture", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            privateSetupMethod.Invoke(viewModel, new object[] { dockVM });
+
+            // 3. ドック側で「画像転送（Push）」を発生させる
+            var targetArea = new PictureArea(new Position(16, 16), new PictureSize(32, 32));
+            var pushMethod = dockVM.GetType().GetMethod("ExecutePicturePush", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            pushMethod.Invoke(dockVM, new object[] { targetArea });
+
+            scheduler.AdvanceBy(1);
+
+            // 4. 検証: 作業エリア側の IsRegionSelecting は false のままであるべき
+            Assert.That(viewModel.DrawableCanvasViewModel.IsRegionSelecting, Is.False, "ドックの操作によって作業エリアの枠が勝手に表示されてはいけません。");
         });
     }
 

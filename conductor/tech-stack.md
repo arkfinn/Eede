@@ -9,8 +9,9 @@
 
 ## アーキテクチャ
 - **設計思想:** Domain-Driven Design (DDD) および オニオンアーキテクチャ
-- **UI状態管理:** ステートパターンによる操作状態の管理に加え、`DrawingSession` 集約による不変な描画履歴（Undo/Redo）管理を導入
-- **ViewModel 設計:** 肥大化した ViewModel に対しては Humble Object パターンを適用し、UI 型に依存しない計算ロジックを分離（`CanvasViewCalculator` 等）することで、テスト可能性と保守性を向上させる。
+- **UI状態管理:** ステートパターンによる操作状態の管理に加え、`DrawingSession` 集約による不変な描画履歴（Undo/Redo）管理を導入。また、マウス等の入力イベントに伴う状態遷移は `CanvasInteractionSession` 集約にカプセル化し、ドメイン知識の Presentation 層への漏出を防ぐ。
+- **ViewModel 設計:** 肥大化した ViewModel に対しては責務の再配置（Repatriation）を適用し、UI 型に依存しない計算ロジックを Domain 層（Value Object, Entity）や Application 層（UseCase）へ移動することで、テスト可能性と保守性を向上させる。
+- **空間の分離:** UI 表示上の座標 (`DisplayCoordinate`) とピクセル単位のドメイン座標 (`CanvasCoordinate`) を型として厳格に分離し、倍率（Magnification）に基づく変換ロジックを VO 内に閉じ込める。
 - **構造:** オニオンアーキテクチャに準拠したマルチプロジェクト構成
   - `Eede.Core / Eede.Domain`: ドメインロジック、集約（`DrawingSession`）、値オブジェクト（`DrawingTool`, `DisplayCoordinate`, `CanvasCoordinate` 等）
   - `Eede.Application`: ユースケース（`DrawActionUseCase`, `SavePictureUseCase`, `LoadPictureUseCase` 等）、アプリケーションサービス

@@ -17,7 +17,7 @@
     - `DrawableCanvasViewModel` 内の `Magnification.Magnify` 等の直接呼び出しを VO のメソッドに置き換える。
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
-## Phase 2: 編集ユースケースの抽出 (Application層)
+## Phase 2: 編集ユースケースの抽出 (Application層) [checkpoint: 72e2864]
 手続き的な編集コマンドを UseCase へ移動し、1クラス1メソッド化します。
 
 - [x] Task: `CopySelectionUseCase` の実装とテスト [1904e03]

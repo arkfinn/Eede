@@ -2,6 +2,7 @@ using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using System;
+using System.Windows.Input;
 
 namespace Eede.Domain.ImageEditing.SelectionStates;
 
@@ -18,7 +19,7 @@ public class AnimationEditingState : ISelectionState
         _imageSize = imageSize;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, Action<Position>? pullAction, Func<Picture> getPicture, Action<Picture>? updateAction)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
     {
         int index = _grid.CalculateCellIndex(cursorArea.RealPosition, _imageSize);
         if (index >= 0)
@@ -28,12 +29,12 @@ public class AnimationEditingState : ISelectionState
         return this;
     }
 
-    public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, Action<Picture>? picturePushAction, Action<Picture>? pictureUpdateAction)
+    public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand? picturePushAction, ICommand? pictureUpdateAction)
     {
         return this;
     }
 
-    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, Action<Picture>? pictureUpdateAction)
+    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, ICommand? pictureUpdateAction)
     {
         return (this, cursorArea);
     }
@@ -45,7 +46,7 @@ public class AnimationEditingState : ISelectionState
         return (newVisibleCursor, newCursorArea);
     }
 
-    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, Action<Picture>? picturePushAction)
+    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand? picturePushAction)
     {
         return (this, cursorArea);
     }

@@ -1,6 +1,7 @@
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using System;
+using System.Windows.Input;
 
 namespace Eede.Domain.ImageEditing.SelectionStates;
 
@@ -17,21 +18,21 @@ public class FloatingSelectionState : ISelectionState
         _basePicture = basePicture;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, Action<Position>? pullAction, Func<Picture> getPicture, Action<Picture>? updateAction)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
     {
         // フローティング状態からドラッグ開始
         return new DraggingState(_pixels, new PictureArea(_position, _pixels.Size), mousePosition);
     }
 
-    public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, Action<Picture>? picturePushAction, Action<Picture>? pictureUpdateAction)
+    public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand? picturePushAction, ICommand? pictureUpdateAction)
     {
         return this;
     }
 
-    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, Action<Picture>? pictureUpdateAction)
+    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, ICommand? pictureUpdateAction)
     {
         // 右クリックで確定して通常状態へ
-        pictureUpdateAction?.Invoke(_basePicture.Blend(new Blending.DirectImageBlender(), _pixels, _position));
+        pictureUpdateAction?.Execute(_basePicture.Blend(new Blending.DirectImageBlender(), _pixels, _position));
         return (new NormalCursorState(cursorArea), cursorArea);
     }
 
@@ -40,7 +41,7 @@ public class FloatingSelectionState : ISelectionState
         return (visibleCursor, cursorArea.Move(nowPosition));
     }
 
-    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, Action<Picture>? picturePushAction)
+    public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand? picturePushAction)
     {
         return (this, cursorArea);
     }

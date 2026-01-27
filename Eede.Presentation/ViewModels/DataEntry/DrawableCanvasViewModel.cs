@@ -2,7 +2,7 @@
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
-using Eede.Application.Common.SelectionStates;
+using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Application.Drawings;
 using Eede.Application.Pictures;
 using Eede.Application.Animations;
@@ -64,7 +64,12 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly CutSelectionUseCase _cutSelectionUseCase;
     private readonly PasteFromClipboardUseCase _pasteFromClipboardUseCase;
     private readonly PictureSize _gridSize;
-    private ISelectionState _selectionState;
+    private CanvasInteractionSession _interactionSession;
+    private ISelectionState _selectionState
+    {
+        get => _interactionSession.SelectionState;
+        set => _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, value);
+    }
     private PictureArea? _operationInitialSelectingArea;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
@@ -121,7 +126,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         _gridSize = new(16, 16);
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
-        _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
+        
+        Picture initialPicture = Picture.CreateEmpty(_globalState.BoxSize);
+        SetPicture(initialPicture);
+        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle);
 
         Magnification = new Magnification(4);
         DrawStyle = new FreeCurve();
@@ -307,7 +315,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
 
-        var area = _selectionState?.GetSelectingArea();
+        var area = _interactionSession.SelectionState?.GetSelectingArea();
         if (area.HasValue)
         {
             SelectingArea = area.Value;
@@ -318,7 +326,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             IsRegionSelecting = false;
         }
 
-        var info = _selectionState?.GetSelectionPreviewInfo();
+        var info = _interactionSession.SelectionState?.GetSelectionPreviewInfo();
         if (info != null)
         {
             PreviewPixels = info.Pixels;
@@ -345,9 +353,9 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private void UpdateCursorSize(Position pos)
     {
-        if (_selectionState == null) return;
+        if (_interactionSession == null) return;
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var selectionCursor = _selectionState.GetCursor(displayCoordinate.ToCanvas(Magnification).ToPosition());
+        var selectionCursor = _interactionSession.SelectionState.GetCursor(displayCoordinate.ToCanvas(Magnification).ToPosition());
         ActiveCursor = selectionCursor switch
         {
             SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
@@ -366,52 +374,52 @@ public class DrawableCanvasViewModel : ViewModelBase
         UpdateCursorSize(pos);
 
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var currentArea = IsAnimationMode
-            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
-            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+        var canvasCoordinate = displayCoordinate.ToCanvas(Magnification);
 
-        ISelectionState nextState = _selectionState.HandlePointerLeftButtonPressed(
-            currentArea,
-            displayCoordinate.ToCanvas(Magnification).ToPosition(),
-            null, // pullAction はここでは不要（またはダミー）
-            () => PictureBuffer.Previous,
+        _interactionSession = _interactionSession.PointerBegin(
+            canvasCoordinate,
+            PenStyle,
+            IsShifted,
             InternalUpdateCommand);
 
-        if (nextState is DraggingState)
+        PictureBuffer = _interactionSession.Buffer;
+
+        if (_interactionSession.SelectionState is DraggingState)
         {
-            _selectionState = nextState;
             DrawableArea = DrawableArea.Leave(PictureBuffer);
             UpdateImage();
             return;
         }
-        _selectionState = nextState;
 
         DrawingResult result = DrawableArea.DrawStart(DrawStyle, PenStyle, PictureBuffer, pos, IsShifted);
         PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
+        // セッションの状態を同期
+        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, _interactionSession.SelectionState);
         UpdateImage();
     }
 
     private void ExecutePonterRightButtonPressedAction(Position pos)
     {
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var canvasCoordinate = displayCoordinate.ToCanvas(Magnification);
         var currentArea = IsAnimationMode
-            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
-            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+            ? HalfBoxArea.Create(canvasCoordinate.ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(canvasCoordinate.ToPosition(), _gridSize);
 
-        (ISelectionState nextState, HalfBoxArea _) = _selectionState.HandlePointerRightButtonPressed(
+        (ISelectionState nextState, HalfBoxArea _) = _interactionSession.SelectionState.HandlePointerRightButtonPressed(
             currentArea,
-            displayCoordinate.ToCanvas(Magnification).ToPosition(),
+            canvasCoordinate.ToPosition(),
             _gridSize,
             InternalUpdateCommand);
 
-        if (_selectionState is DraggingState && nextState is SelectedState)
+        if (_interactionSession.SelectionState is DraggingState && nextState is SelectedState)
         {
-            _selectionState = nextState;
+            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
             UpdateImage();
             return;
         }
-        _selectionState = nextState;
+        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
 
         if (PictureBuffer.IsDrawing())
         {
@@ -433,7 +441,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private void ExecuteDrawingAction(Position pos)
     {
-        if (_selectionState == null || PictureBuffer == null)
+        if (_interactionSession == null || PictureBuffer == null)
         {
             return;
         }
@@ -441,17 +449,18 @@ public class DrawableCanvasViewModel : ViewModelBase
         UpdateCursorSize(pos);
 
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var canvasCoordinate = displayCoordinate.ToCanvas(Magnification);
         var currentArea = IsAnimationMode
-            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
-            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+            ? HalfBoxArea.Create(canvasCoordinate.ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(canvasCoordinate.ToPosition(), _gridSize);
 
-        (bool visible, HalfBoxArea nextCursorArea) = _selectionState.HandlePointerMoved(
+        (bool visible, HalfBoxArea nextCursorArea) = _interactionSession.SelectionState.HandlePointerMoved(
             currentArea,
             true,
-            displayCoordinate.ToCanvas(Magnification).ToPosition(),
+            canvasCoordinate.ToPosition(),
             PictureBuffer.Previous.Size);
 
-        if (_selectionState is DraggingState)
+        if (_interactionSession.SelectionState is DraggingState)
         {
             DrawableArea = DrawableArea.Leave(PictureBuffer);
             UpdateImage();
@@ -461,12 +470,13 @@ public class DrawableCanvasViewModel : ViewModelBase
         DrawingResult result = DrawableArea.Move(DrawStyle, PenStyle, PictureBuffer, pos, IsShifted);
         PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
+        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, _interactionSession.SelectionState);
         UpdateImage();
     }
 
     private void ExecuteDrawEndAction(Position pos)
     {
-        if (_selectionState == null || PictureBuffer == null)
+        if (_interactionSession == null || PictureBuffer == null)
         {
             return;
         }
@@ -475,32 +485,33 @@ public class DrawableCanvasViewModel : ViewModelBase
         var previousArea = IsRegionSelecting ? (PictureArea?)SelectingArea : null;
 
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var canvasCoordinate = displayCoordinate.ToCanvas(Magnification);
         var currentArea = IsAnimationMode
-            ? HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), GridSettings.CellSize)
-            : HalfBoxArea.Create(displayCoordinate.ToCanvas(Magnification).ToPosition(), _gridSize);
+            ? HalfBoxArea.Create(canvasCoordinate.ToPosition(), GridSettings.CellSize)
+            : HalfBoxArea.Create(canvasCoordinate.ToPosition(), _gridSize);
 
-        ISelectionState nextState = _selectionState.HandlePointerLeftButtonReleased(
+        ISelectionState nextState = _interactionSession.SelectionState.HandlePointerLeftButtonReleased(
             currentArea,
-            displayCoordinate.ToCanvas(Magnification).ToPosition(),
-            null, // picturePushAction
+            canvasCoordinate.ToPosition(),
+            InternalUpdateCommand,
             InternalUpdateCommand);
 
-        if (_selectionState is RegionSelectingState && nextState is SelectedState)
+        if (_interactionSession.SelectionState is RegionSelectingState && nextState is SelectedState)
         {
-            _selectionState = nextState;
+            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
             UpdateImage();
             return;
         }
 
-        if (_selectionState is DraggingState draggingState)
+        if (_interactionSession.SelectionState is DraggingState draggingState)
         {
             var originalArea = draggingState.GetOriginalArea();
-            _selectionState = nextState;
+            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
             UpdateImage();
             Drew?.Invoke(previous, PictureBuffer.Previous, originalArea, SelectingArea);
             return;
         }
-        _selectionState = nextState;
+        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
 
         if (!PictureBuffer.IsDrawing())
         {
@@ -512,6 +523,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         DrawingResult result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(pos.X, pos.Y), IsShifted);
         PictureBuffer = result.PictureBuffer;
         DrawableArea = result.DrawableArea;
+        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, _interactionSession.SelectionState);
 
         Drew?.Invoke(previousImage, PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea);
         UpdateImage();
@@ -529,12 +541,11 @@ public class DrawableCanvasViewModel : ViewModelBase
         tool.OnDrawStart += (sender, args) =>
         {
             IsRegionSelecting = false;
-            var displayCoordinate = new DisplayCoordinate(args.Start.X, args.Start.Y);
             // 本来は args.Start は既にキャンバス座標のはずだが、既存の実装に合わせる
             var currentArea = IsAnimationMode
                 ? HalfBoxArea.Create(args.Start, GridSettings.CellSize)
                 : HalfBoxArea.Create(args.Start, _gridSize);
-            _selectionState = new NormalCursorState(currentArea);
+            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, new NormalCursorState(currentArea));
         };
         tool.OnDrawing += (sender, args) =>
         {
@@ -545,7 +556,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         {
             SelectingArea = PictureArea.FromPosition(args.Start, args.Now, PictureBuffer.Previous.Size);
             IsRegionSelecting = true;
-            _selectionState = new SelectedState(new Selection(SelectingArea.Value));
+            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, new SelectedState(new Selection(SelectingArea.Value)));
         };
     }
 

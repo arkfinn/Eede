@@ -429,7 +429,7 @@ public class MainViewModel : ViewModelBase
             vm.PictureBuffer,
             args.Rect);
 
-        DrawingSessionViewModel.Push(result.Updated, result.SelectingArea, DrawableCanvasViewModel.SelectingArea);
+        DrawingSessionViewModel.Push(result.Updated, null, DrawableCanvasViewModel.SelectingArea);
     }
 
     private void SetPictureToDrawArea(Picture picture)

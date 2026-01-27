@@ -1,26 +1,40 @@
-# 概要
-`DrawableCanvasViewModel` は現在、表示計算、入力ハンドリング、ドメイン操作の3つの責務が混在し、肥大化（God Class化）している。本トラックでは、レガシーコード改善の観点から「Humble Object」パターンを適用し、表示用計算ロジックを分離・純粋化することで、テスト可能性の向上とコードの可読性改善を図る。
+# Specification: DrawableCanvasViewModel の責務分離とドメイン知識の返却
 
-# 機能要件
-1. **表示計算ロジックの抽出**:
-   - `Magnification` に基づく `Thickness` や `Size` の計算ロジックを `CanvasViewCalculator`（仮称）などの純粋なC#クラスへ移動する。
-   - `SelectingArea` から `SelectingThickness` / `SelectingSize` を求める計算を分離する。
-   - `PreviewPosition` / `PreviewPixels` から `PreviewThickness` / `PreviewSize` 等を求める計算を分離する。
-2. **Avalonia依存の最小化**:
-   - ViewModel本体が直接 `Thickness` を計算して保持するのではなく、計算クラスを通じて提供、またはView側での変換を検討する。
-3. **副作用の整理**:
-   - `WhenAnyValue` による複雑な計算フローを整理し、入力に対する計算結果が予測可能な状態にする。
+## 1. Overview
+`DrawableCanvasViewModel` は現在、UIの表示状態管理、マウスイベントによる座標計算、描画セッションの状態遷移、および編集コマンド（Copy/Cut/Paste）の実行といった多岐にわたる責務を抱えています。
+本トラックでは、DDDの原則に基づき、これらの混在した責務を Domain 層（Value Object, Entity）および Application 層（UseCase）へ適切に再配置（Repatriation）し、ViewModel を薄く保つことで保守性とテスト容易性を向上させます。
 
-# 非機能要件
-- **テスト可能性**: 抽出された計算ロジックに対し、Avaloniaを起動せずに実行可能な単体テストを実装する。
-- **後方互換性**: 既存の描画機能、選択機能の挙動を変更しない（リファクタリングに徹する）。
+## 2. Functional Requirements
+### 2.1 空間の型による分離 (Spatial Type Separation)
+- `DisplayCoordinate` (UI上の座標) と `CanvasCoordinate` (ピクセル座標) を Value Object として明確に定義する。
+- Magnification に基づく座標変換ロジックをこれらの VO に閉じ込め、ViewModel 内での手動計算を排除する。
 
-# 受入基準
-- [ ] 表示用計算ロジックが独立したクラスに抽出されている。
-- [ ] `DrawableCanvasViewModel` から `Thickness` 計算などのロジックが消去されている。
-- [ ] 新設された計算クラスに対して単体テストがパスしている。
-- [ ] 既存のキャンバス表示（ズーム、選択範囲表示、プレビュー表示）が正しく動作し続けている。
+### 2.2 編集ユースケースの抽出
+- `CopyCommand`, `CutCommand`, `PasteCommand` のロジックを以下の UseCase に分割・抽出する。
+    - `CopySelectionUseCase`
+    - `CutSelectionUseCase`
+    - `PasteFromClipboardUseCase`
+- 各 UseCase は 1クラス1メソッド (`Execute()`) の原則に従う。
 
-# アウトオブスコープ
-- マウス操作ロジック（`ISelectionState` 周り）の抜本的な再設計（次フェーズ以降とする）。
-- ドメイン層（`Picture`, `DrawingBuffer`）のロジック変更。
+### 2.3 相互作用ロジックのドメイン返却
+- マウスイベント（Begin/Move/End）に伴う状態遷移ロジック（`_selectionState` の管理）を、Domain 層の新しい集約（例：`CanvasInteractionSession`）へ移動する。
+- ViewModel はポインタ位置をドメイン空間に変換してセッションへ渡し、更新された画像データと新しい状態（カーソル形状など）を受け取るだけの役割とする。
+
+### 2.4 描画結果の通知 (Undo/Redo 連携)
+- リファクタリング後も、描画確定時の `Drew` イベントが正しく発火し、既存のアンドゥ・リドゥ機構が維持されることを保証する。
+
+## 3. Non-Functional Requirements
+- **アーキテクチャ遵守**: オニオンアーキテクチャの境界を守り、Domain 層が Presentation/Infrastructure 層に依存しないようにする。
+- **テスタビリティ**: 抽出した UseCase および Domain モデルに対して、UIを介さずにロジックを検証できる単体テストを追加する。
+- **結合度の低減**: ViewModel が `ISelectionState` などの具体的な状態クラスを直接操作するのをやめ、インターフェースまたは抽象化されたセッション経由で操作する。
+
+## 4. Acceptance Criteria
+- [ ] `DrawableCanvasViewModel` から直接的な座標計算ロジック（Magnification を使った乗除算）が消滅していること。
+- [ ] コピー・切り取り・貼り付けが、抽出された UseCase を経由して従来通り動作すること。
+- [ ] 自由線描画、範囲選択、選択範囲の移動といった一連の操作が、リファクタリング前と変わらず実行できること。
+- [ ] 新規作成された UseCase および Domain ロジックのユニットテストが全てパスすること。
+
+## 5. Out of Scope
+- UIの外観デザインの変更。
+- アンドゥ・リドゥエンジン（`History` 等）自体の内部実装の変更。
+- 描画ツール（`IDrawStyle` 実装クラス）内部のアルゴリズム変更。

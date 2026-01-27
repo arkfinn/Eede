@@ -115,10 +115,13 @@ public class DrawableCanvasViewModel : ViewModelBase
                 if (SelectingArea.HasValue)
                 {
                     _selectionState = new SelectedState(new Selection(SelectingArea.Value));
+                    // 選択枠を表示するかどうかはツールの状態に従う
+                    IsRegionSelecting = (DrawStyle is RegionSelector);
                 }
                 else
                 {
                     _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
+                    IsRegionSelecting = false;
                 }
                 UpdateImage();
             }
@@ -316,10 +319,9 @@ public class DrawableCanvasViewModel : ViewModelBase
         }
 
         var area = _interactionSession.SelectionState?.GetSelectingArea();
-        if (area.HasValue)
+        if (area.HasValue && IsRegionSelecting)
         {
             SelectingArea = area.Value;
-            IsRegionSelecting = true;
         }
         else if (DrawStyle is not RegionSelector)
         {

@@ -24,7 +24,6 @@ public class DrawableCanvasViewModelTests
     private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock;
     private Mock<IDrawActionUseCase> _drawActionUseCaseMock;
     private Mock<IDrawingSessionProvider> _drawingSessionProviderMock;
-    private CanvasViewCalculator _canvasViewCalculator;
     private GlobalState _globalState;
 
     [SetUp]
@@ -35,7 +34,6 @@ public class DrawableCanvasViewModelTests
         _bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
         _drawActionUseCaseMock = new Mock<IDrawActionUseCase>();
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
-        _canvasViewCalculator = new CanvasViewCalculator();
         _globalState = new GlobalState();
     }
 

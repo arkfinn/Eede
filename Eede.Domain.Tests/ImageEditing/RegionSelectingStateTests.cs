@@ -42,16 +42,22 @@ public class RegionSelectingStateTests
     }
 
     [Test]
-    public void GetSelectingArea_Should_Ensure_Minimum_Size_Even_After_Snap()
+    public void GetSelectingArea_Should_Return_Large_Area_For_Large_Drag()
     {
-        var start = new Position(10, 10);
-        var now = new Position(15, 15);
+        var start = new Position(0, 0);
+        var now = new Position(100, 100);
         var state = new RegionSelectingState(start, now, _minSize);
 
         var area = state.GetSelectingArea();
 
         Assert.That(area, Is.Not.Null);
-        Assert.That(area.Value.Width, Is.EqualTo(32));
-        Assert.That(area.Value.Height, Is.EqualTo(32));
+        // GridSize = 16
+        // Left = Snap(0, 16) = 0
+        // Top = Snap(0, 16) = 0
+        // Right = Snap(0 + 100 + 16 - 1, 16) = Snap(115, 16) = 112
+        // Bottom = Snap(0 + 100 + 16 - 1, 16) = Snap(115, 16) = 112
+        // Width = 112, Height = 112
+        Assert.That(area.Value.Width, Is.EqualTo(112));
+        Assert.That(area.Value.Height, Is.EqualTo(112));
     }
 }

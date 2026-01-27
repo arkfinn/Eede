@@ -75,7 +75,6 @@ public partial class App : Avalonia.Application
         services.AddSingleton<AnimationViewModel>();
         services.AddSingleton<IAddFrameProvider>(sp => sp.GetRequiredService<AnimationViewModel>());
         services.AddTransient<AnimationDockViewModel>();
-        services.AddSingleton<CanvasViewCalculator>();
         services.AddTransient<DrawableCanvasViewModel>();
         services.AddTransient<DrawingSessionViewModel>();
         services.AddTransient<MainViewModel>();

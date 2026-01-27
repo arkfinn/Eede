@@ -33,8 +33,8 @@
 - [x] Task: `CanvasInteractionSession` 集約の設計と実装 [30ea136]
     - `_selectionState` の遷移ロジックをこの集約内に閉じ込める。
     - 入力: `CanvasCoordinate`, `PointerEvent` -> 出力: `UpdatedPicture`, `NextSession`, `CursorType`.
-- [ ] Task: `DrawableCanvasViewModel` のイベントハンドラのリファクタリング
+- [x] Task: `DrawableCanvasViewModel` のイベントハンドラのリファクタリング [57987da]
     - イベントを `CanvasInteractionSession` に委譲し、結果をプロパティに反映するだけにする。
-- [ ] Task: `UpdateImage` メソッドの整理
+- [x] Task: `UpdateImage` メソッドの整理 [57987da]
     - プレビュー合成ロジックを整理し、必要に応じて Domain モデル側へ寄せる。
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)

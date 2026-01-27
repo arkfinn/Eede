@@ -1,8 +1,8 @@
 using Eede.Application.Animations;
 using Eede.Application.Services;
 using Eede.Application.Pictures;
-using Eede.Application.UseCase.Pictures;
 using Eede.Application.Drawings;
+using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.SharedKernel;
@@ -11,6 +11,7 @@ using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.Common.Services;
+using Eede.Application.UseCase.Pictures;
 using Moq;
 using NUnit.Framework;
 using Avalonia.Headless.NUnit;
@@ -18,6 +19,7 @@ using Microsoft.Reactive.Testing;
 using ReactiveUI.Testing;
 using ReactiveUI;
 using System.Reactive;
+using System;
 
 namespace Eede.Presentation.Tests.ViewModels.Pages;
 

@@ -4,6 +4,7 @@ using Eede.Application.Drawings;
 using Eede.Application.Pictures;
 using Eede.Application.Services;
 using Eede.Application.UseCase.Pictures;
+using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;

@@ -2,6 +2,7 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.SharedKernel;
 using System;
+using System.Windows.Input;
 
 namespace Eede.Domain.ImageEditing;
 
@@ -27,7 +28,7 @@ public class CanvasInteractionSession
         CanvasCoordinate coordinate,
         PenStyle penStyle,
         bool isShifted,
-        Action<Picture>? updateAction)
+        ICommand? updateAction)
     {
         // 1. SelectionState の処理
         var currentArea = HalfBoxArea.Create(coordinate.ToPosition(), new PictureSize(16, 16));
@@ -44,14 +45,11 @@ public class CanvasInteractionSession
         }
 
         // 2. 描画の開始
-        // TODO: DrawableArea の責務をここへ集約する
-        // 現時点では、描画開始が可能かどうかの不変条件チェックのみ行う
         if (Buffer.IsDrawing() || !Buffer.Fetch().Contains(coordinate.ToPosition()))
         {
             return new CanvasInteractionSession(Buffer, DrawStyle, nextState);
         }
 
-        // 描画開始（CoordinateHistory の生成）
         var history = new CoordinateHistory(coordinate);
         var nextBuffer = DrawStyle.DrawStart(Buffer, penStyle, history, isShifted);
 

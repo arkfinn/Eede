@@ -30,7 +30,7 @@
 ## Phase 3: 相互作用ロジックのドメイン返却 (Domain層)
 マウスイベントと状態遷移をドメイン集約へ移動します。
 
-- [ ] Task: `CanvasInteractionSession` 集約の設計と実装
+- [x] Task: `CanvasInteractionSession` 集約の設計と実装 [30ea136]
     - `_selectionState` の遷移ロジックをこの集約内に閉じ込める。
     - 入力: `CanvasCoordinate`, `PointerEvent` -> 出力: `UpdatedPicture`, `NextSession`, `CursorType`.
 - [ ] Task: `DrawableCanvasViewModel` のイベントハンドラのリファクタリング

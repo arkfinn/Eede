@@ -1,4 +1,4 @@
-namespace Eede.Application.Animations;
+namespace Eede.Domain.Animations;
 
 public interface IAddFrameProvider
 {

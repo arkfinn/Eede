@@ -61,7 +61,10 @@ public class MainViewModelTests
             _mockClipboardService.Object,
             _mockBitmapAdapter.Object,
             _mockDrawActionUseCase.Object,
-            _mockDrawingSessionProvider.Object);
+            _mockDrawingSessionProvider.Object,
+            new CopySelectionUseCase(_mockClipboardService.Object),
+            new CutSelectionUseCase(_mockClipboardService.Object),
+            new PasteFromClipboardUseCase(_mockClipboardService.Object));
         var drawingSessionViewModel = new DrawingSessionViewModel(_mockDrawingSessionProvider.Object);
         var paletteContainerViewModel = new PaletteContainerViewModel();
 

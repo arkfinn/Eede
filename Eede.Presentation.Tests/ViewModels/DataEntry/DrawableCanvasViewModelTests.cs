@@ -3,6 +3,7 @@ using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Pictures;
 using Eede.Application.Services;
+using Eede.Application.UseCase.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
@@ -24,6 +25,9 @@ public class DrawableCanvasViewModelTests
     private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock;
     private Mock<IDrawActionUseCase> _drawActionUseCaseMock;
     private Mock<IDrawingSessionProvider> _drawingSessionProviderMock;
+    private Mock<CopySelectionUseCase> _copySelectionUseCaseMock;
+    private Mock<CutSelectionUseCase> _cutSelectionUseCaseMock;
+    private Mock<PasteFromClipboardUseCase> _pasteFromClipboardUseCaseMock;
     private GlobalState _globalState;
 
     [SetUp]
@@ -34,6 +38,9 @@ public class DrawableCanvasViewModelTests
         _bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
         _drawActionUseCaseMock = new Mock<IDrawActionUseCase>();
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
+        _copySelectionUseCaseMock = new Mock<CopySelectionUseCase>(_clipboardServiceMock.Object);
+        _cutSelectionUseCaseMock = new Mock<CutSelectionUseCase>(_clipboardServiceMock.Object);
+        _pasteFromClipboardUseCaseMock = new Mock<PasteFromClipboardUseCase>(_clipboardServiceMock.Object);
         _globalState = new GlobalState();
     }
 
@@ -45,7 +52,10 @@ public class DrawableCanvasViewModelTests
             _clipboardServiceMock.Object,
             _bitmapAdapterMock.Object,
             _drawActionUseCaseMock.Object,
-            _drawingSessionProviderMock.Object);
+            _drawingSessionProviderMock.Object,
+            _copySelectionUseCaseMock.Object,
+            _cutSelectionUseCaseMock.Object,
+            _pasteFromClipboardUseCaseMock.Object);
     }
 
     [AvaloniaTest]

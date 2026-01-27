@@ -24,6 +24,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Eede.Application.Services;
+using Eede.Application.UseCase.Pictures;
 
 namespace Eede.Presentation.ViewModels.DataEntry;
 
@@ -59,6 +60,9 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
     private readonly IDrawActionUseCase _drawActionUseCase;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
+    private readonly CopySelectionUseCase _copySelectionUseCase;
+    private readonly CutSelectionUseCase _cutSelectionUseCase;
+    private readonly PasteFromClipboardUseCase _pasteFromClipboardUseCase;
     private readonly PictureSize _gridSize;
     private ISelectionState _selectionState;
     private PictureArea? _operationInitialSelectingArea;
@@ -74,7 +78,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         IClipboardService clipboardService,
         IBitmapAdapter<Bitmap> bitmapAdapter,
         IDrawActionUseCase drawActionUseCase,
-        IDrawingSessionProvider drawingSessionProvider)
+        IDrawingSessionProvider drawingSessionProvider,
+        CopySelectionUseCase copySelectionUseCase,
+        CutSelectionUseCase cutSelectionUseCase,
+        PasteFromClipboardUseCase pasteFromClipboardUseCase)
     {
         _globalState = globalState;
         _addFrameProvider = addFrameProvider;
@@ -82,6 +89,9 @@ public class DrawableCanvasViewModel : ViewModelBase
         _bitmapAdapter = bitmapAdapter;
         _drawActionUseCase = drawActionUseCase;
         _drawingSessionProvider = drawingSessionProvider;
+        _copySelectionUseCase = copySelectionUseCase;
+        _cutSelectionUseCase = cutSelectionUseCase;
+        _pasteFromClipboardUseCase = pasteFromClipboardUseCase;
 
         this.WhenAnyValue(x => x.SelectingArea)
             .Subscribe(area =>
@@ -545,17 +555,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         try
         {
-            Picture target;
-            if (IsRegionSelecting && SelectingArea.HasValue && SelectingArea.Value.Width > 0 && SelectingArea.Value.Height > 0)
-            {
-                target = PictureBuffer.Previous.CutOut(SelectingArea.Value);
-            }
-            else
-            {
-                target = PictureBuffer.Previous;
-            }
-
-            await _clipboardService.CopyAsync(target);
+            await _copySelectionUseCase.Execute(PictureBuffer.Previous, IsRegionSelecting ? SelectingArea : null);
             System.Diagnostics.Debug.WriteLine("Copy executed successfully.");
         }
         catch (Exception ex)
@@ -570,23 +570,11 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         try
         {
-            Picture target;
-            Picture cleared;
             Picture previous = PictureBuffer.Previous;
             PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
 
-            if (IsRegionSelecting && SelectingArea.HasValue && SelectingArea.Value.Width > 0 && SelectingArea.Value.Height > 0)
-            {
-                target = previous.CutOut(SelectingArea.Value);
-                cleared = previous.Clear(SelectingArea.Value);
-            }
-            else
-            {
-                target = previous;
-                cleared = Picture.CreateEmpty(previous.Size);
-            }
+            Picture cleared = await _cutSelectionUseCase.Execute(previous, previousArea);
 
-            await _clipboardService.CopyAsync(target);
             ExecuteInternalUpdate(cleared);
             IsRegionSelecting = false;
             _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
@@ -612,7 +600,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         try
         {
-            Picture pasted = await _clipboardService.GetPictureAsync();
+            Picture? pasted = await _pasteFromClipboardUseCase.Execute();
             if (pasted == null)
             {
                 System.Diagnostics.Debug.WriteLine("Clipboard returned null picture.");

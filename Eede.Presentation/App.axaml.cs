@@ -62,6 +62,9 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IDrawingSessionProvider, DrawingSessionProvider>();
         services.AddSingleton<IFileSystem, RealFileSystem>();
         services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();
+        services.AddTransient<CopySelectionUseCase>();
+        services.AddTransient<CutSelectionUseCase>();
+        services.AddTransient<PasteFromClipboardUseCase>();
 
         // Adapters / Infrastructure
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();

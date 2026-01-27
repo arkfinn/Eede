@@ -20,12 +20,12 @@
 ## Phase 2: 編集ユースケースの抽出 (Application層)
 手続き的な編集コマンドを UseCase へ移動し、1クラス1メソッド化します。
 
-- [ ] Task: `CopySelectionUseCase` の実装とテスト
+- [x] Task: `CopySelectionUseCase` の実装とテスト [1904e03]
     - `Eede.Application.Pictures.UseCase` に配置。
-- [ ] Task: `CutSelectionUseCase` の実装とテスト
-- [ ] Task: `PasteFromClipboardUseCase` の実装とテスト
-- [ ] Task: ViewModel のコマンドから各 UseCase を呼び出すように変更
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: `CutSelectionUseCase` の実装とテスト [c3fa183]
+- [x] Task: `PasteFromClipboardUseCase` の実装とテスト [3d8077a]
+- [x] Task: ViewModel のコマンドから各 UseCase を呼び出すように変更 [780eb1a]
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: 相互作用ロジックのドメイン返却 (Domain層)
 マウスイベントと状態遷移をドメイン集約へ移動します。

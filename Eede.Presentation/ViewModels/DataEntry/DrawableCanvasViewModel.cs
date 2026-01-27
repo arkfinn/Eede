@@ -185,8 +185,10 @@ public class DrawableCanvasViewModel : ViewModelBase
             {
                 if (x.area.HasValue)
                 {
-                    SelectingThickness = new Thickness(x.mag.Magnify(x.area.Value.X), x.mag.Magnify(x.area.Value.Y), 0, 0);
-                    SelectingSize = new PictureSize(x.mag.Magnify(x.area.Value.Width), x.mag.Magnify(x.area.Value.Height));
+                    var displayPos = new CanvasCoordinate(x.area.Value.X, x.area.Value.Y).ToDisplay(x.mag);
+                    var displaySize = new CanvasCoordinate(x.area.Value.Width, x.area.Value.Height).ToDisplay(x.mag);
+                    SelectingThickness = new Thickness(displayPos.X, displayPos.Y, 0, 0);
+                    SelectingSize = new PictureSize(displaySize.X, displaySize.Y);
                 }
                 else
                 {
@@ -200,10 +202,13 @@ public class DrawableCanvasViewModel : ViewModelBase
             {
                 if (x.pix != null)
                 {
-                    PreviewThickness = new Thickness(x.mag.Magnify(x.pos.X), x.mag.Magnify(x.pos.Y), 0, 0);
-                    PreviewSize = new PictureSize(x.mag.Magnify(x.pix.Width), x.mag.Magnify(x.pix.Height));
+                    var displayPos = new CanvasCoordinate(x.pos.X, x.pos.Y).ToDisplay(x.mag);
+                    var displaySize = new CanvasCoordinate(x.pix.Size.Width, x.pix.Size.Height).ToDisplay(x.mag);
+
+                    PreviewThickness = new Thickness(displayPos.X, displayPos.Y, 0, 0);
+                    PreviewSize = new PictureSize(displaySize.X, displaySize.Y);
                     RawPreviewThickness = new Thickness(x.pos.X, x.pos.Y, 0, 0);
-                    RawPreviewSize = new PictureSize(x.pix.Width, x.pix.Height);
+                    RawPreviewSize = x.pix.Size;
 
                     // 既存のMagnificationプロセスを使用
                     var magnifiedPicture = ImageTransfer.Transfer(x.pix, x.mag);

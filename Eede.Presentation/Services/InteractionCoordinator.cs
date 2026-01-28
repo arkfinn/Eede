@@ -256,6 +256,17 @@ public class InteractionCoordinator : IInteractionCoordinator
         };
     }
 
+    public void PasteImage(Picture picture, DrawingBuffer buffer, IDrawStyle drawStyle)
+    {
+        CurrentBuffer = buffer;
+        var position = new Position(0, 0);
+        var state = new FloatingSelectionState(picture, position, buffer.Previous);
+        _interactionSession = new CanvasInteractionSession(buffer, drawStyle, state);
+        
+        SyncSelectionState(drawStyle);
+        NotifyStateChanged();
+    }
+
     public Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
     {
         var picture = _drawableArea.Painted(buffer, penStyle, imageTransfer);

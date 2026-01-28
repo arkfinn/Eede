@@ -15,13 +15,13 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Extract Interaction Logic' (Protocol in workflow.md)
 
 ## Phase 3: Property & State Refactoring
-- [ ] Task: ViewModel の Reactive プロパティの更新を、Coordinator から返される「状態オブジェクト」に基づく更新に整理する
-- [ ] Task: カーソル形状の決定ロジックを Coordinator または Domain 層へ移動する
-- [ ] Task: DI コンテナに Coordinator を登録し、ViewModel への注入を有効化する
+- [x] Task: ViewModel の Reactive プロパティの更新を、Coordinator から返される「状態オブジェクト」に基づく更新に整理する [48bb992]
+- [x] Task: カーソル形状の決定ロジックを Coordinator または Domain 層へ移動する [48bb992]
+- [x] Task: DI コンテナに Coordinator を登録し、ViewModel への注入を有効化する [48bb992]
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Property & State Refactoring' (Protocol in workflow.md)
 
 ## Phase 4: Final Cleanup & Verification
-- [ ] Task: ViewModel 内の不要な using やプライベート変数を削除する
-- [ ] Task: すべての単体テスト（新規および既存）を実行し、100% パスを確認する
+- [x] Task: ViewModel 内の不要な using やプライベート変数を削除する [48bb992]
+- [x] Task: すべての単体テスト（新規および既存）を実行し、100% パスを確認する [48bb992]
 - [ ] Task: 手動でアプリケーションを動かし、操作感に違和感がないか最終確認する
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Cleanup & Verification' (Protocol in workflow.md)

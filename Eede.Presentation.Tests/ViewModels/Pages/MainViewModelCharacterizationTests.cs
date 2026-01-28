@@ -14,6 +14,7 @@ using System.Reactive;
 using System;
 using Eede.Domain.SharedKernel;
 using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.Drawings;
@@ -61,6 +62,12 @@ public class MainViewModelCharacterizationTests
     private MainViewModel CreateViewModel()
     {
         var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Mock<IFileSystem>().Object);
+        var coordinatorMock = new Mock<IInteractionCoordinator>();
+        coordinatorMock.Setup(c => c.Painted(It.IsAny<DrawingBuffer>(), It.IsAny<PenStyle>(), It.IsAny<IImageTransfer>()))
+                       .Returns(Picture.CreateEmpty(new PictureSize(32, 32)));
+        // Ensure CurrentBuffer is not null for SetPicture
+        coordinatorMock.Setup(c => c.CurrentBuffer).Returns(new DrawingBuffer(Picture.CreateEmpty(new PictureSize(32, 32))));
+
         var drawableCanvasViewModel = new DrawableCanvasViewModel(
             _globalState,
             animationViewModel,
@@ -70,7 +77,7 @@ public class MainViewModelCharacterizationTests
             new CopySelectionUseCase(_mockClipboardService.Object),
             new CutSelectionUseCase(_mockClipboardService.Object),
             new PasteFromClipboardUseCase(_mockClipboardService.Object),
-            new Mock<IInteractionCoordinator>().Object);
+            coordinatorMock.Object);
         var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
         var paletteContainerViewModel = new PaletteContainerViewModel();
 
@@ -286,6 +293,11 @@ public class MainViewModelCharacterizationTests
 
             // 各サブ ViewModel を個別に作成
             var animationViewModel = new AnimationViewModel(_mockAnimationService.Object, new Moq.Mock<IFileSystem>().Object);
+            var coordinatorMock = new Mock<IInteractionCoordinator>();
+            coordinatorMock.Setup(c => c.Painted(It.IsAny<DrawingBuffer>(), It.IsAny<PenStyle>(), It.IsAny<IImageTransfer>()))
+                           .Returns(Picture.CreateEmpty(new PictureSize(32, 32)));
+            coordinatorMock.Setup(c => c.CurrentBuffer).Returns(new DrawingBuffer(Picture.CreateEmpty(new PictureSize(32, 32))));
+
             var drawableCanvasViewModel = new DrawableCanvasViewModel(
                 _globalState,
                 animationViewModel,
@@ -295,7 +307,7 @@ public class MainViewModelCharacterizationTests
                 new CopySelectionUseCase(_mockClipboardService.Object),
                 new CutSelectionUseCase(_mockClipboardService.Object),
                 new PasteFromClipboardUseCase(_mockClipboardService.Object),
-                new Mock<IInteractionCoordinator>().Object);
+                coordinatorMock.Object);
             var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
             var paletteContainerViewModel = new PaletteContainerViewModel();
 

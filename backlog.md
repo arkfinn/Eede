@@ -4,7 +4,7 @@
 - [x] App.axaml.cs のリファクタリング：DIコンテナによるインスタンス管理の自動化
 - [x] View と ViewModel の紐付けを DI コンテナ（ViewLocator 等）を介して自動解決するように改善する
 - [x] 範囲選択ツールのドラッグ移動後にアンドゥすると選択範囲が追従しない不具合を解決する。
-- [ ] DrawableCanvasViewModel の責務分離：UI状態と相互作用ロジックの整理
+- [x] DrawableCanvasViewModel の責務分離：UI状態と相互作用ロジックの整理
 - [ ] 引数の多いUseCaseやViewModelをレガシーコード改善としてリファクタリングし、ドメイン駆動開発の観点で意味のある小さい単位に分割する。
 - [ ] Serviceクラスの撲滅。UseCaseに分解または適切な名称に変更
 - [ ] さらなる DI 化: 現在 IServiceProvider を直接受け取っている MainViewModel を、抽象化されたファクトリ（Func<T>  等）を受け取る形にして、DI コンテナへの直接依存をさらに減らすリファクタリング。

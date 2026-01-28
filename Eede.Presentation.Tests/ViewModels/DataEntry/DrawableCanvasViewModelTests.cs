@@ -9,6 +9,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
+using Eede.Presentation.Services;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataEntry;
 using Moq;
@@ -29,6 +30,7 @@ public class DrawableCanvasViewModelTests
     private Mock<CopySelectionUseCase> _copySelectionUseCaseMock;
     private Mock<CutSelectionUseCase> _cutSelectionUseCaseMock;
     private Mock<PasteFromClipboardUseCase> _pasteFromClipboardUseCaseMock;
+    private Mock<IInteractionCoordinator> _interactionCoordinatorMock;
     private GlobalState _globalState;
 
     [SetUp]
@@ -42,6 +44,7 @@ public class DrawableCanvasViewModelTests
         _copySelectionUseCaseMock = new Mock<CopySelectionUseCase>(_clipboardServiceMock.Object);
         _cutSelectionUseCaseMock = new Mock<CutSelectionUseCase>(_clipboardServiceMock.Object);
         _pasteFromClipboardUseCaseMock = new Mock<PasteFromClipboardUseCase>(_clipboardServiceMock.Object);
+        _interactionCoordinatorMock = new Mock<IInteractionCoordinator>();
         _globalState = new GlobalState();
     }
 
@@ -52,11 +55,11 @@ public class DrawableCanvasViewModelTests
             _addFrameProviderMock.Object,
             _clipboardServiceMock.Object,
             _bitmapAdapterMock.Object,
-            _drawActionUseCaseMock.Object,
             _drawingSessionProviderMock.Object,
             _copySelectionUseCaseMock.Object,
             _cutSelectionUseCaseMock.Object,
-            _pasteFromClipboardUseCaseMock.Object);
+            _pasteFromClipboardUseCaseMock.Object,
+            _interactionCoordinatorMock.Object);
     }
 
     [AvaloniaTest]

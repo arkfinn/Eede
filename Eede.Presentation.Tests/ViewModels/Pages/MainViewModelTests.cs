@@ -7,6 +7,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Settings;
+using Eede.Presentation.Services;
 using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
@@ -62,11 +63,11 @@ public class MainViewModelTests
             new Mock<IAddFrameProvider>().Object,
             _mockClipboardService.Object,
             _mockBitmapAdapter.Object,
-            _mockDrawActionUseCase.Object,
             _mockDrawingSessionProvider.Object,
             new CopySelectionUseCase(_mockClipboardService.Object),
             new CutSelectionUseCase(_mockClipboardService.Object),
-            new PasteFromClipboardUseCase(_mockClipboardService.Object));
+            new PasteFromClipboardUseCase(_mockClipboardService.Object),
+            new Mock<IInteractionCoordinator>().Object);
         var drawingSessionViewModel = new DrawingSessionViewModel(_mockDrawingSessionProvider.Object);
         var paletteContainerViewModel = new PaletteContainerViewModel();
 

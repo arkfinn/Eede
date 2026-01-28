@@ -352,7 +352,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         {
             Picture? pasted = await _pasteFromClipboardUseCase.Execute();
             if (pasted == null) return;
-            // TODO: delegate to coordinator
+            _coordinator.PasteImage(pasted, PictureBuffer, DrawStyle);
         }
         catch (Exception ex)
         {

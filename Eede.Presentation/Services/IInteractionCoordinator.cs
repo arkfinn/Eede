@@ -22,6 +22,7 @@ public interface IInteractionCoordinator
     // 状態更新
     void UpdateMagnification(Magnification magnification);
     void SetupRegionSelector(RegionSelector tool, DrawingBuffer buffer, bool isAnimationMode, PictureSize gridSize);
+    void PasteImage(Picture picture, DrawingBuffer buffer, IDrawStyle drawStyle);
 
     // 描画
     Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);

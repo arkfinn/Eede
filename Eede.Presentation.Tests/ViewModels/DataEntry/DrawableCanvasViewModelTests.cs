@@ -6,6 +6,7 @@ using Eede.Application.Services;
 using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
@@ -101,99 +102,47 @@ public class DrawableCanvasViewModelTests
 
         
 
-                [AvaloniaTest]
+        [AvaloniaTest]
+        public void Drawing_Workflow_Test()
+        {
+            var vm = CreateViewModel();
+            vm.Magnification = new Magnification(1);
+            var initialPicture = Picture.CreateEmpty(new PictureSize(32, 32));
+            vm.SetPicture(initialPicture);
 
-        
+            bool drewEventFired = false;
+            // Coordinator's Drew event needs to be forwarded
+            _interactionCoordinatorMock.Raise(x => x.Drew += null, initialPicture, initialPicture, (PictureArea?)null, (PictureArea?)null);
+            vm.Drew += (previous, current, area1, area2) => { drewEventFired = true; };
 
-                public void Drawing_Workflow_Test()
-
-        
-
-                {
-
-        
-
-                    var vm = CreateViewModel();
-
-        
-
-                    vm.Magnification = new Magnification(1);
-
-        
-
-                    var initialPicture = Picture.CreateEmpty(new PictureSize(32, 32));
-
-        
-
-                    vm.SetPicture(initialPicture);
-
-        
-
+            // Setup mock to simulate drawing state
+            var drawingBuffer = new DrawingBuffer(initialPicture);
+            // Simulate start drawing
+            _interactionCoordinatorMock.Setup(c => c.CurrentBuffer).Returns(drawingBuffer.UpdateDrawing(initialPicture));
             
+            // 描画開始 (10, 10)
+            vm.DrawBeginCommand.Execute(new Position(10, 10)).Subscribe();
+            // Manually trigger state change as the mock won't do it automatically
+            _interactionCoordinatorMock.Raise(x => x.StateChanged += null);
 
-        
+            Assert.That(vm.PictureBuffer.IsDrawing(), Is.True);
 
-                    bool drewEventFired = false;
+            // 描画中 (11, 11)
+            vm.DrawingCommand.Execute(new Position(11, 11)).Subscribe();
 
-        
-
-                    vm.Drew += (previous, current, area1, area2) => { drewEventFired = true; };
-
-        
-
+            // Setup mock to simulate end drawing
+            _interactionCoordinatorMock.Setup(c => c.CurrentBuffer).Returns(drawingBuffer);
             
+            // 描画終了 (11, 11)
+            vm.DrawEndCommand.Execute(new Position(11, 11)).Subscribe();
+            // Manually trigger state change
+            _interactionCoordinatorMock.Raise(x => x.StateChanged += null);
+            // Manually raise Drew event
+            _interactionCoordinatorMock.Raise(x => x.Drew += null, initialPicture, initialPicture, (PictureArea?)null, (PictureArea?)null);
 
-        
-
-                    // 描画開始 (10, 10)
-
-        
-
-                    vm.DrawBeginCommand.Execute(new Position(10, 10)).Subscribe();
-
-        
-
-                    Assert.That(vm.PictureBuffer.IsDrawing(), Is.True);
-
-        
-
-            
-
-        
-
-                    // 描画中 (11, 11)
-
-        
-
-                    vm.DrawingCommand.Execute(new Position(11, 11)).Subscribe();
-
-        
-
-            
-
-        
-
-                    // 描画終了 (11, 11)
-
-        
-
-                    vm.DrawEndCommand.Execute(new Position(11, 11)).Subscribe();
-
-        
-
-            
-
-        
-
-                    Assert.That(vm.PictureBuffer.IsDrawing(), Is.False);
-
-        
-
-                    Assert.That(drewEventFired, Is.True, "Drew event should be fired after drawing");
-
-        
-
-                }
+            Assert.That(vm.PictureBuffer.IsDrawing(), Is.False);
+            Assert.That(drewEventFired, Is.True, "Drew event should be fired after drawing");
+        }
 
         
 

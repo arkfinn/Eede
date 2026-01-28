@@ -20,6 +20,7 @@ using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
+using Eede.Presentation.Services;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
@@ -71,17 +72,18 @@ public class PictureContainerTests
         var mockCopy = new Mock<CopySelectionUseCase>(mockClipboard.Object);
         var mockCut = new Mock<CutSelectionUseCase>(mockClipboard.Object);
         var mockPaste = new Mock<PasteFromClipboardUseCase>(mockClipboard.Object);
+        var mockCoordinator = new Mock<IInteractionCoordinator>();
 
         var drawableCanvasVM = new DrawableCanvasViewModel(
             globalState,
             mockAddFrameProvider.Object,
             mockClipboard.Object,
             bitmapAdapter,
-            mockDrawAction.Object,
             mockDrawingSessionProvider.Object,
             mockCopy.Object,
             mockCut.Object,
-            mockPaste.Object
+            mockPaste.Object,
+            mockCoordinator.Object
         );
 
         // 3. UseCases for MainViewModel

@@ -7,11 +7,11 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Assess & Secure' (Protocol in workflow.md)
 
 ## Phase 2: Extract Interaction Logic (Divide & Conquer)
-- [ ] Task: `IInteractionCoordinator` インターフェースと実装クラスを Presentation 層に作成する
-- [ ] Task: 座標変換ロジック（Display <-> Canvas）を Coordinator または専用の VO に移動する
-- [ ] Task: `DrawableCanvasViewModel` 内の `ExecuteDrawBegin/Drawing/End` ロジックを Coordinator へ段階的に移譲する
+- [x] Task: `IInteractionCoordinator` インターフェースと実装クラスを Presentation 層に作成する [031fba0]
+- [x] Task: 座標変換ロジック（Display <-> Canvas）を Coordinator または専用の VO に移動する [031fba0]
+- [x] Task: `DrawableCanvasViewModel` 内の `ExecuteDrawBegin/Drawing/End` ロジックを Coordinator へ段階的に移譲する [b6aecf7]
     - [ ] 各ステップごとに既存の仕様化テストを実行し、挙動が変わっていないことを確認する
-- [ ] Task: `CanvasInteractionSession` の直接操作を Coordinator 内に閉じ込める
+- [x] Task: `CanvasInteractionSession` の直接操作を Coordinator 内に閉じ込める [b6aecf7]
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Extract Interaction Logic' (Protocol in workflow.md)
 
 ## Phase 3: Property & State Refactoring

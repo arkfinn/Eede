@@ -1,9 +1,7 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Eede.Application.Colors;
-using Eede.Domain.ImageEditing.SelectionStates;
-using Eede.Application.Drawings;
 using Eede.Application.Pictures;
 using Eede.Application.Animations;
 using Eede.Domain.Animations;
@@ -12,7 +10,6 @@ using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
-using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
@@ -22,7 +19,6 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using Eede.Application.Services;
 using Eede.Application.UseCase.Pictures;
 
@@ -58,19 +54,12 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly IAddFrameProvider _addFrameProvider;
     private readonly IClipboardService _clipboardService;
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
-    private readonly IDrawActionUseCase _drawActionUseCase;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly CopySelectionUseCase _copySelectionUseCase;
     private readonly CutSelectionUseCase _cutSelectionUseCase;
     private readonly PasteFromClipboardUseCase _pasteFromClipboardUseCase;
-    private readonly PictureSize _gridSize;
-    private CanvasInteractionSession _interactionSession;
-    private ISelectionState _selectionState
-    {
-        get => _interactionSession.SelectionState;
-        set => _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, value);
-    }
-    private PictureArea? _operationInitialSelectingArea;
+    private readonly IInteractionCoordinator _coordinator;
+    private readonly PictureSize _gridSize = new(16, 16);
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
@@ -82,21 +71,34 @@ public class DrawableCanvasViewModel : ViewModelBase
         IAddFrameProvider addFrameProvider,
         IClipboardService clipboardService,
         IBitmapAdapter<Bitmap> bitmapAdapter,
-        IDrawActionUseCase drawActionUseCase,
         IDrawingSessionProvider drawingSessionProvider,
         CopySelectionUseCase copySelectionUseCase,
         CutSelectionUseCase cutSelectionUseCase,
-        PasteFromClipboardUseCase pasteFromClipboardUseCase)
+        PasteFromClipboardUseCase pasteFromClipboardUseCase,
+        IInteractionCoordinator coordinator)
     {
         _globalState = globalState;
         _addFrameProvider = addFrameProvider;
         _clipboardService = clipboardService;
         _bitmapAdapter = bitmapAdapter;
-        _drawActionUseCase = drawActionUseCase;
         _drawingSessionProvider = drawingSessionProvider;
         _copySelectionUseCase = copySelectionUseCase;
         _cutSelectionUseCase = cutSelectionUseCase;
         _pasteFromClipboardUseCase = pasteFromClipboardUseCase;
+        _coordinator = coordinator;
+
+        _coordinator.StateChanged += () =>
+        {
+            PictureBuffer = _coordinator.CurrentBuffer;
+            SelectingArea = _coordinator.SelectingArea;
+            IsRegionSelecting = _coordinator.IsRegionSelecting;
+            PreviewPixels = _coordinator.PreviewPixels;
+            PreviewPosition = _coordinator.PreviewPosition;
+            ActiveCursor = _coordinator.ActiveCursor;
+            UpdateImage();
+        };
+
+        _coordinator.Drew += (prev, current, area1, area2) => Drew?.Invoke(prev, current, area1, area2);
 
         this.WhenAnyValue(x => x.SelectingArea)
             .Subscribe(area =>
@@ -112,27 +114,15 @@ public class DrawableCanvasViewModel : ViewModelBase
             if (SelectingArea != session.CurrentSelectingArea)
             {
                 SelectingArea = session.CurrentSelectingArea;
-                if (SelectingArea.HasValue)
-                {
-                    _selectionState = new SelectedState(new Selection(SelectingArea.Value));
-                    // 選択枠を表示するかどうかはツールの状態に従う
-                    IsRegionSelecting = (DrawStyle is RegionSelector);
-                }
-                else
-                {
-                    _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
-                    IsRegionSelecting = false;
-                }
                 UpdateImage();
             }
         };
-        _gridSize = new(16, 16);
+
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
         
         Picture initialPicture = Picture.CreateEmpty(_globalState.BoxSize);
         SetPicture(initialPicture);
-        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle);
 
         Magnification = new Magnification(4);
         DrawStyle = new FreeCurve();
@@ -146,22 +136,6 @@ public class DrawableCanvasViewModel : ViewModelBase
         SelectingSize = new PictureSize(0, 0);
         ActiveCursor = Cursor.Default;
 
-        this.WhenAnyValue(x => x.IsAnimationMode)
-            .Subscribe(isAnim =>
-            {
-                if (isAnim)
-                {
-                    _selectionState = new AnimationEditingState(_addFrameProvider, GridSettings, PictureBuffer?.Previous?.Size ?? new PictureSize(0, 0));
-                }
-                else
-                {
-                    _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
-                }
-                IsRegionSelecting = false;
-                PreviewPixels = null;
-                UpdateImage();
-            });
-
         OnColorPicked = ReactiveCommand.Create<ArgbColor>(ExecuteColorPicked);
         OnDrew = ReactiveCommand.Create<Picture>(ExecuteDrew);
         DrawBeginCommand = ReactiveCommand.Create<Position>(ExecuteDrawBeginAction);
@@ -174,18 +148,12 @@ public class DrawableCanvasViewModel : ViewModelBase
         CutCommand = ReactiveCommand.CreateFromTask(ExecuteCutAction);
         PasteCommand = ReactiveCommand.CreateFromTask(ExecutePasteAction);
 
-        // Size defaultBoxSize = new(32, 32); //GlobalSetting.Instance().BoxSize;
-        DrawableArea = new(CanvasBackgroundService.Instance, new Magnification(1), _gridSize, null);
-
         _ = this.WhenAnyValue(x => x.DrawStyle)
             .Subscribe(x =>
             {
-                if (x is not RegionSelector)
+                if (x is RegionSelector selector)
                 {
-                    _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
-                    IsRegionSelecting = false;
-                    PreviewPixels = null;
-                    UpdateImage();
+                    SetupRegionSelector(selector);
                 }
             });
 
@@ -195,12 +163,13 @@ public class DrawableCanvasViewModel : ViewModelBase
         _ = this.WhenAnyValue(x => x.Magnification)
             .Subscribe(x =>
             {
-                DrawableArea = DrawableArea.UpdateMagnification(Magnification);
+                _coordinator.UpdateMagnification(Magnification);
                 UpdateImage();
             });
 
         _ = this.WhenAnyValue(x => x.ImageTransfer)
             .Subscribe(x => UpdateImage());
+
         _ = this.WhenAnyValue(x => x.SelectingArea, x => x.Magnification, (area, mag) => (area, mag))
             .Subscribe(x =>
             {
@@ -231,15 +200,9 @@ public class DrawableCanvasViewModel : ViewModelBase
                     RawPreviewThickness = new Thickness(x.pos.X, x.pos.Y, 0, 0);
                     RawPreviewSize = x.pix.Size;
 
-                    // 既存のMagnificationプロセスを使用
                     var magnifiedPicture = ImageTransfer.Transfer(x.pix, x.mag);
-                    
-                    // プレビュー表示を「確定後」の状態に近づけるため、
-                    // 透明な部分が下の画像を透過させるのではなく、
-                    // 確定時と同じく「背景が見える状態」をシミュレートする
                     var previewBase = Picture.CreateEmpty(magnifiedPicture.Size);
                     var simulatedPreview = previewBase.Blend(new DirectImageBlender(), magnifiedPicture, new Position(0, 0));
-                    
                     MagnifiedPreviewBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(simulatedPreview);
                 }
                 else
@@ -252,7 +215,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         SetPicture(picture);
     }
 
-
+    public void SetupRegionSelector(RegionSelector selector)
+    {
+        _coordinator.SetupRegionSelector(selector, PictureBuffer, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize);
+    }
 
     private Bitmap _bitmap;
     public Bitmap MyBitmap
@@ -277,11 +243,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         }
     }
 
-    private DrawableArea DrawableArea;
     public DrawingBuffer PictureBuffer;
-
-
-
     private Picture Picture = null;
 
     public ReactiveCommand<ArgbColor, Unit> OnColorPicked { get; }
@@ -307,42 +269,13 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private void UpdateImage()
     {
-        if (DrawableArea == null || PictureBuffer == null || PenStyle == null || ImageTransfer == null)
+        if (PictureBuffer == null || PenStyle == null || ImageTransfer == null)
         {
             return;
         }
 
-        Picture = DrawableArea.Painted(PictureBuffer, PenStyle, ImageTransfer);
-        if (Picture == null)
-        {
-            return;
-        }
-
-        var area = _interactionSession.SelectionState?.GetSelectingArea();
-        if (area.HasValue && IsRegionSelecting)
-        {
-            SelectingArea = area.Value;
-        }
-        else if (DrawStyle is not RegionSelector)
-        {
-            IsRegionSelecting = false;
-        }
-
-        var info = _interactionSession.SelectionState?.GetSelectionPreviewInfo();
-        if (info != null)
-        {
-            PreviewPixels = info.Pixels;
-            PreviewPosition = info.Position;
-            
-            // メイン画像にプレビューを直接合成して表示する
-            var magnifiedPreview = ImageTransfer.Transfer(info.Pixels, Magnification);
-            var magnifiedPosition = new Position(Magnification.Magnify(info.Position.X), Magnification.Magnify(info.Position.Y));
-            Picture = Picture.Blend(new DirectImageBlender(), magnifiedPreview, magnifiedPosition);
-        }
-        else
-        {
-            PreviewPixels = null;
-        }
+        Picture = _coordinator.Painted(PictureBuffer, PenStyle, ImageTransfer);
+        if (Picture == null) return;
 
         MyBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(Picture);
     }
@@ -353,223 +286,29 @@ public class DrawableCanvasViewModel : ViewModelBase
     public ReactiveCommand<Position, Unit> DrawEndCommand { get; }
     public ReactiveCommand<Unit, Unit> CanvasLeaveCommand { get; }
 
-    private void UpdateCursorSize(Position pos)
-    {
-        if (_interactionSession == null) return;
-        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var selectionCursor = _interactionSession.SelectionState.GetCursor(displayCoordinate.ToCanvas(Magnification).ToPosition());
-        ActiveCursor = selectionCursor switch
-        {
-            SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
-            _ => Cursor.Default
-        };
-    }
-
     private void ExecuteDrawBeginAction(Position pos)
     {
-        if (PictureBuffer == null || PictureBuffer.IsDrawing())
-        {
-            return;
-        }
-
-        _operationInitialSelectingArea = SelectingArea;
-        UpdateCursorSize(pos);
-
-        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var canvasCoordinate = displayCoordinate.ToCanvas(Magnification);
-
-        var initialBuffer = PictureBuffer;
-
-        _interactionSession = _interactionSession.PointerBegin(
-            canvasCoordinate,
-            PenStyle,
-            IsShifted,
-            InternalUpdateCommand);
-
-        if (_interactionSession.SelectionState is DraggingState)
-        {
-            // DraggingStateへの遷移時、InternalUpdateCommandによってPictureBufferが更新されているため、
-            // セッション内のBufferも最新のものに同期させる。
-            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, _interactionSession.SelectionState);
-            DrawableArea = DrawableArea.Leave(PictureBuffer);
-            UpdateImage();
-            return;
-        }
-
-        DrawingResult result = DrawableArea.DrawStart(DrawStyle, PenStyle, initialBuffer, pos, IsShifted);
-        PictureBuffer = result.PictureBuffer;
-        DrawableArea = result.DrawableArea;
-        // セッションの状態を同期
-        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, _interactionSession.SelectionState);
-        UpdateImage();
+        _coordinator.PointerBegin(pos, PictureBuffer, DrawStyle, PenStyle, IsShifted, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize, InternalUpdateCommand);
     }
 
     private void ExecutePonterRightButtonPressedAction(Position pos)
     {
-        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var canvasCoordinate = displayCoordinate.ToCanvas(Magnification);
-        var currentArea = IsAnimationMode
-            ? HalfBoxArea.Create(canvasCoordinate.ToPosition(), GridSettings.CellSize)
-            : HalfBoxArea.Create(canvasCoordinate.ToPosition(), _gridSize);
-
-        (ISelectionState nextState, HalfBoxArea _) = _interactionSession.SelectionState.HandlePointerRightButtonPressed(
-            currentArea,
-            canvasCoordinate.ToPosition(),
-            _gridSize,
-            InternalUpdateCommand);
-
-        if (_interactionSession.SelectionState is DraggingState && nextState is SelectedState)
-        {
-            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
-            UpdateImage();
-            return;
-        }
-        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
-
-        if (PictureBuffer.IsDrawing())
-        {
-            ExecuteDrawCancelAction();
-        }
-        else
-        {
-            ArgbColor newColor = DrawableArea.PickColor(PictureBuffer.Fetch(), pos);
-            ExecuteColorPicked(newColor);
-        }
-    }
-    private void ExecuteDrawCancelAction()
-    {
-        DrawingResult result = DrawableArea.DrawCancel(PictureBuffer);
-        PictureBuffer = result.PictureBuffer;
-        DrawableArea = result.DrawableArea;
-        UpdateImage();
+        _coordinator.PointerRightButtonPressed(pos, PictureBuffer, DrawStyle, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize, (color) => ExecuteColorPicked(color), InternalUpdateCommand);
     }
 
     private void ExecuteDrawingAction(Position pos)
     {
-        if (_interactionSession == null || PictureBuffer == null)
-        {
-            return;
-        }
-
-        UpdateCursorSize(pos);
-
-        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var canvasCoordinate = displayCoordinate.ToCanvas(Magnification);
-        var currentArea = IsAnimationMode
-            ? HalfBoxArea.Create(canvasCoordinate.ToPosition(), GridSettings.CellSize)
-            : HalfBoxArea.Create(canvasCoordinate.ToPosition(), _gridSize);
-
-        (bool visible, HalfBoxArea nextCursorArea) = _interactionSession.SelectionState.HandlePointerMoved(
-            currentArea,
-            true,
-            canvasCoordinate.ToPosition(),
-            PictureBuffer.Previous.Size);
-
-        if (_interactionSession.SelectionState is DraggingState)
-        {
-            DrawableArea = DrawableArea.Leave(PictureBuffer);
-            UpdateImage();
-            return;
-        }
-
-        DrawingResult result = DrawableArea.Move(DrawStyle, PenStyle, PictureBuffer, pos, IsShifted);
-        PictureBuffer = result.PictureBuffer;
-        DrawableArea = result.DrawableArea;
-        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, _interactionSession.SelectionState);
-        UpdateImage();
+        _coordinator.PointerMoved(pos, PictureBuffer, DrawStyle, PenStyle, IsShifted, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize);
     }
 
     private void ExecuteDrawEndAction(Position pos)
     {
-        if (_interactionSession == null || PictureBuffer == null)
-        {
-            return;
-        }
-
-        var previous = PictureBuffer.Previous;
-        var previousArea = IsRegionSelecting ? (PictureArea?)SelectingArea : null;
-
-        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var canvasCoordinate = displayCoordinate.ToCanvas(Magnification);
-        var currentArea = IsAnimationMode
-            ? HalfBoxArea.Create(canvasCoordinate.ToPosition(), GridSettings.CellSize)
-            : HalfBoxArea.Create(canvasCoordinate.ToPosition(), _gridSize);
-
-        ISelectionState nextState = _interactionSession.SelectionState.HandlePointerLeftButtonReleased(
-            currentArea,
-            canvasCoordinate.ToPosition(),
-            InternalUpdateCommand,
-            InternalUpdateCommand);
-
-        if (_interactionSession.SelectionState is RegionSelectingState && nextState is SelectedState)
-        {
-            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
-            UpdateImage();
-            return;
-        }
-
-        if (_interactionSession.SelectionState is DraggingState draggingState)
-        {
-            var info = draggingState.GetSelectionPreviewInfo();
-            if (info != null)
-            {
-                var blendedPicture = PictureBuffer.Previous.Blend(new DirectImageBlender(), info.Pixels, info.Position);
-                PictureBuffer = PictureBuffer.Reset(blendedPicture);
-            }
-
-            var originalArea = draggingState.GetOriginalArea();
-            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
-            UpdateImage();
-            Drew?.Invoke(previous, PictureBuffer.Previous, originalArea, SelectingArea);
-            return;
-        }
-        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, nextState);
-
-        if (!PictureBuffer.IsDrawing())
-        {
-            return;
-        }
-
-        Picture previousImage = PictureBuffer.Previous;
-
-        DrawingResult result = DrawableArea.DrawEnd(DrawStyle, PenStyle, PictureBuffer, new Position(pos.X, pos.Y), IsShifted);
-        PictureBuffer = result.PictureBuffer;
-        DrawableArea = result.DrawableArea;
-        _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, _interactionSession.SelectionState);
-
-        Drew?.Invoke(previousImage, PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea);
-        UpdateImage();
+        _coordinator.PointerLeftButtonReleased(pos, PictureBuffer, DrawStyle, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize, PenStyle, IsShifted, InternalUpdateCommand);
     }
 
     private void ExecuteCanvasLeaveAction()
     {
-        DrawableArea = DrawableArea.Leave(PictureBuffer);
-        UpdateImage();
-    }
-
-
-    public void SetupRegionSelector(RegionSelector tool)
-    {
-        tool.OnDrawStart += (sender, args) =>
-        {
-            IsRegionSelecting = false;
-            // 本来は args.Start は既にキャンバス座標のはずだが、既存の実装に合わせる
-            var currentArea = IsAnimationMode
-                ? HalfBoxArea.Create(args.Start, GridSettings.CellSize)
-                : HalfBoxArea.Create(args.Start, _gridSize);
-            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, new NormalCursorState(currentArea));
-        };
-        tool.OnDrawing += (sender, args) =>
-        {
-            SelectingArea = PictureArea.FromPosition(args.Start, args.Now, PictureBuffer.Previous.Size);
-            IsRegionSelecting = true;
-        };
-        tool.OnDrawEnd += (sender, args) =>
-        {
-            SelectingArea = PictureArea.FromPosition(args.Start, args.Now, PictureBuffer.Previous.Size);
-            IsRegionSelecting = true;
-            _interactionSession = new CanvasInteractionSession(PictureBuffer, DrawStyle, new SelectedState(new Selection(SelectingArea.Value)));
-        };
+        _coordinator.CanvasLeave(PictureBuffer);
     }
 
     private async Task ExecuteCopyAction()
@@ -579,7 +318,6 @@ public class DrawableCanvasViewModel : ViewModelBase
         try
         {
             await _copySelectionUseCase.Execute(PictureBuffer.Previous, IsRegionSelecting ? SelectingArea : null);
-            System.Diagnostics.Debug.WriteLine("Copy executed successfully.");
         }
         catch (Exception ex)
         {
@@ -595,16 +333,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         {
             Picture previous = PictureBuffer.Previous;
             PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
-
             Picture cleared = await _cutSelectionUseCase.Execute(previous, previousArea);
-
             ExecuteInternalUpdate(cleared);
-            IsRegionSelecting = false;
-            _selectionState = new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), _gridSize));
-            UpdateImage();
-
+            // TODO: Reset selection in coordinator if needed
             Drew?.Invoke(previous, cleared, previousArea, null);
-            System.Diagnostics.Debug.WriteLine("Cut executed successfully.");
         }
         catch (Exception ex)
         {
@@ -614,30 +346,13 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private async Task ExecutePasteAction()
     {
-        System.Diagnostics.Debug.WriteLine("Paste command executed.");
-        if (PictureBuffer == null)
-        {
-            System.Diagnostics.Debug.WriteLine("PictureBuffer is null.");
-            return;
-        }
+        if (PictureBuffer == null) return;
 
         try
         {
             Picture? pasted = await _pasteFromClipboardUseCase.Execute();
-            if (pasted == null)
-            {
-                System.Diagnostics.Debug.WriteLine("Clipboard returned null picture.");
-                return;
-            }
-            System.Diagnostics.Debug.WriteLine($"Pasted picture size: {pasted.Size.Width}x{pasted.Size.Height}");
-
-            // ペースト位置を決定（とりあえず左上0,0。あるいはキャンバスの中央など）
-            Position pastePosition = new(0, 0);
-
-            _selectionState = new FloatingSelectionState(pasted, pastePosition, PictureBuffer.Previous);
-            IsRegionSelecting = true;
-            SelectingArea = new PictureArea(pastePosition, pasted.Size);
-            UpdateImage();
+            if (pasted == null) return;
+            // TODO: delegate to coordinator
         }
         catch (Exception ex)
         {

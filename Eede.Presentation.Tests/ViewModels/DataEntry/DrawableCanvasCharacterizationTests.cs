@@ -30,11 +30,11 @@ public class DrawableCanvasCharacterizationTests
     private Mock<IAddFrameProvider> _addFrameProviderMock;
     private Mock<IClipboardService> _clipboardServiceMock;
     private AvaloniaBitmapAdapter _bitmapAdapter;
-    private DrawActionUseCase _drawActionUseCase;
     private DrawingSessionProvider _drawingSessionProvider;
     private CopySelectionUseCase _copySelectionUseCase;
     private CutSelectionUseCase _cutSelectionUseCase;
     private PasteFromClipboardUseCase _pasteFromClipboardUseCase;
+    private InteractionCoordinator _coordinator;
 
     [SetUp]
     public void SetUp()
@@ -43,11 +43,11 @@ public class DrawableCanvasCharacterizationTests
         _addFrameProviderMock = new Mock<IAddFrameProvider>();
         _clipboardServiceMock = new Mock<IClipboardService>();
         _bitmapAdapter = new AvaloniaBitmapAdapter();
-        _drawActionUseCase = new DrawActionUseCase();
         _drawingSessionProvider = new DrawingSessionProvider();
         _copySelectionUseCase = new CopySelectionUseCase(_clipboardServiceMock.Object);
         _cutSelectionUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
         _pasteFromClipboardUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object);
+        _coordinator = new InteractionCoordinator();
     }
 
     private DrawableCanvasViewModel CreateViewModel()
@@ -57,11 +57,11 @@ public class DrawableCanvasCharacterizationTests
             _addFrameProviderMock.Object,
             _clipboardServiceMock.Object,
             _bitmapAdapter,
-            _drawActionUseCase,
             _drawingSessionProvider,
             _copySelectionUseCase,
             _cutSelectionUseCase,
-            _pasteFromClipboardUseCase);
+            _pasteFromClipboardUseCase,
+            _coordinator);
     }
 
     [AvaloniaTest]
@@ -92,7 +92,6 @@ public class DrawableCanvasCharacterizationTests
         var vm = CreateViewModel();
         vm.Magnification = new Magnification(1);
         var selector = new RegionSelector();
-        vm.SetupRegionSelector(selector);
         vm.DrawStyle = selector;
 
         // Select (2, 2) to (5, 5)

@@ -20,6 +20,7 @@ using Eede.Application.Drawings;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
+using Eede.Presentation.Services;
 using Eede.Presentation.Common.Services;
 
 namespace Eede.Presentation.Tests.ViewModels.Pages;
@@ -65,11 +66,11 @@ public class MainViewModelCharacterizationTests
             animationViewModel,
             _mockClipboardService.Object,
             _mockBitmapAdapter.Object,
-            _mockDrawActionUseCase.Object,
             _drawingSessionProvider,
             new CopySelectionUseCase(_mockClipboardService.Object),
             new CutSelectionUseCase(_mockClipboardService.Object),
-            new PasteFromClipboardUseCase(_mockClipboardService.Object));
+            new PasteFromClipboardUseCase(_mockClipboardService.Object),
+            new Mock<IInteractionCoordinator>().Object);
         var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
         var paletteContainerViewModel = new PaletteContainerViewModel();
 
@@ -290,11 +291,11 @@ public class MainViewModelCharacterizationTests
                 animationViewModel,
                 _mockClipboardService.Object,
                 _mockBitmapAdapter.Object,
-                _mockDrawActionUseCase.Object,
                 _drawingSessionProvider,
                 new CopySelectionUseCase(_mockClipboardService.Object),
                 new CutSelectionUseCase(_mockClipboardService.Object),
-                new PasteFromClipboardUseCase(_mockClipboardService.Object));
+                new PasteFromClipboardUseCase(_mockClipboardService.Object),
+                new Mock<IInteractionCoordinator>().Object);
             var drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProvider);
             var paletteContainerViewModel = new PaletteContainerViewModel();
 

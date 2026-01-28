@@ -73,6 +73,7 @@ public partial class App : Avalonia.Application
         services.AddSingleton<LoadPictureUseCase>();
 
         // ViewModels
+        services.AddTransient<IInteractionCoordinator, InteractionCoordinator>();
         services.AddSingleton<InjectableDockFactory>();
         services.AddTransient<PaletteContainerViewModel>();
         services.AddSingleton<AnimationViewModel>();

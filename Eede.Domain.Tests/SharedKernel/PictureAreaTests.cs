@@ -23,6 +23,9 @@ namespace Eede.Domain.Tests.SharedKernel
                 new PictureArea(new Position(0, 0), new PictureSize(300, 400)) },
             new object[] { new Position(1, 1), new Position(500, 500), new PictureSize(300, 400),
                 new PictureArea(new Position(1, 1), new PictureSize(299, 399)) },
+            // Reproduction case for ArgumentException
+            new object[] { new Position(110, 0), new Position(120, 10), new PictureSize(100, 100),
+                new PictureArea(new Position(100, 0), new PictureSize(0, 10)) },
         };
     }
 }

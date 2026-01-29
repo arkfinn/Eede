@@ -462,13 +462,13 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        PictureEditingUseCase.EditResult result = _pictureEditingUseCase.PullFromCanvas(
+        Picture updated = _transferImageFromCanvasUseCase.Execute(
             vm.PictureBuffer,
             DrawableCanvasViewModel.PictureBuffer.Previous,
             args.Position,
             PullBlender);
 
-        vm.PictureBuffer = result.Updated;
+        vm.PictureBuffer = updated;
     }
 
     private void ExecutePictureAction(PictureActions actionType)

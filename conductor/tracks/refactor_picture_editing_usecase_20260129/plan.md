@@ -11,19 +11,19 @@
     - [x] Ensure tests pass and cover edge cases (null areas, boundary sizes). [9faa6b5]
 - [x] Task: Conductor - User Manual Verification 'Phase 0: Safety Net' (Protocol in workflow.md) [9faa6b5]
 
-## Phase 1: New UseCase Implementation (TDD)
+## Phase 1: New UseCase Implementation (TDD) [checkpoint: db99ce1]
 **Goal:** Implement new atomic UseCases using strict TDD, keeping the old code untouched for now.
 
-- [ ] Task: Create `TransformImageUseCase` (Rotate/Flip)
-    - [ ] Write failing tests using `PictureEditingUseCase`'s test cases as a reference.
-    - [ ] Implement logic (copying from old UseCase or Domain).
-- [ ] Task: Create `TransferImageToCanvasUseCase` (Pull)
-    - [ ] Write failing tests.
-    - [ ] Implement logic.
-- [ ] Task: Create `TransferImageFromCanvasUseCase` (Push)
-    - [ ] Write failing tests.
-    - [ ] Implement logic.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: New UseCases' (Protocol in workflow.md)
+- [x] Task: Create `TransformImageUseCase` (Rotate/Flip) [46ede10]
+    - [x] Write failing tests using `PictureEditingUseCase`'s test cases as a reference. [46ede10]
+    - [x] Implement logic (copying from old UseCase or Domain). [46ede10]
+- [x] Task: Create `TransferImageToCanvasUseCase` (Push) [c9b5094]
+    - [x] Write failing tests. [c9b5094]
+    - [x] Implement logic. [c9b5094]
+- [x] Task: Create `TransferImageFromCanvasUseCase` (Pull) [66ce09f]
+    - [x] Write failing tests. [66ce09f]
+    - [x] Implement logic. [66ce09f]
+- [x] Task: Conductor - User Manual Verification 'Phase 1: New UseCases' (Protocol in workflow.md) [db99ce1]
 
 ## Phase 2: Parallel Integration & Strangler Fig Pattern
 **Goal:** Introduce new UseCases into `MainViewModel` alongside the old one, verifying behavior incrementally.

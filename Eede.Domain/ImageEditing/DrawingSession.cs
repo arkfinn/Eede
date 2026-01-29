@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Immutable;
 using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.History;
 using Eede.Domain.SharedKernel;
 
 namespace Eede.Domain.ImageEditing
@@ -11,19 +12,17 @@ namespace Eede.Domain.ImageEditing
     /// </summary>
     public sealed record DrawingSession
     {
-        private record HistoryItem(Picture Picture, PictureArea? SelectingArea);
-
         private readonly DrawingBuffer Buffer;
         private readonly PictureArea? SelectingArea;
-        private readonly ImmutableStack<HistoryItem> UndoStack;
-        private readonly ImmutableStack<HistoryItem> RedoStack;
+        private readonly ImmutableStack<IHistoryItem> UndoStack;
+        private readonly ImmutableStack<IHistoryItem> RedoStack;
 
         public DrawingSession(Picture initialPicture, PictureArea? initialArea = null)
-            : this(new DrawingBuffer(initialPicture), initialArea, ImmutableStack<HistoryItem>.Empty, ImmutableStack<HistoryItem>.Empty)
+            : this(new DrawingBuffer(initialPicture), initialArea, ImmutableStack<IHistoryItem>.Empty, ImmutableStack<IHistoryItem>.Empty)
         {
         }
 
-        private DrawingSession(DrawingBuffer buffer, PictureArea? selectingArea, ImmutableStack<HistoryItem> undoStack, ImmutableStack<HistoryItem> redoStack)
+        private DrawingSession(DrawingBuffer buffer, PictureArea? selectingArea, ImmutableStack<IHistoryItem> undoStack, ImmutableStack<IHistoryItem> redoStack)
         {
             Buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
             SelectingArea = selectingArea;
@@ -74,8 +73,17 @@ namespace Eede.Domain.ImageEditing
             return new DrawingSession(
                 new DrawingBuffer(nextPicture),
                 nextArea,
-                UndoStack.Push(new HistoryItem(Buffer.Previous, areaToStore)),
-                ImmutableStack<HistoryItem>.Empty);
+                UndoStack.Push(new CanvasHistoryItem(Buffer.Previous, areaToStore)),
+                ImmutableStack<IHistoryItem>.Empty);
+        }
+
+        public DrawingSession PushDockUpdate(string dockId, Position position, Picture picture)
+        {
+            return new DrawingSession(
+                Buffer,
+                SelectingArea,
+                UndoStack.Push(new DockActiveHistoryItem(dockId, position, picture)),
+                ImmutableStack<IHistoryItem>.Empty);
         }
 
         /// <summary>
@@ -89,23 +97,55 @@ namespace Eede.Domain.ImageEditing
         public DrawingSession Undo()
         {
             if (!CanUndo()) return this;
-            var previous = UndoStack.Peek();
-            return new DrawingSession(
-                new DrawingBuffer(previous.Picture),
-                previous.SelectingArea,
-                UndoStack.Pop(),
-                RedoStack.Push(new HistoryItem(Buffer.Previous, SelectingArea)));
+            var historyItem = UndoStack.Peek();
+            var newUndoStack = UndoStack.Pop();
+            
+            if (historyItem is CanvasHistoryItem canvasItem)
+            {
+                return new DrawingSession(
+                    new DrawingBuffer(canvasItem.Picture),
+                    canvasItem.SelectingArea,
+                    newUndoStack,
+                    RedoStack.Push(new CanvasHistoryItem(Buffer.Previous, SelectingArea)));
+            }
+            else if (historyItem is DockActiveHistoryItem dockItem)
+            {
+                // For Dock updates, we just move the item to Redo stack.
+                // The DrawingSession's own state (Picture/Selection) does NOT change.
+                return new DrawingSession(
+                    Buffer,
+                    SelectingArea,
+                    newUndoStack,
+                    RedoStack.Push(dockItem));
+            }
+            
+            throw new InvalidOperationException("Unknown history item type.");
         }
 
         public DrawingSession Redo()
         {
             if (!CanRedo()) return this;
-            var next = RedoStack.Peek();
-            return new DrawingSession(
-                new DrawingBuffer(next.Picture),
-                next.SelectingArea,
-                UndoStack.Push(new HistoryItem(Buffer.Previous, SelectingArea)),
-                RedoStack.Pop());
+            var historyItem = RedoStack.Peek();
+            var newRedoStack = RedoStack.Pop();
+
+            if (historyItem is CanvasHistoryItem canvasItem)
+            {
+                return new DrawingSession(
+                    new DrawingBuffer(canvasItem.Picture),
+                    canvasItem.SelectingArea,
+                    UndoStack.Push(new CanvasHistoryItem(Buffer.Previous, SelectingArea)),
+                    newRedoStack);
+            }
+            else if (historyItem is DockActiveHistoryItem dockItem)
+            {
+                 return new DrawingSession(
+                    Buffer,
+                    SelectingArea,
+                    UndoStack.Push(dockItem),
+                    newRedoStack);
+            }
+
+            throw new InvalidOperationException("Unknown history item type.");
         }
 
         public bool CanUndo() => !IsDrawing() && !UndoStack.IsEmpty;

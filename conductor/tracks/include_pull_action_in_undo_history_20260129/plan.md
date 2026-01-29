@@ -22,7 +22,7 @@
     - [x] **Refactor:** 既存の `Push` メソッドも内部で `CanvasHistoryItem` を使うように変更する（既存テストが通ることを維持）。
     - [x] **Red:** `Undo` 時に「何がUndoされたか」を知るための戻り値 (`UndoResult`) をテストで要求する。 [c5b6627]
     - [x] **Green:** `Undo` / `Redo` のシグネチャを変更（または拡張）し、Undoされたアイテム情報を返すように実装する。
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Domain Model' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Domain Model' (Protocol in workflow.md) [checkpoint: a4c0acb]
 
 ## Phase 2: Application Layer Integration (振る舞いの接続)
 **目標:** ドメインの変更をアプリケーション層に波及させ、実際の機能として動作させる。

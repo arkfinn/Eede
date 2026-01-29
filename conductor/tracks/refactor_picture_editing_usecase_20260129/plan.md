@@ -41,7 +41,7 @@
 ## Phase 3: Cleanup
 **Goal:** Remove the dead code once the migration is fully verified.
 
-- [ ] Task: Remove `PictureEditingUseCase` dependency from `MainViewModel`.
-- [ ] Task: Delete `PictureEditingUseCase.cs` and `IPictureEditingUseCase.cs`.
-- [ ] Task: Delete the Characterization Tests (or migrate valuable scenarios to new UseCase tests).
+- [x] Task: Remove `PictureEditingUseCase` dependency from `MainViewModel`. [0bdbc0d]
+- [x] Task: Delete `PictureEditingUseCase.cs` and `IPictureEditingUseCase.cs`. [ed1afb9]
+- [x] Task: Delete the Characterization Tests (or migrate valuable scenarios to new UseCase tests). [ed1afb9]
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Cleanup' (Protocol in workflow.md)

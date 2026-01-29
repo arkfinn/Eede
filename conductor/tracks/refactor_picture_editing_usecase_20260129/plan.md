@@ -25,18 +25,18 @@
     - [x] Implement logic. [66ce09f]
 - [x] Task: Conductor - User Manual Verification 'Phase 1: New UseCases' (Protocol in workflow.md) [db99ce1]
 
-## Phase 2: Parallel Integration & Strangler Fig Pattern
+## Phase 2: Parallel Integration & Strangler Fig Pattern [checkpoint: ddcce9b]
 **Goal:** Introduce new UseCases into `MainViewModel` alongside the old one, verifying behavior incrementally.
 
-- [ ] Task: Register new UseCases in `App.axaml.cs` (DI).
-- [ ] Task: Inject new UseCases into `MainViewModel` (keep `PictureEditingUseCase` for now).
-- [ ] Task: Switch `MainViewModel.ExecutePictureAction` to use `TransformImageUseCase`.
-    - [ ] Verify functionality (Manual & Auto).
-- [ ] Task: Switch `MainViewModel.OnPushToDrawArea` to use `TransferImageFromCanvasUseCase`.
-    - [ ] Verify functionality.
-- [ ] Task: Switch `MainViewModel.OnPullFromDrawArea` to use `TransferImageToCanvasUseCase`.
-    - [ ] Verify functionality.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Integration' (Protocol in workflow.md)
+- [x] Task: Register new UseCases in `App.axaml.cs` (DI). [3a186dc]
+- [x] Task: Inject new UseCases into `MainViewModel` (keep `PictureEditingUseCase` for now). [c43bdb5]
+- [x] Task: Switch `MainViewModel.ExecutePictureAction` to use `TransformImageUseCase`. [a4ba43a]
+    - [x] Verify functionality (Manual & Auto). [a4ba43a]
+- [x] Task: Switch `MainViewModel.OnPushToDrawArea` to use `TransferImageToCanvasUseCase`. [e153f3d]
+    - [x] Verify functionality. [e153f3d]
+- [x] Task: Switch `MainViewModel.OnPullFromDrawArea` to use `TransferImageFromCanvasUseCase`. [b21449d]
+    - [x] Verify functionality. [b21449d]
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Integration' (Protocol in workflow.md) [ddcce9b]
 
 ## Phase 3: Cleanup
 **Goal:** Remove the dead code once the migration is fully verified.

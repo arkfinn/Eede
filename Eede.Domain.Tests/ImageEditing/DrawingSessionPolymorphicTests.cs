@@ -1,0 +1,43 @@
+using Eede.Domain.ImageEditing;
+using Eede.Domain.SharedKernel;
+using NUnit.Framework;
+
+namespace Eede.Domain.Tests.ImageEditing;
+
+[TestFixture]
+public class DrawingSessionPolymorphicTests
+{
+    private Picture _initialPicture;
+    private PictureSize _size = new(32, 32);
+
+    [SetUp]
+    public void Setup()
+    {
+        _initialPicture = Picture.CreateEmpty(_size);
+    }
+
+    [Test]
+    public void PushDockUpdate_UpdatesHistory_But_Undo_DoesNotRevertCurrentPicture()
+    {
+        var session = new DrawingSession(_initialPicture);
+        var dockId = "dock-1";
+        var pos = new Position(10, 10);
+        var diffPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+
+        // Act: Push a Dock Update
+        var s2 = session.PushDockUpdate(dockId, pos, diffPicture);
+        
+        // Assert: State immediately after Push
+        // Canvas should remain same
+        Assert.That(s2.CurrentPicture, Is.EqualTo(_initialPicture));
+        Assert.That(s2.CanUndo(), Is.True);
+        
+        // Act: Undo
+        var s3 = s2.Undo();
+        
+        // Assert: State after Undo
+        // Canvas should STILL be same (Undo of DockUpdate shouldn't affect Canvas)
+        Assert.That(s3.CurrentPicture, Is.EqualTo(_initialPicture));
+        Assert.That(s3.CanUndo(), Is.False);
+    }
+}

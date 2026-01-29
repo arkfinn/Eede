@@ -27,9 +27,9 @@
 ## Phase 2: Application Layer Integration (振る舞いの接続)
 **目標:** ドメインの変更をアプリケーション層に波及させ、実際の機能として動作させる。
 
-- [ ] Task: `MainViewModel` と `DockPictureViewModel` の連携テストを作成する。
-    - [ ] `DockPictureViewModel` の特定（ID）と更新が正しく行われるかのテスト。
-- [ ] Task: `DockPictureViewModel` に一意な ID を実装する。
+- [x] Task: `MainViewModel` と `DockPictureViewModel` の連携テストを作成する。 [a892823]
+    - [x] `DockPictureViewModel` の特定（ID）と更新が正しく行われるかのテスト。
+- [~] Task: `DockPictureViewModel` に一意な ID を実装する。
 - [ ] Task: `MainViewModel` の `Pull` 処理を修正する。
     - [ ] 差分抽出ロジックの実装（テスト必須）。
     - [ ] `DrawingSession` への Push 処理追加。

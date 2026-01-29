@@ -32,7 +32,6 @@ public class MainViewModelTests
     private Mock<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>> _mockBitmapAdapter;
     private Mock<IPictureRepository> _mockPictureRepository;
     private Mock<IDrawStyleFactory> _mockDrawStyleFactory;
-    private Mock<IPictureEditingUseCase> _mockPictureEditingUseCase;
     private Mock<ITransformImageUseCase> _mockTransformImageUseCase;
     private Mock<ITransferImageToCanvasUseCase> _mockTransferImageToCanvasUseCase;
     private Mock<ITransferImageFromCanvasUseCase> _mockTransferImageFromCanvasUseCase;
@@ -49,7 +48,6 @@ public class MainViewModelTests
         _mockBitmapAdapter = new Mock<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>>();
         _mockPictureRepository = new Mock<IPictureRepository>();
         _mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
-        _mockPictureEditingUseCase = new Mock<IPictureEditingUseCase>();
         _mockTransformImageUseCase = new Mock<ITransformImageUseCase>();
         _mockTransferImageToCanvasUseCase = new Mock<ITransferImageToCanvasUseCase>();
         _mockTransferImageFromCanvasUseCase = new Mock<ITransferImageFromCanvasUseCase>();
@@ -83,7 +81,6 @@ public class MainViewModelTests
             _mockBitmapAdapter.Object,
             _mockPictureRepository.Object,
             _mockDrawStyleFactory.Object,
-            _mockPictureEditingUseCase.Object,
             _mockTransformImageUseCase.Object,
             _mockTransferImageToCanvasUseCase.Object,
             _mockTransferImageFromCanvasUseCase.Object,

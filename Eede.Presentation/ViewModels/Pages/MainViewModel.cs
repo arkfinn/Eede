@@ -124,7 +124,6 @@ public class MainViewModel : ViewModelBase
     private readonly IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> _bitmapAdapter;
     private readonly IPictureRepository _pictureRepository;
     private readonly IDrawStyleFactory _drawStyleFactory;
-    private readonly IPictureEditingUseCase _pictureEditingUseCase;
     private readonly ITransformImageUseCase _transformImageUseCase;
     private readonly ITransferImageToCanvasUseCase _transferImageToCanvasUseCase;
     private readonly ITransferImageFromCanvasUseCase _transferImageFromCanvasUseCase;
@@ -145,7 +144,6 @@ public class MainViewModel : ViewModelBase
         IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
         IPictureRepository pictureRepository,
         IDrawStyleFactory drawStyleFactory,
-        IPictureEditingUseCase pictureEditingUseCase,
         ITransformImageUseCase transformImageUseCase,
         ITransferImageToCanvasUseCase transferImageToCanvasUseCase,
         ITransferImageFromCanvasUseCase transferImageFromCanvasUseCase,
@@ -163,7 +161,6 @@ public class MainViewModel : ViewModelBase
         _bitmapAdapter = bitmapAdapter;
         _pictureRepository = pictureRepository;
         _drawStyleFactory = drawStyleFactory;
-        _pictureEditingUseCase = pictureEditingUseCase;
         _transformImageUseCase = transformImageUseCase;
         _transferImageToCanvasUseCase = transferImageToCanvasUseCase;
         _transferImageFromCanvasUseCase = transferImageFromCanvasUseCase;

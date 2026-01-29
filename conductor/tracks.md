@@ -15,8 +15,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [ ] **Track: ・ｽS ViewModel ・ｽ・ｽ DI ・ｽﾚ行・ｽ・ｽ DrawingSession ・ｽﾇ暦ｿｽ・ｽﾌ撰ｿｽ・ｽ・ｽ・ｽi・ｽﾚ搾ｿｽ・ｽ・ｽ・ｽｿｽp・ｽ・ｽ ... **Track: ・ｽﾍ囲選・ｽ ... *Link: [./tracks/fix_selection_undo_inconsistency_20260126/](./fix_selection_undo_inconsistency_20260126/)*
-
----
-
-- [x] **Track: Refactoring PictureEditingUseCase into atomic, domain-centric UseCases to eliminate service anti-pattern.**
-*Link: [./tracks/refactor_picture_editing_usecase_20260129/](./tracks/refactor_picture_editing_usecase_20260129/)*

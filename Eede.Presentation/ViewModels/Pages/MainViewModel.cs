@@ -433,12 +433,11 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        PictureEditingUseCase.EditResult result = _pictureEditingUseCase.PushToCanvas(
-            DrawableCanvasViewModel.PictureBuffer.Previous,
+        Picture updated = _transferImageToCanvasUseCase.Execute(
             vm.PictureBuffer,
             args.Rect);
 
-        DrawingSessionViewModel.Push(result.Updated, null, DrawableCanvasViewModel.SelectingArea);
+        DrawingSessionViewModel.Push(updated, null, DrawableCanvasViewModel.SelectingArea);
     }
 
     private void SetPictureToDrawArea(Picture picture)

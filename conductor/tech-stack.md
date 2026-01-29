@@ -14,7 +14,7 @@
 - **空間の分離:** UI 表示上の座標 (`DisplayCoordinate`) とピクセル単位のドメイン座標 (`CanvasCoordinate`) を型として厳格に分離し、倍率（Magnification）に基づく変換ロジックを VO 内に閉じ込める。
 - **構造:** オニオンアーキテクチャに準拠したマルチプロジェクト構成
   - `Eede.Core / Eede.Domain`: ドメインロジック、集約（`DrawingSession`）、値オブジェクト（`DrawingTool`, `DisplayCoordinate`, `CanvasCoordinate` 等）
-  - `Eede.Application`: ユースケース（`DrawActionUseCase`, `SavePictureUseCase`, `LoadPictureUseCase` 等）、アプリケーションサービス
+  - `Eede.Application`: ユースケース（`DrawActionUseCase`, `SavePictureUseCase`, `LoadPictureUseCase`, `TransformImageUseCase`, `TransferImageToCanvasUseCase`, `TransferImageFromCanvasUseCase` 等）、アプリケーションサービス
   - `Eede.Infrastructure`: 技術詳細（`IPictureRepository` 実装、ファイルI/O）
   - `Eede.Presentation`: UI (Avalonia), ViewModels, アダプター（`PictureRepository` 実装）
 - **依存関係管理:** `Microsoft.Extensions.DependencyInjection` を採用し、`App.axaml.cs` でサービスと ViewModel を一括登録。コンストラクタ注入による疎結合な設計を徹底。

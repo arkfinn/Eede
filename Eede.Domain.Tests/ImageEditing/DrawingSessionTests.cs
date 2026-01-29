@@ -42,7 +42,7 @@ public class DrawingSessionTests
             Assert.That(updatedSession.CanUndo(), Is.True);
         });
 
-        var undoneSession = updatedSession.Undo();
+        var undoneSession = updatedSession.Undo().Session;
         Assert.That(undoneSession.CurrentPicture, Is.EqualTo(_initialPicture));
     }
 
@@ -100,7 +100,7 @@ public class DrawingSessionTests
         Assert.That(updatedSession.CurrentSelectingArea, Is.EqualTo(nextArea));
         
         // Act: Undo実行
-        var undoneSession = updatedSession.Undo();
+        var undoneSession = updatedSession.Undo().Session;
         
         // Assert: Undo後の状態が復元されていること
         Assert.Multiple(() =>

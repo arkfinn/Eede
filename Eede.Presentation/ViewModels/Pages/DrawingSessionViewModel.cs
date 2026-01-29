@@ -38,12 +38,12 @@ namespace Eede.Presentation.ViewModels.Pages
 
         private void ExecuteUndo()
         {
-            _provider.Update(CurrentSession.Undo());
+            _provider.Update(CurrentSession.Undo().Session);
         }
 
         private void ExecuteRedo()
         {
-            _provider.Update(CurrentSession.Redo());
+            _provider.Update(CurrentSession.Redo().Session);
         }
 
         public void Push(Picture picture, PictureArea? selectingArea = null, PictureArea? previousArea = null)

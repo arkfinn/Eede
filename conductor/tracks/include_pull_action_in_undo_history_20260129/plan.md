@@ -20,8 +20,8 @@
     - [x] **Red:** `DrawingSession` に `PushDockUpdate` メソッドを追加し、それを呼んだ後に `Undo` しても `CurrentPicture` (作業エリア) が変わらないことを期待するテストを書く。
     - [x] **Green:** `DrawingSession` 内部 Sora のスタックを `IHistoryItem` 型に変更し、`PushDockUpdate` と `Undo` の最小実装を行う。
     - [x] **Refactor:** 既存の `Push` メソッドも内部で `CanvasHistoryItem` を使うように変更する（既存テストが通ることを維持）。
-    - [~] **Red:** `Undo` 時に「何がUndoされたか」を知るための戻り値 (`UndoResult`) をテストで要求する。
-    - [ ] **Green:** `Undo` / `Redo` のシグネチャを変更（または拡張）し、Undoされたアイテム情報を返すように実装する。
+    - [x] **Red:** `Undo` 時に「何がUndoされたか」を知るための戻り値 (`UndoResult`) をテストで要求する。 [c5b6627]
+    - [x] **Green:** `Undo` / `Redo` のシグネチャを変更（または拡張）し、Undoされたアイテム情報を返すように実装する。
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Domain Model' (Protocol in workflow.md)
 
 ## Phase 2: Application Layer Integration (振る舞いの接続)

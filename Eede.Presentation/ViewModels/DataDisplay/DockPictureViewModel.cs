@@ -38,6 +38,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
         [Reactive] public Picture PictureBuffer { get; set; }
         [Reactive] public Bitmap PremultipliedBitmap { get; set; }
+        [Reactive] public string Id { get; private set; }
         [Reactive] public PictureSize MinCursorSize { get; set; }
         [Reactive] public PictureSize CursorSize { get; set; }
         [Reactive] public Avalonia.Input.Cursor ActiveCursor { get; set; }
@@ -67,6 +68,8 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             BitmapAdapter = bitmapAdapter;
             SavePictureUseCase = savePictureUseCase;
             LoadPictureUseCase = loadPictureUseCase;
+
+            Id = Guid.NewGuid().ToString();
 
             OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
             OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);

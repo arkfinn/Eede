@@ -90,7 +90,6 @@ public class PictureContainerTests
         var mockRepo = new Mock<IPictureRepository>();
         var saveUseCase = new SavePictureUseCase(mockRepo.Object);
         var loadUseCase = new LoadPictureUseCase(mockRepo.Object);
-        var mockEditingUseCase = new Mock<IPictureEditingUseCase>();
         var mockTransformImageUseCase = new Mock<ITransformImageUseCase>();
         var mockTransferImageToCanvasUseCase = new Mock<ITransferImageToCanvasUseCase>();
         var mockTransferImageFromCanvasUseCase = new Mock<ITransferImageFromCanvasUseCase>();
@@ -114,7 +113,6 @@ public class PictureContainerTests
             bitmapAdapter,
             mockRepo.Object,
             mockFactory.Object,
-            mockEditingUseCase.Object,
             mockTransformImageUseCase.Object,
             mockTransferImageToCanvasUseCase.Object,
             mockTransferImageFromCanvasUseCase.Object,

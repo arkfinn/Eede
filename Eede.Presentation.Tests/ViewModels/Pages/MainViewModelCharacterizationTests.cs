@@ -36,6 +36,9 @@ public class MainViewModelCharacterizationTests
     private Mock<IPictureRepository> _mockPictureRepository;
     private Mock<IDrawStyleFactory> _mockDrawStyleFactory;
     private Mock<IPictureEditingUseCase> _mockPictureEditingUseCase;
+    private Mock<ITransformImageUseCase> _mockTransformImageUseCase;
+    private Mock<ITransferImageToCanvasUseCase> _mockTransferImageToCanvasUseCase;
+    private Mock<ITransferImageFromCanvasUseCase> _mockTransferImageFromCanvasUseCase;
     private IDrawingSessionProvider _drawingSessionProvider;
     private Mock<IDrawActionUseCase> _mockDrawActionUseCase;
 
@@ -50,6 +53,9 @@ public class MainViewModelCharacterizationTests
         _mockPictureRepository = new Mock<IPictureRepository>();
         _mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
         _mockPictureEditingUseCase = new Mock<IPictureEditingUseCase>();
+        _mockTransformImageUseCase = new Mock<ITransformImageUseCase>();
+        _mockTransferImageToCanvasUseCase = new Mock<ITransferImageToCanvasUseCase>();
+        _mockTransferImageFromCanvasUseCase = new Mock<ITransferImageFromCanvasUseCase>();
         _drawingSessionProvider = new DrawingSessionProvider();
         _mockDrawActionUseCase = new Mock<IDrawActionUseCase>();
 
@@ -88,14 +94,17 @@ public class MainViewModelCharacterizationTests
             _mockPictureRepository.Object,
             _mockDrawStyleFactory.Object,
             _mockPictureEditingUseCase.Object,
+            _mockTransformImageUseCase.Object,
+            _mockTransferImageToCanvasUseCase.Object,
+            _mockTransferImageFromCanvasUseCase.Object,
             _drawingSessionProvider,
             drawableCanvasViewModel,
             animationViewModel,
             drawingSessionViewModel,
             paletteContainerViewModel,
-            null!,
-            null!,
-            null!);
+            new SavePictureUseCase(_mockPictureRepository.Object),
+            new LoadPictureUseCase(_mockPictureRepository.Object),
+            new Mock<IServiceProvider>().Object);
     }
 
     [AvaloniaTest]
@@ -265,8 +274,10 @@ public class MainViewModelCharacterizationTests
             );
             var dummyPicture = Picture.CreateEmpty(new PictureSize(100, 100));
             viewModel.DrawableCanvasViewModel.SetPicture(dummyPicture);
-            _mockPictureEditingUseCase.Setup(u => u.PushToCanvas(It.IsAny<Picture>(), It.IsAny<Picture>(), It.IsAny<PictureArea>()))
-                .Returns(new PictureEditingUseCase.EditResult(dummyPicture, dummyPicture, null));
+            
+            // Setup TransferImageToCanvasUseCase mock
+            _mockTransferImageToCanvasUseCase.Setup(u => u.Execute(It.IsAny<Picture>(), It.IsAny<PictureArea>()))
+                .Returns(dummyPicture);
 
             // MainViewModel の購読ロジックを登録（SetupDockPicture をシミュレート）
             var privateSetupMethod = viewModel.GetType().GetMethod("SetupDockPicture", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
@@ -319,14 +330,17 @@ public class MainViewModelCharacterizationTests
                 _mockPictureRepository.Object,
                 _mockDrawStyleFactory.Object,
                 _mockPictureEditingUseCase.Object,
+                _mockTransformImageUseCase.Object,
+                _mockTransferImageToCanvasUseCase.Object,
+                _mockTransferImageFromCanvasUseCase.Object,
                 _drawingSessionProvider,
                 drawableCanvasViewModel,
                 animationViewModel,
                 drawingSessionViewModel,
                 paletteContainerViewModel,
-                null!,
-                null!,
-                null!
+                new SavePictureUseCase(_mockPictureRepository.Object),
+                new LoadPictureUseCase(_mockPictureRepository.Object),
+                new Mock<IServiceProvider>().Object
             );
 
             // 同期機能が働いているか確認（アニメーションモード）

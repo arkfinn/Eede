@@ -12,7 +12,7 @@
 ## Phase 1: Polymorphic History Model (TDDによるドメイン拡張)
 **目標:** テスト駆動で新しい履歴モデルを導入し、`DrawingSession` が異種の履歴を扱えるようにする。
 
-- [ ] Task: 履歴アイテムの型定義を作成する。
+- [x] Task: 履歴アイテムの型定義を作成する。 [8bbc0cd]
     - [ ] `IHistoryItem` インターフェースを定義。
     - [ ] `CanvasHistoryItem` を作成し、既存の `Picture` + `PictureArea` を保持させる。
     - [ ] `DockActiveHistoryItem` を作成し、`DockId`, `Position`, `Picture`(差分) を保持させる。

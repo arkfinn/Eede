@@ -4,9 +4,9 @@
 **目標:** 既存の `DrawingSession` の振る舞いをテストコードで完全に固定し、リファクタリング中の退行（デグレ）を防ぐ。
 
 - [x] Task: `DrawingSession` の既存の Undo/Redo 動作に対する仕様化テスト（Characterization Tests）を作成する。 [439dc3a]
-    - [ ] `Push` 後の `CurrentPicture` の状態遷移。
-    - [ ] `Undo` / `Redo` 後の `CurrentPicture` と `SelectingArea` の復元確認。
-    - [ ] `Push` が連続した場合のスタックの挙動確認。
+    - [x] `Push` 後の `CurrentPicture` の状態遷移。
+    - [x] `Undo` / `Redo` 後の `CurrentPicture` と `SelectingArea` の復元確認。
+    - [x] `Push` が連続した場合のスタックの挙動確認。
 - [x] Task: Conductor - User Manual Verification 'Phase 0: Safety Net' (Protocol in workflow.md) [checkpoint: d03e710]
 
 ## Phase 1: Polymorphic History Model (TDDによるドメイン拡張)
@@ -16,11 +16,11 @@
     - [ ] `IHistoryItem` インターフェースを定義。
     - [ ] `CanvasHistoryItem` を作成し、既存の `Picture` + `PictureArea` を保持させる。
     - [ ] `DockActiveHistoryItem` を作成し、`DockId`, `Position`, `Picture`(差分) を保持させる。
-- [ ] Task: `DrawingSession` のリファクタリング (TDD)。
-    - [ ] **Red:** `DrawingSession` に `PushDockUpdate` メソッドを追加し、それを呼んだ後に `Undo` しても `CurrentPicture` (作業エリア) が変わらないことを期待するテストを書く。
-    - [ ] **Green:** `DrawingSession` 内部のスタックを `IHistoryItem` 型に変更し、`PushDockUpdate` と `Undo` の最小実装を行う。
-    - [ ] **Refactor:** 既存の `Push` メソッドも内部で `CanvasHistoryItem` を使うように変更する（既存テストが通ることを維持）。
-    - [ ] **Red:** `Undo` 時に「何がUndoされたか」を知るための戻り値 (`UndoResult`) をテストで要求する。
+- [x] Task: `DrawingSession` のリファクタリング (TDD)。 [46196c2]
+    - [x] **Red:** `DrawingSession` に `PushDockUpdate` メソッドを追加し、それを呼んだ後に `Undo` しても `CurrentPicture` (作業エリア) が変わらないことを期待するテストを書く。
+    - [x] **Green:** `DrawingSession` 内部 Sora のスタックを `IHistoryItem` 型に変更し、`PushDockUpdate` と `Undo` の最小実装を行う。
+    - [x] **Refactor:** 既存の `Push` メソッドも内部で `CanvasHistoryItem` を使うように変更する（既存テストが通ることを維持）。
+    - [~] **Red:** `Undo` 時に「何がUndoされたか」を知るための戻り値 (`UndoResult`) をテストで要求する。
     - [ ] **Green:** `Undo` / `Redo` のシグネチャを変更（または拡張）し、Undoされたアイテム情報を返すように実装する。
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Domain Model' (Protocol in workflow.md)
 

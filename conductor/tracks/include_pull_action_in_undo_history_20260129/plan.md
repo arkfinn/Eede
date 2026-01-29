@@ -7,7 +7,7 @@
     - [ ] `Push` 後の `CurrentPicture` の状態遷移。
     - [ ] `Undo` / `Redo` 後の `CurrentPicture` と `SelectingArea` の復元確認。
     - [ ] `Push` が連続した場合のスタックの挙動確認。
-- [ ] Task: Conductor - User Manual Verification 'Phase 0: Safety Net' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 0: Safety Net' (Protocol in workflow.md) [checkpoint: d03e710]
 
 ## Phase 1: Polymorphic History Model (TDDによるドメイン拡張)
 **目標:** テスト駆動で新しい履歴モデルを導入し、`DrawingSession` が異種の履歴を扱えるようにする。

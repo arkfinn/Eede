@@ -37,7 +37,7 @@ public class DrawingSessionCharacterizationTests
         var nextPicture = Picture.CreateEmpty(_size);
         var s2 = session.Push(nextPicture);
 
-        var s3 = s2.Undo();
+        var s3 = s2.Undo().Session;
 
         Assert.That(s3.CurrentPicture, Is.EqualTo(_initialPicture));
         Assert.That(s3.CanUndo(), Is.False);
@@ -50,9 +50,9 @@ public class DrawingSessionCharacterizationTests
         var session = new DrawingSession(_initialPicture);
         var nextPicture = Picture.CreateEmpty(_size);
         var s2 = session.Push(nextPicture);
-        var s3 = s2.Undo();
+        var s3 = s2.Undo().Session;
 
-        var s4 = s3.Redo();
+        var s4 = s3.Redo().Session;
 
         Assert.That(s4.CurrentPicture, Is.EqualTo(nextPicture));
         Assert.That(s4.CanUndo(), Is.True);
@@ -81,7 +81,7 @@ public class DrawingSessionCharacterizationTests
         Assert.That(s2.CurrentSelectingArea, Is.EqualTo(nextArea));
 
         // Undo
-        var s3 = s2.Undo();
+        var s3 = s2.Undo().Session;
 
         Assert.That(s3.CurrentPicture, Is.EqualTo(_initialPicture));
         Assert.That(s3.CurrentSelectingArea, Is.EqualTo(initialArea));
@@ -102,13 +102,13 @@ public class DrawingSessionCharacterizationTests
 
         Assert.That(s3.CurrentPicture, Is.EqualTo(p3));
         
-        var u1 = s3.Undo();
+        var u1 = s3.Undo().Session;
         Assert.That(u1.CurrentPicture, Is.EqualTo(p2));
 
-        var u2 = u1.Undo();
+        var u2 = u1.Undo().Session;
         Assert.That(u2.CurrentPicture, Is.EqualTo(p1));
 
-        var u3 = u2.Undo();
+        var u3 = u2.Undo().Session;
         Assert.That(u3.CurrentPicture, Is.EqualTo(_initialPicture));
         
         Assert.That(u3.CanUndo(), Is.False);

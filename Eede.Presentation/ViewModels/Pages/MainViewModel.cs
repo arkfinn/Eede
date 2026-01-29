@@ -475,16 +475,16 @@ public class MainViewModel : ViewModelBase
     private void ExecutePictureAction(PictureActions actionType)
     {
         PictureArea? area = DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null;
-        PictureEditingUseCase.EditResult result = area.HasValue ? _pictureEditingUseCase.ExecuteAction(
+        Picture updated = area.HasValue ? _transformImageUseCase.Execute(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType,
             area.Value
-        ) : _pictureEditingUseCase.ExecuteAction(
+        ) : _transformImageUseCase.Execute(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType
         );
 
-        DrawingSessionViewModel.Push(result.Updated, result.SelectingArea, DrawableCanvasViewModel.SelectingArea);
+        DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea);
     }
 
     private IDrawStyle ExecuteUpdateDrawStyle(DrawStyleType drawStyle)

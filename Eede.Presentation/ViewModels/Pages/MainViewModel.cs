@@ -125,6 +125,9 @@ public class MainViewModel : ViewModelBase
     private readonly IPictureRepository _pictureRepository;
     private readonly IDrawStyleFactory _drawStyleFactory;
     private readonly IPictureEditingUseCase _pictureEditingUseCase;
+    private readonly ITransformImageUseCase _transformImageUseCase;
+    private readonly ITransferImageToCanvasUseCase _transferImageToCanvasUseCase;
+    private readonly ITransferImageFromCanvasUseCase _transferImageFromCanvasUseCase;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly SavePictureUseCase _savePictureUseCase;
     private readonly LoadPictureUseCase _loadPictureUseCase;
@@ -143,6 +146,9 @@ public class MainViewModel : ViewModelBase
         IPictureRepository pictureRepository,
         IDrawStyleFactory drawStyleFactory,
         IPictureEditingUseCase pictureEditingUseCase,
+        ITransformImageUseCase transformImageUseCase,
+        ITransferImageToCanvasUseCase transferImageToCanvasUseCase,
+        ITransferImageFromCanvasUseCase transferImageFromCanvasUseCase,
         IDrawingSessionProvider drawingSessionProvider,
         DrawableCanvasViewModel drawableCanvasViewModel,
         AnimationViewModel animationViewModel,
@@ -158,6 +164,9 @@ public class MainViewModel : ViewModelBase
         _pictureRepository = pictureRepository;
         _drawStyleFactory = drawStyleFactory;
         _pictureEditingUseCase = pictureEditingUseCase;
+        _transformImageUseCase = transformImageUseCase;
+        _transferImageToCanvasUseCase = transferImageToCanvasUseCase;
+        _transferImageFromCanvasUseCase = transferImageFromCanvasUseCase;
         _drawingSessionProvider = drawingSessionProvider;
         _savePictureUseCase = savePictureUseCase;
         _loadPictureUseCase = loadPictureUseCase;

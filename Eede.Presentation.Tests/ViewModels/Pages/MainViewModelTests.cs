@@ -33,6 +33,9 @@ public class MainViewModelTests
     private Mock<IPictureRepository> _mockPictureRepository;
     private Mock<IDrawStyleFactory> _mockDrawStyleFactory;
     private Mock<IPictureEditingUseCase> _mockPictureEditingUseCase;
+    private Mock<ITransformImageUseCase> _mockTransformImageUseCase;
+    private Mock<ITransferImageToCanvasUseCase> _mockTransferImageToCanvasUseCase;
+    private Mock<ITransferImageFromCanvasUseCase> _mockTransferImageFromCanvasUseCase;
     private Mock<IDrawingSessionProvider> _mockDrawingSessionProvider;
     private Mock<IDrawActionUseCase> _mockDrawActionUseCase;
 
@@ -47,6 +50,9 @@ public class MainViewModelTests
         _mockPictureRepository = new Mock<IPictureRepository>();
         _mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
         _mockPictureEditingUseCase = new Mock<IPictureEditingUseCase>();
+        _mockTransformImageUseCase = new Mock<ITransformImageUseCase>();
+        _mockTransferImageToCanvasUseCase = new Mock<ITransferImageToCanvasUseCase>();
+        _mockTransferImageFromCanvasUseCase = new Mock<ITransferImageFromCanvasUseCase>();
         _mockDrawingSessionProvider = new Mock<IDrawingSessionProvider>();
         _mockDrawingSessionProvider.Setup(p => p.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
         _mockDrawActionUseCase = new Mock<IDrawActionUseCase>();
@@ -78,14 +84,17 @@ public class MainViewModelTests
             _mockPictureRepository.Object,
             _mockDrawStyleFactory.Object,
             _mockPictureEditingUseCase.Object,
+            _mockTransformImageUseCase.Object,
+            _mockTransferImageToCanvasUseCase.Object,
+            _mockTransferImageFromCanvasUseCase.Object,
             _mockDrawingSessionProvider.Object,
             drawableCanvasViewModel,
             animationViewModel,
             drawingSessionViewModel,
             paletteContainerViewModel,
-            null!,
-            null!,
-            null!);
+            new SavePictureUseCase(_mockPictureRepository.Object),
+            new LoadPictureUseCase(_mockPictureRepository.Object),
+            new Mock<IServiceProvider>().Object);
     }
 
     [AvaloniaTest]

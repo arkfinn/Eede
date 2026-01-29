@@ -91,6 +91,9 @@ public class PictureContainerTests
         var saveUseCase = new SavePictureUseCase(mockRepo.Object);
         var loadUseCase = new LoadPictureUseCase(mockRepo.Object);
         var mockEditingUseCase = new Mock<IPictureEditingUseCase>();
+        var mockTransformImageUseCase = new Mock<ITransformImageUseCase>();
+        var mockTransferImageToCanvasUseCase = new Mock<ITransferImageToCanvasUseCase>();
+        var mockTransferImageFromCanvasUseCase = new Mock<ITransferImageFromCanvasUseCase>();
 
         // 4. MainViewModel Dependencies
         var mockFactory = new Mock<IDrawStyleFactory>();
@@ -112,6 +115,9 @@ public class PictureContainerTests
             mockRepo.Object,
             mockFactory.Object,
             mockEditingUseCase.Object,
+            mockTransformImageUseCase.Object,
+            mockTransferImageToCanvasUseCase.Object,
+            mockTransferImageFromCanvasUseCase.Object,
             mockDrawingSessionProvider.Object,
             drawableCanvasVM,
             animationVM,

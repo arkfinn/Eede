@@ -58,7 +58,6 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IAnimationService, AnimationService>();
         services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
         services.AddSingleton<IDrawStyleFactory, DrawStyleFactory>();
-        services.AddSingleton<IPictureEditingUseCase, PictureEditingUseCase>();
         services.AddTransient<ITransformImageUseCase, TransformImageUseCase>();
         services.AddTransient<ITransferImageToCanvasUseCase, TransferImageToCanvasUseCase>();
         services.AddTransient<ITransferImageFromCanvasUseCase, TransferImageFromCanvasUseCase>();

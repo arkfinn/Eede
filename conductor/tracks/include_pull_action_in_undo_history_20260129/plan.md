@@ -40,7 +40,7 @@
 ## Phase 3: Bug Fix and Finalization
 **目標:** 手動検証で見つかったドックエリアのリドゥ不可問題を修正し、トラックを完了させる。
 
-- [~] Task: ドックエリアに対するリドゥ（Redo）機能の不具合修正。
-    - [ ] `MainViewModel.OnRedone` または `DrawingSession.Redo` のロジック確認と修正。
-    - [ ] 統合テストに Redo の検証ケースを追加。
+- [x] Task: ドックエリアに対するリドゥ（Redo）機能の不具合修正。 [cfa6694]
+    - [x] `MainViewModel.OnRedone` または `DrawingSession.Redo` のロジック確認と修正。
+    - [x] 統合テストに Redo の検証ケースを追加。
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Bug Fix' (Protocol in workflow.md)

@@ -77,12 +77,12 @@ namespace Eede.Domain.ImageEditing
                 ImmutableStack<IHistoryItem>.Empty);
         }
 
-        public DrawingSession PushDockUpdate(string dockId, Position position, Picture picture)
+        public DrawingSession PushDockUpdate(string dockId, Position position, Picture before, Picture after)
         {
             return new DrawingSession(
                 Buffer,
                 SelectingArea,
-                UndoStack.Push(new DockActiveHistoryItem(dockId, position, picture)),
+                UndoStack.Push(new DockActiveHistoryItem(dockId, position, before, after)),
                 ImmutableStack<IHistoryItem>.Empty);
         }
 

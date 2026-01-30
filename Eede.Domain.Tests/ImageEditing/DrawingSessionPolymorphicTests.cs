@@ -23,10 +23,11 @@ public class DrawingSessionPolymorphicTests
         var session = new DrawingSession(_initialPicture);
         var dockId = "dock-1";
         var pos = new Position(10, 10);
-        var diffPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+        var beforePicture = Picture.CreateEmpty(new PictureSize(10, 10));
+        var afterPicture = Picture.CreateEmpty(new PictureSize(10, 10));
 
         // Act: Push a Dock Update
-        var s2 = session.PushDockUpdate(dockId, pos, diffPicture);
+        var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture);
         
         // Assert: State immediately after Push
         // Canvas should remain same
@@ -49,9 +50,10 @@ public class DrawingSessionPolymorphicTests
         var session = new DrawingSession(_initialPicture);
         var dockId = "dock-1";
         var pos = new Position(10, 10);
-        var diffPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+        var beforePicture = Picture.CreateEmpty(new PictureSize(10, 10));
+        var afterPicture = Picture.CreateEmpty(new PictureSize(10, 10));
 
-        var s2 = session.PushDockUpdate(dockId, pos, diffPicture);
+        var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture);
         
         // Act: Undo
         // We expect Undo() to return a record containing the new session and the undone item.
@@ -61,5 +63,30 @@ public class DrawingSessionPolymorphicTests
         Assert.That(result.Item, Is.InstanceOf<DockActiveHistoryItem>());
         var undoneItem = result.Item as DockActiveHistoryItem;
         Assert.That(undoneItem.DockId, Is.EqualTo(dockId));
+        Assert.That(undoneItem.Before, Is.EqualTo(beforePicture));
+        Assert.That(undoneItem.After, Is.EqualTo(afterPicture));
+    }
+
+    [Test]
+    public void Redo_Restores_DockUpdate()
+    {
+        var session = new DrawingSession(_initialPicture);
+        var dockId = "dock-1";
+        var pos = new Position(10, 10);
+        var beforePicture = Picture.CreateEmpty(new PictureSize(10, 10));
+        var afterPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+
+        var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture);
+        var s3 = s2.Undo().Session;
+        
+        // Act: Redo
+        var result = s3.Redo();
+        
+        Assert.That(result.Session.CanUndo(), Is.True);
+        Assert.That(result.Item, Is.InstanceOf<DockActiveHistoryItem>());
+        var redoneItem = result.Item as DockActiveHistoryItem;
+        Assert.That(redoneItem.DockId, Is.EqualTo(dockId));
+        Assert.That(redoneItem.Before, Is.EqualTo(beforePicture));
+        Assert.That(redoneItem.After, Is.EqualTo(afterPicture));
     }
 }

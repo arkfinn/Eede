@@ -159,6 +159,15 @@ public class MainViewModelIntegrationTests
 
             // Assert: Dock picture restored to initial state
             Assert.That(dockPicture.PictureBuffer, Is.EqualTo(picture), "Dock picture should be restored after Undo");
+
+            // 5. Perform Redo
+            bool redoExecuted = false;
+            viewModel.RedoCommand.Execute().Subscribe(_ => redoExecuted = true, ex => throw ex);
+            scheduler.AdvanceByMs(10);
+            Assert.That(redoExecuted, Is.True, "Redo command should be executed");
+
+            // Assert: Dock picture updated again after Redo
+            Assert.That(dockPicture.PictureBuffer, Is.EqualTo(updatedPicture), "Dock picture should be updated again after Redo");
         });
     }
 }

@@ -59,9 +59,9 @@ namespace Eede.Presentation.ViewModels.Pages
             _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea));
         }
 
-        public void PushDockUpdate(string dockId, Position position, Picture picture)
+        public void PushDockUpdate(string dockId, Position position, Picture before, Picture after)
         {
-            _provider.Update(CurrentSession.PushDockUpdate(dockId, position, picture));
+            _provider.Update(CurrentSession.PushDockUpdate(dockId, position, before, after));
         }
     }
 }

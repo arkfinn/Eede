@@ -1,5 +1,6 @@
 using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.History;
 using Eede.Domain.SharedKernel;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -16,6 +17,9 @@ namespace Eede.Presentation.ViewModels.Pages
 
         public ReactiveCommand<Unit, Unit> UndoCommand { get; }
         public ReactiveCommand<Unit, Unit> RedoCommand { get; }
+
+        public event EventHandler<UndoResult> Undone;
+        public event EventHandler<RedoResult> Redone;
 
         public DrawingSessionViewModel(IDrawingSessionProvider provider)
         {
@@ -38,17 +42,26 @@ namespace Eede.Presentation.ViewModels.Pages
 
         private void ExecuteUndo()
         {
-            _provider.Update(CurrentSession.Undo().Session);
+            var result = CurrentSession.Undo();
+            _provider.Update(result.Session);
+            Undone?.Invoke(this, result);
         }
 
         private void ExecuteRedo()
         {
-            _provider.Update(CurrentSession.Redo().Session);
+            var result = CurrentSession.Redo();
+            _provider.Update(result.Session);
+            Redone?.Invoke(this, result);
         }
 
         public void Push(Picture picture, PictureArea? selectingArea = null, PictureArea? previousArea = null)
         {
             _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea));
+        }
+
+        public void PushDockUpdate(string dockId, Position position, Picture picture)
+        {
+            _provider.Update(CurrentSession.PushDockUpdate(dockId, position, picture));
         }
     }
 }

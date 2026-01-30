@@ -9,6 +9,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
+using Eede.Domain.ImageEditing.History;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
@@ -179,6 +180,8 @@ public class MainViewModel : ViewModelBase
 
     private void InitializeConnections()
     {
+        Pictures.CollectionChanged += Pictures_CollectionChanged;
+
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
@@ -289,6 +292,33 @@ public class MainViewModel : ViewModelBase
             {
                 SetPictureToDrawArea(session.CurrentPicture);
             });
+
+        DrawingSessionViewModel.Undone += OnUndone;
+        DrawingSessionViewModel.Redone += OnRedone;
+    }
+
+    private void OnUndone(object? sender, UndoResult e)
+    {
+        if (e.Item is DockActiveHistoryItem dockItem)
+        {
+            var vm = Pictures.FirstOrDefault(x => x.Id == dockItem.DockId);
+            if (vm != null)
+            {
+                vm.PictureBuffer = dockItem.Picture;
+            }
+        }
+    }
+
+    private void OnRedone(object? sender, RedoResult e)
+    {
+        if (e.Item is DockActiveHistoryItem dockItem)
+        {
+            var vm = Pictures.FirstOrDefault(x => x.Id == dockItem.DockId);
+            if (vm != null)
+            {
+                vm.PictureBuffer = dockItem.Picture;
+            }
+        }
     }
 
     public void DragOverPicture(object sender, DragEventArgs e)
@@ -363,6 +393,32 @@ public class MainViewModel : ViewModelBase
 
     }
 
+    private void Pictures_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+        {
+            foreach (DockPictureViewModel vm in e.NewItems)
+            {
+                SetupDockPicture(vm);
+            }
+        }
+        if (e.OldItems != null)
+        {
+            foreach (DockPictureViewModel vm in e.OldItems)
+            {
+                CleanupDockPicture(vm);
+            }
+        }
+    }
+
+    private void CleanupDockPicture(DockPictureViewModel vm)
+    {
+        vm.PicturePush -= OnPushToDrawArea;
+        vm.PicturePull -= OnPullFromDrawArea;
+        vm.PictureUpdate -= OnPictureUpdate;
+        vm.PictureSave -= OnPictureSave;
+    }
+
     private async Task<DockPictureViewModel?> OpenPicture(Uri path)
     {
         FilePath filePath = new(path.LocalPath);
@@ -373,10 +429,10 @@ public class MainViewModel : ViewModelBase
         }
         DockPictureViewModel vm = _services.GetRequiredService<DockPictureViewModel>();
         vm.Initialize(picture, filePath);
-        return SetupDockPicture(vm);
+        return vm;
     }
 
-    private DockPictureViewModel SetupDockPicture(DockPictureViewModel vm)
+    private void SetupDockPicture(DockPictureViewModel vm)
     {
         vm.PicturePush += OnPushToDrawArea;
         vm.PicturePull += OnPullFromDrawArea;
@@ -384,7 +440,6 @@ public class MainViewModel : ViewModelBase
         vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
         _ = this.WhenAnyValue(x => x.AnimationCursor).BindTo(vm, x => x.AnimationCursor);
-        return vm;
     }
 
     private async void ExecuteCreateNewPicture()
@@ -395,7 +450,7 @@ public class MainViewModel : ViewModelBase
         {
             DockPictureViewModel vm = _services.GetRequiredService<DockPictureViewModel>();
             vm.Initialize(Picture.CreateEmpty(result.Size), FilePath.Empty());
-            Pictures.Add(SetupDockPicture(vm));
+            Pictures.Add(vm);
         }
     }
 
@@ -459,6 +514,9 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
+
+        DrawingSessionViewModel.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer);
+
         Picture updated = _transferImageFromCanvasUseCase.Execute(
             vm.PictureBuffer,
             DrawableCanvasViewModel.PictureBuffer.Previous,

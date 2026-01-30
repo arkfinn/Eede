@@ -19,5 +19,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Include Pull Action in Undo History**
-*Link: [./tracks/include_pull_action_in_undo_history_20260129/](./tracks/include_pull_action_in_undo_history_20260129/)*
+- [x] [Include Pull Action in Undo History](./tracks/include_pull_action_in_undo_history_20260129/index.md) [13e5fd1]

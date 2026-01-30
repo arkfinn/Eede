@@ -62,7 +62,11 @@ public class MainViewModelIntegrationTests
         
         _currentSession = new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32)));
         _mockDrawingSessionProvider.Setup(p => p.CurrentSession).Returns(() => _currentSession);
-        _mockDrawingSessionProvider.Setup(p => p.Update(It.IsAny<DrawingSession>())).Callback<DrawingSession>(s => _currentSession = s);
+        _mockDrawingSessionProvider.Setup(p => p.Update(It.IsAny<DrawingSession>())).Callback<DrawingSession>(s => 
+        {
+            _currentSession = s;
+            _mockDrawingSessionProvider.Raise(p => p.SessionChanged += null, s);
+        });
 
         _mockDrawStyleFactory.Setup(f => f.Create(It.IsAny<DrawStyleType>())).Returns(new FreeCurve());
 
@@ -137,18 +141,21 @@ public class MainViewModelIntegrationTests
             // 3. Perform Pull
             // 内部的に MainViewModel.OnPullFromDrawArea が呼ばれるはず
             dockPicture.OnPicturePull.Execute(new Position(0, 0)).Subscribe();
+            scheduler.AdvanceByMs(10);
             
             // Assert: Dock picture updated
             Assert.That(dockPicture.PictureBuffer, Is.EqualTo(updatedPicture), $"Dock picture should be updated. Expected pixel[0]={updatedPicture.AsSpan()[0]}, Actual pixel[0]={dockPicture.PictureBuffer.AsSpan()[0]}");
 
             // Assert: Undo is enabled
-            // この時点ではまだ失敗するはず（MainViewModel.OnPullFromDrawArea に PushDockUpdate がないため）
             bool canUndo = false;
             viewModel.UndoCommand.CanExecute.Take(1).Subscribe(x => canUndo = x);
             Assert.That(canUndo, Is.True, "Undo should be enabled after Pull");
 
             // 4. Perform Undo
-            viewModel.UndoCommand.Execute().Subscribe();
+            bool executed = false;
+            viewModel.UndoCommand.Execute().Subscribe(_ => executed = true, ex => throw ex);
+            scheduler.AdvanceByMs(10);
+            Assert.That(executed, Is.True, "Undo command should be executed");
 
             // Assert: Dock picture restored to initial state
             Assert.That(dockPicture.PictureBuffer, Is.EqualTo(picture), "Dock picture should be restored after Undo");

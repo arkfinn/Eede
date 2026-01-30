@@ -30,9 +30,9 @@
 - [x] Task: `MainViewModel` と `DockPictureViewModel` の連携テストを作成する。 [a892823]
     - [x] `DockPictureViewModel` の特定（ID）と更新が正しく行われるかのテスト。
 - [x] Task: `DockPictureViewModel` に一意な ID を実装する。 [8fe628a]
-- [~] Task: `MainViewModel` の `Pull` 処理を修正する。
-    - [ ] 差分抽出ロジックの実装（テスト必須）。
-    - [ ] `DrawingSession` への Push 処理追加。
-- [ ] Task: Undo/Redo 時のイベントハンドリング実装。
-    - [ ] `DrawingSession` から返された `DockActiveHistoryItem` を元に、対象ドック画像を復元する処理。
+- [x] Task: `MainViewModel` の `Pull` 処理を修正する。 [3fd4cde]
+    - [x] 差分抽出ロジックの実装（テスト必須）。
+    - [x] `DrawingSession` への Push 処理追加。
+- [x] Task: Undo/Redo 時のイベントハンドリング実装。 [16478c5]
+    - [x] `DrawingSession` から返された `DockActiveHistoryItem` を元に、対象ドック画像を復元する処理。
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Integration' (Protocol in workflow.md)

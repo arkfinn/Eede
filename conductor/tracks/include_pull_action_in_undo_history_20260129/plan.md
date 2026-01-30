@@ -35,4 +35,12 @@
     - [x] `DrawingSession` への Push 処理追加。
 - [x] Task: Undo/Redo 時のイベントハンドリング実装。 [16478c5]
     - [x] `DrawingSession` から返された `DockActiveHistoryItem` を元に、対象ドック画像を復元する処理。
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Integration' (Protocol in workflow.md) [checkpoint: 19bfac5]
+
+## Phase 3: Bug Fix and Finalization
+**目標:** 手動検証で見つかったドックエリアのリドゥ不可問題を修正し、トラックを完了させる。
+
+- [~] Task: ドックエリアに対するリドゥ（Redo）機能の不具合修正。
+    - [ ] `MainViewModel.OnRedone` または `DrawingSession.Redo` のロジック確認と修正。
+    - [ ] 統合テストに Redo の検証ケースを追加。
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Bug Fix' (Protocol in workflow.md)

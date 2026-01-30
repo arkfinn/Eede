@@ -60,4 +60,14 @@ public class FloatingSelectionState : ISelectionState
     {
         return new PictureArea(_position, _pixels.Size);
     }
+
+    public DrawingSession Commit(DrawingSession session)
+    {
+        return session;
+    }
+
+    public DrawingSession Cancel(DrawingSession session)
+    {
+        return session;
+    }
 }

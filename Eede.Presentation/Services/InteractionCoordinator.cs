@@ -1,5 +1,6 @@
 using Avalonia.Input;
 using Eede.Application.Drawings;
+using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
@@ -16,23 +17,60 @@ namespace Eede.Presentation.Services;
 
 public class InteractionCoordinator : IInteractionCoordinator
 {
-    public DrawingBuffer CurrentBuffer { get; private set; }
-    public PictureArea? SelectingArea { get; private set; }
-    public bool IsRegionSelecting { get; private set; }
-    public Picture? PreviewPixels { get; private set; }
-    public Position PreviewPosition { get; private set; }
+    public DrawingBuffer CurrentBuffer => _sessionProvider.CurrentSession.Buffer;
+
+    private PictureArea? _manualSelectingArea;
+    public PictureArea? SelectingArea
+    {
+        get
+        {
+            var fromState = _interactionSession?.SelectionState.GetSelectingArea();
+            if (fromState != null) return fromState;
+
+            if (_interactionSession?.DrawStyle is RegionSelector)
+            {
+                return _manualSelectingArea;
+            }
+            return null;
+        }
+    }
+
+    public bool IsRegionSelecting => SelectingArea.HasValue && _interactionSession?.DrawStyle is RegionSelector;
+
+    public Picture? PreviewPixels
+    {
+        get
+        {
+            var info = _interactionSession?.SelectionState.GetSelectionPreviewInfo();
+            if (info != null) return info.Pixels;
+            return _sessionProvider.CurrentSession.CurrentPreviewContent?.Pixels;
+        }
+    }
+
+    public Position PreviewPosition
+    {
+        get
+        {
+            var info = _interactionSession?.SelectionState.GetSelectionPreviewInfo();
+            if (info != null) return info.Position;
+            return _sessionProvider.CurrentSession.CurrentPreviewContent?.Position ?? new Position(0, 0);
+        }
+    }
+
     public Cursor ActiveCursor { get; private set; } = Cursor.Default;
 
     public event Action<Picture, Picture, PictureArea?, PictureArea?> Drew;
     public event Action StateChanged;
 
+    private readonly IDrawingSessionProvider _sessionProvider;
     private DrawableArea _drawableArea;
     private CanvasInteractionSession _interactionSession;
     private Magnification _magnification = new(1);
     private PictureArea? _operationInitialSelectingArea;
 
-    public InteractionCoordinator()
+    public InteractionCoordinator(IDrawingSessionProvider sessionProvider)
     {
+        _sessionProvider = sessionProvider;
         _drawableArea = new(CanvasBackgroundService.Instance, _magnification, new PictureSize(16, 16), null);
     }
 
@@ -69,12 +107,14 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public void PointerBegin(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, PenStyle penStyle, bool isShift, bool isAnimationMode, PictureSize gridSize, ReactiveCommand<Picture, Unit> internalUpdateCommand)
     {
-        CurrentBuffer = buffer;
-        if (CurrentBuffer == null || CurrentBuffer.IsDrawing()) return;
+        if (CurrentBuffer == null) return;
+        if (CurrentBuffer.IsDrawing() && !(_interactionSession?.SelectionState is SelectionPreviewState)) return;
 
         EnsureInteractionSession(CurrentBuffer, drawStyle);
         _operationInitialSelectingArea = SelectingArea;
-        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession?.SelectionState);
+        
+        var previousState = _interactionSession.SelectionState;
+        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, previousState);
         UpdateCursor(pos);
 
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
@@ -86,26 +126,42 @@ public class InteractionCoordinator : IInteractionCoordinator
             isShift,
             internalUpdateCommand);
 
-        if (_interactionSession.SelectionState is DraggingState)
+        var nextState = _interactionSession.SelectionState;
+
+        // プレビュー状態から通常状態へ遷移（範囲外クリック）した場合、確定する
+        if (previousState is SelectionPreviewState && nextState is NormalCursorState)
         {
+            _sessionProvider.Update(previousState.Commit(_sessionProvider.CurrentSession));
+            // 確定後のバッファでセッションを再構築
+            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
+            NotifyStateChanged();
+            return;
+        }
+
+        if (_interactionSession.SelectionState is DraggingState draggingState)
+        {
+            if (previousState is not SelectionPreviewState)
+            {
+                var originalArea = draggingState.GetOriginalArea();
+                var cutPicture = CurrentBuffer.Previous.Clear(originalArea);
+                _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateDrawing(cutPicture));
+            }
+
             _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
             _drawableArea = _drawableArea.Leave(CurrentBuffer);
-            SyncSelectionState(drawStyle);
             NotifyStateChanged();
             return;
         }
 
         DrawingResult result = _drawableArea.DrawStart(drawStyle, penStyle, CurrentBuffer, pos, isShift);
-        CurrentBuffer = result.PictureBuffer;
+        _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
         _drawableArea = result.DrawableArea;
         _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
-        SyncSelectionState(drawStyle);
         NotifyStateChanged();
     }
 
     public void PointerMoved(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, PenStyle penStyle, bool isShift, bool isAnimationMode, PictureSize gridSize)
     {
-        CurrentBuffer = buffer;
         EnsureInteractionSession(CurrentBuffer, drawStyle);
         if (_interactionSession == null || CurrentBuffer == null) return;
 
@@ -113,9 +169,7 @@ public class InteractionCoordinator : IInteractionCoordinator
 
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
         var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
-        var currentArea = isAnimationMode
-            ? HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize)
-            : HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize);
+        var currentArea = HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize);
 
         _interactionSession.SelectionState.HandlePointerMoved(
             currentArea,
@@ -123,25 +177,22 @@ public class InteractionCoordinator : IInteractionCoordinator
             canvasCoordinate.ToPosition(),
             CurrentBuffer.Previous.Size);
 
-        if (_interactionSession.SelectionState is DraggingState)
+        if (_interactionSession.SelectionState is DraggingState or SelectionPreviewState)
         {
             _drawableArea = _drawableArea.Leave(CurrentBuffer);
-            SyncSelectionState(drawStyle);
             NotifyStateChanged();
             return;
         }
 
         DrawingResult result = _drawableArea.Move(drawStyle, penStyle, CurrentBuffer, pos, isShift);
-        CurrentBuffer = result.PictureBuffer;
+        _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
         _drawableArea = result.DrawableArea;
         _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
-        SyncSelectionState(drawStyle);
         NotifyStateChanged();
     }
 
     public void PointerRightButtonPressed(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, Action<ArgbColor> colorPickedAction, ReactiveCommand<Picture, Unit> internalUpdateCommand)
     {
-        CurrentBuffer = buffer;
         if (CurrentBuffer == null) return;
         EnsureInteractionSession(CurrentBuffer, drawStyle);
 
@@ -149,36 +200,45 @@ public class InteractionCoordinator : IInteractionCoordinator
         var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
         var currentArea = HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize);
 
-        (ISelectionState nextState, HalfBoxArea _) = _interactionSession.SelectionState.HandlePointerRightButtonPressed(
+        var previousState = _interactionSession.SelectionState;
+        (ISelectionState nextState, HalfBoxArea _) = previousState.HandlePointerRightButtonPressed(
             currentArea,
             canvasCoordinate.ToPosition(),
             gridSize,
             internalUpdateCommand);
 
-        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
+        if (previousState is SelectionPreviewState && nextState is NormalCursorState)
+        {
+            _sessionProvider.Update(previousState.Cancel(_sessionProvider.CurrentSession));
+            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
+            NotifyStateChanged();
+            return;
+        }
+        else
+        {
+            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
+        }
 
         if (CurrentBuffer.IsDrawing())
         {
             DrawingResult result = _drawableArea.DrawCancel(CurrentBuffer);
-            CurrentBuffer = result.PictureBuffer;
+            _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
             _drawableArea = result.DrawableArea;
         }
-        else
+        else if (previousState is not SelectionPreviewState)
         {
             ArgbColor newColor = _drawableArea.PickColor(CurrentBuffer.Fetch(), pos);
             colorPickedAction?.Invoke(newColor);
         }
-        SyncSelectionState(drawStyle);
         NotifyStateChanged();
     }
 
     public void PointerLeftButtonReleased(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, PenStyle penStyle, bool isShift, ReactiveCommand<Picture, Unit> internalUpdateCommand)
     {
-        CurrentBuffer = buffer;
         EnsureInteractionSession(CurrentBuffer, drawStyle);
         if (_interactionSession == null || CurrentBuffer == null) return;
 
-        var previous = CurrentBuffer.Previous;
+        var previousImage = CurrentBuffer.Previous;
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
         var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
         var currentArea = HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize);
@@ -189,19 +249,9 @@ public class InteractionCoordinator : IInteractionCoordinator
             internalUpdateCommand,
             internalUpdateCommand);
 
-        if (_interactionSession.SelectionState is DraggingState draggingState)
+        if (_interactionSession.SelectionState is DraggingState)
         {
-            var info = draggingState.GetSelectionPreviewInfo();
-            if (info != null)
-            {
-                var blendedPicture = CurrentBuffer.Previous.Blend(new DirectImageBlender(), info.Pixels, info.Position);
-                CurrentBuffer = CurrentBuffer.Reset(blendedPicture);
-            }
-
-            var originalArea = draggingState.GetOriginalArea();
             _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
-            SyncSelectionState(drawStyle);
-            Drew?.Invoke(previous, CurrentBuffer.Previous, originalArea, SelectingArea);
             NotifyStateChanged();
             return;
         }
@@ -210,60 +260,63 @@ public class InteractionCoordinator : IInteractionCoordinator
 
         if (CurrentBuffer.IsDrawing())
         {
-            Picture previousImage = CurrentBuffer.Previous;
             DrawingResult result = _drawableArea.DrawEnd(drawStyle, penStyle, CurrentBuffer, pos, isShift);
-            CurrentBuffer = result.PictureBuffer;
+            _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
             _drawableArea = result.DrawableArea;
             _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
-            SyncSelectionState(drawStyle);
             Drew?.Invoke(previousImage, CurrentBuffer.Previous, _operationInitialSelectingArea, SelectingArea);
-        }
-        else
-        {
-            SyncSelectionState(drawStyle);
         }
         NotifyStateChanged();
     }
 
     public void CanvasLeave(DrawingBuffer buffer)
     {
-        CurrentBuffer = buffer;
         _drawableArea = _drawableArea.Leave(CurrentBuffer);
         NotifyStateChanged();
+    }
+
+    public void CommitSelection()
+    {
+        if (_interactionSession?.SelectionState != null)
+        {
+            var nextSession = _interactionSession.SelectionState.Commit(_sessionProvider.CurrentSession);
+            if (nextSession != _sessionProvider.CurrentSession)
+            {
+                _sessionProvider.Update(nextSession);
+                _interactionSession = new CanvasInteractionSession(CurrentBuffer, _interactionSession.DrawStyle, new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), new PictureSize(16, 16))));
+                NotifyStateChanged();
+            }
+        }
     }
 
     public void SetupRegionSelector(RegionSelector tool, DrawingBuffer buffer, bool isAnimationMode, PictureSize gridSize)
     {
         tool.OnDrawStart += (sender, args) =>
         {
-            IsRegionSelecting = false;
+            _manualSelectingArea = null;
             var currentArea = HalfBoxArea.Create(args.Start, gridSize);
-            _interactionSession = new CanvasInteractionSession(buffer, tool, new NormalCursorState(currentArea));
+            _interactionSession = new CanvasInteractionSession(CurrentBuffer, tool, new NormalCursorState(currentArea));
             NotifyStateChanged();
         };
         tool.OnDrawing += (sender, args) =>
         {
-            SelectingArea = PictureArea.FromPosition(args.Start, args.Now, buffer.Previous.Size);
-            IsRegionSelecting = true;
+            _manualSelectingArea = PictureArea.FromPosition(args.Start, args.Now, CurrentBuffer.Previous.Size);
             NotifyStateChanged();
         };
         tool.OnDrawEnd += (sender, args) =>
         {
-            SelectingArea = PictureArea.FromPosition(args.Start, args.Now, buffer.Previous.Size);
-            IsRegionSelecting = true;
-            _interactionSession = new CanvasInteractionSession(buffer, tool, new SelectedState(new Selection(SelectingArea.Value)));
+            _manualSelectingArea = null;
+            _interactionSession = new CanvasInteractionSession(CurrentBuffer, tool, new SelectedState(new Selection(PictureArea.FromPosition(args.Start, args.Now, CurrentBuffer.Previous.Size))));
             NotifyStateChanged();
         };
     }
 
     public void PasteImage(Picture picture, DrawingBuffer buffer, IDrawStyle drawStyle)
     {
-        CurrentBuffer = buffer;
         var position = new Position(0, 0);
-        var state = new FloatingSelectionState(picture, position, buffer.Previous);
-        _interactionSession = new CanvasInteractionSession(buffer, drawStyle, state);
+        var state = new FloatingSelectionState(picture, position, CurrentBuffer.Previous);
+        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, state);
         
-        SyncSelectionState(drawStyle);
         NotifyStateChanged();
     }
 
@@ -279,32 +332,5 @@ public class InteractionCoordinator : IInteractionCoordinator
             picture = picture.Blend(new DirectImageBlender(), magnifiedPreview, magnifiedPosition);
         }
         return picture;
-    }
-
-    private void SyncSelectionState(IDrawStyle drawStyle)
-    {
-        if (_interactionSession == null) return;
-
-        var area = _interactionSession.SelectionState?.GetSelectingArea();
-        if (area.HasValue && drawStyle is RegionSelector)
-        {
-            SelectingArea = area.Value;
-            IsRegionSelecting = true;
-        }
-        else if (drawStyle is not RegionSelector)
-        {
-            IsRegionSelecting = false;
-        }
-
-        var info = _interactionSession.SelectionState?.GetSelectionPreviewInfo();
-        if (info != null)
-        {
-            PreviewPixels = info.Pixels;
-            PreviewPosition = info.Position;
-        }
-        else
-        {
-            PreviewPixels = null;
-        }
     }
 }

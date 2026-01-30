@@ -92,4 +92,14 @@ public class RegionSelectingState : ISelectionState
         int remainder = value % gridSize;
         return value - remainder;
     }
+
+    public DrawingSession Commit(DrawingSession session)
+    {
+        return session;
+    }
+
+    public DrawingSession Cancel(DrawingSession session)
+    {
+        return session;
+    }
 }

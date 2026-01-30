@@ -47,7 +47,7 @@ public class DrawableCanvasCharacterizationTests
         _copySelectionUseCase = new CopySelectionUseCase(_clipboardServiceMock.Object);
         _cutSelectionUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
         _pasteFromClipboardUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object);
-        _coordinator = new InteractionCoordinator();
+        _coordinator = new InteractionCoordinator(_drawingSessionProvider);
     }
 
     private DrawableCanvasViewModel CreateViewModel()

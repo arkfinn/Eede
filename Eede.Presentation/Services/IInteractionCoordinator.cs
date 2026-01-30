@@ -26,6 +26,7 @@ public interface IInteractionCoordinator
 
     // 描画
     Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);
+    void CommitSelection();
 
     // 状態取得 (ViewModelがバインドするもの)
     DrawingBuffer CurrentBuffer { get; }

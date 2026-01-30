@@ -16,7 +16,8 @@ When creating a new track (`spec.md`, `plan.md`), the AI Agent MUST follow these
 4. **High Code Coverage:** Aim for >80% code coverage for all modules
 5. **User Experience First:** Every decision should prioritize user experience
 6. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
-7. **Vertical Slices:** Plan phases as end-to-end functional increments (Vertical Slices) rather than horizontal technical layers. Each phase should deliver usable value that can be verified by the user.
+7. **Build Failure Awareness:** `dotnet build` が失敗した場合、古いバイナリが残っているためテスト結果が正しく反映されないことがあります。実行前に必ず Exit Code を確認し、疑わしい場合は `dotnet clean` を実行してください。
+8. **Vertical Slices:** Plan phases as end-to-end functional increments (Vertical Slices) rather than horizontal technical layers. Each phase should deliver usable value that can be verified by the user.
 8. **Language Protocol:** All Conductor artifacts (`spec.md`, `plan.md`, `metadata.json` descriptions, etc.) MUST be written in Japanese to ensure clear communication with the project stakeholders.
 
 ## Task Workflow

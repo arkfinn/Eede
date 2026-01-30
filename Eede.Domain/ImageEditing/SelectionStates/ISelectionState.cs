@@ -5,8 +5,6 @@ using System.Windows.Input;
 
 namespace Eede.Domain.ImageEditing.SelectionStates;
 
-public record SelectionPreviewInfo(Picture Pixels, Position Position);
-
 public interface ISelectionState
 {
     ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction);
@@ -17,6 +15,9 @@ public interface ISelectionState
     SelectionPreviewInfo? GetSelectionPreviewInfo();
     SelectionCursor GetCursor(Position mousePosition);
     PictureArea? GetSelectingArea();
+
+    DrawingSession Commit(DrawingSession session);
+    DrawingSession Cancel(DrawingSession session);
 }
 
 public enum SelectionCursor

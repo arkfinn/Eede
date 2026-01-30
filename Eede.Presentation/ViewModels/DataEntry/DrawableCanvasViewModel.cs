@@ -151,6 +151,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         _ = this.WhenAnyValue(x => x.DrawStyle)
             .Subscribe(x =>
             {
+                _coordinator.CommitSelection();
                 if (x is RegionSelector selector)
                 {
                     SetupRegionSelector(selector);

@@ -21,8 +21,7 @@ public class SelectedState : ISelectionState
         {
             var picture = getPicture();
             var cutPicture = picture.CutOut(_selection.Area);
-            var nextPicture = picture.Clear(_selection.Area);
-            updateAction?.Execute(nextPicture);
+            // Coordinator側でBufferを更新するため、ここではupdateActionを呼ばない
             return new DraggingState(cutPicture, _selection.Area, mousePosition);
         }
         return new NormalCursorState(cursorArea);
@@ -63,5 +62,15 @@ public class SelectedState : ISelectionState
     public PictureArea? GetSelectingArea()
     {
         return _selection.Area;
+    }
+
+    public DrawingSession Commit(DrawingSession session)
+    {
+        return session;
+    }
+
+    public DrawingSession Cancel(DrawingSession session)
+    {
+        return session;
     }
 }

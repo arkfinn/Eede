@@ -59,4 +59,14 @@ public class NormalCursorState : ISelectionState
     {
         return null;
     }
+
+    public DrawingSession Commit(DrawingSession session)
+    {
+        return session;
+    }
+
+    public DrawingSession Cancel(DrawingSession session)
+    {
+        return session;
+    }
 }

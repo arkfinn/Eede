@@ -12,33 +12,52 @@ namespace Eede.Domain.ImageEditing
     /// </summary>
     public sealed record DrawingSession
     {
-        private readonly DrawingBuffer Buffer;
+        public readonly DrawingBuffer Buffer;
         private readonly PictureArea? SelectingArea;
+        private readonly SelectionPreviewInfo? PreviewContent;
         private readonly ImmutableStack<IHistoryItem> UndoStack;
         private readonly ImmutableStack<IHistoryItem> RedoStack;
 
         public DrawingSession(Picture initialPicture, PictureArea? initialArea = null)
-            : this(new DrawingBuffer(initialPicture), initialArea, ImmutableStack<IHistoryItem>.Empty, ImmutableStack<IHistoryItem>.Empty)
+            : this(new DrawingBuffer(initialPicture), initialArea, null, ImmutableStack<IHistoryItem>.Empty, ImmutableStack<IHistoryItem>.Empty)
         {
         }
 
-        private DrawingSession(DrawingBuffer buffer, PictureArea? selectingArea, ImmutableStack<IHistoryItem> undoStack, ImmutableStack<IHistoryItem> redoStack)
+        private DrawingSession(DrawingBuffer buffer, PictureArea? selectingArea, SelectionPreviewInfo? previewContent, ImmutableStack<IHistoryItem> undoStack, ImmutableStack<IHistoryItem> redoStack)
         {
             Buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
             SelectingArea = selectingArea;
+            PreviewContent = previewContent;
             UndoStack = undoStack ?? throw new ArgumentNullException(nameof(undoStack));
             RedoStack = redoStack ?? throw new ArgumentNullException(nameof(redoStack));
         }
 
         /// <summary>
         /// 現在の（表示すべき）画像データを取得する。
+        /// プレビュー中の画像がある場合は合成して返す。
         /// </summary>
-        public Picture CurrentPicture => Buffer.Fetch();
+        public Picture CurrentPicture
+        {
+            get
+            {
+                var picture = Buffer.Fetch();
+                if (PreviewContent != null)
+                {
+                    return picture.Blend(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), PreviewContent.Pixels, PreviewContent.Position);
+                }
+                return picture;
+            }
+        }
 
         /// <summary>
         /// 現在の選択範囲を取得する。
         /// </summary>
         public PictureArea? CurrentSelectingArea => SelectingArea;
+
+        /// <summary>
+        /// 現在のプレビュー画像情報を取得する。
+        /// </summary>
+        public SelectionPreviewInfo? CurrentPreviewContent => PreviewContent;
 
         /// <summary>
         /// 履歴として保存されている直近の画像データを取得する。
@@ -52,7 +71,31 @@ namespace Eede.Domain.ImageEditing
         /// </summary>
         public DrawingSession UpdateDrawing(Picture drawing)
         {
-            return new DrawingSession(Buffer.UpdateDrawing(drawing), SelectingArea, UndoStack, RedoStack);
+            return new DrawingSession(Buffer.UpdateDrawing(drawing), SelectingArea, PreviewContent, UndoStack, RedoStack);
+        }
+
+        /// <summary>
+        /// プレビュー画像の状態を更新する。履歴には追加されない。
+        /// </summary>
+        public DrawingSession UpdatePreviewContent(SelectionPreviewInfo? previewContent)
+        {
+            return new DrawingSession(Buffer, SelectingArea, previewContent, UndoStack, RedoStack);
+        }
+
+        /// <summary>
+        /// 現在の描画バッファを直接差し替える。履歴には追加しない。
+        /// </summary>
+        public DrawingSession UpdateBuffer(DrawingBuffer buffer)
+        {
+            return new DrawingSession(buffer, SelectingArea, PreviewContent, UndoStack, RedoStack);
+        }
+
+        /// <summary>
+        /// 現在の画像を差し替える。履歴には追加しない。
+        /// </summary>
+        public DrawingSession ReplacePicture(Picture picture)
+        {
+            return new DrawingSession(Buffer.Reset(picture), SelectingArea, PreviewContent, UndoStack, RedoStack);
         }
 
         /// <summary>
@@ -60,7 +103,7 @@ namespace Eede.Domain.ImageEditing
         /// </summary>
         public DrawingSession CancelDrawing()
         {
-            return new DrawingSession(Buffer.CancelDrawing(), SelectingArea, UndoStack, RedoStack);
+            return new DrawingSession(Buffer.CancelDrawing(), SelectingArea, PreviewContent, UndoStack, RedoStack);
         }
 
         /// <summary>
@@ -69,10 +112,11 @@ namespace Eede.Domain.ImageEditing
         public DrawingSession Push(Picture nextPicture, PictureArea? nextArea = null, PictureArea? previousArea = null)
         {
             var areaToStore = previousArea ?? SelectingArea;
-            if (nextPicture == Buffer.Previous && nextArea == SelectingArea && !IsDrawing()) return this;
+            if (nextPicture == Buffer.Previous && nextArea == SelectingArea && !IsDrawing() && PreviewContent == null) return this;
             return new DrawingSession(
                 new DrawingBuffer(nextPicture),
                 nextArea,
+                null,
                 UndoStack.Push(new CanvasHistoryItem(Buffer.Previous, areaToStore)),
                 ImmutableStack<IHistoryItem>.Empty);
         }
@@ -82,6 +126,7 @@ namespace Eede.Domain.ImageEditing
             return new DrawingSession(
                 Buffer,
                 SelectingArea,
+                PreviewContent,
                 UndoStack.Push(new DockActiveHistoryItem(dockId, position, before, after)),
                 ImmutableStack<IHistoryItem>.Empty);
         }
@@ -91,7 +136,7 @@ namespace Eede.Domain.ImageEditing
         /// </summary>
         public DrawingSession UpdateSelectingArea(PictureArea? area)
         {
-            return new DrawingSession(Buffer, area, UndoStack, RedoStack);
+            return new DrawingSession(Buffer, area, PreviewContent, UndoStack, RedoStack);
         }
 
         public UndoResult Undo()
@@ -105,6 +150,7 @@ namespace Eede.Domain.ImageEditing
                 var nextSession = new DrawingSession(
                     new DrawingBuffer(canvasItem.Picture),
                     canvasItem.SelectingArea,
+                    null,
                     newUndoStack,
                     RedoStack.Push(new CanvasHistoryItem(Buffer.Previous, SelectingArea)));
                 return new UndoResult(nextSession, canvasItem);
@@ -116,6 +162,7 @@ namespace Eede.Domain.ImageEditing
                 var nextSession = new DrawingSession(
                     Buffer,
                     SelectingArea,
+                    PreviewContent,
                     newUndoStack,
                     RedoStack.Push(dockItem));
                 return new UndoResult(nextSession, dockItem);
@@ -135,6 +182,7 @@ namespace Eede.Domain.ImageEditing
                 var nextSession = new DrawingSession(
                     new DrawingBuffer(canvasItem.Picture),
                     canvasItem.SelectingArea,
+                    null,
                     UndoStack.Push(new CanvasHistoryItem(Buffer.Previous, SelectingArea)),
                     newRedoStack);
                 return new RedoResult(nextSession, canvasItem);
@@ -144,6 +192,7 @@ namespace Eede.Domain.ImageEditing
                 var nextSession = new DrawingSession(
                     Buffer,
                     SelectingArea,
+                    PreviewContent,
                     UndoStack.Push(dockItem),
                     newRedoStack);
                 return new RedoResult(nextSession, dockItem);

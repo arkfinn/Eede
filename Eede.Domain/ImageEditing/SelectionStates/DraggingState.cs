@@ -28,10 +28,10 @@ public class DraggingState : ISelectionState
 
     public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand? picturePushAction, ICommand? pictureUpdateAction)
     {
-        var nextArea = GetSelectingArea();
-        if (nextArea.HasValue)
+        var info = GetSelectionPreviewInfo();
+        if (info != null)
         {
-            return new SelectedState(new Selection(nextArea.Value));
+            return new SelectionPreviewState(_pixels, info.Position);
         }
         return new NormalCursorState(cursorArea);
     }
@@ -73,5 +73,15 @@ public class DraggingState : ISelectionState
     public PictureArea GetOriginalArea()
     {
         return _originalArea;
+    }
+
+    public DrawingSession Commit(DrawingSession session)
+    {
+        return session;
+    }
+
+    public DrawingSession Cancel(DrawingSession session)
+    {
+        return session;
     }
 }

@@ -8,4 +8,4 @@ public interface IHistoryItem
 
 public record CanvasHistoryItem(Picture Picture, PictureArea? SelectingArea) : IHistoryItem;
 
-public record DockActiveHistoryItem(string DockId, Position Position, Picture Picture) : IHistoryItem;
+public record DockActiveHistoryItem(string DockId, Position Position, Picture Before, Picture After) : IHistoryItem;

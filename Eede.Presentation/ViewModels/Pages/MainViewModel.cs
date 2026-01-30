@@ -304,7 +304,7 @@ public class MainViewModel : ViewModelBase
             var vm = Pictures.FirstOrDefault(x => x.Id == dockItem.DockId);
             if (vm != null)
             {
-                vm.PictureBuffer = dockItem.Picture;
+                vm.PictureBuffer = dockItem.Before;
             }
         }
     }
@@ -316,7 +316,7 @@ public class MainViewModel : ViewModelBase
             var vm = Pictures.FirstOrDefault(x => x.Id == dockItem.DockId);
             if (vm != null)
             {
-                vm.PictureBuffer = dockItem.Picture;
+                vm.PictureBuffer = dockItem.After;
             }
         }
     }
@@ -515,13 +515,13 @@ public class MainViewModel : ViewModelBase
             return;
         }
 
-        DrawingSessionViewModel.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer);
-
         Picture updated = _transferImageFromCanvasUseCase.Execute(
             vm.PictureBuffer,
             DrawableCanvasViewModel.PictureBuffer.Previous,
             args.Position,
             PullBlender);
+
+        DrawingSessionViewModel.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer, updated);
 
         vm.PictureBuffer = updated;
     }

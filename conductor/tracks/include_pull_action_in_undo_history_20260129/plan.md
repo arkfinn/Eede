@@ -43,4 +43,4 @@
 - [x] Task: ドックエリアに対するリドゥ（Redo）機能の不具合修正。 [cfa6694]
     - [x] `MainViewModel.OnRedone` または `DrawingSession.Redo` のロジック確認と修正。
     - [x] 統合テストに Redo の検証ケースを追加。
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Bug Fix' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Bug Fix' (Protocol in workflow.md) [checkpoint: 8db54e4]

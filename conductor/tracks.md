@@ -27,5 +27,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./tracks/service_extermination_20260131/](./tracks/service_extermination_20260131/)*
 ---
 
-- [~] **Track: 非破壊プレビュー付きコピー＆ペーストの改善**
+- [x] **Track: 非破壊プレビュー付きコピー＆ペーストの改善**
 *Link: [./tracks/improve_paste_preview_20260201/](./tracks/improve_paste_preview_20260201/)*

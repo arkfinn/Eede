@@ -14,10 +14,10 @@
 ## フェーズ 2: Animation Service の解体 (ドメイン知識の返却)
 `AnimationService` をドメイン集約と UseCase に分割します。
 
-- [ ] Task: ドメイン層への `AnimationPatterns` 集約（ファーストクラスコレクション）の導入とテスト
-- [ ] Task: `AddAnimationPatternUseCase`, `RemoveAnimationPatternUseCase` 等の実装
-- [ ] Task: ViewModel で保持していた `IAnimationService` を UseCase と新しい状態管理に差し替え
-- [ ] Task: `AnimationService` クラスの削除
+- [x] Task: ドメイン層への `AnimationPatterns` 集約（ファーストクラスコレクション）の導入とテスト [checkpoint: b6b1ee7]
+- [x] Task: `AddAnimationPatternUseCase`, `RemoveAnimationPatternUseCase` 等の実装
+- [x] Task: ViewModel で保持していた `IAnimationService` を UseCase と新しい状態管理に差し替え
+- [x] Task: `AnimationService` クラスの削除
 - [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## フェーズ 3: Canvas Background の整理 (Humble ViewModel 化)

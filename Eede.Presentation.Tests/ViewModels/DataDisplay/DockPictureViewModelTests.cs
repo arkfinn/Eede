@@ -1,4 +1,4 @@
-﻿using Eede.Application.Animations;
+using Eede.Application.Animations;
 using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Animations;
@@ -9,6 +9,7 @@ using Eede.Presentation.Files;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
+using Eede.Application.UseCase.Animations;
 using Eede.Presentation.Common.Services;
 using Eede.Presentation.Common.Models;
 using Eede.Presentation.Common.Adapters;
@@ -28,8 +29,6 @@ namespace Eede.Presentation.Tests.ViewModels.DataDisplay;
 public class DockPictureViewModelTests
 {
     private GlobalState _globalState;
-    private Mock<IAnimationService> _mockAnimationService;
-    private Mock<IFileSystem> _mockFileSystem;
     private AnimationViewModel _animationViewModel;
     private Mock<IPictureRepository> _mockPictureRepository;
     private SavePictureUseCase _savePictureUseCase;
@@ -39,12 +38,14 @@ public class DockPictureViewModelTests
     public void Setup()
     {
         _globalState = new GlobalState();
-        _mockAnimationService = new Mock<IAnimationService>();
-        _mockAnimationService.Setup(s => s.Patterns).Returns(new System.Collections.Generic.List<AnimationPattern>());
-        _mockFileSystem = new Mock<IFileSystem>();
-        _animationViewModel = new AnimationViewModel(_mockAnimationService.Object, _mockFileSystem.Object);
+        var patternsProvider = new AnimationPatternsProvider();
+        _animationViewModel = new AnimationViewModel(
+            patternsProvider,
+            new AddAnimationPatternUseCase(patternsProvider),
+            new ReplaceAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider),
+            new Mock<IFileSystem>().Object);
         _mockPictureRepository = new Mock<IPictureRepository>();
-        var bitmapAdapter = new AvaloniaBitmapAdapter();
         _savePictureUseCase = new SavePictureUseCase(_mockPictureRepository.Object);
         _loadPictureUseCase = new LoadPictureUseCase(_mockPictureRepository.Object);
     }

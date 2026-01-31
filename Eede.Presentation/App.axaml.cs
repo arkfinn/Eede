@@ -18,6 +18,7 @@ using Eede.Presentation.Files;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Application.Drawings;
 using Eede.Application.UseCase.Pictures;
+using Eede.Application.UseCase.Animations;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.DataDisplay;
 using System;
@@ -55,7 +56,6 @@ public partial class App : Avalonia.Application
     {
         // Core/Domain/Application Services
         services.AddSingleton<GlobalState>();
-        services.AddSingleton<IAnimationService, AnimationService>();
         services.AddSingleton<IClipboard, AvaloniaClipboardService>();
         services.AddTransient<IFileStorage>(sp =>
         {
@@ -72,6 +72,11 @@ public partial class App : Avalonia.Application
         services.AddTransient<CopySelectionUseCase>();
         services.AddTransient<CutSelectionUseCase>();
         services.AddTransient<PasteFromClipboardUseCase>();
+
+        services.AddSingleton<IAnimationPatternsProvider, AnimationPatternsProvider>();
+        services.AddTransient<AddAnimationPatternUseCase>();
+        services.AddTransient<ReplaceAnimationPatternUseCase>();
+        services.AddTransient<RemoveAnimationPatternUseCase>();
 
         // Adapters / Infrastructure
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();

@@ -100,10 +100,29 @@ namespace Eede.Domain.ImageEditing
 
         /// <summary>
         /// 描画をキャンセルし、描画開始前の状態に戻す。
+        /// プレビュー中の画像がある場合も破棄する。
         /// </summary>
         public DrawingSession CancelDrawing()
         {
-            return new DrawingSession(Buffer.CancelDrawing(), SelectingArea, PreviewContent, UndoStack, RedoStack);
+            return new DrawingSession(Buffer.CancelDrawing(), SelectingArea, null, UndoStack, RedoStack);
+        }
+
+        /// <summary>
+        /// 貼り付け画像をプレビューとして受け入れる。
+        /// </summary>
+        public DrawingSession PushPastePreview(Picture pixels, Position position)
+        {
+            return UpdatePreviewContent(new SelectionPreviewInfo(pixels, position, SelectionPreviewType.Paste));
+        }
+
+        /// <summary>
+        /// 現在のプレビュー状態を確定させ、履歴に追加する。
+        /// </summary>
+        public DrawingSession CommitPreview()
+        {
+            if (PreviewContent == null) return this;
+
+            return Push(CurrentPicture, CurrentSelectingArea);
         }
 
         /// <summary>

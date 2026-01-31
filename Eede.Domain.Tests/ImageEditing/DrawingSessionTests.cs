@@ -109,4 +109,66 @@ public class DrawingSessionTests
             Assert.That(undoneSession.CurrentSelectingArea, Is.EqualTo(initialArea));
         });
     }
+
+    [Test]
+    public void DrawingSession_PastePreview_Workflow()
+    {
+        // Arrange: 最初の画像を描画して履歴を1つ作る
+        var initialSession = new DrawingSession(_initialPicture);
+        var secondPicture = Picture.CreateEmpty(_size); // 異なる内容
+        var session = initialSession.Push(secondPicture);
+
+        var pastedPixels = Picture.CreateEmpty(new PictureSize(10, 10));
+        var position = new Position(5, 5);
+
+        // Act: ペーストプレビュー開始
+        var previewSession = session.PushPastePreview(pastedPixels, position);
+
+        // Assert: プレビュー状態の確認
+        Assert.Multiple(() =>
+        {
+            Assert.That(previewSession.CurrentPreviewContent, Is.Not.Null);
+            Assert.That(previewSession.CurrentPreviewContent.Pixels, Is.EqualTo(pastedPixels));
+            Assert.That(previewSession.CurrentPreviewContent.Type, Is.EqualTo(SelectionPreviewType.Paste));
+            Assert.That(previewSession.CanUndo(), Is.True, "Should be able to undo paste preview when history exists");
+        });
+
+        // Act: 確定（Commit）
+        var committedSession = previewSession.CommitPreview();
+
+        // Assert: 確定後の状態確認
+        Assert.Multiple(() =>
+        {
+            Assert.That(committedSession.CurrentPreviewContent, Is.Null);
+            Assert.That(committedSession.CanUndo(), Is.True);
+        });
+
+        // Act: Undo (ペースト確定後の Undo)
+        var undoneSession = committedSession.Undo().Session;
+        Assert.That(undoneSession.CurrentPicture, Is.EqualTo(secondPicture));
+
+        // Act: Undo (ペーストプレビュー中の Undo シナリオを模倣)
+        // プレビュー状態から直接 Undo した場合、PreviewContent が消えて secondPicture に戻るはず
+        var undoneFromPreviewSession = previewSession.Undo().Session;
+        Assert.That(undoneFromPreviewSession.CurrentPicture, Is.EqualTo(_initialPicture));
+        Assert.That(undoneFromPreviewSession.CurrentPreviewContent, Is.Null, "Undo during preview should clear preview content");
+    }
+
+    [Test]
+    public void DrawingSession_PastePreview_Cancel()
+    {
+        // Arrange
+        var session = new DrawingSession(_initialPicture);
+        var pastedPixels = Picture.CreateEmpty(new PictureSize(10, 10));
+
+        // Act: プレビュー開始 -> キャンセル
+        var canceledSession = session.PushPastePreview(pastedPixels, new Position(0, 0)).CancelDrawing();
+
+        // Assert: 元に戻っていること
+        Assert.Multiple(() =>
+        {
+            Assert.That(canceledSession.CurrentPreviewContent, Is.Null);
+            Assert.That(canceledSession.CurrentPicture, Is.EqualTo(_initialPicture));
+        });
+    }
 }

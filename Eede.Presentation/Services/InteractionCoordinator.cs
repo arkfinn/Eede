@@ -114,6 +114,13 @@ public class InteractionCoordinator : IInteractionCoordinator
         _operationInitialSelectingArea = SelectingArea;
         
         var previousState = _interactionSession.SelectionState;
+
+        // プレビュー状態中に別のツールで描画を開始しようとした場合、確定する
+        if (previousState is SelectionPreviewState && drawStyle is not RegionSelector)
+        {
+            _sessionProvider.Update(previousState.Commit(_sessionProvider.CurrentSession));
+        }
+
         _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, previousState);
         UpdateCursor(pos);
 

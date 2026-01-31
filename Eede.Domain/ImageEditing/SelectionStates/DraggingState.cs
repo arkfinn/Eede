@@ -56,7 +56,7 @@ public class DraggingState : ISelectionState
     {
         var offset = new Position(_nowPosition.X - _startPosition.X, _nowPosition.Y - _startPosition.Y);
         var nextPosition = new Position(_originalArea.X + offset.X, _originalArea.Y + offset.Y);
-        return new SelectionPreviewInfo(_pixels, nextPosition);
+        return new SelectionPreviewInfo(_pixels, nextPosition, SelectionPreviewType.CutAndMove, _originalArea);
     }
 
     public SelectionCursor GetCursor(Position mousePosition)

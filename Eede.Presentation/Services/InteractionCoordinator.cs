@@ -147,13 +147,6 @@ public class InteractionCoordinator : IInteractionCoordinator
 
         if (_interactionSession.SelectionState is DraggingState draggingState)
         {
-            if (previousState is not SelectionPreviewState)
-            {
-                var originalArea = draggingState.GetOriginalArea();
-                var cutPicture = CurrentBuffer.Previous.Clear(originalArea);
-                _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateDrawing(cutPicture));
-            }
-
             _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
             _drawableArea = _drawableArea.Leave(CurrentBuffer);
             NotifyStateChanged();
@@ -183,6 +176,8 @@ public class InteractionCoordinator : IInteractionCoordinator
             true,
             canvasCoordinate.ToPosition(),
             CurrentBuffer.Previous.Size);
+
+        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
 
         if (_interactionSession.SelectionState is DraggingState or SelectionPreviewState)
         {
@@ -303,6 +298,11 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public void SyncWithSession()
     {
+        if (_interactionSession?.SelectionState is DraggingState)
+        {
+            return;
+        }
+
         var session = _sessionProvider.CurrentSession;
         if (session.CurrentPreviewContent != null)
         {

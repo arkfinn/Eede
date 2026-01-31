@@ -23,4 +23,5 @@ public enum SelectionPreviewType
 /// <param name="Pixels">プレビュー画像データ</param>
 /// <param name="Position">キャンバス上の位置</param>
 /// <param name="Type">プレビューの種類</param>
-public record SelectionPreviewInfo(Picture Pixels, Position Position, SelectionPreviewType Type = SelectionPreviewType.CutAndMove);
+/// <param name="OriginalArea">切り取り元の範囲（CutAndMoveの場合に使用）</param>
+public record SelectionPreviewInfo(Picture Pixels, Position Position, SelectionPreviewType Type = SelectionPreviewType.CutAndMove, PictureArea? OriginalArea = null);

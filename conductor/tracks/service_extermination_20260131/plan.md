@@ -25,9 +25,9 @@
 
 - [x] Task: ドメイン層への `CanvasBackgroundStyle` Value Object の導入
 - [~] Task: `BackgroundCalculator` の抽出とユニットテスト
-- [ ] Task: Presentation 層（View/Painter）への背景描画ロジックの移動
-- [ ] Task: `ICanvasBackgroundService` の廃止と Application 層からの `System.Drawing` 依存の削除
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: Presentation 層（View/Painter）への背景描画ロジックの移動
+- [x] Task: `ICanvasBackgroundService` の廃止と Application 層からの `System.Drawing` 依存の削除
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) [checkpoint: e1e7ba8]
 
 ## フェーズ 4: 仕上げとクリーンアップ
 残ったサービスの整理と、ディレクトリ構造の最終調整を行います。

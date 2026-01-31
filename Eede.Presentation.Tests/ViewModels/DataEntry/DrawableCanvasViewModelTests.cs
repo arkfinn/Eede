@@ -48,7 +48,8 @@ public class DrawableCanvasViewModelTests
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
         _copySelectionUseCaseMock = new Mock<CopySelectionUseCase>(_clipboardServiceMock.Object);
         _cutSelectionUseCaseMock = new Mock<CutSelectionUseCase>(_clipboardServiceMock.Object);
-        _pasteFromClipboardUseCaseMock = new Mock<PasteFromClipboardUseCase>(_clipboardServiceMock.Object);
+        _pasteFromClipboardUseCaseMock = new Mock<PasteFromClipboardUseCase>(_clipboardServiceMock.Object, _drawingSessionProviderMock.Object);
+        _pasteFromClipboardUseCaseMock.Setup(x => x.ExecuteAsync()).Returns(Task.CompletedTask);
         _interactionCoordinatorMock = new Mock<IInteractionCoordinator>();
         _globalState = new GlobalState();
     }

@@ -1,5 +1,7 @@
 using Eede.Application.Infrastructure;
+using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
+using Eede.Domain.SharedKernel;
 using System.Threading.Tasks;
 
 namespace Eede.Application.UseCase.Pictures;
@@ -7,14 +9,20 @@ namespace Eede.Application.UseCase.Pictures;
 public class PasteFromClipboardUseCase
 {
     private readonly IClipboard _clipboard;
+    private readonly IDrawingSessionProvider _drawingSessionProvider;
 
-    public PasteFromClipboardUseCase(IClipboard clipboard)
+    public PasteFromClipboardUseCase(IClipboard clipboard, IDrawingSessionProvider drawingSessionProvider)
     {
         _clipboard = clipboard;
+        _drawingSessionProvider = drawingSessionProvider;
     }
 
-    public async Task<Picture> ExecuteAsync()
+    public virtual async Task ExecuteAsync()
     {
-        return await _clipboard.GetPictureAsync();
+        var picture = await _clipboard.GetPictureAsync();
+        if (picture == null) return;
+
+        var nextSession = _drawingSessionProvider.CurrentSession.PushPastePreview(picture, new Position(0, 0));
+        _drawingSessionProvider.Update(nextSession);
     }
 }

@@ -73,7 +73,8 @@ public class MainViewModelCharacterizationTests
             Mock.Of<IDrawingSessionProvider>(),
             new CopySelectionUseCase(Mock.Of<IClipboard>()),
             new CutSelectionUseCase(Mock.Of<IClipboard>()),
-            new PasteFromClipboardUseCase(Mock.Of<IClipboard>()),
+                            new PasteFromClipboardUseCase(Mock.Of<IClipboard>(), Mock.Of<IDrawingSessionProvider>()),
+            
             Mock.Of<IInteractionCoordinator>()
         );
                 var patternsProvider = new AnimationPatternsProvider();

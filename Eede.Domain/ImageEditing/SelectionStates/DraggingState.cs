@@ -31,7 +31,7 @@ public class DraggingState : ISelectionState
         var info = GetSelectionPreviewInfo();
         if (info != null)
         {
-            return new SelectionPreviewState(_pixels, info.Position);
+            return new SelectionPreviewState(info);
         }
         return new NormalCursorState(cursorArea);
     }

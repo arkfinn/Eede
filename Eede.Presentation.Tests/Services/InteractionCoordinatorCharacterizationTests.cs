@@ -53,7 +53,7 @@ public class InteractionCoordinatorCharacterizationTests
 
             _cutSelectionUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
 
-            _pasteFromClipboardUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object);
+            _pasteFromClipboardUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProvider);
 
             _coordinator = new InteractionCoordinator(_drawingSessionProvider); // provider 繧呈ｸ｡縺・
         }

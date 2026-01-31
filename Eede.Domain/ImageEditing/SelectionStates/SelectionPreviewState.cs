@@ -8,22 +8,20 @@ namespace Eede.Domain.ImageEditing.SelectionStates;
 
 public class SelectionPreviewState : ISelectionState
 {
-    private readonly Picture _pixels;
-    private readonly Position _position;
+    private readonly SelectionPreviewInfo _info;
 
-    public SelectionPreviewState(Picture pixels, Position position)
+    public SelectionPreviewState(SelectionPreviewInfo info)
     {
-        _pixels = pixels;
-        _position = position;
+        _info = info;
     }
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
     {
         // プレビュー範囲内をクリックしたら再ドラッグ開始
-        var currentArea = new PictureArea(_position, _pixels.Size);
+        var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);
         if (Contains(currentArea, mousePosition))
         {
-            return new DraggingState(_pixels, currentArea, mousePosition);
+            return new DraggingState(_info.Pixels, currentArea, mousePosition);
         }
 
         return new NormalCursorState(cursorArea);
@@ -59,34 +57,27 @@ public class SelectionPreviewState : ISelectionState
 
     public SelectionPreviewInfo? GetSelectionPreviewInfo()
     {
-        return new SelectionPreviewInfo(_pixels, _position);
+        return _info;
     }
 
     public SelectionCursor GetCursor(Position mousePosition)
     {
-        var currentArea = new PictureArea(_position, _pixels.Size);
+        var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);
         return Contains(currentArea, mousePosition) ? SelectionCursor.Move : SelectionCursor.Default;
     }
 
     public PictureArea? GetSelectingArea()
     {
-        return new PictureArea(_position, _pixels.Size);
+        return new PictureArea(_info.Position, _info.Pixels.Size);
     }
 
     public DrawingSession Commit(DrawingSession session)
     {
-        // プレビュー内容を確定する
-        // 現在のバッファ（穴あき状態）をベースにプレビュー画像を合成
-        var basePicture = session.CurrentPicture;
-        var blended = basePicture.Blend(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), _pixels, _position);
-        
-        // プレビューを消して、新しい画像を履歴に追加
-        return session.UpdatePreviewContent(null).Push(blended, GetSelectingArea());
+        return session.CommitPreview();
     }
 
     public DrawingSession Cancel(DrawingSession session)
     {
-        // 一時的な「穴あき」状態をキャンセルし、プレビューも破棄する
-        return session.CancelDrawing().UpdatePreviewContent(null);
+        return session.CancelDrawing();
     }
 }

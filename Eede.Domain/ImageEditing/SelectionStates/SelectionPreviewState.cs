@@ -73,11 +73,13 @@ public class SelectionPreviewState : ISelectionState
 
     public DrawingSession Commit(DrawingSession session)
     {
-        return session.CommitPreview();
+        // 自分が持っている最新の情報をセッションに反映してから確定する
+        return session.UpdatePreviewContent(_info).CommitPreview();
     }
 
     public DrawingSession Cancel(DrawingSession session)
     {
-        return session.CancelDrawing();
+        // プレビュー状態を反映した上でキャンセル（破棄）を実行する
+        return session.UpdatePreviewContent(_info).CancelDrawing();
     }
 }

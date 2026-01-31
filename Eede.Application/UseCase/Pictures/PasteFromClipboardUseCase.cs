@@ -22,7 +22,8 @@ public class PasteFromClipboardUseCase
         var picture = await _clipboard.GetPictureAsync();
         if (picture == null) return;
 
-        var nextSession = _drawingSessionProvider.CurrentSession.PushPastePreview(picture, new Position(0, 0));
+        var position = _drawingSessionProvider.CurrentSession.CurrentSelectingArea?.Position ?? new Position(0, 0);
+        var nextSession = _drawingSessionProvider.CurrentSession.PushPastePreview(picture, position);
         _drawingSessionProvider.Update(nextSession);
     }
 }

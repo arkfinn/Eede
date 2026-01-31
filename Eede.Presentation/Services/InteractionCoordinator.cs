@@ -258,6 +258,11 @@ public class InteractionCoordinator : IInteractionCoordinator
 
         if (_interactionSession.SelectionState is DraggingState)
         {
+            var info = nextState.GetSelectionPreviewInfo();
+            if (info != null)
+            {
+                _sessionProvider.Update(_sessionProvider.CurrentSession.UpdatePreviewContent(info));
+            }
             _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
             NotifyStateChanged();
             return;

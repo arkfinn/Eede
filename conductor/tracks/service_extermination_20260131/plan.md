@@ -18,7 +18,7 @@
 - [x] Task: `AddAnimationPatternUseCase`, `RemoveAnimationPatternUseCase` 等の実装
 - [x] Task: ViewModel で保持していた `IAnimationService` を UseCase と新しい状態管理に差し替え
 - [x] Task: `AnimationService` クラスの削除
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) [checkpoint: 72cb8f5]
 
 ## フェーズ 3: Canvas Background の整理 (Humble ViewModel 化)
 描画ロジックを View へ移動し、設定を Value Object 化します。

@@ -9,7 +9,7 @@
 - [x] Task: 現状の `AnimationService` と `CanvasBackgroundService` の挙動を固定する仕様化テストの作成 [72b1a2a]
 - [x] Task: `Eede.Application/Infrastructure` ディレクトリの作成と `IClipboard`, `IFileStorage` への名称変更・移動
 - [x] Task: `IClipboard` 等をラップする UseCase（`CopyImageUseCase` 等）の作成と ViewModel からの呼び出し置換
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [checkpoint: b6b1ee7]
 
 ## フェーズ 2: Animation Service の解体 (ドメイン知識の返却)
 `AnimationService` をドメイン集約と UseCase に分割します。

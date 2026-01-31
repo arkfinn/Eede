@@ -82,5 +82,59 @@ namespace Eede.Presentation.Tests
             // 3. DrawingSession の CurrentPicture は合成されていること
             Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.Not.EqualTo(_sessionProvider.CurrentSession.Buffer.Fetch()));
         }
+
+        [AvaloniaTest]
+        public async Task Paste_CommitByClickOutside_Test()
+        {
+            // Arrange: ペーストプレビュー状態
+            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
+            await _viewModel.PasteCommand.Execute().ToTask();
+
+            // Act: プレビュー範囲外をクリック
+            // プレビューは (0,0) にあるので、(20,20) をクリック
+            _viewModel.DrawBeginCommand.Execute(new Position(20, 20)).Subscribe();
+
+            // Assert: 確定されていること
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Preview should be committed");
+            // 履歴が1つ増えているはず（初期状態 + ペースト確定）
+            Assert.That(_sessionProvider.CurrentSession.CanUndo(), Is.True);
+        }
+
+        [AvaloniaTest]
+        public async Task Paste_CommitByToolChange_Test()
+        {
+            // Arrange: ペーストプレビュー状態 (RegionSelector)
+            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
+            _viewModel.DrawStyle = new RegionSelector();
+            await _viewModel.PasteCommand.Execute().ToTask();
+
+            // Act: ツールをペンツール（FreeCurve）に切り替え
+            _viewModel.DrawStyle = new FreeCurve();
+
+            // Assert: 確定されていること
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Preview should be committed on tool change");
+        }
+
+        [AvaloniaTest]
+        public async Task Paste_Undo_Test()
+        {
+            // Arrange: 何かを描いて履歴がある状態からペーストプレビュー
+            var initialPicture = _sessionProvider.CurrentSession.Buffer.Fetch();
+            var secondPicture = Picture.CreateEmpty(new PictureSize(32, 32));
+            _sessionProvider.Update(_sessionProvider.CurrentSession.Push(secondPicture));
+
+            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
+            await _viewModel.PasteCommand.Execute().ToTask();
+
+            // Act: Undo 実行
+            _sessionProvider.Update(_sessionProvider.CurrentSession.Undo().Session);
+
+            // Assert: ペースト前の状態に戻っていること
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Preview should be cleared by Undo");
+            Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.EqualTo(initialPicture), "Should return to initial picture");
+        }
     }
 }

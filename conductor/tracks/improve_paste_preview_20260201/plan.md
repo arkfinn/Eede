@@ -13,11 +13,11 @@
 - [x] Task: **蜿､蜈ｸ豢ｾ繝・せ繝医・螳溯｣・*: `DrawingSession` 縺ｫ蟇ｾ縺励※縲悟・蜉幢ｼ医ン繝・ヨ繝槭ャ繝暦ｼ峨ｒ荳弱∴縲∫憾諷具ｼ・reviewInfo・峨′豁｣縺励￥螟牙喧縺励∫｢ｺ螳壼ｾ後↓繧ｭ繝｣繝ｳ繝舌せ縺梧悄蠕・壹ｊ譖ｴ譁ｰ縺輔ｌ繧九阪％縺ｨ繧呈､懆ｨｼ縺吶ｋ繝・せ繝医ｒ菴懈・
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
-## 繝輔ぉ繝ｼ繧ｺ 2: 繧｢繝励Μ繧ｱ繝ｼ繧ｷ繝ｧ繝ｳ螻､縺ｮ逍守ｵ仙粋蛹厄ｼ・seCase 繝ｪ繝輔ぃ繧ｯ繧ｿ繝ｪ繝ｳ繧ｰ・・UseCase 繧ｯ繝ｩ繧ｹ繧・1 繧ｯ繝ｩ繧ｹ 1 繝｡繧ｽ繝・ラ縺ｮ蜴溷援縺ｫ蠕薙＞縲√ラ繝｡繧､繝ｳ繝ｭ繧ｸ繝・け縺ｮ蜻ｼ縺ｳ蜃ｺ縺励↓蟆ょｿｵ縺輔○縺ｾ縺吶・
+## 繝輔ぉ繝ｼ繧ｺ 2: 繧｢繝励Μ繧ｱ繝ｼ繧ｷ繝ｧ繝ｳ螻､縺ｮ逍守ｵ仙粋蛹厄ｼ・seCase 繝ｪ繝輔ぃ繧ｯ繧ｿ繝ｪ繝ｳ繧ｰ・・ [checkpoint: 6b6e91a] UseCase 繧ｯ繝ｩ繧ｹ繧・1 繧ｯ繝ｩ繧ｹ 1 繝｡繧ｽ繝・ラ縺ｮ蜴溷援縺ｫ蠕薙＞縲√ラ繝｡繧､繝ｳ繝ｭ繧ｸ繝・け縺ｮ蜻ｼ縺ｳ蜃ｺ縺励↓蟆ょｿｵ縺輔○縺ｾ縺吶・
 - [x] Task: `PasteUseCase` 縺ｮ菫ｮ豁｣
     - [x] 逶ｴ謗･縺ｮ `Draw` 蜻ｽ莉､繧呈賜髯､縺励～DrawingSession.PushPastePreview()` 縺ｮ蜻ｼ縺ｳ蜃ｺ縺励↓鄂ｮ縺肴鋤縺医ｋ
 - [x] Task: **邨ｱ蜷医ユ繧ｹ繝医・菫ｮ豁｣**: 繝輔ぉ繝ｼ繧ｺ 0 縺ｧ菴懈・縺励◆繝・せ繝医ｒ縲∵眠縺励＞莉墓ｧ假ｼ医・繝ｼ繧ｹ繝育峩蠕後・譛ｪ遒ｺ螳壹〒縺ゅｋ縺薙→・峨↓蜷合ｏ縺帙※譖ｴ譁ｰ縺励；reen 縺ｫ縺吶ｋ
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## 繝輔ぉ繝ｼ繧ｺ 3: 繝励Ξ繧ｼ繝ｳ繝・・繧ｷ繝ｧ繝ｳ螻､縺ｮ謨ｴ蜷茨ｼ郁・蜍慕｢ｺ螳壹→ UI 騾｣謳ｺ・・UI 蛛ｴ縺ｮ驛ｽ蜷医↓繧医ｋ縲檎｢ｺ螳壹ヨ繝ｪ繧ｬ繝ｼ縲阪ｒ縲√ラ繝｡繧､繝ｳ螻､縺ｮ `CommitPreview` 縺ｫ豁｣縺励￥蟋碑ｭｲ縺励∪縺吶・
 - [ ] Task: `DrawableCanvasViewModel` 縺ｮ謾ｹ蝟・    - [ ] 繝・・繝ｫ蛻・ｊ譖ｿ縺医∫ｯ・峇螟悶け繝ｪ繝・け遲峨・繧､繝吶Φ繝医ｒ `CommitPreview` 繝ｦ繝ｼ繧ｹ繧ｱ繝ｼ繧ｹ・医∪縺溘・譌｢蟄倥・遒ｺ螳壼・逅・ｼ峨∈驕ｩ蛻・↓荳ｭ邯吶☆繧九Ο繧ｸ繝・け繧貞ｮ溯｣・- [ ] Task: UI 迥ｶ諷九・蜷梧悄

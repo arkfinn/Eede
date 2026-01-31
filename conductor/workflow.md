@@ -1,5 +1,13 @@
 # Project Workflow
 
+## AI Agent Guidelines (For Conductor Track Creation)
+
+When creating a new track (`spec.md`, `plan.md`), the AI Agent MUST follow these steps:
+
+1.  **Expert Consultation:** Analyze the track type and requirements. Use `activate_skill` to summon relevant experts (e.g., `refactor-legacy-code`, `unit-test-architect`, `refactor-strict-ddd-onion-complete`).
+2.  **Integrate Expert Advice:** The generated `plan.md` MUST strictly adhere to the guidelines provided by the activated skills (e.g., Phase 0 as Safety Net for refactoring).
+3.  **Language Consistency:** All artifacts MUST be written in Japanese as per the Language Protocol.
+
 ## Guiding Principles
 
 1. **The Plan is the Source of Truth:** All work must be tracked in `plan.md`
@@ -9,6 +17,7 @@
 5. **User Experience First:** Every decision should prioritize user experience
 6. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
 7. **Vertical Slices:** Plan phases as end-to-end functional increments (Vertical Slices) rather than horizontal technical layers. Each phase should deliver usable value that can be verified by the user.
+8. **Language Protocol:** All Conductor artifacts (`spec.md`, `plan.md`, `metadata.json` descriptions, etc.) MUST be written in Japanese to ensure clear communication with the project stakeholders.
 
 ## Task Workflow
 

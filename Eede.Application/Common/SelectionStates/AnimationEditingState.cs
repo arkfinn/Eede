@@ -60,5 +60,10 @@ namespace Eede.Application.Common.SelectionStates
         {
             return SelectionCursor.Default;
         }
+
+        public PictureArea? GetSelectingArea()
+        {
+            return null;
+        }
     }
 }

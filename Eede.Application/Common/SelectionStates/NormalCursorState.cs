@@ -57,6 +57,11 @@ namespace Eede.Application.Common.SelectionStates
             return SelectionCursor.Default;
         }
 
+        public PictureArea? GetSelectingArea()
+        {
+            return null;
+        }
+
         private RegionSelectingState BeginRegionSelection(HalfBoxArea cursorArea, HalfBoxArea selectingArea)
         {
             return new RegionSelectingState(cursorArea, selectingArea);

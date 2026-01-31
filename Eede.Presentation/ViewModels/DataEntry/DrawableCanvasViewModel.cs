@@ -252,6 +252,17 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
 
+        var area = _selectionState?.GetSelectingArea();
+        if (area.HasValue)
+        {
+            SelectingArea = area.Value;
+            IsRegionSelecting = true;
+        }
+        else if (DrawStyle is not RegionSelector)
+        {
+            IsRegionSelecting = false;
+        }
+
         var info = _selectionState?.GetSelectionPreviewInfo();
         if (info != null)
         {
@@ -338,10 +349,8 @@ public class DrawableCanvasViewModel : ViewModelBase
             _gridSize,
             InternalUpdateCommand);
 
-        if (_selectionState is DraggingState && nextState is SelectedState selected)
+        if (_selectionState is DraggingState && nextState is SelectedState)
         {
-            SelectingArea = selected.Selection.Area;
-            IsRegionSelecting = true;
             _selectionState = nextState;
             UpdateImage();
             return;
@@ -420,10 +429,8 @@ public class DrawableCanvasViewModel : ViewModelBase
             null, // picturePushAction
             InternalUpdateCommand);
 
-        if (_selectionState is RegionSelectingState && nextState is SelectedState selected)
+        if (_selectionState is RegionSelectingState && nextState is SelectedState)
         {
-            SelectingArea = selected.Selection.Area;
-            IsRegionSelecting = true;
             _selectionState = nextState;
             UpdateImage();
             return;
@@ -431,9 +438,9 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         if (_selectionState is DraggingState)
         {
-            Drew?.Invoke(previous, PictureBuffer.Previous, previousArea, SelectingArea);
             _selectionState = nextState;
             UpdateImage();
+            Drew?.Invoke(previous, PictureBuffer.Previous, previousArea, SelectingArea);
             return;
         }
         _selectionState = nextState;

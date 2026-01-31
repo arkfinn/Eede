@@ -83,4 +83,9 @@ public class FloatingSelectionState : ISelectionState
     {
         return Contains(mousePosition) ? SelectionCursor.Move : SelectionCursor.Default;
     }
+
+    public PictureArea? GetSelectingArea()
+    {
+        return new PictureArea(_position, _pixels.Size);
+    }
 }

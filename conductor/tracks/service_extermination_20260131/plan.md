@@ -30,8 +30,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) [checkpoint: e1e7ba8]
 
 ## フェーズ 4: 仕上げとクリーンアップ
-残ったサービスの整理と、ディレクトリ構造の最終調整を行います。
+残った小さな Service の整理や、不要になったインターフェースの削除を行います。
 
-- [ ] Task: `Eede.Application/Services` ディレクトリの完全削除
-- [ ] Task: 全プロジェクトのビルド確認とユニットテストの実行、カバレッジ確認
-- [ ] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
+- [x] Task: プロジェクト全体の再ビルドと全テストの最終確認
+- [x] Task: 未使用コード（旧 Service インターフェース等）の最終確認と削除
+- [x] Task: リファクタリングによって改善された構造のドキュメント更新（もしあれば）

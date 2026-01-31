@@ -25,7 +25,7 @@
 - [x] Task: **UI 繧ｳ繝ｳ繝昴・繝阪Φ繝医ユ繧ｹ繝・*: Headless 迺ｰ蠅・ｒ菴ｿ逕ｨ縺励※縲√け繝ｪ繝・け謫堺ｽ懃ｭ峨〒豁｣縺励￥遒ｺ螳壼・逅・′襍ｰ繧九％縺ｨ繧呈､懆ｨｼ
 - [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
 
-## 繝輔ぉ繝ｼ繧ｺ 4: 譛邨ら噪縺ｪ謨ｴ蜷域ｧ遒ｺ隱阪→繧ｯ繝ｪ繝ｼ繝ｳ繧｢繝・・
+## 繝輔ぉ繝ｼ繧ｺ 4: 譛邨ら噪縺ｪ謨ｴ蜷域ｧ遒ｺ隱阪→繧ｯ繝ｪ繝ｼ繝ｳ繧｢繝・・ [checkpoint: 3e5e7fa]
 - [x] Task: Undo 1蝗槭〒繝壹・繧ｹ繝域桃菴懷・菴薙′繧ｭ繝｣繝ｳ繧ｻ繝ｫ縺輔ｌ縲√く繝｣繝ｳ繝舌せ縺梧ｱ壹ｌ縺ｦ縺・↑縺・％縺ｨ繧貞・遒ｺ隱・- [x] Task: **繝ｪ繝輔ぃ繧ｯ繧ｿ繝ｪ繝ｳ繧ｰ**: 繝励Ξ繝薙Η繝ｼ縺ｫ髢｢騾｣縺吶ｋ驥崎､・さ繝ｼ繝峨ｒ VO 繧・Entity 蜀・〒蜈ｱ騾壼喧縺励．RY 蜴溷援繧帝←逕ｨ
 - [x] Task: ドラッグ移動後の確定座標ズレ不具合の修正とペースト位置の改善
 - [x] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)

@@ -69,7 +69,7 @@ public class PictureContainerTests
         var mockPictureRepo = new Mock<IPictureRepository>();
         var copyUseCase = new CopySelectionUseCase(mockClipboard.Object);
         var cutUseCase = new CutSelectionUseCase(mockClipboard.Object);
-        var pasteUseCase = new PasteFromClipboardUseCase(mockClipboard.Object);
+        var pasteUseCase = new PasteFromClipboardUseCase(mockClipboard.Object, Mock.Of<IDrawingSessionProvider>());
         var saveUseCase = new SavePictureUseCase(mockPictureRepo.Object);
         var loadUseCase = new LoadPictureUseCase(mockPictureRepo.Object);
         var transformUseCase = new Mock<ITransformImageUseCase>();

@@ -14,9 +14,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## 繝輔ぉ繝ｼ繧ｺ 2: 繧｢繝励Μ繧ｱ繝ｼ繧ｷ繝ｧ繝ｳ螻､縺ｮ逍守ｵ仙粋蛹厄ｼ・seCase 繝ｪ繝輔ぃ繧ｯ繧ｿ繝ｪ繝ｳ繧ｰ・・UseCase 繧ｯ繝ｩ繧ｹ繧・1 繧ｯ繝ｩ繧ｹ 1 繝｡繧ｽ繝・ラ縺ｮ蜴溷援縺ｫ蠕薙＞縲√ラ繝｡繧､繝ｳ繝ｭ繧ｸ繝・け縺ｮ蜻ｼ縺ｳ蜃ｺ縺励↓蟆ょｿｵ縺輔○縺ｾ縺吶・
-- [ ] Task: `PasteUseCase` 縺ｮ菫ｮ豁｣
-    - [ ] 逶ｴ謗･縺ｮ `Draw` 蜻ｽ莉､繧呈賜髯､縺励～DrawingSession.PushPastePreview()` 縺ｮ蜻ｼ縺ｳ蜃ｺ縺励↓鄂ｮ縺肴鋤縺医ｋ
-- [ ] Task: **邨ｱ蜷医ユ繧ｹ繝医・菫ｮ豁｣**: 繝輔ぉ繝ｼ繧ｺ 0 縺ｧ菴懈・縺励◆繝・せ繝医ｒ縲∵眠縺励＞莉墓ｧ假ｼ医・繝ｼ繧ｹ繝育峩蠕後・譛ｪ遒ｺ螳壹〒縺ゅｋ縺薙→・峨↓蜷医ｏ縺帙※譖ｴ譁ｰ縺励；reen 縺ｫ縺吶ｋ
+- [x] Task: `PasteUseCase` 縺ｮ菫ｮ豁｣
+    - [x] 逶ｴ謗･縺ｮ `Draw` 蜻ｽ莉､繧呈賜髯､縺励～DrawingSession.PushPastePreview()` 縺ｮ蜻ｼ縺ｳ蜃ｺ縺励↓鄂ｮ縺肴鋤縺医ｋ
+- [x] Task: **邨ｱ蜷医ユ繧ｹ繝医・菫ｮ豁｣**: 繝輔ぉ繝ｼ繧ｺ 0 縺ｧ菴懈・縺励◆繝・せ繝医ｒ縲∵眠縺励＞莉墓ｧ假ｼ医・繝ｼ繧ｹ繝育峩蠕後・譛ｪ遒ｺ螳壹〒縺ゅｋ縺薙→・峨↓蜷合ｏ縺帙※譖ｴ譁ｰ縺励；reen 縺ｫ縺吶ｋ
 - [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## 繝輔ぉ繝ｼ繧ｺ 3: 繝励Ξ繧ｼ繝ｳ繝・・繧ｷ繝ｧ繝ｳ螻､縺ｮ謨ｴ蜷茨ｼ郁・蜍慕｢ｺ螳壹→ UI 騾｣謳ｺ・・UI 蛛ｴ縺ｮ驛ｽ蜷医↓繧医ｋ縲檎｢ｺ螳壹ヨ繝ｪ繧ｬ繝ｼ縲阪ｒ縲√ラ繝｡繧､繝ｳ螻､縺ｮ `CommitPreview` 縺ｫ豁｣縺励￥蟋碑ｭｲ縺励∪縺吶・

@@ -48,7 +48,7 @@ public class DrawableCanvasCharacterizationTests
 
         _copyUseCase = new CopySelectionUseCase(_clipboardServiceMock.Object);
         _cutUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
-        _pasteUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object);
+        _pasteUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProviderMock.Object);
     }
 
     [Test]

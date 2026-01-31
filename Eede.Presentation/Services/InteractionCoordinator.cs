@@ -289,6 +289,26 @@ public class InteractionCoordinator : IInteractionCoordinator
         }
     }
 
+    public void SyncWithSession()
+    {
+        var session = _sessionProvider.CurrentSession;
+        if (session.CurrentPreviewContent != null)
+        {
+            // プレビュー情報がある場合、対応する状態に移行
+            if (!(_interactionSession?.SelectionState is SelectionPreviewState))
+            {
+                _interactionSession = new CanvasInteractionSession(CurrentBuffer, _interactionSession?.DrawStyle ?? new RegionSelector(), new SelectionPreviewState(session.CurrentPreviewContent));
+                NotifyStateChanged();
+            }
+        }
+        else if (_interactionSession?.SelectionState is SelectionPreviewState)
+        {
+            // プレビューが消えた場合、通常状態に戻す
+            _interactionSession = new CanvasInteractionSession(CurrentBuffer, _interactionSession?.DrawStyle ?? new RegionSelector(), new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), new PictureSize(16, 16))));
+            NotifyStateChanged();
+        }
+    }
+
     public void SetupRegionSelector(RegionSelector tool, DrawingBuffer buffer, bool isAnimationMode, PictureSize gridSize)
     {
         tool.OnDrawStart += (sender, args) =>
@@ -309,15 +329,6 @@ public class InteractionCoordinator : IInteractionCoordinator
             _interactionSession = new CanvasInteractionSession(CurrentBuffer, tool, new SelectedState(new Selection(PictureArea.FromPosition(args.Start, args.Now, CurrentBuffer.Previous.Size))));
             NotifyStateChanged();
         };
-    }
-
-    public void PasteImage(Picture picture, DrawingBuffer buffer, IDrawStyle drawStyle)
-    {
-        var position = new Position(0, 0);
-        var state = new FloatingSelectionState(picture, position, CurrentBuffer.Previous);
-        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, state);
-        
-        NotifyStateChanged();
     }
 
     public Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)

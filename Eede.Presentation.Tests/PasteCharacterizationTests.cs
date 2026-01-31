@@ -39,7 +39,7 @@ namespace Eede.Presentation.Tests
             _sessionProvider.Update(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
             _coordinator = new InteractionCoordinator(_sessionProvider);
             _clipboardMock = new Mock<IClipboard>();
-            _pasteUseCase = new PasteFromClipboardUseCase(_clipboardMock.Object);
+            _pasteUseCase = new PasteFromClipboardUseCase(_clipboardMock.Object, _sessionProvider);
 
             var globalState = new GlobalState();
             var addFrameProvider = new Mock<IAddFrameProvider>();
@@ -60,27 +60,27 @@ namespace Eede.Presentation.Tests
         }
 
         [AvaloniaTest]
-        public async Task PasteCharacterization_CurrentBehavior()
+        public async Task PasteCharacterization_NewBehavior()
         {
             // Arrange: 10x10 の赤い画像をクリップボードに用意
             var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
-            // 本来は赤い色を塗るべきだが、仕様化テストとしては「渡されたインスタンス」で判定
             _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
 
             // Act: ペースト実行
             await _viewModel.PasteCommand.Execute().ToTask();
 
-            // Assert: 現在の挙動を確認
-            // 1. DrawingSession の CurrentPreviewContent は null (現状の設計ミス/課題)
-            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Current Session's preview should be null in CURRENT implementation");
+            // Assert: 新しい挙動を確認
+            // 1. DrawingSession の CurrentPreviewContent が保持されていること
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Not.Null, "Current Session should hold the preview");
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent.Pixels, Is.EqualTo(pastedPicture));
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent.Type, Is.EqualTo(SelectionPreviewType.Paste));
 
-            // 2. InteractionCoordinator 側はプレビュー情報を持っている
-            Assert.That(_coordinator.PreviewPixels, Is.EqualTo(pastedPicture), "Coordinator should hold the pasted pixels as preview");
+            // 2. InteractionCoordinator 側もプレビュー情報をセッションから取得している
+            Assert.That(_coordinator.PreviewPixels, Is.EqualTo(pastedPicture), "Coordinator should hold the pasted pixels via session");
             Assert.That(_coordinator.PreviewPosition, Is.EqualTo(new Position(0, 0)));
 
-            // 3. DrawingSession の CurrentPicture は合成されていない（元のまま）
-            // CurrentPicture は PreviewContent が null なら Buffer.Fetch() を返すため
-            Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.EqualTo(_sessionProvider.CurrentSession.Buffer.Fetch()));
+            // 3. DrawingSession の CurrentPicture は合成されていること
+            Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.Not.EqualTo(_sessionProvider.CurrentSession.Buffer.Fetch()));
         }
     }
 }

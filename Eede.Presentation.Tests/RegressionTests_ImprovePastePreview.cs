@@ -1,0 +1,109 @@
+using Avalonia.Headless.NUnit;
+using Eede.Application.Animations;
+using Eede.Application.Infrastructure;
+using Eede.Application.Pictures;
+using Eede.Application.UseCase.Pictures;
+using Eede.Domain.Animations;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Blending;
+using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.Palettes;
+using Eede.Domain.SharedKernel;
+using Eede.Presentation.Common.Adapters;
+using Eede.Presentation.Common.Models;
+using Eede.Presentation.Services;
+using Eede.Presentation.Settings;
+using Eede.Presentation.ViewModels.DataEntry;
+using Moq;
+using NUnit.Framework;
+using System;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
+
+namespace Eede.Presentation.Tests
+{
+    [TestFixture]
+    public class RegressionTests_ImprovePastePreview
+    {
+        private DrawingSessionProvider _sessionProvider;
+        private InteractionCoordinator _coordinator;
+        private Mock<IClipboard> _clipboardMock;
+        private PasteFromClipboardUseCase _pasteUseCase;
+        private DrawableCanvasViewModel _viewModel;
+
+        [SetUp]
+        public void Setup()
+        {
+            _sessionProvider = new DrawingSessionProvider();
+            _sessionProvider.Update(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
+            _coordinator = new InteractionCoordinator(_sessionProvider);
+            _clipboardMock = new Mock<IClipboard>();
+            _pasteUseCase = new PasteFromClipboardUseCase(_clipboardMock.Object, _sessionProvider);
+
+            var globalState = new GlobalState();
+            var addFrameProvider = new Mock<IAddFrameProvider>();
+            var bitmapAdapter = new Mock<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>>();
+            var copyUseCase = new CopySelectionUseCase(_clipboardMock.Object);
+            var cutUseCase = new CutSelectionUseCase(_clipboardMock.Object);
+
+            _viewModel = new DrawableCanvasViewModel(
+                globalState,
+                addFrameProvider.Object,
+                _clipboardMock.Object,
+                bitmapAdapter.Object,
+                _sessionProvider,
+                copyUseCase,
+                cutUseCase,
+                _pasteUseCase,
+                _coordinator);
+            
+            _viewModel.Magnification = new Magnification(1);
+        }
+
+        [AvaloniaTest]
+        public async Task MoveSelection_ShouldCommitAtCorrectPosition_Regression()
+        {
+            // 1. (0,0) に赤い点がある画像を用意
+            var red = new ArgbColor(255, 255, 0, 0);
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(1, 1), new byte[] { 0, 0, 255, 255 }), new Position(0, 0));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // 2. (0,0) を範囲選択 (1x1の範囲にするため (0,0)-(1,1) を指定)
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(1, 1)).Subscribe();
+
+            // 3. (10,10) へドラッグ移動 (移動開始点を (0,0) とし、終了点を (10,10) とする)
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
+
+            // 4. 範囲外をクリックして確定
+            _viewModel.DrawBeginCommand.Execute(new Position(30, 30)).Subscribe();
+
+            // Assert: (10,10) が赤くなっていること
+            var finalResult = _sessionProvider.CurrentSession.Buffer.Fetch();
+            Assert.That(finalResult.PickColor(new Position(10, 10)), Is.EqualTo(red), "The pixel should be committed at the dragged position (10,10)");
+            Assert.That(finalResult.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "The original position (0,0) should be transparent");
+        }
+
+        [AvaloniaTest]
+        public async Task Paste_ShouldInitializeAtSelectingAreaPosition_Regression()
+        {
+            // 1. (5,5) に範囲選択を作る
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(5, 5)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(15, 15)).Subscribe();
+
+            // 2. ペースト実行
+            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
+            await _viewModel.PasteCommand.Execute().ToTask();
+
+            // Assert: ペースト位置が (5,5) になっていること
+            Assert.That(_viewModel.PreviewPosition, Is.EqualTo(new Position(5, 5)), "Paste should start at the selection's top-left corner");
+        }
+    }
+}

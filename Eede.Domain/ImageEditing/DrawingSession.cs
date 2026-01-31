@@ -43,6 +43,10 @@ namespace Eede.Domain.ImageEditing
                 var picture = Buffer.Fetch();
                 if (PreviewContent != null)
                 {
+                    if (PreviewContent.OriginalArea.HasValue)
+                    {
+                        picture = picture.Clear(PreviewContent.OriginalArea.Value);
+                    }
                     return picture.Blend(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), PreviewContent.Pixels, PreviewContent.Position);
                 }
                 return picture;

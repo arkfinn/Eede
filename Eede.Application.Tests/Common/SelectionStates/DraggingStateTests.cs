@@ -119,4 +119,32 @@ public class DraggingStateTests
             Assert.That(updateCommand.Executed, Is.True);
         });
     }
+
+    [Test]
+    public void GetSelectingAreaReturnsCorrectAreaDuringDrag()
+    {
+        // Arrange
+        var originalArea = new PictureArea(new Position(10, 10), new PictureSize(20, 20));
+        var selection = new Selection(originalArea);
+        var picture = Picture.CreateEmpty(originalArea.Size);
+        var content = new SelectionContent(picture, selection);
+        var originalPicture = Picture.CreateEmpty(new PictureSize(100, 100));
+
+        var state = new DraggingState(content, new Position(10, 10), originalPicture);
+        var cursorArea = HalfBoxArea.Create(new Position(10, 10), new PictureSize(32, 32));
+
+        // Act
+        // (10, 10) から (15, 12) へ移動 (deltaX=5, deltaY=2)
+        state.HandlePointerMoved(cursorArea, true, new Position(15, 12), new PictureSize(100, 100));
+        var area = state.GetSelectingArea();
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(area.HasValue, Is.True);
+            Assert.That(area.Value.X, Is.EqualTo(15));
+            Assert.That(area.Value.Y, Is.EqualTo(12));
+            Assert.That(area.Value.Size, Is.EqualTo(originalArea.Size));
+        });
+    }
 }

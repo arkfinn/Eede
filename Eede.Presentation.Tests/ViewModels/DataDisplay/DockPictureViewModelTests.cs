@@ -1,5 +1,5 @@
-using Eede.Application.Animations;
-using Eede.Application.Services;
+﻿using Eede.Application.Animations;
+using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Animations;
 using Eede.Domain.Files;
@@ -10,6 +10,7 @@ using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.Common.Services;
+using Eede.Presentation.Common.Models;
 using Eede.Presentation.Common.Adapters;
 using Moq;
 using NUnit.Framework;
@@ -43,6 +44,7 @@ public class DockPictureViewModelTests
         _mockFileSystem = new Mock<IFileSystem>();
         _animationViewModel = new AnimationViewModel(_mockAnimationService.Object, _mockFileSystem.Object);
         _mockPictureRepository = new Mock<IPictureRepository>();
+        var bitmapAdapter = new AvaloniaBitmapAdapter();
         _savePictureUseCase = new SavePictureUseCase(_mockPictureRepository.Object);
         _loadPictureUseCase = new LoadPictureUseCase(_mockPictureRepository.Object);
     }

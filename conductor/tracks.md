@@ -20,3 +20,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] [Include Pull Action in Undo History](./tracks/include_pull_action_in_undo_history_20260129/index.md) [13e5fd1]
+
+---
+
+- [~] **Track: Serviceクラスの撲滅。UseCaseに分解または適切な名称に変更**
+*Link: [./tracks/service_extermination_20260131/](./tracks/service_extermination_20260131/)*

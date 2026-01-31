@@ -1,11 +1,12 @@
 ﻿using Avalonia.Platform.Storage;
+using Eede.Application.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.Common.Services
 {
-    public class StorageService(IStorageProvider storageProvider) : IStorageService
+    public class StorageService(IStorageProvider storageProvider) : IFileStorage
     {
         public readonly IStorageProvider StorageProvider = storageProvider;
 

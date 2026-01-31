@@ -1,8 +1,8 @@
-using Avalonia.Headless.NUnit;
+﻿using Avalonia.Headless.NUnit;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Pictures;
-using Eede.Application.Services;
+using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
@@ -25,7 +25,7 @@ public class InteractionCoordinatorCharacterizationTests
 {
     private GlobalState _globalState;
     private Mock<IAddFrameProvider> _addFrameProviderMock;
-    private Mock<IClipboardService> _clipboardServiceMock;
+    private Mock<IClipboard> _clipboardServiceMock;
     private AvaloniaBitmapAdapter _bitmapAdapter;
     private DrawingSessionProvider _drawingSessionProvider;
     private CopySelectionUseCase _copySelectionUseCase;
@@ -43,7 +43,7 @@ public class InteractionCoordinatorCharacterizationTests
 
             _addFrameProviderMock = new Mock<IAddFrameProvider>();
 
-            _clipboardServiceMock = new Mock<IClipboardService>();
+            _clipboardServiceMock = new Mock<IClipboard>();
 
             _bitmapAdapter = new AvaloniaBitmapAdapter();
 
@@ -55,8 +55,7 @@ public class InteractionCoordinatorCharacterizationTests
 
             _pasteFromClipboardUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object);
 
-            _coordinator = new InteractionCoordinator(_drawingSessionProvider); // provider を渡す
-
+            _coordinator = new InteractionCoordinator(_drawingSessionProvider); // provider 繧呈ｸ｡縺・
         }
 
     
@@ -137,8 +136,7 @@ public class InteractionCoordinatorCharacterizationTests
 
         
 
-            // 32x32 の赤い画像
-
+            // 32x32 縺ｮ襍､縺・判蜒・
             var red = new ArgbColor(255, 255, 0, 0);
 
             var initialPicture = CreateFilledPicture(new PictureSize(32, 32), red);
@@ -149,8 +147,7 @@ public class InteractionCoordinatorCharacterizationTests
 
             
 
-            // 1. (0,0)-(8,8) を選択
-
+            // 1. (0,0)-(8,8) 繧帝∈謚・
             vm.DrawStyle = new RegionSelector();
 
             vm.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
@@ -159,7 +156,7 @@ public class InteractionCoordinatorCharacterizationTests
 
     
 
-            // 2. ドラッグ移動 (0,0) -> (10,10)
+            // 2. 繝峨Λ繝・げ遘ｻ蜍・(0,0) -> (10,10)
 
             vm.DrawBeginCommand.Execute(new Position(4, 4)).Subscribe();
 
@@ -169,27 +166,24 @@ public class InteractionCoordinatorCharacterizationTests
 
     
 
-            // この時点ではプレビュー状態（(0,0)は透明、(10,10)はプレビュー）
-
+            // 縺薙・譎らせ縺ｧ縺ｯ繝励Ξ繝薙Η繝ｼ迥ｶ諷具ｼ・0,0)縺ｯ騾乗・縲・10,10)縺ｯ繝励Ξ繝薙Η繝ｼ・・
             Assert.That(vm.PictureBuffer.Fetch().PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0));
 
             Assert.That(vm.PreviewPixels, Is.Not.Null);
 
     
 
-            // 3. 選択範囲外 (20,20) をクリックして確定
-
+            // 3. 驕ｸ謚樒ｯ・峇螟・(20,20) 繧偵け繝ｪ繝・け縺励※遒ｺ螳・
             vm.DrawBeginCommand.Execute(new Position(20, 20)).Subscribe();
 
     
 
-            // 確定後：(10,10) が赤くなっており、プレビューは消えているはず
-
+            // 遒ｺ螳壼ｾ鯉ｼ・10,10) 縺瑚ｵ､縺上↑縺｣縺ｦ縺翫ｊ縲√・繝ｬ繝薙Η繝ｼ縺ｯ豸医∴縺ｦ縺・ｋ縺ｯ縺・
             var result = vm.PictureBuffer.Fetch();
 
-            Assert.That(result.PickColor(new Position(10, 10)), Is.EqualTo(red), "確定後は移動先に画像が書き込まれている");
+            Assert.That(result.PickColor(new Position(10, 10)), Is.EqualTo(red), "遒ｺ螳壼ｾ後・遘ｻ蜍募・縺ｫ逕ｻ蜒上′譖ｸ縺崎ｾｼ縺ｾ繧後※縺・ｋ");
 
-            Assert.That(vm.PreviewPixels, Is.Null, "確定後はプレビューがクリアされている");
+            Assert.That(vm.PreviewPixels, Is.Null, "遒ｺ螳壼ｾ後・繝励Ξ繝薙Η繝ｼ縺後け繝ｪ繧｢縺輔ｌ縺ｦ縺・ｋ");
 
         }
 
@@ -201,8 +195,7 @@ public class InteractionCoordinatorCharacterizationTests
 
         {
 
-            // 32x32 の赤い画像
-
+            // 32x32 縺ｮ襍､縺・判蜒・
             var red = new ArgbColor(255, 255, 0, 0);
 
             var initialPicture = CreateFilledPicture(new PictureSize(32, 32), red);
@@ -213,8 +206,7 @@ public class InteractionCoordinatorCharacterizationTests
 
             
 
-            // 1. 移動操作
-
+            // 1. 遘ｻ蜍墓桃菴・
             vm.DrawStyle = new RegionSelector();
 
             vm.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
@@ -229,19 +221,18 @@ public class InteractionCoordinatorCharacterizationTests
 
     
 
-            // 2. 右クリックでキャンセル
+            // 2. 蜿ｳ繧ｯ繝ｪ繝・け縺ｧ繧ｭ繝｣繝ｳ繧ｻ繝ｫ
 
             vm.PointerRightButtonPressedCommand.Execute(new Position(14, 14)).Subscribe();
 
     
 
-            // キャンセル後：(0,0) が赤に戻っており、プレビューは消えているはず
-
+            // 繧ｭ繝｣繝ｳ繧ｻ繝ｫ蠕鯉ｼ・0,0) 縺瑚ｵ､縺ｫ謌ｻ縺｣縺ｦ縺翫ｊ縲√・繝ｬ繝薙Η繝ｼ縺ｯ豸医∴縺ｦ縺・ｋ縺ｯ縺・
             var result = vm.PictureBuffer.Fetch();
 
-            Assert.That(result.PickColor(new Position(0, 0)), Is.EqualTo(red), "キャンセル後は元の位置に画像が復元されている");
+            Assert.That(result.PickColor(new Position(0, 0)), Is.EqualTo(red), "繧ｭ繝｣繝ｳ繧ｻ繝ｫ蠕後・蜈・・菴咲ｽｮ縺ｫ逕ｻ蜒上′蠕ｩ蜈・＆繧後※縺・ｋ");
 
-            Assert.That(vm.PreviewPixels, Is.Null, "キャンセル後はプレビューがクリアされている");
+            Assert.That(vm.PreviewPixels, Is.Null, "繧ｭ繝｣繝ｳ繧ｻ繝ｫ蠕後・繝励Ξ繝薙Η繝ｼ縺後け繝ｪ繧｢縺輔ｌ縺ｦ縺・ｋ");
 
         }
 

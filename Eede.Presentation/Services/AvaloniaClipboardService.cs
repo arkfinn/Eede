@@ -2,10 +2,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
-using Eede.Application.Services;
+using Eede.Application.Infrastructure;
 using Eede.Domain.ImageEditing;
 using Eede.Presentation.Common.Adapters;
 using System;
@@ -13,10 +12,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AvaloniaIClipboard = Avalonia.Input.Platform.IClipboard;
 
 namespace Eede.Presentation.Services;
 
-public class AvaloniaClipboardService : IClipboardService
+public class AvaloniaClipboardService : IClipboard
 {
     // 一般的な画像形式の識別子
     private static readonly string[] ImageFormats = { "PNG", "Bitmap", "DeviceIndependentBitmap", "TIFF" };
@@ -93,7 +93,7 @@ public class AvaloniaClipboardService : IClipboardService
         return null;
     }
 
-    private async Task<Picture> TryGetFromFormat(IClipboard clipboard, string format)
+    private async Task<Picture> TryGetFromFormat(AvaloniaIClipboard clipboard, string format)
     {
         try
         {
@@ -142,7 +142,7 @@ public class AvaloniaClipboardService : IClipboardService
         return formats.Any(f => ImageFormats.Contains(f, StringComparer.OrdinalIgnoreCase) || f == DataFormats.Files);
     }
 
-    private IClipboard GetClipboard()
+    private AvaloniaIClipboard GetClipboard()
     {
         if (global::Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -151,3 +151,4 @@ public class AvaloniaClipboardService : IClipboardService
         return null;
     }
 }
+

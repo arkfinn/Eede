@@ -1,4 +1,4 @@
-using Eede.Application.Services;
+using Eede.Application.Infrastructure;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using System.Threading.Tasks;
@@ -7,30 +7,23 @@ namespace Eede.Application.UseCase.Pictures;
 
 public class CutSelectionUseCase
 {
-    private readonly IClipboardService _clipboardService;
+    private readonly IClipboard _clipboard;
 
-    public CutSelectionUseCase(IClipboardService clipboardService)
+    public CutSelectionUseCase(IClipboard clipboard)
     {
-        _clipboardService = clipboardService;
+        _clipboard = clipboard;
     }
 
-    public async Task<Picture> Execute(Picture picture, PictureArea? selectingArea)
+    public async Task<Picture> ExecuteAsync(Picture picture, PictureArea? area)
     {
-        Picture target;
-        Picture cleared;
+        var target = area != null ? picture.CutOut(area.Value) : picture;
+        await _clipboard.CopyAsync(target);
 
-        if (selectingArea.HasValue && selectingArea.Value.Width > 0 && selectingArea.Value.Height > 0)
+        if (area == null)
         {
-            target = picture.CutOut(selectingArea.Value);
-            cleared = picture.Clear(selectingArea.Value);
+            return Picture.CreateEmpty(picture.Size);
         }
-        else
-        {
-            target = picture;
-            cleared = Picture.CreateEmpty(picture.Size);
-        }
-
-        await _clipboardService.CopyAsync(target);
-        return cleared;
+        
+        return picture.Clear(area.Value);
     }
 }

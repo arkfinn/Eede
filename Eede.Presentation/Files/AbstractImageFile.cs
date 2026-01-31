@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Eede.Domain.Files;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 
 namespace Eede.Presentation.Files
 {
@@ -15,9 +15,9 @@ namespace Eede.Presentation.Files
 
         public abstract IImageFile WithFilePath(FilePath filePath);
 
-        public abstract Task<SaveImageResult> SaveAsync(IStorageService storage);
+        public abstract Task<SaveImageResult> SaveAsync(IFileStorage storage);
 
-        // 共通のWithFilePathロジック（PNG変換）
+        // 共通 WithFilePathロジック（PNG変換）
         protected IImageFile CreatePngFileWithCheck(Bitmap bitmap, FilePath filePath)
         {
             if (filePath.GetExtension() != ".png")
@@ -27,8 +27,8 @@ namespace Eede.Presentation.Files
             return new PngFile(bitmap, filePath);
         }
 
-        // 共通のSaveAsyncロジック（ファイルピッカーと保存）
-        protected async Task<SaveImageResult> SaveWithFilePickerAsync(IStorageService storage)
+        // 共通 SaveAsyncロジック（ファイルピッカーと保存）
+        protected async Task<SaveImageResult> SaveWithFilePickerAsync(IFileStorage storage)
         {
             Uri? result = await storage.SaveFilePickerAsync();
             if (result == null)
@@ -40,7 +40,7 @@ namespace Eede.Presentation.Files
             try
             {
                 Bitmap.Save(fullPath);
-                return SaveImageResult.Saved(CreatePngFileWithCheck(Bitmap, new FilePath(fullPath))); // 保存成功
+                return SaveImageResult.Saved(CreatePngFileWithCheck(Bitmap, new FilePath(fullPath))); // 保存完了
             }
             catch (Exception)
             {

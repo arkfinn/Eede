@@ -4,6 +4,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
+using Eede.Application.Infrastructure;
 using Eede.Presentation.Common.Services;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
@@ -51,8 +52,8 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
     public ReactiveCommand<AnimationFrame, Unit> RemoveFrameAtCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearSequenceCommand { get; }
     public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
-    public ReactiveCommand<IStorageService, Unit> ExportCommand { get; }
-    public ReactiveCommand<IStorageService, Unit> ImportCommand { get; }
+    public ReactiveCommand<IFileStorage, Unit> ExportCommand { get; }
+    public ReactiveCommand<IFileStorage, Unit> ImportCommand { get; }
 
     public void AddFrame(int cellIndex)
     {
@@ -216,27 +217,24 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
                 }
             });
 
-        TogglePlayCommand = ReactiveCommand.Create(() =>
-        {
-            IsPlaying = !IsPlaying;
-        }, canExecute);
+        TogglePlayCommand = ReactiveCommand.Create(() => { IsPlaying = !IsPlaying; });
 
-        ExportCommand = ReactiveCommand.CreateFromTask<IStorageService>(async storage =>
+        ExportCommand = ReactiveCommand.CreateFromTask<IFileStorage>(async storage =>
         {
             if (SelectedPattern == null) return;
-            var path = await storage.SaveAnimationFilePickerAsync();
-            if (path == null) return;
+            var uri = await storage.SaveAnimationFilePickerAsync();
+            if (uri == null) return;
 
-            var json = JsonSerializer.Serialize(SelectedPattern, new JsonSerializerOptions { WriteIndented = true });
-            await _fileSystem.WriteAllTextAsync(path.LocalPath, json);
-        }, canExecute);
+            var json = JsonSerializer.Serialize(SelectedPattern);
+            await _fileSystem.WriteAllTextAsync(uri.LocalPath, json);
+        });
 
-        ImportCommand = ReactiveCommand.CreateFromTask<IStorageService>(async storage =>
+        ImportCommand = ReactiveCommand.CreateFromTask<IFileStorage>(async storage =>
         {
-            var path = await storage.OpenAnimationFilePickerAsync();
-            if (path == null) return;
+            var uri = await storage.OpenFilePickerAsync();
+            if (uri == null) return;
 
-            var json = await _fileSystem.ReadAllTextAsync(path.LocalPath);
+            var json = await _fileSystem.ReadAllTextAsync(uri.LocalPath);
             var pattern = JsonSerializer.Deserialize<AnimationPattern>(json);
             if (pattern != null)
             {

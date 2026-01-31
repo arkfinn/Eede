@@ -16,7 +16,7 @@ using Eede.Domain.SharedKernel;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
 using Eede.Presentation.Settings;
@@ -25,7 +25,6 @@ using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
-using Eede.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -86,15 +85,15 @@ public class MainViewModel : ViewModelBase
     [Reactive] public PictureSize CursorSize { get; set; }
 
     [Reactive] public DrawingSessionViewModel DrawingSessionViewModel { get; private set; }
-    [Reactive] public StorageService StorageService { get; set; }
+    [Reactive] public IFileStorage StorageService { get; set; }
     [Reactive] public Cursor? AnimationCursor { get; set; }
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
     [Reactive] public bool HasClipboardPicture { get; set; } = false;
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
-    public ReactiveCommand<IStorageService, Unit> LoadPictureCommand { get; private set; }
-    public ReactiveCommand<IStorageService, Unit> SavePictureCommand { get; private set; }
+    public ReactiveCommand<IFileStorage, Unit> LoadPictureCommand { get; private set; }
+    public ReactiveCommand<IFileStorage, Unit> SavePictureCommand { get; private set; }
     public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; private set; }
     public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; private set; }
     public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; private set; }
@@ -102,8 +101,8 @@ public class MainViewModel : ViewModelBase
     public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; private set; }
     public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; private set; }
 
-    public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; private set; }
-    public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; private set; }
+    public ReactiveCommand<IFileStorage, Unit> LoadPaletteCommand { get; private set; }
+    public ReactiveCommand<IFileStorage, Unit> SavePaletteCommand { get; private set; }
     public ReactiveCommand<Unit, Unit> PutBackgroundColorCommand { get; private set; }
     public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; private set; }
     public PaletteContainerViewModel PaletteContainerViewModel { get; private set; }
@@ -132,7 +131,7 @@ public class MainViewModel : ViewModelBase
     private readonly SavePictureUseCase _savePictureUseCase;
     private readonly LoadPictureUseCase _loadPictureUseCase;
     private readonly GlobalState _state;
-    private readonly IClipboardService _clipboardService;
+    private readonly IClipboard _clipboard;
     private readonly IServiceProvider _services;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; private set; }
@@ -141,7 +140,7 @@ public class MainViewModel : ViewModelBase
 
     public MainViewModel(
         GlobalState State,
-        IClipboardService clipboardService,
+        IClipboard clipboard,
         IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
         IPictureRepository pictureRepository,
         IDrawStyleFactory drawStyleFactory,
@@ -158,7 +157,7 @@ public class MainViewModel : ViewModelBase
         IServiceProvider services)
     {
         _state = State;
-        _clipboardService = clipboardService;
+        _clipboard = clipboard;
         _bitmapAdapter = bitmapAdapter;
         _pictureRepository = pictureRepository;
         _drawStyleFactory = drawStyleFactory;
@@ -174,6 +173,9 @@ public class MainViewModel : ViewModelBase
         AnimationViewModel = animationViewModel;
         DrawingSessionViewModel = drawingSessionViewModel;
         PaletteContainerViewModel = paletteContainerViewModel;
+
+        LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
+        SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);
 
         InitializeConnections();
     }
@@ -244,8 +246,8 @@ public class MainViewModel : ViewModelBase
             DrawingSessionViewModel.Push(now, nowArea, previousArea);
         };
 
-        LoadPictureCommand = ReactiveCommand.Create<IStorageService>(ExecuteLoadPicture);
-        SavePictureCommand = ReactiveCommand.Create<IStorageService>(ExecuteSavePicture);
+        LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
+        SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);
         PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
 
         ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
@@ -378,7 +380,7 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private async void ExecuteLoadPicture(IStorageService storage)
+    private async void ExecuteLoadPicture(IFileStorage storage)
     {
         Uri? result = await storage.OpenFilePickerAsync();
         if (result == null)
@@ -454,7 +456,7 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private void ExecuteSavePicture(IStorageService storage)
+    private void ExecuteSavePicture(IFileStorage storage)
     {
         if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc)
         {

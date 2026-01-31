@@ -1,4 +1,4 @@
-using Eede.Application.Services;
+using Eede.Application.Infrastructure;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using System.Threading.Tasks;
@@ -7,25 +7,16 @@ namespace Eede.Application.UseCase.Pictures;
 
 public class CopySelectionUseCase
 {
-    private readonly IClipboardService _clipboardService;
+    private readonly IClipboard _clipboard;
 
-    public CopySelectionUseCase(IClipboardService clipboardService)
+    public CopySelectionUseCase(IClipboard clipboard)
     {
-        _clipboardService = clipboardService;
+        _clipboard = clipboard;
     }
 
-    public async Task Execute(Picture picture, PictureArea? selectingArea)
+    public async Task ExecuteAsync(Picture picture, PictureArea? area)
     {
-        Picture target;
-        if (selectingArea.HasValue && selectingArea.Value.Width > 0 && selectingArea.Value.Height > 0)
-        {
-            target = picture.CutOut(selectingArea.Value);
-        }
-        else
-        {
-            target = picture;
-        }
-
-        await _clipboardService.CopyAsync(target);
+        var target = area != null ? picture.CutOut(area.Value) : picture;
+        await _clipboard.CopyAsync(target);
     }
 }

@@ -1,7 +1,7 @@
 using Avalonia.Media.Imaging;
 using Eede.Domain.Files;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.Files
@@ -13,6 +13,6 @@ namespace Eede.Presentation.Files
         IImageFile WithFilePath(FilePath filePath);
         IImageFile WithBitmap(Bitmap bitmap);
         string Subject();
-        Task<SaveImageResult> SaveAsync(IStorageService storage);
+        Task<SaveImageResult> SaveAsync(IFileStorage storage);
     }
 }

@@ -1,8 +1,11 @@
+using Eede.Presentation.Common.Services;
 using Eede.Application.Animations;
 using Eede.Domain.Animations;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 using Eede.Presentation.ViewModels.Animations;
 using Moq;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace Eede.Presentation.Tests.ViewModels.Animations;
 

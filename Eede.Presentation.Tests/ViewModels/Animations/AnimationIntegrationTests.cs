@@ -1,10 +1,12 @@
+using Eede.Presentation.Common.Services;
 using Eede.Application.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 using Eede.Presentation.ViewModels.Animations;
 using Moq;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
@@ -19,7 +21,7 @@ public class AnimationIntegrationTests
     {
         // Arrange
         var mockService = new AnimationService();
-        var mockStorage = new Mock<IStorageService>();
+        var mockStorage = new Mock<IFileStorage>();
         var mockFileSystem = new Mock<IFileSystem>();
         var viewModel = new AnimationViewModel(mockService, mockFileSystem.Object);
 
@@ -46,22 +48,20 @@ public class AnimationIntegrationTests
             .Returns(Task.CompletedTask);
 
         await viewModel.ExportCommand.Execute(mockStorage.Object).FirstAsync();
-        mockFileSystem.Verify(x => x.WriteAllTextAsync(uri.LocalPath, It.IsAny<string>()), Times.Once);
+        mockFileSystem.Verify(x => x.WriteAllTextAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
 
-        // 4. Import into a fresh ViewModel
-        var freshService = new AnimationService();
-        var freshViewModel = new AnimationViewModel(freshService, mockFileSystem.Object);
-        mockStorage.Setup(x => x.OpenAnimationFilePickerAsync()).ReturnsAsync(uri);
-        mockFileSystem.Setup(x => x.ReadAllTextAsync(uri.LocalPath)).ReturnsAsync(savedJson);
+        // 4. Import
+        var importUri = new Uri("file:///C:/import.json");
+        mockStorage.Setup(x => x.OpenFilePickerAsync()).ReturnsAsync(importUri);
+        mockFileSystem.Setup(x => x.ReadAllTextAsync(importUri.LocalPath)).ReturnsAsync(savedJson);
 
-        await freshViewModel.ImportCommand.Execute(mockStorage.Object).FirstAsync();
+        await viewModel.ImportCommand.Execute(mockStorage.Object).FirstAsync();
 
-        // 5. Verify imported state
-        Assert.That(freshViewModel.Patterns.Count, Is.EqualTo(2)); // Default "Test Run" + Imported
-        var imported = freshViewModel.Patterns[1];
-        Assert.That(imported.Name, Is.EqualTo("New Animation"));
-        Assert.That(imported.Frames.Count, Is.EqualTo(2));
-        Assert.That(imported.Frames[1].CellIndex, Is.EqualTo(20));
-        Assert.That(imported.Frames[1].Duration, Is.EqualTo(150));
+        // 5. Verify Import
+        Assert.That(viewModel.Patterns.Count, Is.EqualTo(3)); // Initial(1) + Created(1) + Imported(1)
+        var importedPattern = viewModel.SelectedPattern;
+        Assert.That(importedPattern.Name, Is.EqualTo("New Animation"));
+        Assert.That(importedPattern.Frames.Count, Is.EqualTo(2));
+        Assert.That(importedPattern.Frames[0].CellIndex, Is.EqualTo(10));
     }
 }

@@ -1,4 +1,4 @@
-using Eede.Application.Services;
+using Eede.Application.Infrastructure;
 using Eede.Domain.ImageEditing;
 using System.Threading.Tasks;
 
@@ -6,15 +6,15 @@ namespace Eede.Application.UseCase.Pictures;
 
 public class PasteFromClipboardUseCase
 {
-    private readonly IClipboardService _clipboardService;
+    private readonly IClipboard _clipboard;
 
-    public PasteFromClipboardUseCase(IClipboardService clipboardService)
+    public PasteFromClipboardUseCase(IClipboard clipboard)
     {
-        _clipboardService = clipboardService;
+        _clipboard = clipboard;
     }
 
-    public async Task<Picture?> Execute()
+    public async Task<Picture> ExecuteAsync()
     {
-        return await _clipboardService.GetPictureAsync();
+        return await _clipboard.GetPictureAsync();
     }
 }

@@ -19,7 +19,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
 using System.Threading.Tasks;
-using Eede.Application.Services;
+using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Pictures;
 
 namespace Eede.Presentation.ViewModels.DataEntry;
@@ -52,7 +52,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private readonly GlobalState _globalState;
     private readonly IAddFrameProvider _addFrameProvider;
-    private readonly IClipboardService _clipboardService;
+    private readonly IClipboard _clipboard;
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly CopySelectionUseCase _copySelectionUseCase;
@@ -69,7 +69,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     public DrawableCanvasViewModel(
         GlobalState globalState,
         IAddFrameProvider addFrameProvider,
-        IClipboardService clipboardService,
+        IClipboard clipboard,
         IBitmapAdapter<Bitmap> bitmapAdapter,
         IDrawingSessionProvider drawingSessionProvider,
         CopySelectionUseCase copySelectionUseCase,
@@ -79,7 +79,8 @@ public class DrawableCanvasViewModel : ViewModelBase
     {
         _globalState = globalState;
         _addFrameProvider = addFrameProvider;
-        _clipboardService = clipboardService;
+        _clipboard = clipboard;
+
         _bitmapAdapter = bitmapAdapter;
         _drawingSessionProvider = drawingSessionProvider;
         _copySelectionUseCase = copySelectionUseCase;
@@ -318,7 +319,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         try
         {
-            await _copySelectionUseCase.Execute(PictureBuffer.Previous, IsRegionSelecting ? SelectingArea : null);
+            await _copySelectionUseCase.ExecuteAsync(PictureBuffer.Previous, IsRegionSelecting ? SelectingArea : null);
         }
         catch (Exception ex)
         {
@@ -334,7 +335,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         {
             Picture previous = PictureBuffer.Previous;
             PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
-            Picture cleared = await _cutSelectionUseCase.Execute(previous, previousArea);
+            Picture cleared = await _cutSelectionUseCase.ExecuteAsync(previous, previousArea);
             ExecuteInternalUpdate(cleared);
             // TODO: Reset selection in coordinator if needed
             Drew?.Invoke(previous, cleared, previousArea, null);
@@ -351,7 +352,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         try
         {
-            Picture? pasted = await _pasteFromClipboardUseCase.Execute();
+            Picture? pasted = await _pasteFromClipboardUseCase.ExecuteAsync();
             if (pasted == null) return;
             _coordinator.PasteImage(pasted, PictureBuffer, DrawStyle);
         }

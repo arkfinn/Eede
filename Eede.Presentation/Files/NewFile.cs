@@ -1,7 +1,7 @@
 using Avalonia.Media.Imaging;
 using Eede.Domain.Files;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Common.Services; // 追加
+using Eede.Application.Infrastructure; // 追加
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.Files
@@ -15,10 +15,10 @@ namespace Eede.Presentation.Files
 
         public override string Subject()
         {
-            return "新しいファイル"; // 新規ファイルのサブジェクトは固定
+            return "新しいファイル"; // 新規ファイルのサブジェクト�E固宁E
         }
 
-        public override async Task<SaveImageResult> SaveAsync(IStorageService storage)
+        public override async Task<SaveImageResult> SaveAsync(IFileStorage storage)
         {
             return await SaveWithFilePickerAsync(storage);
         }

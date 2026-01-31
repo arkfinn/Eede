@@ -7,7 +7,7 @@ using Eede.Application.Animations;
 using System.Collections.Generic;
 using Eede.Domain.Animations;
 using Eede.Presentation.Services;
-using Eede.Application.Services;
+using Eede.Application.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Eede.Presentation.Common.Adapters;
 using Eede.Domain.ImageEditing;
@@ -56,7 +56,12 @@ public partial class App : Avalonia.Application
         // Core/Domain/Application Services
         services.AddSingleton<GlobalState>();
         services.AddSingleton<IAnimationService, AnimationService>();
-        services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
+        services.AddSingleton<IClipboard, AvaloniaClipboardService>();
+        services.AddTransient<IFileStorage>(sp =>
+        {
+            var lifetime = (IClassicDesktopStyleApplicationLifetime)Avalonia.Application.Current.ApplicationLifetime;
+            return new StorageService(lifetime.MainWindow.StorageProvider);
+        });
         services.AddSingleton<IDrawStyleFactory, DrawStyleFactory>();
         services.AddTransient<ITransformImageUseCase, TransformImageUseCase>();
         services.AddTransient<ITransferImageToCanvasUseCase, TransferImageToCanvasUseCase>();

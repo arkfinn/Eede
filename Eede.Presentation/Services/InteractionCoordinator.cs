@@ -71,7 +71,7 @@ public class InteractionCoordinator : IInteractionCoordinator
     public InteractionCoordinator(IDrawingSessionProvider sessionProvider)
     {
         _sessionProvider = sessionProvider;
-        _drawableArea = new(CanvasBackgroundService.Instance, _magnification, new PictureSize(16, 16), null);
+        _drawableArea = new(_magnification, new PictureSize(16, 16), null);
     }
 
     public void UpdateMagnification(Magnification magnification)

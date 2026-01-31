@@ -23,8 +23,8 @@
 ## フェーズ 3: Canvas Background の整理 (Humble ViewModel 化)
 描画ロジックを View へ移動し、設定を Value Object 化します。
 
-- [ ] Task: ドメイン層への `CanvasBackgroundStyle` Value Object の導入
-- [ ] Task: `BackgroundCalculator` の抽出とユニットテスト
+- [x] Task: ドメイン層への `CanvasBackgroundStyle` Value Object の導入
+- [~] Task: `BackgroundCalculator` の抽出とユニットテスト
 - [ ] Task: Presentation 層（View/Painter）への背景描画ロジックの移動
 - [ ] Task: `ICanvasBackgroundService` の廃止と Application 層からの `System.Drawing` 依存の削除
 - [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)

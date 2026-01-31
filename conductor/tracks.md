@@ -1,4 +1,4 @@
-# Project Tracks
+﻿# Project Tracks
 
 This file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.
 
@@ -29,3 +29,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: 非破壊プレビュー付きコピー＆ペーストの改善**
 *Link: [./tracks/improve_paste_preview_20260201/](./tracks/improve_paste_preview_20260201/)*
+

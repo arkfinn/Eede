@@ -4,6 +4,7 @@ using Eede.Application.Drawings;
 using Eede.Application.Infrastructure;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
+using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.Files;
 using Eede.Domain.ImageEditing.History;
@@ -75,11 +76,15 @@ public class MainViewModelCharacterizationTests
             new PasteFromClipboardUseCase(Mock.Of<IClipboard>()),
             Mock.Of<IInteractionCoordinator>()
         );
-        var animationServiceMock = new Mock<IAnimationService>();
-        animationServiceMock.Setup(s => s.Patterns).Returns(new System.Collections.Generic.List<AnimationPattern>());
-        _animationViewModelMock = new Mock<AnimationViewModel>(animationServiceMock.Object, Mock.Of<IFileSystem>());
-                
+                var patternsProvider = new AnimationPatternsProvider();
+                _animationViewModelMock = new Mock<AnimationViewModel>(
+                    patternsProvider,
+                    new AddAnimationPatternUseCase(patternsProvider),
+                    new ReplaceAnimationPatternUseCase(patternsProvider),
+                    new RemoveAnimationPatternUseCase(patternsProvider),
+                    Mock.Of<IFileSystem>());
                 _drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(_drawingSessionProviderMock.Object);
+        
                 _paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>();
         
         

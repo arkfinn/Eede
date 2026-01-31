@@ -1,4 +1,5 @@
 using Eede.Application.Animations;
+using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Transformation;
@@ -23,7 +24,10 @@ namespace Eede.Presentation.ViewModels.Animations;
 
 public class AnimationViewModel : ViewModelBase, IAddFrameProvider
 {
-    private readonly IAnimationService _animationService;
+    private readonly IAnimationPatternsProvider _patternsProvider;
+    private readonly AddAnimationPatternUseCase _addUseCase;
+    private readonly ReplaceAnimationPatternUseCase _replaceUseCase;
+    private readonly RemoveAnimationPatternUseCase _removeUseCase;
     private readonly IFileSystem _fileSystem;
     private readonly IImageTransfer _imageTransfer = new DirectImageTransfer();
 
@@ -60,9 +64,17 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
         AddFrameCommand.Execute(cellIndex).Subscribe();
     }
 
-    public AnimationViewModel(IAnimationService animationService, IFileSystem fileSystem)
+    public AnimationViewModel(
+        IAnimationPatternsProvider patternsProvider,
+        AddAnimationPatternUseCase addUseCase,
+        ReplaceAnimationPatternUseCase replaceUseCase,
+        RemoveAnimationPatternUseCase removeUseCase,
+        IFileSystem fileSystem)
     {
-        _animationService = animationService;
+        _patternsProvider = patternsProvider;
+        _addUseCase = addUseCase;
+        _replaceUseCase = replaceUseCase;
+        _removeUseCase = removeUseCase;
         _fileSystem = fileSystem;
 
         _currentFrame = this.WhenAnyValue(x => x.SelectedPattern, x => x.CurrentFrameIndex)
@@ -76,10 +88,8 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
         WaitTime = 100;
         Magnification = new Magnification(4);
 
-        foreach (var pattern in _animationService.Patterns)
-        {
-            Patterns.Add(pattern);
-        }
+        SyncPatterns(_patternsProvider.Current);
+        _patternsProvider.Changed += SyncPatterns;
 
         if (Patterns.Count == 0)
         {
@@ -90,9 +100,8 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
                 new AnimationFrame(2, 100),
                 new AnimationFrame(1, 100)
             }, new GridSettings(new PictureSize(GridWidth, GridHeight), new Position(0, 0), 0));
-            _animationService.Add(testPattern);
-            Patterns.Add(testPattern);
-            SelectedPattern = testPattern;
+            _addUseCase.Execute(testPattern);
+            SelectedPattern = Patterns.FirstOrDefault();
         }
 
         this.WhenAnyValue(x => x.SelectedPattern)
@@ -135,9 +144,8 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
         CreatePatternCommand = ReactiveCommand.Create<string>(name =>
         {
             var newPattern = new AnimationPattern(name, new List<AnimationFrame>(), new GridSettings(new PictureSize(GridWidth, GridHeight), new Position(0, 0), 0));
-            _animationService.Add(newPattern);
-            Patterns.Add(newPattern);
-            SelectedPattern = newPattern;
+            _addUseCase.Execute(newPattern);
+            SelectedPattern = Patterns.LastOrDefault();
         });
 
         var canExecute = this.WhenAnyValue(x => x.SelectedPattern)
@@ -150,8 +158,7 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
                 int index = Patterns.IndexOf(SelectedPattern);
                 if (index >= 0)
                 {
-                    _animationService.Remove(index);
-                    Patterns.RemoveAt(index);
+                    _removeUseCase.Execute(index);
                     SelectedPattern = Patterns.Count > 0 ? Patterns[0] : null;
                 }
             }
@@ -238,9 +245,8 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
             var pattern = JsonSerializer.Deserialize<AnimationPattern>(json);
             if (pattern != null)
             {
-                _animationService.Add(pattern);
-                Patterns.Add(pattern);
-                SelectedPattern = pattern;
+                _addUseCase.Execute(pattern);
+                SelectedPattern = Patterns.LastOrDefault();
             }
         });
 
@@ -281,15 +287,24 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
             });
     }
 
+    private void SyncPatterns(AnimationPatterns patterns)
+    {
+        // シンプルな同期（必要に応じて最適化）
+        Patterns.Clear();
+        foreach (var p in patterns.Items)
+        {
+            Patterns.Add(p);
+        }
+    }
+
     private void UpdatePattern(AnimationPattern newPattern)
     {
         if (SelectedPattern == null) return;
         int index = Patterns.IndexOf(SelectedPattern);
         if (index >= 0)
         {
-            _animationService.Replace(index, newPattern);
-            Patterns[index] = newPattern;
-            SelectedPattern = newPattern;
+            _replaceUseCase.Execute(index, newPattern);
+            SelectedPattern = Patterns[index];
         }
     }
 }

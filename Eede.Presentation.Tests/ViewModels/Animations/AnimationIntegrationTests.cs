@@ -1,5 +1,6 @@
 using Eede.Presentation.Common.Services;
 using Eede.Application.Animations;
+using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
@@ -20,10 +21,15 @@ public class AnimationIntegrationTests
     public async Task Create_Edit_Export_Import_Workflow_ShouldWork()
     {
         // Arrange
-        var mockService = new AnimationService();
+        var patternsProvider = new AnimationPatternsProvider();
         var mockStorage = new Mock<IFileStorage>();
         var mockFileSystem = new Mock<IFileSystem>();
-        var viewModel = new AnimationViewModel(mockService, mockFileSystem.Object);
+        var viewModel = new AnimationViewModel(
+            patternsProvider,
+            new AddAnimationPatternUseCase(patternsProvider),
+            new ReplaceAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider),
+            mockFileSystem.Object);
 
         // 1. Create Pattern
         viewModel.CreatePatternCommand.Execute("New Animation").Subscribe();

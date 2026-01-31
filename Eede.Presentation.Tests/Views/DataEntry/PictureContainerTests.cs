@@ -7,6 +7,7 @@ using Eede.Application.Drawings;
 using Eede.Application.Pictures;
 using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Pictures;
+using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.Files;
 using Eede.Domain.ImageEditing;
@@ -47,10 +48,13 @@ public class PictureContainerTests
         var globalState = new GlobalState();
 
         // 2. Sub ViewModels Dependencies
-        var mockAnimationService = new Mock<IAnimationService>();
-        mockAnimationService.Setup(x => x.Patterns).Returns(new List<AnimationPattern>());
-        var mockFileSystem = new Mock<IFileSystem>();
-        var animationVM = new AnimationViewModel(mockAnimationService.Object, mockFileSystem.Object);
+        var patternsProvider = new AnimationPatternsProvider();
+        var animationVM = new AnimationViewModel(
+            patternsProvider,
+            new AddAnimationPatternUseCase(patternsProvider),
+            new ReplaceAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider),
+            new Mock<IFileSystem>().Object);
 
         var mockDrawingSessionProvider = new Mock<IDrawingSessionProvider>();
         mockDrawingSessionProvider.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));

@@ -29,23 +29,25 @@ public class DockPictureViewModelTests
     private GlobalState _globalState;
     private AnimationViewModel _animationViewModel;
     private Mock<IPictureRepository> _mockPictureRepository;
-    private SavePictureUseCase _savePictureUseCase;
-    private LoadPictureUseCase _loadPictureUseCase;
+    private IPictureIOService _pictureIOService;
 
     [SetUp]
     public void Setup()
     {
         _globalState = new GlobalState();
         var patternsProvider = new AnimationPatternsProvider();
-        _animationViewModel = new AnimationViewModel(
-            patternsProvider,
+        var patternService = new AnimationPatternService(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
-            new RemoveAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider));
+        _animationViewModel = new AnimationViewModel(
+            patternsProvider,
+            patternService,
             new Mock<IFileSystem>().Object);
         _mockPictureRepository = new Mock<IPictureRepository>();
-        _savePictureUseCase = new SavePictureUseCase(_mockPictureRepository.Object);
-        _loadPictureUseCase = new LoadPictureUseCase(_mockPictureRepository.Object);
+        _pictureIOService = new PictureIOService(
+            new SavePictureUseCase(_mockPictureRepository.Object),
+            new LoadPictureUseCase(_mockPictureRepository.Object));
     }
 
     [AvaloniaTest]
@@ -54,7 +56,7 @@ public class DockPictureViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _savePictureUseCase, _loadPictureUseCase);
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
 
             var size = new PictureSize(32, 32);
             var picture = Picture.CreateEmpty(size);
@@ -78,7 +80,7 @@ public class DockPictureViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _savePictureUseCase, _loadPictureUseCase);
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
 
             var initialSize = new PictureSize(32, 32);
             viewModel.Initialize(Picture.CreateEmpty(initialSize), new FilePath("test.png"));
@@ -104,7 +106,7 @@ public class DockPictureViewModelTests
         new TestScheduler().With(scheduler =>
         {
             RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _savePictureUseCase, _loadPictureUseCase);
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
 
             var mockFile = new Mock<IImageFile>();
             var bitmap = new WriteableBitmap(new Avalonia.PixelSize(32, 32), new Avalonia.Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);

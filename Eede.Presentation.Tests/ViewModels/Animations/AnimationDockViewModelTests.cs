@@ -15,11 +15,13 @@ public class AnimationDockViewModelTests
     public void ShouldInitializeWithCorrectProperties()
     {
         var patternsProvider = new AnimationPatternsProvider();
-        var animationViewModel = new AnimationViewModel(
-            patternsProvider,
+        var patternService = new AnimationPatternService(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
-            new RemoveAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider));
+        var animationViewModel = new AnimationViewModel(
+            patternsProvider,
+            patternService,
             new Mock<IFileSystem>().Object);
         
         var dockViewModel = new AnimationDockViewModel(animationViewModel);

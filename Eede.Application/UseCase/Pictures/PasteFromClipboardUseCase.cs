@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Eede.Application.UseCase.Pictures;
 
-public class PasteFromClipboardUseCase
+public class PasteFromClipboardUseCase : IPasteFromClipboardUseCase
 {
     private readonly IClipboard _clipboard;
     private readonly IDrawingSessionProvider _drawingSessionProvider;

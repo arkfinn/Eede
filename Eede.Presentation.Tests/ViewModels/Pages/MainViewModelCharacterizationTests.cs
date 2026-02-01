@@ -44,7 +44,8 @@ public class MainViewModelCharacterizationTests
     private Mock<PaletteContainerViewModel> _paletteContainerViewModelMock;
     private Mock<SavePictureUseCase> _savePictureUseCaseMock;
     private Mock<LoadPictureUseCase> _loadPictureUseCaseMock;
-    private Mock<IServiceProvider> _serviceProviderMock;
+    private Func<DockPictureViewModel> _dockPictureFactory;
+    private Func<NewPictureWindowViewModel> _newPictureWindowFactory;
 
     [SetUp]
     public void Setup()
@@ -60,7 +61,13 @@ public class MainViewModelCharacterizationTests
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
         _drawingSessionProviderMock.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));
         
-        // ViewModels usually need real instances or careful mocking. 
+        // UseCases
+        var copyUseCase = new CopySelectionUseCase(_clipboardServiceMock.Object);
+        var cutUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
+        var pasteUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProviderMock.Object);
+        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+
+        // DrawableCanvasViewModel usually need real instances or careful mocking. 
         // For characterization tests, we often use nulls if the constructor allows, 
         // but here we'll assume basic mocks are enough to pass the constructor.
         _drawableCanvasViewModelMock = new Mock<DrawableCanvasViewModel>(
@@ -69,32 +76,39 @@ public class MainViewModelCharacterizationTests
             Mock.Of<IClipboard>(),
             Mock.Of<IBitmapAdapter<Bitmap>>(),
             Mock.Of<IDrawingSessionProvider>(),
-            new CopySelectionUseCase(Mock.Of<IClipboard>()),
-            new CutSelectionUseCase(Mock.Of<IClipboard>()),
-                            new PasteFromClipboardUseCase(Mock.Of<IClipboard>(), Mock.Of<IDrawingSessionProvider>()),
-            
+            selectionService,
             Mock.Of<IInteractionCoordinator>()
         );
                 var patternsProvider = new AnimationPatternsProvider();
-                _animationViewModelMock = new Mock<AnimationViewModel>(
-                    patternsProvider,
+                var patternService = new AnimationPatternService(
                     new AddAnimationPatternUseCase(patternsProvider),
                     new ReplaceAnimationPatternUseCase(patternsProvider),
-                    new RemoveAnimationPatternUseCase(patternsProvider),
+                    new RemoveAnimationPatternUseCase(patternsProvider));
+                _animationViewModelMock = new Mock<AnimationViewModel>(
+                    patternsProvider,
+                    patternService,
                     Mock.Of<IFileSystem>());
                 _drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(_drawingSessionProviderMock.Object);
         
                 _paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>();
         
+        var pictureIOService = new PictureIOService(
+            new SavePictureUseCase(_pictureRepositoryMock.Object),
+            new LoadPictureUseCase(_pictureRepositoryMock.Object));
         
         _savePictureUseCaseMock = new Mock<SavePictureUseCase>(_pictureRepositoryMock.Object);
         _loadPictureUseCaseMock = new Mock<LoadPictureUseCase>(_pictureRepositoryMock.Object);
-        _serviceProviderMock = new Mock<IServiceProvider>();
+        _dockPictureFactory = () => new DockPictureViewModel(Mock.Of<GlobalState>(), _animationViewModelMock.Object, _bitmapAdapterMock.Object, pictureIOService);
+        _newPictureWindowFactory = () => new Mock<NewPictureWindowViewModel>().Object;
     }
 
     [Test]
     public void ConstructorTest()
     {
+        var pictureIOService = new PictureIOService(
+            new SavePictureUseCase(_pictureRepositoryMock.Object),
+            new LoadPictureUseCase(_pictureRepositoryMock.Object));
+
         var vm = new MainViewModel(
             _stateMock.Object,
             _clipboardServiceMock.Object,
@@ -109,9 +123,9 @@ public class MainViewModelCharacterizationTests
             _animationViewModelMock.Object,
             _drawingSessionViewModelMock.Object,
             _paletteContainerViewModelMock.Object,
-            _savePictureUseCaseMock.Object,
-            _loadPictureUseCaseMock.Object,
-            _serviceProviderMock.Object
+            pictureIOService,
+            _dockPictureFactory,
+            _newPictureWindowFactory
         );
 
         Assert.That(vm, Is.Not.Null);

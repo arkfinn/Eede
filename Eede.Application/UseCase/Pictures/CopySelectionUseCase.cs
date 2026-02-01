@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Eede.Application.UseCase.Pictures;
 
-public class CopySelectionUseCase
+public class CopySelectionUseCase : ICopySelectionUseCase
 {
     private readonly IClipboard _clipboard;
 

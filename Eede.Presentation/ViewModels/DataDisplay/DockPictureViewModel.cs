@@ -22,16 +22,16 @@ namespace Eede.Presentation.ViewModels.DataDisplay
     public class DockPictureViewModel : ViewModelBase
     {
 
-        public static DockPictureViewModel FromFile(Picture picture, FilePath filePath, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, SavePictureUseCase saveUseCase, LoadPictureUseCase loadUseCase)
+        public static DockPictureViewModel FromFile(Picture picture, FilePath filePath, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureIOService pictureIOService)
         {
-            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, saveUseCase, loadUseCase);
+            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, pictureIOService);
             vm.Initialize(picture, filePath);
             return vm;
         }
 
-        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, SavePictureUseCase saveUseCase, LoadPictureUseCase loadUseCase)
+        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureIOService pictureIOService)
         {
-            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, saveUseCase, loadUseCase);
+            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, pictureIOService);
             vm.Initialize(Picture.CreateEmpty(size), FilePath.Empty());
             return vm;
         }
@@ -58,16 +58,14 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public GlobalState GlobalState { get; }
         public AnimationViewModel AnimationViewModel { get; }
         private readonly IBitmapAdapter<Bitmap> BitmapAdapter;
-        private readonly SavePictureUseCase SavePictureUseCase;
-        private readonly LoadPictureUseCase LoadPictureUseCase;
+        private readonly IPictureIOService PictureIOService;
 
-        public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, SavePictureUseCase savePictureUseCase, LoadPictureUseCase loadPictureUseCase)
+        public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureIOService pictureIOService)
         {
             GlobalState = globalState;
             AnimationViewModel = animationViewModel;
             BitmapAdapter = bitmapAdapter;
-            SavePictureUseCase = savePictureUseCase;
-            LoadPictureUseCase = loadPictureUseCase;
+            PictureIOService = pictureIOService;
 
             Id = Guid.NewGuid().ToString();
 

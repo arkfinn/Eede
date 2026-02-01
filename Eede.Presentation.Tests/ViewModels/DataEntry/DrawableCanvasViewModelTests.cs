@@ -32,9 +32,7 @@ public class DrawableCanvasViewModelTests
     private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock;
     private Mock<IDrawActionUseCase> _drawActionUseCaseMock;
     private Mock<IDrawingSessionProvider> _drawingSessionProviderMock;
-    private Mock<CopySelectionUseCase> _copySelectionUseCaseMock;
-    private Mock<CutSelectionUseCase> _cutSelectionUseCaseMock;
-    private Mock<PasteFromClipboardUseCase> _pasteFromClipboardUseCaseMock;
+    private Mock<ISelectionService> _selectionServiceMock;
     private Mock<IInteractionCoordinator> _interactionCoordinatorMock;
     private GlobalState _globalState;
 
@@ -46,10 +44,8 @@ public class DrawableCanvasViewModelTests
         _bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
         _drawActionUseCaseMock = new Mock<IDrawActionUseCase>();
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
-        _copySelectionUseCaseMock = new Mock<CopySelectionUseCase>(_clipboardServiceMock.Object);
-        _cutSelectionUseCaseMock = new Mock<CutSelectionUseCase>(_clipboardServiceMock.Object);
-        _pasteFromClipboardUseCaseMock = new Mock<PasteFromClipboardUseCase>(_clipboardServiceMock.Object, _drawingSessionProviderMock.Object);
-        _pasteFromClipboardUseCaseMock.Setup(x => x.ExecuteAsync()).Returns(Task.CompletedTask);
+        _selectionServiceMock = new Mock<ISelectionService>();
+        _selectionServiceMock.Setup(x => x.PasteAsync()).Returns(Task.CompletedTask);
         _interactionCoordinatorMock = new Mock<IInteractionCoordinator>();
         _globalState = new GlobalState();
     }
@@ -62,9 +58,7 @@ public class DrawableCanvasViewModelTests
             _clipboardServiceMock.Object,
             _bitmapAdapterMock.Object,
             _drawingSessionProviderMock.Object,
-            _copySelectionUseCaseMock.Object,
-            _cutSelectionUseCaseMock.Object,
-            _pasteFromClipboardUseCaseMock.Object,
+            _selectionServiceMock.Object,
             _interactionCoordinatorMock.Object);
     }
 
@@ -156,13 +150,13 @@ public class DrawableCanvasViewModelTests
     }
 
     [AvaloniaTest]
-    public void CopyCommand_ShouldInvokeClipboardService()
+    public void CopyCommand_ShouldInvokeService()
     {
         var vm = CreateViewModel();
         vm.PictureBuffer = new DrawingBuffer(Picture.CreateEmpty(new PictureSize(32, 32)));
 
         vm.CopyCommand.Execute().Subscribe();
 
-        _clipboardServiceMock.Verify(x => x.CopyAsync(It.IsAny<Picture>()), Times.Once);
+        _selectionServiceMock.Verify(x => x.CopyAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()), Times.Once);
     }
 }

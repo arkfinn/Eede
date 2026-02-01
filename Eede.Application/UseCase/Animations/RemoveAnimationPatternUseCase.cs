@@ -3,7 +3,7 @@ using System;
 
 namespace Eede.Application.UseCase.Animations;
 
-public class RemoveAnimationPatternUseCase
+public class RemoveAnimationPatternUseCase : IRemoveAnimationPatternUseCase
 {
     private readonly IAnimationPatternsProvider _provider;
 

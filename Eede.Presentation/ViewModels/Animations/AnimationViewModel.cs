@@ -1,12 +1,12 @@
 using Eede.Application.Animations;
+using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
-using Eede.Application.Infrastructure;
-using Eede.Presentation.Common.Services;
+using Eede.Presentation.Files;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -18,7 +18,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text.Json;
 using System.IO;
-using Eede.Presentation.Files;
 
 namespace Eede.Presentation.ViewModels.Animations;
 

@@ -17,7 +17,7 @@ namespace Eede.Presentation.Services;
 
 public class InteractionCoordinator : IInteractionCoordinator
 {
-    public DrawingBuffer CurrentBuffer => _sessionProvider.CurrentSession.Buffer;
+    public DrawingBuffer CurrentBuffer => _interactionSession?.Buffer ?? _sessionProvider.CurrentSession.Buffer;
 
     private PictureArea? _manualSelectingArea;
     public PictureArea? SelectingArea
@@ -138,9 +138,10 @@ public class InteractionCoordinator : IInteractionCoordinator
         // プレビュー状態から通常状態へ遷移（範囲外クリック）した場合、確定する
         if (previousState is SelectionPreviewState && nextState is NormalCursorState)
         {
-            _sessionProvider.Update(previousState.Commit(_sessionProvider.CurrentSession));
+            var committedSession = previousState.Commit(_sessionProvider.CurrentSession);
+            _sessionProvider.Update(committedSession);
             // 確定後のバッファでセッションを再構築
-            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
+            _interactionSession = new CanvasInteractionSession(committedSession.Buffer, drawStyle, nextState);
             NotifyStateChanged();
             return;
         }
@@ -156,7 +157,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         DrawingResult result = _drawableArea.DrawStart(drawStyle, penStyle, CurrentBuffer, pos, isShift);
         _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
         _drawableArea = result.DrawableArea;
-        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
+        _interactionSession = new CanvasInteractionSession(result.PictureBuffer, drawStyle, _interactionSession.SelectionState);
         NotifyStateChanged();
     }
 
@@ -189,7 +190,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         DrawingResult result = _drawableArea.Move(drawStyle, penStyle, CurrentBuffer, pos, isShift);
         _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
         _drawableArea = result.DrawableArea;
-        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
+        _interactionSession = new CanvasInteractionSession(result.PictureBuffer, drawStyle, _interactionSession.SelectionState);
         NotifyStateChanged();
     }
 
@@ -226,6 +227,7 @@ public class InteractionCoordinator : IInteractionCoordinator
             DrawingResult result = _drawableArea.DrawCancel(CurrentBuffer);
             _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
             _drawableArea = result.DrawableArea;
+            _interactionSession = new CanvasInteractionSession(result.PictureBuffer, drawStyle, _interactionSession.SelectionState);
         }
         else if (previousState is not SelectionPreviewState)
         {
@@ -270,7 +272,7 @@ public class InteractionCoordinator : IInteractionCoordinator
             DrawingResult result = _drawableArea.DrawEnd(drawStyle, penStyle, CurrentBuffer, pos, isShift);
             _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
             _drawableArea = result.DrawableArea;
-            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
+            _interactionSession = new CanvasInteractionSession(result.PictureBuffer, drawStyle, _interactionSession.SelectionState);
             Drew?.Invoke(previousImage, CurrentBuffer.Previous, _operationInitialSelectingArea, SelectingArea);
         }
         NotifyStateChanged();
@@ -298,6 +300,16 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public void SyncWithSession()
     {
+        SyncWithSession(false);
+    }
+
+    public void SyncWithSession(bool forceReset)
+    {
+        if (forceReset)
+        {
+            _interactionSession = null;
+        }
+
         if (_interactionSession?.SelectionState is DraggingState)
         {
             return;
@@ -338,22 +350,45 @@ public class InteractionCoordinator : IInteractionCoordinator
         tool.OnDrawEnd += (sender, args) =>
         {
             _manualSelectingArea = null;
-            _interactionSession = new CanvasInteractionSession(CurrentBuffer, tool, new SelectedState(new Selection(PictureArea.FromPosition(args.Start, args.Now, CurrentBuffer.Previous.Size))));
+            var selection = new Selection(PictureArea.FromPosition(args.Start, args.Now, CurrentBuffer.Previous.Size));
+            _interactionSession = new CanvasInteractionSession(CurrentBuffer, tool, new SelectedState(selection));
+            
+            // Selection state must be synced to the global session for UseCases (like Paste) to access it.
+            _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateSelectingArea(selection.Area));
+
             NotifyStateChanged();
         };
     }
 
     public Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
     {
-        var picture = _drawableArea.Painted(buffer, penStyle, imageTransfer);
-        if (picture == null) return null;
+        if (buffer == null) return null;
 
-        if (PreviewPixels != null)
+        // 1. 描画中の内容を含むベース画像（未拡大）を取得
+        Picture picture = buffer.Fetch();
+        
+        // 2. プレビュー画像（貼り付けや移動）がある場合、拡大前に合成する
+        // 現在の作業状態 (_interactionSession) のプレビュー情報を最優先し、
+        // なければグローバルセッション (IDrawingSessionProvider) の情報を使う。
+        var preview = _interactionSession?.SelectionState.GetSelectionPreviewInfo() 
+                      ?? _sessionProvider.CurrentSession.CurrentPreviewContent;
+
+        if (preview != null)
         {
-            var magnifiedPreview = imageTransfer.Transfer(PreviewPixels, _magnification);
-            var magnifiedPosition = new Position(_magnification.Magnify(PreviewPosition.X), _magnification.Magnify(PreviewPosition.Y));
-            picture = picture.Blend(new DirectImageBlender(), magnifiedPreview, magnifiedPosition);
+            if (preview.OriginalArea.HasValue)
+            {
+                picture = picture.Clear(preview.OriginalArea.Value);
+            }
+            picture = picture.Blend(new DirectImageBlender(), preview.Pixels, preview.Position);
         }
-        return picture;
+
+        // 3. 合成済みの画像を拡大し、必要に応じてペン先カーソルを重ねる
+        var tempBuffer = buffer.Reset(picture);
+        if (buffer.IsDrawing())
+        {
+            tempBuffer = tempBuffer.UpdateDrawing(picture);
+        }
+        
+        return _drawableArea.Painted(tempBuffer, penStyle, imageTransfer);
     }
 }

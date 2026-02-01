@@ -85,7 +85,7 @@ public class MainViewModel : ViewModelBase
     [Reactive] public PictureSize CursorSize { get; set; }
 
     [Reactive] public DrawingSessionViewModel DrawingSessionViewModel { get; private set; }
-    [Reactive] public IFileStorage StorageService { get; set; }
+    [Reactive] public IFileStorage FileStorage { get; set; }
     [Reactive] public Cursor? AnimationCursor { get; set; }
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
     [Reactive] public bool HasClipboardPicture { get; set; } = false;
@@ -289,18 +289,26 @@ public class MainViewModel : ViewModelBase
             DrawStyle = DrawStyleType.RegionSelect;
         }, this.WhenAnyValue(x => x.HasClipboardPicture));
 
-        this.WhenAnyValue(x => x.DrawingSessionViewModel.CurrentSession)
-            .Subscribe(session =>
-            {
-                SetPictureToDrawArea(session.CurrentPicture);
-            });
-
         DrawingSessionViewModel.Undone += OnUndone;
         DrawingSessionViewModel.Redone += OnRedone;
+
+        this.WhenAnyValue(x => x.ActiveDockable)
+            .Subscribe(active =>
+            {
+                if (active is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
+                {
+                    // ドキュメントが切り替わった時にキャンバスを初期化
+                    // TODO: DrawingSessionProvider 側の切り替えと同期させる
+                }
+            });
     }
 
     private void OnUndone(object? sender, UndoResult e)
     {
+        DrawableCanvasViewModel.PictureBuffer = e.Session.Buffer;
+        DrawableCanvasViewModel.SyncWithSession(true);
+        SetPictureToDrawArea(e.Session.CurrentPicture);
+
         if (e.Item is DockActiveHistoryItem dockItem)
         {
             var vm = Pictures.FirstOrDefault(x => x.Id == dockItem.DockId);
@@ -313,6 +321,10 @@ public class MainViewModel : ViewModelBase
 
     private void OnRedone(object? sender, RedoResult e)
     {
+        DrawableCanvasViewModel.PictureBuffer = e.Session.Buffer;
+        DrawableCanvasViewModel.SyncWithSession(true);
+        SetPictureToDrawArea(e.Session.CurrentPicture);
+
         if (e.Item is DockActiveHistoryItem dockItem)
         {
             var vm = Pictures.FirstOrDefault(x => x.Id == dockItem.DockId);
@@ -469,7 +481,7 @@ public class MainViewModel : ViewModelBase
 
     private async Task OnPictureSave(object sender, PictureSaveEventArgs e)
     {
-        SaveImageResult saveResult = await e.File.SaveAsync(StorageService);
+        SaveImageResult saveResult = await e.File.SaveAsync(FileStorage);
         if (saveResult.IsCanceled)
         {
             e.Cancel();

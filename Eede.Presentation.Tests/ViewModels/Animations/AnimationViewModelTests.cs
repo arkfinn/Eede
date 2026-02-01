@@ -1,34 +1,26 @@
 using Eede.Application.Animations;
-using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
-using Eede.Domain.SharedKernel;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 using Eede.Presentation.ViewModels.Animations;
+using Eede.Application.UseCase.Animations;
 using Moq;
 using NUnit.Framework;
-using ReactiveUI;
-using System;
 using System.Collections.Generic;
-using System.Reactive;
 
 namespace Eede.Presentation.Tests.ViewModels.Animations;
 
-[TestFixture]
 public class AnimationViewModelTests
 {
-    private AnimationPatternsProvider _patternsProvider;
     private Mock<IFileSystem> _fileSystemMock;
+    private AnimationViewModel _viewModel;
+    private AnimationPatternsProvider _patternsProvider;
 
     [SetUp]
-    public void Setup()
+    public void SetUp()
     {
-        _patternsProvider = new AnimationPatternsProvider();
         _fileSystemMock = new Mock<IFileSystem>();
-    }
-
-    private AnimationViewModel CreateViewModel()
-    {
-        return new AnimationViewModel(
+        _patternsProvider = new AnimationPatternsProvider();
+        _viewModel = new AnimationViewModel(
             _patternsProvider,
             new AddAnimationPatternUseCase(_patternsProvider),
             new ReplaceAnimationPatternUseCase(_patternsProvider),
@@ -37,9 +29,11 @@ public class AnimationViewModelTests
     }
 
     [Test]
-    public void ConstructorTest()
+    public void ShouldInitializeWithDefaultValues()
     {
-        var vm = CreateViewModel();
-        Assert.That(vm, Is.Not.Null);
+        Assert.That(_viewModel.GridWidth, Is.EqualTo(32));
+        Assert.That(_viewModel.GridHeight, Is.EqualTo(32));
+        Assert.That(_viewModel.WaitTime, Is.EqualTo(100));
+        Assert.That(_viewModel.Patterns.Count, Is.EqualTo(1));
     }
 }

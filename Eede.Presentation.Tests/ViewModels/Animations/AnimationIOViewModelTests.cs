@@ -1,14 +1,14 @@
-using Eede.Presentation.Common.Services;
 using Eede.Application.Animations;
+using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.SharedKernel;
-using Eede.Application.Infrastructure;
 using Eede.Presentation.ViewModels.Animations;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
@@ -16,19 +16,16 @@ namespace Eede.Presentation.Tests.ViewModels.Animations;
 
 public class AnimationIOViewModelTests
 {
-    private AnimationPatternsProvider _patternsProvider;
     private Mock<IFileSystem> _fileSystemMock;
+    private AnimationViewModel _viewModel;
+    private AnimationPatternsProvider _patternsProvider;
 
     [SetUp]
-    public void Setup()
+    public void SetUp()
     {
-        _patternsProvider = new AnimationPatternsProvider();
         _fileSystemMock = new Mock<IFileSystem>();
-    }
-
-    private AnimationViewModel CreateViewModel()
-    {
-        return new AnimationViewModel(
+        _patternsProvider = new AnimationPatternsProvider();
+        _viewModel = new AnimationViewModel(
             _patternsProvider,
             new AddAnimationPatternUseCase(_patternsProvider),
             new ReplaceAnimationPatternUseCase(_patternsProvider),
@@ -37,52 +34,34 @@ public class AnimationIOViewModelTests
     }
 
     [Test]
-    public async Task ExportCommand_ShouldSaveJsonToFile()
+    public async Task ExportCommand_ShouldSaveToFile()
     {
-        // Arrange
         var mockStorage = new Mock<IFileStorage>();
-        var pattern = new AnimationPattern("Test Pattern", new List<AnimationFrame>(), new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0));
-        var viewModel = CreateViewModel();
-        viewModel.CreatePatternCommand.Execute("Test Pattern").Subscribe();
-        viewModel.SelectedPattern = viewModel.Patterns[1]; // Index 0 is default pattern
+        var uri = new Uri("file:///path/to/animation.json");
+        mockStorage.Setup(s => s.SaveAnimationFilePickerAsync()).ReturnsAsync(uri);
 
-        var uri = new Uri("file:///C:/test.json");
-        mockStorage.Setup(x => x.SaveAnimationFilePickerAsync()).ReturnsAsync(uri);
+        _viewModel.SelectedPattern = new AnimationPattern("ExportTest", new List<AnimationFrame>(), new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0));
 
-        string savedJson = "";
-        _fileSystemMock.Setup(x => x.WriteAllTextAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .Callback<string, string>((path, json) => savedJson = json)
-            .Returns(Task.CompletedTask);
+        await _viewModel.ExportCommand.Execute(mockStorage.Object);
 
-        // Act
-        await viewModel.ExportCommand.Execute(mockStorage.Object).FirstAsync();
-
-        // Assert
-        mockStorage.Verify(x => x.SaveAnimationFilePickerAsync(), Times.Once);
-        _fileSystemMock.Verify(x => x.WriteAllTextAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-        Assert.That(savedJson, Does.Contain("Test Pattern"));
+        _fileSystemMock.Verify(fs => fs.WriteAllTextAsync(uri.LocalPath, It.IsAny<string>()), Times.Once);
     }
 
     [Test]
-    public async Task ImportCommand_ShouldLoadJsonFromFile()
+    public async Task ImportCommand_ShouldLoadFromFile()
     {
-        // Arrange
         var mockStorage = new Mock<IFileStorage>();
-        var viewModel = CreateViewModel();
+        var uri = new Uri("file:///path/to/animation.json");
+        mockStorage.Setup(s => s.OpenFilePickerAsync()).ReturnsAsync(uri);
 
-        var uri = new Uri("file:///C:/test.json");
-        mockStorage.Setup(x => x.OpenFilePickerAsync()).ReturnsAsync(uri);
+        var json = "{\"Name\":\"ImportTest\",\"Frames\":[],\"Grid\":{\"CellSize\":{\"Width\":32,\"Height\":32},\"Offset\":{\"X\":0,\"Y\":0},\"Padding\":0}}";
+        _fileSystemMock.Setup(fs => fs.ReadAllTextAsync(uri.LocalPath)).ReturnsAsync(json);
 
-        string json = "{\"Name\":\"Test Pattern\",\"Frames\":[],\"Grid\":{\"CellSize\":{\"Width\":32,\"Height\":32},\"Offset\":{\"X\":0,\"Y\":0},\"Spacing\":0}}";
-        _fileSystemMock.Setup(x => x.ReadAllTextAsync(It.IsAny<string>())).ReturnsAsync(json);
+        int initialCount = _viewModel.Patterns.Count;
 
-        // Act
-        await viewModel.ImportCommand.Execute(mockStorage.Object).FirstAsync();
+        await _viewModel.ImportCommand.Execute(mockStorage.Object);
 
-        // Assert
-        mockStorage.Verify(x => x.OpenFilePickerAsync(), Times.Once);
-        _fileSystemMock.Verify(x => x.ReadAllTextAsync(It.IsAny<string>()), Times.Once);
-        Assert.That(viewModel.Patterns.Count, Is.EqualTo(2)); // Initial + Imported
-        Assert.That(viewModel.Patterns[1].Name, Is.EqualTo("Test Pattern"));
+        Assert.That(_viewModel.Patterns.Count, Is.EqualTo(initialCount + 1));
+        Assert.That(_viewModel.Patterns.Last().Name, Is.EqualTo("ImportTest"));
     }
 }

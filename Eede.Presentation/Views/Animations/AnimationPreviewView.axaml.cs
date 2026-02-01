@@ -1,29 +1,22 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Eede.Presentation.Common.Services;
-using Eede.Presentation.Files;
+using Eede.Presentation.Common.Adapters;
 
 namespace Eede.Presentation.Views.Animations;
 
 public partial class AnimationPreviewView : UserControl
 {
-    public static readonly StyledProperty<StorageService> StorageServiceProperty =
-        AvaloniaProperty.Register<AnimationPreviewView, StorageService>(nameof(StorageService));
-
-    public StorageService StorageService
-    {
-        get => GetValue(StorageServiceProperty);
-        set => SetValue(StorageServiceProperty, value);
-    }
-
     public AnimationPreviewView()
     {
         InitializeComponent();
     }
 
-    private void InitializeComponent()
+    public static readonly StyledProperty<AvaloniaFileStorage> FileStorageProperty =
+        AvaloniaProperty.Register<AnimationPreviewView, AvaloniaFileStorage>(nameof(FileStorage));
+
+    public AvaloniaFileStorage FileStorage
     {
-        AvaloniaXamlLoader.Load(this);
+        get => GetValue(FileStorageProperty);
+        set => SetValue(FileStorageProperty, value);
     }
 }

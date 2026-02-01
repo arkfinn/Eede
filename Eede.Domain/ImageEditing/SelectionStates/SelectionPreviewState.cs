@@ -21,7 +21,7 @@ public class SelectionPreviewState : ISelectionState
         var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);
         if (Contains(currentArea, mousePosition))
         {
-            return new DraggingState(_info.Pixels, currentArea, mousePosition);
+            return new DraggingState(_info.Pixels, currentArea, mousePosition, _info.Type);
         }
 
         return new NormalCursorState(cursorArea);

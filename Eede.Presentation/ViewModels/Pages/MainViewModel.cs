@@ -545,6 +545,7 @@ public class MainViewModel : ViewModelBase
 
     private void ExecutePictureAction(PictureActions actionType)
     {
+        DrawableCanvasViewModel.CommitSelection();
         PictureArea? area = DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null;
         Picture updated = area.HasValue ? _transformImageUseCase.Execute(
             DrawableCanvasViewModel.PictureBuffer.Previous,

@@ -272,7 +272,10 @@ public class MainViewModel : ViewModelBase
         CloseWindowInteraction = new Interaction<Unit, Unit>();
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
 
-        var canCopyCut = this.WhenAnyValue(x => x.DrawStyle, x => x == DrawStyleType.RegionSelect);
+        var canCopyCut = this.WhenAnyValue(
+            x => x.DrawStyle,
+            x => x.DrawableCanvasViewModel.IsRegionSelecting,
+            (style, isSelecting) => style == DrawStyleType.RegionSelect && isSelecting);
         CopyCommand = ReactiveCommand.CreateFromTask(async () =>
         {
             await DrawableCanvasViewModel.CopyCommand.Execute();

@@ -22,6 +22,8 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
+using Eede.Presentation.ViewModels.Pages; // Add this
+
 namespace Eede.Presentation.Tests
 {
     [TestFixture]
@@ -32,6 +34,7 @@ namespace Eede.Presentation.Tests
         private Mock<IClipboard> _clipboardMock;
         private PasteFromClipboardUseCase _pasteUseCase;
         private DrawableCanvasViewModel _viewModel;
+        private DrawingSessionViewModel _sessionViewModel; // Add this
 
         [SetUp]
         public void Setup()
@@ -60,6 +63,7 @@ namespace Eede.Presentation.Tests
                 _coordinator);
             
             _viewModel.Magnification = new Magnification(1);
+            _sessionViewModel = new DrawingSessionViewModel(_sessionProvider); // Initialize
         }
 
         [AvaloniaTest]
@@ -104,6 +108,44 @@ namespace Eede.Presentation.Tests
 
             // Assert: ペースト位置が (5,5) になっていること
             Assert.That(_viewModel.PreviewPosition, Is.EqualTo(new Position(5, 5)), "Paste should start at the selection's top-left corner");
+        }
+
+        [AvaloniaTest]
+        public async Task MoveSelection_Commit_ShouldBeUndoable()
+        {
+            // Setup: (0,0) に赤い点がある画像
+            var red = new ArgbColor(255, 255, 0, 0);
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(1, 1), new byte[] { 0, 0, 255, 255 }), new Position(0, 0));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // Initial check: Undo should be disabled
+            var canUndo = await _sessionViewModel.UndoCommand.CanExecute.FirstAsync();
+            Assert.That(canUndo, Is.False, "Undo should be disabled initially");
+
+            // 1. Select (0,0)-(1,1)
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(1, 1)).Subscribe();
+
+            // 2. Move to (10,10)
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
+
+            // 3. Commit by clicking outside
+            _viewModel.DrawBeginCommand.Execute(new Position(30, 30)).Subscribe();
+
+            // Assert: Undo should be enabled
+            canUndo = await _sessionViewModel.UndoCommand.CanExecute.FirstAsync();
+            Assert.That(canUndo, Is.True, "Undo should be enabled after commit");
+
+            // 4. Execute Undo
+            await _sessionViewModel.UndoCommand.Execute();
+
+            // Assert: Picture restored
+            var result = _sessionProvider.CurrentSession.Buffer.Fetch();
+            Assert.That(result.PickColor(new Position(0, 0)), Is.EqualTo(red), "Pixel at (0,0) should be restored");
+            Assert.That(result.PickColor(new Position(10, 10)).Alpha, Is.EqualTo(0), "Pixel at (10,10) should be cleared");
         }
     }
 }

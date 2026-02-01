@@ -126,7 +126,8 @@ namespace Eede.Domain.ImageEditing
         {
             if (PreviewContent == null) return this;
 
-            return Push(CurrentPicture, CurrentSelectingArea);
+            var nextArea = new PictureArea(PreviewContent.Position, PreviewContent.Pixels.Size);
+            return Push(CurrentPicture, nextArea);
         }
 
         /// <summary>

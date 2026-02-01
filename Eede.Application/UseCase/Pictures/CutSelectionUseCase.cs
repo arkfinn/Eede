@@ -16,6 +16,10 @@ public class CutSelectionUseCase
 
     public async Task<Picture> ExecuteAsync(Picture picture, PictureArea? area)
     {
+        if (area.HasValue && area.Value.IsEmpty)
+        {
+            return picture;
+        }
         var target = area != null ? picture.CutOut(area.Value) : picture;
         await _clipboard.CopyAsync(target);
 

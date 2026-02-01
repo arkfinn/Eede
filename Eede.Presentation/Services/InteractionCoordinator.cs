@@ -113,57 +113,66 @@ public class InteractionCoordinator : IInteractionCoordinator
         EnsureInteractionSession(CurrentBuffer, drawStyle);
         _operationInitialSelectingArea = SelectingArea;
         
+        var workingSession = _sessionProvider.CurrentSession;
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
         var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
         var currentArea = HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize);
 
         var previousState = _interactionSession.SelectionState;
 
-        // プレビュー状態中に別のツールで描画を開始しようとした場合、確定する
+        // 1. プレビュー状態中に別のツールで描画を開始しようとした場合、確定する
         if (previousState is SelectionPreviewState && drawStyle is not RegionSelector)
         {
-            var committedSession = previousState.Commit(_sessionProvider.CurrentSession);
-            _sessionProvider.Update(committedSession);
-            // 確定後の最新バッファと、確定後の状態(NormalCursorState)でセッションを再構築する
-            _interactionSession = new CanvasInteractionSession(committedSession.Buffer, drawStyle, new NormalCursorState(currentArea));
+            workingSession = previousState.Commit(workingSession);
+            _sessionProvider.Update(workingSession);
+            // 確定後の最新バッファと、確定後の状態(NormalCursorState)でセッションを更新
+            _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, new NormalCursorState(currentArea));
             previousState = _interactionSession.SelectionState;
         }
+        else
+        {
+            // 確定が発生しなかった場合でも、最新のバッファでセッションを確実に同期させる
+            _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, previousState);
+        }
 
-        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, previousState);
         UpdateCursor(pos);
 
+        // 2. 選択状態の更新（移動開始判定など）
         var nextState = _interactionSession.SelectionState.HandlePointerLeftButtonPressed(
             currentArea,
             canvasCoordinate.ToPosition(),
             null,
-            () => CurrentBuffer.Fetch(),
+            () => workingSession.Buffer.Fetch(),
             internalUpdateCommand);
 
         if (nextState is DraggingState)
         {
-            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
-            _drawableArea = _drawableArea.Leave(CurrentBuffer);
+            _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
+            _drawableArea = _drawableArea.Leave(workingSession.Buffer);
             NotifyStateChanged();
             return;
         }
 
-        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
+        _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
 
-        var currentState = nextState;
-
-        // プレビュー状態から通常状態へ遷移（範囲外クリック）した場合、確定する
-        if (previousState is SelectionPreviewState && currentState is NormalCursorState)
+        // 3. プレビュー状態から通常状態へ遷移（範囲外クリック）した場合、確定する
+        if (previousState is SelectionPreviewState && nextState is NormalCursorState)
         {
-            var committedSession = previousState.Commit(_sessionProvider.CurrentSession);
-            _sessionProvider.Update(committedSession);
+            workingSession = previousState.Commit(workingSession);
+            _sessionProvider.Update(workingSession);
             // 確定後のバッファでセッションを再構築
-            _interactionSession = new CanvasInteractionSession(committedSession.Buffer, drawStyle, currentState);
+            _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
             NotifyStateChanged();
             return;
         }
 
-        DrawingResult result = _drawableArea.DrawStart(drawStyle, penStyle, CurrentBuffer, pos, isShift);
-        _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
+        // 4. 新しい描画の開始
+        DrawingResult result = _drawableArea.DrawStart(drawStyle, penStyle, workingSession.Buffer, pos, isShift);
+        if (result.PictureBuffer != workingSession.Buffer)
+        {
+            workingSession = workingSession.UpdateBuffer(result.PictureBuffer);
+            _sessionProvider.Update(workingSession);
+        }
         _drawableArea = result.DrawableArea;
         _interactionSession = new CanvasInteractionSession(result.PictureBuffer, drawStyle, _interactionSession.SelectionState);
         NotifyStateChanged();
@@ -300,7 +309,16 @@ public class InteractionCoordinator : IInteractionCoordinator
             if (nextSession != _sessionProvider.CurrentSession)
             {
                 _sessionProvider.Update(nextSession);
-                _interactionSession = new CanvasInteractionSession(CurrentBuffer, _interactionSession.DrawStyle, new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), new PictureSize(16, 16))));
+                
+                var area = nextSession.CurrentSelectingArea;
+                if (area.HasValue && !area.Value.IsEmpty && _interactionSession.DrawStyle is RegionSelector)
+                {
+                    _interactionSession = new CanvasInteractionSession(nextSession.Buffer, _interactionSession.DrawStyle, new SelectedState(new Selection(area.Value)));
+                }
+                else
+                {
+                    _interactionSession = new CanvasInteractionSession(nextSession.Buffer, _interactionSession.DrawStyle, new NormalCursorState(HalfBoxArea.Create(new Position(0, 0), new PictureSize(16, 16))));
+                }
                 NotifyStateChanged();
             }
         }

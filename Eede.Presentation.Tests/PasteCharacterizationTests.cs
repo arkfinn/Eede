@@ -93,7 +93,8 @@ namespace Eede.Presentation.Tests
 
             // Act: プレビュー範囲外をクリック
             // プレビューは (0,0) にあるので、(20,20) をクリック
-            _viewModel.DrawBeginCommand.Execute(new Position(20, 20)).Subscribe();
+            await _viewModel.DrawBeginCommand.Execute(new Position(20, 20)).ToTask();
+            await _viewModel.DrawEndCommand.Execute(new Position(20, 20)).ToTask();
 
             // Assert: 確定されていること
             Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Preview should be committed");

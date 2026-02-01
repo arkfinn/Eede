@@ -305,6 +305,11 @@ public class DrawableCanvasViewModel : ViewModelBase
         _coordinator.CanvasLeave(PictureBuffer);
     }
 
+    public void CommitSelection()
+    {
+        _coordinator.CommitSelection();
+    }
+
     public void SyncWithSession(bool forceReset = false)
     {
         _coordinator.SyncWithSession(forceReset);
@@ -316,6 +321,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         try
         {
+            CommitSelection();
             await _copySelectionUseCase.ExecuteAsync(PictureBuffer.Previous, IsRegionSelecting ? SelectingArea : null);
         }
         catch (Exception ex)
@@ -330,6 +336,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         try
         {
+            CommitSelection();
             Picture previous = PictureBuffer.Previous;
             PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
             Picture cleared = await _cutSelectionUseCase.ExecuteAsync(previous, previousArea);
@@ -349,6 +356,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         try
         {
+            CommitSelection();
             await _pasteFromClipboardUseCase.ExecuteAsync();
             _coordinator.SyncWithSession();
         }

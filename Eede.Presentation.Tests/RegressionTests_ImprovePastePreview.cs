@@ -147,5 +147,54 @@ namespace Eede.Presentation.Tests
             Assert.That(result.PickColor(new Position(0, 0)), Is.EqualTo(red), "Pixel at (0,0) should be restored");
             Assert.That(result.PickColor(new Position(10, 10)).Alpha, Is.EqualTo(0), "Pixel at (10,10) should be cleared");
         }
+
+        [AvaloniaTest]
+        public async Task Move_Copy_Paste_Commit_ShouldWorkCorrectly()
+        {
+            // Setup: (0,0) に赤い点
+            var red = new ArgbColor(255, 255, 0, 0);
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(1, 1), new byte[] { 0, 0, 255, 255 }), new Position(0, 0));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // 1. (0,0)-(1,1) を選択
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(1, 1)).Subscribe();
+
+            // 2. (5,5) へ移動開始
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(5, 5)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(5, 5)).Subscribe();
+
+            // 3. コピー実行 (移動が自動的に確定されるはず)
+            _clipboardMock.Setup(x => x.CopyAsync(It.IsAny<Picture>())).Returns(Task.CompletedTask);
+            await _viewModel.CopyCommand.Execute();
+
+            // 4. ペースト実行 (コピーしたものが (5,5) にペーストされるはず)
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(Picture.Create(new PictureSize(1, 1), new byte[] { 0, 0, 255, 255 }));
+            await _viewModel.PasteCommand.Execute();
+            
+            // 検証：ペースト位置が (5,5) になっていること
+            Assert.That(_viewModel.PreviewPosition, Is.EqualTo(new Position(5, 5)), "Pasted item should be at (5,5)");
+
+            // 5. ペーストしたものを (10,10) へ移動
+            _viewModel.DrawBeginCommand.Execute(new Position(5, 5)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
+
+            // 6. 確定
+            _viewModel.DrawBeginCommand.Execute(new Position(30, 30)).Subscribe();
+
+            // 最終結果の検証
+            var finalResult = _sessionProvider.CurrentSession.Buffer.Fetch();
+            // 最初の移動で (5,5) に赤が移動し、ペースト後の移動で (10,10) にも赤があるはず
+            Assert.That(finalResult.PickColor(new Position(5, 5)), Is.EqualTo(red), "First moved pixel should be at (5,5)");
+            Assert.That(finalResult.PickColor(new Position(10, 10)), Is.EqualTo(red), "Pasted pixel should be at (10,10)");
+            
+            // 選択範囲の追随検証
+            var currentArea = _sessionProvider.CurrentSession.CurrentSelectingArea;
+            Assert.That(currentArea, Is.Not.Null);
+            Assert.That(currentArea.Value.Position, Is.EqualTo(new Position(10, 10)), "Selection area should follow the last committed item");
+        }
     }
 }

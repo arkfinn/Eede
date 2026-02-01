@@ -18,6 +18,8 @@ public readonly record struct PictureArea
     public int Width => Size.Width;
     public int Height => Size.Height;
 
+    public bool IsEmpty => Width <= 0 || Height <= 0;
+
     public static PictureArea FromPosition(Position from, Position to, PictureSize limit)
     {
         int startX = Math.Min(from.X, to.X);

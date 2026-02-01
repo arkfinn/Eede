@@ -80,11 +80,11 @@ public class DraggingState : ISelectionState
 
     public DrawingSession Commit(DrawingSession session)
     {
-        return session;
+        return session.UpdatePreviewContent(GetSelectionPreviewInfo()).CommitPreview();
     }
 
     public DrawingSession Cancel(DrawingSession session)
     {
-        return session;
+        return session.UpdatePreviewContent(GetSelectionPreviewInfo()).CancelDrawing();
     }
 }

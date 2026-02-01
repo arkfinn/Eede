@@ -35,7 +35,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         }
     }
 
-    public bool IsRegionSelecting => SelectingArea.HasValue && _interactionSession?.DrawStyle is RegionSelector;
+    public bool IsRegionSelecting => SelectingArea.HasValue && !SelectingArea.Value.IsEmpty && _interactionSession?.DrawStyle is RegionSelector;
 
     public Picture? PreviewPixels
     {
@@ -113,43 +113,51 @@ public class InteractionCoordinator : IInteractionCoordinator
         EnsureInteractionSession(CurrentBuffer, drawStyle);
         _operationInitialSelectingArea = SelectingArea;
         
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
+        var currentArea = HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize);
+
         var previousState = _interactionSession.SelectionState;
 
         // プレビュー状態中に別のツールで描画を開始しようとした場合、確定する
         if (previousState is SelectionPreviewState && drawStyle is not RegionSelector)
         {
-            _sessionProvider.Update(previousState.Commit(_sessionProvider.CurrentSession));
+            var committedSession = previousState.Commit(_sessionProvider.CurrentSession);
+            _sessionProvider.Update(committedSession);
+            // 確定後の最新バッファと、確定後の状態(NormalCursorState)でセッションを再構築する
+            _interactionSession = new CanvasInteractionSession(committedSession.Buffer, drawStyle, new NormalCursorState(currentArea));
+            previousState = _interactionSession.SelectionState;
         }
 
         _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, previousState);
         UpdateCursor(pos);
 
-        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
-
-        _interactionSession = _interactionSession.PointerBegin(
-            canvasCoordinate,
-            penStyle,
-            isShift,
+        var nextState = _interactionSession.SelectionState.HandlePointerLeftButtonPressed(
+            currentArea,
+            canvasCoordinate.ToPosition(),
+            null,
+            () => CurrentBuffer.Fetch(),
             internalUpdateCommand);
 
-        var nextState = _interactionSession.SelectionState;
-
-        // プレビュー状態から通常状態へ遷移（範囲外クリック）した場合、確定する
-        if (previousState is SelectionPreviewState && nextState is NormalCursorState)
+        if (nextState is DraggingState)
         {
-            var committedSession = previousState.Commit(_sessionProvider.CurrentSession);
-            _sessionProvider.Update(committedSession);
-            // 確定後のバッファでセッションを再構築
-            _interactionSession = new CanvasInteractionSession(committedSession.Buffer, drawStyle, nextState);
+            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
+            _drawableArea = _drawableArea.Leave(CurrentBuffer);
             NotifyStateChanged();
             return;
         }
 
-        if (_interactionSession.SelectionState is DraggingState draggingState)
+        _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
+
+        var currentState = nextState;
+
+        // プレビュー状態から通常状態へ遷移（範囲外クリック）した場合、確定する
+        if (previousState is SelectionPreviewState && currentState is NormalCursorState)
         {
-            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);
-            _drawableArea = _drawableArea.Leave(CurrentBuffer);
+            var committedSession = previousState.Commit(_sessionProvider.CurrentSession);
+            _sessionProvider.Update(committedSession);
+            // 確定後のバッファでセッションを再構築
+            _interactionSession = new CanvasInteractionSession(committedSession.Buffer, drawStyle, currentState);
             NotifyStateChanged();
             return;
         }
@@ -350,11 +358,18 @@ public class InteractionCoordinator : IInteractionCoordinator
         tool.OnDrawEnd += (sender, args) =>
         {
             _manualSelectingArea = null;
-            var selection = new Selection(PictureArea.FromPosition(args.Start, args.Now, CurrentBuffer.Previous.Size));
-            _interactionSession = new CanvasInteractionSession(CurrentBuffer, tool, new SelectedState(selection));
-            
-            // Selection state must be synced to the global session for UseCases (like Paste) to access it.
-            _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateSelectingArea(selection.Area));
+            var area = PictureArea.FromPosition(args.Start, args.Now, CurrentBuffer.Previous.Size);
+            if (area.IsEmpty)
+            {
+                _interactionSession = new CanvasInteractionSession(CurrentBuffer, tool, new NormalCursorState(HalfBoxArea.Create(args.Now, gridSize)));
+                _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateSelectingArea(null));
+            }
+            else
+            {
+                var selection = new Selection(area);
+                _interactionSession = new CanvasInteractionSession(CurrentBuffer, tool, new SelectedState(selection));
+                _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateSelectingArea(selection.Area));
+            }
 
             NotifyStateChanged();
         };

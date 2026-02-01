@@ -1,5 +1,6 @@
 using Avalonia.Input;
 using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
@@ -26,6 +27,7 @@ public interface IInteractionCoordinator
     void SyncWithSession(bool forceReset);
 
     // 描画
+    void UpdatePicture(Picture picture);
     Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);
     void CommitSelection();
 
@@ -36,6 +38,7 @@ public interface IInteractionCoordinator
     Picture? PreviewPixels { get; }
     Position PreviewPosition { get; }
     Cursor ActiveCursor { get; }
+    IImageBlender ImageBlender { get; set; }
 
     // イベント
     event Action<Picture, Picture, PictureArea?, PictureArea?> Drew;

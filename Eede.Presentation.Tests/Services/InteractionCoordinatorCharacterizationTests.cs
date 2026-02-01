@@ -28,9 +28,7 @@ public class InteractionCoordinatorCharacterizationTests
     private Mock<IClipboard> _clipboardServiceMock;
     private AvaloniaBitmapAdapter _bitmapAdapter;
     private DrawingSessionProvider _drawingSessionProvider;
-    private CopySelectionUseCase _copySelectionUseCase;
-    private CutSelectionUseCase _cutSelectionUseCase;
-    private PasteFromClipboardUseCase _pasteFromClipboardUseCase;
+    private ISelectionService _selectionService;
     private InteractionCoordinator _coordinator;
 
     [SetUp]
@@ -41,9 +39,10 @@ public class InteractionCoordinatorCharacterizationTests
         _clipboardServiceMock = new Mock<IClipboard>();
         _bitmapAdapter = new AvaloniaBitmapAdapter();
         _drawingSessionProvider = new DrawingSessionProvider();
-        _copySelectionUseCase = new CopySelectionUseCase(_clipboardServiceMock.Object);
-        _cutSelectionUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
-        _pasteFromClipboardUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProvider);
+        _selectionService = new SelectionService(
+            new CopySelectionUseCase(_clipboardServiceMock.Object),
+            new CutSelectionUseCase(_clipboardServiceMock.Object),
+            new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProvider));
         _coordinator = new InteractionCoordinator(_drawingSessionProvider);
     }
 
@@ -56,9 +55,7 @@ public class InteractionCoordinatorCharacterizationTests
             _clipboardServiceMock.Object,
             _bitmapAdapter,
             _drawingSessionProvider,
-            _copySelectionUseCase,
-            _cutSelectionUseCase,
-            _pasteFromClipboardUseCase,
+            _selectionService,
             _coordinator);
         return vm;
     }

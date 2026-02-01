@@ -55,9 +55,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly IClipboard _clipboard;
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
-    private readonly CopySelectionUseCase _copySelectionUseCase;
-    private readonly CutSelectionUseCase _cutSelectionUseCase;
-    private readonly PasteFromClipboardUseCase _pasteFromClipboardUseCase;
+    private readonly ISelectionService _selectionService;
     private readonly IInteractionCoordinator _coordinator;
     private readonly PictureSize _gridSize = new(16, 16);
 
@@ -72,9 +70,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         IClipboard clipboard,
         IBitmapAdapter<Bitmap> bitmapAdapter,
         IDrawingSessionProvider drawingSessionProvider,
-        CopySelectionUseCase copySelectionUseCase,
-        CutSelectionUseCase cutSelectionUseCase,
-        PasteFromClipboardUseCase pasteFromClipboardUseCase,
+        ISelectionService selectionService,
         IInteractionCoordinator coordinator)
     {
         _globalState = globalState;
@@ -83,9 +79,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         _bitmapAdapter = bitmapAdapter;
         _drawingSessionProvider = drawingSessionProvider;
-        _copySelectionUseCase = copySelectionUseCase;
-        _cutSelectionUseCase = cutSelectionUseCase;
-        _pasteFromClipboardUseCase = pasteFromClipboardUseCase;
+        _selectionService = selectionService;
         _coordinator = coordinator;
 
         _coordinator.StateChanged += () =>
@@ -153,6 +147,9 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         _ = this.WhenAnyValue(x => x.ImageBlender, x => x.PenColor, x => x.PenSize)
             .Subscribe(x => PenStyle = new(ImageBlender, PenColor, PenSize));
+
+        _ = this.WhenAnyValue(x => x.ImageBlender)
+            .Subscribe(x => _coordinator.ImageBlender = x);
 
         _ = this.WhenAnyValue(x => x.Magnification)
             .Subscribe(x =>
@@ -322,7 +319,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         try
         {
             CommitSelection();
-            await _copySelectionUseCase.ExecuteAsync(PictureBuffer.Previous, IsRegionSelecting ? SelectingArea : null);
+            await _selectionService.CopyAsync(PictureBuffer.Previous, IsRegionSelecting ? SelectingArea : null);
         }
         catch (Exception ex)
         {
@@ -339,7 +336,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             CommitSelection();
             Picture previous = PictureBuffer.Previous;
             PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
-            Picture cleared = await _cutSelectionUseCase.ExecuteAsync(previous, previousArea);
+            Picture cleared = await _selectionService.CutAsync(previous, previousArea);
             ExecuteInternalUpdate(cleared);
             // TODO: Reset selection in coordinator if needed
             Drew?.Invoke(previous, cleared, previousArea, null);
@@ -357,7 +354,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         try
         {
             CommitSelection();
-            await _pasteFromClipboardUseCase.ExecuteAsync();
+            await _selectionService.PasteAsync();
             _coordinator.SyncWithSession();
         }
         catch (Exception ex)

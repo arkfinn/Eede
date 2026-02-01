@@ -46,15 +46,6 @@ public class PictureContainerTests
         var bitmapAdapter = new AvaloniaBitmapAdapter();
         var globalState = new GlobalState();
 
-        // 2. Sub ViewModels Dependencies
-        var patternsProvider = new AnimationPatternsProvider();
-        var animationVM = new AnimationViewModel(
-            patternsProvider,
-            new AddAnimationPatternUseCase(patternsProvider),
-            new ReplaceAnimationPatternUseCase(patternsProvider),
-            new RemoveAnimationPatternUseCase(patternsProvider),
-            new Mock<IFileSystem>().Object);
-
         var mockDrawingSessionProvider = new Mock<IDrawingSessionProvider>();
         mockDrawingSessionProvider.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));
         // DrawingSessionViewModel setup (simplified)
@@ -64,13 +55,27 @@ public class PictureContainerTests
         var mockCoordinator = new Mock<IInteractionCoordinator>();
         var mockAddFrameProvider = new Mock<IAddFrameProvider>();
         
-        // UseCases
-        var mockPictureRepo = new Mock<IPictureRepository>();
         var copyUseCase = new CopySelectionUseCase(mockClipboard.Object);
         var cutUseCase = new CutSelectionUseCase(mockClipboard.Object);
-        var pasteUseCase = new PasteFromClipboardUseCase(mockClipboard.Object, Mock.Of<IDrawingSessionProvider>());
+        var pasteUseCase = new PasteFromClipboardUseCase(mockClipboard.Object, mockDrawingSessionProvider.Object);
+        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+
+        var mockPictureRepo = new Mock<IPictureRepository>();
         var saveUseCase = new SavePictureUseCase(mockPictureRepo.Object);
         var loadUseCase = new LoadPictureUseCase(mockPictureRepo.Object);
+        var pictureIOService = new PictureIOService(saveUseCase, loadUseCase);
+
+        // 2. Sub ViewModels Dependencies
+        var patternsProvider = new AnimationPatternsProvider();
+        var patternService = new AnimationPatternService(
+            new AddAnimationPatternUseCase(patternsProvider),
+            new ReplaceAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider));
+        var animationVM = new AnimationViewModel(
+            patternsProvider,
+            patternService,
+            new Mock<IFileSystem>().Object);
+
         var transformUseCase = new Mock<ITransformImageUseCase>();
         var transferToCanvasUseCase = new Mock<ITransferImageToCanvasUseCase>();
         var transferFromCanvasUseCase = new Mock<ITransferImageFromCanvasUseCase>();
@@ -82,15 +87,12 @@ public class PictureContainerTests
             mockClipboard.Object,
             bitmapAdapter,
             mockDrawingSessionProvider.Object,
-            copyUseCase,
-            cutUseCase,
-            pasteUseCase,
+            selectionService,
             mockCoordinator.Object
         );
 
         var paletteVM = new PaletteContainerViewModel();
         var mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
-        var mockServiceProvider = new Mock<IServiceProvider>();
 
         // MainViewModel
         _mainViewModel = new MainViewModel(
@@ -107,13 +109,13 @@ public class PictureContainerTests
             animationVM,
             drawingSessionVM,
             paletteVM,
-            saveUseCase,
-            loadUseCase,
-            mockServiceProvider.Object
+            pictureIOService,
+            () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
+            () => new NewPictureWindowViewModel()
         );
 
         // DockPictureViewModel
-        _dockViewModel = new DockPictureViewModel(globalState, animationVM, bitmapAdapter, saveUseCase, loadUseCase);
+        _dockViewModel = new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService);
         _dockViewModel.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), new FilePath("test.png"));
 
         // Setup Window and Container

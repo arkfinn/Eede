@@ -4,7 +4,7 @@ using System;
 
 namespace Eede.Application.UseCase.Animations;
 
-public class ReplaceAnimationPatternUseCase
+public class ReplaceAnimationPatternUseCase : IReplaceAnimationPatternUseCase
 {
     private readonly IAnimationPatternsProvider _provider;
 

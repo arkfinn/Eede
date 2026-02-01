@@ -89,6 +89,7 @@ public class MainViewModel : ViewModelBase
     [Reactive] public Cursor? AnimationCursor { get; set; }
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
     [Reactive] public bool HasClipboardPicture { get; set; } = false;
+    [Reactive] public bool IsTransparencyEnabled { get; set; } = false;
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
@@ -128,11 +129,11 @@ public class MainViewModel : ViewModelBase
     private readonly ITransferImageToCanvasUseCase _transferImageToCanvasUseCase;
     private readonly ITransferImageFromCanvasUseCase _transferImageFromCanvasUseCase;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
-    private readonly SavePictureUseCase _savePictureUseCase;
-    private readonly LoadPictureUseCase _loadPictureUseCase;
+    private readonly IPictureIOService _pictureIOService;
     private readonly GlobalState _state;
     private readonly IClipboard _clipboard;
-    private readonly IServiceProvider _services;
+    private readonly Func<DockPictureViewModel> _dockPictureFactory;
+    private readonly Func<NewPictureWindowViewModel> _newPictureWindowFactory;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; private set; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; private set; }
@@ -152,9 +153,9 @@ public class MainViewModel : ViewModelBase
         AnimationViewModel animationViewModel,
         DrawingSessionViewModel drawingSessionViewModel,
         PaletteContainerViewModel paletteContainerViewModel,
-        SavePictureUseCase savePictureUseCase,
-        LoadPictureUseCase loadPictureUseCase,
-        IServiceProvider services)
+        IPictureIOService pictureIOService,
+        Func<DockPictureViewModel> dockPictureFactory,
+        Func<NewPictureWindowViewModel> newPictureWindowFactory)
     {
         _state = State;
         _clipboard = clipboard;
@@ -165,9 +166,9 @@ public class MainViewModel : ViewModelBase
         _transferImageToCanvasUseCase = transferImageToCanvasUseCase;
         _transferImageFromCanvasUseCase = transferImageFromCanvasUseCase;
         _drawingSessionProvider = drawingSessionProvider;
-        _savePictureUseCase = savePictureUseCase;
-        _loadPictureUseCase = loadPictureUseCase;
-        _services = services;
+        _pictureIOService = pictureIOService;
+        _dockPictureFactory = dockPictureFactory;
+        _newPictureWindowFactory = newPictureWindowFactory;
 
         DrawableCanvasViewModel = drawableCanvasViewModel;
         AnimationViewModel = animationViewModel;
@@ -218,19 +219,11 @@ public class MainViewModel : ViewModelBase
         DrawStyle = DrawStyleType.FreeCurve;
         _ = this.WhenAnyValue(x => x.DrawStyle).Subscribe(drawStyle => DrawableCanvasViewModel.DrawStyle = ExecuteUpdateDrawStyle(drawStyle));
 
-        DrawableCanvasViewModel.ColorPicked += (sender, args) =>
-        {
-            PenColor = args.NewColor;
-        };
-
-        _ = this.WhenAnyValue(x => x.AnimationViewModel.IsAnimationMode)
-            .BindTo(this, x => x.DrawableCanvasViewModel.IsAnimationMode);
-
-        _ = this.WhenAnyValue(x => x.AnimationViewModel.SelectedPattern)
-            .Where(x => x != null)
-            .Subscribe(x =>
+        _ = this.WhenAnyValue(x => x.IsTransparencyEnabled)
+            .Subscribe(enabled =>
             {
-                DrawableCanvasViewModel.GridSettings = x!.Grid;
+                ImageTransfer = enabled ? new AlphaToneImageTransfer() : new DirectImageTransfer();
+                ImageBlender = enabled ? new AlphaImageBlender() : new DirectImageBlender();
             });
 
         this.WhenAnyValue(x => x.ActiveDockable)
@@ -354,9 +347,7 @@ public class MainViewModel : ViewModelBase
         }
 
         IEnumerable<IStorageItem> files = dataObject.GetFiles();
-        // TODO: 拡張子チェックしたい
-        // ?.Where(file=> file.Path.);
-        if (files is null)
+        if (files is null || !files.Any(f => IsSupportedImageFile(f)))
         {
             return;
         }
@@ -378,8 +369,6 @@ public class MainViewModel : ViewModelBase
         }
 
         IEnumerable<IStorageItem> files = dataObject.GetFiles();
-        // TODO: 拡張子チェックしたい
-        // ?.Where(file=> file.Path.);
         if (files is null)
         {
             return;
@@ -387,12 +376,21 @@ public class MainViewModel : ViewModelBase
 
         foreach (IStorageItem file in files)
         {
-            DockPictureViewModel? newPicture = await OpenPicture(file.Path);
-            if (newPicture != null)
+            if (IsSupportedImageFile(file))
             {
-                Pictures.Add(newPicture);
+                DockPictureViewModel? newPicture = await OpenPicture(file.Path);
+                if (newPicture != null)
+                {
+                    Pictures.Add(newPicture);
+                }
             }
         }
+    }
+
+    private bool IsSupportedImageFile(IStorageItem file)
+    {
+        var path = file.Path.LocalPath.ToLower();
+        return path.EndsWith(".png") || path.EndsWith(".bmp") || path.EndsWith(".arv");
     }
 
     private async void ExecuteLoadPicture(IFileStorage storage)
@@ -439,12 +437,12 @@ public class MainViewModel : ViewModelBase
     private async Task<DockPictureViewModel?> OpenPicture(Uri path)
     {
         FilePath filePath = new(path.LocalPath);
-        Picture picture = await _loadPictureUseCase.ExecuteAsync(filePath);
+        Picture picture = await _pictureIOService.LoadAsync(filePath);
         if (picture == null)
         {
             return null;
         }
-        DockPictureViewModel vm = _services.GetRequiredService<DockPictureViewModel>();
+        DockPictureViewModel vm = _dockPictureFactory();
         vm.Initialize(picture, filePath);
         return vm;
     }
@@ -461,11 +459,11 @@ public class MainViewModel : ViewModelBase
 
     private async void ExecuteCreateNewPicture()
     {
-        NewPictureWindowViewModel store = _services.GetRequiredService<NewPictureWindowViewModel>();
+        NewPictureWindowViewModel store = _newPictureWindowFactory();
         NewPictureWindowViewModel result = await ShowCreateNewPictureModal.Handle(store);
         if (result.Result)
         {
-            DockPictureViewModel vm = _services.GetRequiredService<DockPictureViewModel>();
+            DockPictureViewModel vm = _dockPictureFactory();
             vm.Initialize(Picture.CreateEmpty(result.Size), FilePath.Empty());
             Pictures.Add(vm);
         }

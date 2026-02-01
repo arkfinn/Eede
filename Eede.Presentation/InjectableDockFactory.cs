@@ -6,10 +6,7 @@ namespace Eede.Presentation;
 
 public class InjectableDockFactory : Factory
 {
-    private readonly IServiceProvider _services;
-
-    public InjectableDockFactory(IServiceProvider services)
+    public InjectableDockFactory()
     {
-        _services = services;
     }
 }

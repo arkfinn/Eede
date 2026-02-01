@@ -25,11 +25,13 @@ public class AnimationIOViewModelTests
     {
         _fileSystemMock = new Mock<IFileSystem>();
         _patternsProvider = new AnimationPatternsProvider();
-        _viewModel = new AnimationViewModel(
-            _patternsProvider,
+        var patternService = new AnimationPatternService(
             new AddAnimationPatternUseCase(_patternsProvider),
             new ReplaceAnimationPatternUseCase(_patternsProvider),
-            new RemoveAnimationPatternUseCase(_patternsProvider),
+            new RemoveAnimationPatternUseCase(_patternsProvider));
+        _viewModel = new AnimationViewModel(
+            _patternsProvider,
+            patternService,
             _fileSystemMock.Object);
     }
 
@@ -52,7 +54,7 @@ public class AnimationIOViewModelTests
     {
         var mockStorage = new Mock<IFileStorage>();
         var uri = new Uri("file:///path/to/animation.json");
-        mockStorage.Setup(s => s.OpenFilePickerAsync()).ReturnsAsync(uri);
+        mockStorage.Setup(s => s.OpenAnimationFilePickerAsync()).ReturnsAsync(uri);
 
         var json = "{\"Name\":\"ImportTest\",\"Frames\":[],\"Grid\":{\"CellSize\":{\"Width\":32,\"Height\":32},\"Offset\":{\"X\":0,\"Y\":0},\"Padding\":0}}";
         _fileSystemMock.Setup(fs => fs.ReadAllTextAsync(uri.LocalPath)).ReturnsAsync(json);

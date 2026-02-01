@@ -22,11 +22,13 @@ public class AnimationIntegrationTests
     {
         var patternsProvider = new AnimationPatternsProvider();
         var mockFileSystem = new Mock<IFileSystem>();
-        var viewModel = new AnimationViewModel(
-            patternsProvider,
+        var patternService = new AnimationPatternService(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
-            new RemoveAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider));
+        var viewModel = new AnimationViewModel(
+            patternsProvider,
+            patternService,
             mockFileSystem.Object);
 
         var initialCount = viewModel.Patterns.Count;
@@ -46,11 +48,13 @@ public class AnimationIntegrationTests
     public async Task DeletePatternIntegration()
     {
         var patternsProvider = new AnimationPatternsProvider();
-        var viewModel = new AnimationViewModel(
-            patternsProvider,
+        var patternService = new AnimationPatternService(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
-            new RemoveAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider));
+        var viewModel = new AnimationViewModel(
+            patternsProvider,
+            patternService,
             new Mock<IFileSystem>().Object);
 
         await viewModel.CreatePatternCommand.Execute("ToDelete");

@@ -68,20 +68,23 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IDrawingSessionProvider, DrawingSessionProvider>();
         services.AddSingleton<IFileSystem, AvaloniaFileSystem>();
         services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();
-        services.AddTransient<CopySelectionUseCase>();
-        services.AddTransient<CutSelectionUseCase>();
-        services.AddTransient<PasteFromClipboardUseCase>();
+        services.AddTransient<ICopySelectionUseCase, CopySelectionUseCase>();
+        services.AddTransient<ICutSelectionUseCase, CutSelectionUseCase>();
+        services.AddTransient<IPasteFromClipboardUseCase, PasteFromClipboardUseCase>();
+        services.AddTransient<ISelectionService, SelectionService>();
 
         services.AddSingleton<IAnimationPatternsProvider, AnimationPatternsProvider>();
-        services.AddTransient<AddAnimationPatternUseCase>();
-        services.AddTransient<ReplaceAnimationPatternUseCase>();
-        services.AddTransient<RemoveAnimationPatternUseCase>();
+        services.AddTransient<IAddAnimationPatternUseCase, AddAnimationPatternUseCase>();
+        services.AddTransient<IReplaceAnimationPatternUseCase, ReplaceAnimationPatternUseCase>();
+        services.AddTransient<IRemoveAnimationPatternUseCase, RemoveAnimationPatternUseCase>();
+        services.AddTransient<IAnimationPatternService, AnimationPatternService>();
 
         // Adapters / Infrastructure
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();
         services.AddSingleton<IPictureRepository, PictureRepository>();
-        services.AddSingleton<SavePictureUseCase>();
-        services.AddSingleton<LoadPictureUseCase>();
+        services.AddSingleton<ISavePictureUseCase, SavePictureUseCase>();
+        services.AddSingleton<ILoadPictureUseCase, LoadPictureUseCase>();
+        services.AddSingleton<IPictureIOService, PictureIOService>();
 
         // ViewModels
         services.AddTransient<IInteractionCoordinator, InteractionCoordinator>();
@@ -95,5 +98,9 @@ public partial class App : Avalonia.Application
         services.AddTransient<MainViewModel>();
         services.AddTransient<NewPictureWindowViewModel>();
         services.AddTransient<DockPictureViewModel>();
+
+        // Factories
+        services.AddSingleton<Func<DockPictureViewModel>>(sp => () => sp.GetRequiredService<DockPictureViewModel>());
+        services.AddSingleton<Func<NewPictureWindowViewModel>>(sp => () => sp.GetRequiredService<NewPictureWindowViewModel>());
     }
 }

@@ -20,11 +20,13 @@ public class AnimationViewModelTests
     {
         _fileSystemMock = new Mock<IFileSystem>();
         _patternsProvider = new AnimationPatternsProvider();
-        _viewModel = new AnimationViewModel(
-            _patternsProvider,
+        var patternService = new AnimationPatternService(
             new AddAnimationPatternUseCase(_patternsProvider),
             new ReplaceAnimationPatternUseCase(_patternsProvider),
-            new RemoveAnimationPatternUseCase(_patternsProvider),
+            new RemoveAnimationPatternUseCase(_patternsProvider));
+        _viewModel = new AnimationViewModel(
+            _patternsProvider,
+            patternService,
             _fileSystemMock.Object);
     }
 

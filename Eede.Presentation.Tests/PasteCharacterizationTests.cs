@@ -29,7 +29,7 @@ namespace Eede.Presentation.Tests
         private DrawingSessionProvider _sessionProvider;
         private InteractionCoordinator _coordinator;
         private Mock<IClipboard> _clipboardMock;
-        private PasteFromClipboardUseCase _pasteUseCase;
+        private ISelectionService _selectionService;
         private DrawableCanvasViewModel _viewModel;
 
         [SetUp]
@@ -39,13 +39,14 @@ namespace Eede.Presentation.Tests
             _sessionProvider.Update(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
             _coordinator = new InteractionCoordinator(_sessionProvider);
             _clipboardMock = new Mock<IClipboard>();
-            _pasteUseCase = new PasteFromClipboardUseCase(_clipboardMock.Object, _sessionProvider);
+            _selectionService = new SelectionService(
+                new CopySelectionUseCase(_clipboardMock.Object),
+                new CutSelectionUseCase(_clipboardMock.Object),
+                new PasteFromClipboardUseCase(_clipboardMock.Object, _sessionProvider));
 
             var globalState = new GlobalState();
             var addFrameProvider = new Mock<IAddFrameProvider>();
             var bitmapAdapter = new Mock<IBitmapAdapter<Bitmap>>();
-            var copyUseCase = new CopySelectionUseCase(_clipboardMock.Object);
-            var cutUseCase = new CutSelectionUseCase(_clipboardMock.Object);
 
             _viewModel = new DrawableCanvasViewModel(
                 globalState,
@@ -53,9 +54,7 @@ namespace Eede.Presentation.Tests
                 _clipboardMock.Object,
                 bitmapAdapter.Object,
                 _sessionProvider,
-                copyUseCase,
-                cutUseCase,
-                _pasteUseCase,
+                _selectionService,
                 _coordinator);
         }
 

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Eede.Application.UseCase.Pictures;
 
-public class CutSelectionUseCase
+public class CutSelectionUseCase : ICutSelectionUseCase
 {
     private readonly IClipboard _clipboard;
 

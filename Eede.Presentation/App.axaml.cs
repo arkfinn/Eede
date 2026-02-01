@@ -1,27 +1,26 @@
 ﻿using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Eede.Application.Animations;
+using Eede.Application.Drawings;
+using Eede.Application.Infrastructure;
+using Eede.Application.Pictures;
+using Eede.Application.UseCase.Animations;
+using Eede.Application.UseCase.Pictures;
+using Eede.Domain.Animations;
+using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Presentation.Common.Adapters;
+using Eede.Presentation.Files;
+using Eede.Presentation.Services;
 using Eede.Presentation.Settings;
+using Eede.Presentation.ViewModels.Animations;
+using Eede.Presentation.ViewModels.DataDisplay;
+using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.Views.Pages;
-using Eede.Application.Animations;
-using System.Collections.Generic;
-using Eede.Domain.Animations;
-using Eede.Presentation.Services;
-using Eede.Application.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using Eede.Presentation.Common.Adapters;
-using Eede.Domain.ImageEditing;
-using Eede.Application.Pictures;
-using Eede.Presentation.ViewModels.Animations;
-using Eede.Presentation.Common.Services;
-using Eede.Presentation.Files;
-using Eede.Domain.ImageEditing.DrawingTools;
-using Eede.Application.Drawings;
-using Eede.Application.UseCase.Pictures;
-using Eede.Application.UseCase.Animations;
-using Eede.Presentation.ViewModels.DataEntry;
-using Eede.Presentation.ViewModels.DataDisplay;
 using System;
+using System.Collections.Generic;
 
 namespace Eede.Presentation;
 
@@ -56,18 +55,18 @@ public partial class App : Avalonia.Application
     {
         // Core/Domain/Application Services
         services.AddSingleton<GlobalState>();
-        services.AddSingleton<IClipboard, AvaloniaClipboardService>();
+        services.AddSingleton<IClipboard, AvaloniaClipboard>();
         services.AddTransient<IFileStorage>(sp =>
         {
             var lifetime = (IClassicDesktopStyleApplicationLifetime)Avalonia.Application.Current.ApplicationLifetime;
-            return new StorageService(lifetime.MainWindow.StorageProvider);
+            return new AvaloniaFileStorage(lifetime.MainWindow.StorageProvider);
         });
         services.AddSingleton<IDrawStyleFactory, DrawStyleFactory>();
         services.AddTransient<ITransformImageUseCase, TransformImageUseCase>();
         services.AddTransient<ITransferImageToCanvasUseCase, TransferImageToCanvasUseCase>();
         services.AddTransient<ITransferImageFromCanvasUseCase, TransferImageFromCanvasUseCase>();
         services.AddSingleton<IDrawingSessionProvider, DrawingSessionProvider>();
-        services.AddSingleton<IFileSystem, RealFileSystem>();
+        services.AddSingleton<IFileSystem, AvaloniaFileSystem>();
         services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();
         services.AddTransient<CopySelectionUseCase>();
         services.AddTransient<CutSelectionUseCase>();

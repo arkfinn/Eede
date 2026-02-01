@@ -14,9 +14,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AvaloniaIClipboard = Avalonia.Input.Platform.IClipboard;
 
-namespace Eede.Presentation.Services;
+namespace Eede.Presentation.Common.Adapters;
 
-public class AvaloniaClipboardService : IClipboard
+public class AvaloniaClipboard : IClipboard
 {
     // 一般的な画像形式の識別子
     private static readonly string[] ImageFormats = { "PNG", "Bitmap", "DeviceIndependentBitmap", "TIFF" };
@@ -151,4 +151,3 @@ public class AvaloniaClipboardService : IClipboard
         return null;
     }
 }
-

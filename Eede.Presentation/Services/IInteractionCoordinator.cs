@@ -23,6 +23,7 @@ public interface IInteractionCoordinator
     void UpdateMagnification(Magnification magnification);
     void SetupRegionSelector(RegionSelector tool, DrawingBuffer buffer, bool isAnimationMode, PictureSize gridSize);
     void SyncWithSession();
+    void SyncWithSession(bool forceReset);
 
     // 描画
     Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);

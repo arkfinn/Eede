@@ -5,7 +5,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.ReactiveUI;
 using Avalonia.Styling;
-using Eede.Presentation.Common.Services;
+using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.ViewModels.Pages;
 using ReactiveUI;
 using System;
@@ -21,7 +21,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
     public MainView()
     {
         InitializeComponent();
-        StorageService = new StorageService(new Window().StorageProvider);
+        FileStorage = new AvaloniaFileStorage(new Window().StorageProvider);
 
         DataContextChanged += (sender, e) =>
         {
@@ -35,7 +35,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
                 viewModel,
                 vm => vm.ShowCreateNewPictureModal, DoShowCreateNewFileWindowAsync);
 
-            viewModel.StorageService = StorageService;
+            viewModel.FileStorage = FileStorage;
 
             // Load Custom Cursor for Animation Mode
             try
@@ -87,7 +87,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
         });
     }
 
-    public StorageService StorageService { get; private set; }
+    public AvaloniaFileStorage FileStorage { get; private set; }
 
     public void OnClickThemeSelect(object sender, SelectionChangedEventArgs e)
     {

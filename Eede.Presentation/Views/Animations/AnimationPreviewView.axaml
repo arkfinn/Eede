@@ -90,13 +90,13 @@
 					</Button>
 					<Button Grid.Column="3" Classes="tool" ToolTip.Tip="読み込み"
 							Command="{Binding ImportCommand}"
-							CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
 							Margin="2,0,0,0">
 						<Image Source="/Assets/Tools/file_open.png" Width="16" Height="16" />
 					</Button>
 					<Button Grid.Column="4" Classes="tool" ToolTip.Tip="保存"
 							Command="{Binding ExportCommand}"
-							CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
 							Margin="2,0,0,0">
 						<Image Source="/Assets/Tools/file_save.png" Width="16" Height="16" />
 					</Button>

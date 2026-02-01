@@ -1,4 +1,3 @@
-﻿using Eede.Presentation.Common.Services;
 using Eede.Presentation.Files;
 using System;
 
@@ -12,4 +11,3 @@ public class PictureSaveEventArgs(IImageFile file) : EventArgs
     public void UpdateFile(IImageFile file) => File = file;
     public void Cancel() => IsCanceled = true;
 }
-

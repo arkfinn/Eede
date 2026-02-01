@@ -1,28 +1,26 @@
+using Avalonia.Headless.NUnit;
+using Avalonia.Media.Imaging;
 using Eede.Application.Animations;
 using Eede.Application.Infrastructure;
+using Eede.Application.Pictures;
+using Eede.Application.UseCase.Animations;
 using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Animations;
 using Eede.Domain.Files;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
+using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
-using Eede.Application.UseCase.Animations;
-using Eede.Presentation.Common.Services;
-using Eede.Presentation.Common.Models;
-using Eede.Presentation.Common.Adapters;
+using Microsoft.Reactive.Testing;
 using Moq;
 using NUnit.Framework;
-using Avalonia.Headless.NUnit;
-using Microsoft.Reactive.Testing;
-using ReactiveUI.Testing;
 using ReactiveUI;
-using Avalonia.Media.Imaging;
-using System.IO;
-using System.Threading.Tasks;
+using ReactiveUI.Testing;
 using System;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.Tests.ViewModels.DataDisplay;
 

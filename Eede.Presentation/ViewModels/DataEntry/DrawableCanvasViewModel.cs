@@ -101,31 +101,13 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         _coordinator.Drew += (prev, current, area1, area2) => Drew?.Invoke(prev, current, area1, area2);
 
-        this.WhenAnyValue(x => x.SelectingArea)
-            .Subscribe(area =>
-            {
-                if (_drawingSessionProvider.CurrentSession != null && _drawingSessionProvider.CurrentSession.CurrentSelectingArea != area)
-                {
-                    _drawingSessionProvider.Update(_drawingSessionProvider.CurrentSession.UpdateSelectingArea(area));
-                }
-            });
-
         _drawingSessionProvider.SessionChanged += (session) =>
         {
+            _coordinator.SyncWithSession();
+            PictureBuffer = session.Buffer;
             SelectingArea = session.CurrentSelectingArea;
             PreviewPixels = session.CurrentPreviewContent?.Pixels;
             PreviewPosition = session.CurrentPreviewContent?.Position ?? new Position(0, 0);
-            UpdateImage();
-        };
-
-        _coordinator.StateChanged += () =>
-        {
-            PictureBuffer = _coordinator.CurrentBuffer;
-            SelectingArea = _coordinator.SelectingArea;
-            IsRegionSelecting = _coordinator.IsRegionSelecting;
-            PreviewPixels = _coordinator.PreviewPixels;
-            PreviewPosition = _coordinator.PreviewPosition;
-            ActiveCursor = _coordinator.ActiveCursor;
             UpdateImage();
         };
 
@@ -321,6 +303,11 @@ public class DrawableCanvasViewModel : ViewModelBase
     private void ExecuteCanvasLeaveAction()
     {
         _coordinator.CanvasLeave(PictureBuffer);
+    }
+
+    public void SyncWithSession(bool forceReset = false)
+    {
+        _coordinator.SyncWithSession(forceReset);
     }
 
     private async Task ExecuteCopyAction()

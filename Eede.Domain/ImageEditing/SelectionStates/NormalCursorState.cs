@@ -60,7 +60,7 @@ public class NormalCursorState : ISelectionState
         return null;
     }
 
-    public DrawingSession Commit(DrawingSession session)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender)
     {
         return session;
     }

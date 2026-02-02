@@ -222,8 +222,8 @@ public class MainViewModel : ViewModelBase
         _ = this.WhenAnyValue(x => x.IsTransparencyEnabled)
             .Subscribe(enabled =>
             {
-                ImageTransfer = enabled ? new AlphaToneImageTransfer() : new DirectImageTransfer();
                 ImageBlender = enabled ? new AlphaImageBlender() : new DirectImageBlender();
+                PullBlender = enabled ? new AlphaImageBlender() : new DirectImageBlender();
             });
 
         this.WhenAnyValue(x => x.ActiveDockable)

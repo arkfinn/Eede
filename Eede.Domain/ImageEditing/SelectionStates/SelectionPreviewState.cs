@@ -71,10 +71,10 @@ public class SelectionPreviewState : ISelectionState
         return new PictureArea(_info.Position, _info.Pixels.Size);
     }
 
-    public DrawingSession Commit(DrawingSession session)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender)
     {
         // 自分が持っている最新の情報をセッションに反映してから確定する
-        return session.UpdatePreviewContent(_info).CommitPreview();
+        return session.UpdatePreviewContent(_info).CommitPreview(blender);
     }
 
     public DrawingSession Cancel(DrawingSession session)

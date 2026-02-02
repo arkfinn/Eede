@@ -93,7 +93,7 @@ public class RegionSelectingState : ISelectionState
         return value - remainder;
     }
 
-    public DrawingSession Commit(DrawingSession session)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender)
     {
         return session;
     }

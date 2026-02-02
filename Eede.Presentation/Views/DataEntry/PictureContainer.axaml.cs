@@ -267,7 +267,7 @@ namespace Eede.Presentation.Views.DataEntry
                 case PointerUpdateKind.LeftButtonPressed:
                     if (_viewModel.AnimationViewModel.IsAnimationMode)
                     {
-                        _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, nowPosition, null, () => _viewModel.PictureBuffer, null, ImageBlender, BackgroundColor);
+                        _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, nowPosition, null, () => _viewModel.PictureBuffer, null);
                     }
                     else
                     {

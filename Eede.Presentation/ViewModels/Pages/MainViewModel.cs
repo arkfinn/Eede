@@ -303,7 +303,7 @@ public class MainViewModel : ViewModelBase
     {
         DrawableCanvasViewModel.PictureBuffer = e.Session.Buffer;
         DrawableCanvasViewModel.SyncWithSession(true);
-        SetPictureToDrawArea(e.Session.CurrentPicture);
+        SetPictureToDrawArea(e.Session.FetchPicture(ImageBlender));
 
         if (e.Item is DockActiveHistoryItem dockItem)
         {
@@ -319,7 +319,7 @@ public class MainViewModel : ViewModelBase
     {
         DrawableCanvasViewModel.PictureBuffer = e.Session.Buffer;
         DrawableCanvasViewModel.SyncWithSession(true);
-        SetPictureToDrawArea(e.Session.CurrentPicture);
+        SetPictureToDrawArea(e.Session.FetchPicture(ImageBlender));
 
         if (e.Item is DockActiveHistoryItem dockItem)
         {
@@ -557,8 +557,14 @@ public class MainViewModel : ViewModelBase
         DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea);
     }
 
+    private DrawStyleType? _lastDrawStyle;
     private IDrawStyle ExecuteUpdateDrawStyle(DrawStyleType drawStyle)
     {
+        if (_lastDrawStyle == drawStyle)
+        {
+            return DrawableCanvasViewModel.DrawStyle;
+        }
+        _lastDrawStyle = drawStyle;
         DrawableCanvasViewModel.IsRegionSelecting = false;
         var style = _drawStyleFactory.Create(drawStyle);
         if (style is RegionSelector regionSelector)

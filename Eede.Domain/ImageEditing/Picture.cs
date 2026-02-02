@@ -119,4 +119,20 @@ public record Picture
     {
         return Blend(new DirectImageBlender(), CreateEmpty(area.Size), area.Position);
     }
+
+    public Picture ApplyTransparency(ArgbColor transparentColor)
+    {
+        byte[] pixels = CloneImage();
+        for (int i = 0; i < pixels.Length; i += 4)
+        {
+            if (pixels[i] == transparentColor.Blue &&
+                pixels[i + 1] == transparentColor.Green &&
+                pixels[i + 2] == transparentColor.Red &&
+                pixels[i + 3] == transparentColor.Alpha)
+            {
+                pixels[i + 3] = 0;
+            }
+        }
+        return Create(Size, pixels);
+    }
 }

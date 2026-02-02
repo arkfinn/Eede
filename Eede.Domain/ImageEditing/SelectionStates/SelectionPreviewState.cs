@@ -15,7 +15,7 @@ public class SelectionPreviewState : ISelectionState
         _info = info;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, Eede.Domain.ImageEditing.Blending.IImageBlender blender, Eede.Domain.Palettes.ArgbColor backgroundColor)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
     {
         // プレビュー範囲内をクリックしたら再ドラッグ開始
         var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);
@@ -71,10 +71,19 @@ public class SelectionPreviewState : ISelectionState
         return new PictureArea(_info.Position, _info.Pixels.Size);
     }
 
-    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender, Eede.Domain.Palettes.ArgbColor backgroundColor)
     {
+        var info = _info;
+        if (blender is Eede.Domain.ImageEditing.Blending.AlphaImageBlender)
+        {
+            info = new SelectionPreviewInfo(
+                info.Pixels.ApplyTransparency(backgroundColor),
+                info.Position,
+                info.Type,
+                info.OriginalArea);
+        }
         // 自分が持っている最新の情報をセッションに反映してから確定する
-        return session.UpdatePreviewContent(_info).CommitPreview(blender);
+        return session.UpdatePreviewContent(info).CommitPreview(blender);
     }
 
     public DrawingSession Cancel(DrawingSession session)

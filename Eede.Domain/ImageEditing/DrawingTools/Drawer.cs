@@ -1,4 +1,4 @@
-﻿using Eede.Domain.Palettes;
+using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using System;
 using System.Collections.Generic;
@@ -46,6 +46,8 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         {
             byte[] imageData = dest.CloneImage();
             int width = dest.Width;
+            int height = dest.Height;
+            int stride = dest.Stride;
             int x1 = from.X;
             int y1 = from.Y;
             int x2 = to.X;
@@ -71,14 +73,9 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                 int E = -dx;
                 for (int i = 0; i <= dx; i++)
                 {
-                    if (cy >= 0 && cy < dest.Height && cx >= 0 && cx < dest.Width)
+                    if (cy >= 0 && cy < height && cx >= 0 && cx < width)
                     {
                         imageData = DrawPointRoutine(dest, imageData, new Position(cx, cy));
-                        //int index = cx * 4 + dest.Stride * cy;
-                        //imageData[index + 0] = color.B;
-                        //imageData[index + 1] = color.G;
-                        //imageData[index + 2] = color.R;
-                        //imageData[index + 3] = color.A;
                     }
                     cx += sx;
                     E += dy2;
@@ -96,14 +93,9 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                 int E = -dy;
                 for (int i = 0; i <= dy; i++)
                 {
-                    if (cy >= 0 && cy < dest.Height && cx >= 0 && cx < dest.Width)
+                    if (cy >= 0 && cy < height && cx >= 0 && cx < width)
                     {
                         imageData = DrawPointRoutine(dest, imageData, new Position(cx, cy));
-                        //int index = cx * 4 + dest.Stride * cy;
-                        //imageData[index + 0] = color.B;
-                        //imageData[index + 1] = color.G;
-                        //imageData[index + 2] = color.R;
-                        //imageData[index + 3] = color.A;
                     }
                     cy += sy;
                     E += dx2;
@@ -131,12 +123,11 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             int width = tx - fx;
             int height = ty - fy;
             int stride = dest.Stride;
+            int imgWidth = dest.Width;
+            int imgHeight = dest.Height;
             if (width == 0 && height == 0)
             {
-                if (fx >= 0 && fx < dest.Width && fy >= 0 && fy < dest.Height)
-                {
-                    DrawPixel(imageData, stride, fx, fy, color);
-                }
+                DrawPixel(imageData, stride, imgWidth, imgHeight, fx, fy, color);
                 return Picture.Create(dest.Size, imageData);
             }
             int centerX = fx + (width / 2);
@@ -168,54 +159,22 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                 int cy = centerY + y;
                 int mx = mirrorX - x;
                 int my = mirrorY - y;
-                if (/*cx >= 0 && */cx < dest.Width)
-                {
-                    if (/*cy >= 0 &&*/ cy < dest.Height)
-                    {
-                        DrawPixel(imageData, stride, cx, cy, color);
-                    }
-                    if (my >= 0 /*&& my < dest.Height*/)
-                    {
-                        DrawPixel(imageData, stride, cx, my, color);
-                    }
-                }
-                if (mx >= 0 /*&& mx < dest.Width*/)
-                {
-                    if (/*cy >= 0 &&*/ cy < dest.Height)
-                    {
-                        DrawPixel(imageData, stride, mx, cy, color);
-                    }
-                    if (my >= 0 /*&& my < dest.Height*/)
-                    {
-                        DrawPixel(imageData, stride, mx, my, color);
-                    }
-                }
+
+                DrawPixel(imageData, stride, imgWidth, imgHeight, cx, cy, color);
+                DrawPixel(imageData, stride, imgWidth, imgHeight, cx, my, color);
+                DrawPixel(imageData, stride, imgWidth, imgHeight, mx, cy, color);
+                DrawPixel(imageData, stride, imgWidth, imgHeight, mx, my, color);
+
                 int cxy = centerX + y;
                 int cyx = centerY + x;
                 int mxy = mirrorX - y;
                 int myx = mirrorY - x;
-                if (/*cxy >= 0 &&*/ cxy < dest.Width)
-                {
-                    if (/*cyx >= 0 &&*/ cyx < dest.Height)
-                    {
-                        DrawPixel(imageData, stride, cxy, cyx, color);
-                    }
-                    if (myx >= 0 /*&& myx < dest.Height*/)
-                    {
-                        DrawPixel(imageData, stride, cxy, myx, color);
-                    }
-                }
-                if (mxy >= 0 /*&& mxy < dest.Width*/)
-                {
-                    if (/*cyx >= 0 &&*/ cyx < dest.Height)
-                    {
-                        DrawPixel(imageData, stride, mxy, cyx, color);
-                    }
-                    if (myx >= 0 /*&& myx < dest.Height*/)
-                    {
-                        DrawPixel(imageData, stride, mxy, myx, color);
-                    }
-                }
+
+                DrawPixel(imageData, stride, imgWidth, imgHeight, cxy, cyx, color);
+                DrawPixel(imageData, stride, imgWidth, imgHeight, cxy, myx, color);
+                DrawPixel(imageData, stride, imgWidth, imgHeight, mxy, cyx, color);
+                DrawPixel(imageData, stride, imgWidth, imgHeight, mxy, myx, color);
+
                 d += dx;
                 dx += 8;
                 x++;
@@ -245,12 +204,11 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         int width = tx - fx;
         int height = ty - fy;
         int stride = dest.Stride;
+        int imgWidth = dest.Width;
+        int imgHeight = dest.Height;
         if (width == 0 && height == 0)
         {
-            if (fx >= 0 && fx < dest.Width && fy >= 0 && fy < dest.Height)
-            {
-                DrawPixel(imageData, stride, fx, fy, color);
-            }
+            DrawPixel(imageData, stride, imgWidth, imgHeight, fx, fy, color);
             return imageData;
         }
         int centerX = fx + (width / 2);
@@ -278,31 +236,21 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                 dy += 8;
                 y--;
             }
-            int cx = Math.Min(centerX + x, dest.Width - 1);
+            int cx = centerX + x;
             int cy = centerY + y;
-            int mx = Math.Max(mirrorX - x, 0);
+            int mx = mirrorX - x;
             int my = mirrorY - y;
-            if (cy >= 0 && cy < dest.Height)
-            {
-                DrawScanLine(imageData, stride, mx, cy, cx, color);
-            }
-            if (my >= 0 && my < dest.Height)
-            {
-                DrawScanLine(imageData, stride, mx, my, cx, color);
-            }
-            int cxy = Math.Min(centerX + y, dest.Width - 1);
+
+            DrawScanLine(imageData, stride, imgWidth, imgHeight, mx, cy, cx, color);
+            DrawScanLine(imageData, stride, imgWidth, imgHeight, mx, my, cx, color);
+
+            int cxy = centerX + y;
             int cyx = centerY + x;
-            int mxy = Math.Max(mirrorX - y, 0);
+            int mxy = mirrorX - y;
             int myx = mirrorY - x;
 
-            if (cyx >= 0 && cyx < dest.Height)
-            {
-                DrawScanLine(imageData, stride, mxy, cyx, cxy, color);
-            }
-            if (myx >= 0 && myx < dest.Height)
-            {
-                DrawScanLine(imageData, stride, mxy, myx, cxy, color);
-            }
+            DrawScanLine(imageData, stride, imgWidth, imgHeight, mxy, cyx, cxy, color);
+            DrawScanLine(imageData, stride, imgWidth, imgHeight, mxy, myx, cxy, color);
 
             d += dx;
             dx += 8;
@@ -319,14 +267,16 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             byte[] imageData = dest.CloneImage();
             ArgbColor color = PenStyle.Color;
             int stride = dest.Stride;
+            int width = dest.Width;
+            int height = dest.Height;
             (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
-            DrawScanLine(imageData, stride, fx, fy, tx, color);
+            DrawScanLine(imageData, stride, width, height, fx, fy, tx, color);
             for (int i = fy; i < ty; i++)
             {
-                DrawPixel(imageData, stride, fx, i, color);
-                DrawPixel(imageData, stride, tx, i, color);
+                DrawPixel(imageData, stride, width, height, fx, i, color);
+                DrawPixel(imageData, stride, width, height, tx, i, color);
             }
-            DrawScanLine(imageData, stride, fx, ty, tx, color);
+            DrawScanLine(imageData, stride, width, height, fx, ty, tx, color);
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
     }
@@ -338,11 +288,13 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             byte[] imageData = dest.CloneImage();
             ArgbColor color = PenStyle.Color;
             int stride = dest.Stride;
+            int width = dest.Width;
+            int height = dest.Height;
             (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
 
             for (int i = fy; i <= ty; i++)
             {
-                DrawScanLine(imageData, stride, fx, i, tx, color);
+                DrawScanLine(imageData, stride, width, height, fx, i, tx, color);
             }
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
@@ -366,8 +318,12 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
     }
 
 
-    private static void DrawPixel(byte[] imageArray, int stride, int x, int y, ArgbColor color)
+    private static void DrawPixel(byte[] imageArray, int stride, int width, int height, int x, int y, ArgbColor color)
     {
+        if (x < 0 || x >= width || y < 0 || y >= height)
+        {
+            return;
+        }
         int index = (x * 4) + (stride * y);
         imageArray[index] = color.Blue;
         imageArray[index + 1] = color.Green;
@@ -375,10 +331,21 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         imageArray[index + 3] = color.Alpha;
     }
 
-    private static void DrawScanLine(byte[] imageArray, int stride, int x, int y, int toX, ArgbColor color)
+    private static void DrawScanLine(byte[] imageArray, int stride, int width, int height, int x, int y, int toX, ArgbColor color)
     {
-        int index = (x * 4) + (stride * y);
-        for (int i = x; i <= toX; i++)
+        if (y < 0 || y >= height)
+        {
+            return;
+        }
+        int startX = Math.Max(0, x);
+        int endX = Math.Min(width - 1, toX);
+        if (startX > endX)
+        {
+            return;
+        }
+
+        int index = (startX * 4) + (stride * y);
+        for (int i = startX; i <= endX; i++)
         {
             imageArray[index] = color.Blue;
             imageArray[index + 1] = color.Green;
@@ -399,114 +366,56 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         {
             int cWidth = dest.Width;
             int cHeight = dest.Height;
+            byte[] imageData = dest.CloneImage();
+            ArgbColor targetColor = dest.PickColor(from);
             ArgbColor color = PenStyle.Color;
-
-            ArgbColor baseCol = dest.PickColor(from);
-
-            if (color.EqualsArgb(baseCol))
+            if (targetColor == color)
             {
-                return dest;
+                return Picture.Create(dest.Size, imageData);
             }
-            byte[] image = dest.CloneImage();
-            Stack<Position> buffer = new();
-            buffer.Push(from);
-            //Pen p = new Pen(col);
-            while (buffer.Count > 0)
+
+            int stride = dest.Stride;
+            Stack<Position> stack = new();
+            stack.Push(from);
+            while (stack.Count > 0)
             {
-                Position point = buffer.Pop();
-                int sy = dest.Stride * point.Y;
-                int index = (point.X * 4) + sy;
-
-                /* skip already painted */
-                if (color.EqualsArgb(PickColor(image, index)))
+                Position p = stack.Pop();
+                int x = p.X;
+                int y = p.Y;
+                while (x >= 0 && dest.PickColor(new Position(x, y)) == targetColor)
                 {
-                    continue;
+                    x--;
                 }
-
-                int leftX = point.X;
-                int rightX = point.X;
-                /* search left point */
-                for (; 0 < leftX; leftX--)
+                x++;
+                bool spanAbove = false;
+                bool spanBelow = false;
+                while (x < cWidth && dest.PickColor(new Position(x, y)) == targetColor)
                 {
-                    int leftIndex = ((leftX - 1) * 4) + sy;
-                    if (!baseCol.EqualsArgb(PickColor(image, leftIndex)))
+                    DrawPixel(imageData, stride, cWidth, cHeight, x, y, color);
+                    if (!spanAbove && y > 0 && dest.PickColor(new Position(x, y - 1)) == targetColor)
                     {
-                        break;
+                        stack.Push(new Position(x, y - 1));
+                        spanAbove = true;
                     }
-                }
-                /* search right point */
-                for (; rightX < cWidth - 1; rightX++)
-                {
-                    int rightIndex = ((rightX + 1) * 4) + sy;
-                    if (!baseCol.EqualsArgb(PickColor(image, rightIndex)))
+                    else if (spanAbove && y > 0 && dest.PickColor(new Position(x, y - 1)) != targetColor)
                     {
-                        break;
+                        spanAbove = false;
                     }
-                }
-                /* paint from leftX to rightX */
-                if (leftX == rightX)
-                {
-                    DrawPixel(image, dest.Stride, leftX, point.Y, color);
-                }
-                else
-                {
-                    DrawScanLine(image, dest.Stride, leftX, point.Y, rightX, color);
-                }
-                /* search next lines */
-                if (point.Y + 1 < cHeight)
-                {
-                    ScanLine(image, leftX, rightX, point.Y + 1, dest.Stride, buffer, baseCol);
-                }
-                if (point.Y - 1 >= 0)
-                {
-                    ScanLine(image, leftX, rightX, point.Y - 1, dest.Stride, buffer, baseCol);
+
+                    if (!spanBelow && y < cHeight - 1 && dest.PickColor(new Position(x, y + 1)) == targetColor)
+                    {
+                        stack.Push(new Position(x, y + 1));
+                        spanBelow = true;
+                    }
+                    else if (spanBelow && y < cHeight - 1 && dest.PickColor(new Position(x, y + 1)) != targetColor)
+                    {
+                        spanBelow = false;
+                    }
+                    x++;
                 }
             }
-            return Picture.Create(dest.Size, image);
+            return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
-    }
-
-    private static ArgbColor PickColor(byte[] image, int index)
-    {
-        return new ArgbColor(
-            image[index + 3],
-            image[index + 2],
-            image[index + 1],
-            image[index]);
-    }
-
-    private static void ScanLine(byte[] image, int leftX, int rightX, int y, int stride, Stack<Position> buffer, ArgbColor baseCol)
-    {
-        int sy = stride * y;
-        while (leftX <= rightX)
-        {
-            for (; leftX <= rightX; leftX++)
-            {
-                int index = (leftX * 4) + sy;
-                if (baseCol.EqualsArgb(PickColor(image, index)))
-                {
-                    break;
-                }
-            }
-            if (rightX < leftX)
-            {
-                break;
-            }
-            for (; leftX <= rightX; leftX++)
-            {
-                int index = (leftX * 4) + sy;
-                if (!baseCol.EqualsArgb(PickColor(image, index)))
-                {
-                    break;
-                }
-            }
-            buffer.Push(new Position(leftX - 1, y));
-        }
-    }
-
-    public bool Contains(CanvasCoordinate coordinate)
-    {
-        return Contains(coordinate.ToPosition());
     }
 
     public bool Contains(Position position)

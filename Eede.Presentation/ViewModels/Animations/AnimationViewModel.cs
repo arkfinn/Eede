@@ -1,10 +1,12 @@
 using Eede.Application.Animations;
+using Eede.Application.Infrastructure;
+using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Common.Services;
+using Eede.Presentation.Files;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -16,13 +18,13 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text.Json;
 using System.IO;
-using Eede.Presentation.Files;
 
 namespace Eede.Presentation.ViewModels.Animations;
 
-public class AnimationViewModel : ViewModelBase
+public class AnimationViewModel : ViewModelBase, IAddFrameProvider
 {
-    private readonly IAnimationService _animationService;
+    private readonly IAnimationPatternsProvider _patternsProvider;
+    private readonly IAnimationPatternService _patternService;
     private readonly IFileSystem _fileSystem;
     private readonly IImageTransfer _imageTransfer = new DirectImageTransfer();
 
@@ -51,12 +53,21 @@ public class AnimationViewModel : ViewModelBase
     public ReactiveCommand<AnimationFrame, Unit> RemoveFrameAtCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearSequenceCommand { get; }
     public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
-    public ReactiveCommand<IStorageService, Unit> ExportCommand { get; }
-    public ReactiveCommand<IStorageService, Unit> ImportCommand { get; }
+    public ReactiveCommand<IFileStorage, Unit> ExportCommand { get; }
+    public ReactiveCommand<IFileStorage, Unit> ImportCommand { get; }
 
-    public AnimationViewModel(IAnimationService animationService, IFileSystem fileSystem)
+    public void AddFrame(int cellIndex)
     {
-        _animationService = animationService;
+        AddFrameCommand.Execute(cellIndex).Subscribe();
+    }
+
+    public AnimationViewModel(
+        IAnimationPatternsProvider patternsProvider,
+        IAnimationPatternService patternService,
+        IFileSystem fileSystem)
+    {
+        _patternsProvider = patternsProvider;
+        _patternService = patternService;
         _fileSystem = fileSystem;
 
         _currentFrame = this.WhenAnyValue(x => x.SelectedPattern, x => x.CurrentFrameIndex)
@@ -70,10 +81,8 @@ public class AnimationViewModel : ViewModelBase
         WaitTime = 100;
         Magnification = new Magnification(4);
 
-        foreach (var pattern in _animationService.Patterns)
-        {
-            Patterns.Add(pattern);
-        }
+        SyncPatterns(_patternsProvider.Current);
+        _patternsProvider.Changed += SyncPatterns;
 
         if (Patterns.Count == 0)
         {
@@ -84,9 +93,8 @@ public class AnimationViewModel : ViewModelBase
                 new AnimationFrame(2, 100),
                 new AnimationFrame(1, 100)
             }, new GridSettings(new PictureSize(GridWidth, GridHeight), new Position(0, 0), 0));
-            _animationService.Add(testPattern);
-            Patterns.Add(testPattern);
-            SelectedPattern = testPattern;
+            _patternService.Add(testPattern);
+            SelectedPattern = Patterns.FirstOrDefault();
         }
 
         this.WhenAnyValue(x => x.SelectedPattern)
@@ -129,9 +137,8 @@ public class AnimationViewModel : ViewModelBase
         CreatePatternCommand = ReactiveCommand.Create<string>(name =>
         {
             var newPattern = new AnimationPattern(name, new List<AnimationFrame>(), new GridSettings(new PictureSize(GridWidth, GridHeight), new Position(0, 0), 0));
-            _animationService.Add(newPattern);
-            Patterns.Add(newPattern);
-            SelectedPattern = newPattern;
+            _patternService.Add(newPattern);
+            SelectedPattern = Patterns.LastOrDefault();
         });
 
         var canExecute = this.WhenAnyValue(x => x.SelectedPattern)
@@ -144,8 +151,7 @@ public class AnimationViewModel : ViewModelBase
                 int index = Patterns.IndexOf(SelectedPattern);
                 if (index >= 0)
                 {
-                    _animationService.Remove(index);
-                    Patterns.RemoveAt(index);
+                    _patternService.Remove(index);
                     SelectedPattern = Patterns.Count > 0 ? Patterns[0] : null;
                 }
             }
@@ -211,33 +217,29 @@ public class AnimationViewModel : ViewModelBase
                 }
             });
 
-        TogglePlayCommand = ReactiveCommand.Create(() =>
-        {
-            IsPlaying = !IsPlaying;
-        }, canExecute);
+        TogglePlayCommand = ReactiveCommand.Create(() => { IsPlaying = !IsPlaying; });
 
-        ExportCommand = ReactiveCommand.CreateFromTask<IStorageService>(async storage =>
+        ExportCommand = ReactiveCommand.CreateFromTask<IFileStorage>(async storage =>
         {
             if (SelectedPattern == null) return;
-            var path = await storage.SaveAnimationFilePickerAsync();
-            if (path == null) return;
+            var uri = await storage.SaveAnimationFilePickerAsync();
+            if (uri == null) return;
 
-            var json = JsonSerializer.Serialize(SelectedPattern, new JsonSerializerOptions { WriteIndented = true });
-            await _fileSystem.WriteAllTextAsync(path.LocalPath, json);
-        }, canExecute);
+            var json = JsonSerializer.Serialize(SelectedPattern);
+            await _fileSystem.WriteAllTextAsync(uri.LocalPath, json);
+        });
 
-        ImportCommand = ReactiveCommand.CreateFromTask<IStorageService>(async storage =>
+        ImportCommand = ReactiveCommand.CreateFromTask<IFileStorage>(async storage =>
         {
-            var path = await storage.OpenAnimationFilePickerAsync();
-            if (path == null) return;
+            var uri = await storage.OpenAnimationFilePickerAsync();
+            if (uri == null) return;
 
-            var json = await _fileSystem.ReadAllTextAsync(path.LocalPath);
+            var json = await _fileSystem.ReadAllTextAsync(uri.LocalPath);
             var pattern = JsonSerializer.Deserialize<AnimationPattern>(json);
             if (pattern != null)
             {
-                _animationService.Add(pattern);
-                Patterns.Add(pattern);
-                SelectedPattern = pattern;
+                _patternService.Add(pattern);
+                SelectedPattern = Patterns.LastOrDefault();
             }
         });
 
@@ -278,15 +280,24 @@ public class AnimationViewModel : ViewModelBase
             });
     }
 
+    private void SyncPatterns(AnimationPatterns patterns)
+    {
+        // シンプルな同期（必要に応じて最適化）
+        Patterns.Clear();
+        foreach (var p in patterns.Items)
+        {
+            Patterns.Add(p);
+        }
+    }
+
     private void UpdatePattern(AnimationPattern newPattern)
     {
         if (SelectedPattern == null) return;
         int index = Patterns.IndexOf(SelectedPattern);
         if (index >= 0)
         {
-            _animationService.Replace(index, newPattern);
-            Patterns[index] = newPattern;
-            SelectedPattern = newPattern;
+            _patternService.Replace(index, newPattern);
+            SelectedPattern = Patterns[index];
         }
     }
 }

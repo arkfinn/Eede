@@ -20,7 +20,7 @@
 	<Design.DataContext>
 		<!-- This only sets the DataContext for the previewer in an IDE,
 		to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-		<vm:MainViewModel StorageService="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}" />
+		<vm:MainViewModel FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}" />
 	</Design.DataContext>
 	<Panel Background="Transparent">
 		<Panel.Styles>
@@ -51,6 +51,10 @@
 								<Image Source="/Assets/Tools/tool_paste.png" Stretch="None" />
 							</Button>
 							<Panel Classes="horizontal-separator" />
+							<ToggleButton Classes="tool" IsChecked="{Binding IsTransparencyEnabled}" ToolTip.Tip="透過を有効にする" IsEnabled="False">
+								<Image Source="/Assets/Tools/layer_alpha.bmp" Stretch="None" />
+							</ToggleButton>
+							<Panel Classes="horizontal-separator" />
 							<navi:LayerStyleMenu ImageTransfer="{Binding ImageTransfer}"
 												 ImageBlender="{Binding ImageBlender}"/>
 							<Panel Classes="horizontal-separator" />
@@ -79,7 +83,7 @@
 											</Style>
 										</TabItem.Styles>
 										<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
-																StorageService="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
+																FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
 																Margin="4 2 4 8"/>
 									</TabItem>
 								</TabControl>
@@ -157,14 +161,14 @@
 										ToolTip.Tip="開く(O)"
 										HotKey="O"
 										Command="{Binding LoadPictureCommand}"
-										CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<Image Source="/Assets/Tools/file_open.png" Stretch="None" />
 								</Button>
 								<Button Classes="tool"
 										ToolTip.Tip="保存(Ctrl+S)"
 										HotKey="Ctrl+S"
 										Command="{Binding SavePictureCommand}"
-										CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<Image Source="/Assets/Tools/file_save.png" Stretch="None" />
 								</Button>
 								<Panel Classes="horizontal-separator" />
@@ -192,7 +196,7 @@
 							<Grid RowDefinitions="Auto, *">
 								<animations:AnimationPreviewView Grid.Row="0"
 																 DataContext="{Binding AnimationViewModel}"
-																 StorageService="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
+																 FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
 																 Width="220" />
 								<animations:AnimationSequencerView Grid.Row="1" DataContext="{Binding AnimationViewModel}" Width="220" />
 							</Grid>

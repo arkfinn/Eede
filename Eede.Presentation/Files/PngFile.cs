@@ -1,7 +1,7 @@
 using Avalonia.Media.Imaging;
 using Eede.Domain.Files;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 using System;
 using System.Threading.Tasks;
 
@@ -14,17 +14,17 @@ namespace Eede.Presentation.Files
             return this with { Path = filePath };
         }
 
-        public override async Task<SaveImageResult> SaveAsync(IStorageService storage)
+        public override async Task<SaveImageResult> SaveAsync(IFileStorage storage)
         {
             string fullPath = Path.ToString();
             try
             {
                 Bitmap.Save(fullPath);
-                return await Task.FromResult(SaveImageResult.Saved(this)); // 保存成功
+                return await Task.FromResult(SaveImageResult.Saved(this)); // 保存�E劁E
             }
             catch (Exception)
             {
-                return await Task.FromResult(SaveImageResult.Canceled()); // エラーが発生した場合
+                return await Task.FromResult(SaveImageResult.Canceled()); // エラーが発生した場吁E
             }
         }
     }

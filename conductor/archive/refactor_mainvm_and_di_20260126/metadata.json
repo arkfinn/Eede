@@ -1,0 +1,8 @@
+﻿{
+    "description":  "MainViewModel のクリーン化と DI コンテナの導入（A\u003eC\u003eBの順で実施）",
+    "track_id":  "refactor_mainvm_and_di_20260126",
+    "type":  "refactor",
+    "created_at":  "2026-01-26T15:30:00Z",
+    "status":  "completed",
+    "updated_at":  "2026-01-26T17:30:00Z"
+}

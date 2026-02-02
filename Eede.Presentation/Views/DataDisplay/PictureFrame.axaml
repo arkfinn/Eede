@@ -8,11 +8,8 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Presentation.Views.DataDisplay.PictureFrame"
              x:Name="Root">
-  <DockControl InitializeLayout="True"
-               InitializeFactory="True">
-    <DockControl.Factory>
-      <Factory />
-    </DockControl.Factory>
+  <DockControl x:Name="DockControl"
+               InitializeLayout="True">
     <RootDock IsCollapsable="False"
               DefaultDockable="{Binding #MainLayout}">
       <ProportionalDock x:Name="MainLayout"

@@ -9,15 +9,12 @@ namespace Eede.Application.Drawings
 {
     public class DrawableArea
     {
-        public DrawableArea(ICanvasBackgroundService background, Magnification magnification, PictureSize gridSize, PositionHistory positionHistory)
+        public DrawableArea(Magnification magnification, PictureSize gridSize, PositionHistory positionHistory)
         {
-            Background = background;
             Magnification = magnification;
             GridSize = gridSize;
             PositionHistory = positionHistory;
         }
-
-        private readonly ICanvasBackgroundService Background;
 
         public readonly Magnification Magnification;
 
@@ -65,18 +62,20 @@ namespace Eede.Application.Drawings
 
         public DrawableArea UpdateMagnification(Magnification m)
         {
-            return new DrawableArea(Background, m, GridSize, PositionHistory);
+            return new DrawableArea(m, GridSize, PositionHistory);
         }
 
         private DrawableArea UpdatePositionHistory(PositionHistory positionHistory)
         {
-            return new DrawableArea(Background, Magnification, GridSize, positionHistory);
+            return new DrawableArea(Magnification, GridSize, positionHistory);
         }
 
         private DrawableArea ClearPositionHistory()
         {
             return UpdatePositionHistory(null);
         }
+
+
 
         private MinifiedPosition RealPositionOf(Position position)
         {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Eede.Application.UseCase.Pictures
 {
-    public class SavePictureUseCase
+    public class SavePictureUseCase : ISavePictureUseCase
     {
         private readonly IPictureRepository _pictureRepository;
 

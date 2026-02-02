@@ -1,15 +1,12 @@
-﻿using Avalonia.Platform.Storage;
+﻿using Eede.Application.Infrastructure;
 using Eede.Domain.Palettes;
 using Eede.Infrastructure.Palettes.Persistence;
 using Eede.Infrastructure.Palettes.Persistence.ActFileFormat;
-using Eede.Presentation.Common.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
-using System.Web;
 
 namespace Eede.Presentation.ViewModels.DataEntry;
 
@@ -23,8 +20,8 @@ public class PaletteContainerViewModel : ViewModelBase
     public event Action<ArgbColor> OnFetchColor;
     public event Func<ArgbColor> OnApplyColor;
 
-    public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; }
-    public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; }
+    public ReactiveCommand<IFileStorage, Unit> LoadPaletteCommand { get; }
+    public ReactiveCommand<IFileStorage, Unit> SavePaletteCommand { get; }
 
     public PaletteContainerViewModel()
     {
@@ -33,8 +30,8 @@ public class PaletteContainerViewModel : ViewModelBase
         ApplyColorCommand = ReactiveCommand.Create<int>(ExecuteApplyColor);
         FetchColorCommand = ReactiveCommand.Create<int>(ExecuteFetchColor);
 
-        LoadPaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteLoadPalette);
-        SavePaletteCommand = ReactiveCommand.Create<StorageService>(ExecuteSavePalette);
+        LoadPaletteCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPalette);
+        SavePaletteCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePalette);
     }
 
     //パレットフォームのクリックイベントを拾って親に伝達できるようにする
@@ -57,59 +54,26 @@ public class PaletteContainerViewModel : ViewModelBase
         OnFetchColor?.Invoke(Palette.Fetch(number));
     }
 
-    private async void ExecuteLoadPalette(StorageService storage)
+    private async void ExecuteLoadPalette(IFileStorage storage)
     {
-        FilePickerOpenOptions options = new()
-        {
-            AllowMultiple = false,
-            FileTypeFilter = [
-                 new("Palette File")
-                 {
-                    Patterns = ["*.aact", "*.act"],
-                    MimeTypes = ["image/*"]
-                 },
-                 new("Palette File (RGBA)")
-                 {
-                    Patterns = ["*.aact"],
-                 },
-                  new("Palette File (RGB)")
-                 {
-                    Patterns = ["*.act"],
-                 },
-            ]
-            //        Title = Title,
-        };
-
-        IReadOnlyList<IStorageFile> result = await storage.StorageProvider.OpenFilePickerAsync(options);
-        if (result == null || result.Count == 0)
-        {
-            return;
-        }
-
-        string filePath = HttpUtility.UrlDecode(result[0].Path.AbsolutePath);
-        Palette = new PaletteRepository().Find(filePath);
-    }
-
-    private async void ExecuteSavePalette(StorageService storage)
-    {
-        FilePickerSaveOptions options = new()
-        {
-            SuggestedFileName = "palette",
-            DefaultExtension = "aact", // デフォルトの拡張子を設定
-            FileTypeChoices = [
-                 new("Palette File (RGBA)")
-                 {
-                    Patterns = ["*.aact"],
-                 },
-            ]
-        };
-        IStorageFile result = await storage.StorageProvider.SaveFilePickerAsync(options);
+        Uri? result = await storage.OpenPaletteFilePickerAsync();
         if (result == null)
         {
             return;
         }
 
-        await using Stream stream = await result.OpenWriteAsync();
+        Palette = new PaletteRepository().Find(result.LocalPath);
+    }
+
+    private async void ExecuteSavePalette(IFileStorage storage)
+    {
+        Uri? result = await storage.SavePaletteFilePickerAsync();
+        if (result == null)
+        {
+            return;
+        }
+
+        await using FileStream stream = File.OpenWrite(result.LocalPath);
         new AlphaActFileWriter().Write(stream, Palette);
     }
 }

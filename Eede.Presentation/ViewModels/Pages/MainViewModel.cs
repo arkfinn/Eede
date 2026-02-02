@@ -9,13 +9,14 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
+using Eede.Domain.ImageEditing.History;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
 using Eede.Presentation.Settings;
@@ -24,7 +25,7 @@ using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
-using Eede.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -84,34 +85,35 @@ public class MainViewModel : ViewModelBase
     [Reactive] public PictureSize CursorSize { get; set; }
 
     [Reactive] public DrawingSessionViewModel DrawingSessionViewModel { get; private set; }
-    [Reactive] public StorageService StorageService { get; set; }
+    [Reactive] public IFileStorage FileStorage { get; set; }
     [Reactive] public Cursor? AnimationCursor { get; set; }
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
     [Reactive] public bool HasClipboardPicture { get; set; } = false;
+    [Reactive] public bool IsTransparencyEnabled { get; set; } = false;
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
-    public ReactiveCommand<IStorageService, Unit> LoadPictureCommand { get; }
-    public ReactiveCommand<IStorageService, Unit> SavePictureCommand { get; }
-    public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; }
-    public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; }
-    public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; }
+    public ReactiveCommand<IFileStorage, Unit> LoadPictureCommand { get; private set; }
+    public ReactiveCommand<IFileStorage, Unit> SavePictureCommand { get; private set; }
+    public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; private set; }
+    public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; private set; }
+    public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; private set; }
 
-    public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; }
-    public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
+    public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; private set; }
+    public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; private set; }
 
-    public ReactiveCommand<StorageService, Unit> LoadPaletteCommand { get; }
-    public ReactiveCommand<StorageService, Unit> SavePaletteCommand { get; }
-    public ReactiveCommand<Unit, Unit> PutBackgroundColorCommand { get; }
-    public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; }
-    public PaletteContainerViewModel PaletteContainerViewModel { get; } = new PaletteContainerViewModel();
+    public ReactiveCommand<IFileStorage, Unit> LoadPaletteCommand { get; private set; }
+    public ReactiveCommand<IFileStorage, Unit> SavePaletteCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> PutBackgroundColorCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; private set; }
+    public PaletteContainerViewModel PaletteContainerViewModel { get; private set; }
 
 
     // Viewにウィンドウを閉じるよう通知するためのInteraction
-    public Interaction<Unit, Unit> CloseWindowInteraction { get; }
+    public Interaction<Unit, Unit> CloseWindowInteraction { get; private set; }
 
     // Viewからのクローズ要求を受け取るためのコマンド
-    public ReactiveCommand<Unit, Unit> RequestCloseCommand { get; }
+    public ReactiveCommand<Unit, Unit> RequestCloseCommand { get; private set; }
 
     private bool _isCloseConfirmed;
     public bool IsCloseConfirmed
@@ -122,26 +124,67 @@ public class MainViewModel : ViewModelBase
 
     private readonly IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> _bitmapAdapter;
     private readonly IPictureRepository _pictureRepository;
-    private readonly SavePictureUseCase _savePictureUseCase;
-    private readonly LoadPictureUseCase _loadPictureUseCase;
+    private readonly IDrawStyleFactory _drawStyleFactory;
+    private readonly ITransformImageUseCase _transformImageUseCase;
+    private readonly ITransferImageToCanvasUseCase _transferImageToCanvasUseCase;
+    private readonly ITransferImageFromCanvasUseCase _transferImageFromCanvasUseCase;
+    private readonly IDrawingSessionProvider _drawingSessionProvider;
+    private readonly IPictureIOService _pictureIOService;
     private readonly GlobalState _state;
-    private readonly IClipboardService _clipboardService;
+    private readonly IClipboard _clipboard;
+    private readonly Func<DockPictureViewModel> _dockPictureFactory;
+    private readonly Func<NewPictureWindowViewModel> _newPictureWindowFactory;
 
-    public ReactiveCommand<Unit, Unit> CopyCommand { get; }
-    public ReactiveCommand<Unit, Unit> CutCommand { get; }
-    public ReactiveCommand<Unit, Unit> PasteCommand { get; }
+    public ReactiveCommand<Unit, Unit> CopyCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> CutCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> PasteCommand { get; private set; }
 
-    public MainViewModel(GlobalState State, IAnimationService animationService, IClipboardService clipboardService)
+    public MainViewModel(
+        GlobalState State,
+        IClipboard clipboard,
+        IBitmapAdapter<Avalonia.Media.Imaging.Bitmap> bitmapAdapter,
+        IPictureRepository pictureRepository,
+        IDrawStyleFactory drawStyleFactory,
+        ITransformImageUseCase transformImageUseCase,
+        ITransferImageToCanvasUseCase transferImageToCanvasUseCase,
+        ITransferImageFromCanvasUseCase transferImageFromCanvasUseCase,
+        IDrawingSessionProvider drawingSessionProvider,
+        DrawableCanvasViewModel drawableCanvasViewModel,
+        AnimationViewModel animationViewModel,
+        DrawingSessionViewModel drawingSessionViewModel,
+        PaletteContainerViewModel paletteContainerViewModel,
+        IPictureIOService pictureIOService,
+        Func<DockPictureViewModel> dockPictureFactory,
+        Func<NewPictureWindowViewModel> newPictureWindowFactory)
     {
         _state = State;
-        _clipboardService = clipboardService;
-        _bitmapAdapter = new AvaloniaBitmapAdapter();
-        _pictureRepository = new PictureRepository(_bitmapAdapter);
-        _savePictureUseCase = new SavePictureUseCase(_pictureRepository);
-        _loadPictureUseCase = new LoadPictureUseCase(_pictureRepository);
-        AnimationViewModel = new AnimationViewModel(animationService, new RealFileSystem());
-        DrawableCanvasViewModel = new DrawableCanvasViewModel(State, AnimationViewModel.AddFrameCommand, _clipboardService, _bitmapAdapter, new DrawActionUseCase());
-        DrawingSessionViewModel = new DrawingSessionViewModel(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
+        _clipboard = clipboard;
+        _bitmapAdapter = bitmapAdapter;
+        _pictureRepository = pictureRepository;
+        _drawStyleFactory = drawStyleFactory;
+        _transformImageUseCase = transformImageUseCase;
+        _transferImageToCanvasUseCase = transferImageToCanvasUseCase;
+        _transferImageFromCanvasUseCase = transferImageFromCanvasUseCase;
+        _drawingSessionProvider = drawingSessionProvider;
+        _pictureIOService = pictureIOService;
+        _dockPictureFactory = dockPictureFactory;
+        _newPictureWindowFactory = newPictureWindowFactory;
+
+        DrawableCanvasViewModel = drawableCanvasViewModel;
+        AnimationViewModel = animationViewModel;
+        DrawingSessionViewModel = drawingSessionViewModel;
+        PaletteContainerViewModel = paletteContainerViewModel;
+
+        LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
+        SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);
+
+        InitializeConnections();
+    }
+
+    private void InitializeConnections()
+    {
+        Pictures.CollectionChanged += Pictures_CollectionChanged;
+
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
@@ -176,19 +219,11 @@ public class MainViewModel : ViewModelBase
         DrawStyle = DrawStyleType.FreeCurve;
         _ = this.WhenAnyValue(x => x.DrawStyle).Subscribe(drawStyle => DrawableCanvasViewModel.DrawStyle = ExecuteUpdateDrawStyle(drawStyle));
 
-        DrawableCanvasViewModel.ColorPicked += (sender, args) =>
-        {
-            PenColor = args.NewColor;
-        };
-
-        _ = this.WhenAnyValue(x => x.AnimationViewModel.IsAnimationMode)
-            .BindTo(this, x => x.DrawableCanvasViewModel.IsAnimationMode);
-
-        _ = this.WhenAnyValue(x => x.AnimationViewModel.SelectedPattern)
-            .Where(x => x != null)
-            .Subscribe(x =>
+        _ = this.WhenAnyValue(x => x.IsTransparencyEnabled)
+            .Subscribe(enabled =>
             {
-                DrawableCanvasViewModel.GridSettings = x!.Grid;
+                ImageTransfer = enabled ? new AlphaToneImageTransfer() : new DirectImageTransfer();
+                ImageBlender = enabled ? new AlphaImageBlender() : new DirectImageBlender();
             });
 
         this.WhenAnyValue(x => x.ActiveDockable)
@@ -201,11 +236,11 @@ public class MainViewModel : ViewModelBase
         DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea) =>
         {
             // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
-            DrawingSessionViewModel.Push(now);
+            DrawingSessionViewModel.Push(now, nowArea, previousArea);
         };
 
-        LoadPictureCommand = ReactiveCommand.Create<IStorageService>(ExecuteLoadPicture);
-        SavePictureCommand = ReactiveCommand.Create<IStorageService>(ExecuteSavePicture);
+        LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
+        SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);
         PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
 
         ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
@@ -230,7 +265,10 @@ public class MainViewModel : ViewModelBase
         CloseWindowInteraction = new Interaction<Unit, Unit>();
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
 
-        var canCopyCut = this.WhenAnyValue(x => x.DrawStyle, x => x == DrawStyleType.RegionSelect);
+        var canCopyCut = this.WhenAnyValue(
+            x => x.DrawStyle,
+            x => x.DrawableCanvasViewModel.IsRegionSelecting,
+            (style, isSelecting) => style == DrawStyleType.RegionSelect && isSelecting);
         CopyCommand = ReactiveCommand.CreateFromTask(async () =>
         {
             await DrawableCanvasViewModel.CopyCommand.Execute();
@@ -247,11 +285,50 @@ public class MainViewModel : ViewModelBase
             DrawStyle = DrawStyleType.RegionSelect;
         }, this.WhenAnyValue(x => x.HasClipboardPicture));
 
-        this.WhenAnyValue(x => x.DrawingSessionViewModel.CurrentSession)
-            .Subscribe(session =>
+        DrawingSessionViewModel.Undone += OnUndone;
+        DrawingSessionViewModel.Redone += OnRedone;
+
+        this.WhenAnyValue(x => x.ActiveDockable)
+            .Subscribe(active =>
             {
-                SetPictureToDrawArea(session.CurrentPicture);
+                if (active is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
+                {
+                    // ドキュメントが切り替わった時にキャンバスを初期化
+                    // TODO: DrawingSessionProvider 側の切り替えと同期させる
+                }
             });
+    }
+
+    private void OnUndone(object? sender, UndoResult e)
+    {
+        DrawableCanvasViewModel.PictureBuffer = e.Session.Buffer;
+        DrawableCanvasViewModel.SyncWithSession(true);
+        SetPictureToDrawArea(e.Session.CurrentPicture);
+
+        if (e.Item is DockActiveHistoryItem dockItem)
+        {
+            var vm = Pictures.FirstOrDefault(x => x.Id == dockItem.DockId);
+            if (vm != null)
+            {
+                vm.PictureBuffer = dockItem.Before;
+            }
+        }
+    }
+
+    private void OnRedone(object? sender, RedoResult e)
+    {
+        DrawableCanvasViewModel.PictureBuffer = e.Session.Buffer;
+        DrawableCanvasViewModel.SyncWithSession(true);
+        SetPictureToDrawArea(e.Session.CurrentPicture);
+
+        if (e.Item is DockActiveHistoryItem dockItem)
+        {
+            var vm = Pictures.FirstOrDefault(x => x.Id == dockItem.DockId);
+            if (vm != null)
+            {
+                vm.PictureBuffer = dockItem.After;
+            }
+        }
     }
 
     public void DragOverPicture(object sender, DragEventArgs e)
@@ -270,9 +347,7 @@ public class MainViewModel : ViewModelBase
         }
 
         IEnumerable<IStorageItem> files = dataObject.GetFiles();
-        // TODO: 拡張子チェックしたい
-        // ?.Where(file=> file.Path.);
-        if (files is null)
+        if (files is null || !files.Any(f => IsSupportedImageFile(f)))
         {
             return;
         }
@@ -294,8 +369,6 @@ public class MainViewModel : ViewModelBase
         }
 
         IEnumerable<IStorageItem> files = dataObject.GetFiles();
-        // TODO: 拡張子チェックしたい
-        // ?.Where(file=> file.Path.);
         if (files is null)
         {
             return;
@@ -303,15 +376,24 @@ public class MainViewModel : ViewModelBase
 
         foreach (IStorageItem file in files)
         {
-            DockPictureViewModel? newPicture = await OpenPicture(file.Path);
-            if (newPicture != null)
+            if (IsSupportedImageFile(file))
             {
-                Pictures.Add(newPicture);
+                DockPictureViewModel? newPicture = await OpenPicture(file.Path);
+                if (newPicture != null)
+                {
+                    Pictures.Add(newPicture);
+                }
             }
         }
     }
 
-    private async void ExecuteLoadPicture(IStorageService storage)
+    private bool IsSupportedImageFile(IStorageItem file)
+    {
+        var path = file.Path.LocalPath.ToLower();
+        return path.EndsWith(".png") || path.EndsWith(".bmp") || path.EndsWith(".arv");
+    }
+
+    private async void ExecuteLoadPicture(IFileStorage storage)
     {
         Uri? result = await storage.OpenFilePickerAsync();
         if (result == null)
@@ -326,19 +408,46 @@ public class MainViewModel : ViewModelBase
 
     }
 
+    private void Pictures_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+        {
+            foreach (DockPictureViewModel vm in e.NewItems)
+            {
+                SetupDockPicture(vm);
+            }
+        }
+        if (e.OldItems != null)
+        {
+            foreach (DockPictureViewModel vm in e.OldItems)
+            {
+                CleanupDockPicture(vm);
+            }
+        }
+    }
+
+    private void CleanupDockPicture(DockPictureViewModel vm)
+    {
+        vm.PicturePush -= OnPushToDrawArea;
+        vm.PicturePull -= OnPullFromDrawArea;
+        vm.PictureUpdate -= OnPictureUpdate;
+        vm.PictureSave -= OnPictureSave;
+    }
+
     private async Task<DockPictureViewModel?> OpenPicture(Uri path)
     {
         FilePath filePath = new(path.LocalPath);
-        Picture picture = await _loadPictureUseCase.ExecuteAsync(filePath);
+        Picture picture = await _pictureIOService.LoadAsync(filePath);
         if (picture == null)
         {
             return null;
         }
-        DockPictureViewModel vm = DockPictureViewModel.FromFile(picture, filePath, _state, AnimationViewModel, _bitmapAdapter, _savePictureUseCase, _loadPictureUseCase);
-        return SetupDockPicture(vm);
+        DockPictureViewModel vm = _dockPictureFactory();
+        vm.Initialize(picture, filePath);
+        return vm;
     }
 
-    private DockPictureViewModel SetupDockPicture(DockPictureViewModel vm)
+    private void SetupDockPicture(DockPictureViewModel vm)
     {
         vm.PicturePush += OnPushToDrawArea;
         vm.PicturePull += OnPullFromDrawArea;
@@ -346,20 +455,21 @@ public class MainViewModel : ViewModelBase
         vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
         _ = this.WhenAnyValue(x => x.AnimationCursor).BindTo(vm, x => x.AnimationCursor);
-        return vm;
     }
 
     private async void ExecuteCreateNewPicture()
     {
-        NewPictureWindowViewModel store = new();
+        NewPictureWindowViewModel store = _newPictureWindowFactory();
         NewPictureWindowViewModel result = await ShowCreateNewPictureModal.Handle(store);
         if (result.Result)
         {
-            Pictures.Add(SetupDockPicture(DockPictureViewModel.FromSize(result.Size, _state, AnimationViewModel, _bitmapAdapter, _savePictureUseCase, _loadPictureUseCase)));
+            DockPictureViewModel vm = _dockPictureFactory();
+            vm.Initialize(Picture.CreateEmpty(result.Size), FilePath.Empty());
+            Pictures.Add(vm);
         }
     }
 
-    private void ExecuteSavePicture(IStorageService storage)
+    private void ExecuteSavePicture(IFileStorage storage)
     {
         if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc)
         {
@@ -372,7 +482,7 @@ public class MainViewModel : ViewModelBase
 
     private async Task OnPictureSave(object sender, PictureSaveEventArgs e)
     {
-        SaveImageResult saveResult = await e.File.SaveAsync(StorageService);
+        SaveImageResult saveResult = await e.File.SaveAsync(FileStorage);
         if (saveResult.IsCanceled)
         {
             e.Cancel();
@@ -390,12 +500,11 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        PictureEditingUseCase.EditResult result = PictureEditingUseCase.PushToCanvas(
-            DrawableCanvasViewModel.PictureBuffer.Previous,
+        Picture updated = _transferImageToCanvasUseCase.Execute(
             vm.PictureBuffer,
             args.Rect);
 
-        DrawingSessionViewModel.Push(result.Updated);
+        DrawingSessionViewModel.Push(updated, null, DrawableCanvasViewModel.SelectingArea);
     }
 
     private void SetPictureToDrawArea(Picture picture)
@@ -420,45 +529,43 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
-        PictureEditingUseCase.EditResult result = PictureEditingUseCase.PullFromCanvas(
+
+        Picture updated = _transferImageFromCanvasUseCase.Execute(
             vm.PictureBuffer,
             DrawableCanvasViewModel.PictureBuffer.Previous,
             args.Position,
             PullBlender);
 
-        vm.PictureBuffer = result.Updated;
+        DrawingSessionViewModel.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer, updated);
+
+        vm.PictureBuffer = updated;
     }
 
     private void ExecutePictureAction(PictureActions actionType)
     {
+        DrawableCanvasViewModel.CommitSelection();
         PictureArea? area = DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null;
-        PictureEditingUseCase.EditResult result = area.HasValue ? PictureEditingUseCase.ExecuteAction(
+        Picture updated = area.HasValue ? _transformImageUseCase.Execute(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType,
             area.Value
-        ) : PictureEditingUseCase.ExecuteAction(
+        ) : _transformImageUseCase.Execute(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType
         );
 
-        DrawingSessionViewModel.Push(result.Updated);
+        DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea);
     }
 
     private IDrawStyle ExecuteUpdateDrawStyle(DrawStyleType drawStyle)
     {
         DrawableCanvasViewModel.IsRegionSelecting = false;
-        return drawStyle switch
+        var style = _drawStyleFactory.Create(drawStyle);
+        if (style is RegionSelector regionSelector)
         {
-            DrawStyleType.RegionSelect => DrawableCanvasViewModel.SetupRegionSelector(),
-            DrawStyleType.FreeCurve => new FreeCurve(),
-            DrawStyleType.Line => new Line(),
-            DrawStyleType.Fill => new Fill(),
-            DrawStyleType.Rectangle => new Rectangle(),
-            DrawStyleType.FilledRectangle => new FilledRectangle(),
-            DrawStyleType.Ellipse => new Ellipse(),
-            DrawStyleType.FilledEllipse => new FilledEllipse(),
-            _ => throw new ArgumentOutOfRangeException(nameof(drawStyle), $"Unknown DrawStyle: {drawStyle}"),
-        };
+            DrawableCanvasViewModel.SetupRegionSelector(regionSelector);
+        }
+        return style;
     }
 
     private ArgbColor OnApplyPaletteColor()

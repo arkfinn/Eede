@@ -1,7 +1,7 @@
-﻿using Avalonia.Media.Imaging;
+using Avalonia.Media.Imaging;
 using Eede.Domain.Files;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.Files
@@ -13,7 +13,7 @@ namespace Eede.Presentation.Files
             return CreatePngFileWithCheck(Bitmap, filePath);
         }
 
-        public override async Task<SaveImageResult> SaveAsync(IStorageService storage)
+        public override async Task<SaveImageResult> SaveAsync(IFileStorage storage)
         {
             return await SaveWithFilePickerAsync(storage);
         }

@@ -1,8 +1,11 @@
 using Eede.Application.Animations;
 using Eede.Domain.Animations;
-using Eede.Presentation.Common.Services;
+using Eede.Application.Infrastructure;
 using Eede.Presentation.ViewModels.Animations;
+using Eede.Application.UseCase.Animations;
 using Moq;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace Eede.Presentation.Tests.ViewModels.Animations;
 
@@ -11,9 +14,15 @@ public class AnimationDockViewModelTests
     [Test]
     public void ShouldInitializeWithCorrectProperties()
     {
-        var mockService = new Mock<IAnimationService>();
-        mockService.Setup(x => x.Patterns).Returns(new List<AnimationPattern>());
-        var animationViewModel = new AnimationViewModel(mockService.Object, new Mock<IFileSystem>().Object);
+        var patternsProvider = new AnimationPatternsProvider();
+        var patternService = new AnimationPatternService(
+            new AddAnimationPatternUseCase(patternsProvider),
+            new ReplaceAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider));
+        var animationViewModel = new AnimationViewModel(
+            patternsProvider,
+            patternService,
+            new Mock<IFileSystem>().Object);
         
         var dockViewModel = new AnimationDockViewModel(animationViewModel);
 

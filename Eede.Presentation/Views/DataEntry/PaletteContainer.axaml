@@ -16,13 +16,13 @@
     <StackPanel Orientation="Vertical" Margin="4 0">
       <Button ToolTip.Tip="パレットを開く"
               Command="{Binding LoadPaletteCommand}"
-              CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
+              CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
         <Image Source="/Assets/Tools/file_open.png" Stretch="None" />
       </Button>
 
       <Button ToolTip.Tip="パレットを保存する"
               Command="{Binding SavePaletteCommand}"
-              CommandParameter="{Binding StorageService, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
+              CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
         <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
       </Button>
     </StackPanel>

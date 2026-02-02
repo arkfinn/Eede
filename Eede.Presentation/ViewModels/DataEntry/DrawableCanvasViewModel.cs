@@ -18,6 +18,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Pictures;
@@ -136,6 +137,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         PasteCommand = ReactiveCommand.CreateFromTask(ExecutePasteAction);
 
         _ = this.WhenAnyValue(x => x.DrawStyle)
+            .DistinctUntilChanged()
             .Subscribe(x =>
             {
                 _coordinator.CommitSelection();

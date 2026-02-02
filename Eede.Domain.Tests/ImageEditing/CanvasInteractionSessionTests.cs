@@ -28,7 +28,7 @@ public class CanvasInteractionSessionTests
         var session = new CanvasInteractionSession(buffer, new FreeCurve());
         var penStyle = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
 
-        var nextSession = session.PointerBegin(new CanvasCoordinate(10, 10), penStyle, false, null, new DirectImageBlender(), new ArgbColor(0, 0, 0, 0));
+        var nextSession = session.PointerBegin(new CanvasCoordinate(10, 10), penStyle, false, null);
 
         Assert.That(nextSession.Buffer.IsDrawing(), Is.True);
     }

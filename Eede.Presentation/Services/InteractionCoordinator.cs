@@ -63,6 +63,7 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public Cursor ActiveCursor { get; private set; } = Cursor.Default;
     public IImageBlender ImageBlender { get; set; } = new DirectImageBlender();
+    public ArgbColor BackgroundColor { get; set; } = new ArgbColor(0, 0, 0, 0);
 
     public event Action<Picture, Picture, PictureArea?, PictureArea?> Drew;
     public event Action StateChanged;
@@ -155,7 +156,9 @@ public class InteractionCoordinator : IInteractionCoordinator
             canvasCoordinate.ToPosition(),
             null,
             () => workingSession.Buffer.Fetch(),
-            internalUpdateCommand);
+            internalUpdateCommand,
+            ImageBlender,
+            BackgroundColor);
 
         if (nextState is DraggingState)
         {

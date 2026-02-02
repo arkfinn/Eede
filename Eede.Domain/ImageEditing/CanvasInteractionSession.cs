@@ -28,7 +28,9 @@ public class CanvasInteractionSession
         CanvasCoordinate coordinate,
         PenStyle penStyle,
         bool isShifted,
-        ICommand? updateAction)
+        ICommand? updateAction,
+        Eede.Domain.ImageEditing.Blending.IImageBlender blender,
+        Eede.Domain.Palettes.ArgbColor backgroundColor)
     {
         // 1. SelectionState の処理
         var currentArea = HalfBoxArea.Create(coordinate.ToPosition(), new PictureSize(16, 16));
@@ -37,7 +39,9 @@ public class CanvasInteractionSession
             coordinate.ToPosition(),
             null,
             () => Buffer.Previous,
-            updateAction);
+            updateAction,
+            blender,
+            backgroundColor);
 
         if (nextState is DraggingState)
         {

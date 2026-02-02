@@ -39,6 +39,7 @@ public interface IInteractionCoordinator
     Position PreviewPosition { get; }
     Cursor ActiveCursor { get; }
     IImageBlender ImageBlender { get; set; }
+    ArgbColor BackgroundColor { get; set; }
 
     // イベント
     event Action<Picture, Picture, PictureArea?, PictureArea?> Drew;

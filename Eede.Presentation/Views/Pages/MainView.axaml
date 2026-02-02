@@ -51,10 +51,6 @@
 								<Image Source="/Assets/Tools/tool_paste.png" Stretch="None" />
 							</Button>
 							<Panel Classes="horizontal-separator" />
-							<ToggleButton Classes="tool" IsChecked="{Binding IsTransparencyEnabled}" ToolTip.Tip="透過を有効にする" IsEnabled="False">
-								<Image Source="/Assets/Tools/layer_alpha.bmp" Stretch="None" />
-							</ToggleButton>
-							<Panel Classes="horizontal-separator" />
 							<navi:LayerStyleMenu ImageTransfer="{Binding ImageTransfer}"
 												 ImageBlender="{Binding ImageBlender}"/>
 							<Panel Classes="horizontal-separator" />
@@ -66,6 +62,9 @@
 						<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
 							<navi:PictureActionMenu Command="{Binding PictureActionCommand}"/>
 							<Separator/>
+							<ToggleButton Classes="tool" IsChecked="{Binding IsTransparencyEnabled}" ToolTip.Tip="透過を有効にする">
+								<Image Source="/Assets/Tools/layer_alpha.bmp" Stretch="None" />
+							</ToggleButton>
 						</StackPanel>
 					</Panel>
 

@@ -134,7 +134,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         // 1. プレビュー状態中に別のツールで描画を開始しようとした場合、確定する
         if (previousState is SelectionPreviewState && drawStyle is not RegionSelector)
         {
-            workingSession = previousState.Commit(workingSession);
+            workingSession = previousState.Commit(workingSession, ImageBlender);
             _sessionProvider.Update(workingSession);
             // 確定後の最新バッファと、確定後の状態(NormalCursorState)でセッションを更新
             _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, new NormalCursorState(currentArea));
@@ -170,7 +170,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         // 3. プレビュー状態から通常状態へ遷移（範囲外クリック）した場合、確定する
         if (previousState is SelectionPreviewState && nextState is NormalCursorState)
         {
-            workingSession = previousState.Commit(workingSession);
+            workingSession = previousState.Commit(workingSession, ImageBlender);
             _sessionProvider.Update(workingSession);
             // 確定後のバッファでセッションを再構築
             _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
@@ -332,7 +332,7 @@ public class InteractionCoordinator : IInteractionCoordinator
     {
         if (_interactionSession?.SelectionState != null && _sessionProvider.CurrentSession != null)
         {
-            var nextSession = _interactionSession.SelectionState.Commit(_sessionProvider.CurrentSession);
+            var nextSession = _interactionSession.SelectionState.Commit(_sessionProvider.CurrentSession, ImageBlender);
             if (nextSession != _sessionProvider.CurrentSession)
             {
                 _sessionProvider.Update(nextSession);

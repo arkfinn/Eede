@@ -1,4 +1,5 @@
 using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.SharedKernel;
 using NUnit.Framework;
@@ -134,7 +135,7 @@ public class DrawingSessionTests
         });
 
         // Act: 確定（Commit）
-        var committedSession = previewSession.CommitPreview();
+        var committedSession = previewSession.CommitPreview(new DirectImageBlender());
 
         // Assert: 確定後の状態確認
         Assert.Multiple(() =>

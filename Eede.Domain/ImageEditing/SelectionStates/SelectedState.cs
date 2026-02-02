@@ -64,7 +64,7 @@ public class SelectedState : ISelectionState
         return _selection.Area;
     }
 
-    public DrawingSession Commit(DrawingSession session)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender)
     {
         return session;
     }

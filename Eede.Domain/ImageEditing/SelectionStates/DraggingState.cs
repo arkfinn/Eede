@@ -78,9 +78,9 @@ public class DraggingState : ISelectionState
         return _originalArea;
     }
 
-    public DrawingSession Commit(DrawingSession session)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender)
     {
-        return session.UpdatePreviewContent(GetSelectionPreviewInfo()).CommitPreview();
+        return session.UpdatePreviewContent(GetSelectionPreviewInfo()).CommitPreview(blender);
     }
 
     public DrawingSession Cancel(DrawingSession session)

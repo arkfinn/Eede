@@ -16,7 +16,7 @@ public interface ISelectionState
     SelectionCursor GetCursor(Position mousePosition);
     PictureArea? GetSelectingArea();
 
-    DrawingSession Commit(DrawingSession session);
+    DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender);
     DrawingSession Cancel(DrawingSession session);
 }
 

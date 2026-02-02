@@ -184,7 +184,9 @@
 							</StackPanel>
 						</Panel>
 						<display:PictureFrame Pictures="{Binding Pictures}"
-											  ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"/>
+											  ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"
+											  ImageBlender="{Binding PullBlender}"
+											  BackgroundColor="{Binding CurrentBackgroundColor.Value}"/>
 					</DockPanel>
 
 					<!-- Collapsible Panel -->

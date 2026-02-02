@@ -15,7 +15,7 @@ public class SelectionPreviewState : ISelectionState
         _info = info;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, Eede.Domain.ImageEditing.Blending.IImageBlender blender, Eede.Domain.Palettes.ArgbColor backgroundColor)
     {
         // プレビュー範囲内をクリックしたら再ドラッグ開始
         var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);

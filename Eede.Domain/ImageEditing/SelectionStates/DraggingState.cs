@@ -13,14 +13,16 @@ public class DraggingState : ISelectionState
     private readonly Position _startPosition;
     private Position _nowPosition;
     private readonly SelectionPreviewType _type;
+    private readonly PictureArea? _clearArea;
 
-    public DraggingState(Picture pixels, PictureArea originalArea, Position startPosition, SelectionPreviewType type = SelectionPreviewType.CutAndMove)
+    public DraggingState(Picture pixels, PictureArea originalArea, Position startPosition, SelectionPreviewType type = SelectionPreviewType.CutAndMove, PictureArea? clearArea = null)
     {
         _pixels = pixels;
         _originalArea = originalArea;
         _startPosition = startPosition;
         _nowPosition = startPosition;
         _type = type;
+        _clearArea = clearArea ?? (type == SelectionPreviewType.CutAndMove ? originalArea : null);
     }
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
@@ -58,8 +60,7 @@ public class DraggingState : ISelectionState
     {
         var offset = new Position(_nowPosition.X - _startPosition.X, _nowPosition.Y - _startPosition.Y);
         var nextPosition = new Position(_originalArea.X + offset.X, _originalArea.Y + offset.Y);
-        var originalArea = _type == SelectionPreviewType.CutAndMove ? _originalArea : (PictureArea?)null;
-        return new SelectionPreviewInfo(_pixels, nextPosition, _type, originalArea);
+        return new SelectionPreviewInfo(_pixels, nextPosition, _type, _clearArea);
     }
 
     public SelectionCursor GetCursor(Position mousePosition)

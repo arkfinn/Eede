@@ -183,8 +183,10 @@ public class InteractionCoordinator : IInteractionCoordinator
             NotifyStateChanged();
             return;
         }
-
-        _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
+        else
+        {
+            _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
+        }
 
         // 3. プレビュー状態から通常状態へ遷移（範囲外クリック）した場合、確定する
         if (previousState is SelectionPreviewState && nextState is NormalCursorState)
@@ -194,7 +196,6 @@ public class InteractionCoordinator : IInteractionCoordinator
             // 確定後のバッファでセッションを再構築
             _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
             NotifyStateChanged();
-            return;
         }
 
         // 4. 新しい描画の開始

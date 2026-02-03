@@ -22,7 +22,7 @@ public class SelectedState : ISelectionState
             var picture = getPicture();
             var cutPicture = picture.CutOut(_selection.Area);
             // Coordinator側でBufferを更新するため、ここではupdateActionを呼ばない
-            return new DraggingState(cutPicture, _selection.Area, mousePosition);
+            return new DraggingState(cutPicture, _selection.Area, mousePosition, SelectionPreviewType.CutAndMove, _selection.Area);
         }
         return new NormalCursorState(cursorArea);
     }

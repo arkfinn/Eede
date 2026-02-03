@@ -34,20 +34,20 @@
 						<StackPanel Orientation="Horizontal"
 									HorizontalAlignment="Center"
 									Margin="2">
-							<Button Classes="tool" Command="{Binding UndoCommand}">
+							<Button Classes="tool" Command="{Binding UndoCommand}" ToolTip.Tip="元に戻す(Ctrl+Z)">
 								<Image Source="/Assets/Tools/tool_undo.png" Stretch="None" />
 							</Button>
-							<Button Classes="tool" Command="{Binding RedoCommand}">
+							<Button Classes="tool" Command="{Binding RedoCommand}" ToolTip.Tip="やり直し(Ctrl+Y)">
 								<Image Source="/Assets/Tools/tool_redo.png" Stretch="None" />
 							</Button>
 							<Panel Classes="horizontal-separator" />
-							<Button Classes="tool" Command="{Binding CopyCommand}" ToolTip.Tip="コピー(Ctrl+C)" HotKey="Ctrl+C">
+							<Button Classes="tool" Command="{Binding CopyCommand}" ToolTip.Tip="コピー(Ctrl+C): 選択範囲をクリップボードにコピー" HotKey="Ctrl+C">
 								<Image Source="/Assets/Tools/tool_copy.png" Stretch="None" />
 							</Button>
-							<Button Classes="tool" Command="{Binding CutCommand}" ToolTip.Tip="切り取り(Ctrl+X)" HotKey="Ctrl+X">
+							<Button Classes="tool" Command="{Binding CutCommand}" ToolTip.Tip="切り取り(Ctrl+X): 選択範囲を切り取ってクリップボードに保存" HotKey="Ctrl+X">
 								<Image Source="/Assets/Tools/tool_cut.png" Stretch="None" />
 							</Button>
-							<Button Classes="tool" Command="{Binding PasteCommand}" ToolTip.Tip="貼り付け(Ctrl+V)" HotKey="Ctrl+V">
+							<Button Classes="tool" Command="{Binding PasteCommand}" ToolTip.Tip="貼り付け(Ctrl+V): クリップボードの内容を現在のキャンバスに貼り付け" HotKey="Ctrl+V">
 								<Image Source="/Assets/Tools/tool_paste.png" Stretch="None" />
 							</Button>
 							<Panel Classes="horizontal-separator" />

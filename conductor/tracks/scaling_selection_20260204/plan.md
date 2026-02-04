@@ -15,10 +15,10 @@ UIや描画ライブラリに依存しない純粋なドメインモデルとし
 ## フェーズ 2: インタラクションの状態管理とアプリケーション層 (Interaction & App)
 ユーザーのドラッグ操作をドメインモデルへのメッセージに変換し、状態遷移を管理します。
 
-- [x] Task: インタラクション集約 (CanvasInteractionSession) の拡張
+- [x] Task: インタラクション集約 (CanvasInteractionSession) の拡張 [e3a9865]
     - [ ] Stateパターン: ResizingState を導入して状態遷移を厳格に管理する。
     - [ ] ハンドル判定: マウス座標がどのハンドルにあるかを判定するドメインロジックの組み込み。
-- [x] Task: プレビュー情報の更新 (SelectionPreviewInfo)
+- [x] Task: プレビュー情報の更新 (SelectionPreviewInfo) [e3a9865]
     - [ ] DrawingSession 内で変形中の状態を保持し、不変性を保ちながら更新する仕組みの実装。
 
 ## フェーズ 3: プレゼンテーションと視覚的フィードバック (Presentation)

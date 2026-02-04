@@ -143,6 +143,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             .Subscribe(x =>
             {
                 _coordinator.CommitSelection(x is not RegionSelector);
+                _coordinator.ChangeDrawStyle(x);
                 if (x is RegionSelector selector)
                 {
                     SetupRegionSelector(selector);

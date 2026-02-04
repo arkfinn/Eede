@@ -39,7 +39,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         }
     }
 
-    public bool IsRegionSelecting => SelectingArea.HasValue && !SelectingArea.Value.IsEmpty && (_interactionSession?.DrawStyle is RegionSelector || _interactionSession == null);
+    public bool IsRegionSelecting => SelectingArea.HasValue && !SelectingArea.Value.IsEmpty && (_interactionSession?.DrawStyle is RegionSelector || _interactionSession == null) && (_interactionSession?.SelectionState is not NormalCursorState || _manualSelectingArea != null);
 
     public bool IsShowHandles => _interactionSession?.SelectionState is SelectedState or ResizingState or SelectionPreviewState;
 
@@ -357,6 +357,7 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public void CommitSelection(bool forceClearSelection = false)
     {
+        _manualSelectingArea = null;
         if (_interactionSession?.SelectionState != null && _sessionProvider.CurrentSession != null)
         {
             var nextSession = _interactionSession.SelectionState.Commit(_sessionProvider.CurrentSession, ImageBlender, BackgroundColor);
@@ -380,6 +381,15 @@ public class InteractionCoordinator : IInteractionCoordinator
                 }
                 NotifyStateChanged();
             }
+        }
+    }
+
+    public void ChangeDrawStyle(IDrawStyle drawStyle)
+    {
+        if (_interactionSession != null)
+        {
+            _interactionSession = new CanvasInteractionSession(_interactionSession.Buffer, drawStyle, _interactionSession.SelectionState);
+            NotifyStateChanged();
         }
     }
 

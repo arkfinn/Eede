@@ -45,9 +45,9 @@ public class SelectionPreviewState : ISelectionState
         return (new NormalCursorState(cursorArea), cursorArea);
     }
 
-    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)
     {
-        return (canvasSize.Contains(nowPosition), cursorArea.Move(nowPosition));
+        return (visibleCursor, cursorArea.Move(nowPosition));
     }
 
     public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand? picturePushAction)

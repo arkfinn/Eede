@@ -1,4 +1,5 @@
 using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
 using System;
@@ -17,6 +18,14 @@ public class SelectedState : ISelectionState
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
     {
+        var handle = SelectionHandleDetector.Detect(_selection.Area, mousePosition, 10);
+        if (handle.HasValue)
+        {
+            var picture = getPicture();
+            var sourcePicture = picture.CutOut(_selection.Area);
+            return new ResizingState(sourcePicture, _selection.Area, mousePosition, handle.Value, new NearestNeighborResampler());
+        }
+
         if (_selection.Contains(mousePosition))
         {
             var picture = getPicture();
@@ -37,7 +46,7 @@ public class SelectedState : ISelectionState
         return (new NormalCursorState(cursorArea), cursorArea);
     }
 
-    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)
     {
         bool newVisibleCursor = canvasSize.Contains(nowPosition);
         HalfBoxArea newCursorArea = cursorArea.Move(nowPosition);
@@ -56,6 +65,11 @@ public class SelectedState : ISelectionState
 
     public SelectionCursor GetCursor(Position mousePosition)
     {
+        var handle = SelectionHandleDetector.Detect(_selection.Area, mousePosition, 10);
+        if (handle.HasValue)
+        {
+            return GetCursorForHandle(handle.Value);
+        }
         return _selection.Contains(mousePosition) ? SelectionCursor.Move : SelectionCursor.Default;
     }
 
@@ -72,5 +86,21 @@ public class SelectedState : ISelectionState
     public DrawingSession Cancel(DrawingSession session)
     {
         return session;
+    }
+
+    private SelectionCursor GetCursorForHandle(SelectionHandle handle)
+    {
+        return handle switch
+        {
+            SelectionHandle.TopLeft => SelectionCursor.SizeNWSE,
+            SelectionHandle.BottomRight => SelectionCursor.SizeNWSE,
+            SelectionHandle.TopRight => SelectionCursor.SizeNESW,
+            SelectionHandle.BottomLeft => SelectionCursor.SizeNESW,
+            SelectionHandle.Top => SelectionCursor.SizeNS,
+            SelectionHandle.Bottom => SelectionCursor.SizeNS,
+            SelectionHandle.Left => SelectionCursor.SizeWE,
+            SelectionHandle.Right => SelectionCursor.SizeWE,
+            _ => SelectionCursor.Default
+        };
     }
 }

@@ -226,6 +226,7 @@ public class InteractionCoordinator : IInteractionCoordinator
             currentArea,
             true,
             canvasCoordinate.ToPosition(),
+            isShift,
             CurrentBuffer.Previous.Size);
 
         _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, _interactionSession.SelectionState);

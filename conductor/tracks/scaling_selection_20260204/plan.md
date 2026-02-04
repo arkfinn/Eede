@@ -47,5 +47,5 @@ UIや描画ライブラリに依存しない純粋なドメインモデルとし
 ## バグ修正
 - [x] Task: バグ修正 - リサイズ確定時に元に戻る問題を修正 [21d856b]
     - [x] InteractionCoordinator.PointerLeftButtonReleased で ResizingState 終了時にもセッションを更新するように修正 [21d856b]
-- [~] Task: バグ調査 - 範囲外クリックで確定できない問題
-    - [ ] 再現テスト Move_Then_Click_Outside_Commits の作成と実行
+- [x] Task: バグ調査 - 範囲外クリックで確定できない問題 [8a9ab54]
+    - [x] 再現テスト Move_Then_Click_Outside_Commits の作成と実行 [8a9ab54]

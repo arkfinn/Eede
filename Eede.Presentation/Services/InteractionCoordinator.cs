@@ -114,12 +114,15 @@ public class InteractionCoordinator : IInteractionCoordinator
         if (_interactionSession?.SelectionState == null) return;
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
         var selectionCursor = _interactionSession.SelectionState.GetCursor(displayCoordinate.ToCanvas(_magnification).ToPosition());
-        ActiveCursor = selectionCursor switch
-        {
-            SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
-            _ => Cursor.Default
-        };
-    }
+                    ActiveCursor = selectionCursor switch
+                    {
+                        SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
+                        SelectionCursor.SizeNWSE => new Cursor(StandardCursorType.SizeNWSE),
+                        SelectionCursor.SizeNESW => new Cursor(StandardCursorType.SizeNESW),
+                        SelectionCursor.SizeNS => new Cursor(StandardCursorType.SizeNS),
+                        SelectionCursor.SizeWE => new Cursor(StandardCursorType.SizeWE),
+                        _ => Cursor.Default
+                    };    }
 
     private void EnsureInteractionSession(DrawingBuffer buffer, IDrawStyle drawStyle)
     {

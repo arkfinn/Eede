@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 
 namespace Eede.Presentation.Views.General
@@ -7,6 +8,15 @@ namespace Eede.Presentation.Views.General
         public Region()
         {
             InitializeComponent();
+        }
+
+        public static readonly StyledProperty<bool> ShowHandlesProperty =
+            AvaloniaProperty.Register<Region, bool>(nameof(ShowHandles));
+
+        public bool ShowHandles
+        {
+            get => GetValue(ShowHandlesProperty);
+            set => SetValue(ShowHandlesProperty, value);
         }
     }
 }

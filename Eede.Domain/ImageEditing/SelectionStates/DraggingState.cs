@@ -13,14 +13,16 @@ public class DraggingState : ISelectionState
     private readonly Position _startPosition;
     private Position _nowPosition;
     private readonly SelectionPreviewType _type;
+    private readonly PictureArea? _clearArea;
 
-    public DraggingState(Picture pixels, PictureArea originalArea, Position startPosition, SelectionPreviewType type = SelectionPreviewType.CutAndMove)
+    public DraggingState(Picture pixels, PictureArea originalArea, Position startPosition, SelectionPreviewType type = SelectionPreviewType.CutAndMove, PictureArea? clearArea = null)
     {
         _pixels = pixels;
         _originalArea = originalArea;
         _startPosition = startPosition;
         _nowPosition = startPosition;
         _type = type;
+        _clearArea = clearArea ?? (type == SelectionPreviewType.CutAndMove ? originalArea : null);
     }
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
@@ -58,8 +60,7 @@ public class DraggingState : ISelectionState
     {
         var offset = new Position(_nowPosition.X - _startPosition.X, _nowPosition.Y - _startPosition.Y);
         var nextPosition = new Position(_originalArea.X + offset.X, _originalArea.Y + offset.Y);
-        var originalArea = _type == SelectionPreviewType.CutAndMove ? _originalArea : (PictureArea?)null;
-        return new SelectionPreviewInfo(_pixels, nextPosition, _type, originalArea);
+        return new SelectionPreviewInfo(_pixels, nextPosition, _type, _clearArea);
     }
 
     public SelectionCursor GetCursor(Position mousePosition)
@@ -78,9 +79,18 @@ public class DraggingState : ISelectionState
         return _originalArea;
     }
 
-    public DrawingSession Commit(DrawingSession session)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender, Eede.Domain.Palettes.ArgbColor backgroundColor)
     {
-        return session.UpdatePreviewContent(GetSelectionPreviewInfo()).CommitPreview();
+        var info = GetSelectionPreviewInfo();
+        if (info != null && blender is Eede.Domain.ImageEditing.Blending.AlphaImageBlender)
+        {
+            info = new SelectionPreviewInfo(
+                info.Pixels.ApplyTransparency(backgroundColor),
+                info.Position,
+                info.Type,
+                info.OriginalArea);
+        }
+        return session.UpdatePreviewContent(info).CommitPreview(blender);
     }
 
     public DrawingSession Cancel(DrawingSession session)

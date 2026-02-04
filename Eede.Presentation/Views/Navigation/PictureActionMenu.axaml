@@ -15,32 +15,38 @@
 		</Grid.Styles>
 		<StackPanel Orientation="Vertical" >
 			<Button Classes="tool"
+					ToolTip.Tip="上にシフト: 画像全体（または選択範囲）を1ピクセル上にずらします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.ShiftUp }" >
 				<Image Source="/Assets/Tools/tool_shift_up.png" Stretch="None" />
 			</Button>
 			<Button Classes="tool"
+					ToolTip.Tip="右にシフト: 画像全体（または選択範囲）を1ピクセル右にずらします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.ShiftRight }" >
 				<Image Source="/Assets/Tools/tool_shift_right.png" Stretch="None" />
 			</Button>
 			<Button Classes="tool"
+					ToolTip.Tip="左にシフト: 画像全体（または選択範囲）を1ピクセル左にずらします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.ShiftLeft }" >
 				<Image Source="/Assets/Tools/tool_shift_left.png" Stretch="None" />
 			</Button>
 			<Button Classes="tool"
+					ToolTip.Tip="下にシフト: 画像全体（または選択範囲）を1ピクセル下にずらします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.ShiftDown }" >
 				<Image Source="/Assets/Tools/tool_shift_down.png" Stretch="None" />
 			</Button>
 			<Panel Classes="vertical-separator" />
 			<Button Classes="tool"
+					ToolTip.Tip="左右反転: 画像（または選択範囲）を左右逆にひっくり返します"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.FlipHorizontal }" >
 				<Image Source="/Assets/Tools/tool_flip_horizontal.png" Stretch="None" />
 			</Button>
 			<Button Classes="tool"
+					ToolTip.Tip="上下反転: 画像（または選択範囲）を上下逆にひっくり返します"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.FlipVertical }" >
 				<Image Source="/Assets/Tools/tool_flip_vertical.png" Stretch="None" />
@@ -48,6 +54,7 @@
 			<Panel Classes="vertical-separator" />
 			<Button
 			Classes="tool"
+			ToolTip.Tip="右90度回転: 画像（または選択範囲）を時計回りに90度回転させます"
 			Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 			CommandParameter="{ x:Static p:PictureActions.RotateRight }" >
 				<Image Source="/Assets/Tools/tool_rotate_right.png" Stretch="None" />

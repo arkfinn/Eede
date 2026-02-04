@@ -66,7 +66,7 @@ public class AnimationEditingState : ISelectionState
         return null;
     }
 
-    public DrawingSession Commit(DrawingSession session)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender, Eede.Domain.Palettes.ArgbColor backgroundColor)
     {
         return session;
     }

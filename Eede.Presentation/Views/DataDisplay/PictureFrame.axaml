@@ -20,7 +20,8 @@
                              CanCreateDocument="False">
           <display:PictureDock.DocumentTemplate>
             <DocumentTemplate x:DataType="displayvm:DockPictureViewModel">
-              <entry:PictureContainer />
+              <entry:PictureContainer ImageBlender="{Binding #Root.ImageBlender}"
+                                      BackgroundColor="{Binding #Root.BackgroundColor}"/>
             </DocumentTemplate>
           </display:PictureDock.DocumentTemplate>
           <Document CanClose="False" CanFloat="False" CanPin="False" Title="ようこそ">

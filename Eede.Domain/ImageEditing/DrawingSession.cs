@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.History;
 using Eede.Domain.SharedKernel;
@@ -36,21 +37,25 @@ namespace Eede.Domain.ImageEditing
         /// 現在の（表示すべき）画像データを取得する。
         /// プレビュー中の画像がある場合は合成して返す。
         /// </summary>
-        public Picture CurrentPicture
+        public Picture CurrentPicture => FetchPicture(new DirectImageBlender());
+
+        /// <summary>
+        /// 指定したブレンダーを使用して、プレビュー画像を含めた現在の画像データを取得する。
+        /// </summary>
+        /// <param name="blender">プレビュー画像の合成に使用するブレンダー</param>
+        /// <returns>合成済みの画像</returns>
+        public Picture FetchPicture(IImageBlender blender)
         {
-            get
+            var picture = Buffer.Fetch();
+            if (PreviewContent != null)
             {
-                var picture = Buffer.Fetch();
-                if (PreviewContent != null)
+                if (PreviewContent.OriginalArea.HasValue)
                 {
-                    if (PreviewContent.OriginalArea.HasValue)
-                    {
-                        picture = picture.Clear(PreviewContent.OriginalArea.Value);
-                    }
-                    return picture.Blend(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), PreviewContent.Pixels, PreviewContent.Position);
+                    picture = picture.Clear(PreviewContent.OriginalArea.Value);
                 }
-                return picture;
+                return picture.Blend(blender, PreviewContent.Pixels, PreviewContent.Position);
             }
+            return picture;
         }
 
         /// <summary>
@@ -122,12 +127,12 @@ namespace Eede.Domain.ImageEditing
         /// <summary>
         /// 現在のプレビュー状態を確定させ、履歴に追加する。
         /// </summary>
-        public DrawingSession CommitPreview()
+        public DrawingSession CommitPreview(IImageBlender blender)
         {
             if (PreviewContent == null) return this;
 
             var nextArea = new PictureArea(PreviewContent.Position, PreviewContent.Pixels.Size);
-            return Push(CurrentPicture, nextArea);
+            return Push(FetchPicture(blender), nextArea);
         }
 
         /// <summary>

@@ -29,9 +29,9 @@ UIや描画ライブラリに依存しない純粋なドメインモデルとし
     - [ ] カーソル制御: ドメインが返すハンドルタイプに基づいてカーソル形状をバインディングする。
 - [x] Task: 確定と永続化 [bebda75]
     - [ ] UseCase実装: ConfirmSelectionScaleUseCase を作成し、キャンバス統合と Undo 履歴への記録を実装。
-- [ ] Task: Conductor - User Manual Verification '拡大縮小機能の基本動作' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification '拡大縮小機能の基本動作' (Protocol in workflow.md) [bebda75]
 
 ## フェーズ 4: 仕上げと洗練
-- [ ] Task: エッジケースの検証（極小サイズでの挙動など）
-- [ ] Task: リファクタリング（ドメイン知識の漏洩チェック・知識の返還）
-- [ ] Task: Conductor - User Manual Verification '最終確認' (Protocol in workflow.md)
+- [x] Task: エッジケースの検証（極小サイズでの挙動など） [bebda75]
+- [x] Task: リファクタリング（ドメイン知識の漏洩チェック・知識の返還） [bebda75]
+- [x] Task: Conductor - User Manual Verification '最終確認' (Protocol in workflow.md) [bebda75]

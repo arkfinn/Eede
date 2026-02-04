@@ -40,7 +40,7 @@ namespace Eede.Domain.ImageEditing.SelectionStates
             var info = GetSelectionPreviewInfo();
             if (info != null)
             {
-                return new SelectionPreviewState(info);
+                return new SelectionPreviewState(info, OriginalPixels);
             }
             return new NormalCursorState(cursorArea);
         }

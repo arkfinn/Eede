@@ -35,3 +35,11 @@ UIや描画ライブラリに依存しない純粋なドメインモデルとし
 - [x] Task: エッジケースの検証（極小サイズでの挙動など） [bebda75]
 - [x] Task: リファクタリング（ドメイン知識の漏洩チェック・知識の返還） [bebda75]
 - [x] Task: Conductor - User Manual Verification '最終確認' (Protocol in workflow.md) [bebda75]
+
+## フェーズ 5: ユーザーフィードバック対応
+- [x] Task: 選択状態の維持と画質劣化防止
+    - [x] SelectionPreviewState でもハンドルを表示・操作可能にする
+    - [x] SelectionPreviewState に元画像を保持させ、画質劣化を防ぐ
+- [x] Task: 極小サイズでの操作性改善
+    - [x] SelectionHandleDetector に極小サイズ用のハンドル縮小ロジックを追加
+    - [x] 既存テストコードの修正（ドラッグ位置の適正化）

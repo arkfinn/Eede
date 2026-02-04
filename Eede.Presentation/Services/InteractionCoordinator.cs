@@ -41,7 +41,7 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public bool IsRegionSelecting => SelectingArea.HasValue && !SelectingArea.Value.IsEmpty && (_interactionSession?.DrawStyle is RegionSelector || _interactionSession == null);
 
-    public bool IsShowHandles => _interactionSession?.SelectionState is SelectedState or ResizingState;
+    public bool IsShowHandles => _interactionSession?.SelectionState is SelectedState or ResizingState or SelectionPreviewState;
 
     public Picture? PreviewPixels
     {

@@ -1,4 +1,5 @@
 using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
 using System;
@@ -9,16 +10,24 @@ namespace Eede.Domain.ImageEditing.SelectionStates;
 public class SelectionPreviewState : ISelectionState
 {
     private readonly SelectionPreviewInfo _info;
+    private readonly Picture _sourcePixels;
 
-    public SelectionPreviewState(SelectionPreviewInfo info)
+    public SelectionPreviewState(SelectionPreviewInfo info, Picture sourcePixels = null)
     {
         _info = info;
+        _sourcePixels = sourcePixels ?? info.Pixels;
     }
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
     {
-        // プレビュー範囲内をクリックしたら再ドラッグ開始
         var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);
+
+        var handle = SelectionHandleDetector.Detect(currentArea, mousePosition, 6);
+        if (handle.HasValue)
+        {
+            return new ResizingState(_sourcePixels, currentArea, mousePosition, handle.Value, new NearestNeighborResampler());
+        }
+
         if (Contains(currentArea, mousePosition))
         {
             return new DraggingState(_info.Pixels, currentArea, mousePosition, _info.Type, _info.OriginalArea);
@@ -40,8 +49,6 @@ public class SelectionPreviewState : ISelectionState
 
     public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, ICommand? pictureUpdateAction)
     {
-        // 右クリックでキャンセル
-        // Cancel は Coordinator から呼ばれる想定だが、ここで遷移先を返す必要もある。
         return (new NormalCursorState(cursorArea), cursorArea);
     }
 
@@ -63,6 +70,13 @@ public class SelectionPreviewState : ISelectionState
     public SelectionCursor GetCursor(Position mousePosition)
     {
         var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);
+
+        var handle = SelectionHandleDetector.Detect(currentArea, mousePosition, 6);
+        if (handle.HasValue)
+        {
+            return GetCursorForHandle(handle.Value);
+        }
+
         return Contains(currentArea, mousePosition) ? SelectionCursor.Move : SelectionCursor.Default;
     }
 
@@ -82,13 +96,27 @@ public class SelectionPreviewState : ISelectionState
                 info.Type,
                 info.OriginalArea);
         }
-        // 自分が持っている最新の情報をセッションに反映してから確定する
         return session.UpdatePreviewContent(info).CommitPreview(blender);
     }
 
     public DrawingSession Cancel(DrawingSession session)
     {
-        // プレビュー状態を反映した上でキャンセル（破棄）を実行する
         return session.UpdatePreviewContent(_info).CancelDrawing();
+    }
+
+    private SelectionCursor GetCursorForHandle(SelectionHandle handle)
+    {
+        return handle switch
+        {
+            SelectionHandle.TopLeft => SelectionCursor.SizeNWSE,
+            SelectionHandle.BottomRight => SelectionCursor.SizeNWSE,
+            SelectionHandle.TopRight => SelectionCursor.SizeNESW,
+            SelectionHandle.BottomLeft => SelectionCursor.SizeNESW,
+            SelectionHandle.Top => SelectionCursor.SizeNS,
+            SelectionHandle.Bottom => SelectionCursor.SizeNS,
+            SelectionHandle.Left => SelectionCursor.SizeWE,
+            SelectionHandle.Right => SelectionCursor.SizeWE,
+            _ => SelectionCursor.Default
+        };
     }
 }

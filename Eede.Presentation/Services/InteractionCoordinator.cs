@@ -41,6 +41,8 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public bool IsRegionSelecting => SelectingArea.HasValue && !SelectingArea.Value.IsEmpty && (_interactionSession?.DrawStyle is RegionSelector || _interactionSession == null);
 
+    public bool IsShowHandles => _interactionSession?.SelectionState is SelectedState or ResizingState;
+
     public Picture? PreviewPixels
     {
         get
@@ -114,15 +116,15 @@ public class InteractionCoordinator : IInteractionCoordinator
         if (_interactionSession?.SelectionState == null) return;
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
         var selectionCursor = _interactionSession.SelectionState.GetCursor(displayCoordinate.ToCanvas(_magnification).ToPosition());
-                    ActiveCursor = selectionCursor switch
-                    {
-                        SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
-                        SelectionCursor.SizeNWSE => new Cursor(StandardCursorType.SizeNWSE),
-                        SelectionCursor.SizeNESW => new Cursor(StandardCursorType.SizeNESW),
-                        SelectionCursor.SizeNS => new Cursor(StandardCursorType.SizeNS),
-                        SelectionCursor.SizeWE => new Cursor(StandardCursorType.SizeWE),
-                        _ => Cursor.Default
-                    };    }
+                                ActiveCursor = selectionCursor switch
+                                {
+                                    SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
+                                    SelectionCursor.SizeNWSE => new Cursor(StandardCursorType.TopLeftCorner),
+                                    SelectionCursor.SizeNESW => new Cursor(StandardCursorType.TopRightCorner),
+                                    SelectionCursor.SizeNS => new Cursor(StandardCursorType.TopSide),
+                                    SelectionCursor.SizeWE => new Cursor(StandardCursorType.LeftSide),
+                                    _ => Cursor.Default
+                                };    }
 
     private void EnsureInteractionSession(DrawingBuffer buffer, IDrawStyle drawStyle)
     {

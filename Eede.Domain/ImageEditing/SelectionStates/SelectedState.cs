@@ -18,7 +18,7 @@ public class SelectedState : ISelectionState
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
     {
-        var handle = SelectionHandleDetector.Detect(_selection.Area, mousePosition, 10);
+        var handle = SelectionHandleDetector.Detect(_selection.Area, mousePosition, 6);
         if (handle.HasValue)
         {
             var picture = getPicture();
@@ -65,7 +65,7 @@ public class SelectedState : ISelectionState
 
     public SelectionCursor GetCursor(Position mousePosition)
     {
-        var handle = SelectionHandleDetector.Detect(_selection.Area, mousePosition, 10);
+        var handle = SelectionHandleDetector.Detect(_selection.Area, mousePosition, 6);
         if (handle.HasValue)
         {
             return GetCursorForHandle(handle.Value);

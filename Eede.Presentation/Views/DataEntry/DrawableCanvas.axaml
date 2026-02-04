@@ -64,7 +64,8 @@
                         VerticalAlignment="Top"
                         Margin="{Binding SelectingThickness}"
                         Width="{Binding SelectingSize.Width}"
-                        Height="{Binding SelectingSize.Height}" />
+                        Height="{Binding SelectingSize.Height}" 
+                        ShowHandles="{Binding IsShowHandles}" />
 
       </Panel>
     </Panel>

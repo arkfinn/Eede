@@ -37,6 +37,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public IImageTransfer ImageTransfer { get; set; }
     [Reactive] public bool IsShifted { get; set; }
     [Reactive] public bool IsRegionSelecting { get; set; }
+    [Reactive] public bool IsShowHandles { get; set; }
     [Reactive] public PictureArea? SelectingArea { get; set; }
     [Reactive] public Thickness SelectingThickness { get; set; }
     [Reactive] public PictureSize SelectingSize { get; set; }
@@ -88,6 +89,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             PictureBuffer = _coordinator.CurrentBuffer;
             SelectingArea = _coordinator.SelectingArea;
             IsRegionSelecting = _coordinator.IsRegionSelecting;
+            IsShowHandles = _coordinator.IsShowHandles;
             PreviewPixels = _coordinator.PreviewPixels;
             PreviewPosition = _coordinator.PreviewPosition;
             ActiveCursor = _coordinator.ActiveCursor;

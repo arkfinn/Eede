@@ -35,6 +35,7 @@ public interface IInteractionCoordinator
     DrawingBuffer CurrentBuffer { get; }
     PictureArea? SelectingArea { get; }
     bool IsRegionSelecting { get; }
+    bool IsShowHandles { get; }
     Picture? PreviewPixels { get; }
     Position PreviewPosition { get; }
     Cursor ActiveCursor { get; }

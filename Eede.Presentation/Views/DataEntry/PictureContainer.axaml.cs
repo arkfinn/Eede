@@ -149,12 +149,14 @@ namespace Eede.Presentation.Views.DataEntry
                     cursor.Width = selectingArea.Value.Width;
                     cursor.Height = selectingArea.Value.Height;
                     cursor.Margin = new Thickness(selectingArea.Value.X, selectingArea.Value.Y, 0, 0);
+                    cursor.ShowHandles = _selectionState is SelectedState || _selectionState is ResizingState;
                 }
                 else
                 {
                     cursor.Width = cursorArea.BoxSize.Width;
                     cursor.Height = cursorArea.BoxSize.Height;
                     cursor.Margin = new Thickness(cursorArea.RealPosition.X, cursorArea.RealPosition.Y, 0, 0);
+                    cursor.ShowHandles = false;
                 }
 
                 UpdateSelectionPreview();

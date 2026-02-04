@@ -1,0 +1,37 @@
+﻿# Implementation Plan: 選択範囲の拡大縮小 (Scaling Selection)
+
+## フェーズ 1: ドメインモデルの定義と純粋なロジックの実装 (DDD Core)
+UIや描画ライブラリに依存しない純粋なドメインモデルとして、変形操作と制約を定義・実装します。
+
+- [x] Task: 選択範囲変形モデル (ResizingSelection Value Object) の作成
+    - [ ] 設計: 元の矩形、変形方向（ハンドル位置）、ドラッグ量をカプセル化。
+    - [ ] ロジック実装: Resize(Vector dragDistance, bool keepAspectRatio) の実装。
+    - [ ] 不変条件: 最小サイズ (1px) 制約の強制。
+    - [ ] テスト: 純粋なC#クラスとしての徹底的な単体テスト。
+- [ ] Task: 画像変形サービスの抽象化 (IImageResampler)
+    - [ ] インターフェース定義: ドメイン層に変形ロジックの意図のみを定義。
+    - [ ] インフラ実装: ニアレストネイバー法による具体的な画像処理の実装。
+
+## フェーズ 2: インタラクションの状態管理とアプリケーション層 (Interaction & App)
+ユーザーのドラッグ操作をドメインモデルへのメッセージに変換し、状態遷移を管理します。
+
+- [ ] Task: インタラクション集約 (CanvasInteractionSession) の拡張
+    - [ ] Stateパターン: ResizingState を導入して状態遷移を厳格に管理する。
+    - [ ] ハンドル判定: マウス座標がどのハンドルにあるかを判定するドメインロジックの組み込み。
+- [ ] Task: プレビュー情報の更新 (SelectionPreviewInfo)
+    - [ ] DrawingSession 内で変形中の状態を保持し、不変性を保ちながら更新する仕組みの実装。
+
+## フェーズ 3: プレゼンテーションと視覚的フィードバック (Presentation)
+ドメインの状態を View に反映させます。
+
+- [ ] Task: ハンドルとプレビューの描画
+    - [ ] Humble ViewModel: ドメイン層から算出されたハンドルの表示座標をそのままViewに公開する。
+    - [ ] カーソル制御: ドメインが返すハンドルタイプに基づいてカーソル形状をバインディングする。
+- [ ] Task: 確定と永続化
+    - [ ] UseCase実装: ConfirmSelectionScaleUseCase を作成し、キャンバス統合と Undo 履歴への記録を実装。
+- [ ] Task: Conductor - User Manual Verification '拡大縮小機能の基本動作' (Protocol in workflow.md)
+
+## フェーズ 4: 仕上げと洗練
+- [ ] Task: エッジケースの検証（極小サイズでの挙動など）
+- [ ] Task: リファクタリング（ドメイン知識の漏洩チェック・知識の返還）
+- [ ] Task: Conductor - User Manual Verification '最終確認' (Protocol in workflow.md)

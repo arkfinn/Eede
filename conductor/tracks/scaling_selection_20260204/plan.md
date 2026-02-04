@@ -24,10 +24,10 @@ UIや描画ライブラリに依存しない純粋なドメインモデルとし
 ## フェーズ 3: プレゼンテーションと視覚的フィードバック (Presentation)
 ドメインの状態を View に反映させます。
 
-- [x] Task: ハンドルとプレビューの描画
+- [x] Task: ハンドルとプレビューの描画 [bebda75]
     - [ ] Humble ViewModel: ドメイン層から算出されたハンドルの表示座標をそのままViewに公開する。
     - [ ] カーソル制御: ドメインが返すハンドルタイプに基づいてカーソル形状をバインディングする。
-- [x] Task: 確定と永続化
+- [x] Task: 確定と永続化 [bebda75]
     - [ ] UseCase実装: ConfirmSelectionScaleUseCase を作成し、キャンバス統合と Undo 履歴への記録を実装。
 - [ ] Task: Conductor - User Manual Verification '拡大縮小機能の基本動作' (Protocol in workflow.md)
 

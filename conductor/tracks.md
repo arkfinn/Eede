@@ -19,8 +19,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: ・ｽS ViewModel ・ｽ・ｽ DI ・ｽﾚ行・ｽ・ｽ DrawingSession ・ｽﾇ暦ｿｽ・ｽﾌ撰ｿｽ・ｽ・ｽ・ｽi・ｽﾚ搾ｿｽ・ｽ ... **Track: ・ｽﾍ囲選・ｽ ... *Link: [./tracks/fix_selection_undo_inconsistency_20260126/](./fix_selection_undo_inconsistency_20260126/)*
----
+- [ ] **Track: ・ｽS ViewModel ・ｽ・ｽ DI ・ｽﾚ行・ｽ・ｽ DrawingSession ・ｽﾇ暦ｿｽ・ｽﾌ撰ｿｽ ... 
 
-- [x] **Track: 選択範囲ツールを元に、選択範囲の四隅四編をドラッグドロップすると拡大縮小するようなUIの実装**
-*Link: [./tracks/scaling_selection_20260204/](./tracks/scaling_selection_20260204/)*

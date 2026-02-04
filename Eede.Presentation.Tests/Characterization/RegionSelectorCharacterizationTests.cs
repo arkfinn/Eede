@@ -235,7 +235,7 @@ public class RegionSelectorCharacterizationTests
         vm.DrawEndCommand.Execute(new Position(8, 8)).Subscribe();
 
         // 2. Drag 1: (0,0) -> (10,10)
-        vm.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+        vm.DrawBeginCommand.Execute(new Position(4, 4)).Subscribe();
         vm.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
         vm.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
 
@@ -300,8 +300,8 @@ public class RegionSelectorCharacterizationTests
         vm.DrawEndCommand.Execute(new Position(8, 8)).Subscribe();
 
         // 2. Drag to (10,10)
-        vm.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
-        vm.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+        vm.DrawBeginCommand.Execute(new Position(4, 4)).Subscribe();
+        vm.DrawingCommand.Execute(new Position(14, 14)).Subscribe();
 
         // 3. Verify visual
         var painted = _coordinator.Painted(vm.PictureBuffer, vm.PenStyle, vm.ImageTransfer);
@@ -345,8 +345,8 @@ public class RegionSelectorCharacterizationTests
         vm.DrawEndCommand.Execute(new Position(8, 8)).Subscribe();
 
         // 2. Drag to (10,10)
-        vm.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
-        vm.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+        vm.DrawBeginCommand.Execute(new Position(4, 4)).Subscribe();
+        vm.DrawingCommand.Execute(new Position(14, 14)).Subscribe();
 
         // 3. Verify visual
         var painted = _coordinator.Painted(vm.PictureBuffer, vm.PenStyle, vm.ImageTransfer);
@@ -370,7 +370,7 @@ public class RegionSelectorCharacterizationTests
         vm.DrawEndCommand.Execute(new Position(8, 8)).Subscribe();
 
         // 2. Drag to (10,10) and release -> Preview State
-        vm.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+        vm.DrawBeginCommand.Execute(new Position(4, 4)).Subscribe();
         vm.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
         vm.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
 

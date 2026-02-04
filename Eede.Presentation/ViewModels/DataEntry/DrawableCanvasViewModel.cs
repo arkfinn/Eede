@@ -18,6 +18,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Pictures;
@@ -136,6 +137,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         PasteCommand = ReactiveCommand.CreateFromTask(ExecutePasteAction);
 
         _ = this.WhenAnyValue(x => x.DrawStyle)
+            .DistinctUntilChanged()
             .Subscribe(x =>
             {
                 _coordinator.CommitSelection();
@@ -150,6 +152,9 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         _ = this.WhenAnyValue(x => x.ImageBlender)
             .Subscribe(x => _coordinator.ImageBlender = x);
+
+        _ = this.WhenAnyValue(x => x.BackgroundColor)
+            .Subscribe(x => _coordinator.BackgroundColor = x.Value);
 
         _ = this.WhenAnyValue(x => x.Magnification)
             .Subscribe(x =>
@@ -193,7 +198,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
                     var magnifiedPicture = ImageTransfer.Transfer(x.pix, x.mag);
                     var previewBase = Picture.CreateEmpty(magnifiedPicture.Size);
-                    var simulatedPreview = previewBase.Blend(new DirectImageBlender(), magnifiedPicture, new Position(0, 0));
+                    var simulatedPreview = previewBase.Blend(ImageBlender, magnifiedPicture, new Position(0, 0));
                     MagnifiedPreviewBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(simulatedPreview);
                 }
                 else

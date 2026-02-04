@@ -21,7 +21,7 @@ public class SelectionPreviewState : ISelectionState
         var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);
         if (Contains(currentArea, mousePosition))
         {
-            return new DraggingState(_info.Pixels, currentArea, mousePosition, _info.Type);
+            return new DraggingState(_info.Pixels, currentArea, mousePosition, _info.Type, _info.OriginalArea);
         }
 
         return new NormalCursorState(cursorArea);
@@ -71,10 +71,19 @@ public class SelectionPreviewState : ISelectionState
         return new PictureArea(_info.Position, _info.Pixels.Size);
     }
 
-    public DrawingSession Commit(DrawingSession session)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender, Eede.Domain.Palettes.ArgbColor backgroundColor)
     {
+        var info = _info;
+        if (blender is Eede.Domain.ImageEditing.Blending.AlphaImageBlender)
+        {
+            info = new SelectionPreviewInfo(
+                info.Pixels.ApplyTransparency(backgroundColor),
+                info.Position,
+                info.Type,
+                info.OriginalArea);
+        }
         // 自分が持っている最新の情報をセッションに反映してから確定する
-        return session.UpdatePreviewContent(_info).CommitPreview();
+        return session.UpdatePreviewContent(info).CommitPreview(blender);
     }
 
     public DrawingSession Cancel(DrawingSession session)

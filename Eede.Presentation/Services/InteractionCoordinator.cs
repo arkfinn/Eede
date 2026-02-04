@@ -62,7 +62,26 @@ public class InteractionCoordinator : IInteractionCoordinator
     }
 
     public Cursor ActiveCursor { get; private set; } = Cursor.Default;
-    public IImageBlender ImageBlender { get; set; } = new DirectImageBlender();
+    private IImageBlender _imageBlender = new DirectImageBlender();
+    public IImageBlender ImageBlender
+    {
+        get => _imageBlender;
+        set
+        {
+            _imageBlender = value;
+            NotifyStateChanged();
+        }
+    }
+    private ArgbColor _backgroundColor = new ArgbColor(0, 0, 0, 0);
+    public ArgbColor BackgroundColor
+    {
+        get => _backgroundColor;
+        set
+        {
+            _backgroundColor = value;
+            NotifyStateChanged();
+        }
+    }
 
     public event Action<Picture, Picture, PictureArea?, PictureArea?> Drew;
     public event Action StateChanged;
@@ -111,7 +130,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         }
     }
 
-    private bool IsOperating => CurrentBuffer != null && (CurrentBuffer.IsDrawing() || _interactionSession?.SelectionState is DraggingState or SelectionPreviewState);
+    private bool IsOperating => CurrentBuffer != null && (CurrentBuffer.IsDrawing() || _interactionSession?.SelectionState is DraggingState or SelectionPreviewState or SelectedState or RegionSelectingState or AnimationEditingState);
 
     public void PointerBegin(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, PenStyle penStyle, bool isShift, bool isAnimationMode, PictureSize gridSize, ReactiveCommand<Picture, Unit> internalUpdateCommand)
     {
@@ -134,7 +153,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         // 1. プレビュー状態中に別のツールで描画を開始しようとした場合、確定する
         if (previousState is SelectionPreviewState && drawStyle is not RegionSelector)
         {
-            workingSession = previousState.Commit(workingSession);
+            workingSession = previousState.Commit(workingSession, ImageBlender, BackgroundColor);
             _sessionProvider.Update(workingSession);
             // 確定後の最新バッファと、確定後の状態(NormalCursorState)でセッションを更新
             _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, new NormalCursorState(currentArea));
@@ -164,18 +183,19 @@ public class InteractionCoordinator : IInteractionCoordinator
             NotifyStateChanged();
             return;
         }
-
-        _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
+        else
+        {
+            _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
+        }
 
         // 3. プレビュー状態から通常状態へ遷移（範囲外クリック）した場合、確定する
         if (previousState is SelectionPreviewState && nextState is NormalCursorState)
         {
-            workingSession = previousState.Commit(workingSession);
+            workingSession = previousState.Commit(workingSession, ImageBlender, BackgroundColor);
             _sessionProvider.Update(workingSession);
             // 確定後のバッファでセッションを再構築
             _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, nextState);
             NotifyStateChanged();
-            return;
         }
 
         // 4. 新しい描画の開始
@@ -332,7 +352,7 @@ public class InteractionCoordinator : IInteractionCoordinator
     {
         if (_interactionSession?.SelectionState != null && _sessionProvider.CurrentSession != null)
         {
-            var nextSession = _interactionSession.SelectionState.Commit(_sessionProvider.CurrentSession);
+            var nextSession = _interactionSession.SelectionState.Commit(_sessionProvider.CurrentSession, ImageBlender, BackgroundColor);
             if (nextSession != _sessionProvider.CurrentSession)
             {
                 _sessionProvider.Update(nextSession);
@@ -361,8 +381,13 @@ public class InteractionCoordinator : IInteractionCoordinator
         var session = _sessionProvider.CurrentSession;
         if (session == null) return;
 
-        // 操作中（描画、ドラッグ、プレビュー）の場合は絶対にリセットしない
-        if (IsOperating && !forceReset)
+        // セッションにプレビューがあるのに、ステートがプレビュー（またはドラッグ）でない場合は、
+        // 外部（ペースト等）で状態が変わったとみなして同期を優先する。
+        bool isStateMismatch = session.CurrentPreviewContent != null &&
+                               !(_interactionSession?.SelectionState is SelectionPreviewState or DraggingState);
+
+        // 操作中（描画、ドラッグ、プレビュー）の場合は絶対にリセットしない（ミスマッチ時を除く）
+        if (IsOperating && !forceReset && !isStateMismatch)
         {
             return;
         }
@@ -455,15 +480,23 @@ public class InteractionCoordinator : IInteractionCoordinator
         var preview = _interactionSession?.SelectionState?.GetSelectionPreviewInfo() 
                       ?? _sessionProvider.CurrentSession?.CurrentPreviewContent;
 
-        if (preview != null)
-        {
-            if (preview.OriginalArea.HasValue)
-            {
-                picture = picture.Clear(preview.OriginalArea.Value);
-            }
-            picture = picture.Blend(ImageBlender, preview.Pixels, preview.Position);
-        }
-
+                if (preview != null)
+                {
+                    var blender = ImageBlender;
+                    var bgColor = BackgroundColor;
+        
+                    if (preview.OriginalArea.HasValue)
+                    {
+                        picture = picture.Clear(preview.OriginalArea.Value);
+                    }
+                    
+                    var pixels = preview.Pixels;
+                    if (blender is AlphaImageBlender)
+                    {
+                        pixels = pixels.ApplyTransparency(bgColor);
+                    }
+                    picture = picture.Blend(blender, pixels, preview.Position);
+                }
         // 3. 合成済みの画像を拡大し、必要に応じてペン先カーソルを重ねる
         var tempBuffer = buffer.Reset(picture);
         if (buffer.IsDrawing())

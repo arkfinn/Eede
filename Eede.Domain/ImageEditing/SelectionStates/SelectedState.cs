@@ -22,7 +22,7 @@ public class SelectedState : ISelectionState
             var picture = getPicture();
             var cutPicture = picture.CutOut(_selection.Area);
             // Coordinator側でBufferを更新するため、ここではupdateActionを呼ばない
-            return new DraggingState(cutPicture, _selection.Area, mousePosition);
+            return new DraggingState(cutPicture, _selection.Area, mousePosition, SelectionPreviewType.CutAndMove, _selection.Area);
         }
         return new NormalCursorState(cursorArea);
     }
@@ -64,7 +64,7 @@ public class SelectedState : ISelectionState
         return _selection.Area;
     }
 
-    public DrawingSession Commit(DrawingSession session)
+    public DrawingSession Commit(DrawingSession session, Eede.Domain.ImageEditing.Blending.IImageBlender blender, Eede.Domain.Palettes.ArgbColor backgroundColor)
     {
         return session;
     }

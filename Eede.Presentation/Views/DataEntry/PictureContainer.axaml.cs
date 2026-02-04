@@ -219,6 +219,22 @@ namespace Eede.Presentation.Views.DataEntry
             set => SetValue(MinCursorSizeProperty, value);
         }
 
+        public static readonly StyledProperty<Eede.Domain.ImageEditing.Blending.IImageBlender> ImageBlenderProperty =
+            AvaloniaProperty.Register<PictureContainer, Eede.Domain.ImageEditing.Blending.IImageBlender>(nameof(ImageBlender), new Eede.Domain.ImageEditing.Blending.DirectImageBlender());
+        public Eede.Domain.ImageEditing.Blending.IImageBlender ImageBlender
+        {
+            get => GetValue(ImageBlenderProperty);
+            set => SetValue(ImageBlenderProperty, value);
+        }
+
+        public static readonly StyledProperty<Eede.Domain.Palettes.ArgbColor> BackgroundColorProperty =
+            AvaloniaProperty.Register<PictureContainer, Eede.Domain.Palettes.ArgbColor>(nameof(BackgroundColor), new Eede.Domain.Palettes.ArgbColor(0, 0, 0, 0));
+        public Eede.Domain.Palettes.ArgbColor BackgroundColor
+        {
+            get => GetValue(BackgroundColorProperty);
+            set => SetValue(BackgroundColorProperty, value);
+        }
+
         public event EventHandler<PicturePullEventArgs> PicturePulled;
         public event EventHandler<PicturePushEventArgs> PicturePushed;
 

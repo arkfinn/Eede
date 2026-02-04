@@ -3,7 +3,7 @@
 ## フェーズ 1: ドメインモデルの定義と純粋なロジックの実装 (DDD Core)
 UIや描画ライブラリに依存しない純粋なドメインモデルとして、変形操作と制約を定義・実装します。
 
-- [x] Task: 選択範囲変形モデル (ResizingSelection Value Object) の作成
+- [x] Task: 選択範囲変形モデル (ResizingSelection Value Object) の作成 [14d0416]
     - [ ] 設計: 元の矩形、変形方向（ハンドル位置）、ドラッグ量をカプセル化。
     - [ ] ロジック実装: Resize(Vector dragDistance, bool keepAspectRatio) の実装。
     - [ ] 不変条件: 最小サイズ (1px) 制約の強制。

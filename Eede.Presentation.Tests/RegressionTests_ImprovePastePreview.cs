@@ -167,5 +167,32 @@ namespace Eede.Presentation.Tests
             // (2,2) should be Red (new TopLeft)
             Assert.That(finalResult.PickColor(new Position(2, 2)), Is.EqualTo(red), "New TopLeft (2,2) should be red");
         }
+
+        [AvaloniaTest]
+        public async Task Move_Then_Click_Outside_Commits()
+        {
+            // Setup
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(4, 4), new byte[4 * 4 * 4]), new Position(0, 0));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // Select
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
+
+            // Move
+            _viewModel.DrawBeginCommand.Execute(new Position(2, 2)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
+
+            // Assert: Preview State
+            Assert.That(_viewModel.PreviewPixels, Is.Not.Null);
+
+            // Click Outside (20, 20)
+            _viewModel.DrawBeginCommand.Execute(new Position(20, 20)).Subscribe();
+
+            // Assert: Committed (Preview null)
+            Assert.That(_viewModel.PreviewPixels, Is.Null, "Preview should be null after clicking outside");
+        }
     }
 }

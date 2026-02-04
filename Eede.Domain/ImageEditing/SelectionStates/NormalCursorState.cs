@@ -32,11 +32,10 @@ public class NormalCursorState : ISelectionState
         return (new RegionSelectingState(nowPosition, nowPosition, minCursorSize), cursorArea);
     }
 
-    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)
     {
         bool newVisibleCursor = canvasSize.Contains(nowPosition);
         HalfBoxArea newCursorArea = cursorArea.Move(nowPosition);
-        _cursorArea = newCursorArea;
         return (newVisibleCursor, newCursorArea);
     }
 

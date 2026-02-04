@@ -45,7 +45,7 @@ public class DraggingState : ISelectionState
         return (this, cursorArea);
     }
 
-    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)
     {
         _nowPosition = nowPosition;
         return (visibleCursor, cursorArea.Move(nowPosition));

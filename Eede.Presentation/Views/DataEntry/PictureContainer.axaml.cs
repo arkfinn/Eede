@@ -316,7 +316,8 @@ namespace Eede.Presentation.Views.DataEntry
                 cursorArea = HalfBoxArea.Create(nowPosition, new PictureSize(_viewModel.AnimationViewModel.GridWidth, _viewModel.AnimationViewModel.GridHeight));
             }
 
-            var (newVisible, newArea) = _selectionState.HandlePointerMoved(cursorArea, VisibleCursor, nowPosition, CanvasSize);
+            bool isShift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            var (newVisible, newArea) = _selectionState.HandlePointerMoved(cursorArea, VisibleCursor, nowPosition, isShift, CanvasSize);
             VisibleCursor = newVisible;
             _localCursorArea = newArea;
             UpdateCursor();

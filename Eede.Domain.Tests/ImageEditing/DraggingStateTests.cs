@@ -23,7 +23,7 @@ namespace Eede.Domain.Tests.ImageEditing
             var state = new DraggingState(pixels, originalArea, startPos);
             
             // Simulate move
-            state.HandlePointerMoved(HalfBoxArea.Create(startPos, new PictureSize(16,16)), true, currentPos, size);
+            state.HandlePointerMoved(HalfBoxArea.Create(startPos, new PictureSize(16,16)), true, currentPos, false, size);
 
             var info = state.GetSelectionPreviewInfo();
 

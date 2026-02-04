@@ -34,11 +34,11 @@ public class RegionSelectingState : ISelectionState
         return (this, cursorArea);
     }
 
-    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)
     {
         bool newVisibleCursor = canvasSize.Contains(nowPosition);
-        _nowPosition = nowPosition;
-        return (newVisibleCursor, cursorArea.Move(nowPosition));
+        HalfBoxArea newCursorArea = cursorArea.Move(nowPosition);
+        return (newVisibleCursor, newCursorArea);
     }
 
     public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand? picturePushAction)

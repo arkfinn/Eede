@@ -1,8 +1,0 @@
-﻿{
-    "description":  "選択範囲ツールを元に、選択範囲の四隅四編をドラッグドロップすると拡大縮小するようなUIの実装",
-    "track_id":  "scaling_selection_20260204",
-    "type":  "feature",
-    "created_at":  "2026-02-04T16:00:00Z",
-    "status":  "new",
-    "updated_at":  "2026-02-04T16:00:00Z"
-}

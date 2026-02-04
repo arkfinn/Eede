@@ -215,5 +215,34 @@ namespace Eede.Presentation.Tests
             Assert.That(_viewModel.SelectingArea, Is.Null, "Selection should be cleared when switching to non-selection tool");
             Assert.That(_viewModel.IsRegionSelecting, Is.False);
         }
+
+        [AvaloniaTest]
+        public async Task SwitchTool_AfterMoveAndResize_ShouldCommitAndClearSelection()
+        {
+            // 1. セットアップ
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // 2. 範囲選択 (0,0)-(4,4)
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
+
+            // 3. 移動操作 (0,0)から(10,10)へ
+            _viewModel.DrawBeginCommand.Execute(new Position(2, 2)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(12, 12)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(12, 12)).Subscribe();
+
+            // 4. ツール切り替え (ペンツールへ)
+            _viewModel.DrawStyle = new FreeCurve();
+
+            // 5. 検証
+            // 選択枠が表示されていないこと
+            Assert.That(_viewModel.IsRegionSelecting, Is.False, "IsRegionSelecting should be false after tool switch");
+            // 選択範囲データが空であること
+            Assert.That(_viewModel.SelectingArea, Is.Null, "SelectingArea should be null after tool switch");
+            // プレビュー表示が消えていること
+            Assert.That(_viewModel.PreviewPixels, Is.Null, "PreviewPixels should be null after tool switch");
+        }
     }
 }

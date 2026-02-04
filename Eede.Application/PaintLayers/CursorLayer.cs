@@ -38,9 +38,14 @@ namespace Eede.Application.PaintLayers
 
         public Picture Painted(Picture destination)
         {
-            Drawer drawer = new(Source, PenStyle);
-            Picture cursor = drawer.DrawPoint(Position);
-            return cursor.Transfer(ImageTransfer, PaintSize.Magnification);
+            Picture emptyLayer = Picture.CreateEmpty(Source.Size);
+            Drawer drawer = new(emptyLayer, PenStyle);
+            Picture cursorOnly = drawer.DrawPoint(Position);
+
+            Picture magnifiedCursor = cursorOnly.Transfer(ImageTransfer, PaintSize.Magnification);
+            Picture magnifiedSource = Source.Transfer(ImageTransfer, PaintSize.Magnification);
+
+            return magnifiedSource.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), magnifiedCursor, new Position(0, 0));
         }
     }
 }

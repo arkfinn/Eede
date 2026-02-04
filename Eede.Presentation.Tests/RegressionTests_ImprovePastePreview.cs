@@ -91,13 +91,16 @@ namespace Eede.Presentation.Tests
         {
             // Setup: (0,0) に赤い点
             var red = new ArgbColor(255, 255, 0, 0);
-            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(1, 1), new byte[] { 0, 0, 255, 255 }), new Position(0, 0));
+            var rectData = new byte[4 * 4 * 4];
+            for (int i = 0; i < rectData.Length; i += 4) { rectData[i] = 0; rectData[i + 1] = 0; rectData[i + 2] = 255; rectData[i + 3] = 255; }
+
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(4, 4), rectData), new Position(0, 0));
             _sessionProvider.Update(new DrawingSession(picture));
 
-            // 1. (0,0)-(1,1) を選択
+            // 1. (0,0)-(4,4) を選択
             _viewModel.DrawStyle = new RegionSelector();
             _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
-            _viewModel.DrawEndCommand.Execute(new Position(1, 1)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
 
             // 2. Skipped moving selection directly as it is disabled.
 
@@ -106,16 +109,17 @@ namespace Eede.Presentation.Tests
             await _viewModel.CopyCommand.Execute();
 
             // 4. ペースト実行 (コピーしたものが (0,0) にペーストされるはず)
-            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(Picture.Create(new PictureSize(1, 1), new byte[] { 0, 0, 255, 255 }));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(Picture.Create(new PictureSize(4, 4), rectData));
             await _viewModel.PasteCommand.Execute();
             
             // 検証：ペースト位置が (0,0) になっていること (Selection position)
             Assert.That(_viewModel.PreviewPosition, Is.EqualTo(new Position(0, 0)), "Pasted item should be at (0,0)");
 
             // 5. ペーストしたものを (10,10) へ移動
-            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
-            _viewModel.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
-            _viewModel.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
+            // Center (2,2) -> Move +10 -> (12,12)
+            _viewModel.DrawBeginCommand.Execute(new Position(2, 2)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(12, 12)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(12, 12)).Subscribe();
 
             // 6. 確定
             _viewModel.DrawBeginCommand.Execute(new Position(30, 30)).Subscribe();

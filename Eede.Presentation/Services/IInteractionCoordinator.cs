@@ -29,7 +29,7 @@ public interface IInteractionCoordinator
     // 描画
     void UpdatePicture(Picture picture);
     Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);
-    void CommitSelection();
+    void CommitSelection(bool forceClearSelection = false);
 
     // 状態取得 (ViewModelがバインドするもの)
     DrawingBuffer CurrentBuffer { get; }

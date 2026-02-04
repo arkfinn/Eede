@@ -159,6 +159,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         if (previousState is SelectionPreviewState && drawStyle is not RegionSelector)
         {
             workingSession = previousState.Commit(workingSession, ImageBlender, BackgroundColor);
+            workingSession = workingSession.UpdateSelectingArea(null);
             _sessionProvider.Update(workingSession);
             // 確定後の最新バッファと、確定後の状態(NormalCursorState)でセッションを更新
             _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, new NormalCursorState(currentArea));
@@ -354,11 +355,16 @@ public class InteractionCoordinator : IInteractionCoordinator
         NotifyStateChanged();
     }
 
-    public void CommitSelection()
+    public void CommitSelection(bool forceClearSelection = false)
     {
         if (_interactionSession?.SelectionState != null && _sessionProvider.CurrentSession != null)
         {
             var nextSession = _interactionSession.SelectionState.Commit(_sessionProvider.CurrentSession, ImageBlender, BackgroundColor);
+            if (forceClearSelection || _interactionSession.DrawStyle is not RegionSelector)
+            {
+                nextSession = nextSession.UpdateSelectingArea(null);
+            }
+
             if (nextSession != _sessionProvider.CurrentSession)
             {
                 _sessionProvider.Update(nextSession);

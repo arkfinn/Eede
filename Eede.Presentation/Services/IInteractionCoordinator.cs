@@ -30,6 +30,7 @@ public interface IInteractionCoordinator
     void UpdatePicture(Picture picture);
     Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);
     void CommitSelection(bool forceClearSelection = false);
+    void ChangeDrawStyle(IDrawStyle drawStyle);
 
     // 状態取得 (ViewModelがバインドするもの)
     DrawingBuffer CurrentBuffer { get; }

@@ -319,7 +319,7 @@ public class InteractionCoordinator : IInteractionCoordinator
             internalUpdateCommand,
             internalUpdateCommand);
 
-        if (_interactionSession.SelectionState is DraggingState)
+        if (_interactionSession.SelectionState is DraggingState or ResizingState)
         {
             var info = nextState.GetSelectionPreviewInfo();
             if (info != null && _sessionProvider.CurrentSession != null)

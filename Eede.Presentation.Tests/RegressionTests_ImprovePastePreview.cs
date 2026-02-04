@@ -136,5 +136,36 @@ namespace Eede.Presentation.Tests
             Assert.That(currentArea, Is.Not.Null);
             Assert.That(currentArea.Value.Position, Is.EqualTo(new Position(10, 10)), "Selection area should follow the last committed item");
         }
+
+        [AvaloniaTest]
+        public async Task Resize_Commit_ShouldWorkCorrectly()
+        {
+            // Setup: (0,0)-(4,4) に赤い矩形
+            var red = new ArgbColor(255, 255, 0, 0);
+            var rectData = new byte[4 * 4 * 4];
+            for (int i = 0; i < rectData.Length; i += 4) { rectData[i] = 0; rectData[i + 1] = 0; rectData[i + 2] = 255; rectData[i + 3] = 255; }
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(4, 4), rectData), new Position(0, 0));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // 1. Select (0,0)-(4,4)
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
+
+            // 2. Resize: Drag TopLeft(0,0) to (2,2) -> Shrink to 2x2
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(2, 2)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(2, 2)).Subscribe();
+
+            // 3. Commit
+            _viewModel.DrawBeginCommand.Execute(new Position(30, 30)).Subscribe();
+
+            // Assert
+            var finalResult = _sessionProvider.CurrentSession.Buffer.Fetch();
+            // (0,0) should be transparent (cleared) because it moved/shrank
+            Assert.That(finalResult.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "Original (0,0) should be cleared");
+            // (2,2) should be Red (new TopLeft)
+            Assert.That(finalResult.PickColor(new Position(2, 2)), Is.EqualTo(red), "New TopLeft (2,2) should be red");
+        }
     }
 }

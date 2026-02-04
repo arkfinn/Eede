@@ -142,7 +142,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             .DistinctUntilChanged()
             .Subscribe(x =>
             {
-                _coordinator.CommitSelection();
+                _coordinator.CommitSelection(x is not RegionSelector);
                 if (x is RegionSelector selector)
                 {
                     SetupRegionSelector(selector);

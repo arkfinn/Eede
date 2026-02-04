@@ -194,5 +194,26 @@ namespace Eede.Presentation.Tests
             // Assert: Committed (Preview null)
             Assert.That(_viewModel.PreviewPixels, Is.Null, "Preview should be null after clicking outside");
         }
+
+        [AvaloniaTest]
+        public async Task SwitchTool_ShouldCommitAndClearSelection()
+        {
+            // Setup
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // 1. Select
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
+            Assert.That(_viewModel.IsRegionSelecting, Is.True);
+
+            // 2. Switch to FreeCurve
+            _viewModel.DrawStyle = new FreeCurve();
+
+            // Assert: SelectingArea should be null
+            Assert.That(_viewModel.SelectingArea, Is.Null, "Selection should be cleared when switching to non-selection tool");
+            Assert.That(_viewModel.IsRegionSelecting, Is.False);
+        }
     }
 }

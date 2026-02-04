@@ -45,5 +45,5 @@ UIや描画ライブラリに依存しない純粋なドメインモデルとし
     - [x] 既存テストコードの修正（ドラッグ位置の適正化）
 
 ## バグ修正
-- [~] Task: バグ修正 - リサイズ確定時に元に戻る問題を修正
-    - [ ] InteractionCoordinator.PointerLeftButtonReleased で ResizingState 終了時にもセッションを更新するように修正
+- [x] Task: バグ修正 - リサイズ確定時に元に戻る問題を修正 [21d856b]
+    - [x] InteractionCoordinator.PointerLeftButtonReleased で ResizingState 終了時にもセッションを更新するように修正 [21d856b]

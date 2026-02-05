@@ -51,6 +51,59 @@ namespace Eede.Domain.Tests.ImageEditing
             AssertColor(result, 2, 2, 255, 255, 0, 255);
         }
 
+        [Test]
+        public void Resize_4x4_to_2x2_ShrinksPixels()
+        {
+            // 4x4 Image
+            int w = 4;
+            int h = 4;
+            var data = new byte[w * h * 4];
+            for (int i = 0; i < data.Length; i++) data[i] = 255; // White base
+
+            // (0,0) to (1,1) Red
+            SetPixel(data, 0, 0, w, 255, 0, 0, 255);
+            // (2,0) to (3,1) Blue
+            SetPixel(data, 2, 0, w, 0, 0, 255, 255);
+
+            var source = Picture.Create(new PictureSize(w, h), data);
+            var resampler = new NearestNeighborResampler();
+            var newSize = new PictureSize(2, 2);
+
+            var result = resampler.Resize(source, newSize);
+
+            Assert.That(result.Width, Is.EqualTo(2));
+            Assert.That(result.Height, Is.EqualTo(2));
+
+            // (0,0) in 2x2 mapped from (0,0) in 4x4 -> Red
+            AssertColor(result, 0, 0, 255, 0, 0, 255);
+            // (1,0) in 2x2 mapped from (2,0) in 4x4 -> Blue
+            AssertColor(result, 1, 0, 0, 0, 255, 255);
+        }
+
+        [Test]
+        public void Resize_DifferentAspectRatio()
+        {
+            // 2x2 to 4x2
+            var data = new byte[2 * 2 * 4];
+            SetPixel(data, 0, 0, 2, 255, 0, 0, 255); // (0,0) Red
+            SetPixel(data, 1, 0, 2, 0, 0, 255, 255); // (1,0) Blue
+
+            var source = Picture.Create(new PictureSize(2, 2), data);
+            var resampler = new NearestNeighborResampler();
+            var newSize = new PictureSize(4, 2);
+
+            var result = resampler.Resize(source, newSize);
+
+            Assert.That(result.Width, Is.EqualTo(4));
+            Assert.That(result.Height, Is.EqualTo(2));
+
+            // 0,1 -> Red, 2,3 -> Blue
+            AssertColor(result, 0, 0, 255, 0, 0, 255);
+            AssertColor(result, 1, 0, 255, 0, 0, 255);
+            AssertColor(result, 2, 0, 0, 0, 255, 255);
+            AssertColor(result, 3, 0, 0, 0, 255, 255);
+        }
+
         private void SetPixel(byte[] data, int x, int y, int strideWidth, byte r, byte g, byte b, byte a)
         {
             int idx = (y * strideWidth + x) * 4;

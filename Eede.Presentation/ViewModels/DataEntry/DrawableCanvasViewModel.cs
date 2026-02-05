@@ -314,9 +314,9 @@ public class DrawableCanvasViewModel : ViewModelBase
         _coordinator.CanvasLeave(PictureBuffer);
     }
 
-    public void CommitSelection()
+    public void CommitSelection(bool forceClearSelection = false)
     {
-        _coordinator.CommitSelection();
+        _coordinator.CommitSelection(forceClearSelection);
     }
 
     public void SyncWithSession(bool forceReset = false)

@@ -500,6 +500,7 @@ public class MainViewModel : ViewModelBase
         {
             return;
         }
+        DrawableCanvasViewModel.CommitSelection(true);
         Picture updated = _transferImageToCanvasUseCase.Execute(
             vm.PictureBuffer,
             args.Rect);
@@ -530,6 +531,7 @@ public class MainViewModel : ViewModelBase
             return;
         }
 
+        DrawableCanvasViewModel.CommitSelection(true);
         Picture updated = _transferImageFromCanvasUseCase.Execute(
             vm.PictureBuffer,
             DrawableCanvasViewModel.PictureBuffer.Previous,

@@ -16,7 +16,7 @@ UIや外部依存を切り離し、純粋な計算ロジック（リサイズ計
 ## Phase 2: ユースケースと状態遷移 (State-based TDD)
 `DrawingSession`（集約）の状態変化と、ユースケースを通じた統合をテストします。
 
-- [ ] Task: `ScalingImageUseCase` のTDD
+- [~] Task: `ScalingImageUseCase` のTDD
     - [ ] **Red**: 「範囲選択なし時」にキャンバスがリサイズされ、画像が指定アンカーに配置される状態変化のテストを記述
     - [ ] **Red**: 「範囲選択あり時」に `DrawingSession` がプレビュー状態に遷移し、リサイズ後の画像が保持されるテストを記述
     - [ ] **Green**: ユースケースを実装し、テストをパスさせる

@@ -115,8 +115,8 @@ public class InteractionCoordinator : IInteractionCoordinator
     {
         if (_interactionSession?.SelectionState == null) return;
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        // 表示上の 8ピクセルをキャンバス上のピクセルサイズに変換
-        int handleSize = (int)Math.Max(1, 8 / _magnification.Value);
+        // 表示上の 12ピクセルをキャンバス上のピクセルサイズに変換し、最低 3ピクセルの遊びを確保する
+        int handleSize = (int)Math.Max(3, Math.Round(12.0 / _magnification.Value));
         var selectionCursor = _interactionSession.SelectionState.GetCursor(displayCoordinate.ToCanvas(_magnification).ToPosition(), handleSize);
                                 ActiveCursor = selectionCursor switch
                                 {
@@ -179,7 +179,7 @@ public class InteractionCoordinator : IInteractionCoordinator
 
         // 2. 選択状態の更新（移動開始判定など）
         var currentState = _interactionSession.SelectionState;
-        int handleSize = (int)Math.Max(1, 8 / _magnification.Value);
+        int handleSize = (int)Math.Max(3, Math.Round(12.0 / _magnification.Value));
         var nextState = currentState.HandlePointerLeftButtonPressed(
             currentArea,
             canvasPos,

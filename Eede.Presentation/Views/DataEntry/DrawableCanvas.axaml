@@ -65,7 +65,9 @@
                         Margin="{Binding SelectingThickness}"
                         Width="{Binding SelectingSize.Width}"
                         Height="{Binding SelectingSize.Height}" 
-                        ShowHandles="{Binding IsShowHandles}" />
+                        ShowHandles="{Binding IsShowHandles}"
+                        HandleSize="{Binding HandleSize}"
+                        HandleMargin="{Binding HandleMargin}" />
 
       </Panel>
     </Panel>

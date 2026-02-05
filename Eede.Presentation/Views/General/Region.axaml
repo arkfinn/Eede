@@ -23,8 +23,8 @@
           <Setter Property="Fill" Value="White"/>
           <Setter Property="Stroke" Value="Black"/>
           <Setter Property="StrokeThickness" Value="1"/>
-          <Setter Property="Width" Value="6"/>
-          <Setter Property="Height" Value="6"/>
+          <Setter Property="Width" Value="{Binding HandleSize, ElementName=root}"/>
+          <Setter Property="Height" Value="{Binding HandleSize, ElementName=root}"/>
       </Style>
     </Panel.Styles>
 
@@ -38,17 +38,17 @@
                Stroke="Red" StrokeThickness="1" />
                
     <Panel IsVisible="{Binding ShowHandles, ElementName=root}">
-        <Rectangle Classes="handle" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-3,-3,0,0"/>
-        <Rectangle Classes="handle" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-3,0,0"/>
-        <Rectangle Classes="handle" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-3,-3,0"/>
+        <Rectangle Classes="handle" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="{Binding HandleMargin, ElementName=root}"/>
+        <Rectangle Classes="handle" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="{Binding HandleMargin, ElementName=root}"/>
+        <Rectangle Classes="handle" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="{Binding HandleMargin, ElementName=root}"/>
         
-        <Rectangle Classes="handle" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,-3,0"/>
+        <Rectangle Classes="handle" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="{Binding HandleMargin, ElementName=root}"/>
         
-        <Rectangle Classes="handle" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-3,-3"/>
-        <Rectangle Classes="handle" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,-3"/>
-        <Rectangle Classes="handle" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-3,0,0,-3"/>
+        <Rectangle Classes="handle" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="{Binding HandleMargin, ElementName=root}"/>
+        <Rectangle Classes="handle" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="{Binding HandleMargin, ElementName=root}"/>
+        <Rectangle Classes="handle" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="{Binding HandleMargin, ElementName=root}"/>
         
-        <Rectangle Classes="handle" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="-3,0,0,0"/>
+        <Rectangle Classes="handle" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="{Binding HandleMargin, ElementName=root}"/>
     </Panel>
   </Panel>
 </UserControl>

@@ -150,6 +150,14 @@ namespace Eede.Presentation.Views.DataEntry
                     cursor.Height = selectingArea.Value.Height;
                     cursor.Margin = new Thickness(selectingArea.Value.X, selectingArea.Value.Y, 0, 0);
                     cursor.ShowHandles = _selectionState is SelectedState || _selectionState is ResizingState;
+
+                    // 表示倍率に応じてハンドルの見た目のサイズを調整
+                    // Dockエリアは現在拡大をサポートしていないため 1.0 固定、遊びを考慮し 12px
+                    double magnification = 1.0;
+                    double visualSize = 12.0 / magnification;
+                    cursor.HandleSize = visualSize;
+                    double offset = -visualSize / 2.0;
+                    cursor.HandleMargin = new Thickness(offset, offset, offset, offset);
                 }
                 else
                 {
@@ -166,7 +174,7 @@ namespace Eede.Presentation.Views.DataEntry
         private void UpdateCursorCursor(Position mousePos)
         {
             if (_viewModel == null) return;
-            var selectionCursor = _selectionState.GetCursor(mousePos, 8);
+            var selectionCursor = _selectionState.GetCursor(mousePos, 12);
             _viewModel.AnimationCursor = selectionCursor switch
             {
                 SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
@@ -284,7 +292,7 @@ namespace Eede.Presentation.Views.DataEntry
                 case PointerUpdateKind.LeftButtonPressed:
                     if (_viewModel.AnimationViewModel.IsAnimationMode)
                     {
-                        _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, nowPosition, null, () => _viewModel.PictureBuffer, null, 8);
+                        _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, nowPosition, null, () => _viewModel.PictureBuffer, null, 12);
                     }
                     else
                     {

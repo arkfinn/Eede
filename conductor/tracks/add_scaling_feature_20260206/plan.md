@@ -1,6 +1,6 @@
 # 拡大縮小機能の実装計画 (TDD Edition)
 
-## Phase 1: ドメイン計算ロジック (Output-based TDD)
+## Phase 1: ドメイン計算ロジック (Output-based TDD) [checkpoint: 9b9ec21]
 UIや外部依存を切り離し、純粋な計算ロジック（リサイズ計算とビットマップ変換）を構築します。
 
 - [x] Task: `ResizeContext` 値オブジェクトのTDD (ced9543)
@@ -11,7 +11,7 @@ UIや外部依存を切り離し、純粋な計算ロジック（リサイズ計
     - [x] **Red**: 小さなビットマップ（2x2等）を200%, 50%にした際、特定のピクセルが期待通り配置されるかのテストを記述
     - [x] **Green**: `ImageProcessingHelper` 等に変換ロジックを実装し、テストをパスさせる
     - [x] **Refactor**: パフォーマンス改善とコードの明瞭化
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) (9b9ec21)
 
 ## Phase 2: ユースケースと状態遷移 (State-based TDD)
 `DrawingSession`（集約）の状態変化と、ユースケースを通じた統合をテストします。

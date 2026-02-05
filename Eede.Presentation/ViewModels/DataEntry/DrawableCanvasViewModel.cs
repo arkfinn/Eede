@@ -127,9 +127,8 @@ public class DrawableCanvasViewModel : ViewModelBase
         SelectingThickness = new Thickness(0, 0, 0, 0);
         SelectingSize = new PictureSize(0, 0);
         ActiveCursor = Cursor.Default;
-        HandleSize = 12.0 / 4.0; // Default magnification is 4, Base is 12
-        double initialOffset = -HandleSize / 2.0;
-        HandleMargin = new Thickness(initialOffset, initialOffset, initialOffset, initialOffset);
+        HandleSize = 4.0;
+        HandleMargin = new Thickness(-2, -2, 0, 0);
 
         OnColorPicked = ReactiveCommand.Create<ArgbColor>(ExecuteColorPicked);
         OnDrew = ReactiveCommand.Create<Picture>(ExecuteDrew);
@@ -168,9 +167,6 @@ public class DrawableCanvasViewModel : ViewModelBase
             .Subscribe(x =>
             {
                 _coordinator.UpdateMagnification(Magnification);
-                HandleSize = Math.Max(3.0, 12.0 / Magnification.Value);
-                double offset = -HandleSize / 2.0;
-                HandleMargin = new Thickness(offset, offset, offset, offset);
                 UpdateImage();
             });
 

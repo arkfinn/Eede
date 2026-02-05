@@ -14,7 +14,7 @@ public class NormalCursorState : ISelectionState
         _cursorArea = cursorArea;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
     {
         pullAction?.Execute(cursorArea.RealPosition);
         _cursorArea = cursorArea;
@@ -49,7 +49,7 @@ public class NormalCursorState : ISelectionState
         return null;
     }
 
-    public SelectionCursor GetCursor(Position mousePosition)
+    public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)
     {
         return SelectionCursor.Default;
     }

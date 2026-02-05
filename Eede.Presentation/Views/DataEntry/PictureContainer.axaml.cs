@@ -163,6 +163,21 @@ namespace Eede.Presentation.Views.DataEntry
             });
         }
 
+        private void UpdateCursorCursor(Position mousePos)
+        {
+            if (_viewModel == null) return;
+            var selectionCursor = _selectionState.GetCursor(mousePos, 8);
+            _viewModel.AnimationCursor = selectionCursor switch
+            {
+                SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
+                SelectionCursor.SizeNWSE => new Cursor(StandardCursorType.TopLeftCorner),
+                SelectionCursor.SizeNESW => new Cursor(StandardCursorType.TopRightCorner),
+                SelectionCursor.SizeNS => new Cursor(StandardCursorType.TopSide),
+                SelectionCursor.SizeWE => new Cursor(StandardCursorType.LeftSide),
+                _ => Cursor.Default
+            };
+        }
+
         private void UpdateSelectionPreview()
         {
             var info = _selectionState.GetSelectionPreviewInfo();
@@ -269,7 +284,7 @@ namespace Eede.Presentation.Views.DataEntry
                 case PointerUpdateKind.LeftButtonPressed:
                     if (_viewModel.AnimationViewModel.IsAnimationMode)
                     {
-                        _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, nowPosition, null, () => _viewModel.PictureBuffer, null);
+                        _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, nowPosition, null, () => _viewModel.PictureBuffer, null, 8);
                     }
                     else
                     {
@@ -323,6 +338,7 @@ namespace Eede.Presentation.Views.DataEntry
             VisibleCursor = newVisible;
             _localCursorArea = newArea;
             UpdateCursor();
+            UpdateCursorCursor(nowPosition);
         }
 
         private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)

@@ -25,7 +25,7 @@ namespace Eede.Domain.ImageEditing.SelectionStates
             Resampler = resampler;
         }
 
-        public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
+        public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
         {
             return this;
         }
@@ -76,7 +76,7 @@ namespace Eede.Domain.ImageEditing.SelectionStates
             return new SelectionPreviewInfo(newPixels, newArea.Position, SelectionPreviewType.CutAndMove, OriginalArea);
         }
 
-        public SelectionCursor GetCursor(Position mousePosition)
+        public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)
         {
             // 操作中は常にリサイズカーソルを表示すべき
             return GetCursorForHandle(Handle);

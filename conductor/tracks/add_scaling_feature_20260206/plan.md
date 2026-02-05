@@ -16,11 +16,11 @@ UIや外部依存を切り離し、純粋な計算ロジック（リサイズ計
 ## Phase 2: ユースケースと状態遷移 (State-based TDD)
 `DrawingSession`（集約）の状態変化と、ユースケースを通じた統合をテストします。
 
-- [~] Task: `ScalingImageUseCase` のTDD
-    - [ ] **Red**: 「範囲選択なし時」にキャンバスがリサイズされ、画像が指定アンカーに配置される状態変化のテストを記述
-    - [ ] **Red**: 「範囲選択あり時」に `DrawingSession` がプレビュー状態に遷移し、リサイズ後の画像が保持されるテストを記述
-    - [ ] **Green**: ユースケースを実装し、テストをパスさせる
-    - [ ] **Refactor**: ドメインイベントや状態遷移ロジックの Repatriation（適切な場所への再配置）
+- [x] Task: `ScalingImageUseCase` のTDD (87f4867)
+    - [x] **Red**: 「範囲選択なし時」にキャンバスがリサイズされ、画像が指定アンカーに配置される状態変化のテストを記述
+    - [x] **Red**: 「範囲選択あり時」に `DrawingSession` がプレビュー状態に遷移し、リサイズ後の画像が保持されるテストを記述
+    - [x] **Green**: ユースケースを実装し、テストをパスさせる
+    - [x] **Refactor**: ドメインイベントや状態遷移ロジックの Repatriation（適切な場所への再配置）
 - [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: プレゼンテーション層 (Testable UI)

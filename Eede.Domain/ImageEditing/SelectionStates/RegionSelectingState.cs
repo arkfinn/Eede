@@ -11,6 +11,7 @@ public class RegionSelectingState : ISelectionState
     private Position _startPosition;
     private Position _nowPosition;
     private PictureSize _minSize;
+    private bool _isShifted;
 
     public RegionSelectingState(Position startPosition, Position nowPosition, PictureSize minSize)
     {
@@ -36,6 +37,8 @@ public class RegionSelectingState : ISelectionState
 
     public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)
     {
+        _nowPosition = nowPosition;
+        _isShifted = isShift;
         bool newVisibleCursor = canvasSize.Contains(nowPosition);
         HalfBoxArea newCursorArea = cursorArea.Move(nowPosition);
         return (newVisibleCursor, newCursorArea);
@@ -65,8 +68,19 @@ public class RegionSelectingState : ISelectionState
 
     public PictureArea? GetSelectingArea()
     {
+        Position targetPosition = _nowPosition;
+        if (_isShifted)
+        {
+            int deltaX = _nowPosition.X - _startPosition.X;
+            int deltaY = _nowPosition.Y - _startPosition.Y;
+            int size = Math.Max(Math.Abs(deltaX), Math.Abs(deltaY));
+            targetPosition = new Position(
+                _startPosition.X + (deltaX >= 0 ? size : -size),
+                _startPosition.Y + (deltaY >= 0 ? size : -size));
+        }
+
         // マウスの生座標から暫定的な矩形を作成
-        var rawArea = PictureArea.FromPosition(_startPosition, _nowPosition, new PictureSize(int.MaxValue, int.MaxValue));
+        var rawArea = PictureArea.FromPosition(_startPosition, targetPosition, new PictureSize(int.MaxValue, int.MaxValue));
 
         // グリッドサイズ（スナップ単位）を算出（通常は 16x16）
         int gridSizeW = _minSize.Width / 2;

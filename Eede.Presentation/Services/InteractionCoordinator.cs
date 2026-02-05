@@ -115,7 +115,9 @@ public class InteractionCoordinator : IInteractionCoordinator
     {
         if (_interactionSession?.SelectionState == null) return;
         var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var selectionCursor = _interactionSession.SelectionState.GetCursor(displayCoordinate.ToCanvas(_magnification).ToPosition());
+        // 表示上の 8ピクセルをキャンバス上のピクセルサイズに変換
+        int handleSize = (int)Math.Max(1, 8 / _magnification.Value);
+        var selectionCursor = _interactionSession.SelectionState.GetCursor(displayCoordinate.ToCanvas(_magnification).ToPosition(), handleSize);
                                 ActiveCursor = selectionCursor switch
                                 {
                                     SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
@@ -139,6 +141,10 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public void PointerBegin(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, PenStyle penStyle, bool isShift, bool isAnimationMode, PictureSize gridSize, ReactiveCommand<Picture, Unit> internalUpdateCommand)
     {
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
+        var canvasPos = canvasCoordinate.ToPosition();
+
         if (CurrentBuffer == null) return;
         if (CurrentBuffer.IsDrawing() && !(_interactionSession?.SelectionState is SelectionPreviewState)) return;
 
@@ -149,9 +155,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         var workingSession = _sessionProvider.CurrentSession;
         if (workingSession == null) return;
 
-        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
-        var currentArea = HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize);
+        var currentArea = HalfBoxArea.Create(canvasPos, gridSize);
 
         var previousState = _interactionSession.SelectionState;
 
@@ -175,12 +179,14 @@ public class InteractionCoordinator : IInteractionCoordinator
 
         // 2. 選択状態の更新（移動開始判定など）
         var currentState = _interactionSession.SelectionState;
+        int handleSize = (int)Math.Max(1, 8 / _magnification.Value);
         var nextState = currentState.HandlePointerLeftButtonPressed(
             currentArea,
-            canvasCoordinate.ToPosition(),
+            canvasPos,
             null,
             () => workingSession.Buffer.Fetch(),
-            internalUpdateCommand);
+            internalUpdateCommand,
+            handleSize);
 
         if (nextState is DraggingState)
         {
@@ -219,19 +225,21 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public void PointerMoved(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, PenStyle penStyle, bool isShift, bool isAnimationMode, PictureSize gridSize)
     {
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
+        var canvasPos = canvasCoordinate.ToPosition();
+
         EnsureInteractionSession(CurrentBuffer, drawStyle);
         if (_interactionSession?.SelectionState == null || CurrentBuffer == null) return;
 
         UpdateCursor(pos);
 
-        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
-        var currentArea = HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize);
+        var currentArea = HalfBoxArea.Create(canvasPos, gridSize);
 
         _interactionSession.SelectionState.HandlePointerMoved(
             currentArea,
             true,
-            canvasCoordinate.ToPosition(),
+            canvasPos,
             isShift,
             CurrentBuffer.Previous.Size);
 
@@ -306,17 +314,21 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     public void PointerLeftButtonReleased(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, PenStyle penStyle, bool isShift, ReactiveCommand<Picture, Unit> internalUpdateCommand)
     {
+        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
+        var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
+        var canvasPos = canvasCoordinate.ToPosition();
+
         EnsureInteractionSession(CurrentBuffer, drawStyle);
         if (_interactionSession?.SelectionState == null || CurrentBuffer == null) return;
 
         var previousImage = CurrentBuffer.Previous;
-        var displayCoordinate = new DisplayCoordinate(pos.X, pos.Y);
-        var canvasCoordinate = displayCoordinate.ToCanvas(_magnification);
-        var currentArea = HalfBoxArea.Create(canvasCoordinate.ToPosition(), gridSize);
+        UpdateCursor(pos);
+
+        var currentArea = HalfBoxArea.Create(canvasPos, gridSize);
 
         ISelectionState nextState = _interactionSession.SelectionState.HandlePointerLeftButtonReleased(
             currentArea,
-            canvasCoordinate.ToPosition(),
+            canvasPos,
             internalUpdateCommand,
             internalUpdateCommand);
 

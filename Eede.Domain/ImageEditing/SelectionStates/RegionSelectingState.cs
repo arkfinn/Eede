@@ -19,7 +19,7 @@ public class RegionSelectingState : ISelectionState
         _minSize = minSize;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
     {
         return this;
     }
@@ -58,7 +58,7 @@ public class RegionSelectingState : ISelectionState
         return null;
     }
 
-    public SelectionCursor GetCursor(Position mousePosition)
+    public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)
     {
         return SelectionCursor.Default;
     }

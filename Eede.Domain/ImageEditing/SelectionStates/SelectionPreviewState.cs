@@ -18,13 +18,15 @@ public class SelectionPreviewState : ISelectionState
         _sourcePixels = sourcePixels ?? info.Pixels;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
     {
         var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);
 
-        var handle = SelectionHandleDetector.Detect(currentArea, mousePosition, 6);
+        var handle = SelectionHandleDetector.Detect(currentArea, mousePosition, handleSize);
         if (handle.HasValue)
         {
+            // 再リサイズ時も _sourcePixels (変形前の元画像) を渡すことで画質劣化を防ぎ、
+            // 連続したリサイズ操作を可能にする
             return new ResizingState(_sourcePixels, currentArea, mousePosition, handle.Value, new NearestNeighborResampler());
         }
 
@@ -67,11 +69,11 @@ public class SelectionPreviewState : ISelectionState
         return _info;
     }
 
-    public SelectionCursor GetCursor(Position mousePosition)
+    public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)
     {
         var currentArea = new PictureArea(_info.Position, _info.Pixels.Size);
 
-        var handle = SelectionHandleDetector.Detect(currentArea, mousePosition, 6);
+        var handle = SelectionHandleDetector.Detect(currentArea, mousePosition, handleSize);
         if (handle.HasValue)
         {
             return GetCursorForHandle(handle.Value);

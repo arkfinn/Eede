@@ -81,18 +81,24 @@ public class ResizingSelection
         if (keepAspectRatio && IsCornerHandle(Handle))
         {
             double originalRatio = (double)OriginalArea.Width / OriginalArea.Height;
-            double currentRatio = (double)newWidth / newHeight;
 
-            if (currentRatio > originalRatio)
+            // 元のサイズからの変化量を計算する
+            double dw = newWidth - OriginalArea.Width;
+            double dh = newHeight - OriginalArea.Height;
+
+            // 変化量の絶対値を比率で補正して比較し、より大きく動かそうとしている軸を主導とする
+            if (Math.Abs(dw) >= Math.Abs(dh * originalRatio))
             {
-                // 横長になりすぎている -> 高さを増やす (大きい辺に合わせる)
                 newHeight = (int)Math.Round(newWidth / originalRatio);
             }
             else
             {
-                // 縦長になりすぎている -> 幅を増やす
                 newWidth = (int)Math.Round(newHeight * originalRatio);
             }
+
+            // newWidth, newHeight が 0 にならないように最小 1 を保証
+            newWidth = Math.Max(1, newWidth);
+            newHeight = Math.Max(1, newHeight);
 
             // 調整後のサイズに合わせて座標を再調整 (Anchorは動かさない)
             if (Handle == SelectionHandle.TopLeft)

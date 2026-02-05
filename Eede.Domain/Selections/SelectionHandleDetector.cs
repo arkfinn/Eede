@@ -34,9 +34,9 @@ namespace Eede.Domain.Selections
 
         private static bool IsHit(Position pos, int targetX, int targetY, int size)
         {
-            int half = size / 2;
-            return pos.X >= targetX - half && pos.X <= targetX + half &&
-                   pos.Y >= targetY - half && pos.Y <= targetY + half;
+            int tolerance = size / 2;
+            return pos.X >= targetX - tolerance && pos.X <= targetX + tolerance &&
+                   pos.Y >= targetY - tolerance && pos.Y <= targetY + tolerance;
         }
     }
 }

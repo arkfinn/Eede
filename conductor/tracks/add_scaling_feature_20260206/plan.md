@@ -13,7 +13,7 @@ UIや外部依存を切り離し、純粋な計算ロジック（リサイズ計
     - [x] **Refactor**: パフォーマンス改善とコードの明瞭化
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) (9b9ec21)
 
-## Phase 2: ユースケースと状態遷移 (State-based TDD)
+## Phase 2: ユースケースと状態遷移 (State-based TDD) [checkpoint: fd59cb2]
 `DrawingSession`（集約）の状態変化と、ユースケースを通じた統合をテストします。
 
 - [x] Task: `ScalingImageUseCase` のTDD (87f4867)
@@ -21,12 +21,12 @@ UIや外部依存を切り離し、純粋な計算ロジック（リサイズ計
     - [x] **Red**: 「範囲選択あり時」に `DrawingSession` がプレビュー状態に遷移し、リサイズ後の画像が保持されるテストを記述
     - [x] **Green**: ユースケースを実装し、テストをパスさせる
     - [x] **Refactor**: ドメインイベントや状態遷移ロジックの Repatriation（適切な場所への再配置）
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) (fd59cb2)
 
 ## Phase 3: プレゼンテーション層 (Testable UI)
 ViewModelの振る舞いをテストし、最後に View を構築します。
 
-- [ ] Task: `ScalingDialogViewModel` のTDD
+- [~] Task: `ScalingDialogViewModel` のTDD
     - [ ] **Red**: 入力値の変化に伴うプロパティの連動（幅を変えたら高さが変わる等）と、バリデーションのテストを記述
     - [ ] **Green**: ReactiveUIを用いた ViewModel の実装
     - [ ] **Refactor**: Rxクエリ（WhenAnyValue）の整理

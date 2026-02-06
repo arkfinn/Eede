@@ -1,8 +1,0 @@
-{
-  "track_id": "canvas-service-elimination_20260124",
-  "type": "refactor",
-  "status": "new",
-  "created_at": "2026-01-24T17:49:00Z",
-  "updated_at": "2026-01-24T17:49:00Z",
-  "description": "CanvasServiceを排除し、ドメインモデル（Value Object/Entity）への知識の集約と、Application層のUseCaseへの移行を行う"
-}

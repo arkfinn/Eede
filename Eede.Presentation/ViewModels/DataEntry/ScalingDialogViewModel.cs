@@ -50,16 +50,16 @@ namespace Eede.Presentation.ViewModels.DataEntry
             RefreshStates();
 
             this.WhenAnyValue(x => x.Width)
-                .Subscribe(w => { UpdateFromWidth(w); RefreshStates(); });
+                .Subscribe(UpdateFromWidth);
 
             this.WhenAnyValue(x => x.Height)
-                .Subscribe(h => { UpdateFromHeight(h); RefreshStates(); });
+                .Subscribe(UpdateFromHeight);
 
             this.WhenAnyValue(x => x.WidthPercent)
-                .Subscribe(wp => { UpdateFromWidthPercent(wp); RefreshStates(); });
+                .Subscribe(UpdateFromWidthPercent);
 
             this.WhenAnyValue(x => x.HeightPercent)
-                .Subscribe(hp => { UpdateFromHeightPercent(hp); RefreshStates(); });
+                .Subscribe(UpdateFromHeightPercent);
 
             ApplyPreset = ReactiveCommand.Create<double>(factor =>
             {
@@ -120,11 +120,13 @@ namespace Eede.Presentation.ViewModels.DataEntry
             isUpdating = true;
             try
             {
+                if (w < 1) { Width = 1; }
                 if (IsLockAspectRatio && OriginalSize.Width > 0)
                 {
-                    Height = (int)Math.Max(1, Math.Round((double)w * OriginalSize.Height / OriginalSize.Width));
+                    Height = (int)Math.Max(1, Math.Round((double)Width * OriginalSize.Height / OriginalSize.Width));
                 }
                 UpdatePercents();
+                RefreshStates();
             }
             finally { isUpdating = false; }
         }
@@ -135,11 +137,13 @@ namespace Eede.Presentation.ViewModels.DataEntry
             isUpdating = true;
             try
             {
+                if (h < 1) { Height = 1; }
                 if (IsLockAspectRatio && OriginalSize.Height > 0)
                 {
-                    Width = (int)Math.Max(1, Math.Round((double)h * OriginalSize.Width / OriginalSize.Height));
+                    Width = (int)Math.Max(1, Math.Round((double)Height * OriginalSize.Width / OriginalSize.Height));
                 }
                 UpdatePercents();
+                RefreshStates();
             }
             finally { isUpdating = false; }
         }
@@ -150,16 +154,18 @@ namespace Eede.Presentation.ViewModels.DataEntry
             isUpdating = true;
             try
             {
-                Width = (int)Math.Max(1, Math.Round(OriginalSize.Width * wp / 100.0));
+                if (wp < 0.1) { WidthPercent = 0.1; }
+                Width = (int)Math.Max(1, Math.Round(OriginalSize.Width * WidthPercent / 100.0));
                 if (IsLockAspectRatio)
                 {
-                    HeightPercent = wp;
-                    Height = (int)Math.Max(1, Math.Round(OriginalSize.Height * wp / 100.0));
+                    HeightPercent = WidthPercent;
+                    Height = (int)Math.Max(1, Math.Round(OriginalSize.Height * WidthPercent / 100.0));
                 }
                 else
                 {
                     UpdatePercents();
                 }
+                RefreshStates();
             }
             finally { isUpdating = false; }
         }
@@ -170,16 +176,18 @@ namespace Eede.Presentation.ViewModels.DataEntry
             isUpdating = true;
             try
             {
-                Height = (int)Math.Max(1, Math.Round(OriginalSize.Height * hp / 100.0));
+                if (hp < 0.1) { HeightPercent = 0.1; }
+                Height = (int)Math.Max(1, Math.Round(OriginalSize.Height * HeightPercent / 100.0));
                 if (IsLockAspectRatio)
                 {
-                    WidthPercent = hp;
-                    Width = (int)Math.Max(1, Math.Round(OriginalSize.Width * hp / 100.0));
+                    WidthPercent = HeightPercent;
+                    Width = (int)Math.Max(1, Math.Round(OriginalSize.Width * HeightPercent / 100.0));
                 }
                 else
                 {
                     UpdatePercents();
                 }
+                RefreshStates();
             }
             finally { isUpdating = false; }
         }

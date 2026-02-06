@@ -25,5 +25,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: 作業エリアへのグリッド表示機能の追加**
+- [x] **Track: 作業エリアへのグリッド表示機能の追加**
+
 *Link: [./tracks/add_grid_display_20260207/](./tracks/add_grid_display_20260207/)*
+
+

@@ -47,12 +47,27 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public PictureSize PreviewSize { get; set; }
     [Reactive] public Thickness RawPreviewThickness { get; set; }
     [Reactive] public PictureSize RawPreviewSize { get; set; }
-    [Reactive] public Bitmap? MagnifiedPreviewBitmap { get; set; }
+    private Bitmap? _magnifiedPreviewBitmap;
+    public Bitmap? MagnifiedPreviewBitmap
+    {
+        get => _magnifiedPreviewBitmap;
+        set
+        {
+            if (_magnifiedPreviewBitmap != value)
+            {
+                _magnifiedPreviewBitmap?.Dispose();
+            }
+            _ = this.RaiseAndSetIfChanged(ref _magnifiedPreviewBitmap, value);
+        }
+    }
     [Reactive] public bool IsAnimationMode { get; set; }
     [Reactive] public GridSettings GridSettings { get; set; }
     [Reactive] public Cursor ActiveCursor { get; set; }
     [Reactive] public double HandleSize { get; set; }
     [Reactive] public Thickness HandleMargin { get; set; }
+
+    [Reactive] public double DisplayWidth { get; set; }
+    [Reactive] public double DisplayHeight { get; set; }
 
     private readonly GlobalState _globalState;
     private readonly IAddFrameProvider _addFrameProvider;
@@ -62,6 +77,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly ISelectionService _selectionService;
     private readonly IInteractionCoordinator _coordinator;
     private readonly PictureSize _gridSize = new(16, 16);
+    private readonly IImageTransfer _identityTransfer = new IdentityImageTransfer();
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; }
@@ -190,6 +206,16 @@ public class DrawableCanvasViewModel : ViewModelBase
                 }
             });
 
+        _ = this.WhenAnyValue(x => x.Magnification, x => x.PictureBuffer)
+            .Subscribe(x =>
+            {
+                if (x.Item2 != null)
+                {
+                    DisplayWidth = x.Item1.Magnify(x.Item2.Previous.Width);
+                    DisplayHeight = x.Item1.Magnify(x.Item2.Previous.Height);
+                }
+            });
+
         _ = this.WhenAnyValue(x => x.PreviewPosition, x => x.PreviewPixels, x => x.Magnification, (pos, pix, mag) => (pos, pix, mag))
             .Subscribe(x =>
             {
@@ -203,9 +229,9 @@ public class DrawableCanvasViewModel : ViewModelBase
                     RawPreviewThickness = new Thickness(x.pos.X, x.pos.Y, 0, 0);
                     RawPreviewSize = x.pix.Size;
 
-                    var magnifiedPicture = ImageTransfer.Transfer(x.pix, x.mag);
-                    var previewBase = Picture.CreateEmpty(magnifiedPicture.Size);
-                    var simulatedPreview = previewBase.Blend(ImageBlender, magnifiedPicture, new Position(0, 0));
+                    // プレビューもIdentityTransferを使用し、View側で拡大させる
+                    var previewBase = Picture.CreateEmpty(x.pix.Size);
+                    var simulatedPreview = previewBase.Blend(ImageBlender, x.pix, new Position(0, 0));
                     MagnifiedPreviewBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(simulatedPreview);
                 }
                 else
@@ -246,7 +272,12 @@ public class DrawableCanvasViewModel : ViewModelBase
         }
     }
 
-    public DrawingBuffer PictureBuffer;
+    private DrawingBuffer _pictureBuffer;
+    public DrawingBuffer PictureBuffer
+    {
+        get => _pictureBuffer;
+        set => this.RaiseAndSetIfChanged(ref _pictureBuffer, value);
+    }
     private Picture Picture = null;
 
     public ReactiveCommand<ArgbColor, Unit> OnColorPicked { get; }
@@ -278,7 +309,8 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
 
-        Picture = _coordinator.Painted(PictureBuffer, PenStyle, ImageTransfer);
+        // 表示用には拡大を行わない _identityTransfer を使用する
+        Picture = _coordinator.Painted(PictureBuffer, PenStyle, _identityTransfer);
         if (Picture == null) return;
 
         MyBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(Picture);

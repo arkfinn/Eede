@@ -108,6 +108,8 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; private set; }
     public PaletteContainerViewModel PaletteContainerViewModel { get; private set; }
 
+    public Interaction<ScalingDialogViewModel, ResizeContext?> ShowScalingModal { get; private set; }
+    public ReactiveCommand<Unit, Unit> ScalingCommand { get; private set; }
 
     // Viewにウィンドウを閉じるよう通知するためのInteraction
     public Interaction<Unit, Unit> CloseWindowInteraction { get; private set; }
@@ -126,6 +128,7 @@ public class MainViewModel : ViewModelBase
     private readonly IPictureRepository _pictureRepository;
     private readonly IDrawStyleFactory _drawStyleFactory;
     private readonly ITransformImageUseCase _transformImageUseCase;
+    private readonly IScalingImageUseCase _scalingImageUseCase;
     private readonly ITransferImageToCanvasUseCase _transferImageToCanvasUseCase;
     private readonly ITransferImageFromCanvasUseCase _transferImageFromCanvasUseCase;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
@@ -146,6 +149,7 @@ public class MainViewModel : ViewModelBase
         IPictureRepository pictureRepository,
         IDrawStyleFactory drawStyleFactory,
         ITransformImageUseCase transformImageUseCase,
+        IScalingImageUseCase scalingImageUseCase,
         ITransferImageToCanvasUseCase transferImageToCanvasUseCase,
         ITransferImageFromCanvasUseCase transferImageFromCanvasUseCase,
         IDrawingSessionProvider drawingSessionProvider,
@@ -163,6 +167,7 @@ public class MainViewModel : ViewModelBase
         _pictureRepository = pictureRepository;
         _drawStyleFactory = drawStyleFactory;
         _transformImageUseCase = transformImageUseCase;
+        _scalingImageUseCase = scalingImageUseCase;
         _transferImageToCanvasUseCase = transferImageToCanvasUseCase;
         _transferImageFromCanvasUseCase = transferImageFromCanvasUseCase;
         _drawingSessionProvider = drawingSessionProvider;
@@ -245,6 +250,9 @@ public class MainViewModel : ViewModelBase
 
         ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
         CreateNewPictureCommand = ReactiveCommand.Create(ExecuteCreateNewPicture);
+
+        ShowScalingModal = new Interaction<ScalingDialogViewModel, ResizeContext?>();
+        ScalingCommand = ReactiveCommand.CreateFromTask(ExecuteScalingAsync);
 
         PutBackgroundColorCommand = ReactiveCommand.Create(() =>
         {
@@ -466,6 +474,22 @@ public class MainViewModel : ViewModelBase
             DockPictureViewModel vm = _dockPictureFactory();
             vm.Initialize(Picture.CreateEmpty(result.Size), FilePath.Empty());
             Pictures.Add(vm);
+        }
+    }
+
+    private async Task ExecuteScalingAsync()
+    {
+        PictureArea? area = DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null;
+        PictureSize size = area?.Size ?? DrawableCanvasViewModel.PictureBuffer.Previous.Size;
+
+        ScalingDialogViewModel vm = new(size);
+        ResizeContext? context = await ShowScalingModal.Handle(vm);
+        if (context != null)
+        {
+            DrawingSession updated = _scalingImageUseCase.Execute(_drawingSessionProvider.CurrentSession, context);
+            DrawingSessionViewModel.Sync(updated);
+            DrawableCanvasViewModel.SyncWithSession(true);
+            SetPictureToDrawArea(updated.CurrentPicture);
         }
     }
 

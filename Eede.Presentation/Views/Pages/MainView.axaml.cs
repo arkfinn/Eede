@@ -7,6 +7,8 @@ using Avalonia.ReactiveUI;
 using Avalonia.Styling;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.ViewModels.Pages;
+using Eede.Presentation.ViewModels.DataEntry;
+using Eede.Domain.ImageEditing;
 using ReactiveUI;
 using System;
 using System.Reactive;
@@ -34,6 +36,10 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             _ = this.BindInteraction(
                 viewModel,
                 vm => vm.ShowCreateNewPictureModal, DoShowCreateNewFileWindowAsync);
+
+            _ = this.BindInteraction(
+                viewModel,
+                vm => vm.ShowScalingModal, DoShowScalingWindowAsync);
 
             viewModel.FileStorage = FileStorage;
 
@@ -106,6 +112,18 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
                 app.RequestedThemeVariant = ThemeVariant.Dark;
                 break;
         }
+    }
+
+    private async Task DoShowScalingWindowAsync(IInteractionContext<ScalingDialogViewModel, ResizeContext?> interaction)
+    {
+        var dialog = new Views.DataEntry.ScalingDialogView()
+        {
+            DataContext = interaction.Input
+        };
+
+        Window currentWindow = (Window)VisualRoot;
+        var result = await dialog.ShowDialog<ResizeContext?>(currentWindow);
+        interaction.SetOutput(result);
     }
 
     private async Task DoShowCreateNewFileWindowAsync(IInteractionContext<NewPictureWindowViewModel, NewPictureWindowViewModel> interaction)

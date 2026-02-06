@@ -9,6 +9,7 @@ using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
 using Eede.Presentation.Services;
@@ -63,6 +64,8 @@ public partial class App : Avalonia.Application
         });
         services.AddSingleton<IDrawStyleFactory, DrawStyleFactory>();
         services.AddTransient<ITransformImageUseCase, TransformImageUseCase>();
+        services.AddTransient<IScalingImageUseCase, ScalingImageUseCase>();
+        services.AddTransient<IImageResampler, NearestNeighborResampler>();
         services.AddTransient<ITransferImageToCanvasUseCase, TransferImageToCanvasUseCase>();
         services.AddTransient<ITransferImageFromCanvasUseCase, TransferImageFromCanvasUseCase>();
         services.AddSingleton<IDrawingSessionProvider, DrawingSessionProvider>();

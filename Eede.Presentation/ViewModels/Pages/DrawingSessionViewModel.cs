@@ -63,5 +63,10 @@ namespace Eede.Presentation.ViewModels.Pages
         {
             _provider.Update(CurrentSession.PushDockUpdate(dockId, position, before, after));
         }
+
+        public void Sync(DrawingSession session)
+        {
+            _provider.Update(session);
+        }
     }
 }

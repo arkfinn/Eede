@@ -59,6 +59,13 @@
 			CommandParameter="{ x:Static p:PictureActions.RotateRight }" >
 				<Image Source="/Assets/Tools/tool_rotate_right.png" Stretch="None" />
 			</Button>
+			<Panel Classes="vertical-separator" />
+			<Button
+			Classes="tool"
+			ToolTip.Tip="拡大縮小: 画像全体（または選択範囲）を指定した数値でリサイズします"
+			Command="{ Binding ScalingCommand, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }" >
+				<Image Source="/Assets/Tools/tool_scaling.png" Stretch="None" />
+			</Button>
 		</StackPanel>
 	</Grid>
 </UserControl>

@@ -116,6 +116,7 @@ public class MainViewModelCharacterizationTests
             _pictureRepositoryMock.Object,
             _drawStyleFactoryMock.Object,
             _transformImageUseCaseMock.Object,
+            new Mock<IScalingImageUseCase>().Object,
             _transferImageToCanvasUseCaseMock.Object,
             _transferImageFromCanvasUseCaseMock.Object,
             _drawingSessionProviderMock.Object,

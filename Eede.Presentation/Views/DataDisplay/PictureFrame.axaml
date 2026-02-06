@@ -16,7 +16,6 @@
                         Id="MainLayout"
                         Orientation="Horizontal">
         <display:PictureDock Pictures="{Binding ElementName=Root, Path=Pictures}"
-                             ActiveDockable="{Binding ElementName=Root, Path=ActiveDockable, Mode=TwoWay}"
                              CanCreateDocument="False">
           <display:PictureDock.DocumentTemplate>
             <DocumentTemplate x:DataType="displayvm:DockPictureViewModel">

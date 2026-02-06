@@ -154,4 +154,80 @@ public class MainViewModelTests
         // Assert
         _interactionCoordinatorMock.Verify(x => x.CommitSelection(true), Times.AtLeastOnce, "CommitSelection(true) should be called before pulling image from draw area.");
     }
+
+    [AvaloniaTest]
+    public void GridFlagsInitialValueAndChangeTest()
+    {
+        var mainVM = CreateMainViewModel();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainVM.IsShowPixelGrid, Is.False, "IsShowPixelGrid should be False by default");
+            Assert.That(mainVM.IsShowCursorGrid, Is.False, "IsShowCursorGrid should be False by default");
+        });
+
+        mainVM.IsShowPixelGrid = true;
+        Assert.That(mainVM.IsShowPixelGrid, Is.True);
+
+        mainVM.IsShowCursorGrid = true;
+        Assert.That(mainVM.IsShowCursorGrid, Is.True);
+    }
+
+    [AvaloniaTest]
+    public void GridFlagPropagationAndVisibilityIntegrationTest()
+    {
+        var mainVM = CreateMainViewModel();
+        var canvasVM = mainVM.DrawableCanvasViewModel;
+
+        // 初期状態の確認
+        Assert.Multiple(() =>
+        {
+            Assert.That(canvasVM.IsShowPixelGrid, Is.False);
+            Assert.That(canvasVM.IsPixelGridEffectivelyVisible, Is.False);
+            Assert.That(canvasVM.Magnification.Value, Is.EqualTo(4.0f), "Default mag should be x4");
+        });
+
+        // 1. MainViewModel で PixelGrid を ON にする -> 伝播して有効になる (x4なので)
+        mainVM.IsShowPixelGrid = true;
+        Assert.Multiple(() =>
+        {
+            Assert.That(canvasVM.IsShowPixelGrid, Is.True, "Flag should propagate to CanvasVM");
+            Assert.That(canvasVM.IsPixelGridEffectivelyVisible, Is.True, "Should be visible at x4");
+        });
+
+        // 2. 倍率を x2 に下げる -> 内部フラグは ON のままだが、有効表示は False になる
+        mainVM.Magnification = new Magnification(2);
+        Assert.Multiple(() =>
+        {
+            Assert.That(canvasVM.IsShowPixelGrid, Is.True, "Flag should remain True");
+            Assert.That(canvasVM.IsPixelGridEffectivelyVisible, Is.False, "Should be hidden below x4");
+        });
+
+        // 3. CursorGrid の伝播確認
+        mainVM.IsShowCursorGrid = true;
+        Assert.That(canvasVM.IsShowCursorGrid, Is.True);
+        Assert.That(canvasVM.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be visible at any magnification");
+    }
+
+    [AvaloniaTest]
+    public void CursorSizeInitializationTest()
+    {
+        var mainVM = CreateMainViewModel();
+        var canvasVM = mainVM.DrawableCanvasViewModel;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainVM.CursorSize.Width, Is.EqualTo(32));
+            Assert.That(canvasVM.CursorSize.Width, Is.EqualTo(32), "CursorSize should propagate to CanvasVM on initialization");
+        });
+
+        // 最小カーソルサイズの変更が CursorSize に反映されることを確認
+        mainVM.MinCursorWidth = 16;
+        mainVM.MinCursorHeight = 16;
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainVM.CursorSize.Width, Is.EqualTo(16));
+            Assert.That(canvasVM.CursorSize.Width, Is.EqualTo(16));
+        });
+    }
 }

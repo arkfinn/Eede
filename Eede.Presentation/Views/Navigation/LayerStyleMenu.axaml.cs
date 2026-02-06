@@ -18,6 +18,7 @@ namespace Eede.Presentation.Views.Navigation
         public static readonly StyledProperty<IImageTransfer> ImageTransferProperty =
             AvaloniaProperty.Register<LayerStyleMenu, IImageTransfer>(
                 nameof(ImageTransfer), new DirectImageTransfer(), defaultBindingMode: BindingMode.TwoWay);
+
         public IImageTransfer ImageTransfer
         {
             get => GetValue(ImageTransferProperty);
@@ -27,10 +28,17 @@ namespace Eede.Presentation.Views.Navigation
         public static readonly StyledProperty<IImageBlender> ImageBlenderProperty =
             AvaloniaProperty.Register<LayerStyleMenu, IImageBlender>(
                 nameof(ImageBlender), new DirectImageBlender(), defaultBindingMode: BindingMode.TwoWay);
+
         public IImageBlender ImageBlender
         {
             get => GetValue(ImageBlenderProperty);
             set => SetValue(ImageBlenderProperty, value);
+        }
+
+        static LayerStyleMenu()
+        {
+            ImageTransferProperty.Changed.AddClassHandler<LayerStyleMenu>((x, e) => x.UpdateChecked());
+            ImageBlenderProperty.Changed.AddClassHandler<LayerStyleMenu>((x, e) => x.UpdateChecked());
         }
 
         public void SetRgbLayer(object sender, RoutedEventArgs e)

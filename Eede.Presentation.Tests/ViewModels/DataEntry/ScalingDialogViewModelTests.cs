@@ -176,9 +176,20 @@ namespace Eede.Presentation.Tests.ViewModels.DataEntry
             var vm = new ScalingDialogViewModel(originalSize);
 
             vm.WidthPercent = 0;
+            Assert.Multiple(() =>
+            {
+                Assert.That(vm.Width, Is.GreaterThanOrEqualTo(1), "Width should be at least 1");
+                Assert.That(vm.WidthPercent, Is.GreaterThan(0), "WidthPercent should be greater than 0");
+            });
 
-            Assert.That(vm.Width, Is.GreaterThanOrEqualTo(1));
-            Assert.That(vm.Height, Is.GreaterThanOrEqualTo(1));
+            vm.Width = -10;
+            Assert.That(vm.Width, Is.GreaterThanOrEqualTo(1), "Width should be clamped to 1");
+
+            vm.Height = -5;
+            Assert.That(vm.Height, Is.GreaterThanOrEqualTo(1), "Height should be clamped to 1");
+
+            vm.HeightPercent = -1.0;
+            Assert.That(vm.HeightPercent, Is.GreaterThan(0), "HeightPercent should be greater than 0");
         }
 
         [Test]

@@ -54,17 +54,9 @@ public class MainViewModel : ViewModelBase
 
     [Reactive] public DrawStyleType DrawStyle { get; set; }
 
-    public IImageBlender ImageBlender
-    {
-        get => DrawableCanvasViewModel.ImageBlender;
-        set => DrawableCanvasViewModel.ImageBlender = value;
-    }
+    [Reactive] public IImageBlender ImageBlender { get; set; }
 
-    public IImageTransfer ImageTransfer
-    {
-        get => DrawableCanvasViewModel.ImageTransfer;
-        set => DrawableCanvasViewModel.ImageTransfer = value;
-    }
+    [Reactive] public IImageTransfer ImageTransfer { get; set; }
 
     [Reactive] public ArgbColor PenColor { get; set; }
     [Reactive] public Color NowPenColor { get; set; }
@@ -90,6 +82,8 @@ public class MainViewModel : ViewModelBase
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
     [Reactive] public bool HasClipboardPicture { get; set; } = false;
     [Reactive] public bool IsTransparencyEnabled { get; set; } = false;
+    [Reactive] public bool IsShowPixelGrid { get; set; } = false;
+    [Reactive] public bool IsShowCursorGrid { get; set; } = false;
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
@@ -190,10 +184,25 @@ public class MainViewModel : ViewModelBase
     {
         Pictures.CollectionChanged += Pictures_CollectionChanged;
 
+        ImageBlender = new DirectImageBlender();
         ImageTransfer = new DirectImageTransfer();
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
             .BindTo(this, x => x.DrawableCanvasViewModel.BackgroundColor);
+        _ = this.WhenAnyValue(x => x.IsShowPixelGrid).BindTo(this, x => x.DrawableCanvasViewModel.IsShowPixelGrid);
+        _ = this.WhenAnyValue(x => x.IsShowCursorGrid).BindTo(this, x => x.DrawableCanvasViewModel.IsShowCursorGrid);
+        _ = this.WhenAnyValue(x => x.CursorSize).BindTo(this, x => x.DrawableCanvasViewModel.CursorSize);
+
+        _ = this.WhenAnyValue(x => x.ImageBlender)
+            .Subscribe(x => DrawableCanvasViewModel.ImageBlender = x);
+        _ = DrawableCanvasViewModel.WhenAnyValue(x => x.ImageBlender)
+            .Subscribe(x => ImageBlender = x);
+
+        _ = this.WhenAnyValue(x => x.ImageTransfer)
+            .Subscribe(x => DrawableCanvasViewModel.ImageTransfer = x);
+        _ = DrawableCanvasViewModel.WhenAnyValue(x => x.ImageTransfer)
+            .Subscribe(x => ImageTransfer = x);
+
         PullBlender = new DirectImageBlender();
         PenColor = DrawableCanvasViewModel.PenColor;
         _ = this.WhenAnyValue(x => x.PenColor)
@@ -213,6 +222,7 @@ public class MainViewModel : ViewModelBase
             .Subscribe(x =>
             {
                 PictureSize size = new(MinCursorWidth, MinCursorHeight);
+                CursorSize = size;
                 foreach (DockPictureViewModel vm in Pictures)
                 {
                     vm.MinCursorSize = size;

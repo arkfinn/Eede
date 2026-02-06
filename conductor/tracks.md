@@ -24,5 +24,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: 拡大縮小ボタンの追加と数値指定リサイズ機能の実装**
+- [x] **Track: 拡大縮小ボタンの追加と数値指定リサイズ機能の実装**
 *Link: [./tracks/add_scaling_feature_20260206/](./tracks/add_scaling_feature_20260206/)*
+
+---
+
+- [ ] **Track: ��ƃG���A�ւ̃O���b�h�\���@�\�̒ǉ�**
+*Link: [./tracks/add_grid_display_20260207/](./tracks/add_grid_display_20260207/)*

@@ -32,6 +32,7 @@ public class MainViewModelTests
     private Mock<IPictureRepository> _pictureRepositoryMock;
     private Mock<IDrawStyleFactory> _drawStyleFactoryMock;
     private Mock<ITransformImageUseCase> _transformImageUseCaseMock;
+    private Mock<IScalingImageUseCase> _scalingImageUseCaseMock;
     private Mock<ITransferImageToCanvasUseCase> _transferImageToCanvasUseCaseMock;
     private Mock<ITransferImageFromCanvasUseCase> _transferImageFromCanvasUseCaseMock;
     private Mock<IDrawingSessionProvider> _drawingSessionProviderMock;
@@ -58,6 +59,7 @@ public class MainViewModelTests
         _pictureRepositoryMock = new Mock<IPictureRepository>();
         _drawStyleFactoryMock = new Mock<IDrawStyleFactory>();
         _transformImageUseCaseMock = new Mock<ITransformImageUseCase>();
+        _scalingImageUseCaseMock = new Mock<IScalingImageUseCase>();
         _transferImageToCanvasUseCaseMock = new Mock<ITransferImageToCanvasUseCase>();
         _transferImageFromCanvasUseCaseMock = new Mock<ITransferImageFromCanvasUseCase>();
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
@@ -96,6 +98,7 @@ public class MainViewModelTests
             _pictureRepositoryMock.Object,
             _drawStyleFactoryMock.Object,
             _transformImageUseCaseMock.Object,
+            _scalingImageUseCaseMock.Object,
             _transferImageToCanvasUseCaseMock.Object,
             _transferImageFromCanvasUseCaseMock.Object,
             _drawingSessionProviderMock.Object,

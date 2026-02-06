@@ -1,0 +1,101 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+        xmlns:vm="using:Eede.Presentation.ViewModels.DataEntry"
+        x:Class="Eede.Presentation.Views.DataEntry.ScalingDialogView"
+        x:DataType="vm:ScalingDialogViewModel"
+        Title="拡大縮小"
+        Width="350" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+  <DockPanel Margin="20">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,20,0,0">
+      <Button Content="キャンセル" IsCancel="True" Click="CancelButton_Click" Width="80" HorizontalContentAlignment="Center"/>
+      <Button Content="OK" IsDefault="True" Command="{Binding OkCommand}" Width="80" HorizontalContentAlignment="Center"/>
+    </StackPanel>
+
+    <StackPanel Spacing="15">
+      <TextBlock Text="サイズ (ピクセル)" FontWeight="Bold"/>
+      <Grid ColumnDefinitions="*, 10, *">
+        <StackPanel Grid.Column="0">
+          <TextBlock Text="幅" FontSize="12"/>
+          <NumericUpDown Value="{Binding Width}" Minimum="1" Maximum="9999"/>
+        </StackPanel>
+        <StackPanel Grid.Column="2">
+          <TextBlock Text="高さ" FontSize="12"/>
+          <NumericUpDown Value="{Binding Height}" Minimum="1" Maximum="9999"/>
+        </StackPanel>
+      </Grid>
+
+      <TextBlock Text="サイズ (パーセント)" FontWeight="Bold"/>
+      <Grid ColumnDefinitions="*, 10, *">
+        <StackPanel Grid.Column="0">
+          <TextBlock Text="幅 %" FontSize="12"/>
+          <NumericUpDown Value="{Binding WidthPercent}" Minimum="1" Maximum="1000" Increment="10"/>
+        </StackPanel>
+        <StackPanel Grid.Column="2">
+          <TextBlock Text="高さ %" FontSize="12"/>
+          <NumericUpDown Value="{Binding HeightPercent}" Minimum="1" Maximum="1000" Increment="10"/>
+        </StackPanel>
+      </Grid>
+
+      <CheckBox IsChecked="{Binding IsLockAspectRatio}" Content="アスペクト比を固定"/>
+
+      <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+        <Button Content="0.5x" Command="{Binding ApplyPreset}">
+          <Button.CommandParameter><sys:Double>0.5</sys:Double></Button.CommandParameter>
+        </Button>
+        <Button Content="2x" Command="{Binding ApplyPreset}">
+          <Button.CommandParameter><sys:Double>2.0</sys:Double></Button.CommandParameter>
+        </Button>
+        <Button Content="3x" Command="{Binding ApplyPreset}">
+          <Button.CommandParameter><sys:Double>3.0</sys:Double></Button.CommandParameter>
+        </Button>
+        <Button Content="4x" Command="{Binding ApplyPreset}">
+          <Button.CommandParameter><sys:Double>4.0</sys:Double></Button.CommandParameter>
+        </Button>
+      </StackPanel>
+
+      <TextBlock Text="アンカー" FontWeight="Bold"/>
+      <UniformGrid Rows="3" Columns="3" Width="120" Height="120" HorizontalAlignment="Center">
+        <RadioButton GroupName="Anchor" Content="↖" Theme="{StaticResource {x:Type ToggleButton}}" IsChecked="True"
+                     IsEnabled="{Binding IsTopLeftEnabled}"
+                     Command="{Binding SetAnchorCommand}" CommandParameter="TopLeft"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton GroupName="Anchor" Content="↑" Theme="{StaticResource {x:Type ToggleButton}}"
+                     IsEnabled="{Binding IsTopCenterEnabled}"
+                     Command="{Binding SetAnchorCommand}" CommandParameter="TopCenter"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton GroupName="Anchor" Content="↗" Theme="{StaticResource {x:Type ToggleButton}}"
+                     IsEnabled="{Binding IsTopRightEnabled}"
+                     Command="{Binding SetAnchorCommand}" CommandParameter="TopRight"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton GroupName="Anchor" Content="←" Theme="{StaticResource {x:Type ToggleButton}}"
+                     IsEnabled="{Binding IsCenterLeftEnabled}"
+                     Command="{Binding SetAnchorCommand}" CommandParameter="CenterLeft"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton GroupName="Anchor" Content="・" Theme="{StaticResource {x:Type ToggleButton}}"
+                     IsEnabled="{Binding IsCenterCenterEnabled}"
+                     Command="{Binding SetAnchorCommand}" CommandParameter="CenterCenter"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton GroupName="Anchor" Content="→" Theme="{StaticResource {x:Type ToggleButton}}"
+                     IsEnabled="{Binding IsCenterRightEnabled}"
+                     Command="{Binding SetAnchorCommand}" CommandParameter="CenterRight"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton GroupName="Anchor" Content="↙" Theme="{StaticResource {x:Type ToggleButton}}"
+                     IsEnabled="{Binding IsBottomLeftEnabled}"
+                     Command="{Binding SetAnchorCommand}" CommandParameter="BottomLeft"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton GroupName="Anchor" Content="↓" Theme="{StaticResource {x:Type ToggleButton}}"
+                     IsEnabled="{Binding IsBottomCenterEnabled}"
+                     Command="{Binding SetAnchorCommand}" CommandParameter="BottomCenter"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton GroupName="Anchor" Content="↘" Theme="{StaticResource {x:Type ToggleButton}}"
+                     IsEnabled="{Binding IsBottomRightEnabled}"
+                     Command="{Binding SetAnchorCommand}" CommandParameter="BottomRight"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+      </UniformGrid>
+      <TextBlock Text="※拡大時は左上固定、縮小時は基準位置を選択可能です。" FontSize="10" Foreground="Gray" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+    </StackPanel>
+  </DockPanel>
+</Window>

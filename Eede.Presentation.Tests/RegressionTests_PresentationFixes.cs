@@ -212,7 +212,7 @@ public class RegressionTests_PresentationFixes
 
         return new MainViewModel(
             state, clipboard, bitmapAdapter, pictureRepo, drawStyleFactory,
-            transformUseCase, transferToCanvas, transferFromCanvas,
+            transformUseCase, new Mock<IScalingImageUseCase>().Object, transferToCanvas, transferFromCanvas,
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
             paletteVM, pictureIOService,
             () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),

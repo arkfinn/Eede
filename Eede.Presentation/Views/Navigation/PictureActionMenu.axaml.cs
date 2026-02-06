@@ -22,5 +22,14 @@ namespace Eede.Presentation.Views.Navigation
             get => GetValue(CommandProperty);
             set => SetValue(CommandProperty, value);
         }
+
+        public static readonly StyledProperty<ICommand?> ScalingCommandProperty =
+            AvaloniaProperty.Register<PictureActionMenu, ICommand?>(nameof(ScalingCommand));
+
+        public ICommand? ScalingCommand
+        {
+            get => GetValue(ScalingCommandProperty);
+            set => SetValue(ScalingCommandProperty, value);
+        }
     }
 }

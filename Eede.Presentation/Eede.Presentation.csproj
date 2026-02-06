@@ -117,6 +117,9 @@
     <Compile Update="Views\Pages\NewPictureWindow.axaml.cs">
       <DependentUpon>NewPictureWindow.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\DataEntry\ScalingDialogView.axaml.cs">
+      <DependentUpon>ScalingDialogView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

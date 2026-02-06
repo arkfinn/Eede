@@ -21,6 +21,9 @@
 
 ## テスト
 - **フレームワーク:** NUnit
+- **モッキング:** Moq
+- **UIテスト:** Avalonia.Headless.NUnit (ヘッドレス環境でのUIコンポーネントテスト)
+- **Reactive Extensionsテスト:** ReactiveUI.Testing, Microsoft.Reactive.Testing (TestSchedulerを用いた時間依存ロジックのテスト)
 - **カバレッジ計測:** coverlet.collector
 
 ## その他ライブラリ

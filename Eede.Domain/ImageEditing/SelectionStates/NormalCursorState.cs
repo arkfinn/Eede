@@ -14,7 +14,7 @@ public class NormalCursorState : ISelectionState
         _cursorArea = cursorArea;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
     {
         pullAction?.Execute(cursorArea.RealPosition);
         _cursorArea = cursorArea;
@@ -32,11 +32,10 @@ public class NormalCursorState : ISelectionState
         return (new RegionSelectingState(nowPosition, nowPosition, minCursorSize), cursorArea);
     }
 
-    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)
     {
         bool newVisibleCursor = canvasSize.Contains(nowPosition);
         HalfBoxArea newCursorArea = cursorArea.Move(nowPosition);
-        _cursorArea = newCursorArea;
         return (newVisibleCursor, newCursorArea);
     }
 
@@ -50,7 +49,7 @@ public class NormalCursorState : ISelectionState
         return null;
     }
 
-    public SelectionCursor GetCursor(Position mousePosition)
+    public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)
     {
         return SelectionCursor.Default;
     }

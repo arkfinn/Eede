@@ -11,6 +11,7 @@ public class RegionSelectingState : ISelectionState
     private Position _startPosition;
     private Position _nowPosition;
     private PictureSize _minSize;
+    private bool _isShifted;
 
     public RegionSelectingState(Position startPosition, Position nowPosition, PictureSize minSize)
     {
@@ -19,7 +20,7 @@ public class RegionSelectingState : ISelectionState
         _minSize = minSize;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
     {
         return this;
     }
@@ -34,11 +35,13 @@ public class RegionSelectingState : ISelectionState
         return (this, cursorArea);
     }
 
-    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)
     {
-        bool newVisibleCursor = canvasSize.Contains(nowPosition);
         _nowPosition = nowPosition;
-        return (newVisibleCursor, cursorArea.Move(nowPosition));
+        _isShifted = isShift;
+        bool newVisibleCursor = canvasSize.Contains(nowPosition);
+        HalfBoxArea newCursorArea = cursorArea.Move(nowPosition);
+        return (newVisibleCursor, newCursorArea);
     }
 
     public (ISelectionState, HalfBoxArea) HandlePointerRightButtonReleased(HalfBoxArea cursorArea, ICommand? picturePushAction)
@@ -58,15 +61,26 @@ public class RegionSelectingState : ISelectionState
         return null;
     }
 
-    public SelectionCursor GetCursor(Position mousePosition)
+    public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)
     {
         return SelectionCursor.Default;
     }
 
     public PictureArea? GetSelectingArea()
     {
+        Position targetPosition = _nowPosition;
+        if (_isShifted)
+        {
+            int deltaX = _nowPosition.X - _startPosition.X;
+            int deltaY = _nowPosition.Y - _startPosition.Y;
+            int size = Math.Max(Math.Abs(deltaX), Math.Abs(deltaY));
+            targetPosition = new Position(
+                _startPosition.X + (deltaX >= 0 ? size : -size),
+                _startPosition.Y + (deltaY >= 0 ? size : -size));
+        }
+
         // マウスの生座標から暫定的な矩形を作成
-        var rawArea = PictureArea.FromPosition(_startPosition, _nowPosition, new PictureSize(int.MaxValue, int.MaxValue));
+        var rawArea = PictureArea.FromPosition(_startPosition, targetPosition, new PictureSize(int.MaxValue, int.MaxValue));
 
         // グリッドサイズ（スナップ単位）を算出（通常は 16x16）
         int gridSizeW = _minSize.Width / 2;

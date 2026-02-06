@@ -13,14 +13,12 @@ namespace Eede.Presentation.Common.Adapters
     {
         public Bitmap ConvertToBitmap(Picture picture)
         {
-            byte[] src = picture.CloneImage();
-            return CreateBitmapFromPixelData(src, picture.Width, picture.Height);
+            return CreateBitmapFromPixelData(picture.AsSpan(), picture.Width, picture.Height);
         }
 
         public Bitmap ConvertToPremultipliedBitmap(Picture picture)
         {
-            byte[] src = picture.CloneImage();
-            return CreatePremultipliedBitmapFromPixelData(src, picture.Width, picture.Height);
+            return CreatePremultipliedBitmapFromPixelData(picture.AsSpan(), picture.Width, picture.Height);
         }
 
         public Picture ConvertToPicture(Bitmap bitmap)
@@ -53,34 +51,46 @@ namespace Eede.Presentation.Common.Adapters
             return Picture.Create(new PictureSize(width, height), pixels);
         }
 
-        private static WriteableBitmap CreateBitmapFromPixelData(byte[] rgbPixelData, int width, int height)
+        private static WriteableBitmap CreateBitmapFromPixelData(ReadOnlySpan<byte> rgbPixelData, int width, int height)
         {
             Vector dpi = new(96, 96);
             WriteableBitmap bitmap = new(new PixelSize(width, height), dpi, PixelFormat.Bgra8888);
             using (ILockedFramebuffer frameBuffer = bitmap.Lock())
             {
-                Marshal.Copy(rgbPixelData, 0, frameBuffer.Address, rgbPixelData.Length);
+                unsafe
+                {
+                    Span<byte> dest = new((void*)frameBuffer.Address, rgbPixelData.Length);
+                    rgbPixelData.CopyTo(dest);
+                }
             }
             return bitmap;
         }
 
-        private static WriteableBitmap CreatePremultipliedBitmapFromPixelData(byte[] rgbPixelData, int width, int height)
+        private static WriteableBitmap CreatePremultipliedBitmapFromPixelData(ReadOnlySpan<byte> rgbPixelData, int width, int height)
         {
             Vector dpi = new(96, 96);
             WriteableBitmap bitmap = new(new PixelSize(width, height), dpi, PixelFormat.Bgra8888);
             using (ILockedFramebuffer frameBuffer = bitmap.Lock())
             {
-                Marshal.Copy(rgbPixelData, 0, frameBuffer.Address, rgbPixelData.Length);
                 unsafe
                 {
-                    Span<byte> pixels = new((void*)frameBuffer.Address, rgbPixelData.Length);
-                    for (int i = 0; i < pixels.Length; i += 4)
+                    Span<byte> dest = new((void*)frameBuffer.Address, rgbPixelData.Length);
+                    rgbPixelData.CopyTo(dest);
+                    for (int i = 0; i < dest.Length; i += 4)
                     {
-                        byte a = pixels[i + 3];
+                        byte a = dest[i + 3];
+                        if (a == 255) continue;
+                        if (a == 0)
+                        {
+                            dest[i + 0] = 0;
+                            dest[i + 1] = 0;
+                            dest[i + 2] = 0;
+                            continue;
+                        }
                         double factor = a / 255.0;
-                        pixels[i + 0] = (byte)Math.Round(pixels[i + 0] * factor);
-                        pixels[i + 1] = (byte)Math.Round(pixels[i + 1] * factor);
-                        pixels[i + 2] = (byte)Math.Round(pixels[i + 2] * factor);
+                        dest[i + 0] = (byte)Math.Round(dest[i + 0] * factor);
+                        dest[i + 1] = (byte)Math.Round(dest[i + 1] * factor);
+                        dest[i + 2] = (byte)Math.Round(dest[i + 2] * factor);
                     }
                 }
             }

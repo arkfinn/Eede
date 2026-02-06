@@ -91,13 +91,16 @@ namespace Eede.Presentation.Tests
         {
             // Setup: (0,0) に赤い点
             var red = new ArgbColor(255, 255, 0, 0);
-            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(1, 1), new byte[] { 0, 0, 255, 255 }), new Position(0, 0));
+            var rectData = new byte[4 * 4 * 4];
+            for (int i = 0; i < rectData.Length; i += 4) { rectData[i] = 0; rectData[i + 1] = 0; rectData[i + 2] = 255; rectData[i + 3] = 255; }
+
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(4, 4), rectData), new Position(0, 0));
             _sessionProvider.Update(new DrawingSession(picture));
 
-            // 1. (0,0)-(1,1) を選択
+            // 1. (0,0)-(4,4) を選択
             _viewModel.DrawStyle = new RegionSelector();
             _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
-            _viewModel.DrawEndCommand.Execute(new Position(1, 1)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
 
             // 2. Skipped moving selection directly as it is disabled.
 
@@ -106,16 +109,17 @@ namespace Eede.Presentation.Tests
             await _viewModel.CopyCommand.Execute();
 
             // 4. ペースト実行 (コピーしたものが (0,0) にペーストされるはず)
-            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(Picture.Create(new PictureSize(1, 1), new byte[] { 0, 0, 255, 255 }));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(Picture.Create(new PictureSize(4, 4), rectData));
             await _viewModel.PasteCommand.Execute();
             
             // 検証：ペースト位置が (0,0) になっていること (Selection position)
             Assert.That(_viewModel.PreviewPosition, Is.EqualTo(new Position(0, 0)), "Pasted item should be at (0,0)");
 
             // 5. ペーストしたものを (10,10) へ移動
-            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
-            _viewModel.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
-            _viewModel.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
+            // Center (2,2) -> Move +10 -> (12,12)
+            _viewModel.DrawBeginCommand.Execute(new Position(2, 2)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(12, 12)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(12, 12)).Subscribe();
 
             // 6. 確定
             _viewModel.DrawBeginCommand.Execute(new Position(30, 30)).Subscribe();
@@ -131,6 +135,114 @@ namespace Eede.Presentation.Tests
             var currentArea = _sessionProvider.CurrentSession.CurrentSelectingArea;
             Assert.That(currentArea, Is.Not.Null);
             Assert.That(currentArea.Value.Position, Is.EqualTo(new Position(10, 10)), "Selection area should follow the last committed item");
+        }
+
+        [AvaloniaTest]
+        public async Task Resize_Commit_ShouldWorkCorrectly()
+        {
+            // Setup: (0,0)-(4,4) に赤い矩形
+            var red = new ArgbColor(255, 255, 0, 0);
+            var rectData = new byte[4 * 4 * 4];
+            for (int i = 0; i < rectData.Length; i += 4) { rectData[i] = 0; rectData[i + 1] = 0; rectData[i + 2] = 255; rectData[i + 3] = 255; }
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(4, 4), rectData), new Position(0, 0));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // 1. Select (0,0)-(4,4)
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
+
+            // 2. Resize: Drag TopLeft(0,0) to (2,2) -> Shrink to 2x2
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(2, 2)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(2, 2)).Subscribe();
+
+            // 3. Commit
+            _viewModel.DrawBeginCommand.Execute(new Position(30, 30)).Subscribe();
+
+            // Assert
+            var finalResult = _sessionProvider.CurrentSession.Buffer.Fetch();
+            // (0,0) should be transparent (cleared) because it moved/shrank
+            Assert.That(finalResult.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "Original (0,0) should be cleared");
+            // (2,2) should be Red (new TopLeft)
+            Assert.That(finalResult.PickColor(new Position(2, 2)), Is.EqualTo(red), "New TopLeft (2,2) should be red");
+        }
+
+        [AvaloniaTest]
+        public async Task Move_Then_Click_Outside_Commits()
+        {
+            // Setup
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32)).Blend(new DirectImageBlender(), Picture.Create(new PictureSize(4, 4), new byte[4 * 4 * 4]), new Position(0, 0));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // Select
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
+
+            // Move
+            _viewModel.DrawBeginCommand.Execute(new Position(2, 2)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
+
+            // Assert: Preview State
+            Assert.That(_viewModel.PreviewPixels, Is.Not.Null);
+
+            // Click Outside (20, 20)
+            _viewModel.DrawBeginCommand.Execute(new Position(20, 20)).Subscribe();
+
+            // Assert: Committed (Preview null)
+            Assert.That(_viewModel.PreviewPixels, Is.Null, "Preview should be null after clicking outside");
+        }
+
+        [AvaloniaTest]
+        public async Task SwitchTool_ShouldCommitAndClearSelection()
+        {
+            // Setup
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // 1. Select
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
+            Assert.That(_viewModel.IsRegionSelecting, Is.True);
+
+            // 2. Switch to FreeCurve
+            _viewModel.DrawStyle = new FreeCurve();
+
+            // Assert: SelectingArea should be null
+            Assert.That(_viewModel.SelectingArea, Is.Null, "Selection should be cleared when switching to non-selection tool");
+            Assert.That(_viewModel.IsRegionSelecting, Is.False);
+        }
+
+        [AvaloniaTest]
+        public async Task SwitchTool_AfterMoveAndResize_ShouldCommitAndClearSelection()
+        {
+            // 1. セットアップ
+            var picture = Picture.CreateEmpty(new PictureSize(32, 32));
+            _sessionProvider.Update(new DrawingSession(picture));
+
+            // 2. 範囲選択 (0,0)-(4,4)
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(4, 4)).Subscribe();
+
+            // 3. 移動操作 (0,0)から(10,10)へ
+            _viewModel.DrawBeginCommand.Execute(new Position(2, 2)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(12, 12)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(12, 12)).Subscribe();
+
+            // 4. ツール切り替え (ペンツールへ)
+            _viewModel.DrawStyle = new FreeCurve();
+
+            // 5. 検証
+            // 選択枠が表示されていないこと
+            Assert.That(_viewModel.IsRegionSelecting, Is.False, "IsRegionSelecting should be false after tool switch");
+            // 選択範囲データが空であること
+            Assert.That(_viewModel.SelectingArea, Is.Null, "SelectingArea should be null after tool switch");
+            // プレビュー表示が消えていること
+            Assert.That(_viewModel.PreviewPixels, Is.Null, "PreviewPixels should be null after tool switch");
         }
     }
 }

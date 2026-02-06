@@ -36,8 +36,8 @@
                     AlignmentX="Left"/>
       </Panel.Background>
       <Panel x:Name="background"
-             Width="{Binding MyBitmap.PixelSize.Width}"
-             Height="{Binding MyBitmap.PixelSize.Height}">
+             Width="{Binding DisplayWidth}"
+             Height="{Binding DisplayHeight}">
         <Panel.Background>
           <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
                       Stretch="None"
@@ -47,24 +47,37 @@
                       AlignmentY="Top"
                       AlignmentX="Left"/>
         </Panel.Background>
-        <Panel Width="{Binding MyBitmap.PixelSize.Width}"
-              Height="{Binding MyBitmap.PixelSize.Height}" >
+        <Panel Width="{Binding DisplayWidth}"
+              Height="{Binding DisplayHeight}" >
           <Panel.Background>
             <SolidColorBrush Color="{Binding BackgroundColor, Converter={StaticResource BackgroundColorConverter}}"/>
           </Panel.Background>
         </Panel>
         <Image x:Name="canvas"
-               Stretch="None"
+               Stretch="Fill"
                Focusable="True"
                Source="{Binding MyBitmap}"
-               Width="{Binding MyBitmap.PixelSize.Width}"
-               Height="{Binding MyBitmap.PixelSize.Height}"/>
+               Width="{Binding DisplayWidth}"
+               Height="{Binding DisplayHeight}"
+               RenderOptions.BitmapInterpolationMode="None"/>
+        <Image x:Name="preview"
+               Source="{Binding MagnifiedPreviewBitmap}"
+               Stretch="Fill"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Margin="{Binding PreviewThickness}"
+               Width="{Binding PreviewSize.Width}"
+               Height="{Binding PreviewSize.Height}"
+               RenderOptions.BitmapInterpolationMode="None"/>
         <general:Region IsVisible="{Binding IsRegionSelecting}"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         Margin="{Binding SelectingThickness}"
                         Width="{Binding SelectingSize.Width}"
-                        Height="{Binding SelectingSize.Height}" />
+                        Height="{Binding SelectingSize.Height}" 
+                        ShowHandles="{Binding IsShowHandles}"
+                        HandleSize="{Binding HandleSize}"
+                        HandleMargin="{Binding HandleMargin}" />
 
       </Panel>
     </Panel>

@@ -149,16 +149,38 @@ namespace Eede.Presentation.Views.DataEntry
                     cursor.Width = selectingArea.Value.Width;
                     cursor.Height = selectingArea.Value.Height;
                     cursor.Margin = new Thickness(selectingArea.Value.X, selectingArea.Value.Y, 0, 0);
+                    cursor.ShowHandles = _selectionState is SelectedState || _selectionState is ResizingState;
+
+                    // ハンドルサイズはキャンバス上の 4ピクセル固定
+                    double visualSize = 4.0;
+                    cursor.HandleSize = visualSize;
+                    cursor.HandleMargin = new Thickness(-2, -2, 0, 0);
                 }
                 else
                 {
                     cursor.Width = cursorArea.BoxSize.Width;
                     cursor.Height = cursorArea.BoxSize.Height;
                     cursor.Margin = new Thickness(cursorArea.RealPosition.X, cursorArea.RealPosition.Y, 0, 0);
+                    cursor.ShowHandles = false;
                 }
 
                 UpdateSelectionPreview();
             });
+        }
+
+        private void UpdateCursorCursor(Position mousePos)
+        {
+            if (_viewModel == null) return;
+            var selectionCursor = _selectionState.GetCursor(mousePos, 4);
+            _viewModel.AnimationCursor = selectionCursor switch
+            {
+                SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
+                SelectionCursor.SizeNWSE => new Cursor(StandardCursorType.TopLeftCorner),
+                SelectionCursor.SizeNESW => new Cursor(StandardCursorType.TopRightCorner),
+                SelectionCursor.SizeNS => new Cursor(StandardCursorType.TopSide),
+                SelectionCursor.SizeWE => new Cursor(StandardCursorType.LeftSide),
+                _ => Cursor.Default
+            };
         }
 
         private void UpdateSelectionPreview()
@@ -267,7 +289,7 @@ namespace Eede.Presentation.Views.DataEntry
                 case PointerUpdateKind.LeftButtonPressed:
                     if (_viewModel.AnimationViewModel.IsAnimationMode)
                     {
-                        _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, nowPosition, null, () => _viewModel.PictureBuffer, null);
+                        _selectionState = _selectionState.HandlePointerLeftButtonPressed(currentCursorArea, nowPosition, null, () => _viewModel.PictureBuffer, null, 4);
                     }
                     else
                     {
@@ -316,10 +338,12 @@ namespace Eede.Presentation.Views.DataEntry
                 cursorArea = HalfBoxArea.Create(nowPosition, new PictureSize(_viewModel.AnimationViewModel.GridWidth, _viewModel.AnimationViewModel.GridHeight));
             }
 
-            var (newVisible, newArea) = _selectionState.HandlePointerMoved(cursorArea, VisibleCursor, nowPosition, CanvasSize);
+            bool isShift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            var (newVisible, newArea) = _selectionState.HandlePointerMoved(cursorArea, VisibleCursor, nowPosition, isShift, CanvasSize);
             VisibleCursor = newVisible;
             _localCursorArea = newArea;
             UpdateCursor();
+            UpdateCursorCursor(nowPosition);
         }
 
         private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)

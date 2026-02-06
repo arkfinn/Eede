@@ -37,7 +37,19 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         }
 
         [Reactive] public Picture PictureBuffer { get; set; }
-        [Reactive] public Bitmap PremultipliedBitmap { get; set; }
+        private Bitmap _premultipliedBitmap;
+        public Bitmap PremultipliedBitmap
+        {
+            get => _premultipliedBitmap;
+            set
+            {
+                if (_premultipliedBitmap != value)
+                {
+                    _premultipliedBitmap?.Dispose();
+                }
+                _ = this.RaiseAndSetIfChanged(ref _premultipliedBitmap, value);
+            }
+        }
         [Reactive] public string Id { get; private set; }
         [Reactive] public PictureSize MinCursorSize { get; set; }
         [Reactive] public PictureSize CursorSize { get; set; }
@@ -139,7 +151,15 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         private PictureSaveEventArgs CreateSaveEventArgs()
         {
             Bitmap bitmap = BitmapAdapter.ConvertToBitmap(PictureBuffer);
-            return new PictureSaveEventArgs(new BitmapFile(bitmap, FilePath));
+            IImageFile file = FilePath.IsEmpty() ? new NewFile(bitmap) :
+                             FilePath.GetExtension() switch
+                             {
+                                 ".png" => new PngFile(bitmap, FilePath),
+                                 ".bmp" => new BitmapFile(bitmap, FilePath),
+                                 ".arv" => new ArvFile(bitmap, FilePath),
+                                 _ => new BitmapFile(bitmap, FilePath) // フォールバック
+                             };
+            return new PictureSaveEventArgs(file);
         }
 
         private void HandleSaveResult(PictureSaveEventArgs args)

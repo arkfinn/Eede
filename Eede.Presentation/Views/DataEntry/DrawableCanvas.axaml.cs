@@ -18,6 +18,10 @@ namespace Eede.Presentation.Views.DataEntry
             canvas.PointerMoved += OnCvanvasPointerMoved;
             canvas.PointerReleased += OnCanvasPointerReleased;
             canvas.PointerExited += OnCanvasPointerExited;
+            
+            // UserControl自身でRequestBringIntoViewイベントをインターセプトする
+            this.AddHandler(RequestBringIntoViewEvent, (s, e) => e.Handled = true);
+
             canvas.KeyDown += OnKeyDown;
             canvas.KeyUp += OnKeyUp;
         }
@@ -90,6 +94,7 @@ namespace Eede.Presentation.Views.DataEntry
         //private bool IsRightButtonPressing = false;
         private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
         {
+            canvas.Focus();
             Point pos = e.GetPosition(canvas);
             PointerPointProperties pointer = e.GetCurrentPoint(canvas).Properties;
             if (pointer.IsLeftButtonPressed)

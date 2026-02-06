@@ -375,6 +375,20 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             }
 
             int stride = dest.Stride;
+
+            bool IsTargetColor(int x, int y)
+            {
+                if (x < 0 || x >= cWidth || y < 0 || y >= cHeight)
+                {
+                    return false;
+                }
+                int index = (x * 4) + (stride * y);
+                return imageData[index] == targetColor.Blue &&
+                       imageData[index + 1] == targetColor.Green &&
+                       imageData[index + 2] == targetColor.Red &&
+                       imageData[index + 3] == targetColor.Alpha;
+            }
+
             Stack<Position> stack = new();
             stack.Push(from);
             while (stack.Count > 0)
@@ -382,32 +396,32 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                 Position p = stack.Pop();
                 int x = p.X;
                 int y = p.Y;
-                while (x >= 0 && dest.PickColor(new Position(x, y)) == targetColor)
+                while (x >= 0 && IsTargetColor(x, y))
                 {
                     x--;
                 }
                 x++;
                 bool spanAbove = false;
                 bool spanBelow = false;
-                while (x < cWidth && dest.PickColor(new Position(x, y)) == targetColor)
+                while (x < cWidth && IsTargetColor(x, y))
                 {
                     DrawPixel(imageData, stride, cWidth, cHeight, x, y, color);
-                    if (!spanAbove && y > 0 && dest.PickColor(new Position(x, y - 1)) == targetColor)
+                    if (!spanAbove && y > 0 && IsTargetColor(x, y - 1))
                     {
                         stack.Push(new Position(x, y - 1));
                         spanAbove = true;
                     }
-                    else if (spanAbove && y > 0 && dest.PickColor(new Position(x, y - 1)) != targetColor)
+                    else if (spanAbove && y > 0 && !IsTargetColor(x, y - 1))
                     {
                         spanAbove = false;
                     }
 
-                    if (!spanBelow && y < cHeight - 1 && dest.PickColor(new Position(x, y + 1)) == targetColor)
+                    if (!spanBelow && y < cHeight - 1 && IsTargetColor(x, y + 1))
                     {
                         stack.Push(new Position(x, y + 1));
                         spanBelow = true;
                     }
-                    else if (spanBelow && y < cHeight - 1 && dest.PickColor(new Position(x, y + 1)) != targetColor)
+                    else if (spanBelow && y < cHeight - 1 && !IsTargetColor(x, y + 1))
                     {
                         spanBelow = false;
                     }

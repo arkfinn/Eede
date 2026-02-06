@@ -151,7 +151,15 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         private PictureSaveEventArgs CreateSaveEventArgs()
         {
             Bitmap bitmap = BitmapAdapter.ConvertToBitmap(PictureBuffer);
-            return new PictureSaveEventArgs(new BitmapFile(bitmap, FilePath));
+            IImageFile file = FilePath.IsEmpty() ? new NewFile(bitmap) :
+                             FilePath.GetExtension() switch
+                             {
+                                 ".png" => new PngFile(bitmap, FilePath),
+                                 ".bmp" => new BitmapFile(bitmap, FilePath),
+                                 ".arv" => new ArvFile(bitmap, FilePath),
+                                 _ => new BitmapFile(bitmap, FilePath) // フォールバック
+                             };
+            return new PictureSaveEventArgs(file);
         }
 
         private void HandleSaveResult(PictureSaveEventArgs args)

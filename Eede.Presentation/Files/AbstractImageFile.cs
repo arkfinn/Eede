@@ -27,6 +27,19 @@ namespace Eede.Presentation.Files
             return new PngFile(bitmap, filePath);
         }
 
+        protected async Task<SaveImageResult> SaveToPathAsync(FilePath filePath)
+        {
+            try
+            {
+                Bitmap.Save(filePath.ToString());
+                return SaveImageResult.Saved(WithFilePath(filePath)); // 保存完了
+            }
+            catch (Exception)
+            {
+                return SaveImageResult.Canceled(); // エラーが発生した場合
+            }
+        }
+
         // 共通 SaveAsyncロジック（ファイルピッカーと保存）
         protected async Task<SaveImageResult> SaveWithFilePickerAsync(IFileStorage storage)
         {
@@ -35,17 +48,7 @@ namespace Eede.Presentation.Files
             {
                 return SaveImageResult.Canceled(); // キャンセルされた場合
             }
-            string fullPath = result.LocalPath;
-
-            try
-            {
-                Bitmap.Save(fullPath);
-                return SaveImageResult.Saved(CreatePngFileWithCheck(Bitmap, new FilePath(fullPath))); // 保存完了
-            }
-            catch (Exception)
-            {
-                return SaveImageResult.Canceled(); // エラーが発生した場合
-            }
+            return await SaveToPathAsync(new FilePath(result.LocalPath));
         }
     }
 }

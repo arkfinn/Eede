@@ -9,6 +9,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
+using Eede.Domain.Palettes;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
 using Eede.Presentation.Settings;
@@ -21,6 +22,8 @@ using Microsoft.Reactive.Testing;
 using ReactiveUI.Testing;
 using ReactiveUI;
 using System;
+using System.Reactive;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.Tests.ViewModels.DataEntry;
 
@@ -60,6 +63,44 @@ public class DrawableCanvasViewModelTests
             _drawingSessionProviderMock.Object,
             _selectionServiceMock.Object,
             _interactionCoordinatorMock.Object);
+    }
+
+    [AvaloniaTest]
+    public void DisplaySize_Calculation_Test()
+    {
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            var vm = CreateViewModel();
+
+            // Case 1: Initial state (usually empty picture from GlobalState)
+            vm.Magnification = new Magnification(1);
+            var picture32 = Picture.CreateEmpty(new PictureSize(32, 32));
+            vm.PictureBuffer = new DrawingBuffer(picture32);
+            scheduler.AdvanceBy(1);
+            Assert.That(vm.DisplayWidth, Is.EqualTo(32));
+            Assert.That(vm.DisplayHeight, Is.EqualTo(32));
+
+            // Case 2: Change magnification to x4
+            vm.Magnification = new Magnification(4);
+            scheduler.AdvanceBy(1);
+            Assert.That(vm.DisplayWidth, Is.EqualTo(128));
+            Assert.That(vm.DisplayHeight, Is.EqualTo(128));
+
+            // Case 3: Change picture to a larger one (e.g. 2046x2048) at x1
+            vm.Magnification = new Magnification(1);
+            var largePicture = Picture.CreateEmpty(new PictureSize(2046, 2048));
+            vm.PictureBuffer = new DrawingBuffer(largePicture);
+            scheduler.AdvanceBy(1);
+            Assert.That(vm.DisplayWidth, Is.EqualTo(2046));
+            Assert.That(vm.DisplayHeight, Is.EqualTo(2048));
+
+            // Case 4: Large picture at x2
+            vm.Magnification = new Magnification(2);
+            scheduler.AdvanceBy(1);
+            Assert.That(vm.DisplayWidth, Is.EqualTo(4092));
+            Assert.That(vm.DisplayHeight, Is.EqualTo(4096));
+        });
     }
 
     [AvaloniaTest]
@@ -158,5 +199,29 @@ public class DrawableCanvasViewModelTests
         vm.CopyCommand.Execute().Subscribe();
 
         _selectionServiceMock.Verify(x => x.CopyAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()), Times.Once);
+    }
+
+    [AvaloniaTest]
+    public void PointerRightButtonPressedCommand_ShouldUpdatePenColorWithAlpha()
+    {
+        var vm = CreateViewModel();
+        var pos = new Position(5, 5);
+        var expectedColor = new ArgbColor(128, 255, 0, 0); // Semi-transparent red
+
+        // Setup mock to call the colorPickedAction callback when PointerRightButtonPressed is called
+        _interactionCoordinatorMock.Setup(x => x.PointerRightButtonPressed(
+            It.IsAny<Position>(),
+            It.IsAny<DrawingBuffer>(),
+            It.IsAny<IDrawStyle>(),
+            It.IsAny<bool>(),
+            It.IsAny<PictureSize>(),
+            It.IsAny<Action<ArgbColor>>(),
+            It.IsAny<ReactiveCommand<Picture, Unit>>()))
+            .Callback<Position, DrawingBuffer, IDrawStyle, bool, PictureSize, Action<ArgbColor>, ReactiveCommand<Picture, Unit>>(
+            (p, b, s, anim, grid, callback, cmd) => callback(expectedColor));
+
+        vm.PointerRightButtonPressedCommand.Execute(pos).Subscribe();
+
+        Assert.That(vm.PenColor, Is.EqualTo(expectedColor), "PenColor should be updated with the color picked from the coordinator (including alpha)");
     }
 }

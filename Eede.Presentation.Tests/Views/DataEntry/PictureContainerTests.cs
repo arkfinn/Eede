@@ -102,6 +102,7 @@ public class PictureContainerTests
             mockPictureRepo.Object,
             mockDrawStyleFactory.Object,
             transformUseCase.Object,
+            new Mock<IScalingImageUseCase>().Object,
             transferToCanvasUseCase.Object,
             transferFromCanvasUseCase.Object,
             mockDrawingSessionProvider.Object,

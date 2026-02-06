@@ -29,12 +29,14 @@ public interface IInteractionCoordinator
     // 描画
     void UpdatePicture(Picture picture);
     Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);
-    void CommitSelection();
+    void CommitSelection(bool forceClearSelection = false);
+    void ChangeDrawStyle(IDrawStyle drawStyle);
 
     // 状態取得 (ViewModelがバインドするもの)
     DrawingBuffer CurrentBuffer { get; }
     PictureArea? SelectingArea { get; }
     bool IsRegionSelecting { get; }
+    bool IsShowHandles { get; }
     Picture? PreviewPixels { get; }
     Position PreviewPosition { get; }
     Cursor ActiveCursor { get; }

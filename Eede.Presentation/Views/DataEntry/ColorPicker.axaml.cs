@@ -36,7 +36,7 @@ namespace Eede.Presentation.Views.DataEntry
         }
 
         public static readonly StyledProperty<ArgbColor> NowColorProperty =
-            AvaloniaProperty.Register<DrawableCanvas, ArgbColor>(nameof(ArgbColor), new ArgbColor(255, 0, 0, 0), defaultBindingMode: BindingMode.TwoWay);
+            AvaloniaProperty.Register<ColorPicker, ArgbColor>(nameof(NowColor), new ArgbColor(255, 0, 0, 0), defaultBindingMode: BindingMode.TwoWay);
         public ArgbColor NowColor
         {
             get => GetValue(NowColorProperty);
@@ -94,7 +94,8 @@ namespace Eede.Presentation.Views.DataEntry
                     byte r = (byte)pickerR.Value;
                     byte g = (byte)pickerG.Value;
                     byte b = (byte)pickerB.Value;
-                    NowColor = new ArgbColor((byte)pickerA.Value, r, g, b);
+                    byte a = (byte)pickerA.Value;
+                    NowColor = new ArgbColor(a, r, g, b);
                     break;
 
                 case ColorPickerMode.HSV:
@@ -103,7 +104,7 @@ namespace Eede.Presentation.Views.DataEntry
                     break;
 
                 case ColorPickerMode.Empty:
-                    // Empty‚Í‰½‚às‚í‚È‚¢i“à•”ˆ——pj
+                    // Emptyï¿½ï¿½ï¿½Í‰ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½È‚ï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½j
                     break;
             }
         }
@@ -132,7 +133,7 @@ namespace Eede.Presentation.Views.DataEntry
                     break;
 
                 case ColorPickerMode.Empty:
-                    // Empty‚Í‰½‚às‚í‚È‚¢i“à•”ˆ——pj
+                    // Emptyï¿½ï¿½ï¿½Í‰ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½È‚ï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½j
                     break;
             }
         }

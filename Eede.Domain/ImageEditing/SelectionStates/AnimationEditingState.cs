@@ -19,7 +19,7 @@ public class AnimationEditingState : ISelectionState
         _imageSize = imageSize;
     }
 
-    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction)
+    public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
     {
         int index = _grid.CalculateCellIndex(cursorArea.RealPosition, _imageSize);
         if (index >= 0)
@@ -39,7 +39,7 @@ public class AnimationEditingState : ISelectionState
         return (this, cursorArea);
     }
 
-    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, PictureSize canvasSize)
+    public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)
     {
         bool newVisibleCursor = canvasSize.Contains(nowPosition);
         HalfBoxArea newCursorArea = cursorArea.Move(nowPosition);
@@ -56,7 +56,7 @@ public class AnimationEditingState : ISelectionState
         return null;
     }
 
-    public SelectionCursor GetCursor(Position mousePosition)
+    public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)
     {
         return SelectionCursor.Default;
     }

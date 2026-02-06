@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:general="using:Eede.Presentation.Views.General"
+             xmlns:local="using:Eede.Presentation.Views.DataEntry"
              xmlns:vm="using:Eede.Presentation.ViewModels.DataEntry"
              xmlns:converters="using:Eede.Presentation.Common.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -69,6 +70,14 @@
                Width="{Binding PreviewSize.Width}"
                Height="{Binding PreviewSize.Height}"
                RenderOptions.BitmapInterpolationMode="None"/>
+        <local:GridOverlay Width="{Binding DisplayWidth}"
+                           Height="{Binding DisplayHeight}"
+                           IsShowPixelGrid="{Binding IsPixelGridEffectivelyVisible}"
+                           IsShowCursorGrid="{Binding IsCursorGridEffectivelyVisible}"
+                           Magnification="{Binding Magnification}"
+                           CursorSize="{Binding CursorSize}"
+                           BackgroundColor="{Binding BackgroundColor.Value}"
+                           IsHitTestVisible="False"/>
         <general:Region IsVisible="{Binding IsRegionSelecting}"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"

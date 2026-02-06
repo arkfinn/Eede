@@ -90,6 +90,8 @@ public class MainViewModel : ViewModelBase
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
     [Reactive] public bool HasClipboardPicture { get; set; } = false;
     [Reactive] public bool IsTransparencyEnabled { get; set; } = false;
+    [Reactive] public bool IsShowPixelGrid { get; set; } = false;
+    [Reactive] public bool IsShowCursorGrid { get; set; } = false;
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
@@ -194,6 +196,9 @@ public class MainViewModel : ViewModelBase
         CurrentBackgroundColor = BackgroundColor.Default;
         _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
             .BindTo(this, x => x.DrawableCanvasViewModel.BackgroundColor);
+        _ = this.WhenAnyValue(x => x.IsShowPixelGrid).BindTo(this, x => x.DrawableCanvasViewModel.IsShowPixelGrid);
+        _ = this.WhenAnyValue(x => x.IsShowCursorGrid).BindTo(this, x => x.DrawableCanvasViewModel.IsShowCursorGrid);
+        _ = this.WhenAnyValue(x => x.CursorSize).BindTo(this, x => x.DrawableCanvasViewModel.CursorSize);
         PullBlender = new DirectImageBlender();
         PenColor = DrawableCanvasViewModel.PenColor;
         _ = this.WhenAnyValue(x => x.PenColor)

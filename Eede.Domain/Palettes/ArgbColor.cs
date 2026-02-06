@@ -16,5 +16,10 @@
                 && Green == other.Green
                 && Blue == other.Blue;
         }
+
+        /// <summary>
+        /// 相対輝度 (0.0 - 1.0) を取得する。
+        /// </summary>
+        public double Luminance => (0.299 * Red + 0.587 * Green + 0.114 * Blue) / 255.0;
     }
 }

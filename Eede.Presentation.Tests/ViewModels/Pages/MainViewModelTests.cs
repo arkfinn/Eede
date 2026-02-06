@@ -154,4 +154,22 @@ public class MainViewModelTests
         // Assert
         _interactionCoordinatorMock.Verify(x => x.CommitSelection(true), Times.AtLeastOnce, "CommitSelection(true) should be called before pulling image from draw area.");
     }
+
+    [AvaloniaTest]
+    public void GridFlagsInitialValueAndChangeTest()
+    {
+        var mainVM = CreateMainViewModel();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainVM.IsShowPixelGrid, Is.False, "IsShowPixelGrid should be False by default");
+            Assert.That(mainVM.IsShowCursorGrid, Is.False, "IsShowCursorGrid should be False by default");
+        });
+
+        mainVM.IsShowPixelGrid = true;
+        Assert.That(mainVM.IsShowPixelGrid, Is.True);
+
+        mainVM.IsShowCursorGrid = true;
+        Assert.That(mainVM.IsShowCursorGrid, Is.True);
+    }
 }

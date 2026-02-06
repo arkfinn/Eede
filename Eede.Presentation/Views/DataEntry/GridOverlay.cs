@@ -69,15 +69,23 @@ public class GridOverlay : Control
         double width = Bounds.Width;
         double height = Bounds.Height;
 
-        // 背景が明るい場合は暗いグレー、暗い場合は明るいグレーを選択
-        bool isDarkBackground = BackgroundColor.Luminance < 0.5;
-        Color gridBaseColor = isDarkBackground ? Colors.White : Colors.Black;
+        // 背景が透明（Alphaが小さい）の場合は、チェッカーボードで見えやすい中間色を使用する
+        Color gridBaseColor;
+        if (BackgroundColor.Alpha < 10)
+        {
+            gridBaseColor = Colors.Gray;
+        }
+        else
+        {
+            bool isDarkBackground = BackgroundColor.Luminance < 0.5;
+            gridBaseColor = isDarkBackground ? Colors.White : Colors.Black;
+        }
 
         // 1px Pixel Grid
         if (IsShowPixelGrid)
         {
-            // 低不透明度の実線
-            var pixelPen = new Pen(new SolidColorBrush(gridBaseColor, 0.15), 1);
+            // 不透明度を少し上げて視認性を確保 (0.3)
+            var pixelPen = new Pen(new SolidColorBrush(gridBaseColor, 0.3), 1);
             float magValue = mag.Value.Value;
             for (int x = 1; x < width / magValue; x++)
             {
@@ -91,11 +99,11 @@ public class GridOverlay : Control
             }
         }
 
-        // Cursor Grid
+        // Cursor Grid (Guide)
         if (IsShowCursorGrid)
         {
-            // 少し濃い実線の破線
-            var cursorPen = new Pen(new SolidColorBrush(gridBaseColor, 0.4), 1, new DashStyle(new[] { 4.0, 4.0 }, 0));
+            // 2pxの実線に変更し、不透明度を上げる (0.6)
+            var cursorPen = new Pen(new SolidColorBrush(gridBaseColor, 0.6), 2);
             int stepX = mag.Value.Magnify(CursorSize.Width);
             int stepY = mag.Value.Magnify(CursorSize.Height);
 

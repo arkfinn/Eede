@@ -155,6 +155,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         ActiveCursor = Cursor.Default;
         HandleSize = 4.0;
         HandleMargin = new Thickness(-2, -2, 0, 0);
+        CursorSize = new PictureSize(32, 32);
 
         OnColorPicked = ReactiveCommand.Create<ArgbColor>(ExecuteColorPicked);
         OnDrew = ReactiveCommand.Create<Picture>(ExecuteDrew);

@@ -218,6 +218,7 @@ public class MainViewModel : ViewModelBase
             .Subscribe(x =>
             {
                 PictureSize size = new(MinCursorWidth, MinCursorHeight);
+                CursorSize = size;
                 foreach (DockPictureViewModel vm in Pictures)
                 {
                     vm.MinCursorSize = size;

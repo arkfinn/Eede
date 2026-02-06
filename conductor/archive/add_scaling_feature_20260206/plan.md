@@ -26,11 +26,11 @@ UIや外部依存を切り離し、純粋な計算ロジック（リサイズ計
 ## Phase 3: プレゼンテーション層 (Testable UI)
 ViewModelの振る舞いをテストし、最後に View を構築します。
 
-- [~] Task: `ScalingDialogViewModel` のTDD
-    - [ ] **Red**: 入力値の変化に伴うプロパティの連動（幅を変えたら高さが変わる等）と、バリデーションのテストを記述
-    - [ ] **Green**: ReactiveUIを用いた ViewModel の実装
-    - [ ] **Refactor**: Rxクエリ（WhenAnyValue）の整理
-- [ ] Task: UI 実装と最終統合
-    - [ ] ツールバーへのボタン追加とダイアログの表示実装（View）
-    - [ ] 実機での手動検証と、既存の「プレビュー状態」との操作感の統一
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: `ScalingDialogViewModel` のTDD (c0d3a51)
+    - [x] **Red**: 入力値の変化に伴うプロパティの連動（幅を変えたら高さが変わる等）と、バリデーションのテストを記述
+    - [x] **Green**: ReactiveUIを用いた ViewModel の実装
+    - [x] **Refactor**: Rxクエリ（WhenAnyValue）の整理
+- [x] Task: UI 実装と最終統合 (87f4867)
+    - [x] ツールバーへのボタン追加とダイアログの表示実装（View）
+    - [x] 実機での手動検証と、既存の「プレビュー状態」との操作感の統一
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) (87f4867)

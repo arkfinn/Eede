@@ -69,6 +69,16 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public double DisplayWidth { get; set; }
     [Reactive] public double DisplayHeight { get; set; }
 
+    [Reactive] public bool IsShowPixelGrid { get; set; }
+    [Reactive] public bool IsShowCursorGrid { get; set; }
+    [Reactive] public PictureSize CursorSize { get; set; }
+
+    private readonly ObservableAsPropertyHelper<bool> _isPixelGridEffectivelyVisible;
+    public bool IsPixelGridEffectivelyVisible => _isPixelGridEffectivelyVisible.Value;
+
+    private readonly ObservableAsPropertyHelper<bool> _isCursorGridEffectivelyVisible;
+    public bool IsCursorGridEffectivelyVisible => _isCursorGridEffectivelyVisible.Value;
+
     private readonly GlobalState _globalState;
     private readonly IAddFrameProvider _addFrameProvider;
     private readonly IClipboard _clipboard;
@@ -145,6 +155,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         ActiveCursor = Cursor.Default;
         HandleSize = 4.0;
         HandleMargin = new Thickness(-2, -2, 0, 0);
+        CursorSize = new PictureSize(32, 32);
 
         OnColorPicked = ReactiveCommand.Create<ArgbColor>(ExecuteColorPicked);
         OnDrew = ReactiveCommand.Create<Picture>(ExecuteDrew);
@@ -157,6 +168,16 @@ public class DrawableCanvasViewModel : ViewModelBase
         CopyCommand = ReactiveCommand.CreateFromTask(ExecuteCopyAction);
         CutCommand = ReactiveCommand.CreateFromTask(ExecuteCutAction);
         PasteCommand = ReactiveCommand.CreateFromTask(ExecutePasteAction);
+
+        _isPixelGridEffectivelyVisible = this.WhenAnyValue(
+            x => x.IsShowPixelGrid,
+            x => x.Magnification,
+            (isShow, mag) => isShow && (mag != null && mag.Value >= 4))
+            .ToProperty(this, x => x.IsPixelGridEffectivelyVisible);
+
+        _isCursorGridEffectivelyVisible = this.WhenAnyValue(
+            x => x.IsShowCursorGrid)
+            .ToProperty(this, x => x.IsCursorGridEffectivelyVisible);
 
         _ = this.WhenAnyValue(x => x.DrawStyle)
             .DistinctUntilChanged()
@@ -171,6 +192,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             });
 
         _ = this.WhenAnyValue(x => x.ImageBlender, x => x.PenColor, x => x.PenSize)
+            .Where(x => x.Item1 != null)
             .Subscribe(x => PenStyle = new(ImageBlender, PenColor, PenSize));
 
         _ = this.WhenAnyValue(x => x.ImageBlender)
@@ -309,8 +331,8 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
 
-        // 表示用には拡大を行わない _identityTransfer を使用する
-        Picture = _coordinator.Painted(PictureBuffer, PenStyle, _identityTransfer);
+        // 表示用にも設定された ImageTransfer を使用して、RGB/Alphaトーン変換などを反映させる
+        Picture = _coordinator.Painted(PictureBuffer, PenStyle, ImageTransfer);
         if (Picture == null) return;
 
         MyBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(Picture);

@@ -11,18 +11,15 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] [Include Pull Action in Undo History](archive/include_pull_action_in_undo_history_20260129/index.md) [13e5fd1]
 - [x] [Serviceクラスの撲滅。UseCaseに分解または適切な名称に変更](archive/service_extermination_20260131/index.md)
 - [x] [非破壊プレビュー付きコピー＆ペーストの改善](archive/improve_paste_preview_20260201/index.md)
+- [x] [拡大縮小ボタンの追加と数値指定リサイズ機能の実装](archive/add_scaling_feature_20260206/index.md)
+- [x] [作業エリアへのグリッド表示機能の追加](archive/add_grid_display_20260207/index.md)
 
 ---
 
-- [ ] **Track: MainViewModel ・ｽﾌク・ｽ・ｽ・ｽ[・ｽ・ｽ・ｽ・ｽ・ｽ・ｽ DI ・ｽR・ｽ・ｽ・ｽe・ｽi・ｽﾌ難ｿｽ・ｽ・ｽ・ｽiA>C>B・ｽﾌ擾ｿｽ・ｽﾅ趣ｿｽ・ｽ{・ｽj**
+- [ ] **Track: MainViewModel などのクリーンアップと DI コンテナの導入(A>C>Bの順で実施)**
 *Link: [./tracks/refactor_mainvm_and_di_20260126/](./tracks/refactor_mainvm_and_di_20260126/)*
 
 ---
 
-- [ ] **Track: ・ｽS ViewModel ・ｽ・ｽ DI ・ｽﾚ行・ｽ・ｽ DrawingSession ・ｽﾇ暦ｿｽ・ｽﾌ撰ｿｽ ... 
-
-
----
-
-- [~] **Track: 拡大縮小ボタンの追加と数値指定リサイズ機能の実装**
-*Link: [./tracks/add_scaling_feature_20260206/](./tracks/add_scaling_feature_20260206/)*
+- [ ] **Track: 全 ViewModel への DI 移行と DrawingSession 独立の推進**
+*Link: [./tracks/refactor_all_vms_to_di_20260126/](./tracks/refactor_all_vms_to_di_20260126/)*

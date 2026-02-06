@@ -9,6 +9,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
+using Eede.Domain.Palettes;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
 using Eede.Presentation.Settings;
@@ -21,6 +22,8 @@ using Microsoft.Reactive.Testing;
 using ReactiveUI.Testing;
 using ReactiveUI;
 using System;
+using System.Reactive;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.Tests.ViewModels.DataEntry;
 
@@ -158,5 +161,29 @@ public class DrawableCanvasViewModelTests
         vm.CopyCommand.Execute().Subscribe();
 
         _selectionServiceMock.Verify(x => x.CopyAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()), Times.Once);
+    }
+
+    [AvaloniaTest]
+    public void PointerRightButtonPressedCommand_ShouldUpdatePenColorWithAlpha()
+    {
+        var vm = CreateViewModel();
+        var pos = new Position(5, 5);
+        var expectedColor = new ArgbColor(128, 255, 0, 0); // Semi-transparent red
+
+        // Setup mock to call the colorPickedAction callback when PointerRightButtonPressed is called
+        _interactionCoordinatorMock.Setup(x => x.PointerRightButtonPressed(
+            It.IsAny<Position>(),
+            It.IsAny<DrawingBuffer>(),
+            It.IsAny<IDrawStyle>(),
+            It.IsAny<bool>(),
+            It.IsAny<PictureSize>(),
+            It.IsAny<Action<ArgbColor>>(),
+            It.IsAny<ReactiveCommand<Picture, Unit>>()))
+            .Callback<Position, DrawingBuffer, IDrawStyle, bool, PictureSize, Action<ArgbColor>, ReactiveCommand<Picture, Unit>>(
+            (p, b, s, anim, grid, callback, cmd) => callback(expectedColor));
+
+        vm.PointerRightButtonPressedCommand.Execute(pos).Subscribe();
+
+        Assert.That(vm.PenColor, Is.EqualTo(expectedColor), "PenColor should be updated with the color picked from the coordinator (including alpha)");
     }
 }

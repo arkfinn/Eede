@@ -304,7 +304,8 @@ public class InteractionCoordinator : IInteractionCoordinator
             _drawableArea = result.DrawableArea;
             _interactionSession = new CanvasInteractionSession(result.PictureBuffer, drawStyle, _interactionSession?.SelectionState ?? nextState);
         }
-        else if (previousState is not SelectionPreviewState)
+
+        if (previousState is not SelectionPreviewState)
         {
             ArgbColor newColor = _drawableArea.PickColor(CurrentBuffer.Fetch(), pos);
             colorPickedAction?.Invoke(newColor);

@@ -84,8 +84,8 @@ public class GridOverlay : Control
         // 1px Pixel Grid
         if (IsShowPixelGrid)
         {
-            // 不透明度を少し上げて視認性を確保 (0.3)
-            var pixelPen = new Pen(new SolidColorBrush(gridBaseColor, 0.3), 1);
+            // 不透明度をさらに上げて主張を強める (0.5)
+            var pixelPen = new Pen(new SolidColorBrush(gridBaseColor, 0.5), 1);
             float magValue = mag.Value.Value;
             for (int x = 1; x < width / magValue; x++)
             {
@@ -102,8 +102,8 @@ public class GridOverlay : Control
         // Cursor Grid (Guide)
         if (IsShowCursorGrid)
         {
-            // 2pxの実線に変更し、不透明度を上げる (0.6)
-            var cursorPen = new Pen(new SolidColorBrush(gridBaseColor, 0.6), 2);
+            // 不透明度をさらに上げてよりはっきりと表示 (0.8)
+            var cursorPen = new Pen(new SolidColorBrush(gridBaseColor, 0.8), 2);
             int stepX = mag.Value.Magnify(CursorSize.Width);
             int stepY = mag.Value.Magnify(CursorSize.Height);
 

@@ -57,10 +57,10 @@
 							<navi:MagnificationMenu Magnification="{Binding Magnification}"/>
 							<Panel Classes="horizontal-separator" />
 							<ToggleButton Classes="tool" IsChecked="{Binding IsShowPixelGrid}" ToolTip.Tip="1pxグリッドを表示">
-								<Image Source="/Assets/Tools/pen_region.png" Stretch="None" />
+								<Image Source="/Assets/Tools/tool_grid_pixel.png" Stretch="None" />
 							</ToggleButton>
 							<ToggleButton Classes="tool" IsChecked="{Binding IsShowCursorGrid}" ToolTip.Tip="カーソルグリッドを表示">
-								<Image Source="/Assets/Tools/tool_scaling.png" Stretch="None" />
+								<Image Source="/Assets/Tools/tool_grid_cursor.png" Stretch="None" />
 							</ToggleButton>
 						</StackPanel>
 					</Panel>

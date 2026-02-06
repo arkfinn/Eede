@@ -192,6 +192,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             });
 
         _ = this.WhenAnyValue(x => x.ImageBlender, x => x.PenColor, x => x.PenSize)
+            .Where(x => x.Item1 != null)
             .Subscribe(x => PenStyle = new(ImageBlender, PenColor, PenSize));
 
         _ = this.WhenAnyValue(x => x.ImageBlender)
@@ -330,8 +331,8 @@ public class DrawableCanvasViewModel : ViewModelBase
             return;
         }
 
-        // 表示用には拡大を行わない _identityTransfer を使用する
-        Picture = _coordinator.Painted(PictureBuffer, PenStyle, _identityTransfer);
+        // 表示用にも設定された ImageTransfer を使用して、RGB/Alphaトーン変換などを反映させる
+        Picture = _coordinator.Painted(PictureBuffer, PenStyle, ImageTransfer);
         if (Picture == null) return;
 
         MyBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(Picture);

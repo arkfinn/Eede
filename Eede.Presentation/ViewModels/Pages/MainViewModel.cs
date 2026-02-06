@@ -199,7 +199,13 @@ public class MainViewModel : ViewModelBase
         _ = this.WhenAnyValue(x => x.PenColor)
             .Select(x => Color.FromArgb(x.Alpha, x.Red, x.Green, x.Blue))
             .BindTo(this, x => x.NowPenColor);
-        _ = this.WhenAnyValue(x => x.PenColor).BindTo(this, x => x.DrawableCanvasViewModel.PenColor);
+
+        _ = this.WhenAnyValue(x => x.PenColor)
+            .Subscribe(x => DrawableCanvasViewModel.PenColor = x);
+
+        _ = DrawableCanvasViewModel.WhenAnyValue(x => x.PenColor)
+            .Subscribe(x => PenColor = x);
+
         MinCursorSizeList = new ObservableCollection<int>([8, 16, 24, 32, 48, 64]);
         MinCursorWidth = 32;
         MinCursorHeight = 32;

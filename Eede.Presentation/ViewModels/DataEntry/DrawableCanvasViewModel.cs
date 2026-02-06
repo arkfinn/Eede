@@ -253,6 +253,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     public event EventHandler<ColorPickedEventArgs> ColorPicked;
     private void ExecuteColorPicked(ArgbColor color)
     {
+        PenColor = color;
         ColorPicked?.Invoke(this, new ColorPickedEventArgs(color));
     }
 

@@ -34,12 +34,12 @@
 - [x] Task: 仕様化テストの実行 [74aa0bd]
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 3: 差分Undoインフラ' (Protocol in workflow.md)
 
-## フェーズ 4: ツールの差分報告対応
+## フェーズ 4: ツールの差分報告対応 [checkpoint: 43f652c]
 ### ステップ 4-1: 各ツールの描画結果の固定
-- [ ] Task: 各ツール（ペン、矩形、塗りつぶし）の描画結果の仕様化テスト
+- [x] Task: 各ツール（ペン、矩形、塗りつぶし）の描画結果の仕様化テスト [03b80da]
 ### ステップ 4-2: 差分報告への移行
-- [ ] Task: `IDrawingTool` インターフェース拡張と各ツールの実装更新
-- [ ] Task: 仕様化テストによる描画結果の不変確認
+- [x] Task: `IDrawingTool` インターフェース拡張と各ツールの実装更新 (IDrawStyle を拡張) [03b80da]
+- [x] Task: 仕様化テストによる描画結果の不変確認 [03b80da]
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 4: ツールの差分報告対応' (Protocol in workflow.md)
 
 ## フェーズ 5: 最終統合と品質確認

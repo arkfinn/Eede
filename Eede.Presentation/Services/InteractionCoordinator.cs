@@ -85,7 +85,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         }
     }
 
-    public event Action<Picture, Picture, PictureArea?, PictureArea?, PictureArea?> Drew;
+    public event Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion> Drew;
     public event Action StateChanged;
 
     private readonly IDrawingSessionProvider _sessionProvider;

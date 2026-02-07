@@ -47,9 +47,9 @@ namespace Eede.Application.Drawings
             var result = tool.DrawEnd(new DrawingBuffer(session.PreviousPicture), History, isShift);
             History = null;
 
-            if (result.AffectedArea.HasValue && !result.AffectedArea.Value.IsEmpty)
+            if (!result.AffectedArea.IsEmpty)
             {
-                return session.PushDiff(result.Buffer.Fetch(), result.AffectedArea.Value, session.CurrentSelectingArea);
+                return session.PushDiff(result.Buffer.Fetch(), result.AffectedArea, session.CurrentSelectingArea);
             }
             return session.Push(result.Buffer.Fetch(), session.CurrentSelectingArea);
         }

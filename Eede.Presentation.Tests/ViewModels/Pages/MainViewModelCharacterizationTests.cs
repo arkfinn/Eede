@@ -87,7 +87,8 @@ public class MainViewModelCharacterizationTests
                 _animationViewModelMock = new Mock<AnimationViewModel>(
                     patternsProvider,
                     patternService,
-                    Mock.Of<IFileSystem>());
+                    Mock.Of<IFileSystem>(),
+                    Mock.Of<IBitmapAdapter<Bitmap>>());
                 _drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(_drawingSessionProviderMock.Object);
         
                 _paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>();

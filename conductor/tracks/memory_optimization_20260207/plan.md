@@ -16,14 +16,14 @@
 - [x] Task: 改善後のテスト通過確認 [b1e5726]
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 1: ビットマップリソース管理' (Protocol in workflow.md)
 
-## フェーズ 2: GPUスケーリングへの移行
+## フェーズ 2: GPUスケーリングへの移行 [checkpoint: 3b288d7]
 ### ステップ 2-1: 現状の描画フローの固定
-- [ ] Task: 拡大描画結果の仕様化テスト (Golden Master)
+- [x] Task: 拡大描画結果の仕様化テスト (Golden Master) [3b288d7]
 ### ステップ 2-2: スケーリング方式の切り替え
-- [ ] Task: ViewModel への表示サイズプロパティ追加
-- [ ] Task: View (XAML) のスケーリング設定適用
-- [ ] Task: ドメイン層からの拡大処理排除
-- [ ] Task: スナップショット比較テストの実行
+- [x] Task: ViewModel への表示サイズプロパティ追加 (既に一部実装済み、確認と修正) [3b288d7]
+- [x] Task: View (XAML) のスケーリング設定適用 (既に一部実装済み、確認と修正) [3b288d7]
+- [x] Task: ドメイン層からの拡大処理排除 [3b288d7]
+- [x] Task: スナップショット比較テストの実行 [3b288d7]
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 2: GPUスケーリングへの移行' (Protocol in workflow.md)
 
 ## フェーズ 3: 差分Undoインフラの構築

@@ -20,20 +20,32 @@ When creating a new track (`spec.md`, `plan.md`), the AI Agent MUST follow these
 8. **Vertical Slices:** Plan phases as end-to-end functional increments (Vertical Slices) rather than horizontal technical layers. Each phase should deliver usable value that can be verified by the user.
 8. **Language Protocol:** All Conductor artifacts (`spec.md`, `plan.md`, `metadata.json` descriptions, etc.) MUST be written in Japanese to ensure clear communication with the project stakeholders.
 
+## Safety Guardrails
+
+エージェントは、プロジェクトの整合性を維持するために以下のガードレールを遵守しなければならない。
+
+1.  **No Blind Resets**: ドキュメント（`plan.md`等）に記載された古いコミットハッシュに対して `git reset --hard` を実行してはならない。記載されたハッシュは古い可能性がある。
+2.  **Baseline Verification**: トラックやタスクの開始時に必ず `git status` と `git log -n 1` を実行し、現在のブランチとベースラインを確認すること。
+3.  **Encoding Standard**: 全ての `.cs` および `.axaml` ファイルは必ず **UTF-8 (BOMなし)** で保存すること。
+4.  **Atomic Revert**: ビルド失敗時は、全体のリセットではなく、最後に変更したファイルを特定し `git checkout <file>` で戻しながら原因を特定すること。
+
 ## Task Workflow
 
 All tasks follow a strict lifecycle:
 
 ### Standard Task Workflow
 
-1. **Select Task:** Choose the next available task from `plan.md` in sequential order
+1. **Verify Baseline (Safety First):** 
+   - `git status` および `git log -n 1` を実行し、現在の作業ベースが期待通り（最新の成果物を含んでいるか）確認する。
 
-2. **Mark In Progress:** Before beginning work, edit `plan.md` and change the task from `[ ]` to `[~]`
+2. **Select Task:** Choose the next available task from `plan.md` in sequential order
 
-3. **Analyze Context:**
+3. **Mark In Progress:** Before beginning work, edit `plan.md` and change the task from `[ ]` to `[~]`
+
+4. **Analyze Context:**
    - Before implementing, analyze existing code and assets to ensure consistency with project standards.
    - **Check Test Environment:** UIやDIに関わる変更を行う場合、`Eede.Presentation.Tests\TestAppBuilder.cs` 等のテスト初期化コードが適切（`.UseReactiveUI()`等が含まれているか）か確認する。
-   - **Encoding Awareness:** 日本語を含むファイルを操作する際は文字化けを防ぐため、常に UTF-8 エンコーディングを明示する。
+   - **Encoding Awareness:** 日本語を含むファイルを操作する際は文字化けを防ぐため、常に **UTF-8 (BOMなし)** エンコーディングを維持する。
 
 4. **Write Failing Tests (Red Phase):**
    - Create a new test file for the feature or bug fix.
@@ -345,6 +357,20 @@ A task is complete when:
 2. Check error logs
 3. Gather user feedback
 4. Plan next iteration
+
+## Build & Troubleshooting
+
+原因不明のビルド失敗やテストエラーが発生した場合、以下の手順で環境をクリーンアップすること。
+
+1.  **Shutdown MSBuild**: `dotnet build-server shutdown` を実行して、ファイルをロックしている可能性のあるプロセスを停止する。
+2.  **Clear Caches**: `bin`, `obj`, `.vs` ディレクトリを削除する。
+    ```powershell
+    Get-ChildItem -Path . -Include bin,obj,.vs -Recurse | Remove-Item -Recurse -Force
+    ```
+3.  **Read UTF-8 Errors**: エラー出力が文字化けしている場合は、以下を実行してからビルドする。
+    ```powershell
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; dotnet build
+    ```
 
 ## Continuous Learning (/learn)
 

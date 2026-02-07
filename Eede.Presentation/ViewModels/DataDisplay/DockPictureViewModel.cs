@@ -62,11 +62,44 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public bool Edited { get; set; }
         [Reactive] public FilePath FilePath { get; private set; }
         [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
+        [Reactive] public Magnification Magnification { get; set; }
+        [Reactive] public double DisplayWidth { get; private set; }
+        [Reactive] public double DisplayHeight { get; private set; }
+        public ReactiveCommand<Unit, Unit> ZoomInCommand { get; }
+        public ReactiveCommand<Unit, Unit> ZoomOutCommand { get; }
         public ReactiveCommand<Unit, bool> OnClosing { get; }
         public ReactiveCommand<Unit, bool> CloseCommand { get; }
         public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
         public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
         public event AsyncEventHandler<EventArgs> RequestClose;
+        private static readonly float[] MagnificationSteps = [1f, 2f, 4f, 6f, 8f, 12f];
+
+        public void ZoomIn()
+        {
+            float current = Magnification.Value;
+            foreach (float step in MagnificationSteps)
+            {
+                if (step > current)
+                {
+                    Magnification = new Magnification(step);
+                    return;
+                }
+            }
+        }
+
+        public void ZoomOut()
+        {
+            float current = Magnification.Value;
+            for (int i = MagnificationSteps.Length - 1; i >= 0; i--)
+            {
+                if (MagnificationSteps[i] < current)
+                {
+                    Magnification = new Magnification(MagnificationSteps[i]);
+                    return;
+                }
+            }
+        }
+
         public GlobalState GlobalState { get; }
         public AnimationViewModel AnimationViewModel { get; }
         private readonly IBitmapAdapter<Bitmap> BitmapAdapter;
@@ -86,9 +119,12 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             OnPictureUpdate = ReactiveCommand.Create<Picture>(ExecutePictureUpdate);
             OnClosing = ReactiveCommand.CreateFromTask(ExecuteClosing);
             CloseCommand = ReactiveCommand.CreateFromTask(ExecuteClose);
+            ZoomInCommand = ReactiveCommand.Create(ZoomIn);
+            ZoomOutCommand = ReactiveCommand.Create(ZoomOut);
 
             MinCursorSize = new PictureSize(32, 32);
             CursorSize = new PictureSize(32, 32);
+            Magnification = new Magnification(1);
             ActiveCursor = Avalonia.Input.Cursor.Default;
             Enabled = true;
             Closable = true;
@@ -103,6 +139,20 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             SetupEditStateObservation();
             SetupTitleObservation();
             SetupBitmapObservation();
+            SetupDisplaySizeObservation();
+        }
+
+        private void SetupDisplaySizeObservation()
+        {
+            this.WhenAnyValue(x => x.Magnification, x => x.PictureBuffer)
+                .Subscribe(x =>
+                {
+                    if (x.Item2 != null)
+                    {
+                        DisplayWidth = x.Item1.Magnify(x.Item2.Size.Width);
+                        DisplayHeight = x.Item1.Magnify(x.Item2.Size.Height);
+                    }
+                });
         }
 
         private void SetupAnimationCursorObservation()

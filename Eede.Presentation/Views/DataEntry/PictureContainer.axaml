@@ -3,15 +3,24 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:general="clr-namespace:Eede.Presentation.Views.General"
+             xmlns:converters="clr-namespace:Eede.Presentation.Common.Converters"
              xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.DataDisplay"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Presentation.Views.DataEntry.PictureContainer"
              x:DataType="vm:DockPictureViewModel"
             >
+  <UserControl.Resources>
+    <converters:MagnificationToPercentageConverter x:Key="MagnificationToPercentageConverter"/>
+  </UserControl.Resources>
   <Design.DataContext>
     <vm:DockPictureViewModel />
   </Design.DataContext>
   <DockPanel LastChildFill="True">
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Background="{DynamicResource BaseBrush}" Spacing="4" Margin="4">
+      <Button Command="{Binding ZoomOutCommand}" Width="24" Height="24" Padding="0">-</Button>
+      <TextBlock Text="{Binding Magnification, Converter={StaticResource MagnificationToPercentageConverter}}" VerticalAlignment="Center" Width="40" TextAlignment="Center"/>
+      <Button Command="{Binding ZoomInCommand}" Width="24" Height="24" Padding="0">+</Button>
+    </StackPanel>
     <ScrollViewer DockPanel.Dock="Bottom"
                    Background="{DynamicResource BaseBrush}"
                   VerticalScrollBarVisibility="Visible"

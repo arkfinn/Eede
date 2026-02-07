@@ -53,10 +53,26 @@ namespace Eede.Presentation.Views.DataEntry
 
             CanvasSize = new PictureSize((int)bitmap.Size.Width, (int)bitmap.Size.Height);
 
-            background.Width = bitmap.Size.Width;
-            background.Height = bitmap.Size.Height;
-            canvas.Width = bitmap.Size.Width;
-            canvas.Height = bitmap.Size.Height;
+            _ = background.Bind(WidthProperty, new Binding
+            {
+                Source = _viewModel,
+                Path = nameof(_viewModel.DisplayWidth)
+            });
+            _ = background.Bind(HeightProperty, new Binding
+            {
+                Source = _viewModel,
+                Path = nameof(_viewModel.DisplayHeight)
+            });
+            _ = canvas.Bind(WidthProperty, new Binding
+            {
+                Source = _viewModel,
+                Path = nameof(_viewModel.DisplayWidth)
+            });
+            _ = canvas.Bind(HeightProperty, new Binding
+            {
+                Source = _viewModel,
+                Path = nameof(_viewModel.DisplayHeight)
+            });
             ImageBrush canvasBrush = new();
             _ = canvasBrush.Bind(ImageBrush.SourceProperty, new Binding
             {
@@ -88,6 +104,12 @@ namespace Eede.Presentation.Views.DataEntry
                     UpdateCursor();
                 });
 
+            _viewModel.WhenAnyValue(x => x.Magnification)
+                .Subscribe(_ =>
+                {
+                    UpdateCursor();
+                });
+
             // GridView のバインディング設定
             gridOverlay.Magnification = new Magnification(1);
             _ = gridOverlay.Bind(IsVisibleProperty, new Binding
@@ -100,15 +122,20 @@ namespace Eede.Presentation.Views.DataEntry
                 Source = _viewModel.AnimationViewModel,
                 Path = "SelectedPattern.Grid"
             });
+            _ = gridOverlay.Bind(General.GridView.MagnificationProperty, new Binding
+            {
+                Source = _viewModel,
+                Path = nameof(_viewModel.Magnification)
+            });
             _ = gridOverlay.Bind(WidthProperty, new Binding
             {
-                Source = canvas,
-                Path = nameof(canvas.Width)
+                Source = _viewModel,
+                Path = nameof(_viewModel.DisplayWidth)
             });
             _ = gridOverlay.Bind(HeightProperty, new Binding
             {
-                Source = canvas,
-                Path = nameof(canvas.Height)
+                Source = _viewModel,
+                Path = nameof(_viewModel.DisplayHeight)
             });
         }
 
@@ -135,6 +162,7 @@ namespace Eede.Presentation.Views.DataEntry
             {
                 if (_viewModel == null) return;
 
+                var mag = _viewModel.Magnification;
                 HalfBoxArea cursorArea = _localCursorArea;
                 if (_viewModel.AnimationViewModel.IsAnimationMode)
                 {
@@ -146,9 +174,12 @@ namespace Eede.Presentation.Views.DataEntry
                 var selectingArea = _selectionState.GetSelectingArea();
                 if (selectingArea.HasValue)
                 {
-                    cursor.Width = selectingArea.Value.Width;
-                    cursor.Height = selectingArea.Value.Height;
-                    cursor.Margin = new Thickness(selectingArea.Value.X, selectingArea.Value.Y, 0, 0);
+                    var displayPos = new CanvasCoordinate(selectingArea.Value.X, selectingArea.Value.Y).ToDisplay(mag);
+                    var displaySize = new CanvasCoordinate(selectingArea.Value.Width, selectingArea.Value.Height).ToDisplay(mag);
+
+                    cursor.Width = displaySize.X;
+                    cursor.Height = displaySize.Y;
+                    cursor.Margin = new Thickness(displayPos.X, displayPos.Y, 0, 0);
                     cursor.ShowHandles = _selectionState is SelectedState || _selectionState is ResizingState;
 
                     // ハンドルサイズはキャンバス上の 4ピクセル固定
@@ -158,9 +189,12 @@ namespace Eede.Presentation.Views.DataEntry
                 }
                 else
                 {
-                    cursor.Width = cursorArea.BoxSize.Width;
-                    cursor.Height = cursorArea.BoxSize.Height;
-                    cursor.Margin = new Thickness(cursorArea.RealPosition.X, cursorArea.RealPosition.Y, 0, 0);
+                    var displayPos = new CanvasCoordinate(cursorArea.RealPosition.X, cursorArea.RealPosition.Y).ToDisplay(mag);
+                    var displaySize = new CanvasCoordinate(cursorArea.BoxSize.Width, cursorArea.BoxSize.Height).ToDisplay(mag);
+
+                    cursor.Width = displaySize.X;
+                    cursor.Height = displaySize.Y;
+                    cursor.Margin = new Thickness(displayPos.X, displayPos.Y, 0, 0);
                     cursor.ShowHandles = false;
                 }
 
@@ -186,17 +220,21 @@ namespace Eede.Presentation.Views.DataEntry
         private void UpdateSelectionPreview()
         {
             var info = _selectionState.GetSelectionPreviewInfo();
-            if (info == null)
+            if (info == null || _viewModel == null)
             {
                 selectionPreview.IsVisible = false;
                 return;
             }
 
+            var mag = _viewModel.Magnification;
+            var displayPos = new CanvasCoordinate(info.Position.X, info.Position.Y).ToDisplay(mag);
+            var displaySize = new CanvasCoordinate(info.Pixels.Width, info.Pixels.Height).ToDisplay(mag);
+
             selectionPreview.IsVisible = true;
             selectionPreview.Source = PictureBitmapAdapter.ConvertToPremultipliedBitmap(info.Pixels);
-            selectionPreview.Width = info.Pixels.Width;
-            selectionPreview.Height = info.Pixels.Height;
-            selectionPreview.Margin = new Thickness(info.Position.X, info.Position.Y, 0, 0);
+            selectionPreview.Width = displaySize.X;
+            selectionPreview.Height = displaySize.Y;
+            selectionPreview.Margin = new Thickness(displayPos.X, displayPos.Y, 0, 0);
         }
 
         public bool VisibleCursor
@@ -415,9 +453,10 @@ namespace Eede.Presentation.Views.DataEntry
             UpdateCursor();
         }
 
-        private static Position PointToPosition(Point point)
+        private Position PointToPosition(Point point)
         {
-            return new((int)point.X, (int)point.Y);
+            if (_viewModel == null) return new((int)point.X, (int)point.Y);
+            return new(_viewModel.Magnification.Minify((int)point.X), _viewModel.Magnification.Minify((int)point.Y));
         }
     }
 }

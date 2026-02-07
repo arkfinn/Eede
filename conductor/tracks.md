@@ -14,18 +14,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] [拡大縮小ボタンの追加と数値指定リサイズ機能の実装](archive/add_scaling_feature_20260206/index.md)
 - [x] [作業エリアへのグリッド表示機能の追加](archive/add_grid_display_20260207/index.md)
 - [x] [ドックエリアの拡大縮小機能](archive/dock_scaling_20260207/index.md)
+- [x] [巨大画像対応のためのメモリ最適化と差分Undo](archive/memory_optimization_20260207/index.md)
 
 ---
-
-- [ ] **Track: MainViewModel などのクリーンアップと DI コンテナの導入(A>C>Bの順で実施)**
-*Link: [./tracks/refactor_mainvm_and_di_20260126/](./tracks/refactor_mainvm_and_di_20260126/)*
-
----
-
-- [ ] **Track: 全 ViewModel への DI 移行と DrawingSession 独立の推進**
-*Link: [./tracks/refactor_all_vms_to_di_20260126/](./tracks/refactor_all_vms_to_di_20260126/)*
-
----
-
-- [x] **Track: 巨大画像対応のためのメモリ最適化と差分Undo**
-*Link: [./tracks/memory_optimization_20260207/](./tracks/memory_optimization_20260207/)*

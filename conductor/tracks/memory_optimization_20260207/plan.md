@@ -10,10 +10,10 @@
 - [x] Task: `MainViewModel` (DrawableCanvasViewModel) の仕様化テストの作成
 - [x] Task: `AnimationViewModel` の仕様化テストの作成
 ### ステップ 1-2: 改善の実装 (Phase 3: Divide & Conquer)
-- [x] Task: `DockPictureViewModel` の Bitmap 破棄実装 (既に一部実装済み、確認と強化)
-- [x] Task: `MainViewModel` (DrawableCanvasViewModel) の Bitmap 破棄実装 (既に一部実装済み、確認と強化)
-- [x] Task: `AnimationViewModel` の Bitmap 破棄実装
-- [x] Task: 改善後のテスト通過確認
+- [x] Task: `DockPictureViewModel` の Bitmap 破棄実装 (既に一部実装済み、確認と強化) [b1e5726]
+- [x] Task: `MainViewModel` (DrawableCanvasViewModel) の Bitmap 破棄実装 (既に一部実装済み、確認と強化) [b1e5726]
+- [x] Task: `AnimationViewModel` の Bitmap 破棄実装 [b1e5726]
+- [x] Task: 改善後のテスト通過確認 [b1e5726]
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 1: ビットマップリソース管理' (Protocol in workflow.md)
 
 ## フェーズ 2: GPUスケーリングへの移行

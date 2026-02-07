@@ -15,6 +15,12 @@
         <ResourceInclude Source="/Styles/Colors/DefaultTheme.axaml"/>
       </ResourceDictionary.MergedDictionaries>
       <converters:PlayPauseTextConverter x:Key="PlayPauseTextConverter" />
+      <x:Single x:Key="Single1">1</x:Single>
+      <x:Single x:Key="Single2">2</x:Single>
+      <x:Single x:Key="Single4">4</x:Single>
+      <x:Single x:Key="Single6">6</x:Single>
+      <x:Single x:Key="Single8">8</x:Single>
+      <x:Single x:Key="Single12">12</x:Single>
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>

@@ -108,6 +108,7 @@ namespace Eede.Presentation.Views.DataEntry
                 .Subscribe(_ =>
                 {
                     UpdateCursor();
+                    UpdateChecked();
                 });
 
             // GridView のバインディング設定
@@ -137,6 +138,18 @@ namespace Eede.Presentation.Views.DataEntry
                 Source = _viewModel,
                 Path = nameof(_viewModel.DisplayHeight)
             });
+        }
+
+        private void UpdateChecked()
+        {
+            if (_viewModel == null) return;
+            float val = _viewModel.Magnification.Value;
+            m1.IsChecked = val == 1;
+            m2.IsChecked = val == 2;
+            m4.IsChecked = val == 4;
+            m6.IsChecked = val == 6;
+            m8.IsChecked = val == 8;
+            m12.IsChecked = val == 12;
         }
 
         private ISelectionState CreateInitialState()

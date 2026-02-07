@@ -168,4 +168,19 @@ public class DockPictureViewModelMagnificationTests
             Assert.That(viewModel.DisplayHeight, Is.EqualTo(128));
         });
     }
+
+    [AvaloniaTest]
+    public void SetMagnificationCommandUpdatesMagnification()
+    {
+        new TestScheduler().With(scheduler =>
+        {
+            RxApp.MainThreadScheduler = scheduler;
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+
+            viewModel.SetMagnificationCommand.Execute(8f).Subscribe();
+            scheduler.AdvanceBy(1);
+
+            Assert.That(viewModel.Magnification.Value, Is.EqualTo(8f));
+        });
+    }
 }

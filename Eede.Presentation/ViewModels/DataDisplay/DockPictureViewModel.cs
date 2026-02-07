@@ -270,6 +270,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public event EventHandler<PictureUpdateEventArgs> PictureUpdate;
         private void ExecutePictureUpdate(Picture picture)
         {
+            PictureBuffer = picture;
             PictureUpdate?.Invoke(this, new PictureUpdateEventArgs(picture));
             if (!Edited)
             {

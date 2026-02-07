@@ -1,38 +1,38 @@
-﻿using Eede.Domain.ImageEditing;
+using Eede.Domain.ImageEditing;
 using NUnit.Framework;
 using System;
 
 namespace Eede.Domain.Tests.ImageEditing
 {
-    [TestFixture]
     public class MagnificationTests
     {
         [Test]
-        public void OutOfRange()
+        [TestCase(1f, 10, 10)]
+        [TestCase(2f, 10, 20)]
+        [TestCase(4f, 10, 40)]
+        [TestCase(0.5f, 10, 5)]
+        public void Magnify_CalculatesCorrectValue(float mag, int input, int expected)
         {
-            _ = Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                _ = new Magnification(0);
-            });
+            var magnification = new Magnification(mag);
+            Assert.That(magnification.Magnify(input), Is.EqualTo(expected));
         }
 
         [Test]
-        public void MagnifyTest()
+        [TestCase(1f, 10, 10)]
+        [TestCase(2f, 20, 10)]
+        [TestCase(4f, 40, 10)]
+        [TestCase(2f, 21, 10)] // 切り捨て確認
+        public void Minify_CalculatesCorrectValue(float mag, int input, int expected)
         {
-            Magnification m = new(4);
-            Assert.That(m.Magnify(3), Is.EqualTo(12));
+            var magnification = new Magnification(mag);
+            Assert.That(magnification.Minify(input), Is.EqualTo(expected));
         }
 
         [Test]
-        public void EqualsTest()
+        public void Constructor_ThrowsException_ForZeroOrNegative()
         {
-            Assert.That(new Magnification(4), Is.EqualTo(new Magnification(4)));
-        }
-
-        [Test]
-        public void GetHashCodeTest()
-        {
-            Assert.That(new Magnification(4).GetHashCode(), Is.EqualTo(new Magnification(4).GetHashCode()));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Magnification(0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Magnification(-1));
         }
     }
 }

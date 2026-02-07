@@ -161,11 +161,23 @@ public class DockPictureViewModelMagnificationTests
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
             viewModel.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), new FilePath("test.png"));
 
+            // 4倍時
             viewModel.Magnification = new Magnification(4);
             scheduler.AdvanceBy(1);
+            Assert.Multiple(() =>
+            {
+                Assert.That(viewModel.DisplayWidth, Is.EqualTo(128));
+                Assert.That(viewModel.DisplayHeight, Is.EqualTo(128));
+            });
 
-            Assert.That(viewModel.DisplayWidth, Is.EqualTo(128));
-            Assert.That(viewModel.DisplayHeight, Is.EqualTo(128));
+            // 画像サイズ変更時
+            viewModel.OnPictureUpdate.Execute(Picture.CreateEmpty(new PictureSize(64, 48))).Subscribe();
+            scheduler.AdvanceBy(1);
+            Assert.Multiple(() =>
+            {
+                Assert.That(viewModel.DisplayWidth, Is.EqualTo(256), "DisplayWidth should update when picture size changes");
+                Assert.That(viewModel.DisplayHeight, Is.EqualTo(192), "DisplayHeight should update when picture size changes");
+            });
         });
     }
 

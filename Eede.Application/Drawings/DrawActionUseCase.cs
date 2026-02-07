@@ -24,7 +24,7 @@ namespace Eede.Application.Drawings
             var canvasCoordinate = displayCoordinate.ToCanvas(magnification);
             History = new CoordinateHistory(canvasCoordinate);
 
-            return session.UpdateDrawing(tool.DrawStart(new DrawingBuffer(session.CurrentPicture), History, isShift).Fetch());
+            return session.UpdateDrawing(tool.DrawStart(session.Buffer, History, isShift).Fetch());
         }
 
         public DrawingSession Drawing(DrawingSession session, DrawingTool tool, DisplayCoordinate displayCoordinate, Magnification magnification, bool isShift)
@@ -34,7 +34,7 @@ namespace Eede.Application.Drawings
             var canvasCoordinate = displayCoordinate.ToCanvas(magnification);
             History = History.Update(canvasCoordinate);
 
-            return session.UpdateDrawing(tool.Drawing(new DrawingBuffer(session.PreviousPicture), History, isShift).Fetch());
+            return session.UpdateDrawing(tool.Drawing(session.Buffer, History, isShift).Fetch());
         }
 
         public DrawingSession DrawEnd(DrawingSession session, DrawingTool tool, DisplayCoordinate displayCoordinate, Magnification magnification, bool isShift)
@@ -44,7 +44,7 @@ namespace Eede.Application.Drawings
             var canvasCoordinate = displayCoordinate.ToCanvas(magnification);
             History = History.Update(canvasCoordinate);
 
-            var result = tool.DrawEnd(new DrawingBuffer(session.PreviousPicture), History, isShift);
+            var result = tool.DrawEnd(session.Buffer, History, isShift);
             History = null;
 
             if (!result.AffectedArea.IsEmpty)

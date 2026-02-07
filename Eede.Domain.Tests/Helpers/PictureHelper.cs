@@ -10,23 +10,47 @@ namespace Eede.Domain.Tests.Helpers
     {
         public static Picture ReadBitmap(string path)
         {
-            // .net8.0-windowsを指定してる限り当面windows依存とする
-            Bitmap bitmap = new(path);
-            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-            byte[] bytes = new byte[Math.Abs(bmpData.Stride) * bitmap.Height];
-            System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, bytes, 0, bytes.Length);
-            bitmap.UnlockBits(bmpData);
-            return Picture.Create(new PictureSize(bitmap.Width, bitmap.Height), bytes);
+            using Bitmap bitmap = new(path);
+            int width = bitmap.Width;
+            int height = bitmap.Height;
+            byte[] pixels = new byte[width * 4 * height];
+            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            try
+            {
+                int sourceStride = bmpData.Stride;
+                IntPtr sourcePtr = bmpData.Scan0;
+                for (int y = 0; y < height; y++)
+                {
+                    System.Runtime.InteropServices.Marshal.Copy(sourcePtr + y * sourceStride, pixels, y * width * 4, width * 4);
+                }
+            }
+            finally
+            {
+                bitmap.UnlockBits(bmpData);
+            }
+            return Picture.Create(new PictureSize(width, height), pixels);
         }
 
         public static void WriteBitmap(string path, Picture picture)
         {
-            // .net8.0-windowsを指定してる限り当面windows依存とする
-            Bitmap bitmap = new(picture.Width, picture.Height);
-            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-            byte[] bytes = picture.CloneImage();
-            System.Runtime.InteropServices.Marshal.Copy(bytes, 0, bmpData.Scan0, bytes.Length);
-            bitmap.UnlockBits(bmpData);
+            int width = picture.Width;
+            int height = picture.Height;
+            using Bitmap bitmap = new(width, height, PixelFormat.Format32bppArgb);
+            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            try
+            {
+                int destStride = bmpData.Stride;
+                IntPtr destPtr = bmpData.Scan0;
+                byte[] pixels = picture.CloneImage();
+                for (int y = 0; y < height; y++)
+                {
+                    System.Runtime.InteropServices.Marshal.Copy(pixels, y * width * 4, destPtr + y * destStride, width * 4);
+                }
+            }
+            finally
+            {
+                bitmap.UnlockBits(bmpData);
+            }
             bitmap.Save(path);
         }
     }

@@ -6,20 +6,30 @@ public class AlphaToneImageTransfer : IImageTransfer
 {
     public Picture Transfer(Picture src, Magnification magnification)
     {
-        // GPUスケーリング移行のため、ドメイン層での拡大は行わない。引数の magnification は無視して等倍で処理する。
-        int toStride = src.Stride;
-        int destWidth = src.Width;
-        int destHeight = src.Height;
+        float factor = magnification.Value;
+        int destWidth = magnification.Magnify(src.Width);
+        int destHeight = magnification.Magnify(src.Height);
+        int toStride = destWidth * 4;
         byte[] destPixels = new byte[toStride * destHeight];
 
         System.ReadOnlySpan<byte> srcSpan = src.AsSpan();
-        for (int i = 0; i < srcSpan.Length; i += 4)
+        int srcStride = src.Stride;
+
+        for (int y = 0; y < destHeight; y++)
         {
-            byte alpha = srcSpan[i + 3];
-            destPixels[i + 0] = alpha;
-            destPixels[i + 1] = alpha;
-            destPixels[i + 2] = alpha;
-            destPixels[i + 3] = 255;
+            int srcY = (int)(y / factor);
+            for (int x = 0; x < destWidth; x++)
+            {
+                int srcX = (int)(x / factor);
+                int srcIdx = (srcY * srcStride) + (srcX * 4);
+                int destIdx = (y * toStride) + (x * 4);
+
+                byte alpha = srcSpan[srcIdx + 3];
+                destPixels[destIdx + 0] = alpha;
+                destPixels[destIdx + 1] = alpha;
+                destPixels[destIdx + 2] = alpha;
+                destPixels[destIdx + 3] = 255;
+            }
         }
         return Picture.Create(new PictureSize(destWidth, destHeight), destPixels);
     }

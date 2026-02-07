@@ -150,6 +150,20 @@ namespace Eede.Domain.ImageEditing
                 ImmutableStack<IHistoryItem>.Empty);
         }
 
+        public DrawingSession PushDiff(Picture nextPicture, PictureArea area, PictureArea? nextArea = null, PictureArea? previousArea = null)
+        {
+            var areaToStore = previousArea ?? SelectingArea;
+            var beforePixels = Buffer.Previous.CutOut(area);
+            var afterPixels = nextPicture.CutOut(area);
+
+            return new DrawingSession(
+                new DrawingBuffer(nextPicture),
+                nextArea,
+                null,
+                UndoStack.Push(new DiffHistoryItem(area, beforePixels, afterPixels, areaToStore)),
+                ImmutableStack<IHistoryItem>.Empty);
+        }
+
         public DrawingSession PushDockUpdate(string dockId, Position position, Picture before, Picture after)
         {
             return new DrawingSession(
@@ -184,6 +198,17 @@ namespace Eede.Domain.ImageEditing
                     RedoStack.Push(new CanvasHistoryItem(Buffer.Previous, SelectingArea)));
                 return new UndoResult(nextSession, canvasItem);
             }
+            else if (historyItem is DiffHistoryItem diffItem)
+            {
+                var restoredPicture = Buffer.Previous.Blend(new DirectImageBlender(), diffItem.Before, diffItem.Area.Position);
+                var nextSession = new DrawingSession(
+                    new DrawingBuffer(restoredPicture),
+                    diffItem.SelectingArea,
+                    null,
+                    newUndoStack,
+                    RedoStack.Push(new DiffHistoryItem(diffItem.Area, diffItem.After, diffItem.Before, SelectingArea)));
+                return new UndoResult(nextSession, diffItem);
+            }
             else if (historyItem is DockActiveHistoryItem dockItem)
             {
                 // For Dock updates, we just move the item to Redo stack.
@@ -215,6 +240,17 @@ namespace Eede.Domain.ImageEditing
                     UndoStack.Push(new CanvasHistoryItem(Buffer.Previous, SelectingArea)),
                     newRedoStack);
                 return new RedoResult(nextSession, canvasItem);
+            }
+            else if (historyItem is DiffHistoryItem diffItem)
+            {
+                var restoredPicture = Buffer.Previous.Blend(new DirectImageBlender(), diffItem.Before, diffItem.Area.Position);
+                var nextSession = new DrawingSession(
+                    new DrawingBuffer(restoredPicture),
+                    diffItem.SelectingArea,
+                    null,
+                    UndoStack.Push(new DiffHistoryItem(diffItem.Area, diffItem.After, diffItem.Before, SelectingArea)),
+                    newRedoStack);
+                return new RedoResult(nextSession, diffItem);
             }
             else if (historyItem is DockActiveHistoryItem dockItem)
             {

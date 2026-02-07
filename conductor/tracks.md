@@ -24,3 +24,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: 全 ViewModel への DI 移行と DrawingSession 独立の推進**
 *Link: [./tracks/refactor_all_vms_to_di_20260126/](./tracks/refactor_all_vms_to_di_20260126/)*
+
+---
+
+- [~] **Track: 巨大画像対応のためのメモリ最適化と差分Undo**
+*Link: [./tracks/memory_optimization_20260207/](./tracks/memory_optimization_20260207/)*

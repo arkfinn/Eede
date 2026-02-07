@@ -75,7 +75,7 @@ public class MainViewModelTests
         _fileSystemMock = new Mock<IFileSystem>();
 
         _globalState = new GlobalState();
-        _animationViewModel = new AnimationViewModel(_patternsProviderMock.Object, _animationPatternServiceMock.Object, _fileSystemMock.Object);
+        _animationViewModel = new AnimationViewModel(_patternsProviderMock.Object, _animationPatternServiceMock.Object, _fileSystemMock.Object, new AvaloniaBitmapAdapter());
         _drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProviderMock.Object);
         _paletteContainerViewModel = new PaletteContainerViewModel();
 

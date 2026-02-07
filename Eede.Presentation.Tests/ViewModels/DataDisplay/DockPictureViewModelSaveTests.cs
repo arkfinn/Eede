@@ -49,7 +49,8 @@ public class DockPictureViewModelSaveTests
         _animationViewModel = new AnimationViewModel(
             _patternsProviderMock.Object,
             _patternServiceMock.Object,
-            _fileSystemMock.Object);
+            _fileSystemMock.Object,
+            new AvaloniaBitmapAdapter());
 
         // BitmapAdapterのデフォルト挙動を設定
         _bitmapAdapterMock.Setup(x => x.ConvertToBitmap(It.IsAny<Picture>()))

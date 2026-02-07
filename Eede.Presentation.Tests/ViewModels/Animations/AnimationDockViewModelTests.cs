@@ -3,6 +3,7 @@ using Eede.Domain.Animations;
 using Eede.Application.Infrastructure;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.UseCase.Animations;
+using Eede.Presentation.Common.Adapters;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -22,7 +23,8 @@ public class AnimationDockViewModelTests
         var animationViewModel = new AnimationViewModel(
             patternsProvider,
             patternService,
-            new Mock<IFileSystem>().Object);
+            new Mock<IFileSystem>().Object,
+            new AvaloniaBitmapAdapter());
         
         var dockViewModel = new AnimationDockViewModel(animationViewModel);
 

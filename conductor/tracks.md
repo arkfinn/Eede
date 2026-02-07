@@ -25,5 +25,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./tracks/refactor_all_vms_to_di_20260126/](./tracks/refactor_all_vms_to_di_20260126/)*
 ---
 
-- [~] **Track: ドックエリアの拡大縮小機能**
+- [x] **Track: ドックエリアの拡大縮小機能**
 *Link: [./tracks/dock_scaling_20260207/](./tracks/dock_scaling_20260207/)*

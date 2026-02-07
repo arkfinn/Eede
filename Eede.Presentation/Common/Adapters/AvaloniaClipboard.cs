@@ -26,7 +26,7 @@ public class AvaloniaClipboard : IClipboard
         var clipboard = GetClipboard();
         if (clipboard == null) return;
 
-        var bitmap = PictureBitmapAdapter.ConvertToBitmap(picture);
+        var bitmap = AvaloniaBitmapAdapter.StaticConvertToBitmap(picture);
         var dataObject = new DataObject();
 
         // 1. 標準のBitmapオブジェクトとしてセット
@@ -79,7 +79,7 @@ public class AvaloniaClipboard : IClipboard
                     using (var stream = await firstFile.OpenReadAsync())
                     {
                         var bitmap = new Bitmap(stream);
-                        return PictureBitmapAdapter.ConvertToPicture(bitmap);
+                        return AvaloniaBitmapAdapter.StaticConvertToPicture(bitmap);
                     }
                 }
             }
@@ -108,19 +108,19 @@ public class AvaloniaClipboard : IClipboard
 
             if (data is Bitmap bitmap)
             {
-                return PictureBitmapAdapter.ConvertToPicture(bitmap);
+                return AvaloniaBitmapAdapter.StaticConvertToPicture(bitmap);
             }
 
             if (data is Stream stream)
             {
-                return PictureBitmapAdapter.ConvertToPicture(new Bitmap(stream));
+                return AvaloniaBitmapAdapter.StaticConvertToPicture(new Bitmap(stream));
             }
 
             if (data is byte[] bytes)
             {
                 using (var ms = new MemoryStream(bytes))
                 {
-                    return PictureBitmapAdapter.ConvertToPicture(new Bitmap(ms));
+                    return AvaloniaBitmapAdapter.StaticConvertToPicture(new Bitmap(ms));
                 }
             }
         }

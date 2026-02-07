@@ -274,7 +274,7 @@ namespace Eede.Presentation.Views.DataEntry
             var displaySize = new CanvasCoordinate(info.Pixels.Width, info.Pixels.Height).ToDisplay(mag);
 
             selectionPreview.IsVisible = true;
-            selectionPreview.Source = PictureBitmapAdapter.ConvertToPremultipliedBitmap(info.Pixels);
+            selectionPreview.Source = AvaloniaBitmapAdapter.StaticConvertToPremultipliedBitmap(info.Pixels);
             selectionPreview.Width = displaySize.X;
             selectionPreview.Height = displaySize.Y;
             selectionPreview.Margin = new Thickness(displayPos.X, displayPos.Y, 0, 0);

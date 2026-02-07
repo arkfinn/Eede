@@ -23,3 +23,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: 全 ViewModel への DI 移行と DrawingSession 独立の推進**
 *Link: [./tracks/refactor_all_vms_to_di_20260126/](./tracks/refactor_all_vms_to_di_20260126/)*
+---
+
+- [~] **Track: ドックエリアの拡大縮小機能**
+*Link: [./tracks/dock_scaling_20260207/](./tracks/dock_scaling_20260207/)*

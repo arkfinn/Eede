@@ -203,7 +203,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             }
             finally
             {
-                args.File.Bitmap.Dispose();
+                args.File?.Bitmap?.Dispose();
             }
         }
 

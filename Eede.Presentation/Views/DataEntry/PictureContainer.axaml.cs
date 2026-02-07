@@ -152,6 +152,36 @@ namespace Eede.Presentation.Views.DataEntry
             m12.IsChecked = val == 12;
         }
 
+        private void SetMagnification1(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_viewModel != null) _viewModel.Magnification = new Magnification(1);
+        }
+
+        private void SetMagnification2(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_viewModel != null) _viewModel.Magnification = new Magnification(2);
+        }
+
+        private void SetMagnification4(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_viewModel != null) _viewModel.Magnification = new Magnification(4);
+        }
+
+        private void SetMagnification6(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_viewModel != null) _viewModel.Magnification = new Magnification(6);
+        }
+
+        private void SetMagnification8(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_viewModel != null) _viewModel.Magnification = new Magnification(8);
+        }
+
+        private void SetMagnification12(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_viewModel != null) _viewModel.Magnification = new Magnification(12);
+        }
+
         private ISelectionState CreateInitialState()
         {
             if (_viewModel?.AnimationViewModel.IsAnimationMode == true)

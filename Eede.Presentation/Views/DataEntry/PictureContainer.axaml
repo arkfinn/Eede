@@ -20,22 +20,22 @@
       <StackPanel.Styles>
         <StyleInclude Source="/Styles/Styles.axaml" />
       </StackPanel.Styles>
-      <ToggleButton x:Name="m1" Classes="tool" Command="{Binding SetMagnificationCommand}" CommandParameter="{StaticResource Single1}">
+      <ToggleButton x:Name="m1" Classes="tool" Click="SetMagnification1">
         <Image Source="/Assets/Tools/mag1.bmp" Stretch="None" />
       </ToggleButton>
-      <ToggleButton x:Name="m2" Classes="tool" Command="{Binding SetMagnificationCommand}" CommandParameter="{StaticResource Single2}">
+      <ToggleButton x:Name="m2" Classes="tool" Click="SetMagnification2">
         <Image Source="/Assets/Tools/mag2.bmp" Stretch="None" />
       </ToggleButton>
-      <ToggleButton x:Name="m4" Classes="tool" Command="{Binding SetMagnificationCommand}" CommandParameter="{StaticResource Single4}">
+      <ToggleButton x:Name="m4" Classes="tool" Click="SetMagnification4">
         <Image Source="/Assets/Tools/mag4.bmp" Stretch="None" />
       </ToggleButton>
-      <ToggleButton x:Name="m6" Classes="tool" Command="{Binding SetMagnificationCommand}" CommandParameter="{StaticResource Single6}">
+      <ToggleButton x:Name="m6" Classes="tool" Click="SetMagnification6">
         <Image Source="/Assets/Tools/mag6.bmp" Stretch="None" />
       </ToggleButton>
-      <ToggleButton x:Name="m8" Classes="tool" Command="{Binding SetMagnificationCommand}" CommandParameter="{StaticResource Single8}">
+      <ToggleButton x:Name="m8" Classes="tool" Click="SetMagnification8">
         <Image Source="/Assets/Tools/mag8.bmp" Stretch="None" />
       </ToggleButton>
-      <ToggleButton x:Name="m12" Classes="tool" Command="{Binding SetMagnificationCommand}" CommandParameter="{StaticResource Single12}">
+      <ToggleButton x:Name="m12" Classes="tool" Click="SetMagnification12">
         <Image Source="/Assets/Tools/mag12.bmp" Stretch="None" />
       </ToggleButton>
     </StackPanel>

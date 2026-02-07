@@ -2,18 +2,5 @@
 
 This file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.
 
-- [x] [Copy, Cut, and Paste Selection](archive/copy_paste_selection_20260123/index.md) [3a0f3c3]
-- [x] [Refactoring DockPictureViewModel (DDD & Safe Refactor)](archive/refactor_dock_vm_20260125/index.md)
-- [x] [ViewLocator導入によるDI自動解決とDock.Avaloniaの統合](archive/setup_view_locator_20260127/index.md)
-- [x] [DrawableCanvasViewModel の責務分離：UI状態と相互作用ロジックの整理](archive/refactor_drawable_canvas_vm_20260127/index.md)
-- [x] [DrawableCanvasViewModel の責務分離：UI状態と相互作用ロジックの整理（再）](archive/refactor_drawable_canvas_vm_20260128/index.md)
-- [x] [Refactoring PictureEditingUseCase into atomic, domain-centric UseCases to eliminate service anti-pattern](archive/refactor_picture_editing_usecase_20260129/index.md)
-- [x] [Include Pull Action in Undo History](archive/include_pull_action_in_undo_history_20260129/index.md) [13e5fd1]
-- [x] [Serviceクラスの撲滅。UseCaseに分解または適切な名称に変更](archive/service_extermination_20260131/index.md)
-- [x] [非破壊プレビュー付きコピー＆ペーストの改善](archive/improve_paste_preview_20260201/index.md)
-- [x] [拡大縮小ボタンの追加と数値指定リサイズ機能の実装](archive/add_scaling_feature_20260206/index.md)
-- [x] [作業エリアへのグリッド表示機能の追加](archive/add_grid_display_20260207/index.md)
-- [x] [ドックエリアの拡大縮小機能](archive/dock_scaling_20260207/index.md)
-- [x] [巨大画像対応のためのメモリ最適化と差分Undo](archive/memory_optimization_20260207/index.md)
-
----
+- [~] **Track: ゼロクローン変換（ReadOnlySpan<byte> 等を用いたネイティブ転送）の導入** [baseline: 5fdd9f6]
+*Link: [./tracks/zero_clone_20260207/](./tracks/zero_clone_20260207/)*

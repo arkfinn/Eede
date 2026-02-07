@@ -13,6 +13,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] [非破壊プレビュー付きコピー＆ペーストの改善](archive/improve_paste_preview_20260201/index.md)
 - [x] [拡大縮小ボタンの追加と数値指定リサイズ機能の実装](archive/add_scaling_feature_20260206/index.md)
 - [x] [作業エリアへのグリッド表示機能の追加](archive/add_grid_display_20260207/index.md)
+- [x] [ドックエリアの拡大縮小機能](archive/dock_scaling_20260207/index.md)
 
 ---
 
@@ -23,7 +24,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: 全 ViewModel への DI 移行と DrawingSession 独立の推進**
 *Link: [./tracks/refactor_all_vms_to_di_20260126/](./tracks/refactor_all_vms_to_di_20260126/)*
----
-
-- [x] **Track: ドックエリアの拡大縮小機能**
-*Link: [./tracks/dock_scaling_20260207/](./tracks/dock_scaling_20260207/)*

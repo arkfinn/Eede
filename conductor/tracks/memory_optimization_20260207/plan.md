@@ -4,7 +4,7 @@
 - [x] Task: Git ステータスの確認 (Phase 1: Assess & Secure) [40d6684]
     - [x] `git status` を実行し、クリーンな状態であることを確認する。
 
-## フェーズ 1: ビットマップリソース管理の徹底
+## フェーズ 1: ビットマップリソース管理の徹底 [checkpoint: 47d9736]
 ### ステップ 1-1: 現状の振る舞いの固定 (Phase 2: Lock Down)
 - [x] Task: `DockPictureViewModel` の仕様化テストの作成
 - [x] Task: `MainViewModel` (DrawableCanvasViewModel) の仕様化テストの作成

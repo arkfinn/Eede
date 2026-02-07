@@ -7,9 +7,9 @@ namespace Eede.Application.Drawings
     {
         public readonly DrawingBuffer PictureBuffer;
         public readonly DrawableArea DrawableArea;
-        public readonly PictureArea? AffectedArea;
+        public readonly PictureRegion AffectedArea;
 
-        public DrawingResult(DrawingBuffer picture, DrawableArea runner, PictureArea? affectedArea = null)
+        public DrawingResult(DrawingBuffer picture, DrawableArea runner, PictureRegion affectedArea = default)
         {
             PictureBuffer = picture;
             DrawableArea = runner;

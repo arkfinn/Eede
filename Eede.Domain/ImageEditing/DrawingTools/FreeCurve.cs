@@ -1,16 +1,19 @@
-﻿using Eede.Domain.SharedKernel;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Eede.Domain.SharedKernel;
 
 namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public record FreeCurve : IDrawStyle
 {
-    private PictureArea? AffectedArea;
+    private readonly List<PictureArea> AffectedAreas = new();
 
     public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
+        AffectedAreas.Clear();
         Drawer drawer = new(buffer.Previous, penStyle);
         var result = drawer.DrawPoint(coordinateHistory.Now.ToPosition());
-        AffectedArea = result.Area;
+        AffectedAreas.Add(result.Area);
         return buffer.UpdateDrawing(result.Picture);
     }
 
@@ -18,15 +21,15 @@ public record FreeCurve : IDrawStyle
     {
         Drawer drawer = new(buffer.Fetch(), penStyle);
         var result = Draw(drawer, coordinateHistory);
-        AffectedArea = AffectedArea.HasValue ? AffectedArea.Value.Combine(result.Area) : result.Area;
+        AffectedAreas.Add(result.Area);
         return buffer.UpdateDrawing(result.Picture);
     }
 
     public DrawEndResult DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
-        var area = AffectedArea;
-        AffectedArea = null;
-        return new DrawEndResult(ContextFactory.Create(buffer.Fetch()), area);
+        var result = new DrawEndResult(ContextFactory.Create(buffer.Fetch()), new PictureRegion(AffectedAreas.ToList()));
+        AffectedAreas.Clear();
+        return result;
     }
 
     private (Picture Picture, PictureArea Area) Draw(Drawer drawer, CoordinateHistory coordinateHistory)

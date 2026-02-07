@@ -23,7 +23,7 @@ public class RegionSelector : IDrawStyle
     public DrawEndResult DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         OnDrawEnd?.Invoke(this, coordinateHistory.ToPositionHistory());
-        return new DrawEndResult(buffer.CancelDrawing(), null);
+        return new DrawEndResult(buffer.CancelDrawing(), default);
     }
 }
 

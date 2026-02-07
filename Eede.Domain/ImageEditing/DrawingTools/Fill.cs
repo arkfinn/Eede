@@ -25,8 +25,7 @@ public record Fill : IDrawStyle
     {
         var area = AffectedArea;
         AffectedArea = null;
-        return new DrawEndResult(ContextFactory.Create(buffer.Fetch()), area);
+        return new DrawEndResult(ContextFactory.Create(buffer.Fetch()), area ?? default);
     }
-
 }
 

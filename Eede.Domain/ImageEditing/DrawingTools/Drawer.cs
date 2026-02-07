@@ -392,7 +392,9 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
     public (Picture Picture, PictureArea Area) Fill(Position from)
     {
-        PictureArea area = new(new Position(0, 0), DrawingPicture.Size);
+        int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+        bool anyFilled = false;
+
         Picture result = DrawingPicture.Draw(dest =>
         {
             int cWidth = dest.Width;
@@ -420,6 +422,15 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                        imageData[index + 3] == targetColor.Alpha;
             }
 
+            void UpdateBounds(int x, int y)
+            {
+                minX = Math.Min(minX, x);
+                minY = Math.Min(minY, y);
+                maxX = Math.Max(maxX, x);
+                maxY = Math.Max(maxY, y);
+                anyFilled = true;
+            }
+
             Stack<Position> stack = new();
             stack.Push(from);
             while (stack.Count > 0)
@@ -437,6 +448,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                 while (x < cWidth && IsTargetColor(x, y))
                 {
                     DrawPixel(imageData, stride, cWidth, cHeight, x, y, color);
+                    UpdateBounds(x, y);
                     if (!spanAbove && y > 0 && IsTargetColor(x, y - 1))
                     {
                         stack.Push(new Position(x, y - 1));
@@ -461,6 +473,10 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             }
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
+
+        PictureArea area = anyFilled
+            ? new PictureArea(new Position(minX, minY), new PictureSize(maxX - minX + 1, maxY - minY + 1))
+            : new PictureArea(new Position(0, 0), new PictureSize(0, 0));
         return (result, area);
     }
 

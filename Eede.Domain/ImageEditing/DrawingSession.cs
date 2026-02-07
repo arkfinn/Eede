@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.History;
@@ -150,17 +152,20 @@ namespace Eede.Domain.ImageEditing
                 ImmutableStack<IHistoryItem>.Empty);
         }
 
-        public DrawingSession PushDiff(Picture nextPicture, PictureArea area, PictureArea? nextArea = null, PictureArea? previousArea = null)
+        public DrawingSession PushDiff(Picture nextPicture, PictureRegion region, PictureArea? nextArea = null, PictureArea? previousArea = null)
         {
             var areaToStore = previousArea ?? SelectingArea;
-            var beforePixels = Buffer.Previous.CutOut(area);
-            var afterPixels = nextPicture.CutOut(area);
+            var diffs = region.Select(area => new PictureDiff(
+                area,
+                Buffer.Previous.CutOut(area),
+                nextPicture.CutOut(area)
+            )).ToList();
 
             return new DrawingSession(
                 new DrawingBuffer(nextPicture),
                 nextArea,
                 null,
-                UndoStack.Push(new DiffHistoryItem(area, beforePixels, afterPixels, areaToStore)),
+                UndoStack.Push(new DiffHistoryItem(diffs, areaToStore)),
                 ImmutableStack<IHistoryItem>.Empty);
         }
 
@@ -200,13 +205,19 @@ namespace Eede.Domain.ImageEditing
             }
             else if (historyItem is DiffHistoryItem diffItem)
             {
-                var restoredPicture = Buffer.Previous.Blend(new DirectImageBlender(), diffItem.Before, diffItem.Area.Position);
+                var restoredPicture = Buffer.Previous;
+                foreach (var diff in diffItem.Diffs)
+                {
+                    restoredPicture = restoredPicture.Blend(new DirectImageBlender(), diff.Before, diff.Area.Position);
+                }
                 var nextSession = new DrawingSession(
                     new DrawingBuffer(restoredPicture),
                     diffItem.SelectingArea,
                     null,
                     newUndoStack,
-                    RedoStack.Push(new DiffHistoryItem(diffItem.Area, diffItem.After, diffItem.Before, SelectingArea)));
+                    RedoStack.Push(new DiffHistoryItem(
+                        diffItem.Diffs.Select(d => new PictureDiff(d.Area, d.After, d.Before)).ToList(),
+                        SelectingArea)));
                 return new UndoResult(nextSession, diffItem);
             }
             else if (historyItem is DockActiveHistoryItem dockItem)
@@ -243,12 +254,18 @@ namespace Eede.Domain.ImageEditing
             }
             else if (historyItem is DiffHistoryItem diffItem)
             {
-                var restoredPicture = Buffer.Previous.Blend(new DirectImageBlender(), diffItem.Before, diffItem.Area.Position);
+                var restoredPicture = Buffer.Previous;
+                foreach (var diff in diffItem.Diffs)
+                {
+                    restoredPicture = restoredPicture.Blend(new DirectImageBlender(), diff.Before, diff.Area.Position);
+                }
                 var nextSession = new DrawingSession(
                     new DrawingBuffer(restoredPicture),
                     diffItem.SelectingArea,
                     null,
-                    UndoStack.Push(new DiffHistoryItem(diffItem.Area, diffItem.After, diffItem.Before, SelectingArea)),
+                    UndoStack.Push(new DiffHistoryItem(
+                        diffItem.Diffs.Select(d => new PictureDiff(d.Area, d.After, d.Before)).ToList(),
+                        SelectingArea)),
                     newRedoStack);
                 return new RedoResult(nextSession, diffItem);
             }

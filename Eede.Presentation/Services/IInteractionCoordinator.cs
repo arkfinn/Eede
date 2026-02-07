@@ -44,6 +44,6 @@ public interface IInteractionCoordinator
     ArgbColor BackgroundColor { get; set; }
 
     // イベント
-    event Action<Picture, Picture, PictureArea?, PictureArea?> Drew;
+    event Action<Picture, Picture, PictureArea?, PictureArea?, PictureArea?> Drew;
     event Action StateChanged;
 }

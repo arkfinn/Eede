@@ -148,8 +148,8 @@ namespace Eede.Application.Drawings
                 return new DrawingResult(picture, this);
             }
             PositionHistory nextHistory = NextPositionHistory(PositionHistory, displayPosition);
-            DrawingBuffer result = drawStyle.DrawEnd(picture, penStyle, ToCoordinateHistory(nextHistory), isShift);
-            return new DrawingResult(result, ClearPositionHistory());
+            DrawEndResult result = drawStyle.DrawEnd(picture, penStyle, ToCoordinateHistory(nextHistory), isShift);
+            return new DrawingResult(result.Buffer, ClearPositionHistory(), result.AffectedArea);
         }
 
         public DrawingResult DrawCancel(DrawingBuffer picture)

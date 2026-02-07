@@ -76,7 +76,8 @@ public partial class PaletteForm : UserControl
             Drawer drawer = new(Buffer, new PenStyle(new DirectImageBlender(), color, 1));
             int x = index % 16 * CELL_WIDTH;
             int y = index / 16 * CELL_HEIGHT;
-            Buffer = drawer.DrawFillRectangle(new Position(x, y), new Position(x + CELL_WIDTH - 1, y + CELL_HEIGHT - 1));
+            var result = drawer.DrawFillRectangle(new Position(x, y), new Position(x + CELL_WIDTH - 1, y + CELL_HEIGHT - 1));
+            Buffer = result.Picture;
         });
         PaletteBitmap?.Dispose();
         PaletteBitmap = PictureBitmapAdapter.ConvertToBitmap(Buffer);

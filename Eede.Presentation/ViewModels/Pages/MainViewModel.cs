@@ -254,10 +254,10 @@ public class MainViewModel : ViewModelBase
             .Switch()
             .BindTo(this, x => x.AnimationViewModel.ActivePicture);
 
-        DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea) =>
+        DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea, affectedArea) =>
         {
             // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
-            DrawingSessionViewModel.Push(now, nowArea, previousArea);
+            DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea);
         };
 
         LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);

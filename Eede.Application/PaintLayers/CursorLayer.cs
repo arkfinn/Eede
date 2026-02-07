@@ -29,8 +29,8 @@ namespace Eede.Application.PaintLayers
         public void Paint(Graphics destination)
         {
             Drawer drawer = new(Source, PenStyle);
-            Picture cursor = drawer.DrawPoint(Position);
-            Picture data = cursor.Transfer(ImageTransfer, PaintSize.Magnification);
+            var result = drawer.DrawPoint(Position);
+            Picture data = result.Picture.Transfer(ImageTransfer, PaintSize.Magnification);
             using Bitmap dest = BitmapConverter.Convert(data);
             destination.PixelOffsetMode = PixelOffsetMode.Half;
             destination.InterpolationMode = InterpolationMode.NearestNeighbor;
@@ -63,10 +63,10 @@ namespace Eede.Application.PaintLayers
             Drawer drawer = new(cursorLayer, displayPenStyle);
 
             // 描画位置は元の座標を使用
-            Picture cursorOnly = drawer.DrawPoint(Position);
+            var result = drawer.DrawPoint(Position);
 
             // 4. トーン変換済みの背景に対して、ペン先のみをアルファブレンドで重ねる
-            return source.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), cursorOnly, new Position(0, 0));
+            return source.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), result.Picture, new Position(0, 0));
         }
     }
 }

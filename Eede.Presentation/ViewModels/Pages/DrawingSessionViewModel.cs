@@ -54,9 +54,16 @@ namespace Eede.Presentation.ViewModels.Pages
             Redone?.Invoke(this, result);
         }
 
-        public void Push(Picture picture, PictureArea? selectingArea = null, PictureArea? previousArea = null)
+        public void Push(Picture picture, PictureArea? selectingArea = null, PictureArea? previousArea = null, PictureArea? affectedArea = null)
         {
-            _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea));
+            if (affectedArea.HasValue && !affectedArea.Value.IsEmpty)
+            {
+                _provider.Update(CurrentSession.PushDiff(picture, affectedArea.Value, selectingArea, previousArea));
+            }
+            else
+            {
+                _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea));
+            }
         }
 
         public void PushDockUpdate(string dockId, Position position, Picture before, Picture after)

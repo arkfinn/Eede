@@ -11,20 +11,20 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
     private readonly PenStyle PenStyle = penCase;
 
-    public Picture DrawPoint(CanvasCoordinate coordinate)
+    public (Picture Picture, PictureArea Area) DrawPoint(CanvasCoordinate coordinate)
     {
         return DrawPoint(coordinate.ToPosition());
     }
 
-    public Picture DrawPoint(Position position)
+    public (Picture Picture, PictureArea Area) DrawPoint(Position position)
     {
-        int x = position.X;
-        int y = position.Y;
-        return DrawingPicture.Draw(dest =>
+        PictureArea area = GetPointArea(position);
+        Picture result = DrawingPicture.Draw(dest =>
         {
             byte[] imageData = DrawPointRoutine(dest, dest.CloneImage(), position);
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
+        return (result, area);
     }
 
     private byte[] DrawPointRoutine(Picture dest, byte[] imageData, Position position)
@@ -40,9 +40,26 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         return DrawFillEllipseRoutine(dest, imageData, fromPosition, toPosition);
     }
 
-    public Picture DrawLine(Position from, Position to)
+    private PictureArea GetPointArea(Position position)
     {
-        return DrawingPicture.Draw(dest =>
+        if (PenStyle.Width == 1)
+        {
+            return new PictureArea(position, new PictureSize(1, 1));
+        }
+        int d = PenStyle.Width / 2;
+        int dd = PenStyle.Width - d;
+        Position fromPosition = new(position.X - d, position.Y - d);
+        return new PictureArea(fromPosition, new PictureSize(PenStyle.Width, PenStyle.Width));
+    }
+
+    public (Picture Picture, PictureArea Area) DrawLine(Position from, Position to)
+    {
+        (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
+        int d = PenStyle.Width / 2;
+        int dd = PenStyle.Width - d;
+        PictureArea area = new(new Position(fx - d, fy - d), new PictureSize(tx - fx + PenStyle.Width, ty - fy + PenStyle.Width));
+
+        Picture result = DrawingPicture.Draw(dest =>
         {
             byte[] imageData = dest.CloneImage();
             int width = dest.Width;
@@ -109,16 +126,18 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
+        return (result, area);
     }
 
-    public Picture DrawEllipse(Position from, Position to)
+    public (Picture Picture, PictureArea Area) DrawEllipse(Position from, Position to)
     {
-        return DrawingPicture.Draw(dest =>
+        (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
+        PictureArea area = new(new Position(fx, fy), new PictureSize(tx - fx + 1, ty - fy + 1));
+
+        Picture result = DrawingPicture.Draw(dest =>
         {
             byte[] imageData = dest.CloneImage();
             ArgbColor color = PenStyle.Color;
-
-            (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
 
             int width = tx - fx;
             int height = ty - fy;
@@ -182,17 +201,22 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
+        return (result, area);
     }
 
 
 
-    public Picture DrawFillEllipse(Position from, Position to)
+    public (Picture Picture, PictureArea Area) DrawFillEllipse(Position from, Position to)
     {
-        return DrawingPicture.Draw(dest =>
+        (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
+        PictureArea area = new(new Position(fx, fy), new PictureSize(tx - fx + 1, ty - fy + 1));
+
+        Picture result = DrawingPicture.Draw(dest =>
         {
             byte[] imageData = DrawFillEllipseRoutine(dest, dest.CloneImage(), from, to);
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
+        return (result, area);
     }
 
     private byte[] DrawFillEllipseRoutine(Picture dest, byte[] imageData, Position from, Position to)
@@ -260,16 +284,18 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         return imageData;
     }
 
-    public Picture DrawRectangle(Position from, Position to)
+    public (Picture Picture, PictureArea Area) DrawRectangle(Position from, Position to)
     {
-        return DrawingPicture.Draw(dest =>
+        (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
+        PictureArea area = new(new Position(fx, fy), new PictureSize(tx - fx + 1, ty - fy + 1));
+
+        Picture result = DrawingPicture.Draw(dest =>
         {
             byte[] imageData = dest.CloneImage();
             ArgbColor color = PenStyle.Color;
             int stride = dest.Stride;
             int width = dest.Width;
             int height = dest.Height;
-            (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
             DrawScanLine(imageData, stride, width, height, fx, fy, tx, color);
             for (int i = fy; i < ty; i++)
             {
@@ -279,18 +305,21 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             DrawScanLine(imageData, stride, width, height, fx, ty, tx, color);
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
+        return (result, area);
     }
 
-    public Picture DrawFillRectangle(Position from, Position to)
+    public (Picture Picture, PictureArea Area) DrawFillRectangle(Position from, Position to)
     {
-        return DrawingPicture.Draw(dest =>
+        (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
+        PictureArea area = new(new Position(fx, fy), new PictureSize(tx - fx + 1, ty - fy + 1));
+
+        Picture result = DrawingPicture.Draw(dest =>
         {
             byte[] imageData = dest.CloneImage();
             ArgbColor color = PenStyle.Color;
             int stride = dest.Stride;
             int width = dest.Width;
             int height = dest.Height;
-            (int fx, int fy, int tx, int ty) = NormalizePosition(from, to);
 
             for (int i = fy; i <= ty; i++)
             {
@@ -298,6 +327,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             }
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
+        return (result, area);
     }
 
     private static (int fx, int fy, int tx, int ty) NormalizePosition(Position from, Position to)
@@ -355,14 +385,15 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         }
     }
 
-    public Picture Fill(CanvasCoordinate from)
+    public (Picture Picture, PictureArea Area) Fill(CanvasCoordinate from)
     {
         return Fill(from.ToPosition());
     }
 
-    public Picture Fill(Position from)
+    public (Picture Picture, PictureArea Area) Fill(Position from)
     {
-        return DrawingPicture.Draw(dest =>
+        PictureArea area = new(new Position(0, 0), DrawingPicture.Size);
+        Picture result = DrawingPicture.Draw(dest =>
         {
             int cWidth = dest.Width;
             int cHeight = dest.Height;
@@ -430,6 +461,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             }
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
+        return (result, area);
     }
 
     public bool Contains(Position position)

@@ -26,12 +26,12 @@
 - [x] Task: スナップショット比較テストの実行 [3b288d7]
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 2: GPUスケーリングへの移行' (Protocol in workflow.md)
 
-## フェーズ 3: 差分Undoインフラの構築
+## フェーズ 3: 差分Undoインフラの構築 [checkpoint: 74aa0bd]
 ### ステップ 3-1: 現状の履歴システムの固定
-- [ ] Task: `DrawingSession` Undo/Redo の仕様化テスト
+- [x] Task: `DrawingSession` Undo/Redo の仕様化テスト [74aa0bd]
 ### ステップ 3-2: 差分保存の実装
-- [ ] Task: `DiffPictureHistory` の実装と統合
-- [ ] Task: 仕様化テストの実行
+- [x] Task: `DiffPictureHistory` の実装と統合 (DiffHistoryItem として実装) [74aa0bd]
+- [x] Task: 仕様化テストの実行 [74aa0bd]
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 3: 差分Undoインフラ' (Protocol in workflow.md)
 
 ## フェーズ 4: ツールの差分報告対応

@@ -16,7 +16,8 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
         {
             Picture src = ReadPicture(@"ImageEditing\DrawingTools\test\base.png");
             Drawer drawer = new(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1));
-            Picture dst = drawer.DrawPoint(new Position(5, 5));
+            var result = drawer.DrawPoint(new Position(5, 5));
+            Picture dst = result.Picture;
             //dstBmp.Save(@"ImageEditing\DrawingTools\test\dest.png", ImageFormat.Png);
             Picture expected = ReadPicture(@"ImageEditing\DrawingTools\test\point1.png");
             Assert.That(dst.CloneImage(), Is.EqualTo(expected.CloneImage()));
@@ -31,7 +32,8 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             Drawer drawer = new(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
 
             // Act
-            Picture dst = drawer.DrawEllipse(new Position(fx, fy), new Position(tx, ty));
+            var result = drawer.DrawEllipse(new Position(fx, fy), new Position(tx, ty));
+            Picture dst = result.Picture;
             //PictureHelper.WriteBitmap(@"ImageEditing\DrawingTools\test\ellipse_test.png", dst);
 
             // Assert
@@ -48,7 +50,8 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             Drawer drawer = new(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
 
             // Act
-            Picture dst = drawer.DrawFillEllipse(new Position(fx, fy), new Position(tx, ty));
+            var result = drawer.DrawFillEllipse(new Position(fx, fy), new Position(tx, ty));
+            Picture dst = result.Picture;
             //PictureHelper.WriteBitmap(@"ImageEditing\DrawingTools\test\fillEllipse_test.png", dst);
 
             // Assert
@@ -64,7 +67,8 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             Drawer drawer = new(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
 
             // Act
-            Picture dst = drawer.DrawRectangle(new(10, 10), new(15, 15));
+            var result = drawer.DrawRectangle(new(10, 10), new(15, 15));
+            Picture dst = result.Picture;
             //PictureHelper.WriteBitmap(@"ImageEditing\DrawingTools\test\test.png", dst);
 
             // Assert
@@ -80,7 +84,8 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             Drawer drawer = new(src, new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1));
 
             // Act
-            Picture dst = drawer.DrawFillRectangle(new(10, 10), new(15, 15));
+            var result = drawer.DrawFillRectangle(new(10, 10), new(15, 15));
+            Picture dst = result.Picture;
             // PictureHelper.WriteBitmap(@"ImageEditing\DrawingTools\test\test.png", dst);
 
             // Assert

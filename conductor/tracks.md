@@ -27,5 +27,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: 巨大画像対応のためのメモリ最適化と差分Undo**
+- [x] **Track: 巨大画像対応のためのメモリ最適化と差分Undo**
 *Link: [./tracks/memory_optimization_20260207/](./tracks/memory_optimization_20260207/)*

@@ -67,6 +67,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public double DisplayHeight { get; private set; }
         public ReactiveCommand<Unit, Unit> ZoomInCommand { get; }
         public ReactiveCommand<Unit, Unit> ZoomOutCommand { get; }
+        public ReactiveCommand<float, Unit> SetMagnificationCommand { get; }
         public ReactiveCommand<Unit, bool> OnClosing { get; }
         public ReactiveCommand<Unit, bool> CloseCommand { get; }
         public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
@@ -121,6 +122,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             CloseCommand = ReactiveCommand.CreateFromTask(ExecuteClose);
             ZoomInCommand = ReactiveCommand.Create(ZoomIn);
             ZoomOutCommand = ReactiveCommand.Create(ZoomOut);
+            SetMagnificationCommand = ReactiveCommand.Create<float>(v => Magnification = new Magnification(v));
 
             MinCursorSize = new PictureSize(32, 32);
             CursorSize = new PictureSize(32, 32);

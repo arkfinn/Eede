@@ -19,7 +19,7 @@ namespace Eede.Application.PaintLayers
 
         public Picture Painted(Picture destination)
         {
-            return Source == null ? destination : Source.Transfer(ImageTransfer, PaintSize.Magnification);
+            return Source == null ? destination : Source.Transfer(ImageTransfer, new Magnification(1));
         }
     }
 }

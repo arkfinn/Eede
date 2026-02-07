@@ -11,17 +11,23 @@ namespace Eede.Presentation.Common.Adapters
 {
     public class AvaloniaBitmapAdapter : IBitmapAdapter<Bitmap>
     {
-        public Bitmap ConvertToBitmap(Picture picture)
+        public Bitmap ConvertToBitmap(Picture picture) => StaticConvertToBitmap(picture);
+
+        public Bitmap ConvertToPremultipliedBitmap(Picture picture) => StaticConvertToPremultipliedBitmap(picture);
+
+        public Picture ConvertToPicture(Bitmap bitmap) => StaticConvertToPicture(bitmap);
+
+        public static Bitmap StaticConvertToBitmap(Picture picture)
         {
             return CreateBitmapFromPixelData(picture.AsSpan(), picture.Width, picture.Height, AlphaFormat.Unpremul);
         }
 
-        public Bitmap ConvertToPremultipliedBitmap(Picture picture)
+        public static Bitmap StaticConvertToPremultipliedBitmap(Picture picture)
         {
             return CreateBitmapFromPixelData(picture.AsSpan(), picture.Width, picture.Height, AlphaFormat.Premul);
         }
 
-        public Picture ConvertToPicture(Bitmap bitmap)
+        public static Picture StaticConvertToPicture(Bitmap bitmap)
         {
             int width = bitmap.PixelSize.Width;
             int height = bitmap.PixelSize.Height;

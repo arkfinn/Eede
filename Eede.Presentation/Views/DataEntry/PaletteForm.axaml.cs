@@ -52,7 +52,7 @@ public partial class PaletteForm : UserControl
         panel.Height = height;
         image.Width = width;
         image.Height = height;
-        PaletteBitmap = PictureBitmapAdapter.ConvertToBitmap(PaletteBuffer);
+        PaletteBitmap = AvaloniaBitmapAdapter.StaticConvertToBitmap(PaletteBuffer);
         image.Source = PaletteBitmap;
         Refresh();
 
@@ -80,7 +80,7 @@ public partial class PaletteForm : UserControl
             Buffer = result.Picture;
         });
         PaletteBitmap?.Dispose();
-        PaletteBitmap = PictureBitmapAdapter.ConvertToBitmap(Buffer);
+        PaletteBitmap = AvaloniaBitmapAdapter.StaticConvertToBitmap(Buffer);
         image.Source = PaletteBitmap;
     }
 

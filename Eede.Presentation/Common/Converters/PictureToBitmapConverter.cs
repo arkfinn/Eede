@@ -12,7 +12,7 @@ namespace Eede.Presentation.Common.Converters
         {
             if (value is Picture picture)
             {
-                return PictureBitmapAdapter.ConvertToPremultipliedBitmap(picture);
+                return AvaloniaBitmapAdapter.StaticConvertToPremultipliedBitmap(picture);
             }
             return null;
         }

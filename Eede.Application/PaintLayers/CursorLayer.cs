@@ -4,8 +4,6 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 
 namespace Eede.Application.PaintLayers
 {
@@ -24,17 +22,6 @@ namespace Eede.Application.PaintLayers
             PenStyle = penStyle;
             Position = position;
             ImageTransfer = imageTransfer;
-        }
-
-        public void Paint(Graphics destination)
-        {
-            Drawer drawer = new(Source, PenStyle);
-            var result = drawer.DrawPoint(Position);
-            Picture data = result.Picture.Transfer(ImageTransfer, PaintSize.Magnification);
-            using Bitmap dest = BitmapConverter.Convert(data);
-            destination.PixelOffsetMode = PixelOffsetMode.Half;
-            destination.InterpolationMode = InterpolationMode.NearestNeighbor;
-            destination.DrawImage(dest, new Point(0, 0));
         }
 
         public Picture Painted(Picture destination)

@@ -1,0 +1,48 @@
+# 実装計画: 巨大画像対応のためのメモリ最適化と差分Undo (Legacy Refactoring Style)
+
+## フェーズ 0: 全体的なセーフティネットの確認
+- [x] Task: Git ステータスの確認 (Phase 1: Assess & Secure) [40d6684]
+    - [x] `git status` を実行し、クリーンな状態であることを確認する。
+
+## フェーズ 1: ビットマップリソース管理の徹底
+### ステップ 1-1: 現状の振る舞いの固定 (Phase 2: Lock Down)
+- [x] Task: `DockPictureViewModel` の仕様化テストの作成
+- [x] Task: `MainViewModel` (DrawableCanvasViewModel) の仕様化テストの作成
+- [x] Task: `AnimationViewModel` の仕様化テストの作成
+### ステップ 1-2: 改善の実装 (Phase 3: Divide & Conquer)
+- [x] Task: `DockPictureViewModel` の Bitmap 破棄実装 (既に一部実装済み、確認と強化)
+- [x] Task: `MainViewModel` (DrawableCanvasViewModel) の Bitmap 破棄実装 (既に一部実装済み、確認と強化)
+- [x] Task: `AnimationViewModel` の Bitmap 破棄実装
+- [x] Task: 改善後のテスト通過確認
+- [ ] Task: Conductor - User Manual Verification 'フェーズ 1: ビットマップリソース管理' (Protocol in workflow.md)
+
+## フェーズ 2: GPUスケーリングへの移行
+### ステップ 2-1: 現状の描画フローの固定
+- [ ] Task: 拡大描画結果の仕様化テスト (Golden Master)
+### ステップ 2-2: スケーリング方式の切り替え
+- [ ] Task: ViewModel への表示サイズプロパティ追加
+- [ ] Task: View (XAML) のスケーリング設定適用
+- [ ] Task: ドメイン層からの拡大処理排除
+- [ ] Task: スナップショット比較テストの実行
+- [ ] Task: Conductor - User Manual Verification 'フェーズ 2: GPUスケーリングへの移行' (Protocol in workflow.md)
+
+## フェーズ 3: 差分Undoインフラの構築
+### ステップ 3-1: 現状の履歴システムの固定
+- [ ] Task: `DrawingSession` Undo/Redo の仕様化テスト
+### ステップ 3-2: 差分保存の実装
+- [ ] Task: `DiffPictureHistory` の実装と統合
+- [ ] Task: 仕様化テストの実行
+- [ ] Task: Conductor - User Manual Verification 'フェーズ 3: 差分Undoインフラ' (Protocol in workflow.md)
+
+## フェーズ 4: ツールの差分報告対応
+### ステップ 4-1: 各ツールの描画結果の固定
+- [ ] Task: 各ツール（ペン、矩形、塗りつぶし）の描画結果の仕様化テスト
+### ステップ 4-2: 差分報告への移行
+- [ ] Task: `IDrawingTool` インターフェース拡張と各ツールの実装更新
+- [ ] Task: 仕様化テストによる描画結果の不変確認
+- [ ] Task: Conductor - User Manual Verification 'フェーズ 4: ツールの差分報告対応' (Protocol in workflow.md)
+
+## フェーズ 5: 最終統合と品質確認
+- [ ] Task: 巨大画像によるメモリ負荷検証
+- [ ] Task: 不要になったコードの削除と最終リファクタリング
+- [ ] Task: Conductor - User Manual Verification 'フェーズ 5: 最終確認' (Protocol in workflow.md)

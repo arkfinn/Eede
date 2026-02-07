@@ -200,7 +200,8 @@ public class RegressionTests_PresentationFixes
                 new ReplaceAnimationPatternUseCase(patternsProvider),
                 new RemoveAnimationPatternUseCase(patternsProvider)
             ),
-            new Mock<IFileSystem>().Object
+            new Mock<IFileSystem>().Object,
+            new AvaloniaBitmapAdapter()
         );
 
         var sessionVM = new DrawingSessionViewModel(sessionProvider);

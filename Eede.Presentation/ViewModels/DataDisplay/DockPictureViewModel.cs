@@ -196,8 +196,15 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         {
             if (PictureSave == null) return;
             PictureSaveEventArgs args = CreateSaveEventArgs();
-            await PictureSave.Invoke(this, args);
-            HandleSaveResult(args);
+            try
+            {
+                await PictureSave.Invoke(this, args);
+                HandleSaveResult(args);
+            }
+            finally
+            {
+                args.File.Bitmap.Dispose();
+            }
         }
 
         private PictureSaveEventArgs CreateSaveEventArgs()

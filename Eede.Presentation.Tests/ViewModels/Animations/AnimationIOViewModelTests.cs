@@ -4,6 +4,7 @@ using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.ViewModels.Animations;
+using Eede.Presentation.Common.Adapters;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -32,7 +33,8 @@ public class AnimationIOViewModelTests
         _viewModel = new AnimationViewModel(
             _patternsProvider,
             patternService,
-            _fileSystemMock.Object);
+            _fileSystemMock.Object,
+            new AvaloniaBitmapAdapter());
     }
 
     [Test]

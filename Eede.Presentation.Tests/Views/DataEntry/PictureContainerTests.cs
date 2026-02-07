@@ -74,7 +74,8 @@ public class PictureContainerTests
         var animationVM = new AnimationViewModel(
             patternsProvider,
             patternService,
-            new Mock<IFileSystem>().Object);
+            new Mock<IFileSystem>().Object,
+            new AvaloniaBitmapAdapter());
 
         var transformUseCase = new Mock<ITransformImageUseCase>();
         var transferToCanvasUseCase = new Mock<ITransferImageToCanvasUseCase>();

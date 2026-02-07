@@ -39,8 +39,8 @@ namespace Eede.Application.PaintLayers
 
         public Picture Painted(Picture destination)
         {
-            // 1. 背景をトーン変換・拡大する
-            Picture magnifiedSource = destination.Transfer(ImageTransfer, PaintSize.Magnification);
+            // 1. 背景をトーン変換する（拡大は View 側の GPU スケーリングに任せるため、ここでは等倍で行う）
+            Picture source = destination.Transfer(ImageTransfer, new Magnification(1));
 
             // 2. 表示用の色を決定する
             ArgbColor originalColor = PenStyle.Color;
@@ -56,21 +56,17 @@ namespace Eede.Application.PaintLayers
                 displayColor = new ArgbColor(255, originalColor.Red, originalColor.Green, originalColor.Blue);
             }
 
-            // 3. 拡大後のサイズと同じ透明なレイヤーを用意し、そこにペン先を描く
-            Picture cursorLayer = Picture.CreateEmpty(magnifiedSource.Size);
-            int m = (int)PaintSize.Magnification.Value;
-            int magnifiedWidth = PenStyle.Width * m;
+            // 3. 背景と同じサイズの透明なレイヤーを用意し、そこに等倍のペン先を描く
+            Picture cursorLayer = Picture.CreateEmpty(source.Size);
             // カーソル描画自体は上書き(Direct)で行う
-            PenStyle displayPenStyle = new(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), displayColor, magnifiedWidth);
+            PenStyle displayPenStyle = new(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), displayColor, PenStyle.Width);
             Drawer drawer = new(cursorLayer, displayPenStyle);
 
-            // 描画位置を拡大後の中心座標に変換
-            int offset = m / 2;
-            Position magnifiedPos = new(Position.X * m + offset, Position.Y * m + offset);
-            Picture cursorOnly = drawer.DrawPoint(magnifiedPos);
+            // 描画位置は元の座標を使用
+            Picture cursorOnly = drawer.DrawPoint(Position);
 
             // 4. トーン変換済みの背景に対して、ペン先のみをアルファブレンドで重ねる
-            return magnifiedSource.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), cursorOnly, new Position(0, 0));
+            return source.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), cursorOnly, new Position(0, 0));
         }
     }
 }

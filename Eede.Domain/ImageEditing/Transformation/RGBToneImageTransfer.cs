@@ -6,28 +6,19 @@ public class RGBToneImageTransfer : IImageTransfer
 {
     public Picture Transfer(Picture src, Magnification magnification)
     {
-        int toStride = magnification.Magnify(src.Stride);
-        int destWidth = magnification.Magnify(src.Width);
-        int destHeight = magnification.Magnify(src.Height);
+        // GPUスケーリング移行のため、ドメイン層での拡大は行わない。引数の magnification は無視して等倍で処理する。
+        int toStride = src.Stride;
+        int destWidth = src.Width;
+        int destHeight = src.Height;
         byte[] destPixels = new byte[toStride * destHeight];
 
-        for (int y = 0; y < destHeight; y++)
+        System.ReadOnlySpan<byte> srcSpan = src.AsSpan();
+        for (int i = 0; i < srcSpan.Length; i += 4)
         {
-            int srcOffset = src.Stride * magnification.Minify(y);
-            int destOffset = y * toStride;
-
-            for (int x = 0; x < destWidth; x++)
-            {
-                int pos = (x * 4) + destOffset;
-                int srcX = magnification.Minify(x);
-                int fromPos = (srcX * 4) + srcOffset;
-
-                System.ReadOnlySpan<byte> srcSpan = src.AsSpan();
-                destPixels[pos + 0] = srcSpan[fromPos + 0];
-                destPixels[pos + 1] = srcSpan[fromPos + 1];
-                destPixels[pos + 2] = srcSpan[fromPos + 2];
-                destPixels[pos + 3] = 255;
-            }
+            destPixels[i + 0] = srcSpan[i + 0];
+            destPixels[i + 1] = srcSpan[i + 1];
+            destPixels[i + 2] = srcSpan[i + 2];
+            destPixels[i + 3] = 255;
         }
         return Picture.Create(new PictureSize(destWidth, destHeight), destPixels);
     }

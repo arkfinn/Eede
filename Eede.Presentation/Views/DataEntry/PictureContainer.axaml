@@ -63,11 +63,12 @@
                         AlignmentY="Top"
                         AlignmentX="Left"/>
           </Panel.Background>
-          <Panel x:Name="canvas" Cursor="{Binding ActiveCursor}">
+          <Panel x:Name="canvas" Cursor="{Binding ActiveCursor}" RenderOptions.BitmapInterpolationMode="None">
             <Image x:Name="selectionPreview"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   IsVisible="False" />
+                   IsVisible="False"
+                   RenderOptions.BitmapInterpolationMode="None" />
             <general:Region x:Name="cursor"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top" />

@@ -124,7 +124,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             UpdateImage();
         };
 
-        _coordinator.Drew += (prev, current, area1, area2) => Drew?.Invoke(prev, current, area1, area2);
+        _coordinator.Drew += (prev, current, area1, area2, affectedArea) => Drew?.Invoke(prev, current, area1, area2, affectedArea);
 
         _drawingSessionProvider.SessionChanged += (session) =>
         {
@@ -311,10 +311,10 @@ public class DrawableCanvasViewModel : ViewModelBase
     }
 
     public ReactiveCommand<Picture, Unit> OnDrew { get; }
-    public event Action<Picture, Picture, PictureArea?, PictureArea?> Drew;
+    public event Action<Picture, Picture, PictureArea?, PictureArea?, PictureArea?> Drew;
     private void ExecuteDrew(Picture previous)
     {
-        Drew?.Invoke(previous, Picture, null, null);
+        Drew?.Invoke(previous, Picture, null, null, null);
     }
 
     public void SetPicture(Picture source)
@@ -406,7 +406,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             Picture cleared = await _selectionService.CutAsync(previous, previousArea);
             ExecuteInternalUpdate(cleared);
             // TODO: Reset selection in coordinator if needed
-            Drew?.Invoke(previous, cleared, previousArea, null);
+            Drew?.Invoke(previous, cleared, previousArea, null, null);
         }
         catch (Exception ex)
         {

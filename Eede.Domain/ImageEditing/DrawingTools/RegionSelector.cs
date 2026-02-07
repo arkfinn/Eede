@@ -20,10 +20,10 @@ public class RegionSelector : IDrawStyle
         return buffer;
     }
 
-    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
+    public DrawEndResult DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         OnDrawEnd?.Invoke(this, coordinateHistory.ToPositionHistory());
-        return buffer.CancelDrawing();
+        return new DrawEndResult(buffer.CancelDrawing(), null);
     }
 }
 

@@ -44,10 +44,14 @@ namespace Eede.Application.Drawings
             var canvasCoordinate = displayCoordinate.ToCanvas(magnification);
             History = History.Update(canvasCoordinate);
 
-            var resultBuffer = tool.DrawEnd(new DrawingBuffer(session.PreviousPicture), History, isShift);
+            var result = tool.DrawEnd(new DrawingBuffer(session.PreviousPicture), History, isShift);
             History = null;
 
-            return session.Push(resultBuffer.Fetch(), session.CurrentSelectingArea);
+            if (result.AffectedArea.HasValue && !result.AffectedArea.Value.IsEmpty)
+            {
+                return session.PushDiff(result.Buffer.Fetch(), result.AffectedArea.Value, session.CurrentSelectingArea);
+            }
+            return session.Push(result.Buffer.Fetch(), session.CurrentSelectingArea);
         }
     }
 }

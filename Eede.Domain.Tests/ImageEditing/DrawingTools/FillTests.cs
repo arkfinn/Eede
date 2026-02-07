@@ -22,13 +22,14 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             var red = new ArgbColor(255, 255, 0, 0);
             var drawer = new Drawer(picture, new PenStyle(new DirectImageBlender(), red, 1));
             var result = drawer.Fill(new Position(0, 0));
+            var resultPicture = result.Picture;
 
             // Assert: 全てのピクセルが赤くなっていることを確認（ハングアップせずにここに到達すること）
             for (int y = 0; y < size.Height; y++)
             {
                 for (int x = 0; x < size.Width; x++)
                 {
-                    Assert.That(result.PickColor(new Position(x, y)), Is.EqualTo(red), $"Pixel at ({x}, {y}) should be red.");
+                    Assert.That(resultPicture.PickColor(new Position(x, y)), Is.EqualTo(red), $"Pixel at ({x}, {y}) should be red.");
                 }
             }
         }
@@ -59,6 +60,7 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             var red = new ArgbColor(255, 255, 0, 0);
             var drawer = new Drawer(picture, new PenStyle(new DirectImageBlender(), red, 1));
             var result = drawer.Fill(new Position(0, 0));
+            var resultPicture = result.Picture;
 
             // Assert: 左半分(x < 2)は赤、右半分(x >= 2)は黒のままであること
             for (int y = 0; y < 4; y++)
@@ -66,7 +68,7 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
                 for (int x = 0; x < 4; x++)
                 {
                     var expected = x < 2 ? red : black;
-                    Assert.That(result.PickColor(new Position(x, y)), Is.EqualTo(expected), $"Pixel at ({x}, {y}) failed.");
+                    Assert.That(resultPicture.PickColor(new Position(x, y)), Is.EqualTo(expected), $"Pixel at ({x}, {y}) failed.");
                 }
             }
         }
@@ -82,9 +84,10 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             // Act: 赤色で塗りつぶしを試みる
             var drawer = new Drawer(picture, new PenStyle(new DirectImageBlender(), red, 1));
             var result = drawer.Fill(new Position(0, 0));
+            var resultPicture = result.Picture;
 
             // Assert: 中身が同じであることを確認
-            Assert.That(result.CloneImage(), Is.EqualTo(picture.CloneImage()));
+            Assert.That(resultPicture.CloneImage(), Is.EqualTo(picture.CloneImage()));
         }
 
         private Picture CreateMonoColorPicture(PictureSize size, ArgbColor color)

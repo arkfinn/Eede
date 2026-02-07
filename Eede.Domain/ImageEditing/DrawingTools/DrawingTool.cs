@@ -27,7 +27,7 @@ namespace Eede.Domain.ImageEditing.DrawingTools
             return Style.Drawing(buffer, PenStyle, coordinateHistory, isShift);
         }
 
-        public DrawingBuffer DrawEnd(DrawingBuffer buffer, CoordinateHistory coordinateHistory, bool isShift)
+        public DrawEndResult DrawEnd(DrawingBuffer buffer, CoordinateHistory coordinateHistory, bool isShift)
         {
             return Style.DrawEnd(buffer, PenStyle, coordinateHistory, isShift);
         }

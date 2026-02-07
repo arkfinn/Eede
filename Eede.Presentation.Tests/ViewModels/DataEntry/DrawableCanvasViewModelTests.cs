@@ -158,8 +158,8 @@ public class DrawableCanvasViewModelTests
 
         bool drewEventFired = false;
         // Coordinator's Drew event needs to be forwarded
-        _interactionCoordinatorMock.Raise(x => x.Drew += null, initialPicture, initialPicture, (PictureArea?)null, (PictureArea?)null);
-        vm.Drew += (previous, current, area1, area2) => { drewEventFired = true; };
+        _interactionCoordinatorMock.Raise(x => x.Drew += null, initialPicture, initialPicture, (PictureArea?)null, (PictureArea?)null, (PictureArea?)null);
+        vm.Drew += (previous, current, area1, area2, affectedArea) => { drewEventFired = true; };
 
         // Setup mock to simulate drawing state
         var drawingBuffer = new DrawingBuffer(initialPicture);
@@ -184,7 +184,7 @@ public class DrawableCanvasViewModelTests
         // Manually trigger state change
         _interactionCoordinatorMock.Raise(x => x.StateChanged += null);
         // Manually raise Drew event
-        _interactionCoordinatorMock.Raise(x => x.Drew += null, initialPicture, initialPicture, (PictureArea?)null, (PictureArea?)null);
+        _interactionCoordinatorMock.Raise(x => x.Drew += null, initialPicture, initialPicture, (PictureArea?)null, (PictureArea?)null, (PictureArea?)null);
 
         // Assert.That(vm.PictureBuffer.IsDrawing(), Is.False);
         // Assert.That(drewEventFired, Is.True, "Drew event should be fired after drawing");

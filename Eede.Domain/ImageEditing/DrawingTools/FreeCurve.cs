@@ -1,30 +1,39 @@
-﻿namespace Eede.Domain.ImageEditing.DrawingTools;
+﻿using Eede.Domain.SharedKernel;
+
+namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public record FreeCurve : IDrawStyle
 {
+    private PictureArea? AffectedArea;
 
     public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return buffer.UpdateDrawing(drawer.DrawPoint(coordinateHistory.Now.ToPosition()));
+        var result = drawer.DrawPoint(coordinateHistory.Now.ToPosition());
+        AffectedArea = result.Area;
+        return buffer.UpdateDrawing(result.Picture);
     }
 
     public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Fetch(), penStyle);
-        return buffer.UpdateDrawing(Draw(drawer, coordinateHistory));
+        var result = Draw(drawer, coordinateHistory);
+        AffectedArea = AffectedArea.HasValue ? AffectedArea.Value.Combine(result.Area) : result.Area;
+        return buffer.UpdateDrawing(result.Picture);
     }
 
-    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
+    public DrawEndResult DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
-        return ContextFactory.Create(buffer.Fetch());
+        var area = AffectedArea;
+        AffectedArea = null;
+        return new DrawEndResult(ContextFactory.Create(buffer.Fetch()), area);
     }
 
-    private Picture Draw(Drawer drawer, CoordinateHistory coordinateHistory)
+    private (Picture Picture, PictureArea Area) Draw(Drawer drawer, CoordinateHistory coordinateHistory)
     {
         return drawer.Contains(coordinateHistory.Now.ToPosition())
             ? drawer.DrawLine(coordinateHistory.Last.ToPosition(), coordinateHistory.Now.ToPosition())
-            : drawer.Contains(coordinateHistory.Last.ToPosition()) ? drawer.DrawLine(coordinateHistory.Now.ToPosition(), coordinateHistory.Last.ToPosition()) : drawer.DrawingPicture;
+            : drawer.Contains(coordinateHistory.Last.ToPosition()) ? drawer.DrawLine(coordinateHistory.Now.ToPosition(), coordinateHistory.Last.ToPosition()) : (drawer.DrawingPicture, new PictureArea(coordinateHistory.Now.ToPosition(), new PictureSize(0, 0)));
     }
 }
 

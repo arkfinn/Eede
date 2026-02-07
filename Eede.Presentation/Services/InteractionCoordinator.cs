@@ -85,7 +85,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         }
     }
 
-    public event Action<Picture, Picture, PictureArea?, PictureArea?> Drew;
+    public event Action<Picture, Picture, PictureArea?, PictureArea?, PictureArea?> Drew;
     public event Action StateChanged;
 
     private readonly IDrawingSessionProvider _sessionProvider;
@@ -352,7 +352,7 @@ public class InteractionCoordinator : IInteractionCoordinator
             DrawingResult result = _drawableArea.DrawEnd(drawStyle, penStyle, CurrentBuffer, pos, isShift);
             _drawableArea = result.DrawableArea;
             _interactionSession = new CanvasInteractionSession(result.PictureBuffer, drawStyle, _interactionSession?.SelectionState ?? nextState);
-            Drew?.Invoke(previousImage, CurrentBuffer.Previous, _operationInitialSelectingArea, SelectingArea);
+            Drew?.Invoke(previousImage, result.PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea, result.AffectedArea);
             if (_sessionProvider.CurrentSession != null)
             {
                 _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));

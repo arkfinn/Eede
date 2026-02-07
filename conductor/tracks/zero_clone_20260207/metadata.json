@@ -1,0 +1,7 @@
+{
+  "track_id": "zero_clone_20260207",
+  "title": "ゼロクローン変換（ReadOnlySpan<byte> 等を用いたネイティブ転送）の導入",
+  "status": "in_progress",
+  "type": "refactor",
+  "created_at": "2026-02-07T22:30:00Z"
+}

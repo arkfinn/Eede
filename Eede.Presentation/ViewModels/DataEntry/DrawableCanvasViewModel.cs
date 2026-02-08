@@ -8,6 +8,7 @@ using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
@@ -63,6 +64,7 @@ public class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public bool IsAnimationMode { get; set; }
     [Reactive] public GridSettings GridSettings { get; set; }
     [Reactive] public Cursor ActiveCursor { get; set; }
+    [Reactive] public SelectionCursor ActiveSelectionCursor { get; set; }
     [Reactive] public double HandleSize { get; set; }
     [Reactive] public Thickness HandleMargin { get; set; }
 
@@ -121,6 +123,9 @@ public class DrawableCanvasViewModel : ViewModelBase
             PreviewPixels = _coordinator.PreviewPixels;
             PreviewPosition = _coordinator.PreviewPosition;
             ActiveCursor = _coordinator.ActiveCursor;
+            ActiveSelectionCursor = _coordinator.ActiveSelectionCursor;
+            this.RaisePropertyChanged(nameof(ActiveCursor));
+            this.RaisePropertyChanged(nameof(ActiveSelectionCursor));
             UpdateImage();
         };
 
@@ -153,6 +158,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         SelectingThickness = new Thickness(0, 0, 0, 0);
         SelectingSize = new PictureSize(0, 0);
         ActiveCursor = Cursor.Default;
+        ActiveSelectionCursor = SelectionCursor.Default;
         HandleSize = 4.0;
         HandleMargin = new Thickness(-2, -2, 0, 0);
         CursorSize = new PictureSize(32, 32);

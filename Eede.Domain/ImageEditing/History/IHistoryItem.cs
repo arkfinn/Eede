@@ -7,10 +7,10 @@ public interface IHistoryItem
 {
 }
 
-public record CanvasHistoryItem(Picture Picture, PictureArea? SelectingArea) : IHistoryItem;
+public record CanvasHistoryItem(Picture Picture, PictureArea? SelectingArea, SelectionPreviewInfo? PreviewContent = null) : IHistoryItem;
 
 public record PictureDiff(PictureArea Area, Picture Before, Picture After);
 
-public record DiffHistoryItem(IEnumerable<PictureDiff> Diffs, PictureArea? SelectingArea) : IHistoryItem;
+public record DiffHistoryItem(IEnumerable<PictureDiff> Diffs, PictureArea? SelectingArea, SelectionPreviewInfo? PreviewContent = null) : IHistoryItem;
 
 public record DockActiveHistoryItem(string DockId, Position Position, Picture Before, Picture After) : IHistoryItem;

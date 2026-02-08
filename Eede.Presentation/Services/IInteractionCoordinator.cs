@@ -2,6 +2,7 @@ using Avalonia.Input;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
@@ -40,6 +41,7 @@ public interface IInteractionCoordinator
     Picture? PreviewPixels { get; }
     Position PreviewPosition { get; }
     Cursor ActiveCursor { get; }
+    SelectionCursor ActiveSelectionCursor { get; }
     IImageBlender ImageBlender { get; set; }
     ArgbColor BackgroundColor { get; set; }
 

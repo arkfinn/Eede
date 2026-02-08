@@ -10,16 +10,15 @@
     - [x] 画像の転送（Push/Pull）および変形操作の挙動を固定するテストコードの実装
     - [x] テストの実行と全パスの確認
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [61b132a]
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2: Characterization Testing (入出力・編集系)
 残りの主要なユースケースをテストで保護します。
 
-- [ ] Task: ファイル入出力 (`LoadPictureUseCase`, `SavePictureUseCase`) の振る舞いテスト作成
-    - [ ] 画像の読み込み・保存処理の挙動を固定するテストコードの実装
-- [ ] Task: 選択・クリップボード (`CopySelectionUseCase`, `PasteFromClipboardUseCase`) の振る舞いテスト作成
-    - [ ] 選択範囲のコピー・ペースト挙動を固定するテストコードの実装
-- [ ] Task: 全テストの実行と現時点でのステータス確認
+- [x] Task: ファイル入出力 (`LoadPictureUseCase`, `SavePictureUseCase`) の振る舞いテスト作成 [fe29fac]
+    - [x] 画像の読み込み・保存処理の挙動を固定するテストコードの実装
+- [x] Task: 選択・クリップボード (`CopySelectionUseCase`, `PasteFromClipboardUseCase`) の振る舞いテスト作成 [25ce88d]
+    - [x] 選択範囲のコピー・ペースト挙動を固定するテストコードの実装
+- [x] Task: 全テストの実行と現時点でのステータス確認 [25ce88d]
 - [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: Project Configuration Update

@@ -27,12 +27,12 @@ public class SelectionPreviewState : ISelectionState
         {
             // 再リサイズ時も _sourcePixels (変形前の元画像) を渡すことで画質劣化を防ぎ、
             // 連続したリサイズ操作を可能にする
-            return new ResizingState(_sourcePixels, currentArea, mousePosition, handle.Value, new NearestNeighborResampler());
+            return new ResizingState(_sourcePixels, currentArea, mousePosition, handle.Value, new NearestNeighborResampler(), _info.Type, _info.OriginalArea);
         }
 
         if (Contains(currentArea, mousePosition))
         {
-            return new DraggingState(_info.Pixels, currentArea, mousePosition, _info.Type, _info.OriginalArea);
+            return new DraggingState(_info.Pixels, _sourcePixels, currentArea, mousePosition, _info.Type, _info.OriginalArea);
         }
 
         return new NormalCursorState(cursorArea);
@@ -66,7 +66,7 @@ public class SelectionPreviewState : ISelectionState
 
     public SelectionPreviewInfo? GetSelectionPreviewInfo()
     {
-        return _info;
+        return _info with { SourcePixels = _sourcePixels };
     }
 
     public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)
@@ -96,7 +96,8 @@ public class SelectionPreviewState : ISelectionState
                 info.Pixels.ApplyTransparency(backgroundColor),
                 info.Position,
                 info.Type,
-                info.OriginalArea);
+                info.OriginalArea,
+                info.SourcePixels);
         }
         return session.UpdatePreviewContent(info).CommitPreview(blender);
     }

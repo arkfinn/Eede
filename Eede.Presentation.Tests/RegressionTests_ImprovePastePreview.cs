@@ -7,6 +7,7 @@ using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
@@ -135,6 +136,125 @@ namespace Eede.Presentation.Tests
             var currentArea = _sessionProvider.CurrentSession.CurrentSelectingArea;
             Assert.That(currentArea, Is.Not.Null);
             Assert.That(currentArea.Value.Position, Is.EqualTo(new Position(10, 10)), "Selection area should follow the last committed item");
+        }
+
+        [AvaloniaTest]
+        public async Task Cursor_ShouldChange_AfterSelection()
+        {
+            // 1. (5,5)-(15,15) を選択
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(5, 5)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(15, 15)).Subscribe();
+
+            // 2. 中央 (10,10) にマウスを移動 (倍率1)
+            _viewModel.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+
+            // 検証：カーソルが Move になっていること
+            Assert.That(_viewModel.ActiveSelectionCursor, Is.EqualTo(SelectionCursor.Move), "Cursor should be Move over the selected area");
+
+            // 3. 右下ハンドル (15,15) にマウスを移動
+            _viewModel.DrawingCommand.Execute(new Position(15, 15)).Subscribe();
+            Assert.That(_viewModel.ActiveSelectionCursor, Is.EqualTo(SelectionCursor.SizeNWSE), "Cursor should be NWSE over the bottom-right handle");
+        }
+
+        [AvaloniaTest]
+        public async Task Cursor_ShouldChange_WhenHoveringSelection()
+        {
+            // 1. (5,5)-(15,15) を選択
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(5, 5)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(15, 15)).Subscribe();
+
+            // 一旦カーソルを外す
+            _viewModel.DrawingCommand.Execute(new Position(30, 30)).Subscribe();
+            Assert.That(_viewModel.ActiveSelectionCursor, Is.EqualTo(SelectionCursor.Default));
+
+            // 2. ホバー移動 (ボタンを押さずに 10,10 へ)
+            // ViewModelのDrawingCommandは内部的にcoordinator.PointerMovedを呼ぶだけなので、
+            // ボタン押下状態(IsLeftButtonPressing)に関わらずカーソル更新が走るはず
+            _viewModel.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+
+            // 検証
+            Assert.That(_viewModel.ActiveSelectionCursor, Is.EqualTo(SelectionCursor.Move), "Cursor should change to Move just by hovering");
+        }
+
+        [AvaloniaTest]
+        public async Task Paste_And_Resize_ShouldWork()
+        {
+            // 1. (5,5) に範囲選択を作る
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(5, 5)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(15, 15)).Subscribe();
+
+            // 2. ペースト実行 (10x10画像)
+            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
+            await _viewModel.PasteCommand.Execute().ToTask();
+
+            // 3. 右下ハンドル (15,15) を掴んで (20,20) へドラッグ
+            // handleSize=8 なので、(15,15) は確実にハンドル内
+            _viewModel.DrawBeginCommand.Execute(new Position(15, 15)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(20, 20)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(20, 20)).Subscribe();
+
+            // 検証：サイズが 15x15 になっていること (5,5) から (20,20)
+            Assert.That(_viewModel.PreviewPosition, Is.EqualTo(new Position(5, 5)));
+            var info = _sessionProvider.CurrentSession.CurrentPreviewContent;
+            Assert.That(info.Pixels.Size, Is.EqualTo(new PictureSize(15, 15)), "Size should be resized to 15x15");
+        }
+
+        [AvaloniaTest]
+        public async Task Paste_And_Move_ShouldWork()
+        {
+            // 1. (5,5) に範囲選択を作る
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(5, 5)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(15, 15)).Subscribe();
+
+            // 2. ペースト実行 (10x10画像)
+            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
+            await _viewModel.PasteCommand.Execute().ToTask();
+
+            // 3. 画像の中央 (10,10) を掴んで (20,20) へ移動
+            // (10,10) は (5,5)-(15,15) の中央
+            _viewModel.DrawBeginCommand.Execute(new Position(10, 10)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(20, 20)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(20, 20)).Subscribe();
+
+            // 検証：位置が (15,15) になっていること ((5,5) + (20-10, 20-10))
+            Assert.That(_viewModel.PreviewPosition, Is.EqualTo(new Position(15, 15)), "Position should be moved to (15,15)");
+        }
+
+        [AvaloniaTest]
+        public async Task Paste_Resize_Then_Move_ShouldWork()
+        {
+            // 1. (5,5) に範囲選択を作る
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.DrawBeginCommand.Execute(new Position(5, 5)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(15, 15)).Subscribe();
+
+            // 2. ペースト実行 (10x10画像)
+            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
+            await _viewModel.PasteCommand.Execute().ToTask();
+
+            // 3. リサイズ: 右下 (15,15) を (20,20) へドラッグ -> 15x15 に
+            _viewModel.DrawBeginCommand.Execute(new Position(15, 15)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(20, 20)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(20, 20)).Subscribe();
+
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent.Pixels.Size, Is.EqualTo(new PictureSize(15, 15)));
+
+            // 4. 移動: リサイズ後の画像中央 (12,12) 辺りを掴んで (22,22) へ移動
+            // (5,5)-(20,20) の中央は (12,12)
+            _viewModel.DrawBeginCommand.Execute(new Position(12, 12)).Subscribe();
+            _viewModel.DrawingCommand.Execute(new Position(22, 22)).Subscribe();
+            _viewModel.DrawEndCommand.Execute(new Position(22, 22)).Subscribe();
+
+            // 検証：位置が (15,15) になっていること ((5,5) + (22-12, 22-12))
+            Assert.That(_viewModel.PreviewPosition, Is.EqualTo(new Position(15, 15)), "Position should be moved to (15,15) after resizing");
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent.Pixels.Size, Is.EqualTo(new PictureSize(15, 15)), "Size should be maintained");
         }
 
         [AvaloniaTest]

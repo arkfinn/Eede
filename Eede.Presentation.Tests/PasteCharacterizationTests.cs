@@ -91,9 +91,10 @@ namespace Eede.Presentation.Tests
             await _viewModel.PasteCommand.Execute().ToTask();
 
             // Act: プレビュー範囲外をクリック
-            // プレビューは (0,0) にあるので、(20,20) をクリック
-            await _viewModel.DrawBeginCommand.Execute(new Position(20, 20)).ToTask();
-            await _viewModel.DrawEndCommand.Execute(new Position(20, 20)).ToTask();
+            // プレビューは (0,0) にあるので、(50,50) をクリック
+            // 倍率が 4 なのでキャンバス座標では (12,12) となり、10x10 の範囲外となる
+            await _viewModel.DrawBeginCommand.Execute(new Position(50, 50)).ToTask();
+            await _viewModel.DrawEndCommand.Execute(new Position(50, 50)).ToTask();
 
             // Assert: 確定されていること
             Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Preview should be committed");

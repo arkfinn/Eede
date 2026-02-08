@@ -21,14 +21,14 @@
 - [x] Task: 全テストの実行と現時点でのステータス確認 [25ce88d]
 - [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) [a062f29]
 
-## Phase 3: Project Configuration Update
+## Phase 3: Project Configuration Update [checkpoint: a6b179b]
 テストによる保護が完了した後、Nullable 設定を変更します。
 
-- [ ] Task: 全 csproj ファイル（Tests以外）の Nullable 設定を disable に更新
-    - [ ] `Eede.Domain`, `Eede.Application`, `Eede.Infrastructure`, `Eede.Presentation`, `Eede.Presentation.Desktop` の各プロジェクトファイルを編集
-- [ ] Task: ビルドおよび全テストの再実行
-    - [ ] Nullable 無効化によってコンパイルエラーやテスト失敗が発生しないことを確認
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: 全 csproj ファイル（Tests以外）の Nullable 設定を disable に更新 [a6b179b]
+    - [x] `Eede.Domain`, `Eede.Application`, `Eede.Infrastructure`, `Eede.Presentation`, `Eede.Presentation.Desktop` の各プロジェクトファイルを編集
+- [x] Task: ビルドおよび全テストの再実行 [a6b179b]
+    - [x] Nullable 無効化によってコンパイルエラーやテスト失敗が発生しないことを確認
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) [a6b179b]
 
 ## Phase 4: Final Verification and Cleanup
 - [ ] Task: 全プロジェクトのクリーンビルドと全テスト実行の最終確認

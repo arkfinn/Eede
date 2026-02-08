@@ -1,6 +1,6 @@
 ﻿# Implementation Plan - Nullable Disable and Behavioral Refactoring
 
-## Phase 1: Preparation and Characterization Testing (描画・操作系)
+## Phase 1: Preparation and Characterization Testing (描画・操作系) [checkpoint: 61b132a]
 現在の挙動を保護するためのテストを作成します。
 
 - [x] Task: 描画ユースケース (`DrawActionUseCase`) の振る舞いテスト作成 [72c3fa2]
@@ -9,7 +9,7 @@
 - [x] Task: キャンバス操作 (`TransferImageToCanvasUseCase`, `TransformImageUseCase`) の振る舞いテスト作成 [8fc04ad]
     - [x] 画像の転送（Push/Pull）および変形操作の挙動を固定するテストコードの実装
     - [x] テストの実行と全パスの確認
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [61b132a]
 - [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2: Characterization Testing (入出力・編集系)

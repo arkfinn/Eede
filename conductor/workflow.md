@@ -371,6 +371,11 @@ A task is complete when:
     ```powershell
     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; dotnet build
     ```
+    それでも読めない場合は、ファイルにリダイレクトして確認する。
+    ```powershell
+    dotnet build > build_error.log 2>&1
+    Get-Content build_error.log
+    ```
 
 ## Continuous Learning (/learn)
 

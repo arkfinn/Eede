@@ -11,7 +11,7 @@
     - [x] テストの実行と全パスの確認
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [61b132a]
 
-## Phase 2: Characterization Testing (入出力・編集系)
+## Phase 2: Characterization Testing (入出力・編集系) [checkpoint: a062f29]
 残りの主要なユースケースをテストで保護します。
 
 - [x] Task: ファイル入出力 (`LoadPictureUseCase`, `SavePictureUseCase`) の振る舞いテスト作成 [fe29fac]
@@ -19,7 +19,7 @@
 - [x] Task: 選択・クリップボード (`CopySelectionUseCase`, `PasteFromClipboardUseCase`) の振る舞いテスト作成 [25ce88d]
     - [x] 選択範囲のコピー・ペースト挙動を固定するテストコードの実装
 - [x] Task: 全テストの実行と現時点でのステータス確認 [25ce88d]
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) [a062f29]
 
 ## Phase 3: Project Configuration Update
 テストによる保護が完了した後、Nullable 設定を変更します。

@@ -220,6 +220,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         if (previousState is SelectionPreviewState && nextState is NormalCursorState)
         {
             workingSession = previousState.Commit(workingSession, ImageBlender, BackgroundColor);
+            workingSession = workingSession.UpdateSelectingArea(null);
             _sessionProvider.Update(workingSession);
             workingSession = _sessionProvider.CurrentSession;
             // 確定後のバッファでセッションを再構築し、状態をNormalCursorStateにリセット

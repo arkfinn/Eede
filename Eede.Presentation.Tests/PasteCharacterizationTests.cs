@@ -119,6 +119,79 @@ namespace Eede.Presentation.Tests
         }
 
         [AvaloniaTest]
+        public async Task Paste_Commit_Undo_Test()
+        {
+            // Arrange: 履歴がある状態からペースト -> 確定
+            var initialPicture = _sessionProvider.CurrentSession.Buffer.Fetch();
+            var secondPicture = Picture.CreateEmpty(new PictureSize(32, 32));
+            _sessionProvider.Update(_sessionProvider.CurrentSession.Push(secondPicture));
+
+            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
+            await _viewModel.PasteCommand.Execute().ToTask();
+
+            // 確定 (範囲外クリック)
+            await _viewModel.DrawBeginCommand.Execute(new Position(50, 50)).ToTask();
+            await _viewModel.DrawEndCommand.Execute(new Position(50, 50)).ToTask();
+
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Should be committed");
+
+            // Act: Undo 実行
+            _sessionProvider.Update(_sessionProvider.CurrentSession.Undo().Session);
+
+            // Assert: 確定が取り消され、ペースト前の状態（secondPicture）に戻り、かつプレビューもないこと
+            Assert.Multiple(() =>
+            {
+                Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Undo of commit should NOT restore preview");
+                Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.EqualTo(secondPicture), "Should return to second picture (before paste)");
+            });
+        }
+
+        [AvaloniaTest]
+        public async Task Paste_ClickOutside_Undo_ShouldReturnToBeforePaste_InOneStep()
+        {
+            // Arrange: 1つ履歴がある状態
+            var initialPicture = _sessionProvider.CurrentSession.Buffer.Fetch();
+            var secondPicture = Picture.CreateEmpty(new PictureSize(32, 32));
+            _sessionProvider.Update(_sessionProvider.CurrentSession.Push(secondPicture));
+
+            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
+            
+            // 1. ペースト実行。RegionSelectorに切り替わる
+            _viewModel.DrawStyle = new RegionSelector();
+            _viewModel.Magnification = new Magnification(1);
+            await _viewModel.PasteCommand.Execute().ToTask();
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Not.Null, "Should be in preview state");
+
+            // 2. 範囲外クリックで確定 (20, 20 は 10x10 の外)
+            await _viewModel.DrawBeginCommand.Execute(new Position(20, 20)).ToTask();
+            await _viewModel.DrawEndCommand.Execute(new Position(20, 20)).ToTask();
+
+            Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Should be committed");
+            Assert.That(_sessionProvider.CurrentSession.CurrentSelectingArea, Is.Null, "Selection should be cleared by click outside");
+
+            // Act: Undo 1回目
+            _sessionProvider.Update(_sessionProvider.CurrentSession.Undo().Session);
+
+            // Assert: 1回のUndoでペースト前の画像(secondPicture)に戻るべき
+            // もし「選択解除」が別履歴になっている不具合がある場合、1回目のUndoでは画像がペースト後のままになる。
+            Assert.Multiple(() =>
+            {
+                Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.EqualTo(secondPicture), 
+                    "Undo 1 should return to picture BEFORE paste.");
+                Assert.That(_sessionProvider.CurrentSession.CurrentSelectingArea, Is.Null, 
+                    "Undo 1 should return to selection BEFORE paste (null).");
+            });
+            
+            // Act: Undo 2回目
+            _sessionProvider.Update(_sessionProvider.CurrentSession.Undo().Session);
+            
+            // Assert: 2回目のUndoで初期画像に戻るべき
+            Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.EqualTo(initialPicture), "Undo 2 should return to initial picture");
+        }
+
+        [AvaloniaTest]
         public async Task Paste_Undo_Test()
         {
             // Arrange: 何かを描いて履歴がある状態からペーストプレビュー

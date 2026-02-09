@@ -86,7 +86,8 @@
                         Height="{Binding SelectingSize.Height}" 
                         ShowHandles="{Binding IsShowHandles}"
                         HandleSize="{Binding HandleSize}"
-                        HandleMargin="{Binding HandleMargin}" />
+                        HandleMargin="{Binding HandleMargin}"
+                        IsHitTestVisible="False" />
 
       </Panel>
     </Panel>

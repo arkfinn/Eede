@@ -132,10 +132,9 @@ namespace Eede.Presentation.Tests
             // ペーストされた赤は (10,10) にあるはず
             Assert.That(finalResult.PickColor(new Position(10, 10)), Is.EqualTo(red), "Pasted pixel should be at (10,10)");
             
-            // 選択範囲の追随検証
+            // 選択範囲の検証 (不具合修正により、範囲外クリックによる確定後は選択が解除されるようになった)
             var currentArea = _sessionProvider.CurrentSession.CurrentSelectingArea;
-            Assert.That(currentArea, Is.Not.Null);
-            Assert.That(currentArea.Value.Position, Is.EqualTo(new Position(10, 10)), "Selection area should follow the last committed item");
+            Assert.That(currentArea, Is.Null, "Selection area should be cleared after click-outside commit");
         }
 
         [AvaloniaTest]

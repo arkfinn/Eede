@@ -72,7 +72,7 @@ namespace Eede.Domain.ImageEditing.SelectionStates
             
             var newPixels = Resampler.Resize(OriginalPixels, newArea.Size);
             
-            return new SelectionPreviewInfo(newPixels, newArea.Position, Type, ClearArea);
+            return new SelectionPreviewInfo(newPixels, newArea.Position, Type, ClearArea, OriginalPixels);
         }
 
         public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)

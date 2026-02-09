@@ -134,10 +134,12 @@ public class DrawableCanvasViewModel : ViewModelBase
         _drawingSessionProvider.SessionChanged += (session) =>
         {
             _coordinator.SyncWithSession();
-            PictureBuffer = session.Buffer;
-            SelectingArea = session.CurrentSelectingArea;
-            PreviewPixels = session.CurrentPreviewContent?.Pixels;
-            PreviewPosition = session.CurrentPreviewContent?.Position ?? new Position(0, 0);
+            PictureBuffer = _coordinator.CurrentBuffer;
+            SelectingArea = _coordinator.SelectingArea;
+            IsRegionSelecting = _coordinator.IsRegionSelecting;
+            IsShowHandles = _coordinator.IsShowHandles;
+            PreviewPixels = _coordinator.PreviewPixels;
+            PreviewPosition = _coordinator.PreviewPosition;
             UpdateImage();
         };
 

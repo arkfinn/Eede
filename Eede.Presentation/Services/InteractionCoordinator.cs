@@ -372,11 +372,11 @@ public class InteractionCoordinator : IInteractionCoordinator
             DrawingResult result = _drawableArea.DrawEnd(drawStyle, penStyle, CurrentBuffer, pos, isShift);
             _drawableArea = result.DrawableArea;
             _interactionSession = new CanvasInteractionSession(result.PictureBuffer, drawStyle, _interactionSession?.SelectionState ?? nextState);
-            Drew?.Invoke(previousImage, result.PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea, result.AffectedArea);
             if (_sessionProvider.CurrentSession != null)
             {
                 _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
             }
+            Drew?.Invoke(previousImage, result.PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea, result.AffectedArea);
         }
         NotifyStateChanged();
     }

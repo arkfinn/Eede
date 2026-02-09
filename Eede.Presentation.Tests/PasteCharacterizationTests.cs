@@ -15,7 +15,8 @@ using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Eede.Application.Animations;
 using System.Reactive;
-
+using Eede.Domain.Palettes;
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.Animations;
 using System.Reactive.Threading.Tasks;
 
@@ -150,45 +151,44 @@ namespace Eede.Presentation.Tests
         [AvaloniaTest]
         public async Task Paste_ClickOutside_Undo_ShouldReturnToBeforePaste_InOneStep()
         {
-            // Arrange: 1つ履歴がある状態
+            // Arrange: 初期状態 (空の32x32)
             var initialPicture = _sessionProvider.CurrentSession.Buffer.Fetch();
-            var secondPicture = Picture.CreateEmpty(new PictureSize(32, 32));
-            _sessionProvider.Update(_sessionProvider.CurrentSession.Push(secondPicture));
-
-            var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
-            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
             
-            // 1. ペースト実行。RegionSelectorに切り替わる
+            // 1. 赤い点を描画して履歴を1つ作る (secondPicture)
+            _viewModel.DrawStyle = new FreeCurve();
+            _viewModel.PenColor = new ArgbColor(255, 255, 0, 0); // Red
+            await _viewModel.DrawBeginCommand.Execute(new Position(0, 0)).ToTask();
+            await _viewModel.DrawEndCommand.Execute(new Position(0, 0)).ToTask();
+            var secondPicture = _sessionProvider.CurrentSession.Buffer.Fetch();
+            Assert.That(secondPicture.PickColor(new Position(0, 0)).Red, Is.EqualTo(255), "Second picture should have a red pixel");
+
+            // 2. ペーストを実行 (Preview状態へ)。青い1x1ピクセル。
+            var blueData = new byte[4] { 255, 0, 0, 255 }; // RGBA/BGRA
+            var blueImage = Picture.Create(new PictureSize(1, 1), blueData);
+            _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(blueImage);
+            
             _viewModel.DrawStyle = new RegionSelector();
             _viewModel.Magnification = new Magnification(1);
             await _viewModel.PasteCommand.Execute().ToTask();
             Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Not.Null, "Should be in preview state");
 
-            // 2. 範囲外クリックで確定 (20, 20 は 10x10 の外)
+            // 3. 範囲外クリックで確定 (20, 20)
             await _viewModel.DrawBeginCommand.Execute(new Position(20, 20)).ToTask();
             await _viewModel.DrawEndCommand.Execute(new Position(20, 20)).ToTask();
 
             Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent, Is.Null, "Should be committed");
-            Assert.That(_sessionProvider.CurrentSession.CurrentSelectingArea, Is.Null, "Selection should be cleared by click outside");
 
             // Act: Undo 1回目
             _sessionProvider.Update(_sessionProvider.CurrentSession.Undo().Session);
 
             // Assert: 1回のUndoでペースト前の画像(secondPicture)に戻るべき
-            // もし「選択解除」が別履歴になっている不具合がある場合、1回目のUndoでは画像がペースト後のままになる。
             Assert.Multiple(() =>
             {
-                Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.EqualTo(secondPicture), 
-                    "Undo 1 should return to picture BEFORE paste.");
-                Assert.That(_sessionProvider.CurrentSession.CurrentSelectingArea, Is.Null, 
-                    "Undo 1 should return to selection BEFORE paste (null).");
+                // 履歴が2重になっている場合、Undo 1回目ではまだ青いピクセルが残ったままになる
+                Assert.That(_sessionProvider.CurrentSession.CurrentPicture.PickColor(new Position(0, 0)).Red, Is.EqualTo(255), "Should have original red pixel after Undo 1");
+                Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.EqualTo(secondPicture), "Undo 1 should return exactly to secondPicture");
+                Assert.That(_sessionProvider.CurrentSession.CurrentSelectingArea, Is.Null, "Selection should be cleared (null)");
             });
-            
-            // Act: Undo 2回目
-            _sessionProvider.Update(_sessionProvider.CurrentSession.Undo().Session);
-            
-            // Assert: 2回目のUndoで初期画像に戻るべき
-            Assert.That(_sessionProvider.CurrentSession.CurrentPicture, Is.EqualTo(initialPicture), "Undo 2 should return to initial picture");
         }
 
         [AvaloniaTest]

@@ -54,15 +54,15 @@ namespace Eede.Presentation.Tests
 
             // 検証:
             // 1. 元の領域 (0,0) がクリアされている（Alpha = 0）
-            var color00 = result.PickColor(new Position(0, 0));
+            var color00 = result!.PickColor(new Position(0, 0));
             Assert.That(color00.Alpha, Is.EqualTo(0), "Original area (0,0) should be cleared");
 
             // 2. 移動先 (5,5) にプレビューが合成されている（Red = 255）
-            var color55 = result.PickColor(new Position(5, 5));
+            var color55 = result!.PickColor(new Position(5, 5));
             Assert.That(color55.Red, Is.EqualTo(255), "Preview should be blended at (5,5)");
 
             // 3. 関係ない領域 (9,9) は背景のまま（Blue = 255）
-            var color99 = result.PickColor(new Position(9, 9));
+            var color99 = result!.PickColor(new Position(9, 9));
             Assert.That(color99.Blue, Is.EqualTo(255), "Background should remain at (9,9)");
         }
     }

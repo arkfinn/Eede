@@ -16,7 +16,6 @@ using Eede.Presentation.Common.Adapters;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Animations;
 using Eede.Application.Animations;
-using Eede.Application.Infrastructure;
 using System;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -24,32 +23,34 @@ using Avalonia.Headless.NUnit;
 
 namespace Eede.Presentation.Tests.ViewModels.Pages;
 
+#nullable enable
+
 [TestFixture]
 public class MainViewModelTests
 {
-    private Mock<IClipboard> _clipboardMock;
-    private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock;
-    private Mock<IPictureRepository> _pictureRepositoryMock;
-    private Mock<IDrawStyleFactory> _drawStyleFactoryMock;
-    private Mock<ITransformImageUseCase> _transformImageUseCaseMock;
-    private Mock<IScalingImageUseCase> _scalingImageUseCaseMock;
-    private Mock<ITransferImageToCanvasUseCase> _transferImageToCanvasUseCaseMock;
-    private Mock<ITransferImageFromCanvasUseCase> _transferImageFromCanvasUseCaseMock;
-    private Mock<IDrawingSessionProvider> _drawingSessionProviderMock;
-    private Mock<IPictureIOService> _pictureIOServiceMock;
-    private Mock<IInteractionCoordinator> _interactionCoordinatorMock;
-    private Mock<IAddFrameProvider> _addFrameProviderMock;
-    private Mock<ISelectionService> _selectionServiceMock;
+    private Mock<IClipboard> _clipboardMock = default!;
+    private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock = default!;
+    private Mock<IPictureRepository> _pictureRepositoryMock = default!;
+    private Mock<IDrawStyleFactory> _drawStyleFactoryMock = default!;
+    private Mock<ITransformImageUseCase> _transformImageUseCaseMock = default!;
+    private Mock<IScalingImageUseCase> _scalingImageUseCaseMock = default!;
+    private Mock<ITransferImageToCanvasUseCase> _transferImageToCanvasUseCaseMock = default!;
+    private Mock<ITransferImageFromCanvasUseCase> _transferImageFromCanvasUseCaseMock = default!;
+    private Mock<IDrawingSessionProvider> _drawingSessionProviderMock = default!;
+    private Mock<IPictureIOService> _pictureIOServiceMock = default!;
+    private Mock<IInteractionCoordinator> _interactionCoordinatorMock = default!;
+    private Mock<IAddFrameProvider> _addFrameProviderMock = default!;
+    private Mock<ISelectionService> _selectionServiceMock = default!;
 
-    private Mock<IAnimationPatternsProvider> _patternsProviderMock;
-    private Mock<IAnimationPatternService> _animationPatternServiceMock;
-    private Mock<IFileSystem> _fileSystemMock;
+    private Mock<IAnimationPatternsProvider> _patternsProviderMock = default!;
+    private Mock<IAnimationPatternService> _animationPatternServiceMock = default!;
+    private Mock<IFileSystem> _fileSystemMock = default!;
 
-    private GlobalState _globalState;
-    private DrawableCanvasViewModel _drawableCanvasViewModel;
-    private AnimationViewModel _animationViewModel;
-    private DrawingSessionViewModel _drawingSessionViewModel;
-    private PaletteContainerViewModel _paletteContainerViewModel;
+    private GlobalState _globalState = default!;
+    private DrawableCanvasViewModel _drawableCanvasViewModel = default!;
+    private AnimationViewModel _animationViewModel = default!;
+    private DrawingSessionViewModel _drawingSessionViewModel = default!;
+    private PaletteContainerViewModel _paletteContainerViewModel = default!;
 
     [SetUp]
     public void SetUp()
@@ -108,7 +109,7 @@ public class MainViewModelTests
             _paletteContainerViewModel,
             _pictureIOServiceMock.Object,
             () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object),
-            () => null); // NewPictureWindowViewModel はここでは不要
+            () => null!); // NewPictureWindowViewModel はここでは不要なため null!
     }
 
     [AvaloniaTest]
@@ -206,7 +207,7 @@ public class MainViewModelTests
         // 3. CursorGrid の伝播確認
         mainVM.IsShowCursorGrid = true;
         Assert.That(canvasVM.IsShowCursorGrid, Is.True);
-        Assert.That(canvasVM.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be visible at any magnification");
+        Assert.That(canvasVM.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be effectively visible at any magnification");
     }
 
     [AvaloniaTest]

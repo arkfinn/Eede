@@ -27,16 +27,19 @@ using System.Reactive;
 using System.Reactive.Subjects;
 using Avalonia.Headless.NUnit;
 using Dock.Model.Avalonia.Controls;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.Tests;
+
+#nullable enable
 
 [TestFixture]
 public class RegressionTests_PresentationFixes
 {
-    private Mock<IDrawingSessionProvider> _drawingSessionProviderMock;
-    private Mock<IInteractionCoordinator> _coordinatorMock;
-    private DrawingSessionProvider _realDrawingSessionProvider;
-    private InteractionCoordinator _realCoordinator;
+    private Mock<IDrawingSessionProvider> _drawingSessionProviderMock = default!;
+    private Mock<IInteractionCoordinator> _coordinatorMock = default!;
+    private DrawingSessionProvider _realDrawingSessionProvider = default!;
+    private InteractionCoordinator _realCoordinator = default!;
 
     [SetUp]
     public void Setup()
@@ -93,7 +96,7 @@ public class RegressionTests_PresentationFixes
 
         // 1. Initial interaction (Normal state)
         _realCoordinator.SyncWithSession();
-        Assert.That(_realCoordinator.CurrentBuffer.Fetch(), Is.EqualTo(initialPicture));
+        Assert.That(_realCoordinator.CurrentBuffer!.Fetch(), Is.EqualTo(initialPicture));
 
         // 2. External update (e.g. Undo or Push)
         var updatedPicture = Picture.CreateEmpty(new PictureSize(32, 32));
@@ -103,13 +106,13 @@ public class RegressionTests_PresentationFixes
         _realCoordinator.SyncWithSession();
 
         // Assert: Buffer is updated
-        Assert.That(_realCoordinator.CurrentBuffer.Fetch(), Is.EqualTo(updatedPicture), "Coordinator should sync with external buffer changes.");
+        Assert.That(_realCoordinator.CurrentBuffer!.Fetch(), Is.EqualTo(updatedPicture), "Coordinator should sync with external buffer changes.");
 
         // 4. Verify no crash on subsequent interaction
         // Use 16x16 grid size to avoid DivideByZero if HalfBoxArea expects power-of-two or similar
         Assert.DoesNotThrow(() =>
         {
-            _realCoordinator.PointerBegin(new Position(0, 0), new DrawingBuffer(updatedPicture), new RegionSelector(), new PenStyle(new DirectImageBlender()), false, false, new PictureSize(16, 16), null);
+            _realCoordinator.PointerBegin(new Position(0, 0), new DrawingBuffer(updatedPicture), new RegionSelector(), new PenStyle(new DirectImageBlender()), false, false, new PictureSize(16, 16), null!);
         }, "Coordinator should not crash after an external buffer update.");
     }
 
@@ -130,10 +133,10 @@ public class RegressionTests_PresentationFixes
 
         // 3. Perform a pointer action. 
         // Previously, if SyncWithSession was broken, this might have used an old internal session with 'initialPicture'.
-        _realCoordinator.PointerBegin(new Position(0, 0), new DrawingBuffer(newPicture), new RegionSelector(), new PenStyle(new DirectImageBlender()), false, false, new PictureSize(16, 16), null);
+        _realCoordinator.PointerBegin(new Position(0, 0), new DrawingBuffer(newPicture), new RegionSelector(), new PenStyle(new DirectImageBlender()), false, false, new PictureSize(16, 16), null!);
 
         // Assert: CurrentBuffer should be the newPicture, not the old one
-        Assert.That(_realCoordinator.CurrentBuffer.Fetch(), Is.EqualTo(newPicture), "Should maintain the new picture after external update, even during interactions.");
+        Assert.That(_realCoordinator.CurrentBuffer!.Fetch(), Is.EqualTo(newPicture), "Should maintain the new picture after external update, even during interactions.");
     }
 
     [AvaloniaTest]
@@ -164,7 +167,7 @@ public class RegressionTests_PresentationFixes
                 new RegionSelector(),
                 new PenStyle(new DirectImageBlender()),
                 false, false, new PictureSize(16, 16),
-                null);
+                null!);
         }, "Coordinator should be resilient to SyncWithSession calls triggered during its own operations.");
     }
 

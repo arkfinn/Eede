@@ -64,6 +64,12 @@
                         AlignmentX="Left"/>
           </Panel.Background>
           <Panel x:Name="canvas" Cursor="{Binding ActiveCursor}" RenderOptions.BitmapInterpolationMode="None">
+            <Image x:Name="mainImage"
+                   Source="{Binding PremultipliedBitmap}"
+                   Stretch="None"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   RenderOptions.BitmapInterpolationMode="None" />
             <Image x:Name="selectionPreview"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"

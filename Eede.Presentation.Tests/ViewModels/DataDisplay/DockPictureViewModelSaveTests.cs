@@ -65,7 +65,7 @@ public class DockPictureViewModelSaveTests
         // Arrange
         var path = new FilePath("test.png");
         var vm = CreateViewModel(path);
-        
+
         bool saveInvoked = false;
         vm.PictureSave += async (s, e) =>
         {
@@ -87,7 +87,7 @@ public class DockPictureViewModelSaveTests
         // Arrange
         var path = new FilePath("test.bmp");
         var vm = CreateViewModel(path);
-        
+
         vm.PictureSave += async (s, e) =>
         {
             await e.File.SaveAsync(_fileStorageMock.Object);
@@ -105,7 +105,7 @@ public class DockPictureViewModelSaveTests
     {
         // Arrange
         var vm = CreateViewModel(FilePath.Empty());
-        
+
         vm.PictureSave += async (s, e) =>
         {
             await e.File.SaveAsync(_fileStorageMock.Object);

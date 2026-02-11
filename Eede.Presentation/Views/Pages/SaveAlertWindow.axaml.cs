@@ -4,7 +4,7 @@ using Eede.Presentation.Common.Enums;
 
 namespace Eede.Views.Pages
 {
-    #nullable enable
+#nullable enable
 
     public partial class SaveAlertWindow : Window
     {

@@ -19,10 +19,10 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             DrawingBuffer buffer = new(src);
             PenStyle penStyle = new(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1);
             FilledRectangle tool = new();
-            
+
             // Start at (10, 10)
             CoordinateHistory pos = new(new CanvasCoordinate(10, 10));
-            
+
             // Act
             DrawingBuffer startBuffer = tool.DrawStart(buffer, penStyle, pos, false);
             // Move to (15, 15)

@@ -28,7 +28,7 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             // Assert
             Assert.That(result.AffectedArea.IsEmpty, Is.False);
             var boundingBox = result.AffectedArea.GetBoundingBox();
-            
+
             // Expected: Returns whole canvas (0, 0, 10, 10) because whole canvas is filled
             Assert.That(boundingBox.X, Is.EqualTo(0));
             Assert.That(boundingBox.Y, Is.EqualTo(0));
@@ -69,7 +69,7 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             // Assert
             Assert.That(result.AffectedArea.IsEmpty, Is.False);
             var boundingBox = result.AffectedArea.GetBoundingBox();
-            
+
             // Expected: (3, 3, 4, 4)
             Assert.That(boundingBox.X, Is.EqualTo(3), "X mismatch");
             Assert.That(boundingBox.Y, Is.EqualTo(3), "Y mismatch");

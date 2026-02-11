@@ -15,7 +15,7 @@ namespace Eede.Domain.ImageEditing.SelectionStates
         private readonly IImageResampler Resampler;
         private readonly SelectionPreviewType Type;
         private readonly PictureArea? ClearArea;
-        
+
         private Position NowPosition;
 
         public ResizingState(Picture originalPixels, PictureArea originalArea, Position startPosition, SelectionHandle handle, IImageResampler resampler, SelectionPreviewType type = SelectionPreviewType.CutAndMove, PictureArea? clearArea = null)
@@ -68,9 +68,9 @@ namespace Eede.Domain.ImageEditing.SelectionStates
         {
             var resizer = new ResizingSelection(OriginalArea, Handle);
             var newArea = resizer.Resize(StartPosition, NowPosition, _isShifted);
-            
+
             var newPixels = Resampler.Resize(OriginalPixels, newArea.Size);
-            
+
             return new SelectionPreviewInfo(newPixels, newArea.Position, Type, ClearArea, OriginalPixels);
         }
 

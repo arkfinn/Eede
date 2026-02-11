@@ -35,7 +35,7 @@ public class AnimationIntegrationTests
 
         var initialCount = viewModel.Patterns.Count;
         await viewModel.CreatePatternCommand.Execute("NewPattern");
-        
+
         Assert.That(viewModel.Patterns.Count, Is.EqualTo(initialCount + 1));
         Assert.That(viewModel.SelectedPattern?.Name, Is.EqualTo("NewPattern"));
 
@@ -62,7 +62,7 @@ public class AnimationIntegrationTests
 
         await viewModel.CreatePatternCommand.Execute("ToDelete");
         var countAfterAdd = viewModel.Patterns.Count;
-        
+
         viewModel.SelectedPattern = viewModel.Patterns.Last();
         await viewModel.RemovePatternCommand.Execute();
 

@@ -22,7 +22,7 @@ public class ScalingCharacterizationTests
 
         Assert.That(magnified.Width, Is.EqualTo(1));
         Assert.That(magnified.Height, Is.EqualTo(1));
-        
+
         var resultPixels = magnified.CloneImage();
         // 1x1 = 1 pixel * 4 bytes = 4 bytes
         Assert.That(resultPixels.Length, Is.EqualTo(4));

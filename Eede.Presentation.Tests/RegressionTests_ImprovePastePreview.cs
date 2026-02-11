@@ -61,7 +61,7 @@ namespace Eede.Presentation.Tests
                 _sessionProvider,
                 _selectionService,
                 _coordinator);
-            
+
             _viewModel.Magnification = new Magnification(1);
             _sessionViewModel = new DrawingSessionViewModel(_sessionProvider);
         }
@@ -112,7 +112,7 @@ namespace Eede.Presentation.Tests
             // 4. ペースト実行 (コピーしたものが (0,0) にペーストされるはず)
             _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(Picture.Create(new PictureSize(4, 4), rectData));
             await _viewModel.PasteCommand.Execute();
-            
+
             // 検証：ペースト位置が (0,0) になっていること (Selection position)
             Assert.That(_viewModel.PreviewPosition, Is.EqualTo(new Position(0, 0)), "Pasted item should be at (0,0)");
 
@@ -131,7 +131,7 @@ namespace Eede.Presentation.Tests
             Assert.That(finalResult.PickColor(new Position(0, 0)), Is.EqualTo(red), "Original pixel should be at (0,0)");
             // ペーストされた赤は (10,10) にあるはず
             Assert.That(finalResult.PickColor(new Position(10, 10)), Is.EqualTo(red), "Pasted pixel should be at (10,10)");
-            
+
             // 選択範囲の検証 (不具合修正により、範囲外クリックによる確定後は選択が解除されるようになった)
             var currentArea = _sessionProvider.CurrentSession.CurrentSelectingArea;
             Assert.That(currentArea, Is.Null, "Selection area should be cleared after click-outside commit");

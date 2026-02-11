@@ -27,7 +27,7 @@ namespace Eede.Application.Tests.Drawings
 
             var resultColor = session.CurrentPicture.PickColor(new Position(5, 5));
             Assert.That(resultColor, Is.EqualTo(color), "描画したピクセルの色が一致すること");
-            
+
             var otherColor = session.CurrentPicture.PickColor(new Position(0, 0));
             Assert.That(otherColor.Alpha, Is.EqualTo(0), "描画していない場所は透明であること");
         }

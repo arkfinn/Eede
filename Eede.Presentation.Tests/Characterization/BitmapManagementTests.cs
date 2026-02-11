@@ -78,7 +78,7 @@ public class BitmapManagementTests
         {
             await Task.Delay(50);
         }
-        
+
         Assert.That(mockCalled, Is.True, "Mock should be called");
         Assert.That(viewModel.PremultipliedBitmap, Is.Not.Null, "Initial bitmap should be set via mock");
     }
@@ -113,7 +113,7 @@ public class BitmapManagementTests
 
         // Trigger update by notifying coordinator change
         mockCoordinator.Raise(m => m.StateChanged += null);
-        
+
         for (int i = 0; i < 20 && viewModel.MyBitmap == null; i++)
         {
             await Task.Delay(50);
@@ -139,7 +139,7 @@ public class BitmapManagementTests
         _animationViewModel.Patterns.Add(pattern);
         _animationViewModel.SelectedPattern = pattern;
         _animationViewModel.CurrentFrameIndex = 0;
-        
+
         // 手動で通知
         _animationViewModel.RaisePropertyChanged(nameof(_animationViewModel.SelectedPattern));
         _animationViewModel.RaisePropertyChanged(nameof(_animationViewModel.ActivePicture));
@@ -169,7 +169,7 @@ public class BitmapManagementTests
         // Change magnification to update bitmap
         _animationViewModel.Magnification = new Magnification(2);
         _animationViewModel.RaisePropertyChanged(nameof(_animationViewModel.Magnification));
-        
+
         for (int i = 0; i < 20 && !mockCalled; i++)
         {
             await Task.Delay(50);

@@ -19,10 +19,10 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             DrawingBuffer buffer = new(src);
             PenStyle penStyle = new(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1);
             FilledEllipse tool = new();
-            
+
             // DrawerTests uses (5, 5) to (9, 9) for fillEllipse1.png
             CoordinateHistory pos = new(new CanvasCoordinate(5, 5));
-            
+
             // Act
             DrawingBuffer startBuffer = tool.DrawStart(buffer, penStyle, pos, false);
             CoordinateHistory endPos = pos.Update(new CanvasCoordinate(9, 9));

@@ -64,7 +64,7 @@ namespace Eede.Presentation.Tests
 
             var pastedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
             _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(pastedPicture);
-            
+
             // 貼り付け実行。この直後に SyncWithSession が呼ばれる。
             await _viewModel.PasteCommand.Execute().ToTask();
 
@@ -86,7 +86,7 @@ namespace Eede.Presentation.Tests
 
             // 位置 (0,0) にある 10x10 の選択範囲に対して、
             // 論理ピクセル (5,5) の範囲内（表示座標 160〜191）の様々な位置をクリックしてみる
-            
+
             // 1. ピクセルの中央 (160 + 16, 160 + 16) = (176, 176)
             await _viewModel.DrawBeginCommand.Execute(new Position(176, 176)).ToTask();
             Assert.That(_coordinator.ActiveSelectionCursor, Is.EqualTo(SelectionCursor.Move), "Center of pixel should be Move");
@@ -101,7 +101,7 @@ namespace Eede.Presentation.Tests
             await _viewModel.DrawBeginCommand.Execute(new Position(191, 191)).ToTask();
             Assert.That(_coordinator.ActiveSelectionCursor, Is.EqualTo(SelectionCursor.Move), "Bottom-right of pixel should be Move");
             await _viewModel.DrawEndCommand.Execute(new Position(191, 191)).ToTask();
-            
+
             // 4. 隣のピクセルとの境界 (192, 192) -> これは論理ピクセル (6,6) になるはず
             await _viewModel.DrawBeginCommand.Execute(new Position(192, 192)).ToTask();
             Assert.That(_coordinator.ActiveSelectionCursor, Is.EqualTo(SelectionCursor.Move), "Boundary pixel should still be Move");

@@ -17,11 +17,11 @@ namespace Eede.Application.Tests.UseCase.Pictures
             var useCase = new TransferImageToCanvasUseCase();
             var size = new PictureSize(10, 10);
             var color = new ArgbColor(255, 10, 20, 30);
-            
+
             // (2, 2) に色がついた画像を作成
             var dot = Picture.Create(new PictureSize(1, 1), new byte[] { color.Blue, color.Green, color.Red, color.Alpha });
-            var source = Picture.CreateEmpty(size).Blend(new DirectImageBlender(), 
-                dot, 
+            var source = Picture.CreateEmpty(size).Blend(new DirectImageBlender(),
+                dot,
                 new Position(2, 2));
 
             // (2, 2) を含む 2x2 の範囲を切り出す
@@ -40,7 +40,7 @@ namespace Eede.Application.Tests.UseCase.Pictures
             var size = new PictureSize(2, 1);
             var color1 = new ArgbColor(255, 255, 0, 0); // Red
             var color2 = new ArgbColor(255, 0, 255, 0); // Green
-            
+
             // [Red, Green] という 2x1 の画像を作成
             var redDot = Picture.Create(new PictureSize(1, 1), new byte[] { color1.Blue, color1.Green, color1.Red, color1.Alpha });
             var greenDot = Picture.Create(new PictureSize(1, 1), new byte[] { color2.Blue, color2.Green, color2.Red, color2.Alpha });

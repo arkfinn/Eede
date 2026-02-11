@@ -28,16 +28,16 @@ public class DrawingSessionPolymorphicTests
 
         // Act: Push a Dock Update
         var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture);
-        
+
         // Assert: State immediately after Push
         // Canvas should remain same
         Assert.That(s2.CurrentPicture, Is.EqualTo(_initialPicture));
         Assert.That(s2.CanUndo(), Is.True);
-        
+
         // Act: Undo
         var result = s2.Undo();
         var s3 = result.Session;
-        
+
         // Assert: State after Undo
         // Canvas should STILL be same (Undo of DockUpdate shouldn't affect Canvas)
         Assert.That(s3.CurrentPicture, Is.EqualTo(_initialPicture));
@@ -54,11 +54,11 @@ public class DrawingSessionPolymorphicTests
         var afterPicture = Picture.CreateEmpty(new PictureSize(10, 10));
 
         var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture);
-        
+
         // Act: Undo
         // We expect Undo() to return a record containing the new session and the undone item.
         UndoResult result = s2.Undo();
-        
+
         Assert.That(result.Session.CanUndo(), Is.False);
         Assert.That(result.Item, Is.InstanceOf<DockActiveHistoryItem>());
         var undoneItem = result.Item as DockActiveHistoryItem;
@@ -78,10 +78,10 @@ public class DrawingSessionPolymorphicTests
 
         var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture);
         var s3 = s2.Undo().Session;
-        
+
         // Act: Redo
         var result = s3.Redo();
-        
+
         Assert.That(result.Session.CanUndo(), Is.True);
         Assert.That(result.Item, Is.InstanceOf<DockActiveHistoryItem>());
         var redoneItem = result.Item as DockActiveHistoryItem;

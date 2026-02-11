@@ -71,7 +71,7 @@ namespace Eede.Presentation.Views.General
             {
                 context.DrawLine(pen, new Point(x, 0), new Point(x, height));
                 context.DrawLine(dashPen, new Point(x, 0), new Point(x, height));
-                
+
                 if (mPadding > 0 && x + mCellW <= width)
                 {
                     context.DrawLine(pen, new Point(x + mCellW, 0), new Point(x + mCellW, height));
@@ -84,7 +84,7 @@ namespace Eede.Presentation.Views.General
             {
                 context.DrawLine(pen, new Point(0, y), new Point(width, y));
                 context.DrawLine(dashPen, new Point(0, y), new Point(width, y));
-                
+
                 if (mPadding > 0 && y + mCellH <= height)
                 {
                     context.DrawLine(pen, new Point(0, y + mCellH), new Point(width, y + mCellH));
@@ -112,7 +112,7 @@ namespace Eede.Presentation.Views.General
 
                     double tx = mOffsetX + c * stepX + 2;
                     double ty = mOffsetY + r * stepY + 2;
-                    
+
                     if (tx + text.Width <= width && ty + text.Height <= height)
                     {
                         // Background for text visibility

@@ -51,7 +51,7 @@ public class DrawingSessionUndoRedoTests
 
         // PushDiff を実行
         var sessionAfterPush = session.PushDiff(nextPicture, diffArea);
-        
+
         // (1, 1) のピクセルが 128 になっていることを確認
         // Position(1, 1) -> index = (1 * 4) + (1 * 16) = 20
         Assert.That(sessionAfterPush.CurrentPicture.AsSpan()[20], Is.EqualTo(128));

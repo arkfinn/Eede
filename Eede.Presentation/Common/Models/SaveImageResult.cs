@@ -2,7 +2,7 @@ using Eede.Presentation.Files;
 
 namespace Eede.Presentation.Common.Models
 {
-    #nullable enable
+#nullable enable
 
     public record SaveImageResult
     {

@@ -45,7 +45,7 @@ public class ViewModelSafetyCharacterizationTests
         var transferImageFromCanvasUseCaseMock = new Mock<ITransferImageFromCanvasUseCase>();
         var drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
         drawingSessionProviderMock.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));
-        
+
         var copyUseCase = new CopySelectionUseCase(clipboardServiceMock.Object);
         var cutUseCase = new CutSelectionUseCase(clipboardServiceMock.Object);
         var pasteUseCase = new PasteFromClipboardUseCase(clipboardServiceMock.Object, drawingSessionProviderMock.Object);
@@ -62,7 +62,7 @@ public class ViewModelSafetyCharacterizationTests
         );
         drawableCanvasViewModelMock.SetupAllProperties();
         drawableCanvasViewModelMock.Object.Magnification = new Magnification(4.0f);
-        
+
         var patternsProvider = new AnimationPatternsProvider();
         var patternService = new AnimationPatternService(
             new AddAnimationPatternUseCase(patternsProvider),
@@ -73,14 +73,14 @@ public class ViewModelSafetyCharacterizationTests
             patternService,
             Mock.Of<IFileSystem>(),
             bitmapAdapterMock.Object);
-        
+
         var drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(drawingSessionProviderMock.Object);
         var paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>();
-        
+
         var pictureIOService = new PictureIOService(
             new SavePictureUseCase(pictureRepositoryMock.Object),
             new LoadPictureUseCase(pictureRepositoryMock.Object));
-        
+
         Func<DockPictureViewModel> dockPictureFactory = () => new DockPictureViewModel(stateMock.Object, animationViewModelMock.Object, bitmapAdapterMock.Object, pictureIOService);
         Func<NewPictureWindowViewModel> newPictureWindowFactory = () => new Mock<NewPictureWindowViewModel>().Object;
 

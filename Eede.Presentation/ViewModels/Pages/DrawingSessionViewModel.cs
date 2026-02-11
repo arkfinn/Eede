@@ -9,7 +9,7 @@ using System.Reactive;
 
 namespace Eede.Presentation.ViewModels.Pages
 {
-    #nullable enable
+#nullable enable
 
     public class DrawingSessionViewModel : ViewModelBase
     {

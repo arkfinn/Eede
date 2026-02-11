@@ -140,7 +140,7 @@ namespace Eede.Presentation.Common.Adapters
                 {
                     pinnedArray.Free();
                 }
-                
+
                 // For non-writeable bitmaps, we don't easily know the format, 
                 // but we assume standard platform behavior.
             }

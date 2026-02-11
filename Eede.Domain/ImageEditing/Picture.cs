@@ -48,7 +48,7 @@ public record Picture
 
     public byte[] CloneImage()
     {
-        return ImageData.Clone() as byte[];
+        return (byte[])ImageData.Clone();
     }
 
     public ArgbColor PickColor(Position pos)

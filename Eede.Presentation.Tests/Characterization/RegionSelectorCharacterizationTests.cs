@@ -20,16 +20,18 @@ using System;
 
 namespace Eede.Presentation.Tests.Characterization;
 
+#nullable enable
+
 [TestFixture]
 public class RegionSelectorCharacterizationTests
 {
-    private GlobalState _globalState;
-    private Mock<IAddFrameProvider> _addFrameProviderMock;
-    private Mock<IClipboard> _clipboardServiceMock;
-    private AvaloniaBitmapAdapter _bitmapAdapter;
-    private DrawingSessionProvider _drawingSessionProvider;
-    private ISelectionService _selectionService;
-    private InteractionCoordinator _coordinator;
+    private GlobalState _globalState = default!;
+    private Mock<IAddFrameProvider> _addFrameProviderMock = default!;
+    private Mock<IClipboard> _clipboardServiceMock = default!;
+    private AvaloniaBitmapAdapter _bitmapAdapter = default!;
+    private DrawingSessionProvider _drawingSessionProvider = default!;
+    private ISelectionService _selectionService = default!;
+    private InteractionCoordinator _coordinator = default!;
 
     [SetUp]
     public void SetUp()
@@ -97,9 +99,9 @@ public class RegionSelectorCharacterizationTests
         vm.DrawEndCommand.Execute(new Position(20, 20)).Subscribe();
 
         // Assert: Final selection
-        Assert.That(vm.SelectingArea.Value.X, Is.EqualTo(10));
-        Assert.That(vm.SelectingArea.Value.Y, Is.EqualTo(10));
-        Assert.That(vm.SelectingArea.Value.Width, Is.GreaterThan(0));
+        Assert.That(vm.SelectingArea!.Value.X, Is.EqualTo(10));
+        Assert.That(vm.SelectingArea!.Value.Y, Is.EqualTo(10));
+        Assert.That(vm.SelectingArea!.Value.Width, Is.GreaterThan(0));
     }
 
     /// <summary>
@@ -115,7 +117,7 @@ public class RegionSelectorCharacterizationTests
         // 1. Create selection (0,0)-(10,10)
         vm.DrawBeginCommand.Execute(new Position(0, 0)).Subscribe();
         vm.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
-        Assert.That(vm.SelectingArea.Value.X, Is.EqualTo(0));
+        Assert.That(vm.SelectingArea!.Value.X, Is.EqualTo(0));
 
         // 2. Start dragging OUTSIDE existing selection (20, 20)
         vm.DrawBeginCommand.Execute(new Position(20, 20)).Subscribe();
@@ -126,7 +128,7 @@ public class RegionSelectorCharacterizationTests
         vm.DrawingCommand.Execute(new Position(30, 30)).Subscribe();
 
         Assert.That(vm.SelectingArea.HasValue, Is.True);
-        Assert.That(vm.SelectingArea.Value.X, Is.EqualTo(20)); // New start pos
+        Assert.That(vm.SelectingArea!.Value.X, Is.EqualTo(20)); // New start pos
 
         vm.DrawEndCommand.Execute(new Position(30, 30)).Subscribe();
     }
@@ -150,7 +152,7 @@ public class RegionSelectorCharacterizationTests
 
         // Verify selection exists
         Assert.That(vm.SelectingArea.HasValue, Is.True);
-        Assert.That(vm.SelectingArea.Value.X, Is.EqualTo(0));
+        Assert.That(vm.SelectingArea!.Value.X, Is.EqualTo(0));
 
         // 2. Click INSIDE existing selection (e.g. 4,4).
         // This should start dragging.
@@ -205,10 +207,10 @@ public class RegionSelectorCharacterizationTests
         var painted = _coordinator.Painted(vm.PictureBuffer, vm.PenStyle, vm.ImageTransfer);
 
         // Original position (0,0) should be cleared (Alpha 0).
-        Assert.That(painted.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "Original position should be cleared during drag");
+        Assert.That(painted!.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "Original position should be cleared during drag");
 
         // New position (10,10) should be red.
-        Assert.That(painted.PickColor(new Position(10, 10)), Is.EqualTo(red), "New position should be red");
+        Assert.That(painted!.PickColor(new Position(10, 10)), Is.EqualTo(red), "New position should be red");
     }
 
     [AvaloniaTest]
@@ -241,8 +243,8 @@ public class RegionSelectorCharacterizationTests
 
         // Verify state after Drag 1
         var painted1 = _coordinator.Painted(vm.PictureBuffer, vm.PenStyle, vm.ImageTransfer);
-        Assert.That(painted1.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "Original pos (0,0) should be clear after drag 1");
-        Assert.That(painted1.PickColor(new Position(10, 10)), Is.EqualTo(red), "New pos (10,10) should be red after drag 1");
+        Assert.That(painted1!.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "Original pos (0,0) should be clear after drag 1");
+        Assert.That(painted1!.PickColor(new Position(10, 10)), Is.EqualTo(red), "New pos (10,10) should be red after drag 1");
 
         // 3. Drag 2: (10,10) -> (20,20)
         // Note: Clicking on (10,10) which is the current preview position
@@ -253,13 +255,13 @@ public class RegionSelectorCharacterizationTests
         var painted2 = _coordinator.Painted(vm.PictureBuffer, vm.PenStyle, vm.ImageTransfer);
 
         // Verify original pos (0,0) is STILL clear
-        Assert.That(painted2.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "Original pos (0,0) should remain clear during drag 2");
+        Assert.That(painted2!.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "Original pos (0,0) should remain clear during drag 2");
 
         // Verify intermediate pos (10,10) is clear (since we moved away from it)
-        Assert.That(painted2.PickColor(new Position(10, 10)).Alpha, Is.EqualTo(0), "Intermediate pos (10,10) should be clear during drag 2");
+        Assert.That(painted2!.PickColor(new Position(10, 10)).Alpha, Is.EqualTo(0), "Intermediate pos (10,10) should be clear during drag 2");
 
         // Verify new pos (20,20) is red
-        Assert.That(painted2.PickColor(new Position(20, 20)), Is.EqualTo(red), "New pos (20,20) should be red during drag 2");
+        Assert.That(painted2!.PickColor(new Position(20, 20)), Is.EqualTo(red), "New pos (20,20) should be red during drag 2");
     }
 
     [AvaloniaTest]
@@ -307,7 +309,7 @@ public class RegionSelectorCharacterizationTests
         var painted = _coordinator.Painted(vm.PictureBuffer, vm.PenStyle, vm.ImageTransfer);
 
         // The center of the dragged image (at 10+2, 10+2 = 12,12) should be BLUE (opaque), not Green (transparent/underlying).
-        Assert.That(painted.PickColor(new Position(12, 12)), Is.EqualTo(blue), "Center should remain Blue with DirectImageBlender");
+        Assert.That(painted!.PickColor(new Position(12, 12)), Is.EqualTo(blue), "Center should remain Blue with DirectImageBlender");
     }
 
     [AvaloniaTest]
@@ -352,7 +354,7 @@ public class RegionSelectorCharacterizationTests
         var painted = _coordinator.Painted(vm.PictureBuffer, vm.PenStyle, vm.ImageTransfer);
 
         // The center of the dragged image (at 12,12) should be GREEN (underlying), because Blue became transparent.
-        Assert.That(painted.PickColor(new Position(12, 12)), Is.EqualTo(green), "Center should be Green (transparent) with AlphaImageBlender");
+        Assert.That(painted!.PickColor(new Position(12, 12)), Is.EqualTo(green), "Center should be Green (transparent) with AlphaImageBlender");
     }
 
     [AvaloniaTest]
@@ -391,6 +393,6 @@ public class RegionSelectorCharacterizationTests
 
         // Assert 3: New selection started at (20,20)
         Assert.That(vm.IsRegionSelecting, Is.True, "Should be selecting new region");
-        Assert.That(vm.SelectingArea.Value.X, Is.EqualTo(20), "New selection should start at click position (20,20)");
+        Assert.That(vm.SelectingArea!.Value.X, Is.EqualTo(20), "New selection should start at click position (20,20)");
     }
 }

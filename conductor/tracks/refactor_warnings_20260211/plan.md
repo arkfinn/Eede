@@ -8,7 +8,7 @@
 - [x] Task: `Eede.Presentation` の ViewModel における重要プロパティの挙動を確認するテストの追加 (9034bf2)
 - [x] Task: Conductor - User Manual Verification 'フェーズ 0: 現状固定 (Safety Net)' (Protocol in workflow.md)
 
-## フェーズ 1: ドメイン層の段階的 Nullable 有効化
+## フェーズ 1: ドメイン層の段階的 Nullable 有効化 [checkpoint: cb1638c]
 依存関係の最内部から Null 安全を確立し、ドメインモデルを洗練させる。
 
 - [x] Task: `Eede.Domain.SharedKernel` および `Files` の `#nullable enable` 化と警告解消 (d9863dc)

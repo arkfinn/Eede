@@ -70,7 +70,7 @@
 							<navi:PictureActionMenu Command="{Binding PictureActionCommand}" ScalingCommand="{Binding ScalingCommand}"/>
 							<Separator/>
 							<ToggleButton Classes="tool" IsChecked="{Binding IsTransparencyEnabled}" ToolTip.Tip="透過を有効にする">
-								<Image Source="/Assets/Tools/layer_alpha.bmp" Stretch="None" />
+								<PathIcon Data="{StaticResource BlurOnIconGeometry}" Classes="icon" />
 							</ToggleButton>
 						</StackPanel>
 					</Panel>

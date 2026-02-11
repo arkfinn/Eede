@@ -13,6 +13,7 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="/Styles/Colors/DefaultTheme.axaml"/>
+        <ResourceInclude Source="/Resources/Icons.axaml"/>
       </ResourceDictionary.MergedDictionaries>
       <converters:PlayPauseTextConverter x:Key="PlayPauseTextConverter" />
       <x:Single x:Key="Single1">1</x:Single>

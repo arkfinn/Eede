@@ -1,8 +1,0 @@
-﻿{
-    "description":  "範囲選択ツールのドラッグ移動後におけるアンドゥ時の選択範囲不整合修正",
-    "track_id":  "fix_selection_undo_inconsistency_20260126",
-    "type":  "bug",
-    "created_at":  "2026-01-26T20:00:00Z",
-    "status":  "new",
-    "updated_at":  "2026-01-26T20:00:00Z"
-}

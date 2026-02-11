@@ -15,6 +15,13 @@ namespace Eede.Presentation.Views.DataDisplay
             if (factory != null)
             {
                 DockControl.Factory = factory;
+                factory.ActiveDockableChanged += (s, e) =>
+                {
+                    if (ActiveDockable != e)
+                    {
+                        ActiveDockable = e;
+                    }
+                };
             }
         }
 

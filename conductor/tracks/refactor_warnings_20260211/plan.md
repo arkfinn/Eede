@@ -20,7 +20,7 @@
 ## フェーズ 2: アプリケーション・インフラ層の刷新
 ドメイン層の変更を上位層へ伝播させ、古い API を更新する。
 
-- [ ] Task: `Eede.Application` の `#nullable enable` 化と警告解消
+- [x] Task: `Eede.Application` の `#nullable enable` 化と警告解消 (fccb5f5)
 - [ ] Task: `Eede.Infrastructure` のリファクタリングと非推奨 API (`Obsolete`) の解消
 - [ ] Task: 外部ライブラリ (Avalonia 等) の更新に伴う影響調査と対応
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 2: アプリケーション・インフラ層の刷新' (Protocol in workflow.md)

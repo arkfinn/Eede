@@ -13,10 +13,14 @@ using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.ViewModels.DataDisplay;
 using ReactiveUI;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Views.DataEntry
 {
+    #nullable enable
+
     public partial class PictureContainer : UserControl
     {
         private ISelectionState _selectionState;
@@ -49,7 +53,7 @@ namespace Eede.Presentation.Views.DataEntry
             {
                 return;
             }
-            Avalonia.Media.Imaging.Bitmap bitmap = _viewModel.PremultipliedBitmap;
+            Avalonia.Media.Imaging.Bitmap bitmap = _viewModel.PremultipliedBitmap!;
 
             CanvasSize = new PictureSize((int)bitmap.Size.Width, (int)bitmap.Size.Height);
 
@@ -155,32 +159,32 @@ namespace Eede.Presentation.Views.DataEntry
             m12.IsChecked = val == 12;
         }
 
-        private void SetMagnification1(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void SetMagnification1(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (_viewModel != null) _viewModel.Magnification = new Magnification(1);
         }
 
-        private void SetMagnification2(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void SetMagnification2(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (_viewModel != null) _viewModel.Magnification = new Magnification(2);
         }
 
-        private void SetMagnification4(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void SetMagnification4(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (_viewModel != null) _viewModel.Magnification = new Magnification(4);
         }
 
-        private void SetMagnification6(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void SetMagnification6(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (_viewModel != null) _viewModel.Magnification = new Magnification(6);
         }
 
-        private void SetMagnification8(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void SetMagnification8(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (_viewModel != null) _viewModel.Magnification = new Magnification(8);
         }
 
-        private void SetMagnification12(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void SetMagnification12(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (_viewModel != null) _viewModel.Magnification = new Magnification(12);
         }
@@ -352,9 +356,6 @@ namespace Eede.Presentation.Views.DataEntry
             get => GetValue(BackgroundColorProperty);
             set => SetValue(BackgroundColorProperty, value);
         }
-
-        public event EventHandler<PicturePullEventArgs> PicturePulled;
-        public event EventHandler<PicturePushEventArgs> PicturePushed;
 
         private PictureSize CanvasSize = new(32, 32);
 

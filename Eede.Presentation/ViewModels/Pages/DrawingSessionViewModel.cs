@@ -9,6 +9,8 @@ using System.Reactive;
 
 namespace Eede.Presentation.ViewModels.Pages
 {
+    #nullable enable
+
     public class DrawingSessionViewModel : ViewModelBase
     {
         private readonly IDrawingSessionProvider _provider;
@@ -18,8 +20,8 @@ namespace Eede.Presentation.ViewModels.Pages
         public ReactiveCommand<Unit, Unit> UndoCommand { get; }
         public ReactiveCommand<Unit, Unit> RedoCommand { get; }
 
-        public event EventHandler<UndoResult> Undone;
-        public event EventHandler<RedoResult> Redone;
+        public event EventHandler<UndoResult>? Undone;
+        public event EventHandler<RedoResult>? Redone;
 
         public DrawingSessionViewModel(IDrawingSessionProvider provider)
         {

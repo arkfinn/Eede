@@ -38,13 +38,15 @@ using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.Pages;
 
+#nullable enable
+
 public class MainViewModel : ViewModelBase
 {
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
     public DrawableCanvasViewModel DrawableCanvasViewModel { get; }
     public AnimationViewModel AnimationViewModel { get; }
 
-    [Reactive] public BackgroundColor CurrentBackgroundColor { get; set; }
+    [Reactive] public BackgroundColor CurrentBackgroundColor { get; set; } = BackgroundColor.Default;
 
     public Magnification Magnification
     {
@@ -54,11 +56,11 @@ public class MainViewModel : ViewModelBase
 
     [Reactive] public DrawStyleType DrawStyle { get; set; }
 
-    [Reactive] public IImageBlender ImageBlender { get; set; }
+    [Reactive] public IImageBlender ImageBlender { get; set; } = new DirectImageBlender();
 
-    [Reactive] public IImageTransfer ImageTransfer { get; set; }
+    [Reactive] public IImageTransfer ImageTransfer { get; set; } = new DirectImageTransfer();
 
-    [Reactive] public ArgbColor PenColor { get; set; }
+    [Reactive] public ArgbColor PenColor { get; set; } = new ArgbColor(255, 0, 0, 0);
     [Reactive] public Color NowPenColor { get; set; }
     [Reactive] public Color SampleColor { get; set; }
 
@@ -68,16 +70,16 @@ public class MainViewModel : ViewModelBase
         set => DrawableCanvasViewModel.PenSize = value;
     }
 
-    [Reactive] public IImageBlender PullBlender { get; set; }
-    [Reactive] public IDockable ActiveDockable { get; set; }
+    [Reactive] public IImageBlender PullBlender { get; set; } = new DirectImageBlender();
+    [Reactive] public IDockable? ActiveDockable { get; set; }
 
-    [Reactive] public ObservableCollection<int> MinCursorSizeList { get; set; }
-    [Reactive] public int MinCursorWidth { get; set; }
-    [Reactive] public int MinCursorHeight { get; set; }
-    [Reactive] public PictureSize CursorSize { get; set; }
+    [Reactive] public ObservableCollection<int> MinCursorSizeList { get; set; } = new([8, 16, 24, 32, 48, 64]);
+    [Reactive] public int MinCursorWidth { get; set; } = 32;
+    [Reactive] public int MinCursorHeight { get; set; } = 32;
+    [Reactive] public PictureSize CursorSize { get; set; } = new PictureSize(32, 32);
 
     [Reactive] public DrawingSessionViewModel DrawingSessionViewModel { get; private set; }
-    [Reactive] public IFileStorage FileStorage { get; set; }
+    [Reactive] public IFileStorage? FileStorage { get; set; }
     [Reactive] public Cursor? AnimationCursor { get; set; }
     [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
     [Reactive] public bool HasClipboardPicture { get; set; } = false;
@@ -93,7 +95,7 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; private set; }
     public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; private set; }
 
-    public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; private set; }
+    public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; private set; } = new();
     public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; private set; }
 
     public ReactiveCommand<IFileStorage, Unit> LoadPaletteCommand { get; private set; }
@@ -102,11 +104,11 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; private set; }
     public PaletteContainerViewModel PaletteContainerViewModel { get; private set; }
 
-    public Interaction<ScalingDialogViewModel, ResizeContext?> ShowScalingModal { get; private set; }
+    public Interaction<ScalingDialogViewModel, ResizeContext?> ShowScalingModal { get; private set; } = new();
     public ReactiveCommand<Unit, Unit> ScalingCommand { get; private set; }
 
     // Viewにウィンドウを閉じるよう通知するためのInteraction
-    public Interaction<Unit, Unit> CloseWindowInteraction { get; private set; }
+    public Interaction<Unit, Unit> CloseWindowInteraction { get; private set; } = new();
 
     // Viewからのクローズ要求を受け取るためのコマンド
     public ReactiveCommand<Unit, Unit> RequestCloseCommand { get; private set; }
@@ -176,6 +178,19 @@ public class MainViewModel : ViewModelBase
 
         LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
         SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);
+        PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
+        PutPaletteColorCommand = ReactiveCommand.Create<int>(_ => { });
+        GetPaletteColorCommand = ReactiveCommand.Create<int>(_ => { });
+        CreateNewPictureCommand = ReactiveCommand.Create(ExecuteCreateNewPicture);
+        LoadPaletteCommand = ReactiveCommand.Create<IFileStorage>(_ => { });
+        SavePaletteCommand = ReactiveCommand.Create<IFileStorage>(_ => { });
+        PutBackgroundColorCommand = ReactiveCommand.Create(() => { });
+        GetBackgroundColorCommand = ReactiveCommand.Create(() => { });
+        ScalingCommand = ReactiveCommand.CreateFromTask(ExecuteScalingAsync);
+        RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
+        CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
+        CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
+        PasteCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
 
         InitializeConnections();
     }
@@ -219,7 +234,7 @@ public class MainViewModel : ViewModelBase
         MinCursorWidth = 32;
         MinCursorHeight = 32;
         _ = this.WhenAnyValue(x => x.MinCursorWidth, x => x.MinCursorHeight)
-            .Subscribe(x =>
+            .Subscribe(_ =>
             {
                 PictureSize size = new(MinCursorWidth, MinCursorHeight);
                 CursorSize = size;
@@ -264,11 +279,7 @@ public class MainViewModel : ViewModelBase
         SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);
         PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
 
-        ShowCreateNewPictureModal = new Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel>();
         CreateNewPictureCommand = ReactiveCommand.Create(ExecuteCreateNewPicture);
-
-        ShowScalingModal = new Interaction<ScalingDialogViewModel, ResizeContext?>();
-        ScalingCommand = ReactiveCommand.CreateFromTask(ExecuteScalingAsync);
 
         PutBackgroundColorCommand = ReactiveCommand.Create(() =>
         {
@@ -286,7 +297,6 @@ public class MainViewModel : ViewModelBase
             .Where(expanded => !expanded)
             .Subscribe(_ => AnimationViewModel.IsAnimationMode = false);
 
-        CloseWindowInteraction = new Interaction<Unit, Unit>();
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
 
         var canCopyCut = this.WhenAnyValue(
@@ -355,7 +365,7 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    public void DragOverPicture(object sender, DragEventArgs e)
+    public void DragOverPicture(object? sender, DragEventArgs e)
     {
         e.DragEffects = DragDropEffects.None;
         e.Handled = false;
@@ -370,7 +380,7 @@ public class MainViewModel : ViewModelBase
             return;
         }
 
-        IEnumerable<IStorageItem> files = dataObject.GetFiles();
+        IEnumerable<IStorageItem>? files = dataObject.GetFiles();
         if (files is null || !files.Any(f => IsSupportedImageFile(f)))
         {
             return;
@@ -380,7 +390,7 @@ public class MainViewModel : ViewModelBase
         e.Handled = true;
     }
 
-    public async void DropPicture(object sender, DragEventArgs e)
+    public async void DropPicture(object? sender, DragEventArgs e)
     {
         if (e.Data is not IDataObject dataObject)
         {
@@ -392,7 +402,7 @@ public class MainViewModel : ViewModelBase
             return;
         }
 
-        IEnumerable<IStorageItem> files = dataObject.GetFiles();
+        IEnumerable<IStorageItem>? files = dataObject.GetFiles();
         if (files is null)
         {
             return;
@@ -461,7 +471,7 @@ public class MainViewModel : ViewModelBase
     private async Task<DockPictureViewModel?> OpenPicture(Uri path)
     {
         FilePath filePath = new(path.LocalPath);
-        Picture picture = await _pictureIOService.LoadAsync(filePath);
+        Picture? picture = await _pictureIOService.LoadAsync(filePath);
         if (picture == null)
         {
             return null;
@@ -520,21 +530,22 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private async Task OnPictureSave(object sender, PictureSaveEventArgs e)
+    private async Task OnPictureSave(object? sender, PictureSaveEventArgs e)
     {
+        if (FileStorage == null) return;
         SaveImageResult saveResult = await e.File.SaveAsync(FileStorage);
         if (saveResult.IsCanceled)
         {
             e.Cancel();
             return;
         }
-        if (saveResult.IsSaved)
+        if (saveResult.IsSaved && saveResult.File != null)
         {
             e.UpdateFile(saveResult.File);
         }
     }
 
-    private void OnPushToDrawArea(object sender, PicturePushEventArgs args)
+    private void OnPushToDrawArea(object? sender, PicturePushEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {
@@ -554,7 +565,7 @@ public class MainViewModel : ViewModelBase
         CursorSize = picture.Size;
     }
 
-    private void OnPictureUpdate(object sender, PictureUpdateEventArgs args)
+    private void OnPictureUpdate(object? sender, PictureUpdateEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {
@@ -564,7 +575,7 @@ public class MainViewModel : ViewModelBase
         vm.PictureBuffer = args.Updated;
     }
 
-    private void OnPullFromDrawArea(object sender, PicturePullEventArgs args)
+    private void OnPullFromDrawArea(object? sender, PicturePullEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {

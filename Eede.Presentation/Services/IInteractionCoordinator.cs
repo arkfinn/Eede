@@ -12,6 +12,8 @@ using ReactiveUI;
 
 namespace Eede.Presentation.Services;
 
+#nullable enable
+
 public interface IInteractionCoordinator
 {
     // マウス操作に対応するメソッド
@@ -29,12 +31,12 @@ public interface IInteractionCoordinator
 
     // 描画
     void UpdatePicture(Picture picture);
-    Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);
+    Picture? Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);
     void CommitSelection(bool forceClearSelection = false);
     void ChangeDrawStyle(IDrawStyle drawStyle);
 
     // 状態取得 (ViewModelがバインドするもの)
-    DrawingBuffer CurrentBuffer { get; }
+    DrawingBuffer? CurrentBuffer { get; }
     PictureArea? SelectingArea { get; }
     bool IsRegionSelecting { get; }
     bool IsShowHandles { get; }
@@ -46,6 +48,6 @@ public interface IInteractionCoordinator
     ArgbColor BackgroundColor { get; set; }
 
     // イベント
-    event Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion> Drew;
-    event Action StateChanged;
+    event Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion>? Drew;
+    event Action? StateChanged;
 }

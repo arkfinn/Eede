@@ -19,6 +19,8 @@ using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.DataDisplay
 {
+    #nullable enable
+
     public class DockPictureViewModel : ViewModelBase
     {
 
@@ -36,9 +38,9 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             return vm;
         }
 
-        [Reactive] public Picture PictureBuffer { get; set; }
-        private Bitmap _premultipliedBitmap;
-        public Bitmap PremultipliedBitmap
+        [Reactive] public Picture PictureBuffer { get; set; } = Picture.CreateEmpty(new PictureSize(1, 1));
+        private Bitmap? _premultipliedBitmap;
+        public Bitmap? PremultipliedBitmap
         {
             get => _premultipliedBitmap;
             set
@@ -51,18 +53,18 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             }
         }
         [Reactive] public string Id { get; private set; }
-        [Reactive] public PictureSize MinCursorSize { get; set; }
-        [Reactive] public PictureSize CursorSize { get; set; }
-        [Reactive] public Avalonia.Input.Cursor ActiveCursor { get; set; }
+        [Reactive] public PictureSize MinCursorSize { get; set; } = new PictureSize(32, 32);
+        [Reactive] public PictureSize CursorSize { get; set; } = new PictureSize(32, 32);
+        [Reactive] public Avalonia.Input.Cursor ActiveCursor { get; set; } = Avalonia.Input.Cursor.Default;
         [Reactive] public Avalonia.Input.Cursor? AnimationCursor { get; set; }
         [Reactive] public bool Enabled { get; set; }
         [Reactive] public bool Closable { get; set; }
-        [Reactive] public string Subject { get; private set; }
-        [Reactive] public string Title { get; private set; }
+        [Reactive] public string Subject { get; private set; } = "";
+        [Reactive] public string Title { get; private set; } = "";
         [Reactive] public bool Edited { get; set; }
-        [Reactive] public FilePath FilePath { get; private set; }
+        [Reactive] public FilePath FilePath { get; private set; } = FilePath.Empty();
         [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
-        [Reactive] public Magnification Magnification { get; set; }
+        [Reactive] public Magnification Magnification { get; set; } = new Magnification(1);
         [Reactive] public double DisplayWidth { get; private set; }
         [Reactive] public double DisplayHeight { get; private set; }
         public ReactiveCommand<Unit, Unit> ZoomInCommand { get; }
@@ -71,8 +73,8 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public ReactiveCommand<Unit, bool> OnClosing { get; }
         public ReactiveCommand<Unit, bool> CloseCommand { get; }
         public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
-        public event AsyncEventHandler<PictureSaveEventArgs> PictureSave;
-        public event AsyncEventHandler<EventArgs> RequestClose;
+        public event AsyncEventHandler<PictureSaveEventArgs>? PictureSave;
+        public event AsyncEventHandler<EventArgs>? RequestClose;
         private static readonly float[] MagnificationSteps = [1f, 2f, 4f, 6f, 8f, 12f];
 
         public void ZoomIn()
@@ -242,7 +244,10 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             {
                 return true;
             }
-            await RequestClose?.Invoke(this, EventArgs.Empty);
+            if (RequestClose != null)
+            {
+                await RequestClose.Invoke(this, EventArgs.Empty);
+            }
             return Closable;
         }
 
@@ -274,7 +279,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
 
         public ReactiveCommand<Picture, Unit> OnPictureUpdate { get; }
-        public event EventHandler<PictureUpdateEventArgs> PictureUpdate;
+        public event EventHandler<PictureUpdateEventArgs>? PictureUpdate;
         private void ExecutePictureUpdate(Picture picture)
         {
             PictureBuffer = picture;
@@ -286,14 +291,14 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         }
 
         public ReactiveCommand<PictureArea, Unit> OnPicturePush { get; }
-        public event EventHandler<PicturePushEventArgs> PicturePush;
+        public event EventHandler<PicturePushEventArgs>? PicturePush;
         private void ExecutePicturePush(PictureArea area)
         {
             PicturePush?.Invoke(this, new PicturePushEventArgs(BringPictureBuffer(), area));
         }
 
         public ReactiveCommand<Position, Unit> OnPicturePull { get; }
-        public event EventHandler<PicturePullEventArgs> PicturePull;
+        public event EventHandler<PicturePullEventArgs>? PicturePull;
         private void ExecutePicturePull(Position position)
         {
             PicturePull?.Invoke(this, new PicturePullEventArgs(BringPictureBuffer(), position));

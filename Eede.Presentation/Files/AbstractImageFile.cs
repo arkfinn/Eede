@@ -7,6 +7,8 @@ using Eede.Application.Infrastructure;
 
 namespace Eede.Presentation.Files
 {
+    #nullable enable
+
     public abstract record AbstractImageFile(Bitmap Bitmap, FilePath Path) : IImageFile
     {
         public IImageFile WithBitmap(Bitmap bitmap) => this with { Bitmap = bitmap };
@@ -27,16 +29,16 @@ namespace Eede.Presentation.Files
             return new PngFile(bitmap, filePath);
         }
 
-        protected async Task<SaveImageResult> SaveToPathAsync(FilePath filePath)
+        protected Task<SaveImageResult> SaveToPathAsync(FilePath filePath)
         {
             try
             {
                 Bitmap.Save(filePath.ToString());
-                return SaveImageResult.Saved(WithFilePath(filePath)); // 保存完了
+                return Task.FromResult(SaveImageResult.Saved(WithFilePath(filePath))); // 保存完了
             }
             catch (Exception)
             {
-                return SaveImageResult.Canceled(); // エラーが発生した場合
+                return Task.FromResult(SaveImageResult.Canceled()); // エラーが発生した場合
             }
         }
 

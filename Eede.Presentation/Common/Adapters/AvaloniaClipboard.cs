@@ -16,6 +16,8 @@ using AvaloniaIClipboard = Avalonia.Input.Platform.IClipboard;
 
 namespace Eede.Presentation.Common.Adapters;
 
+#nullable enable
+
 public class AvaloniaClipboard : IClipboard
 {
     // 一般的な画像形式の識別子
@@ -43,7 +45,7 @@ public class AvaloniaClipboard : IClipboard
         System.Diagnostics.Debug.WriteLine("Copy: Set Bitmap and PNG data.");
     }
 
-    public async Task<Picture> GetPictureAsync()
+    public async Task<Picture?> GetPictureAsync()
     {
         var clipboard = GetClipboard();
         if (clipboard == null) return null;
@@ -67,7 +69,7 @@ public class AvaloniaClipboard : IClipboard
             try
             {
                 var data = await clipboard.GetDataAsync(DataFormats.Files);
-                IEnumerable<IStorageItem> items = data as IEnumerable<IStorageItem>;
+                IEnumerable<IStorageItem>? items = data as IEnumerable<IStorageItem>;
                 if (items == null && data is IDataObject dataObject)
                 {
                     items = dataObject.GetFiles();
@@ -93,11 +95,11 @@ public class AvaloniaClipboard : IClipboard
         return null;
     }
 
-    private async Task<Picture> TryGetFromFormat(AvaloniaIClipboard clipboard, string format)
+    private async Task<Picture?> TryGetFromFormat(AvaloniaIClipboard clipboard, string format)
     {
         try
         {
-            object data = await clipboard.GetDataAsync(format);
+            object? data = await clipboard.GetDataAsync(format);
             if (data == null)
             {
                 System.Diagnostics.Debug.WriteLine($"Paste: GetDataAsync('{format}') returned null.");
@@ -142,7 +144,7 @@ public class AvaloniaClipboard : IClipboard
         return formats.Any(f => ImageFormats.Contains(f, StringComparer.OrdinalIgnoreCase) || f == DataFormats.Files);
     }
 
-    private AvaloniaIClipboard GetClipboard()
+    private AvaloniaIClipboard? GetClipboard()
     {
         if (global::Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

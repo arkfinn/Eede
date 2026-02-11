@@ -30,7 +30,7 @@
 
 - [x] Task: `Eede.Presentation` (ViewModels) の `#nullable enable` 化と警告解消 (c865d4b)
 - [x] Task: `Eede.Presentation` (Views) のコードビハインドにおける警告解消 (c865d4b)
-- [ ] Task: 全プロジェクトに対する `.editorconfig` に基づくコードスタイルの一括適用
+- [x] Task: 全プロジェクトに対する `.editorconfig` に基づくコードスタイルの一括適用 (c72ae0c)
 - [ ] Task: 未使用コード (using, 変数) の削除と最新 C# 構文への置換
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 3: プレゼンテーション層の警告一掃' (Protocol in workflow.md)
 

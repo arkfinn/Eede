@@ -1,6 +1,7 @@
 using Eede.Domain.SharedKernel;
 using System;
 
+#nullable enable
 namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public abstract record BoxDrawingTool : IDrawStyle

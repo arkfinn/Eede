@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.Selections;
@@ -12,10 +13,10 @@ public class SelectionPreviewState : ISelectionState
     private readonly SelectionPreviewInfo _info;
     private readonly Picture _sourcePixels;
 
-    public SelectionPreviewState(SelectionPreviewInfo info, Picture sourcePixels = null)
+    public SelectionPreviewState(SelectionPreviewInfo info, Picture? sourcePixels = null)
     {
-        _info = info;
-        _sourcePixels = sourcePixels ?? info.SourcePixels;
+        _info = info ?? throw new ArgumentNullException(nameof(info));
+        _sourcePixels = sourcePixels ?? info.SourcePixels ?? throw new ArgumentException("SourcePixels must be provided via either argument or info.", nameof(info));
     }
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)

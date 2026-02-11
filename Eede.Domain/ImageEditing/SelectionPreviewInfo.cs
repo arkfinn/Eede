@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.SharedKernel;
 
 namespace Eede.Domain.ImageEditing;
@@ -25,7 +26,7 @@ public enum SelectionPreviewType
 /// <param name="Type">プレビューの種類</param>
 /// <param name="OriginalArea">切り取り元の範囲（CutAndMoveの場合に使用）</param>
 /// <param name="SourcePixels">変形前の元画像データ（連続した変形時に使用）</param>
-public record SelectionPreviewInfo(Picture Pixels, Position Position, SelectionPreviewType Type = SelectionPreviewType.CutAndMove, PictureArea? OriginalArea = null, Picture SourcePixels = null)
+public record SelectionPreviewInfo(Picture Pixels, Position Position, SelectionPreviewType Type = SelectionPreviewType.CutAndMove, PictureArea? OriginalArea = null, Picture? SourcePixels = null)
 {
     public Picture SourcePixels { get; init; } = SourcePixels ?? Pixels;
 }

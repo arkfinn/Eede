@@ -1,4 +1,5 @@
-﻿namespace Eede.Domain.ImageEditing.DrawingTools;
+﻿#nullable enable
+namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public interface IDrawStyle
 {

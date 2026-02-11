@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -22,7 +23,7 @@ namespace Eede.Domain.ImageEditing
         private readonly ImmutableStack<IHistoryItem> RedoStack;
 
         public DrawingSession(Picture initialPicture, PictureArea? initialArea = null)
-            : this(new DrawingBuffer(initialPicture), initialArea, null, ImmutableStack<IHistoryItem>.Empty, ImmutableStack<IHistoryItem>.Empty)
+            : this(new DrawingBuffer(initialPicture ?? throw new ArgumentNullException(nameof(initialPicture))), initialArea, null, ImmutableStack<IHistoryItem>.Empty, ImmutableStack<IHistoryItem>.Empty)
         {
         }
 

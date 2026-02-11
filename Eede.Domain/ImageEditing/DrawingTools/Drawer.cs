@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using System;
@@ -7,9 +8,9 @@ namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public class Drawer(Picture drawingPicture, PenStyle penCase)
 {
-    public readonly Picture DrawingPicture = drawingPicture;
+    public readonly Picture DrawingPicture = drawingPicture ?? throw new ArgumentNullException(nameof(drawingPicture));
 
-    private readonly PenStyle PenStyle = penCase;
+    private readonly PenStyle PenStyle = penCase ?? throw new ArgumentNullException(nameof(penCase));
 
     public (Picture Picture, PictureArea Area) DrawPoint(CanvasCoordinate coordinate)
     {

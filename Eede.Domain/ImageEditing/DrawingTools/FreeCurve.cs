@@ -2,6 +2,7 @@
 using System.Linq;
 using Eede.Domain.SharedKernel;
 
+#nullable enable
 namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public record FreeCurve : IDrawStyle

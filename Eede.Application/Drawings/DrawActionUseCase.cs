@@ -11,7 +11,7 @@ namespace Eede.Application.Drawings
     /// </summary>
     public class DrawActionUseCase : IDrawActionUseCase
     {
-        private CoordinateHistory History;
+        private CoordinateHistory? History;
 
         public DrawActionUseCase()
         {

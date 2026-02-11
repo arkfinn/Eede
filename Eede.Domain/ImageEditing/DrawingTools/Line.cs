@@ -1,6 +1,7 @@
 ﻿using Eede.Domain.SharedKernel;
 using System;
 
+#nullable enable
 namespace Eede.Domain.ImageEditing.DrawingTools;
 
 // 実装内容を再検討する

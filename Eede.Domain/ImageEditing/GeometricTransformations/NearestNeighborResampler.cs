@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.SharedKernel;
 using System;
 

@@ -41,8 +41,8 @@ public class CharacterizationSafetyTests
     [Test]
     public void Picture_Create_ThrowsException_WhenImageDataIsNull()
     {
-        // 現状はガード節がないため NullReferenceException が発生するはず
-        Assert.Throws<NullReferenceException>(() =>
+        // ガード節を導入したため ArgumentNullException が発生するはず
+        Assert.Throws<ArgumentNullException>(() =>
         {
             Picture.Create(new PictureSize(1, 1), null!);
         });

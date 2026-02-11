@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.Selections;

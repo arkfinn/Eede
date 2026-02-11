@@ -1,5 +1,6 @@
 ﻿using Eede.Domain.SharedKernel;
 
+#nullable enable
 namespace Eede.Domain.ImageEditing.DrawingTools;
 
 

@@ -1,4 +1,5 @@
-﻿namespace Eede.Domain.ImageEditing.Transformation;
+﻿#nullable enable
+namespace Eede.Domain.ImageEditing.Transformation;
 
 public interface IImageTransfer
 {

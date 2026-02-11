@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.ImageEditing;
 
 namespace Eede.Domain.SharedKernel;

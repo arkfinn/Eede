@@ -21,9 +21,9 @@
 ドメイン層の変更を上位層へ伝播させ、古い API を更新する。
 
 - [x] Task: `Eede.Application` の `#nullable enable` 化と警告解消 (fccb5f5)
-- [ ] Task: `Eede.Infrastructure` のリファクタリングと非推奨 API (`Obsolete`) の解消
-- [ ] Task: 外部ライブラリ (Avalonia 等) の更新に伴う影響調査と対応
-- [ ] Task: Conductor - User Manual Verification 'フェーズ 2: アプリケーション・インフラ層の刷新' (Protocol in workflow.md)
+- [x] Task: `Eede.Infrastructure` のリファクタリングと非推奨 API (`Obsolete`) の解消 (fccb5f5)
+- [x] Task: 外部ライブラリ (Avalonia 等) の更新に伴う影響調査と対応 (fccb5f5)
+- [x] Task: Conductor - User Manual Verification 'フェーズ 2: アプリケーション・インフラ層の刷新' (Protocol in workflow.md)
 
 ## フェーズ 3: プレゼンテーション層の警告一掃
 下位層の Null 安全化の恩恵を受け、UI層の大量の警告を効率的に解消する。

@@ -23,6 +23,8 @@ using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.Animations;
 
+#nullable enable
+
 public class AnimationViewModel : ViewModelBase, IAddFrameProvider
 {
     private readonly IAnimationPatternsProvider _patternsProvider;
@@ -46,7 +48,7 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
 
     [Reactive] public int WaitTime { get; set; }
 
-    [Reactive] public Magnification Magnification { get; set; }
+    [Reactive] public Magnification Magnification { get; set; } = new(1);
     [Reactive] public Picture? ActivePicture { get; set; }
     private Bitmap? _previewBitmap;
     public Bitmap? PreviewBitmap
@@ -66,7 +68,6 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
     public ReactiveCommand<Unit, Unit> RemovePatternCommand { get; }
     public ReactiveCommand<int, Unit> AddFrameCommand { get; }
     public ReactiveCommand<AnimationFrame, Unit> RemoveFrameAtCommand { get; }
-    public ReactiveCommand<Unit, Unit> ClearSequenceCommand { get; }
     public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
     public ReactiveCommand<IFileStorage, Unit> ExportCommand { get; }
     public ReactiveCommand<IFileStorage, Unit> ImportCommand { get; }
@@ -203,7 +204,7 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
                 var picture = x.Item1;
                 var frame = x.Item2;
                 var mag = x.Item3;
-                if (picture != null && frame != null && SelectedPattern != null && mag != null)
+                if (picture != null && frame != null && SelectedPattern != null)
                 {
                     var cellSize = SelectedPattern.Grid.CellSize;
                     var offset = SelectedPattern.Grid.Offset;

@@ -26,28 +26,30 @@ using Eede.Application.UseCase.Pictures;
 
 namespace Eede.Presentation.ViewModels.DataEntry;
 
+#nullable enable
+
 public class DrawableCanvasViewModel : ViewModelBase
 {
-    [Reactive] public BackgroundColor BackgroundColor { get; set; }
-    [Reactive] public Magnification Magnification { get; set; }
-    [Reactive] public IDrawStyle DrawStyle { get; set; }
-    [Reactive] public IImageBlender ImageBlender { get; set; }
-    [Reactive] public ArgbColor PenColor { get; set; }
-    [Reactive] public int PenSize { get; set; }
+    [Reactive] public BackgroundColor BackgroundColor { get; set; } = BackgroundColor.Default;
+    [Reactive] public Magnification Magnification { get; set; } = new Magnification(1);
+    [Reactive] public IDrawStyle DrawStyle { get; set; } = new FreeCurve();
+    [Reactive] public IImageBlender ImageBlender { get; set; } = new DirectImageBlender();
+    [Reactive] public ArgbColor PenColor { get; set; } = new ArgbColor(255, 0, 0, 0);
+    [Reactive] public int PenSize { get; set; } = 1;
     [Reactive] public PenStyle PenStyle { get; set; }
-    [Reactive] public IImageTransfer ImageTransfer { get; set; }
+    [Reactive] public IImageTransfer ImageTransfer { get; set; } = new DirectImageTransfer();
     [Reactive] public bool IsShifted { get; set; }
     [Reactive] public bool IsRegionSelecting { get; set; }
     [Reactive] public bool IsShowHandles { get; set; }
     [Reactive] public PictureArea? SelectingArea { get; set; }
     [Reactive] public Thickness SelectingThickness { get; set; }
-    [Reactive] public PictureSize SelectingSize { get; set; }
-    [Reactive] public Position PreviewPosition { get; set; }
+    [Reactive] public PictureSize SelectingSize { get; set; } = new PictureSize(0, 0);
+    [Reactive] public Position PreviewPosition { get; set; } = new Position(0, 0);
     [Reactive] public Picture? PreviewPixels { get; set; }
     [Reactive] public Thickness PreviewThickness { get; set; }
-    [Reactive] public PictureSize PreviewSize { get; set; }
+    [Reactive] public PictureSize PreviewSize { get; set; } = new PictureSize(0, 0);
     [Reactive] public Thickness RawPreviewThickness { get; set; }
-    [Reactive] public PictureSize RawPreviewSize { get; set; }
+    [Reactive] public PictureSize RawPreviewSize { get; set; } = new PictureSize(0, 0);
     private Bitmap? _magnifiedPreviewBitmap;
     public Bitmap? MagnifiedPreviewBitmap
     {
@@ -62,9 +64,9 @@ public class DrawableCanvasViewModel : ViewModelBase
         }
     }
     [Reactive] public bool IsAnimationMode { get; set; }
-    [Reactive] public GridSettings GridSettings { get; set; }
-    [Reactive] public Cursor ActiveCursor { get; set; }
-    [Reactive] public SelectionCursor ActiveSelectionCursor { get; set; }
+    [Reactive] public GridSettings GridSettings { get; set; } = new GridSettings(new(32, 32), new(0, 0), 0);
+    [Reactive] public Cursor ActiveCursor { get; set; } = Cursor.Default;
+    [Reactive] public SelectionCursor ActiveSelectionCursor { get; set; } = SelectionCursor.Default;
     [Reactive] public double HandleSize { get; set; }
     [Reactive] public Thickness HandleMargin { get; set; }
 
@@ -73,7 +75,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     [Reactive] public bool IsShowPixelGrid { get; set; }
     [Reactive] public bool IsShowCursorGrid { get; set; }
-    [Reactive] public PictureSize CursorSize { get; set; }
+    [Reactive] public PictureSize CursorSize { get; set; } = new PictureSize(32, 32);
 
     private readonly ObservableAsPropertyHelper<bool> _isPixelGridEffectivelyVisible;
     public bool IsPixelGridEffectivelyVisible => _isPixelGridEffectivelyVisible.Value;
@@ -116,7 +118,10 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         _coordinator.StateChanged += () =>
         {
-            PictureBuffer = _coordinator.CurrentBuffer;
+            if (_coordinator.CurrentBuffer != null)
+            {
+                PictureBuffer = _coordinator.CurrentBuffer;
+            }
             SelectingArea = _coordinator.SelectingArea;
             IsRegionSelecting = _coordinator.IsRegionSelecting;
             IsShowHandles = _coordinator.IsShowHandles;
@@ -134,7 +139,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         _drawingSessionProvider.SessionChanged += (session) =>
         {
             _coordinator.SyncWithSession();
-            PictureBuffer = _coordinator.CurrentBuffer;
+            if (_coordinator.CurrentBuffer != null)
+            {
+                PictureBuffer = _coordinator.CurrentBuffer;
+            }
             SelectingArea = _coordinator.SelectingArea;
             IsRegionSelecting = _coordinator.IsRegionSelecting;
             IsShowHandles = _coordinator.IsShowHandles;
@@ -147,6 +155,8 @@ public class DrawableCanvasViewModel : ViewModelBase
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
         
         Picture initialPicture = Picture.CreateEmpty(_globalState.BoxSize);
+        _bitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(initialPicture);
+        _pictureBuffer = ContextFactory.Create(initialPicture);
         SetPicture(initialPicture);
 
         Magnification = new Magnification(4);
@@ -180,7 +190,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         _isPixelGridEffectivelyVisible = this.WhenAnyValue(
             x => x.IsShowPixelGrid,
             x => x.Magnification,
-            (isShow, mag) => isShow && (mag != null && mag.Value >= 4))
+            (isShow, mag) => isShow && (mag.Value >= 4))
             .ToProperty(this, x => x.IsPixelGridEffectivelyVisible);
 
         _isCursorGridEffectivelyVisible = this.WhenAnyValue(
@@ -275,8 +285,7 @@ public class DrawableCanvasViewModel : ViewModelBase
                 }
             });
 
-        Picture picture = Picture.CreateEmpty(_globalState.BoxSize);
-        SetPicture(picture);
+        SetPicture(initialPicture);
     }
 
     public void SetupRegionSelector(RegionSelector selector)
@@ -284,8 +293,8 @@ public class DrawableCanvasViewModel : ViewModelBase
         _coordinator.SetupRegionSelector(selector, PictureBuffer, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize);
     }
 
-    private Bitmap _bitmap;
-    public Bitmap MyBitmap
+    private Bitmap? _bitmap;
+    public Bitmap? MyBitmap
     {
         get => _bitmap;
         set
@@ -298,7 +307,7 @@ public class DrawableCanvasViewModel : ViewModelBase
         }
     }
 
-    private void ExecuteInternalUpdate(Picture picture)
+    private void ExecuteInternalUpdate(Picture? picture)
     {
         if (picture != null && PictureBuffer != null)
         {
@@ -313,10 +322,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         get => _pictureBuffer;
         set => this.RaiseAndSetIfChanged(ref _pictureBuffer, value);
     }
-    private Picture Picture = null;
+    private Picture? _currentPicture = null;
 
     public ReactiveCommand<ArgbColor, Unit> OnColorPicked { get; }
-    public event EventHandler<ColorPickedEventArgs> ColorPicked;
+    public event EventHandler<ColorPickedEventArgs>? ColorPicked;
     private void ExecuteColorPicked(ArgbColor color)
     {
         PenColor = color;
@@ -324,10 +333,13 @@ public class DrawableCanvasViewModel : ViewModelBase
     }
 
     public ReactiveCommand<Picture, Unit> OnDrew { get; }
-    public event Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion> Drew;
+    public event Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion>? Drew;
     private void ExecuteDrew(Picture previous)
     {
-        Drew?.Invoke(previous, Picture, null, null, default);
+        if (_currentPicture != null)
+        {
+            Drew?.Invoke(previous, _currentPicture, null, null, default);
+        }
     }
 
     public void SetPicture(Picture source)
@@ -345,10 +357,10 @@ public class DrawableCanvasViewModel : ViewModelBase
         }
 
         // 表示用にも設定された ImageTransfer を使用して、RGB/Alphaトーン変換などを反映させる
-        Picture = _coordinator.Painted(PictureBuffer, PenStyle, ImageTransfer);
-        if (Picture == null) return;
+        _currentPicture = _coordinator.Painted(PictureBuffer, PenStyle, ImageTransfer);
+        if (_currentPicture == null) return;
 
-        MyBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(Picture);
+        MyBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(_currentPicture);
     }
 
     public ReactiveCommand<Position, Unit> DrawBeginCommand { get; }

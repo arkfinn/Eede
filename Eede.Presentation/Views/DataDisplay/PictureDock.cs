@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Data;
 using Dock.Model.Avalonia.Controls;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -8,16 +8,18 @@ using System.Collections.Specialized;
 
 namespace Eede.Presentation.Views.DataDisplay
 {
+    #nullable enable
+
     public class PictureDock : DocumentDock
     {
-        public static readonly DirectProperty<PictureDock, IList> PicturesProperty =
-            AvaloniaProperty.RegisterDirect<PictureDock, IList>(
+        public static readonly DirectProperty<PictureDock, IList?> PicturesProperty =
+            AvaloniaProperty.RegisterDirect<PictureDock, IList?>(
                 nameof(Pictures),
                 o => o.Pictures,
                 (o, v) => o.Pictures = v);
-        private IList pictures;
+        private IList? pictures;
 
-        public IList Pictures
+        public IList? Pictures
         {
             get => pictures;
             set => SetAndRaise(PicturesProperty, ref pictures, value);
@@ -39,7 +41,7 @@ namespace Eede.Presentation.Views.DataDisplay
             base.OnPropertyChanged(change);
         }
 
-        private void Pictures_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void Pictures_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -50,7 +52,7 @@ namespace Eede.Presentation.Views.DataDisplay
                             return;
                         }
 
-                        object data = e.NewItems?.Count == 1 ? e.NewItems[0] : null;
+                        object? data = e.NewItems?.Count == 1 ? e.NewItems[0] : null;
                         if (data is not DockPictureViewModel vm)
                         {
                             return;
@@ -73,7 +75,7 @@ namespace Eede.Presentation.Views.DataDisplay
                             Source = vm,
                             Path = nameof(vm.Closable)
                         });
-                        document.CloseAction = () => Pictures!.Remove(vm);
+                        document.CloseAction = () => Pictures?.Remove(vm);
                         _ = document.Bind(PictureDocument.SaveAlertResultProperty, new Binding
                         {
                             Source = vm,
@@ -95,7 +97,7 @@ namespace Eede.Presentation.Views.DataDisplay
 
                 case NotifyCollectionChangedAction.Remove:
                     {
-                        object data = e.OldItems?.Count == 1 ? e.OldItems[0] : null;
+                        object? data = e.OldItems?.Count == 1 ? e.OldItems[0] : null;
                         if (data is null || data is not DockPictureViewModel vm)
                         {
                             break;

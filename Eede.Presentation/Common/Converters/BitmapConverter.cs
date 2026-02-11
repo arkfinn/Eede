@@ -1,4 +1,4 @@
-﻿using Avalonia.Data.Converters;
+using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System;
@@ -9,13 +9,13 @@ namespace Eede.Presentation.Common.Converters
 {
     internal sealed class BitmapConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is not string path)
             {
                 return null;
             }
-            Uri uri = null;
+            Uri? uri = null;
 
             if (path.StartsWith("avares://"))
             {
@@ -23,7 +23,7 @@ namespace Eede.Presentation.Common.Converters
             }
             else
             {
-                Assembly assembly = Assembly.GetEntryAssembly();
+                Assembly? assembly = Assembly.GetEntryAssembly();
                 if (assembly != null)
                 {
                     // string? assemblyName = assembly.GetName().Name;
@@ -42,7 +42,7 @@ namespace Eede.Presentation.Common.Converters
             return null;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             throw new NotSupportedException();
         }

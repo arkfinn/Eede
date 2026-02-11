@@ -8,7 +8,7 @@ namespace Eede.Presentation.Common.Converters
 {
     public class PictureToBitmapConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is Picture picture)
             {
@@ -17,7 +17,7 @@ namespace Eede.Presentation.Common.Converters
             return null;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             throw new NotSupportedException();
         }

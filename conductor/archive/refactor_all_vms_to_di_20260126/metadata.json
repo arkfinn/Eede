@@ -1,8 +1,0 @@
-﻿{
-    "description":  "全 ViewModel の DI 移行と DrawingSession 管理の洗練（接合部を用いた段階的移行）",
-    "track_id":  "refactor_all_vms_to_di_20260126",
-    "type":  "refactor",
-    "created_at":  "2026-01-26T17:45:00Z",
-    "status":  "completed",
-    "updated_at":  "2026-01-26T19:00:00Z"
-}

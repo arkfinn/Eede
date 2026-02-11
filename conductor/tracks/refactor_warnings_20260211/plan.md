@@ -12,7 +12,7 @@
 依存関係の最内部から Null 安全を確立し、ドメインモデルを洗練させる。
 
 - [x] Task: `Eede.Domain.SharedKernel` および `Files` の `#nullable enable` 化と警告解消 (d9863dc)
-- [ ] Task: `Eede.Domain.ImageEditing` および `Pictures` の `#nullable enable` 化と警告解消
+- [x] Task: `Eede.Domain.ImageEditing` および `Pictures` の `#nullable enable` 化と警告解消 (2059fe9)
 - [ ] Task: `Eede.Domain` プロジェクト全体の `Nullable` 設定を `enable` に変更
 - [ ] Task: 警告解消に伴うドメインモデルの改善（コンストラクタ注入の強化、Null Object パターンの適用）
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 1: ドメイン層の段階的 Nullable 有効化' (Protocol in workflow.md)

@@ -73,13 +73,16 @@ namespace Eede.Presentation.Views.DataEntry
                 Source = _viewModel,
                 Path = nameof(_viewModel.DisplayHeight)
             });
-            ImageBrush canvasBrush = new();
-            _ = canvasBrush.Bind(ImageBrush.SourceProperty, new Binding
+            _ = mainImage.Bind(WidthProperty, new Binding
             {
                 Source = _viewModel,
-                Path = nameof(_viewModel.PremultipliedBitmap)
+                Path = nameof(_viewModel.DisplayWidth)
             });
-            canvas.Background = canvasBrush;
+            _ = mainImage.Bind(HeightProperty, new Binding
+            {
+                Source = _viewModel,
+                Path = nameof(_viewModel.DisplayHeight)
+            });
             MinCursorSize = _viewModel.MinCursorSize;
             _ = Bind(MinCursorSizeProperty, new Binding
             {
@@ -266,18 +269,30 @@ namespace Eede.Presentation.Views.DataEntry
             if (info == null || _viewModel == null)
             {
                 selectionPreview.IsVisible = false;
+                if (_viewModel != null)
+                {
+                    mainImage.Source = _viewModel.PremultipliedBitmap;
+                }
                 return;
             }
 
-            var mag = _viewModel.Magnification;
-            var displayPos = new CanvasCoordinate(info.Position.X, info.Position.Y).ToDisplay(mag);
-            var displaySize = new CanvasCoordinate(info.Pixels.Width, info.Pixels.Height).ToDisplay(mag);
+            var picture = _viewModel.PictureBuffer;
+            if (info.OriginalArea.HasValue)
+            {
+                picture = picture.Clear(info.OriginalArea.Value);
+            }
 
-            selectionPreview.IsVisible = true;
-            selectionPreview.Source = AvaloniaBitmapAdapter.StaticConvertToPremultipliedBitmap(info.Pixels);
-            selectionPreview.Width = displaySize.X;
-            selectionPreview.Height = displaySize.Y;
-            selectionPreview.Margin = new Thickness(displayPos.X, displayPos.Y, 0, 0);
+            var blender = ImageBlender;
+            var bgColor = BackgroundColor;
+            var pixels = info.Pixels;
+            if (blender is Eede.Domain.ImageEditing.Blending.AlphaImageBlender)
+            {
+                pixels = pixels.ApplyTransparency(bgColor);
+            }
+            picture = picture.Blend(blender, pixels, info.Position);
+
+            mainImage.Source = AvaloniaBitmapAdapter.StaticConvertToPremultipliedBitmap(picture);
+            selectionPreview.IsVisible = false;
         }
 
         public bool VisibleCursor

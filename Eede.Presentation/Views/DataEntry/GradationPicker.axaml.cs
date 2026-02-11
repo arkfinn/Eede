@@ -6,7 +6,7 @@ using System;
 
 namespace Eede.Presentation.Views.DataEntry
 {
-    #nullable enable
+#nullable enable
 
     public partial class GradationPicker : UserControl
     {

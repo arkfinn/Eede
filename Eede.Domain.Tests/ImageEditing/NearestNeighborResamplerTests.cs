@@ -18,7 +18,7 @@ namespace Eede.Domain.Tests.ImageEditing
             int w = 2;
             int h = 2;
             var data = new byte[w * h * 4];
-            
+
             // (0,0) Red
             SetPixel(data, 0, 0, w, 255, 0, 0, 255);
             // (1,0) Blue
@@ -40,10 +40,10 @@ namespace Eede.Domain.Tests.ImageEditing
             // Check (0,0), (0,1), (1,0), (1,1) should all be Red
             AssertColor(result, 0, 0, 255, 0, 0, 255);
             AssertColor(result, 1, 1, 255, 0, 0, 255);
-            
+
             // Check (2,0) should be Blue
             AssertColor(result, 2, 0, 0, 0, 255, 255);
-            
+
             // Check (0,2) should be Green
             AssertColor(result, 0, 2, 0, 255, 0, 255);
 

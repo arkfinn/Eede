@@ -60,7 +60,7 @@ public class MainViewModelCharacterizationTests
         _transferImageFromCanvasUseCaseMock = new Mock<ITransferImageFromCanvasUseCase>();
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
         _drawingSessionProviderMock.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));
-        
+
         // UseCases
         var copyUseCase = new CopySelectionUseCase(_clipboardServiceMock.Object);
         var cutUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
@@ -79,24 +79,24 @@ public class MainViewModelCharacterizationTests
             selectionService,
             Mock.Of<IInteractionCoordinator>()
         );
-                var patternsProvider = new AnimationPatternsProvider();
-                var patternService = new AnimationPatternService(
-                    new AddAnimationPatternUseCase(patternsProvider),
-                    new ReplaceAnimationPatternUseCase(patternsProvider),
-                    new RemoveAnimationPatternUseCase(patternsProvider));
-                _animationViewModelMock = new Mock<AnimationViewModel>(
-                    patternsProvider,
-                    patternService,
-                    Mock.Of<IFileSystem>(),
-                    Mock.Of<IBitmapAdapter<Bitmap>>());
-                _drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(_drawingSessionProviderMock.Object);
-        
-                _paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>();
-        
+        var patternsProvider = new AnimationPatternsProvider();
+        var patternService = new AnimationPatternService(
+            new AddAnimationPatternUseCase(patternsProvider),
+            new ReplaceAnimationPatternUseCase(patternsProvider),
+            new RemoveAnimationPatternUseCase(patternsProvider));
+        _animationViewModelMock = new Mock<AnimationViewModel>(
+            patternsProvider,
+            patternService,
+            Mock.Of<IFileSystem>(),
+            Mock.Of<IBitmapAdapter<Bitmap>>());
+        _drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(_drawingSessionProviderMock.Object);
+
+        _paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>();
+
         var pictureIOService = new PictureIOService(
             new SavePictureUseCase(_pictureRepositoryMock.Object),
             new LoadPictureUseCase(_pictureRepositoryMock.Object));
-        
+
         _savePictureUseCaseMock = new Mock<SavePictureUseCase>(_pictureRepositoryMock.Object);
         _loadPictureUseCaseMock = new Mock<LoadPictureUseCase>(_pictureRepositoryMock.Object);
         _dockPictureFactory = () => new DockPictureViewModel(Mock.Of<GlobalState>(), _animationViewModelMock.Object, _bitmapAdapterMock.Object, pictureIOService);

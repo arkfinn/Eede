@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.DataDisplay
 {
-    #nullable enable
+#nullable enable
 
     public class DockPictureViewModel : ViewModelBase
     {

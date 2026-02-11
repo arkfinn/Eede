@@ -165,7 +165,7 @@ public class DrawableCanvasViewModelTests
         var drawingBuffer = new DrawingBuffer(initialPicture);
         // Simulate start drawing
         _interactionCoordinatorMock.Setup(c => c.CurrentBuffer).Returns(drawingBuffer.UpdateDrawing(initialPicture));
-        
+
         // 描画開始 (10, 10)
         vm.DrawBeginCommand.Execute(new Position(10, 10)).Subscribe();
         // Manually trigger state change as the mock won't do it automatically
@@ -178,7 +178,7 @@ public class DrawableCanvasViewModelTests
 
         // Setup mock to simulate end drawing
         _interactionCoordinatorMock.Setup(c => c.CurrentBuffer).Returns(drawingBuffer);
-        
+
         // 描画終了 (11, 11)
         vm.DrawEndCommand.Execute(new Position(11, 11)).Subscribe();
         // Manually trigger state change
@@ -220,96 +220,96 @@ public class DrawableCanvasViewModelTests
             .Callback<Position, DrawingBuffer, IDrawStyle, bool, PictureSize, Action<ArgbColor>, ReactiveCommand<Picture, Unit>>(
             (p, b, s, anim, grid, callback, cmd) => callback(expectedColor));
 
-                vm.PointerRightButtonPressedCommand.Execute(pos).Subscribe();
+        vm.PointerRightButtonPressedCommand.Execute(pos).Subscribe();
 
-        
 
-                Assert.That(vm.PenColor, Is.EqualTo(expectedColor), "PenColor should be updated with the color picked from the coordinator (including alpha)");
 
-            }
+        Assert.That(vm.PenColor, Is.EqualTo(expectedColor), "PenColor should be updated with the color picked from the coordinator (including alpha)");
 
-        
+    }
 
-            [AvaloniaTest]
 
-            public void GridVisibility_Logic_Test()
+
+    [AvaloniaTest]
+
+    public void GridVisibility_Logic_Test()
+
+    {
+
+        new TestScheduler().With(scheduler =>
+
+        {
+
+            RxApp.MainThreadScheduler = scheduler;
+
+            var vm = CreateViewModel();
+
+
+
+            // Default: All False
+
+            Assert.Multiple(() =>
 
             {
 
-                new TestScheduler().With(scheduler =>
+                Assert.That(vm.IsShowPixelGrid, Is.False);
 
-                {
+                Assert.That(vm.IsShowCursorGrid, Is.False);
 
-                    RxApp.MainThreadScheduler = scheduler;
+                Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False);
 
-                    var vm = CreateViewModel();
+                Assert.That(vm.IsCursorGridEffectivelyVisible, Is.False);
 
-        
+            });
 
-                    // Default: All False
 
-                    Assert.Multiple(() =>
 
-                    {
+            // Case 1: Enable Pixel Grid at x1 -> effectively hidden
 
-                        Assert.That(vm.IsShowPixelGrid, Is.False);
+            vm.Magnification = new Magnification(1);
 
-                        Assert.That(vm.IsShowCursorGrid, Is.False);
+            vm.IsShowPixelGrid = true;
 
-                        Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False);
+            scheduler.AdvanceBy(1);
 
-                        Assert.That(vm.IsCursorGridEffectivelyVisible, Is.False);
+            Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False, "Pixel grid should be effectively hidden below x4 even if ON");
 
-                    });
 
-        
 
-                    // Case 1: Enable Pixel Grid at x1 -> effectively hidden
+            // Case 2: Increase magnification to x4 -> effectively visible
 
-                    vm.Magnification = new Magnification(1);
+            vm.Magnification = new Magnification(4);
 
-                    vm.IsShowPixelGrid = true;
+            scheduler.AdvanceBy(1);
 
-                    scheduler.AdvanceBy(1);
+            Assert.That(vm.IsPixelGridEffectivelyVisible, Is.True, "Pixel grid should be effectively visible at x4 or higher when ON");
 
-                    Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False, "Pixel grid should be effectively hidden below x4 even if ON");
 
-        
 
-                    // Case 2: Increase magnification to x4 -> effectively visible
+            // Case 3: Disable Pixel Grid at x4 -> effectively hidden
 
-                    vm.Magnification = new Magnification(4);
+            vm.IsShowPixelGrid = false;
 
-                    scheduler.AdvanceBy(1);
+            scheduler.AdvanceBy(1);
 
-                    Assert.That(vm.IsPixelGridEffectivelyVisible, Is.True, "Pixel grid should be effectively visible at x4 or higher when ON");
+            Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False);
 
-        
 
-                    // Case 3: Disable Pixel Grid at x4 -> effectively hidden
 
-                    vm.IsShowPixelGrid = false;
+            // Case 4: Enable Cursor Grid at x1 -> effectively visible
 
-                    scheduler.AdvanceBy(1);
+            vm.Magnification = new Magnification(1);
 
-                    Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False);
+            vm.IsShowCursorGrid = true;
 
-        
+            scheduler.AdvanceBy(1);
 
-                    // Case 4: Enable Cursor Grid at x1 -> effectively visible
+            Assert.That(vm.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be effectively visible at any magnification when ON");
 
-                    vm.Magnification = new Magnification(1);
+        });
 
-                    vm.IsShowCursorGrid = true;
+    }
 
-                    scheduler.AdvanceBy(1);
+}
 
-                    Assert.That(vm.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be effectively visible at any magnification when ON");
 
-                });
-
-            }
-
-        }
-
-        

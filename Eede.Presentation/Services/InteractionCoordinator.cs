@@ -165,7 +165,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         EnsureInteractionSession(currentBuffer, drawStyle);
         if (_interactionSession == null) return;
         _operationInitialSelectingArea = SelectingArea;
-        
+
         var workingSession = _sessionProvider.CurrentSession;
         if (workingSession == null) return;
 
@@ -589,37 +589,37 @@ public class InteractionCoordinator : IInteractionCoordinator
 
         // 1. 描画中の内容を含むベース画像（未拡大）を取得
         Picture picture = buffer.Fetch();
-        
+
         // 2. プレビュー画像（貼り付けや移動）がある場合、拡大前に合成する
         // 現在の作業状態 (_interactionSession) のプレビュー情報を最優先し、
         // なければグローバルセッション (IDrawingSessionProvider) の情報を使う。
-        var preview = _interactionSession?.SelectionState?.GetSelectionPreviewInfo() 
+        var preview = _interactionSession?.SelectionState?.GetSelectionPreviewInfo()
                       ?? _sessionProvider.CurrentSession?.CurrentPreviewContent;
 
-                if (preview != null)
-                {
-                    var blender = ImageBlender;
-                    var bgColor = BackgroundColor;
-        
-                    if (preview.OriginalArea.HasValue)
-                    {
-                        picture = picture.Clear(preview.OriginalArea.Value);
-                    }
-                    
-                    var pixels = preview.Pixels;
-                    if (blender is AlphaImageBlender)
-                    {
-                        pixels = pixels.ApplyTransparency(bgColor);
-                    }
-                    picture = picture.Blend(blender, pixels, preview.Position);
-                }
+        if (preview != null)
+        {
+            var blender = ImageBlender;
+            var bgColor = BackgroundColor;
+
+            if (preview.OriginalArea.HasValue)
+            {
+                picture = picture.Clear(preview.OriginalArea.Value);
+            }
+
+            var pixels = preview.Pixels;
+            if (blender is AlphaImageBlender)
+            {
+                pixels = pixels.ApplyTransparency(bgColor);
+            }
+            picture = picture.Blend(blender, pixels, preview.Position);
+        }
         // 3. 合成済みの画像を拡大し、必要に応じてペン先カーソルを重ねる
         var tempBuffer = buffer.Reset(picture);
         if (buffer.IsDrawing())
         {
             tempBuffer = tempBuffer.UpdateDrawing(picture);
         }
-        
+
         return _drawableArea.Painted(tempBuffer, penStyle, imageTransfer);
     }
 }

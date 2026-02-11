@@ -51,7 +51,7 @@ namespace Eede.Presentation.Tests.Characterization
                 _sessionProvider,
                 _selectionService,
                 _coordinator);
-            
+
             _viewModel.Magnification = new Magnification(1);
         }
 

@@ -21,7 +21,7 @@ namespace Eede.Application.Tests.UseCase.Pictures
         {
             _clipboardMock = new Mock<IClipboard>();
             _sessionProviderMock = new Mock<IDrawingSessionProvider>();
-            
+
             var picture = Picture.CreateEmpty(new PictureSize(10, 10));
             _currentSession = new DrawingSession(picture);
             _sessionProviderMock.Setup(p => p.CurrentSession).Returns(_currentSession);
@@ -44,13 +44,13 @@ namespace Eede.Application.Tests.UseCase.Pictures
         {
             var pastePicture = Picture.CreateEmpty(new PictureSize(5, 5));
             _clipboardMock.Setup(c => c.GetPictureAsync()).ReturnsAsync(pastePicture);
-            
+
             var useCase = new PasteFromClipboardUseCase(_clipboardMock.Object, _sessionProviderMock.Object);
 
             await useCase.ExecuteAsync();
 
-            _sessionProviderMock.Verify(p => p.Update(It.Is<DrawingSession>(s => 
-                s.CurrentPreviewContent != null && 
+            _sessionProviderMock.Verify(p => p.Update(It.Is<DrawingSession>(s =>
+                s.CurrentPreviewContent != null &&
                 s.CurrentPreviewContent.Pixels == pastePicture)), Times.Once);
         }
     }

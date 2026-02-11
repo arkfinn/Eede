@@ -25,7 +25,7 @@ public class AnimationDockViewModelTests
             patternService,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter());
-        
+
         var dockViewModel = new AnimationDockViewModel(animationViewModel);
 
         Assert.That(dockViewModel.Id, Is.EqualTo("Animation"));

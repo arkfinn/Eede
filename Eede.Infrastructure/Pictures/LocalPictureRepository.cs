@@ -20,7 +20,7 @@ namespace Eede.Infrastructure.Pictures
                     return Task.FromResult(reader.Read(fs));
                 }
             }
-            
+
             // PNG/BMP 等の標準形式については、現在は Presentation 層のアダプターが必要。
             // インフラ層で完結させる場合は SkiaSharp 等の導入が必要なため、
             // ここではサポート外の例外を投げるか、将来の拡張ポイントとして残す。

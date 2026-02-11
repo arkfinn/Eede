@@ -140,7 +140,7 @@ public class AvaloniaClipboard : IClipboard
 
         var formats = await clipboard.GetFormatsAsync();
         if (formats == null) return false;
-        
+
         return formats.Any(f => ImageFormats.Contains(f, StringComparer.OrdinalIgnoreCase) || f == DataFormats.Files);
     }
 

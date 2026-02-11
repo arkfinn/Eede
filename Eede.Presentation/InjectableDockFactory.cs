@@ -16,7 +16,7 @@ public class InjectableDockFactory : Factory
         {
             base.SetFocusedDockable(dock, dockable);
         }
-        
+
         if (_lastFocused != dockable)
         {
             _lastFocused = dockable;

@@ -19,7 +19,7 @@ using System.Windows.Input;
 
 namespace Eede.Presentation.Views.DataEntry
 {
-    #nullable enable
+#nullable enable
 
     public partial class PictureContainer : UserControl
     {
@@ -476,7 +476,7 @@ namespace Eede.Presentation.Views.DataEntry
                     PicturePushAction?.Execute(finalArea.Value);
                     // 作業エリア側の選択状態も同期させる
                     vm.GlobalState.CursorArea = HalfBoxArea.Create(finalArea.Value.Position, finalArea.Value.Size);
-                    
+
                     // 次回のカーソルサイズのためにサイズを保存
                     _cursorSize = finalArea.Value.Size;
                 }

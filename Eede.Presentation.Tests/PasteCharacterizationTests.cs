@@ -153,7 +153,7 @@ namespace Eede.Presentation.Tests
         {
             // Arrange: 初期状態 (空の32x32)
             var initialPicture = _sessionProvider.CurrentSession.Buffer.Fetch();
-            
+
             // 1. 赤い点を描画して履歴を1つ作る (secondPicture)
             _viewModel.DrawStyle = new FreeCurve();
             _viewModel.PenColor = new ArgbColor(255, 255, 0, 0); // Red
@@ -166,7 +166,7 @@ namespace Eede.Presentation.Tests
             var blueData = new byte[4] { 255, 0, 0, 255 }; // RGBA/BGRA
             var blueImage = Picture.Create(new PictureSize(1, 1), blueData);
             _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(blueImage);
-            
+
             _viewModel.DrawStyle = new RegionSelector();
             _viewModel.Magnification = new Magnification(1);
             await _viewModel.PasteCommand.Execute().ToTask();

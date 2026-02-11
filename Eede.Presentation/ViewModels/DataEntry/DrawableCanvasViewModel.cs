@@ -153,7 +153,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
-        
+
         Picture initialPicture = Picture.CreateEmpty(_globalState.BoxSize);
         _bitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(initialPicture);
         _pictureBuffer = ContextFactory.Create(initialPicture);

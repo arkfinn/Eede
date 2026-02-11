@@ -30,7 +30,7 @@ public class DrawableCanvasCharacterizationTests
     private Mock<IDrawingSessionProvider> _drawingSessionProviderMock;
     private Mock<IInteractionCoordinator> _coordinatorMock;
     private Mock<DrawingSessionViewModel> _drawingSessionViewModelMock;
-    
+
     private ISelectionService _selectionService;
 
     [SetUp]

@@ -7,7 +7,7 @@ using Eede.Application.Infrastructure;
 
 namespace Eede.Presentation.Files
 {
-    #nullable enable
+#nullable enable
 
     public abstract record AbstractImageFile(Bitmap Bitmap, FilePath Path) : IImageFile
     {

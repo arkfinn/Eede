@@ -8,7 +8,7 @@ using System.Collections.Specialized;
 
 namespace Eede.Presentation.Views.DataDisplay
 {
-    #nullable enable
+#nullable enable
 
     public class PictureDock : DocumentDock
     {

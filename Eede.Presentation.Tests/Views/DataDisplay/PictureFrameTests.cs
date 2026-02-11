@@ -64,7 +64,7 @@ public class PictureFrameTests
         // Act
         // イベントを発火させて、プロパティが更新されることを確認
         _factory.SetFocusedDockable(null, mockDockable);
-        
+
         // すでに同じ値が入っている状態でもう一度発火させても、
         // ガードによってイベントはそれ以上連鎖しないはず
         _factory.SetFocusedDockable(null, mockDockable);

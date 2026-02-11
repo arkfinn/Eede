@@ -26,7 +26,7 @@ public class CutSelectionUseCaseTests
     {
         var picture = Picture.CreateEmpty(new PictureSize(10, 10));
         var area = new PictureArea(new Position(0, 0), new PictureSize(5, 5));
-        
+
         // Setup mock to verify CopyAsync is called
         _clipboardServiceMock.Setup(x => x.CopyAsync(It.IsAny<Picture>())).Returns(Task.CompletedTask);
 

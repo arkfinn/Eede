@@ -34,9 +34,9 @@ public class DrawingSessionTests
     {
         var session = new DrawingSession(_initialPicture);
         var nextPicture = Picture.CreateEmpty(_size); // 本来は異なるデータ
-        
+
         var updatedSession = session.Push(nextPicture);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(updatedSession.CurrentPicture, Is.EqualTo(nextPicture));
@@ -52,9 +52,9 @@ public class DrawingSessionTests
     {
         var session = new DrawingSession(_initialPicture);
         var drawingPicture = Picture.CreateEmpty(_size);
-        
+
         var drawingSession = session.UpdateDrawing(drawingPicture);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(drawingSession.CurrentPicture, Is.EqualTo(drawingPicture));
@@ -75,7 +75,7 @@ public class DrawingSessionTests
         var finalPicture = Picture.CreateEmpty(_size);
 
         var s2 = session.UpdateDrawing(drawingPicture).Push(finalPicture);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(s2.CurrentPicture, Is.EqualTo(finalPicture));
@@ -90,19 +90,19 @@ public class DrawingSessionTests
         // Arrange
         var initialArea = new PictureArea(new Position(0, 0), new PictureSize(10, 10));
         var session = new DrawingSession(_initialPicture, initialArea); // このコンストラクタは未実装
-        
+
         var nextPicture = Picture.CreateEmpty(_size);
         var nextArea = new PictureArea(new Position(5, 5), new PictureSize(15, 15));
-        
+
         // Act
         var updatedSession = session.Push(nextPicture, nextArea); // この引数は未実装
-        
+
         // Assert: Push後の状態
         Assert.That(updatedSession.CurrentSelectingArea, Is.EqualTo(nextArea));
-        
+
         // Act: Undo実行
         var undoneSession = updatedSession.Undo().Session;
-        
+
         // Assert: Undo後の状態が復元されていること
         Assert.Multiple(() =>
         {

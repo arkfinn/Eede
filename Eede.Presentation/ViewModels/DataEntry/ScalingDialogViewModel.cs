@@ -8,7 +8,7 @@ using System.Reactive.Linq;
 
 namespace Eede.Presentation.ViewModels.DataEntry
 {
-    #nullable enable
+#nullable enable
 
     public class ScalingDialogViewModel : ReactiveObject
     {

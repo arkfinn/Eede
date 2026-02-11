@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace Eede.Presentation.Views.DataDisplay
 {
-    #nullable enable
+#nullable enable
 
     public class PictureDocument : Document
     {

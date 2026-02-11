@@ -69,7 +69,8 @@
                Margin="{Binding PreviewThickness}"
                Width="{Binding PreviewSize.Width}"
                Height="{Binding PreviewSize.Height}"
-               RenderOptions.BitmapInterpolationMode="None"/>
+               RenderOptions.BitmapInterpolationMode="None"
+               IsHitTestVisible="False"/>
         <local:GridOverlay Width="{Binding DisplayWidth}"
                            Height="{Binding DisplayHeight}"
                            IsShowPixelGrid="{Binding IsPixelGridEffectivelyVisible}"

@@ -27,16 +27,12 @@ public class InteractionCoordinator : IInteractionCoordinator
             var fromState = _interactionSession?.SelectionState?.GetSelectingArea();
             if (fromState != null) return fromState;
 
-            if (_interactionSession == null)
-            {
-                return _sessionProvider.CurrentSession?.CurrentSelectingArea;
-            }
-
-            if (_interactionSession.DrawStyle is RegionSelector)
+            if (_interactionSession?.DrawStyle is RegionSelector && _manualSelectingArea != null)
             {
                 return _manualSelectingArea;
             }
-            return null;
+
+            return _sessionProvider.CurrentSession?.CurrentSelectingArea;
         }
     }
 
@@ -193,7 +189,6 @@ public class InteractionCoordinator : IInteractionCoordinator
             _interactionSession = new CanvasInteractionSession(workingSession.Buffer, drawStyle, previousState);
         }
 
-        // 2. 選択状態の更新（移動開始判定など）
         var currentState = _interactionSession.SelectionState;
         UpdateCursor(canvasPos);
         var nextState = currentState.HandlePointerLeftButtonPressed(
@@ -356,11 +351,13 @@ public class InteractionCoordinator : IInteractionCoordinator
         if (previousState is DraggingState or ResizingState)
         {
             var info = nextState.GetSelectionPreviewInfo();
+            // 先に内部状態を更新しておくことで、Update(session) が呼ぶ SyncWithSession() が
+            // 正しい nextState を参照できるようにする
+            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
             if (info != null && _sessionProvider.CurrentSession != null)
             {
                 _sessionProvider.Update(_sessionProvider.CurrentSession.UpdatePreviewContent(info));
             }
-            _interactionSession = new CanvasInteractionSession(CurrentBuffer, drawStyle, nextState);
             NotifyStateChanged();
             return;
         }
@@ -445,6 +442,20 @@ public class InteractionCoordinator : IInteractionCoordinator
         bool isPreviewInState = _interactionSession?.SelectionState is SelectionPreviewState or DraggingState or ResizingState;
         bool isStateMismatch = isPreviewInSession != isPreviewInState;
 
+        // 操作中（ドラッグやリサイズ中）は、ローカルの状態が優先されるため、
+        // 外部からの強制リセットや状態の不一致（プレビューの有無の変化）がない限り同期をスキップする。
+        // 特に移動中は statePos と sessionPos が不一致になるため、ここでリセットしてはいけない。
+        if (IsOperating && !forceReset && !isStateMismatch)
+        {
+            // 操作中でもバッファが外部要因（Undo等）で変わった場合は、セッションのバッファを同期する
+            if (_interactionSession != null && _interactionSession.Buffer != session.Buffer)
+            {
+                _interactionSession = new CanvasInteractionSession(session.Buffer, _interactionSession.DrawStyle, _interactionSession.SelectionState);
+                NotifyStateChanged();
+            }
+            return;
+        }
+
         // セッション内のプレビュー位置と、現在の状態が保持しているプレビュー位置が異なる場合も
         // 外部からの更新（Undo等）とみなして同期対象とする
         bool isPositionMismatch = false;
@@ -460,16 +471,6 @@ public class InteractionCoordinator : IInteractionCoordinator
         {
             // Coordinator側にはプレビューがあるが、セッション側にはない（確定された）場合
             isPositionMismatch = true;
-        }
-
-        if (IsOperating && !forceReset && !isStateMismatch && !isPositionMismatch)
-        {
-            // 操作中でもバッファが外部要因（Undo等）で変わった場合は、セッションのバッファを同期する
-            if (_interactionSession != null && _interactionSession.Buffer != session.Buffer)
-            {
-                _interactionSession = new CanvasInteractionSession(session.Buffer, _interactionSession.DrawStyle, _interactionSession.SelectionState);
-            }
-            return;
         }
 
         if (forceReset || isStateMismatch || isPositionMismatch || (_interactionSession == null) || (_interactionSession.Buffer != session.Buffer))

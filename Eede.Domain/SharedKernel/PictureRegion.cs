@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ namespace Eede.Domain.SharedKernel
 {
     public readonly struct PictureRegion : IEnumerable<PictureArea>
     {
-        private readonly IEnumerable<PictureArea> Areas;
+        private readonly IEnumerable<PictureArea>? Areas;
 
         public PictureRegion(PictureArea area)
         {
@@ -23,7 +24,7 @@ namespace Eede.Domain.SharedKernel
 
         public PictureArea GetBoundingBox()
         {
-            if (IsEmpty) return new PictureArea(new Position(0, 0), new PictureSize(0, 0));
+            if (IsEmpty || Areas == null) return new PictureArea(new Position(0, 0), new PictureSize(0, 0));
             var first = Areas.First(a => !a.IsEmpty);
             return Areas.Where(a => !a.IsEmpty).Aggregate(first, (current, next) => current.Combine(next));
         }

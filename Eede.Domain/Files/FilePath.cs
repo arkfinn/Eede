@@ -1,8 +1,11 @@
-﻿namespace Eede.Domain.Files
+﻿#nullable enable
+using System;
+
+namespace Eede.Domain.Files
 {
     public class FilePath(string filePath)
     {
-        private readonly string Path = filePath;
+        private readonly string Path = filePath ?? throw new ArgumentNullException(nameof(filePath));
 
         public bool IsEmpty()
         {

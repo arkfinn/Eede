@@ -4,9 +4,9 @@
 リファクタリングによる先退（デグレード）を防ぐため、主要プロジェクトのテスト基盤を強化する。
 
 - [x] Task: 既存テストの実行とベースライン確認 (eb57cdf)
-- [ ] Task: `Eede.Domain` の主要クラス (`DrawingSession`, `Coordinate`, `Picture`) に対する仕様化テストの拡充
-- [ ] Task: `Eede.Presentation` の ViewModel における重要プロパティの挙動を確認するテストの追加
-- [ ] Task: Conductor - User Manual Verification 'フェーズ 0: 現状固定 (Safety Net)' (Protocol in workflow.md)
+- [x] Task: `Eede.Domain` の主要クラス (`DrawingSession`, `Coordinate`, `Picture`) に対する仕様化テストの拡充 (9034bf2)
+- [x] Task: `Eede.Presentation` の ViewModel における重要プロパティの挙動を確認するテストの追加 (9034bf2)
+- [x] Task: Conductor - User Manual Verification 'フェーズ 0: 現状固定 (Safety Net)' (Protocol in workflow.md)
 
 ## フェーズ 1: ドメイン層の段階的 Nullable 有効化
 依存関係の最内部から Null 安全を確立し、ドメインモデルを洗練させる。

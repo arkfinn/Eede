@@ -26,14 +26,25 @@ public class SelectedState : ISelectionState
             return new ResizingState(sourcePicture, _selection.Area, mousePosition, handle.Value, new NearestNeighborResampler());
         }
 
-        if (_selection.Contains(mousePosition))
+        // mousePosition (生のクリック位置) と cursorArea.RealPosition (スナップ位置) の両方をチェック
+        // 高倍率時の 1ピクセル未満の判定誤差を許容するため、遊び(margin)を持たせる
+        int margin = Math.Max(1, handleSize / 2);
+        bool containsMouse = ContainsWithMargin(_selection.Area, mousePosition, margin);
+        bool containsCursor = ContainsWithMargin(_selection.Area, cursorArea.RealPosition, margin);
+
+        if (containsMouse || containsCursor)
         {
             var picture = getPicture();
             var cutPicture = picture.CutOut(_selection.Area);
-            // Coordinator側でBufferを更新するため、ここではupdateActionを呼ばない
-            return new DraggingState(cutPicture, _selection.Area, mousePosition, SelectionPreviewType.CutAndMove, _selection.Area);
+            return new DraggingState(cutPicture, cutPicture, _selection.Area, mousePosition, SelectionPreviewType.CutAndMove, _selection.Area);
         }
         return new NormalCursorState(cursorArea);
+    }
+
+    private bool ContainsWithMargin(PictureArea area, Position position, int margin)
+    {
+        return position.X >= area.X - margin && position.X < area.X + area.Width + margin &&
+               position.Y >= area.Y - margin && position.Y < area.Y + area.Height + margin;
     }
 
     public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand? picturePushAction, ICommand? pictureUpdateAction)

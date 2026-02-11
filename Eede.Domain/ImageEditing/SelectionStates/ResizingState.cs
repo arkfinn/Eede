@@ -63,8 +63,6 @@ namespace Eede.Domain.ImageEditing.SelectionStates
             return (this, cursorArea);
         }
 
-        // ...
-
         public SelectionPreviewInfo? GetSelectionPreviewInfo()
         {
             var resizer = new ResizingSelection(OriginalArea, Handle);

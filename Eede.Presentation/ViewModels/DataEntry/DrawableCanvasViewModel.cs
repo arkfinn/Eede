@@ -191,7 +191,12 @@ public class DrawableCanvasViewModel : ViewModelBase
             .DistinctUntilChanged()
             .Subscribe(x =>
             {
-                _coordinator.CommitSelection(x is not RegionSelector);
+                // ツールが RegionSelector に切り替わる場合は、現在のプレビュー（貼り付け直後など）を
+                // 維持したまま操作を継続できるようにするため、確定を行わない。
+                if (x is not RegionSelector)
+                {
+                    _coordinator.CommitSelection(true);
+                }
                 _coordinator.ChangeDrawStyle(x);
                 if (x is RegionSelector selector)
                 {

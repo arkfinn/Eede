@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.SharedKernel;
 using System;
 
@@ -15,7 +16,7 @@ namespace Eede.Domain.ImageEditing.GeometricTransformations
 
             // 新しい画像バッファ
             var newData = new byte[newSize.Width * newSize.Height * 4];
-            
+
             var sourceSpan = source.AsSpan();
             int sourceStride = source.Stride;
             int sourceWidth = source.Width;

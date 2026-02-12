@@ -8,6 +8,8 @@ using System.Reactive.Linq;
 
 namespace Eede.Presentation.ViewModels.DataEntry
 {
+#nullable enable
+
     public class ScalingDialogViewModel : ReactiveObject
     {
         private readonly PictureSize OriginalSize;

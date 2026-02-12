@@ -6,6 +6,6 @@ namespace Eede.Application.Infrastructure;
 public interface IClipboard
 {
     Task CopyAsync(Picture picture);
-    Task<Picture> GetPictureAsync();
+    Task<Picture?> GetPictureAsync();
     Task<bool> HasPictureAsync();
 }

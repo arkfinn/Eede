@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
 using System;
@@ -12,10 +13,12 @@ namespace Eede.Domain.ImageEditing.SelectionStates
         private readonly Position StartPosition;
         private readonly SelectionHandle Handle;
         private readonly IImageResampler Resampler;
-        
+        private readonly SelectionPreviewType Type;
+        private readonly PictureArea? ClearArea;
+
         private Position NowPosition;
 
-        public ResizingState(Picture originalPixels, PictureArea originalArea, Position startPosition, SelectionHandle handle, IImageResampler resampler)
+        public ResizingState(Picture originalPixels, PictureArea originalArea, Position startPosition, SelectionHandle handle, IImageResampler resampler, SelectionPreviewType type = SelectionPreviewType.CutAndMove, PictureArea? clearArea = null)
         {
             OriginalPixels = originalPixels;
             OriginalArea = originalArea;
@@ -23,6 +26,8 @@ namespace Eede.Domain.ImageEditing.SelectionStates
             NowPosition = startPosition;
             Handle = handle;
             Resampler = resampler;
+            Type = type;
+            ClearArea = clearArea ?? (type == SelectionPreviewType.CutAndMove ? originalArea : null);
         }
 
         public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
@@ -32,11 +37,6 @@ namespace Eede.Domain.ImageEditing.SelectionStates
 
         public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand? picturePushAction, ICommand? pictureUpdateAction)
         {
-            // リリースしたら SelectionPreviewState に移行 (確定待ち)
-            // または SelectedState に戻るか？
-            // DraggingState の実装を見ると SelectionPreviewState に移行している。
-            // SelectionPreviewState は SelectionPreviewInfo を持っているだけのステート。
-            
             var info = GetSelectionPreviewInfo();
             if (info != null)
             {
@@ -64,16 +64,14 @@ namespace Eede.Domain.ImageEditing.SelectionStates
             return (this, cursorArea);
         }
 
-        // ...
-
         public SelectionPreviewInfo? GetSelectionPreviewInfo()
         {
             var resizer = new ResizingSelection(OriginalArea, Handle);
             var newArea = resizer.Resize(StartPosition, NowPosition, _isShifted);
-            
+
             var newPixels = Resampler.Resize(OriginalPixels, newArea.Size);
-            
-            return new SelectionPreviewInfo(newPixels, newArea.Position, SelectionPreviewType.CutAndMove, OriginalArea);
+
+            return new SelectionPreviewInfo(newPixels, newArea.Position, Type, ClearArea, OriginalPixels);
         }
 
         public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)

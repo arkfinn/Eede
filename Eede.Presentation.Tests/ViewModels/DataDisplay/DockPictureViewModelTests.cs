@@ -43,8 +43,8 @@ public class DockPictureViewModelTests
         _animationViewModel = new AnimationViewModel(
             patternsProvider,
             patternService,
-            new Mock<IFileSystem>().Object);
-        _mockPictureRepository = new Mock<IPictureRepository>();
+            new Mock<IFileSystem>().Object,
+            new AvaloniaBitmapAdapter()); _mockPictureRepository = new Mock<IPictureRepository>();
         _pictureIOService = new PictureIOService(
             new SavePictureUseCase(_mockPictureRepository.Object),
             new LoadPictureUseCase(_mockPictureRepository.Object));

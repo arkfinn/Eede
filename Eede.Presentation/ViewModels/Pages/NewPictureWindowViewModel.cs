@@ -1,4 +1,4 @@
-﻿using Eede.Domain.SharedKernel;
+using Eede.Domain.SharedKernel;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -6,6 +6,8 @@ using System.Reactive;
 
 namespace Eede.Presentation.ViewModels.Pages
 {
+#nullable enable
+
     public class NewPictureWindowViewModel : ViewModelBase
     {
         [Reactive] public PictureSize Size { get; set; }
@@ -24,7 +26,7 @@ namespace Eede.Presentation.ViewModels.Pages
         public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         public bool Result { get; private set; }
-        public Action Close { get; set; }
+        public Action? Close { get; set; }
 
         public NewPictureWindowViewModel()
         {

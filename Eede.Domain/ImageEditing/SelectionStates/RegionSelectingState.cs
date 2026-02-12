@@ -1,4 +1,5 @@
 using Eede.Domain.ImageEditing;
+#nullable enable
 using Eede.Domain.SharedKernel;
 using Eede.Domain.Selections;
 using System;

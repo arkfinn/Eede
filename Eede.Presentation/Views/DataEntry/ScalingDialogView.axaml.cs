@@ -8,6 +8,8 @@ using System;
 
 namespace Eede.Presentation.Views.DataEntry
 {
+#nullable enable
+
     public partial class ScalingDialogView : ReactiveWindow<ScalingDialogViewModel>
     {
         public ScalingDialogView()
@@ -15,11 +17,14 @@ namespace Eede.Presentation.Views.DataEntry
             AvaloniaXamlLoader.Load(this);
             this.WhenActivated(d =>
             {
-                d(ViewModel.OkCommand.Subscribe(context => Close(context)));
+                if (ViewModel != null)
+                {
+                    d(ViewModel.OkCommand.Subscribe(context => Close(context)));
+                }
             });
         }
 
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        private void CancelButton_Click(object? sender, RoutedEventArgs e)
         {
             Close(null);
         }

@@ -2,6 +2,7 @@ using Avalonia.Input;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
@@ -10,6 +11,8 @@ using System.Reactive;
 using ReactiveUI;
 
 namespace Eede.Presentation.Services;
+
+#nullable enable
 
 public interface IInteractionCoordinator
 {
@@ -28,22 +31,23 @@ public interface IInteractionCoordinator
 
     // 描画
     void UpdatePicture(Picture picture);
-    Picture Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);
+    Picture? Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer);
     void CommitSelection(bool forceClearSelection = false);
     void ChangeDrawStyle(IDrawStyle drawStyle);
 
     // 状態取得 (ViewModelがバインドするもの)
-    DrawingBuffer CurrentBuffer { get; }
+    DrawingBuffer? CurrentBuffer { get; }
     PictureArea? SelectingArea { get; }
     bool IsRegionSelecting { get; }
     bool IsShowHandles { get; }
     Picture? PreviewPixels { get; }
     Position PreviewPosition { get; }
     Cursor ActiveCursor { get; }
+    SelectionCursor ActiveSelectionCursor { get; }
     IImageBlender ImageBlender { get; set; }
     ArgbColor BackgroundColor { get; set; }
 
     // イベント
-    event Action<Picture, Picture, PictureArea?, PictureArea?> Drew;
-    event Action StateChanged;
+    event Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion>? Drew;
+    event Action? StateChanged;
 }

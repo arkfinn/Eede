@@ -1,5 +1,6 @@
 using Eede.Application.Animations;
 using Eede.Application.Infrastructure;
+using Eede.Application.Pictures;
 using Eede.Application.UseCase.Animations;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
@@ -18,14 +19,18 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text.Json;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.Animations;
+
+#nullable enable
 
 public class AnimationViewModel : ViewModelBase, IAddFrameProvider
 {
     private readonly IAnimationPatternsProvider _patternsProvider;
     private readonly IAnimationPatternService _patternService;
     private readonly IFileSystem _fileSystem;
+    private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
     private readonly IImageTransfer _imageTransfer = new DirectImageTransfer();
 
     [Reactive] public AnimationPattern? SelectedPattern { get; set; }
@@ -43,15 +48,26 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
 
     [Reactive] public int WaitTime { get; set; }
 
-    [Reactive] public Magnification Magnification { get; set; }
+    [Reactive] public Magnification Magnification { get; set; } = new(1);
     [Reactive] public Picture? ActivePicture { get; set; }
-    [Reactive] public Bitmap? PreviewBitmap { get; set; }
+    private Bitmap? _previewBitmap;
+    public Bitmap? PreviewBitmap
+    {
+        get => _previewBitmap;
+        set
+        {
+            if (_previewBitmap != value)
+            {
+                _previewBitmap?.Dispose();
+            }
+            _ = this.RaiseAndSetIfChanged(ref _previewBitmap, value);
+        }
+    }
 
     public ReactiveCommand<string, Unit> CreatePatternCommand { get; }
     public ReactiveCommand<Unit, Unit> RemovePatternCommand { get; }
     public ReactiveCommand<int, Unit> AddFrameCommand { get; }
     public ReactiveCommand<AnimationFrame, Unit> RemoveFrameAtCommand { get; }
-    public ReactiveCommand<Unit, Unit> ClearSequenceCommand { get; }
     public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
     public ReactiveCommand<IFileStorage, Unit> ExportCommand { get; }
     public ReactiveCommand<IFileStorage, Unit> ImportCommand { get; }
@@ -64,11 +80,13 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
     public AnimationViewModel(
         IAnimationPatternsProvider patternsProvider,
         IAnimationPatternService patternService,
-        IFileSystem fileSystem)
+        IFileSystem fileSystem,
+        IBitmapAdapter<Bitmap> bitmapAdapter)
     {
         _patternsProvider = patternsProvider;
         _patternService = patternService;
         _fileSystem = fileSystem;
+        _bitmapAdapter = bitmapAdapter;
 
         _currentFrame = this.WhenAnyValue(x => x.SelectedPattern, x => x.CurrentFrameIndex)
             .Select(x => (x.Item1 != null && x.Item2 >= 0 && x.Item2 < x.Item1.Frames.Count)
@@ -186,7 +204,7 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
                 var picture = x.Item1;
                 var frame = x.Item2;
                 var mag = x.Item3;
-                if (picture != null && frame != null && SelectedPattern != null && mag != null)
+                if (picture != null && frame != null && SelectedPattern != null)
                 {
                     var cellSize = SelectedPattern.Grid.CellSize;
                     var offset = SelectedPattern.Grid.Offset;
@@ -204,7 +222,7 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
                     {
                         var framePixels = picture.CutOut(rect);
                         var magnified = _imageTransfer.Transfer(framePixels, mag);
-                        PreviewBitmap = PictureBitmapAdapter.ConvertToPremultipliedBitmap(magnified);
+                        PreviewBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(magnified);
                     }
                     else
                     {

@@ -24,11 +24,11 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             DrawingBuffer process2 = tool.Drawing(process, penStyle, pos2, false);
             CoordinateHistory pos3 = pos2.Update(new CanvasCoordinate(15, 18));
             DrawingBuffer process3 = tool.Drawing(process2, penStyle, pos3, false);
-            DrawingBuffer dst = tool.DrawEnd(process3, penStyle, pos3, false);
+            var result = tool.DrawEnd(process3, penStyle, pos3, false);
 
             //　dstBmp.Save(@"ImageEditing\DrawingTools\test\freeCurve1_.png", ImageFormat.Png);
             Picture expected = ReadPicture(@"ImageEditing\DrawingTools\test\freeCurve1.png");
-            Assert.That(dst.Fetch().CloneImage(), Is.EqualTo(expected.CloneImage()));
+            Assert.That(result.Buffer.Fetch().CloneImage(), Is.EqualTo(expected.CloneImage()));
         }
 
         private Picture ReadPicture(string path)

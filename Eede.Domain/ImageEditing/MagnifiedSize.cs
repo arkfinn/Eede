@@ -1,4 +1,5 @@
-﻿using Eede.Domain.SharedKernel;
+﻿#nullable enable
+using Eede.Domain.SharedKernel;
 using System;
 
 namespace Eede.Domain.ImageEditing

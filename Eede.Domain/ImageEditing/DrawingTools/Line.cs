@@ -1,30 +1,40 @@
 ﻿using Eede.Domain.SharedKernel;
 using System;
 
+#nullable enable
 namespace Eede.Domain.ImageEditing.DrawingTools;
 
 // 実装内容を再検討する
 public record Line : IDrawStyle
 {
+    private PictureArea? AffectedArea;
+
     public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return buffer.UpdateDrawing(drawer.DrawPoint(coordinateHistory.Now.ToPosition()));
+        var result = drawer.DrawPoint(coordinateHistory.Now.ToPosition());
+        AffectedArea = result.Area;
+        return buffer.UpdateDrawing(result.Picture);
     }
 
     public DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return buffer.UpdateDrawing(Draw(drawer, coordinateHistory, isShift));
+        var result = Draw(drawer, coordinateHistory, isShift);
+        AffectedArea = result.Area;
+        return buffer.UpdateDrawing(result.Picture);
     }
 
-    public DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
+    public DrawEndResult DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         Drawer drawer = new(buffer.Previous, penStyle);
-        return ContextFactory.Create(Draw(drawer, coordinateHistory, isShift));
+        var result = Draw(drawer, coordinateHistory, isShift);
+        var area = AffectedArea.HasValue ? AffectedArea.Value.Combine(result.Area) : result.Area;
+        AffectedArea = null;
+        return new DrawEndResult(ContextFactory.Create(result.Picture), area);
     }
 
-    private Picture Draw(Drawer drawer, CoordinateHistory coordinateHistory, bool isShift)
+    private (Picture Picture, PictureArea Area) Draw(Drawer drawer, CoordinateHistory coordinateHistory, bool isShift)
     {
         Position to = isShift ? CalculateShiftedPosition(coordinateHistory.Start.ToPosition(), coordinateHistory.Now.ToPosition()) : coordinateHistory.Now.ToPosition();
         return drawer.DrawLine(coordinateHistory.Start.ToPosition(), to);

@@ -1,4 +1,5 @@
-﻿namespace Eede.Domain.Palettes
+﻿#nullable enable
+namespace Eede.Domain.Palettes
 {
     public readonly record struct ArgbColor(byte Alpha, byte Red, byte Green, byte Blue)
     {

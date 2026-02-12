@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.Palettes;
 
 namespace Eede.Domain.ImageEditing;

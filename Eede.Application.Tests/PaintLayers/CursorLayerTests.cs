@@ -50,7 +50,7 @@ namespace Eede.Application.Tests.PaintLayers
             // 3. CursorLayer作成 (transferは何もしないもの)
             var paintSize = new MagnifiedSize(size, new Magnification(1));
             var transfer = new DirectImageTransfer();
-            var cursorPosition = new Position(5, 5); 
+            var cursorPosition = new Position(5, 5);
             var layer = new CursorLayer(paintSize, background, penStyle, cursorPosition, transfer);
 
             // 4. 描画実行
@@ -58,13 +58,13 @@ namespace Eede.Application.Tests.PaintLayers
             // 新しい実装では引数がベースになるため、空の画像を渡すとカーソル部分だけが確認できる。
             // しかし、本来の使われ方は「背景画像に対して実行する」ことなので、
             // 「背景画像に対して、カーソルがない場所の色が変わらないこと」を確認する。
-            var result = layer.Painted(background); 
+            var result = layer.Painted(background);
 
             // 5. 検証
             // カーソル以外の位置 (0,0) は「半透明赤 (128)」のままであるべき。
             // ※新しい CursorLayer.Painted は destination に対して描画するため、
             // テスト内で引数に background を渡すと、128赤の上に何も重ならない場所は 128赤のままになるはず。
-            
+
             var pixel = result.PickColor(new Position(0, 0));
             Assert.That(pixel.Alpha, Is.EqualTo(128), "CursorLayer should not darken the background pixels where cursor is not present.");
         }
@@ -87,7 +87,7 @@ namespace Eede.Application.Tests.PaintLayers
             var result = layer.Painted(background);
 
             Assert.That(result.PickColor(cursorPosition).Blue, Is.EqualTo(255));
-            
+
             var bgPixel = result.PickColor(new Position(0, 0));
             Assert.That(bgPixel.Red, Is.EqualTo(255), "Background should remain red.");
             Assert.That(bgPixel.Alpha, Is.EqualTo(255), "Background should remain opaque.");
@@ -98,7 +98,7 @@ namespace Eede.Application.Tests.PaintLayers
         {
             // 1. 赤(RGB)でアルファが128のペンを設定
             var size = new PictureSize(1, 1);
-            var penColor = new ArgbColor(128, 255, 0, 0); 
+            var penColor = new ArgbColor(128, 255, 0, 0);
             var blender = new Eede.Domain.ImageEditing.Blending.DirectImageBlender();
             var penStyle = new PenStyle(blender, penColor, 1);
 
@@ -126,7 +126,7 @@ namespace Eede.Application.Tests.PaintLayers
         {
             // 1. 赤(RGB)でアルファが128のペンを設定
             var size = new PictureSize(1, 1);
-            var penColor = new ArgbColor(128, 255, 0, 0); 
+            var penColor = new ArgbColor(128, 255, 0, 0);
             var blender = new Eede.Domain.ImageEditing.Blending.DirectImageBlender();
             var penStyle = new PenStyle(blender, penColor, 1);
 

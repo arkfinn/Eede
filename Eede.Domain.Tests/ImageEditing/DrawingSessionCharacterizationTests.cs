@@ -91,7 +91,7 @@ public class DrawingSessionCharacterizationTests
     public void MultiplePushes_BehaveAsStack()
     {
         var session = new DrawingSession(_initialPicture);
-        
+
         var p1 = Picture.CreateEmpty(_size);
         var p2 = Picture.CreateEmpty(_size);
         var p3 = Picture.CreateEmpty(_size);
@@ -101,7 +101,7 @@ public class DrawingSessionCharacterizationTests
         var s3 = s2.Push(p3);
 
         Assert.That(s3.CurrentPicture, Is.EqualTo(p3));
-        
+
         var u1 = s3.Undo().Session;
         Assert.That(u1.CurrentPicture, Is.EqualTo(p2));
 
@@ -110,7 +110,7 @@ public class DrawingSessionCharacterizationTests
 
         var u3 = u2.Undo().Session;
         Assert.That(u3.CurrentPicture, Is.EqualTo(_initialPicture));
-        
+
         Assert.That(u3.CanUndo(), Is.False);
     }
 }

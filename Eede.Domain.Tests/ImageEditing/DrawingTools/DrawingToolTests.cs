@@ -27,7 +27,7 @@ public class DrawingToolTests
         var tool = new DrawingTool(_mockStyle.Object, _penStyle);
         var buffer = new DrawingBuffer(Picture.CreateEmpty(new PictureSize(32, 32)));
         var history = new CoordinateHistory(new CanvasCoordinate(0, 0));
-        
+
         tool.DrawStart(buffer, history, false);
         _mockStyle.Verify(s => s.DrawStart(buffer, _penStyle, history, false), Times.Once);
 
@@ -43,9 +43,9 @@ public class DrawingToolTests
     {
         var tool = new DrawingTool(_mockStyle.Object, _penStyle);
         var newColor = new ArgbColor(255, 255, 0, 0);
-        
+
         var updatedTool = tool.WithColor(newColor);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(updatedTool.PenStyle.Color, Is.EqualTo(newColor));

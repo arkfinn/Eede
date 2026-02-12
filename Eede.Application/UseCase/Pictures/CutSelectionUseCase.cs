@@ -27,7 +27,7 @@ public class CutSelectionUseCase : ICutSelectionUseCase
         {
             return Picture.CreateEmpty(picture.Size);
         }
-        
+
         return picture.Clear(area.Value);
     }
 }

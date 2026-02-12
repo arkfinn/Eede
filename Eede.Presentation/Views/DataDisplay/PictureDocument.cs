@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data;
@@ -11,18 +11,20 @@ using System.Windows.Input;
 
 namespace Eede.Presentation.Views.DataDisplay
 {
+#nullable enable
+
     public class PictureDocument : Document
     {
 
-        public static readonly StyledProperty<ICommand> ClosingActionProperty =
-            AvaloniaProperty.Register<PictureDocument, ICommand>(nameof(ClosingAction));
-        public ICommand ClosingAction
+        public static readonly StyledProperty<ICommand?> ClosingActionProperty =
+            AvaloniaProperty.Register<PictureDocument, ICommand?>(nameof(ClosingAction));
+        public ICommand? ClosingAction
         {
             get => GetValue(ClosingActionProperty);
             set => SetValue(ClosingActionProperty, value);
         }
 
-        public Action CloseAction { get; set; }
+        public Action? CloseAction { get; set; }
 
         public static readonly StyledProperty<bool> ClosableProperty =
             AvaloniaProperty.Register<PictureDocument, bool>(nameof(Closable));
@@ -68,19 +70,19 @@ namespace Eede.Presentation.Views.DataDisplay
             return false;
         }
 
-        public async Task OpenSaveAlertDialog(object sender, EventArgs e = null)
+        public async Task OpenSaveAlertDialog(object sender, EventArgs? e = null)
         {
             SaveAlertWindow window = new(Subject);
 
-            Window mainWindow = ((IClassicDesktopStyleApplicationLifetime)Avalonia.Application.Current.ApplicationLifetime).MainWindow;
-
-            //var parent = this.GetVisualRoot() as Window ?? new Window();
-            await window.ShowDialog(mainWindow);
-            SaveAlertResult = window.Result;
-            ClosingAction?.Execute(null);
-            if (Closable)
+            if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
             {
-                Factory?.CloseDockable(this);
+                await window.ShowDialog(desktop.MainWindow);
+                SaveAlertResult = window.Result;
+                ClosingAction?.Execute(null);
+                if (Closable)
+                {
+                    Factory?.CloseDockable(this);
+                }
             }
         }
     }

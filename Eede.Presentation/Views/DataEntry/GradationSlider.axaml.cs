@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
@@ -8,6 +8,8 @@ using System;
 
 namespace Eede.Presentation.Views.DataEntry
 {
+#nullable enable
+
     public class GradationSlider : TemplatedControl
     {
         public class ValueChangedEventArgs : EventArgs
@@ -23,7 +25,7 @@ namespace Eede.Presentation.Views.DataEntry
         private readonly Polygon TickPolygon;
         private Size SliderSize = new(0, 0);
 
-        public event EventHandler<ValueChangedEventArgs> ValueChanged;
+        public event EventHandler<ValueChangedEventArgs>? ValueChanged;
         public int MaxValue { set; get; } = 255;
         public int MinValue { get; set; } = 0;
 
@@ -44,8 +46,8 @@ namespace Eede.Presentation.Views.DataEntry
             }
         }
 
-        private Color[] _gradationColor = null;
-        public Color[] GradationColor
+        private Color[]? _gradationColor = null;
+        public Color[]? GradationColor
         {
             set
             {
@@ -174,20 +176,20 @@ namespace Eede.Presentation.Views.DataEntry
         }
 
         ////リサイズ時、グラデーションの再描画
-        private void OnLayoutUpdated(object sender, EventArgs e)
+        private void OnLayoutUpdated(object? sender, EventArgs e)
         {
             // これいらないかもしれない
             InvalidateVisual();
         }
 
         private bool mouseDown = false;
-        private void OnPointerPressed(object sender, PointerPressedEventArgs e)
+        private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             UpdateValueByPositionY(e.GetPosition(this).Y);
             mouseDown = true;
         }
 
-        private void OnPointerMoved(object sender, PointerEventArgs e)
+        private void OnPointerMoved(object? sender, PointerEventArgs e)
         {
             if (mouseDown != true)
             {
@@ -201,19 +203,19 @@ namespace Eede.Presentation.Views.DataEntry
             Value = (int)(MaxValue - ((value - (TickPolygon.Height / 2)) / (Height - TickPolygon.Height) * (MaxValue - MinValue)));
         }
 
-        private void OnPointerReleased(object sender, PointerReleasedEventArgs e)
+        private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
             mouseDown = false;
         }
 
         private bool activeFlag = false;
-        private void OnPointerEntered(object sender, PointerEventArgs e)
+        private void OnPointerEntered(object? sender, PointerEventArgs e)
         {
             activeFlag = true;
             InvalidateVisual();
         }
 
-        private void OnPointerExited(object sender, PointerEventArgs e)
+        private void OnPointerExited(object? sender, PointerEventArgs e)
         {
             activeFlag = false;
             InvalidateVisual();

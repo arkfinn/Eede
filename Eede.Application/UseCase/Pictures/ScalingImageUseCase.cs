@@ -34,7 +34,7 @@ namespace Eede.Application.UseCase.Pictures
             // 選択範囲のリサイズ時は「切り取り＆移動」プレビュー状態へ
             Position offset = context.CalculateOffset();
             Position newPosition = selection.Position + offset;
-            
+
             SelectionPreviewInfo preview = new(resized, newPosition, SelectionPreviewType.CutAndMove, selection);
             return session.UpdatePreviewContent(preview);
         }

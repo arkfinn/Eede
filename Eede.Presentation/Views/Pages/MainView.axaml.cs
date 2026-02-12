@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
@@ -17,6 +17,8 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.Views.Pages;
+
+#nullable enable
 
 public partial class MainView : ReactiveUserControl<MainViewModel>
 {
@@ -63,41 +65,44 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
                 return;
             }
 
-            // ViewModelのInteractionを購読し、通知が来たらウィンドウを閉じる
-            _ = ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
+            if (ViewModel != null)
             {
-                window.Close();
-                interaction.SetOutput(Unit.Default);
-            }).DisposeWith(disposables);
-
-
-            // WindowのClosingイベントをObservableに変換
-            _ = Observable.FromEventPattern<EventHandler<WindowClosingEventArgs>, WindowClosingEventArgs>(
-                handler => window.Closing += handler,
-                handler => window.Closing -= handler)
-                .Subscribe(args =>
+                // ViewModelのInteractionを購読し、通知が来たらウィンドウを閉じる
+                _ = ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
                 {
-                    // ViewModelが既にクローズを確定している場合は、何もしないで通過させる
-                    if (ViewModel.IsCloseConfirmed)
-                    {
-                        return;
-                    }
-
-                    // イベントをキャンセルして、ViewModelに処理を委譲する
-                    args.EventArgs.Cancel = true;
-
-                    // ViewModelのコマンドを実行
-                    _ = ViewModel.RequestCloseCommand.Execute().Subscribe();
-
+                    window.Close();
+                    interaction.SetOutput(Unit.Default);
                 }).DisposeWith(disposables);
+
+
+                // WindowのClosingイベントをObservableに変換
+                _ = Observable.FromEventPattern<EventHandler<WindowClosingEventArgs>, WindowClosingEventArgs>(
+                    handler => window.Closing += handler,
+                    handler => window.Closing -= handler)
+                    .Subscribe(args =>
+                    {
+                        // ViewModelが既にクローズを確定している場合は、何もしないで通過させる
+                        if (ViewModel.IsCloseConfirmed)
+                        {
+                            return;
+                        }
+
+                        // イベントをキャンセルして、ViewModelに処理を委譲する
+                        args.EventArgs.Cancel = true;
+
+                        // ViewModelのコマンドを実行
+                        _ = ViewModel.RequestCloseCommand.Execute().Subscribe();
+
+                    }).DisposeWith(disposables);
+            }
         });
     }
 
     public AvaloniaFileStorage FileStorage { get; private set; }
 
-    public void OnClickThemeSelect(object sender, SelectionChangedEventArgs e)
+    public void OnClickThemeSelect(object? sender, SelectionChangedEventArgs e)
     {
-        Avalonia.Application app = Avalonia.Application.Current;
+        Avalonia.Application? app = Avalonia.Application.Current;
         if (app is null)
         {
             return;
@@ -121,9 +126,11 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             DataContext = interaction.Input
         };
 
-        Window currentWindow = (Window)VisualRoot;
-        var result = await dialog.ShowDialog<ResizeContext?>(currentWindow);
-        interaction.SetOutput(result);
+        if (VisualRoot is Window currentWindow)
+        {
+            var result = await dialog.ShowDialog<ResizeContext?>(currentWindow);
+            interaction.SetOutput(result);
+        }
     }
 
     private async Task DoShowCreateNewFileWindowAsync(IInteractionContext<NewPictureWindowViewModel, NewPictureWindowViewModel> interaction)
@@ -136,8 +143,10 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
         };
         interaction.Input.Close = new Action(dialog.Close);
 
-        Window currentWindow = (Window)VisualRoot;
-        _ = await dialog.ShowDialog<NewPictureWindowViewModel>(currentWindow);
-        interaction.SetOutput(interaction.Input);
+        if (VisualRoot is Window currentWindow)
+        {
+            _ = await dialog.ShowDialog<NewPictureWindowViewModel>(currentWindow);
+            interaction.SetOutput(interaction.Input);
+        }
     }
 }

@@ -1,3 +1,4 @@
+#nullable enable
 namespace Eede.Domain.ImageEditing.DrawingTools
 {
     public static class ContextFactory

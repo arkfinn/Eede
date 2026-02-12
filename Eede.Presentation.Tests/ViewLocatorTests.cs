@@ -37,7 +37,7 @@ public class ViewLocatorTests
     public void Build_ShouldReturnMainView_ForMainViewModel()
     {
         // 型情報のみが必要なため、インスタンス化の代わりに型情報を模倣する
-        var viewModel = (MainViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(MainViewModel));
+        var viewModel = (MainViewModel)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(MainViewModel));
         var result = _viewLocator.Build(viewModel);
         Assert.That(result, Is.InstanceOf<MainView>());
     }

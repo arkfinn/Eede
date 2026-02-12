@@ -61,15 +61,6 @@
                Width="{Binding DisplayWidth}"
                Height="{Binding DisplayHeight}"
                RenderOptions.BitmapInterpolationMode="None"/>
-        <Image x:Name="preview"
-               Source="{Binding MagnifiedPreviewBitmap}"
-               Stretch="Fill"
-               HorizontalAlignment="Left"
-               VerticalAlignment="Top"
-               Margin="{Binding PreviewThickness}"
-               Width="{Binding PreviewSize.Width}"
-               Height="{Binding PreviewSize.Height}"
-               RenderOptions.BitmapInterpolationMode="None"/>
         <local:GridOverlay Width="{Binding DisplayWidth}"
                            Height="{Binding DisplayHeight}"
                            IsShowPixelGrid="{Binding IsPixelGridEffectivelyVisible}"
@@ -86,7 +77,8 @@
                         Height="{Binding SelectingSize.Height}" 
                         ShowHandles="{Binding IsShowHandles}"
                         HandleSize="{Binding HandleSize}"
-                        HandleMargin="{Binding HandleMargin}" />
+                        HandleMargin="{Binding HandleMargin}"
+                        IsHitTestVisible="False" />
 
       </Panel>
     </Panel>

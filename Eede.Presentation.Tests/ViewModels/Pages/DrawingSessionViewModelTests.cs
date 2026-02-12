@@ -54,13 +54,13 @@ public class DrawingSessionViewModelTests
             var session = new DrawingSession(_initialPicture);
             var nextPicture = Picture.CreateEmpty(_size);
             var session2 = session.Push(nextPicture);
-            
+
             _mockProvider.Setup(p => p.CurrentSession).Returns(session2);
             var viewModel = new DrawingSessionViewModel(_mockProvider.Object);
             scheduler.AdvanceBy(1);
 
             Assert.That(((System.Windows.Input.ICommand)viewModel.UndoCommand).CanExecute(null), Is.True);
-            
+
             // Undo実行時に Provider.Update が呼ばれることを確認
             viewModel.UndoCommand.Execute().Subscribe();
             scheduler.AdvanceBy(1);

@@ -1,4 +1,5 @@
-﻿using Eede.Domain.ImageEditing.Blending;
+﻿#nullable enable
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.Palettes;
 using System;
 

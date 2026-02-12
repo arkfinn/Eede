@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 
 namespace Eede.Domain.SharedKernel;
 
@@ -36,5 +37,18 @@ public readonly record struct PictureArea
         int height = clampedEndY - clampedStartY;
 
         return new PictureArea(new Position(clampedStartX, clampedStartY), new PictureSize(width, height));
+    }
+
+    public PictureArea Combine(PictureArea other)
+    {
+        if (IsEmpty) return other;
+        if (other.IsEmpty) return this;
+
+        int minX = Math.Min(X, other.X);
+        int minY = Math.Min(Y, other.Y);
+        int maxX = Math.Max(X + Width, other.X + other.Width);
+        int maxY = Math.Max(Y + Height, other.Y + other.Height);
+
+        return new PictureArea(new Position(minX, minY), new PictureSize(maxX - minX, maxY - minY));
     }
 }

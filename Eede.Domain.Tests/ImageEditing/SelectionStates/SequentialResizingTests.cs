@@ -25,7 +25,7 @@ namespace Eede.Domain.Tests.ImageEditing.SelectionStates
 
             // 3. Move to (40, 40) -> Size becomes 30x30
             resizingState.HandlePointerMoved(cursorArea, true, new Position(40, 40), false, new PictureSize(100, 100));
-            
+
             // 4. Release -> Should transition to SelectionPreviewState
             var previewState = resizingState.HandlePointerLeftButtonReleased(cursorArea, new Position(40, 40), null, null) as SelectionPreviewState;
             Assert.That(previewState, Is.Not.Null, "Should transition to SelectionPreviewState");

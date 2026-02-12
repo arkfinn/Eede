@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Headless;
+using Avalonia.Media.Imaging;
 using Avalonia.ReactiveUI;
 using Eede.Presentation.Tests;
 

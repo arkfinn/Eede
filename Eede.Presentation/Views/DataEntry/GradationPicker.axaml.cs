@@ -6,6 +6,8 @@ using System;
 
 namespace Eede.Presentation.Views.DataEntry
 {
+#nullable enable
+
     public partial class GradationPicker : UserControl
     {
         internal enum ColorPickerMode
@@ -46,12 +48,12 @@ namespace Eede.Presentation.Views.DataEntry
             set => slider.MaxValue = value;
         }
 
-        private void IncrementValue(object sender, RoutedEventArgs e)
+        private void IncrementValue(object? sender, RoutedEventArgs e)
         {
             slider.Value++;
         }
 
-        private void DecrementValue(object sender, RoutedEventArgs e)
+        private void DecrementValue(object? sender, RoutedEventArgs e)
         {
             slider.Value--;
         }
@@ -61,7 +63,7 @@ namespace Eede.Presentation.Views.DataEntry
             textbox.Text = e.Value.ToString();
         }
 
-        private void OnTextChanging(object sender, TextChangingEventArgs e)
+        private void OnTextChanging(object? sender, TextChangingEventArgs e)
         {
             if (textbox.Text == Value.ToString())
             {

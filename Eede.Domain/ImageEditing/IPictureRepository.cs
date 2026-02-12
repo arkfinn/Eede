@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+#nullable enable
 using Eede.Domain.Files;
 
 namespace Eede.Domain.ImageEditing

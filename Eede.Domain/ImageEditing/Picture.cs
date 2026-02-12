@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
@@ -13,6 +14,7 @@ public record Picture
 
     public static Picture Create(PictureSize size, byte[] imageData)
     {
+        if (imageData == null) throw new ArgumentNullException(nameof(imageData));
         int stride = size.Width * COLOR_32BIT;
         return stride * size.Height != imageData.Length
             ? throw new ArgumentException($"(width:{size.Width}, height:{size.Height}) * {COLOR_32BIT} != length:{imageData.Length}")
@@ -46,7 +48,7 @@ public record Picture
 
     public byte[] CloneImage()
     {
-        return ImageData.Clone() as byte[];
+        return (byte[])ImageData.Clone();
     }
 
     public ArgbColor PickColor(Position pos)

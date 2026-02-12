@@ -18,7 +18,7 @@ namespace Eede.Presentation.Views.DataEntry
             canvas.PointerMoved += OnCvanvasPointerMoved;
             canvas.PointerReleased += OnCanvasPointerReleased;
             canvas.PointerExited += OnCanvasPointerExited;
-            
+
             // UserControl自身でRequestBringIntoViewイベントをインターセプトする
             this.AddHandler(RequestBringIntoViewEvent, (s, e) => e.Handled = true);
 

@@ -10,9 +10,9 @@ namespace Eede.Domain.Selections
             // 領域が小さい場合、中央部分を空けるためにハンドルサイズを制限する
             int minDimension = Math.Min(area.Width, area.Height);
             int adjustedHandleSize = handleSize;
-            
+
             // 少なくとも中央の 1/3 は移動用に空ける
-            if (adjustedHandleSize * 2 > minDimension * 2 / 3) 
+            if (adjustedHandleSize * 2 > minDimension * 2 / 3)
             {
                 adjustedHandleSize = Math.Max(1, minDimension / 3);
             }

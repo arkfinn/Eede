@@ -29,9 +29,9 @@ public class AnimationUseCaseTests
     {
         var useCase = new AddAnimationPatternUseCase(_providerMock.Object);
         var pattern = new AnimationPattern("Test", new List<AnimationFrame>(), new GridSettings(new PictureSize(16, 16), new Position(0, 0), 0));
-        
+
         useCase.Execute(pattern);
-        
+
         _providerMock.Verify(p => p.Update(It.IsAny<AnimationPatterns>()), Times.Once);
         Assert.That(_patterns.Items.Count, Is.EqualTo(1));
     }
@@ -45,7 +45,7 @@ public class AnimationUseCaseTests
 
         var useCase = new ReplaceAnimationPatternUseCase(_providerMock.Object);
         useCase.Execute(0, pattern2);
-        
+
         Assert.That(_patterns.Items[0].Name, Is.EqualTo("Test2"));
     }
 
@@ -57,7 +57,7 @@ public class AnimationUseCaseTests
 
         var useCase = new RemoveAnimationPatternUseCase(_providerMock.Object);
         useCase.Execute(0);
-        
+
         Assert.That(_patterns.Items.Count, Is.EqualTo(0));
     }
 }

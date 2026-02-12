@@ -9,6 +9,8 @@ using System.Reactive;
 
 namespace Eede.Presentation.ViewModels.Pages
 {
+#nullable enable
+
     public class DrawingSessionViewModel : ViewModelBase
     {
         private readonly IDrawingSessionProvider _provider;
@@ -18,8 +20,8 @@ namespace Eede.Presentation.ViewModels.Pages
         public ReactiveCommand<Unit, Unit> UndoCommand { get; }
         public ReactiveCommand<Unit, Unit> RedoCommand { get; }
 
-        public event EventHandler<UndoResult> Undone;
-        public event EventHandler<RedoResult> Redone;
+        public event EventHandler<UndoResult>? Undone;
+        public event EventHandler<RedoResult>? Redone;
 
         public DrawingSessionViewModel(IDrawingSessionProvider provider)
         {
@@ -54,9 +56,16 @@ namespace Eede.Presentation.ViewModels.Pages
             Redone?.Invoke(this, result);
         }
 
-        public void Push(Picture picture, PictureArea? selectingArea = null, PictureArea? previousArea = null)
+        public void Push(Picture picture, PictureArea? selectingArea = null, PictureArea? previousArea = null, PictureRegion affectedArea = default)
         {
-            _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea));
+            if (!affectedArea.IsEmpty)
+            {
+                _provider.Update(CurrentSession.PushDiff(picture, affectedArea, selectingArea, previousArea));
+            }
+            else
+            {
+                _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea));
+            }
         }
 
         public void PushDockUpdate(string dockId, Position position, Picture before, Picture after)

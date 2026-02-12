@@ -1,5 +1,6 @@
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
+#nullable enable
 using Eede.Domain.SharedKernel;
 using System;
 using System.Windows.Input;

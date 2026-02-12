@@ -3,15 +3,42 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:general="clr-namespace:Eede.Presentation.Views.General"
+             xmlns:converters="clr-namespace:Eede.Presentation.Common.Converters"
              xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.DataDisplay"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Presentation.Views.DataEntry.PictureContainer"
              x:DataType="vm:DockPictureViewModel"
             >
+  <UserControl.Resources>
+    <converters:MagnificationToPercentageConverter x:Key="MagnificationToPercentageConverter"/>
+  </UserControl.Resources>
   <Design.DataContext>
     <vm:DockPictureViewModel />
   </Design.DataContext>
   <DockPanel LastChildFill="True">
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Background="{DynamicResource BaseBrush}" Spacing="0" Margin="4">
+      <StackPanel.Styles>
+        <StyleInclude Source="/Styles/Styles.axaml" />
+      </StackPanel.Styles>
+      <ToggleButton x:Name="m1" Classes="tool" Click="SetMagnification1">
+        <Image Source="/Assets/Tools/mag1.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m2" Classes="tool" Click="SetMagnification2">
+        <Image Source="/Assets/Tools/mag2.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m4" Classes="tool" Click="SetMagnification4">
+        <Image Source="/Assets/Tools/mag4.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m6" Classes="tool" Click="SetMagnification6">
+        <Image Source="/Assets/Tools/mag6.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m8" Classes="tool" Click="SetMagnification8">
+        <Image Source="/Assets/Tools/mag8.bmp" Stretch="None" />
+      </ToggleButton>
+      <ToggleButton x:Name="m12" Classes="tool" Click="SetMagnification12">
+        <Image Source="/Assets/Tools/mag12.bmp" Stretch="None" />
+      </ToggleButton>
+    </StackPanel>
     <ScrollViewer DockPanel.Dock="Bottom"
                    Background="{DynamicResource BaseBrush}"
                   VerticalScrollBarVisibility="Visible"
@@ -36,11 +63,18 @@
                         AlignmentY="Top"
                         AlignmentX="Left"/>
           </Panel.Background>
-          <Panel x:Name="canvas" Cursor="{Binding ActiveCursor}">
+          <Panel x:Name="canvas" Cursor="{Binding ActiveCursor}" RenderOptions.BitmapInterpolationMode="None">
+            <Image x:Name="mainImage"
+                   Source="{Binding PremultipliedBitmap}"
+                   Stretch="None"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   RenderOptions.BitmapInterpolationMode="None" />
             <Image x:Name="selectionPreview"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   IsVisible="False" />
+                   IsVisible="False"
+                   RenderOptions.BitmapInterpolationMode="None" />
             <general:Region x:Name="cursor"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top" />

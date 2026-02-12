@@ -21,9 +21,9 @@ namespace Eede.Domain.Tests.ImageEditing
             var currentPos = new Position(15, 15);
 
             var state = new DraggingState(pixels, originalArea, startPos);
-            
+
             // Simulate move
-            state.HandlePointerMoved(HalfBoxArea.Create(startPos, new PictureSize(16,16)), true, currentPos, false, size);
+            state.HandlePointerMoved(HalfBoxArea.Create(startPos, new PictureSize(16, 16)), true, currentPos, false, size);
 
             var info = state.GetSelectionPreviewInfo();
 
@@ -44,7 +44,7 @@ namespace Eede.Domain.Tests.ImageEditing
 
             // Preview info: Clear (0,0)-(10,10), Place at (10,10)
             var pixels = Picture.CreateEmpty(new PictureSize(10, 10)); // Transparent pixels to paste
-            
+
             var originalArea = new PictureArea(new Position(0, 0), new PictureSize(10, 10));
             var previewPos = new Position(10, 10);
             var info = new SelectionPreviewInfo(pixels, previewPos, SelectionPreviewType.CutAndMove, originalArea);
@@ -60,7 +60,7 @@ namespace Eede.Domain.Tests.ImageEditing
             // Assert
             // (0,0) should be cleared (Alpha 0)
             Assert.That(picture.PickColor(new Position(0, 0)).Alpha, Is.EqualTo(0), "Original area should be cleared");
-            
+
             // (10,10) should be transparent (since pixels is empty) but base was red.
             // DirectImageBlender overwrites, so it should be Alpha 0.
             Assert.That(picture.PickColor(new Position(10, 10)).Alpha, Is.EqualTo(0), "Moved area should be overwritten with preview pixels");

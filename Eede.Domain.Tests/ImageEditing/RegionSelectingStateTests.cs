@@ -58,44 +58,43 @@ public class RegionSelectingStateTests
         // Right = Snap(0 + 100 + 16 - 1, 16) = Snap(115, 16) = 112
         // Bottom = Snap(0 + 100 + 16 - 1, 16) = Snap(115, 16) = 112
         // Width = 112, Height = 112
-                Assert.That(area.Value.Width, Is.EqualTo(112));
-                Assert.That(area.Value.Height, Is.EqualTo(112));
-            }
-        
-            [Test]
-            public void HandlePointerMoved_Should_Update_NowPosition()
-            {
-                var start = new Position(0, 0);
-                var state = new RegionSelectingState(start, start, _minSize);
-        
-                // Initial area (32x32 due to min size and snap)
-                var initialArea = state.GetSelectingArea();
-                Assert.That(initialArea.Value.Width, Is.EqualTo(32));
-        
-                        // Move to (100, 100)
-                        var cursorArea = HalfBoxArea.Create(start, _minSize);
-                        state.HandlePointerMoved(cursorArea, true, new Position(100, 100), false, new PictureSize(200, 200));
-                                var movedArea = state.GetSelectingArea();
-                Assert.That(movedArea.Value.Width, Is.EqualTo(112)); // Updated!
-            }
-        
-            [Test]
-            public void HandlePointerMoved_Should_Support_Square_Selection_With_Shift()
-            {
-                var start = new Position(100, 100);
-                var state = new RegionSelectingState(start, start, _minSize);
-        
-                        // Move to (150, 120) with Shift
-                        // deltaX = 50, deltaY = 20. Max delta = 50.
-                        // Target should be (150, 150)
-                        var cursorArea = HalfBoxArea.Create(start, _minSize);
-                        state.HandlePointerMoved(cursorArea, true, new Position(150, 120), true, new PictureSize(1000, 1000));
-                                var area = state.GetSelectingArea();
-                // Snap(100, 16) = 96
-                // Snap(150 + 16 - 1, 16) = Snap(165, 16) = 160
-                // Size = 160 - 96 = 64
-                Assert.That(area.Value.Width, Is.EqualTo(64));
-                Assert.That(area.Value.Height, Is.EqualTo(64));
-            }
-        }
-        
+        Assert.That(area.Value.Width, Is.EqualTo(112));
+        Assert.That(area.Value.Height, Is.EqualTo(112));
+    }
+
+    [Test]
+    public void HandlePointerMoved_Should_Update_NowPosition()
+    {
+        var start = new Position(0, 0);
+        var state = new RegionSelectingState(start, start, _minSize);
+
+        // Initial area (32x32 due to min size and snap)
+        var initialArea = state.GetSelectingArea();
+        Assert.That(initialArea.Value.Width, Is.EqualTo(32));
+
+        // Move to (100, 100)
+        var cursorArea = HalfBoxArea.Create(start, _minSize);
+        state.HandlePointerMoved(cursorArea, true, new Position(100, 100), false, new PictureSize(200, 200));
+        var movedArea = state.GetSelectingArea();
+        Assert.That(movedArea.Value.Width, Is.EqualTo(112)); // Updated!
+    }
+
+    [Test]
+    public void HandlePointerMoved_Should_Support_Square_Selection_With_Shift()
+    {
+        var start = new Position(100, 100);
+        var state = new RegionSelectingState(start, start, _minSize);
+
+        // Move to (150, 120) with Shift
+        // deltaX = 50, deltaY = 20. Max delta = 50.
+        // Target should be (150, 150)
+        var cursorArea = HalfBoxArea.Create(start, _minSize);
+        state.HandlePointerMoved(cursorArea, true, new Position(150, 120), true, new PictureSize(1000, 1000));
+        var area = state.GetSelectingArea();
+        // Snap(100, 16) = 96
+        // Snap(150 + 16 - 1, 16) = Snap(165, 16) = 160
+        // Size = 160 - 96 = 64
+        Assert.That(area.Value.Width, Is.EqualTo(64));
+        Assert.That(area.Value.Height, Is.EqualTo(64));
+    }
+}

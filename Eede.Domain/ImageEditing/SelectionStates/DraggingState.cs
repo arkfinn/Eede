@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
@@ -9,6 +10,7 @@ namespace Eede.Domain.ImageEditing.SelectionStates;
 public class DraggingState : ISelectionState
 {
     private readonly Picture _pixels;
+    private readonly Picture _sourcePixels;
     private readonly PictureArea _originalArea;
     private readonly Position _startPosition;
     private Position _nowPosition;
@@ -16,8 +18,14 @@ public class DraggingState : ISelectionState
     private readonly PictureArea? _clearArea;
 
     public DraggingState(Picture pixels, PictureArea originalArea, Position startPosition, SelectionPreviewType type = SelectionPreviewType.CutAndMove, PictureArea? clearArea = null)
+        : this(pixels, pixels, originalArea, startPosition, type, clearArea)
+    {
+    }
+
+    public DraggingState(Picture pixels, Picture sourcePixels, PictureArea originalArea, Position startPosition, SelectionPreviewType type = SelectionPreviewType.CutAndMove, PictureArea? clearArea = null)
     {
         _pixels = pixels;
+        _sourcePixels = sourcePixels;
         _originalArea = originalArea;
         _startPosition = startPosition;
         _nowPosition = startPosition;
@@ -35,7 +43,7 @@ public class DraggingState : ISelectionState
         var info = GetSelectionPreviewInfo();
         if (info != null)
         {
-            return new SelectionPreviewState(info);
+            return new SelectionPreviewState(info, _sourcePixels);
         }
         return new NormalCursorState(cursorArea);
     }
@@ -60,7 +68,7 @@ public class DraggingState : ISelectionState
     {
         var offset = new Position(_nowPosition.X - _startPosition.X, _nowPosition.Y - _startPosition.Y);
         var nextPosition = new Position(_originalArea.X + offset.X, _originalArea.Y + offset.Y);
-        return new SelectionPreviewInfo(_pixels, nextPosition, _type, _clearArea);
+        return new SelectionPreviewInfo(_pixels, nextPosition, _type, _clearArea, _sourcePixels);
     }
 
     public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)

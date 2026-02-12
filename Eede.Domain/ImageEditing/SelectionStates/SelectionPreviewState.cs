@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.Selections;
@@ -12,10 +13,10 @@ public class SelectionPreviewState : ISelectionState
     private readonly SelectionPreviewInfo _info;
     private readonly Picture _sourcePixels;
 
-    public SelectionPreviewState(SelectionPreviewInfo info, Picture sourcePixels = null)
+    public SelectionPreviewState(SelectionPreviewInfo info, Picture? sourcePixels = null)
     {
-        _info = info;
-        _sourcePixels = sourcePixels ?? info.Pixels;
+        _info = info ?? throw new ArgumentNullException(nameof(info));
+        _sourcePixels = sourcePixels ?? info.SourcePixels ?? throw new ArgumentException("SourcePixels must be provided via either argument or info.", nameof(info));
     }
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
@@ -27,21 +28,27 @@ public class SelectionPreviewState : ISelectionState
         {
             // 再リサイズ時も _sourcePixels (変形前の元画像) を渡すことで画質劣化を防ぎ、
             // 連続したリサイズ操作を可能にする
-            return new ResizingState(_sourcePixels, currentArea, mousePosition, handle.Value, new NearestNeighborResampler());
+            return new ResizingState(_sourcePixels, currentArea, mousePosition, handle.Value, new NearestNeighborResampler(), _info.Type, _info.OriginalArea);
         }
 
-        if (Contains(currentArea, mousePosition))
+        // Contains の判定にも handleSize 相当の遊びを持たせるか、
+        // あるいは境界ピクセルの判定を緩和する。
+        // ここでは単純な包含判定ではなく、ハンドル検出に使用したロジックとの整合性を高める。
+        if (Contains(currentArea, mousePosition, handleSize))
         {
-            return new DraggingState(_info.Pixels, currentArea, mousePosition, _info.Type, _info.OriginalArea);
+            return new DraggingState(_info.Pixels, _sourcePixels, currentArea, mousePosition, _info.Type, _info.OriginalArea);
         }
 
         return new NormalCursorState(cursorArea);
     }
 
-    private bool Contains(PictureArea area, Position position)
+    private bool Contains(PictureArea area, Position position, int handleSize = 0)
     {
-        return position.X >= area.X && position.X < area.X + area.Width &&
-               position.Y >= area.Y && position.Y < area.Y + area.Height;
+        // 高倍率時の判定誤差を吸収するため、handleSize の半分程度の遊びを持たせる
+        // 少なくとも 1ピクセル（キャンバス座標）の遊びを確保する
+        int margin = Math.Max(1, handleSize / 2);
+        return position.X >= area.X - margin && position.X < area.X + area.Width + margin &&
+               position.Y >= area.Y - margin && position.Y < area.Y + area.Height + margin;
     }
 
     public ISelectionState HandlePointerLeftButtonReleased(HalfBoxArea cursorArea, Position mousePosition, ICommand? picturePushAction, ICommand? pictureUpdateAction)
@@ -66,7 +73,7 @@ public class SelectionPreviewState : ISelectionState
 
     public SelectionPreviewInfo? GetSelectionPreviewInfo()
     {
-        return _info;
+        return _info with { SourcePixels = _sourcePixels };
     }
 
     public SelectionCursor GetCursor(Position mousePosition, int handleSize = 8)
@@ -79,7 +86,7 @@ public class SelectionPreviewState : ISelectionState
             return GetCursorForHandle(handle.Value);
         }
 
-        return Contains(currentArea, mousePosition) ? SelectionCursor.Move : SelectionCursor.Default;
+        return Contains(currentArea, mousePosition, handleSize) ? SelectionCursor.Move : SelectionCursor.Default;
     }
 
     public PictureArea? GetSelectingArea()
@@ -96,7 +103,8 @@ public class SelectionPreviewState : ISelectionState
                 info.Pixels.ApplyTransparency(backgroundColor),
                 info.Position,
                 info.Type,
-                info.OriginalArea);
+                info.OriginalArea,
+                info.SourcePixels);
         }
         return session.UpdatePreviewContent(info).CommitPreview(blender);
     }

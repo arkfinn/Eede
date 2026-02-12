@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 
 namespace Eede.Domain.ImageEditing.DrawingTools
 {
@@ -42,7 +43,7 @@ namespace Eede.Domain.ImageEditing.DrawingTools
     public class DrawingBuffer
     {
         public readonly Picture Previous;
-        public readonly Picture Drawing;
+        public readonly Picture? Drawing;
         private readonly IContext Context;
 
         public DrawingBuffer(Picture previous)
@@ -60,7 +61,7 @@ namespace Eede.Domain.ImageEditing.DrawingTools
             Context = new Active(drawing);
         }
 
-        private DrawingBuffer(Picture previous, Picture drawing, IContext context)
+        private DrawingBuffer(Picture previous, Picture? drawing, IContext context)
         {
             Previous = previous;
             Drawing = drawing;

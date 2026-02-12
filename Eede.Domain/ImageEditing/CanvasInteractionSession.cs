@@ -1,3 +1,4 @@
+#nullable enable
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.SharedKernel;
@@ -19,9 +20,9 @@ public class CanvasInteractionSession
 
     public CanvasInteractionSession(DrawingBuffer buffer, IDrawStyle drawStyle, ISelectionState selectionState)
     {
-        Buffer = buffer;
-        DrawStyle = drawStyle;
-        SelectionState = selectionState;
+        Buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
+        DrawStyle = drawStyle ?? throw new ArgumentNullException(nameof(drawStyle));
+        SelectionState = selectionState ?? throw new ArgumentNullException(nameof(selectionState));
     }
 
     public CanvasInteractionSession PointerBegin(

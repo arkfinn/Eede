@@ -41,10 +41,10 @@ public class AnimationPatternTests
         };
         var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
         var pattern = new AnimationPattern("Walk", frames, grid);
-        
+
         // Ensure we cannot modify the internal list through the reference passed to constructor
         frames.Add(new AnimationFrame(1, 100));
-        
+
         Assert.That(pattern.Frames.Count, Is.EqualTo(1));
     }
 
@@ -58,7 +58,7 @@ public class AnimationPatternTests
         };
         var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
         var pattern = new AnimationPattern("Run", frames, grid);
-        
+
         var json = System.Text.Json.JsonSerializer.Serialize(pattern);
         var deserialized = System.Text.Json.JsonSerializer.Deserialize<AnimationPattern>(json);
 
@@ -79,9 +79,9 @@ public class AnimationPatternTests
         var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
         var pattern = new AnimationPattern("Test", new List<AnimationFrame>(), grid);
         var frame = new AnimationFrame(0, 100);
-        
+
         var newPattern = pattern.AddFrame(frame);
-        
+
         Assert.That(newPattern.Frames.Count, Is.EqualTo(1));
         Assert.That(newPattern.Frames[0], Is.EqualTo(frame));
         Assert.That(newPattern.Grid, Is.EqualTo(grid));
@@ -93,9 +93,9 @@ public class AnimationPatternTests
         var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
         var frames = new List<AnimationFrame> { new AnimationFrame(0, 100), new AnimationFrame(1, 100) };
         var pattern = new AnimationPattern("Test", frames, grid);
-        
+
         var newPattern = pattern.RemoveFrame(0);
-        
+
         Assert.That(newPattern.Frames.Count, Is.EqualTo(1));
         Assert.That(newPattern.Frames[0].CellIndex, Is.EqualTo(1));
     }
@@ -104,16 +104,16 @@ public class AnimationPatternTests
     public void MoveFrameTest()
     {
         var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
-        var frames = new List<AnimationFrame> { 
-            new AnimationFrame(0, 100), 
+        var frames = new List<AnimationFrame> {
+            new AnimationFrame(0, 100),
             new AnimationFrame(1, 100),
             new AnimationFrame(2, 100)
         };
         var pattern = new AnimationPattern("Test", frames, grid);
-        
+
         // Move index 0 to index 2 (end)
         var newPattern = pattern.MoveFrame(0, 2);
-        
+
         Assert.That(newPattern.Frames[0].CellIndex, Is.EqualTo(1));
         Assert.That(newPattern.Frames[1].CellIndex, Is.EqualTo(2));
         Assert.That(newPattern.Frames[2].CellIndex, Is.EqualTo(0));

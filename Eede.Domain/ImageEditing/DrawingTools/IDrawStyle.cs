@@ -1,4 +1,5 @@
-﻿namespace Eede.Domain.ImageEditing.DrawingTools;
+﻿#nullable enable
+namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public interface IDrawStyle
 {
@@ -6,6 +7,6 @@ public interface IDrawStyle
 
     DrawingBuffer Drawing(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift);
 
-    DrawingBuffer DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift);
+    DrawEndResult DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift);
 }
 

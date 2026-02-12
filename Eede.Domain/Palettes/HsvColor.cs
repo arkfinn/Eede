@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 
 namespace Eede.Domain.Palettes
 {
@@ -95,7 +96,7 @@ namespace Eede.Domain.Palettes
             };
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is HsvColor color &&
                    Hue == color.Hue &&

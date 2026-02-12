@@ -11,7 +11,7 @@ namespace Eede.Application.Drawings
     /// </summary>
     public class DrawActionUseCase : IDrawActionUseCase
     {
-        private CoordinateHistory History;
+        private CoordinateHistory? History;
 
         public DrawActionUseCase()
         {
@@ -24,7 +24,7 @@ namespace Eede.Application.Drawings
             var canvasCoordinate = displayCoordinate.ToCanvas(magnification);
             History = new CoordinateHistory(canvasCoordinate);
 
-            return session.UpdateDrawing(tool.DrawStart(new DrawingBuffer(session.CurrentPicture), History, isShift).Fetch());
+            return session.UpdateDrawing(tool.DrawStart(session.Buffer, History, isShift).Fetch());
         }
 
         public DrawingSession Drawing(DrawingSession session, DrawingTool tool, DisplayCoordinate displayCoordinate, Magnification magnification, bool isShift)
@@ -34,7 +34,7 @@ namespace Eede.Application.Drawings
             var canvasCoordinate = displayCoordinate.ToCanvas(magnification);
             History = History.Update(canvasCoordinate);
 
-            return session.UpdateDrawing(tool.Drawing(new DrawingBuffer(session.PreviousPicture), History, isShift).Fetch());
+            return session.UpdateDrawing(tool.Drawing(session.Buffer, History, isShift).Fetch());
         }
 
         public DrawingSession DrawEnd(DrawingSession session, DrawingTool tool, DisplayCoordinate displayCoordinate, Magnification magnification, bool isShift)
@@ -44,10 +44,14 @@ namespace Eede.Application.Drawings
             var canvasCoordinate = displayCoordinate.ToCanvas(magnification);
             History = History.Update(canvasCoordinate);
 
-            var resultBuffer = tool.DrawEnd(new DrawingBuffer(session.PreviousPicture), History, isShift);
+            var result = tool.DrawEnd(session.Buffer, History, isShift);
             History = null;
 
-            return session.Push(resultBuffer.Fetch(), session.CurrentSelectingArea);
+            if (!result.AffectedArea.IsEmpty)
+            {
+                return session.PushDiff(result.Buffer.Fetch(), result.AffectedArea, session.CurrentSelectingArea);
+            }
+            return session.Push(result.Buffer.Fetch(), session.CurrentSelectingArea);
         }
     }
 }

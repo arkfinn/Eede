@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
@@ -24,6 +24,8 @@ using System;
 using System.Collections.Generic;
 
 namespace Eede.Presentation;
+
+#nullable enable
 
 public partial class App : Avalonia.Application
 {
@@ -59,8 +61,11 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IClipboard, AvaloniaClipboard>();
         services.AddTransient<IFileStorage>(sp =>
         {
-            var lifetime = (IClassicDesktopStyleApplicationLifetime)Avalonia.Application.Current.ApplicationLifetime;
-            return new AvaloniaFileStorage(lifetime.MainWindow.StorageProvider);
+            if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+            {
+                return new AvaloniaFileStorage(desktop.MainWindow.StorageProvider);
+            }
+            throw new InvalidOperationException("ClassicDesktopStyleApplicationLifetime is not available or MainWindow is null.");
         });
         services.AddSingleton<IDrawStyleFactory, DrawStyleFactory>();
         services.AddTransient<ITransformImageUseCase, TransformImageUseCase>();

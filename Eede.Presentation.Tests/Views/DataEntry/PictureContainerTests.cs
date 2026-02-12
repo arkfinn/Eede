@@ -49,12 +49,12 @@ public class PictureContainerTests
         var mockDrawingSessionProvider = new Mock<IDrawingSessionProvider>();
         mockDrawingSessionProvider.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));
         // DrawingSessionViewModel setup (simplified)
-        var drawingSessionVM = new DrawingSessionViewModel(mockDrawingSessionProvider.Object); 
+        var drawingSessionVM = new DrawingSessionViewModel(mockDrawingSessionProvider.Object);
 
         var mockClipboard = new Mock<IClipboard>();
         var mockCoordinator = new Mock<IInteractionCoordinator>();
         var mockAddFrameProvider = new Mock<IAddFrameProvider>();
-        
+
         var copyUseCase = new CopySelectionUseCase(mockClipboard.Object);
         var cutUseCase = new CutSelectionUseCase(mockClipboard.Object);
         var pasteUseCase = new PasteFromClipboardUseCase(mockClipboard.Object, mockDrawingSessionProvider.Object);
@@ -74,7 +74,8 @@ public class PictureContainerTests
         var animationVM = new AnimationViewModel(
             patternsProvider,
             patternService,
-            new Mock<IFileSystem>().Object);
+            new Mock<IFileSystem>().Object,
+            new AvaloniaBitmapAdapter());
 
         var transformUseCase = new Mock<ITransformImageUseCase>();
         var transferToCanvasUseCase = new Mock<ITransferImageToCanvasUseCase>();

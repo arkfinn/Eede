@@ -23,8 +23,8 @@ namespace Eede.Application.Tests.Pictures
         {
             // Arrange
             var size = new PictureSize(2, 1);
-            var data = new byte[] 
-            { 
+            var data = new byte[]
+            {
                 1, 1, 1, 1,
                 2, 2, 2, 2
             };
@@ -36,7 +36,7 @@ namespace Eede.Application.Tests.Pictures
 
             // Assert
             var resultSpan = result.AsSpan();
-            Assert.That(resultSpan[0], Is.EqualTo(2)); 
+            Assert.That(resultSpan[0], Is.EqualTo(2));
             Assert.That(resultSpan[4], Is.EqualTo(1));
         }
 
@@ -45,12 +45,12 @@ namespace Eede.Application.Tests.Pictures
         {
             // Arrange
             var size = new PictureSize(4, 1);
-            var data = new byte[] 
+            var data = new byte[]
             {
                 1,1,1,1,
-                2,2,2,2, 
-                3,3,3,3, 
-                4,4,4,4 
+                2,2,2,2,
+                3,3,3,3,
+                4,4,4,4
             };
             var source = Picture.Create(size, data);
             var action = PictureActions.FlipHorizontal;

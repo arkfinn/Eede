@@ -45,7 +45,7 @@ public class AnimationPattern
     {
         if (fromIndex < 0 || fromIndex >= Frames.Count) throw new ArgumentOutOfRangeException(nameof(fromIndex));
         if (toIndex < 0 || toIndex >= Frames.Count) throw new ArgumentOutOfRangeException(nameof(toIndex));
-        
+
         var newFrames = new List<AnimationFrame>(Frames);
         var item = newFrames[fromIndex];
         newFrames.RemoveAt(fromIndex);

@@ -27,16 +27,19 @@ using System.Reactive;
 using System.Reactive.Subjects;
 using Avalonia.Headless.NUnit;
 using Dock.Model.Avalonia.Controls;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation.Tests;
+
+#nullable enable
 
 [TestFixture]
 public class RegressionTests_PresentationFixes
 {
-    private Mock<IDrawingSessionProvider> _drawingSessionProviderMock;
-    private Mock<IInteractionCoordinator> _coordinatorMock;
-    private DrawingSessionProvider _realDrawingSessionProvider;
-    private InteractionCoordinator _realCoordinator;
+    private Mock<IDrawingSessionProvider> _drawingSessionProviderMock = default!;
+    private Mock<IInteractionCoordinator> _coordinatorMock = default!;
+    private DrawingSessionProvider _realDrawingSessionProvider = default!;
+    private InteractionCoordinator _realCoordinator = default!;
 
     [SetUp]
     public void Setup()
@@ -56,7 +59,7 @@ public class RegressionTests_PresentationFixes
     {
         // Setup MainViewModel with mocked DrawingSessionProvider to verify Update calls
         var mainVM = CreateMainViewModel(_drawingSessionProviderMock.Object, _coordinatorMock.Object);
-        
+
         var picture1 = Picture.CreateEmpty(new PictureSize(16, 16));
         var dockVM1 = new DockPictureViewModel(new GlobalState(), mainVM.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureIOService>());
         dockVM1.PictureBuffer = picture1;
@@ -80,7 +83,7 @@ public class RegressionTests_PresentationFixes
         mainVM.ActiveDockable = doc1;
         mainVM.ActiveDockable = doc2;
 
-        _drawingSessionProviderMock.Verify(x => x.Update(It.IsAny<DrawingSession>()), Times.Never, 
+        _drawingSessionProviderMock.Verify(x => x.Update(It.IsAny<DrawingSession>()), Times.Never,
             "Workspace should not be overwritten automatically when switching documents.");
     }
 
@@ -90,25 +93,26 @@ public class RegressionTests_PresentationFixes
         // Setup InteractionCoordinator with real session provider
         var initialPicture = Picture.CreateEmpty(new PictureSize(16, 16));
         _realDrawingSessionProvider.Update(new DrawingSession(initialPicture));
-        
+
         // 1. Initial interaction (Normal state)
         _realCoordinator.SyncWithSession();
-        Assert.That(_realCoordinator.CurrentBuffer.Fetch(), Is.EqualTo(initialPicture));
+        Assert.That(_realCoordinator.CurrentBuffer!.Fetch(), Is.EqualTo(initialPicture));
 
         // 2. External update (e.g. Undo or Push)
         var updatedPicture = Picture.CreateEmpty(new PictureSize(32, 32));
         _realDrawingSessionProvider.Update(new DrawingSession(updatedPicture));
-        
+
         // 3. Sync with session should detect the change and reset the internal session safely
         _realCoordinator.SyncWithSession();
-        
+
         // Assert: Buffer is updated
-        Assert.That(_realCoordinator.CurrentBuffer.Fetch(), Is.EqualTo(updatedPicture), "Coordinator should sync with external buffer changes.");
-        
+        Assert.That(_realCoordinator.CurrentBuffer!.Fetch(), Is.EqualTo(updatedPicture), "Coordinator should sync with external buffer changes.");
+
         // 4. Verify no crash on subsequent interaction
         // Use 16x16 grid size to avoid DivideByZero if HalfBoxArea expects power-of-two or similar
-        Assert.DoesNotThrow(() => {
-            _realCoordinator.PointerBegin(new Position(0, 0), new DrawingBuffer(updatedPicture), new RegionSelector(), new PenStyle(new DirectImageBlender()), false, false, new PictureSize(16, 16), null);
+        Assert.DoesNotThrow(() =>
+        {
+            _realCoordinator.PointerBegin(new Position(0, 0), new DrawingBuffer(updatedPicture), new RegionSelector(), new PenStyle(new DirectImageBlender()), false, false, new PictureSize(16, 16), null!);
         }, "Coordinator should not crash after an external buffer update.");
     }
 
@@ -129,10 +133,10 @@ public class RegressionTests_PresentationFixes
 
         // 3. Perform a pointer action. 
         // Previously, if SyncWithSession was broken, this might have used an old internal session with 'initialPicture'.
-        _realCoordinator.PointerBegin(new Position(0, 0), new DrawingBuffer(newPicture), new RegionSelector(), new PenStyle(new DirectImageBlender()), false, false, new PictureSize(16, 16), null);
+        _realCoordinator.PointerBegin(new Position(0, 0), new DrawingBuffer(newPicture), new RegionSelector(), new PenStyle(new DirectImageBlender()), false, false, new PictureSize(16, 16), null!);
 
         // Assert: CurrentBuffer should be the newPicture, not the old one
-        Assert.That(_realCoordinator.CurrentBuffer.Fetch(), Is.EqualTo(newPicture), "Should maintain the new picture after external update, even during interactions.");
+        Assert.That(_realCoordinator.CurrentBuffer!.Fetch(), Is.EqualTo(newPicture), "Should maintain the new picture after external update, even during interactions.");
     }
 
     [AvaloniaTest]
@@ -141,27 +145,29 @@ public class RegressionTests_PresentationFixes
         var initialPicture = Picture.CreateEmpty(new PictureSize(16, 16));
         var provider = new DrawingSessionProvider();
         provider.Update(new DrawingSession(initialPicture));
-        
+
         var coordinator = new InteractionCoordinator(provider);
         coordinator.SyncWithSession();
 
         // Simulate an environment where provider.Update triggers coordinator.SyncWithSession
         // (In the real app, this happens via SessionChanged event in DrawableCanvasViewModel)
-        provider.SessionChanged += (session) => {
+        provider.SessionChanged += (session) =>
+        {
             coordinator.SyncWithSession();
         };
 
         var nextPicture = Picture.CreateEmpty(new PictureSize(16, 16));
-        
-        Assert.DoesNotThrow(() => {
+
+        Assert.DoesNotThrow(() =>
+        {
             // PointerBegin will call provider.Update several times internally
             coordinator.PointerBegin(
-                new Position(0, 0), 
-                new DrawingBuffer(initialPicture), 
-                new RegionSelector(), 
-                new PenStyle(new DirectImageBlender()), 
-                false, false, new PictureSize(16, 16), 
-                null);
+                new Position(0, 0),
+                new DrawingBuffer(initialPicture),
+                new RegionSelector(),
+                new PenStyle(new DirectImageBlender()),
+                false, false, new PictureSize(16, 16),
+                null!);
         }, "Coordinator should be resilient to SyncWithSession calls triggered during its own operations.");
     }
 
@@ -175,7 +181,7 @@ public class RegressionTests_PresentationFixes
         var transformUseCase = new Mock<ITransformImageUseCase>().Object;
         var transferToCanvas = new Mock<ITransferImageToCanvasUseCase>().Object;
         var transferFromCanvas = new Mock<ITransferImageFromCanvasUseCase>().Object;
-        
+
         var selectionService = new SelectionService(
             new CopySelectionUseCase(clipboard),
             new CutSelectionUseCase(clipboard),
@@ -200,7 +206,8 @@ public class RegressionTests_PresentationFixes
                 new ReplaceAnimationPatternUseCase(patternsProvider),
                 new RemoveAnimationPatternUseCase(patternsProvider)
             ),
-            new Mock<IFileSystem>().Object
+            new Mock<IFileSystem>().Object,
+            new AvaloniaBitmapAdapter()
         );
 
         var sessionVM = new DrawingSessionViewModel(sessionProvider);

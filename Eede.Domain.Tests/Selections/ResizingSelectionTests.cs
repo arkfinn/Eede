@@ -12,7 +12,7 @@ namespace Eede.Domain.Tests.Selections
         {
             var original = new PictureArea(new Position(10, 10), new PictureSize(20, 20));
             var resizer = new ResizingSelection(original, SelectionHandle.BottomRight);
-            
+
             var startPos = new Position(30, 30); // BottomRight corner of original
             var currentPos = new Position(40, 50); // Dragged by +10, +20
 
@@ -32,7 +32,7 @@ namespace Eede.Domain.Tests.Selections
         {
             var original = new PictureArea(new Position(10, 10), new PictureSize(20, 20));
             var resizer = new ResizingSelection(original, SelectionHandle.TopLeft);
-            
+
             var startPos = new Position(10, 10);
             var currentPos = new Position(5, 5); // Dragged by -5, -5
 
@@ -92,7 +92,7 @@ namespace Eede.Domain.Tests.Selections
         {
             var original = new PictureArea(new Position(10, 10), new PictureSize(20, 20));
             var resizer = new ResizingSelection(original, SelectionHandle.BottomRight);
-            
+
             var startPos = new Position(30, 30);
             var currentPos = new Position(10, 10); // Try to shrink to 0 size
 
@@ -110,10 +110,10 @@ namespace Eede.Domain.Tests.Selections
         {
             var original = new PictureArea(new Position(10, 10), new PictureSize(20, 20)); // 1:1 ratio
             var resizer = new ResizingSelection(original, SelectionHandle.BottomRight);
-            
+
             var startPos = new Position(30, 30);
             var currentPos = new Position(40, 50); // Dragged to make width 30, height 40
-            
+
             var result = resizer.Resize(startPos, currentPos, keepAspectRatio: true);
 
             Assert.That(result.Width, Is.EqualTo(result.Height));

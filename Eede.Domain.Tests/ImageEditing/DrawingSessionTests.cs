@@ -34,9 +34,9 @@ public class DrawingSessionTests
     {
         var session = new DrawingSession(_initialPicture);
         var nextPicture = Picture.CreateEmpty(_size); // 本来は異なるデータ
-        
+
         var updatedSession = session.Push(nextPicture);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(updatedSession.CurrentPicture, Is.EqualTo(nextPicture));
@@ -52,9 +52,9 @@ public class DrawingSessionTests
     {
         var session = new DrawingSession(_initialPicture);
         var drawingPicture = Picture.CreateEmpty(_size);
-        
+
         var drawingSession = session.UpdateDrawing(drawingPicture);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(drawingSession.CurrentPicture, Is.EqualTo(drawingPicture));
@@ -75,7 +75,7 @@ public class DrawingSessionTests
         var finalPicture = Picture.CreateEmpty(_size);
 
         var s2 = session.UpdateDrawing(drawingPicture).Push(finalPicture);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(s2.CurrentPicture, Is.EqualTo(finalPicture));
@@ -90,19 +90,19 @@ public class DrawingSessionTests
         // Arrange
         var initialArea = new PictureArea(new Position(0, 0), new PictureSize(10, 10));
         var session = new DrawingSession(_initialPicture, initialArea); // このコンストラクタは未実装
-        
+
         var nextPicture = Picture.CreateEmpty(_size);
         var nextArea = new PictureArea(new Position(5, 5), new PictureSize(15, 15));
-        
+
         // Act
         var updatedSession = session.Push(nextPicture, nextArea); // この引数は未実装
-        
+
         // Assert: Push後の状態
         Assert.That(updatedSession.CurrentSelectingArea, Is.EqualTo(nextArea));
-        
+
         // Act: Undo実行
         var undoneSession = updatedSession.Undo().Session;
-        
+
         // Assert: Undo後の状態が復元されていること
         Assert.Multiple(() =>
         {
@@ -112,7 +112,42 @@ public class DrawingSessionTests
     }
 
     [Test]
-    public void DrawingSession_PastePreview_Workflow()
+    public void DrawingSession_MovePreview_Undo_Workflow()
+    {
+        // Arrange: 最初の画像を用意
+        var initialPicture = _initialPicture;
+        var initialArea = new PictureArea(new Position(0, 0), new PictureSize(10, 10));
+        var session = new DrawingSession(initialPicture, initialArea);
+
+        // Act: 移動プレビュー開始 (Cut & Move)
+        var movedPixels = Picture.CreateEmpty(new PictureSize(10, 10)); // 実際には切り抜いた画像
+        var movedPosition = new Position(5, 5);
+        var previewSession = session.UpdatePreviewContent(new SelectionPreviewInfo(movedPixels, movedPosition, SelectionPreviewType.CutAndMove, initialArea));
+
+        // Act: 確定（Commit）
+        var committedSession = previewSession.CommitPreview(new DirectImageBlender());
+
+        // Assert: 確定後の状態確認
+        Assert.Multiple(() =>
+        {
+            Assert.That(committedSession.CurrentPreviewContent, Is.Null, "Committed session should have no preview");
+            Assert.That(committedSession.CurrentSelectingArea?.Position, Is.EqualTo(movedPosition), "Committed area should be at the new position");
+        });
+
+        // Act: Undo (移動確定後の Undo)
+        var undoneSession = committedSession.Undo().Session;
+
+        // Assert: Undo後は「移動前」の状態に戻るべき
+        Assert.Multiple(() =>
+        {
+            Assert.That(undoneSession.CurrentPicture, Is.EqualTo(initialPicture), "Should return to the picture before move");
+            Assert.That(undoneSession.CurrentPreviewContent, Is.Null, "Undo should NOT restore preview content");
+            Assert.That(undoneSession.CurrentSelectingArea, Is.EqualTo(initialArea), "Should return to the selection area before move");
+        });
+    }
+
+    [Test]
+    public void DrawingSession_PastePreview_Undo_Workflow()
     {
         // Arrange: 最初の画像を描画して履歴を1つ作る
         var initialSession = new DrawingSession(_initialPicture);

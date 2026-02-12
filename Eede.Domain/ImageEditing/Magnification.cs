@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 
 namespace Eede.Domain.ImageEditing
 {
@@ -14,12 +15,12 @@ namespace Eede.Domain.ImageEditing
 
         public int Magnify(int value)
         {
-            return (int)(value * Value);
+            return (int)Math.Floor(value * Value);
         }
 
         public int Minify(int value)
         {
-            return (int)(value / Value);
+            return (int)Math.Floor(value / Value);
         }
 
         public float Scale(float value)

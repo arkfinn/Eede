@@ -66,7 +66,7 @@
           <Panel x:Name="canvas" Cursor="{Binding ActiveCursor}" RenderOptions.BitmapInterpolationMode="None">
             <Image x:Name="mainImage"
                    Source="{Binding PremultipliedBitmap}"
-                   Stretch="None"
+                   Stretch="Fill"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    RenderOptions.BitmapInterpolationMode="None" />

@@ -175,13 +175,12 @@
 								<TextBlock VerticalAlignment="Center" Text=" x "/>
 								<ComboBox ItemsSource="{Binding MinCursorSizeList}"
 										  SelectedItem="{Binding MinCursorHeight, Mode=TwoWay}"/>
-								<Panel Classes="horizontal-separator" />
-								<ComboBox x:Name="ThemeSelect" SelectedIndex="0" SelectionChanged="OnClickThemeSelect">
-									<ComboBoxItem>Light</ComboBoxItem>
-									<ComboBoxItem>Dark</ComboBoxItem>
-								</ComboBox>
-							</StackPanel>
-						</Panel>
+								                                                                <Panel Classes="horizontal-separator" />
+								                                                                <ComboBox x:Name="ThemeSelect" SelectedIndex="{Binding SelectedThemeIndex}" SelectionChanged="OnClickThemeSelect">
+								                                                                        <ComboBoxItem>Light</ComboBoxItem>
+								                                                                        <ComboBoxItem>Dark</ComboBoxItem>
+								                                                                </ComboBox>
+								                                                        </StackPanel>						</Panel>
 						<display:PictureFrame Pictures="{Binding Pictures}"
 											  ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"
 											  ImageBlender="{Binding PullBlender}"

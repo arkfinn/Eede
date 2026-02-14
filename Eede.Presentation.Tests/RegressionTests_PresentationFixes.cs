@@ -221,7 +221,7 @@ public class RegressionTests_PresentationFixes
             state, clipboard, bitmapAdapter, pictureRepo, drawStyleFactory,
             transformUseCase, new Mock<IScalingImageUseCase>().Object, transferToCanvas, transferFromCanvas,
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
-            paletteVM, pictureIOService,
+            paletteVM, pictureIOService, new Mock<IThemeService>().Object,
             () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
             () => new NewPictureWindowViewModel()
         );

@@ -100,6 +100,7 @@ public class ViewModelSafetyCharacterizationTests
             drawingSessionViewModelMock.Object,
             paletteContainerViewModelMock.Object,
             pictureIOService,
+            new Mock<IThemeService>().Object,
             dockPictureFactory,
             newPictureWindowFactory
         );

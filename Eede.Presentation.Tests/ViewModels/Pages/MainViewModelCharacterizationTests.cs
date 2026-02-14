@@ -126,6 +126,7 @@ public class MainViewModelCharacterizationTests
             _drawingSessionViewModelMock.Object,
             _paletteContainerViewModelMock.Object,
             pictureIOService,
+            new Mock<IThemeService>().Object,
             _dockPictureFactory,
             _newPictureWindowFactory
         );

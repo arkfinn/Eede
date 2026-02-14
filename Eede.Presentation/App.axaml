@@ -12,8 +12,36 @@
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="/Styles/Colors/DefaultTheme.axaml"/>
+        <ResourceInclude Source="/Resources/Icons.axaml"/>
       </ResourceDictionary.MergedDictionaries>
+
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key='Light'>
+          <SolidColorBrush x:Key='RegionBrush'>#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key='BaseBrush'>#CCCCCC</SolidColorBrush>
+          <SolidColorBrush x:Key='AccentContrastBrush' Color='White' />
+          <SolidColorBrush x:Key='TextBrush'>#000000</SolidColorBrush>
+          <Color x:Key='DockApplicationAccentForegroundColor'>White</Color>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key='Dark'>
+          <SolidColorBrush x:Key='RegionBrush'>Black</SolidColorBrush>
+          <SolidColorBrush x:Key='BaseBrush'>#333333</SolidColorBrush>
+          <SolidColorBrush x:Key='AccentContrastBrush' Color='Black' />
+          <SolidColorBrush x:Key='TextBrush'>#FFFFFF</SolidColorBrush>
+          <Color x:Key='DockApplicationAccentForegroundColor'>#222222</Color>
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+
+      <!-- Globally defined brushes to ensure priority and reactivity -->
+      <SolidColorBrush x:Key='PrimaryBrush' Color='{DynamicResource SystemAccentColor}' />
+      <SolidColorBrush x:Key='DockApplicationAccentBrush' Color='{DynamicResource SystemAccentColor}' />
+      <SolidColorBrush x:Key='DockApplicationAccentBrushLow' Color='{DynamicResource SystemAccentColor}' />
+      <SolidColorBrush x:Key='DockApplicationAccentBrushMedium' Color='{DynamicResource SystemAccentColorLight2}' />
+      <SolidColorBrush x:Key='DockApplicationAccentBrushHigh' Color='{DynamicResource SystemAccentColorLight1}' />
+      <SolidColorBrush x:Key='DockThemeAccentBrush' Color='{DynamicResource SystemAccentColor}' />
+      <SolidColorBrush x:Key='DockApplicationAccentForegroundBrush' Color='{DynamicResource DockApplicationAccentForegroundColor}' />
+
+
       <converters:PlayPauseTextConverter x:Key="PlayPauseTextConverter" />
       <x:Single x:Key="Single1">1</x:Single>
       <x:Single x:Key="Single2">2</x:Single>
@@ -24,7 +52,18 @@
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>
-    <FluentTheme/>
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Light"
+                               Accent="#00C853"
+                               RegionColor="White"
+                               ErrorText="Red" />
+        <ColorPaletteResources x:Key="Dark"
+                               Accent="#19e68a"
+                               RegionColor="Black"
+                               ErrorText="Red" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
 
     <StyleInclude Source="avares://Dock.Avalonia/Themes/DockFluentTheme.axaml" />
     <StyleInclude Source="/Styles/Styles.axaml"/>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StreamGeometry x:Key="BackgroundGridSmallIconGeometry">M110-110h131v-131H110v131Zm203 0h131v-131H313v131Zm203 0h130v-131H516v131Zm204 0h130v-131H720v131ZM110-719h131v-131H110v131Zm0 203h131v-131H110v131Zm0 203h131v-131H110v131Zm203-406h131v-131H313v131Zm0 203h131v-131H313v131Zm0 203h131v-131H313v131Zm203-406h130v-131H516v131Zm0 203h130v-131H516v131Zm0 203h130v-131H516v131Zm204-406h130v-131H720v131Zm0 203h130v-131H720v131Zm0 203h130v-131H720v131Z</StreamGeometry>
+</ResourceDictionary>

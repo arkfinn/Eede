@@ -15,6 +15,7 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Views.DataEntry
@@ -53,9 +54,6 @@ namespace Eede.Presentation.Views.DataEntry
             {
                 return;
             }
-            Avalonia.Media.Imaging.Bitmap bitmap = _viewModel.PremultipliedBitmap!;
-
-            CanvasSize = new PictureSize((int)bitmap.Size.Width, (int)bitmap.Size.Height);
 
             _ = background.Bind(WidthProperty, new Binding
             {
@@ -116,6 +114,13 @@ namespace Eede.Presentation.Views.DataEntry
                 {
                     UpdateCursor();
                     UpdateChecked();
+                });
+
+            _viewModel.WhenAnyValue(x => x.PremultipliedBitmap)
+                .Where(x => x != null)
+                .Subscribe(bitmap =>
+                {
+                    CanvasSize = new PictureSize((int)bitmap!.Size.Width, (int)bitmap!.Size.Height);
                 });
 
             // GridView のバインディング設定

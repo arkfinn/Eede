@@ -19,6 +19,7 @@ using Eede.Presentation.Common.Models;
 using Eede.Application.Infrastructure;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
+using Eede.Presentation.Services;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
@@ -87,6 +88,8 @@ public class MainViewModel : ViewModelBase
     [Reactive] public bool IsShowPixelGrid { get; set; } = false;
     [Reactive] public bool IsShowCursorGrid { get; set; } = false;
 
+    [Reactive] public int SelectedThemeIndex { get; set; }
+
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
     public ReactiveCommand<IFileStorage, Unit> LoadPictureCommand { get; private set; }
@@ -129,6 +132,7 @@ public class MainViewModel : ViewModelBase
     private readonly ITransferImageFromCanvasUseCase _transferImageFromCanvasUseCase;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly IPictureIOService _pictureIOService;
+    private readonly IThemeService _themeService;
     private readonly GlobalState _state;
     private readonly IClipboard _clipboard;
     private readonly Func<DockPictureViewModel> _dockPictureFactory;
@@ -154,6 +158,7 @@ public class MainViewModel : ViewModelBase
         DrawingSessionViewModel drawingSessionViewModel,
         PaletteContainerViewModel paletteContainerViewModel,
         IPictureIOService pictureIOService,
+        IThemeService themeService,
         Func<DockPictureViewModel> dockPictureFactory,
         Func<NewPictureWindowViewModel> newPictureWindowFactory)
     {
@@ -168,6 +173,7 @@ public class MainViewModel : ViewModelBase
         _transferImageFromCanvasUseCase = transferImageFromCanvasUseCase;
         _drawingSessionProvider = drawingSessionProvider;
         _pictureIOService = pictureIOService;
+        _themeService = themeService;
         _dockPictureFactory = dockPictureFactory;
         _newPictureWindowFactory = newPictureWindowFactory;
 
@@ -175,6 +181,8 @@ public class MainViewModel : ViewModelBase
         AnimationViewModel = animationViewModel;
         DrawingSessionViewModel = drawingSessionViewModel;
         PaletteContainerViewModel = paletteContainerViewModel;
+
+        SelectedThemeIndex = _themeService.GetActualThemeVariant() == Avalonia.Styling.ThemeVariant.Dark ? 1 : 0;
 
         LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
         SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);

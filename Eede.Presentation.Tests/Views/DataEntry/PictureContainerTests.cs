@@ -112,6 +112,7 @@ public class PictureContainerTests
             drawingSessionVM,
             paletteVM,
             pictureIOService,
+            new Mock<IThemeService>().Object,
             () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
             () => new NewPictureWindowViewModel()
         );

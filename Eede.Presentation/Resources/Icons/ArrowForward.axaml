@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StreamGeometry x:Key="ArrowForwardIconGeometry">M575-421H158v-118h417L396-718l84-84 322 322-322 322-84-84 179-179Z</StreamGeometry>
+</ResourceDictionary>

@@ -1,8 +1,0 @@
-﻿{
-    "description":  "SVGアイコンの直接埋め込みコンポーネント化と共通スタイルの構築、および透過ボタンのSVG化",
-    "track_id":  "svg_icon_migration_20260211",
-    "type":  "feature",
-    "created_at":  "2026-02-11T23:32:08Z",
-    "status":  "new",
-    "updated_at":  "2026-02-11T23:32:08Z"
-}

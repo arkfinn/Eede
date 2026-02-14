@@ -14,16 +14,16 @@
                        PointerLeftButtonPressedCommand="{Binding FetchColorCommand}"
                        PointerRightButtonPressedCommand="{Binding ApplyColorCommand}" />
     <StackPanel Orientation="Vertical" Margin="4 0">
-      <Button ToolTip.Tip="パレットを開く"
+      <Button Classes="tool" ToolTip.Tip="パレットを開く"
               Command="{Binding LoadPaletteCommand}"
               CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
-        <Image Source="/Assets/Tools/file_open.png" Stretch="None" />
+        <PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
       </Button>
 
-      <Button ToolTip.Tip="パレットを保存する"
+      <Button Classes="tool" ToolTip.Tip="パレットを保存する"
               Command="{Binding SavePaletteCommand}"
               CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
-        <Image Source="/Assets/Tools/file_save.png" Stretch="None" />
+        <PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
       </Button>
     </StackPanel>
   </WrapPanel>

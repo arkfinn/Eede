@@ -81,7 +81,7 @@
 							Command="{Binding CreatePatternCommand}"
 							CommandParameter="New Pattern"
 							Margin="2,0,0,0">
-						<Image Source="/Assets/Tools/file_new.png" Width="16" Height="16" />
+						<PathIcon Data="{StaticResource NoteAddIconGeometry}" Classes="icon" />
 					</Button>
 					<Button Grid.Column="2" Classes="tool" ToolTip.Tip="パターン削除"
 							Command="{Binding RemovePatternCommand}"
@@ -92,13 +92,13 @@
 							Command="{Binding ImportCommand}"
 							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
 							Margin="2,0,0,0">
-						<Image Source="/Assets/Tools/file_open.png" Width="16" Height="16" />
+						<PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
 					</Button>
 					<Button Grid.Column="4" Classes="tool" ToolTip.Tip="保存"
 							Command="{Binding ExportCommand}"
 							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
 							Margin="2,0,0,0">
-						<Image Source="/Assets/Tools/file_save.png" Width="16" Height="16" />
+						<PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
 					</Button>
 				</Grid>
 			</StackPanel>

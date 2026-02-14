@@ -13,3 +13,80 @@
 - [ ] 「透過ボタン」のアイコンを正式なものにする
 - [ ] Presentation層全体でのインターフェース依存への移行：テスト容易性の向上
 - [ ] テストケースのリファクタリング。単体テストの使い方・考え方に基づく。
+
+条件は不明、ドックパネルのズームボタンを押したら以下のエラー
+System.NullReferenceException
+  HResult=0x80004003
+  Message=Object reference not set to an instance of an object.
+  Source=Avalonia.Controls
+  スタック トレース:
+   場所 Avalonia.Controls.Image.MeasureOverride(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureOverride(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureOverride(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
+   場所 Avalonia.Layout.LayoutManager.Measure(Layoutable control)
+   場所 Avalonia.Layout.LayoutManager.ExecuteLayoutPass()
+   場所 Avalonia.Media.MediaContext.FireInvokeOnRenderCallbacks()
+   場所 Avalonia.Media.MediaContext.RenderCore()
+   場所 Avalonia.Media.MediaContext.Render()
+   場所 Avalonia.Threading.DispatcherOperation.InvokeCore()
+   場所 Avalonia.Threading.DispatcherOperation.Execute()
+   場所 Avalonia.Threading.Dispatcher.ExecuteJob(DispatcherOperation job)
+   場所 Avalonia.Threading.Dispatcher.ExecuteJobsCore(Boolean fromExplicitBackgroundProcessingCallback)
+   場所 Avalonia.Threading.Dispatcher.Signaled()
+   場所 Avalonia.Win32.Win32Platform.WndProc(IntPtr hWnd, UInt32 msg, IntPtr wParam, IntPtr lParam)
+   場所 Avalonia.Win32.Interop.UnmanagedMethods.DispatchMessage(MSG& lpmsg)
+   場所 Avalonia.Win32.Win32DispatcherImpl.RunLoop(CancellationToken cancellationToken)
+   場所 Avalonia.Threading.DispatcherFrame.Run(IControlledDispatcherImpl impl)
+   場所 Avalonia.Threading.Dispatcher.PushFrame(DispatcherFrame frame)
+   場所 Avalonia.Threading.Dispatcher.MainLoop(CancellationToken cancellationToken)
+   場所 Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime.StartCore(String[] args)
+   場所 Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime.Start(String[] args)
+   場所 Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(AppBuilder builder, String[] args, Action`1 lifetimeBuilder)
+   場所 Eede.Presentation.Desktop.Program.Main(String[] args) (F:\mydata\program\EedeWin\Eede\Eede.Presentation.Desktop\Program.cs):行 15
+
+  この例外は、最初にこの呼び出し履歴
+    [外部コード]
+    Eede.Presentation.Desktop.Program.Main(string[]) (Program.cs 内) でスローされましたSystem.NullReferenceException
+  HResult=0x80004003
+  Message=Object reference not set to an instance of an object.
+  Source=Avalonia.Controls
+  スタック トレース:
+   場所 Avalonia.Controls.Image.MeasureOverride(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureOverride(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureOverride(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
+   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
+   場所 Avalonia.Layout.LayoutManager.Measure(Layoutable control)
+   場所 Avalonia.Layout.LayoutManager.ExecuteLayoutPass()
+   場所 Avalonia.Media.MediaContext.FireInvokeOnRenderCallbacks()
+   場所 Avalonia.Media.MediaContext.RenderCore()
+   場所 Avalonia.Media.MediaContext.Render()
+   場所 Avalonia.Threading.DispatcherOperation.InvokeCore()
+   場所 Avalonia.Threading.DispatcherOperation.Execute()
+   場所 Avalonia.Threading.Dispatcher.ExecuteJob(DispatcherOperation job)
+   場所 Avalonia.Threading.Dispatcher.ExecuteJobsCore(Boolean fromExplicitBackgroundProcessingCallback)
+   場所 Avalonia.Threading.Dispatcher.Signaled()
+   場所 Avalonia.Win32.Win32Platform.WndProc(IntPtr hWnd, UInt32 msg, IntPtr wParam, IntPtr lParam)
+   場所 Avalonia.Win32.Interop.UnmanagedMethods.DispatchMessage(MSG& lpmsg)
+   場所 Avalonia.Win32.Win32DispatcherImpl.RunLoop(CancellationToken cancellationToken)
+   場所 Avalonia.Threading.DispatcherFrame.Run(IControlledDispatcherImpl impl)
+   場所 Avalonia.Threading.Dispatcher.PushFrame(DispatcherFrame frame)
+   場所 Avalonia.Threading.Dispatcher.MainLoop(CancellationToken cancellationToken)
+   場所 Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime.StartCore(String[] args)
+   場所 Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime.Start(String[] args)
+   場所 Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(AppBuilder builder, String[] args, Action`1 lifetimeBuilder)
+   場所 Eede.Presentation.Desktop.Program.Main(String[] args) (F:\mydata\program\EedeWin\Eede\Eede.Presentation.Desktop\Program.cs):行 15
+
+  この例外は、最初にこの呼び出し履歴
+    [外部コード]
+    Eede.Presentation.Desktop.Program.Main(string[]) (Program.cs 内) でスローされました

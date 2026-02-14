@@ -110,6 +110,8 @@ public class MainViewModelCharacterizationTests
             new SavePictureUseCase(_pictureRepositoryMock.Object),
             new LoadPictureUseCase(_pictureRepositoryMock.Object));
 
+        var settingsService = new SettingsService(new Mock<ISettingsRepository>().Object);
+
         var vm = new MainViewModel(
             _stateMock.Object,
             _clipboardServiceMock.Object,
@@ -127,6 +129,7 @@ public class MainViewModelCharacterizationTests
             _paletteContainerViewModelMock.Object,
             pictureIOService,
             new Mock<IThemeService>().Object,
+            settingsService,
             _dockPictureFactory,
             _newPictureWindowFactory
         );

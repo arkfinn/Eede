@@ -94,6 +94,7 @@ public class PictureContainerTests
 
         var paletteVM = new PaletteContainerViewModel();
         var mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
+        var settingsService = new SettingsService(new Mock<ISettingsRepository>().Object);
 
         // MainViewModel
         _mainViewModel = new MainViewModel(
@@ -113,6 +114,7 @@ public class PictureContainerTests
             paletteVM,
             pictureIOService,
             new Mock<IThemeService>().Object,
+            settingsService,
             () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
             () => new NewPictureWindowViewModel()
         );

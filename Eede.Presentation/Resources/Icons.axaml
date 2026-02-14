@@ -1,6 +1,40 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/Resources/Icons/ArrowBack.axaml" />
+        <ResourceInclude Source="/Resources/Icons/ArrowDownward.axaml" />
+        <ResourceInclude Source="/Resources/Icons/ArrowForward.axaml" />
+        <ResourceInclude Source="/Resources/Icons/ArrowUpward.axaml" />
+        <ResourceInclude Source="/Resources/Icons/BackgroundGridSmall.axaml" />
         <ResourceInclude Source="/Resources/Icons/BlurOn.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Circle.axaml" />
+        <ResourceInclude Source="/Resources/Icons/ContentCopy.axaml" />
+        <ResourceInclude Source="/Resources/Icons/ContentCut.axaml" />
+        <ResourceInclude Source="/Resources/Icons/ContentPaste.axaml" />
+        <ResourceInclude Source="/Resources/Icons/CropFree.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Edit.axaml" />
+        <ResourceInclude Source="/Resources/Icons/FillCircle.axaml" />
+        <ResourceInclude Source="/Resources/Icons/FillSquare.axaml" />
+        <ResourceInclude Source="/Resources/Icons/FolderOpen.axaml" />
+        <ResourceInclude Source="/Resources/Icons/FormatColorFill.axaml" />
+        <ResourceInclude Source="/Resources/Icons/FormatColorFill1.axaml" />
+        <ResourceInclude Source="/Resources/Icons/GridOn.axaml" />
+        <ResourceInclude Source="/Resources/Icons/GridView.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Line.axaml" />
+        <ResourceInclude Source="/Resources/Icons/NoteAdd.axaml" />
+        <ResourceInclude Source="/Resources/Icons/OpenInFull.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Redo.axaml" />
+        <ResourceInclude Source="/Resources/Icons/RotateRight.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Save.axaml" />
+        <ResourceInclude Source="/Resources/Icons/SaveAs.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Select.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Square.axaml" />
+        <ResourceInclude Source="/Resources/Icons/SubdirectoryArrowLeft.axaml" />
+        <ResourceInclude Source="/Resources/Icons/SubdirectoryArrowRight.axaml" />
+        <ResourceInclude Source="/Resources/Icons/SwapHoriz.axaml" />
+        <ResourceInclude Source="/Resources/Icons/SwapVert.axaml" />
+        <ResourceInclude Source="/Resources/Icons/TileSmall.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Transform.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Undo.axaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

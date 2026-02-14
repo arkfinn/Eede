@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StreamGeometry x:Key="RedoIconGeometry">M363-158q-86 0-145.5-65.5T158-378q0-89 59.5-155T363-599h213l-72-72 83-83 215 214-215 214-83-83 72-72H363q-38 0-62.5 30.5T276-379q0 41 24.5 72t62.5 31h297v118H363Z</StreamGeometry>
+</ResourceDictionary>

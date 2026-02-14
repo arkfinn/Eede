@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StreamGeometry x:Key="SwapVertIconGeometry">M299-430v-242l-82 82-83-83 224-225 224 225-83 83-82-82v242H299ZM602-62 378-287l83-83 82 82v-242h118v242l82-82 83 83L602-62Z</StreamGeometry>
+</ResourceDictionary>

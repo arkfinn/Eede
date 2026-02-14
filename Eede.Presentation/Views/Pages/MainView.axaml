@@ -35,20 +35,20 @@
 									HorizontalAlignment="Center"
 									Margin="2">
 							<Button Classes="tool" Command="{Binding UndoCommand}" ToolTip.Tip="元に戻す(Ctrl+Z)">
-								<Image Source="/Assets/Tools/tool_undo.png" Stretch="None" />
+									<PathIcon Data="{StaticResource UndoIconGeometry}" Classes="icon" />
 							</Button>
 							<Button Classes="tool" Command="{Binding RedoCommand}" ToolTip.Tip="やり直し(Ctrl+Y)">
-								<Image Source="/Assets/Tools/tool_redo.png" Stretch="None" />
+								<PathIcon Data="{StaticResource RedoIconGeometry}" Classes="icon" />
 							</Button>
 							<Panel Classes="horizontal-separator" />
 							<Button Classes="tool" Command="{Binding CopyCommand}" ToolTip.Tip="コピー(Ctrl+C): 選択範囲をクリップボードにコピー" HotKey="Ctrl+C">
-								<Image Source="/Assets/Tools/tool_copy.png" Stretch="None" />
+								<PathIcon Data="{StaticResource ContentCopyIconGeometry}" Classes="icon" />
 							</Button>
 							<Button Classes="tool" Command="{Binding CutCommand}" ToolTip.Tip="切り取り(Ctrl+X): 選択範囲を切り取ってクリップボードに保存" HotKey="Ctrl+X">
-								<Image Source="/Assets/Tools/tool_cut.png" Stretch="None" />
+								<PathIcon Data="{StaticResource ContentCutIconGeometry}" Classes="icon" />
 							</Button>
 							<Button Classes="tool" Command="{Binding PasteCommand}" ToolTip.Tip="貼り付け(Ctrl+V): クリップボードの内容を現在のキャンバスに貼り付け" HotKey="Ctrl+V">
-								<Image Source="/Assets/Tools/tool_paste.png" Stretch="None" />
+								<PathIcon Data="{StaticResource ContentPasteIconGeometry}" Classes="icon" />
 							</Button>
 							<Panel Classes="horizontal-separator" />
 							<navi:LayerStyleMenu ImageTransfer="{Binding ImageTransfer}"
@@ -57,10 +57,10 @@
 							<navi:MagnificationMenu Magnification="{Binding Magnification}"/>
 							<Panel Classes="horizontal-separator" />
 							<ToggleButton Classes="tool" IsChecked="{Binding IsShowPixelGrid}" ToolTip.Tip="1pxグリッドを表示">
-								<Image Source="/Assets/Tools/tool_grid_pixel.png" Stretch="None" />
+								<PathIcon Data="{StaticResource BackgroundGridSmallIconGeometry}" Classes="icon" />
 							</ToggleButton>
 							<ToggleButton Classes="tool" IsChecked="{Binding IsShowCursorGrid}" ToolTip.Tip="カーソルグリッドを表示">
-								<Image Source="/Assets/Tools/tool_grid_cursor.png" Stretch="None" />
+								<PathIcon Data="{StaticResource GridViewIconGeometry}" Classes="icon" />
 							</ToggleButton>
 						</StackPanel>
 					</Panel>
@@ -68,7 +68,7 @@
 					<Panel DockPanel.Dock="Right" Margin="2" Width="24">
 						<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
 							<navi:PictureActionMenu Command="{Binding PictureActionCommand}" ScalingCommand="{Binding ScalingCommand}"/>
-							<Separator/>
+							<Panel Classes="vertical-separator" />
 							<ToggleButton Classes="tool" IsChecked="{Binding IsTransparencyEnabled}" ToolTip.Tip="透過を有効にする">
 								<PathIcon Data="{StaticResource BlurOnIconGeometry}" Classes="icon" />
 							</ToggleButton>
@@ -80,14 +80,6 @@
 							<Panel>
 								<TabControl>
 									<TabItem Header="一時パレット">
-										<TabItem.Styles>
-											<Style Selector="TabItem">
-												<Setter Property="FontSize" Value="12"/>
-												<Setter Property="FontWeight" Value="Bold"/>
-												<Setter Property="MinHeight" Value="24"/>
-
-											</Style>
-										</TabItem.Styles>
 										<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
 																FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
 																Margin="4 2 4 8"/>
@@ -161,21 +153,21 @@
 										ToolTip.Tip="新規作成(N)"
 										HotKey="N"
 										Command="{Binding CreateNewPictureCommand}">
-									<Image Source="/Assets/Tools/file_new.png" Stretch="None" />
+									<PathIcon Data="{StaticResource NoteAddIconGeometry}" Classes="icon" />
 								</Button>
 								<Button Classes="tool"
 										ToolTip.Tip="開く(O)"
 										HotKey="O"
 										Command="{Binding LoadPictureCommand}"
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
-									<Image Source="/Assets/Tools/file_open.png" Stretch="None" />
+									<PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
 								</Button>
 								<Button Classes="tool"
 										ToolTip.Tip="保存(Ctrl+S)"
 										HotKey="Ctrl+S"
 										Command="{Binding SavePictureCommand}"
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
-									<Image Source="/Assets/Tools/file_save.png" Stretch="None" />
+									<PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
 								</Button>
 								<Panel Classes="horizontal-separator" />
 								<ComboBox ItemsSource="{Binding MinCursorSizeList}"

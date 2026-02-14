@@ -10,6 +10,7 @@ using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
+using Eede.Infrastructure.Settings;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
 using Eede.Presentation.Services;
@@ -94,6 +95,15 @@ public partial class App : Avalonia.Application
         services.AddSingleton<ISavePictureUseCase, SavePictureUseCase>();
         services.AddSingleton<ILoadPictureUseCase, LoadPictureUseCase>();
         services.AddSingleton<IPictureIOService, PictureIOService>();
+
+        // Settings
+        services.AddSingleton<ISettingsRepository>(sp =>
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var path = System.IO.Path.Combine(appData, "Eede", "settings.json");
+            return new Eede.Infrastructure.Settings.JsonSettingsRepository(path);
+        });
+        services.AddSingleton<SettingsService>();
 
         // ViewModels
         services.AddTransient<IInteractionCoordinator, InteractionCoordinator>();

@@ -217,11 +217,14 @@ public class RegressionTests_PresentationFixes
             new LoadPictureUseCase(pictureRepo)
         );
 
+        var settingsService = new SettingsService(new Mock<ISettingsRepository>().Object);
+
         return new MainViewModel(
             state, clipboard, bitmapAdapter, pictureRepo, drawStyleFactory,
             transformUseCase, new Mock<IScalingImageUseCase>().Object, transferToCanvas, transferFromCanvas,
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
             paletteVM, pictureIOService, new Mock<IThemeService>().Object,
+            settingsService,
             () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
             () => new NewPictureWindowViewModel()
         );

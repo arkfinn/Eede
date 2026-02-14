@@ -133,10 +133,13 @@ public class MainViewModel : ViewModelBase
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly IPictureIOService _pictureIOService;
     private readonly IThemeService _themeService;
+    private readonly SettingsService _settingsService;
     private readonly GlobalState _state;
     private readonly IClipboard _clipboard;
     private readonly Func<DockPictureViewModel> _dockPictureFactory;
     private readonly Func<NewPictureWindowViewModel> _newPictureWindowFactory;
+
+    private bool _isInitializing = true;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; private set; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; private set; }
@@ -159,6 +162,7 @@ public class MainViewModel : ViewModelBase
         PaletteContainerViewModel paletteContainerViewModel,
         IPictureIOService pictureIOService,
         IThemeService themeService,
+        SettingsService settingsService,
         Func<DockPictureViewModel> dockPictureFactory,
         Func<NewPictureWindowViewModel> newPictureWindowFactory)
     {
@@ -174,6 +178,7 @@ public class MainViewModel : ViewModelBase
         _drawingSessionProvider = drawingSessionProvider;
         _pictureIOService = pictureIOService;
         _themeService = themeService;
+        _settingsService = settingsService;
         _dockPictureFactory = dockPictureFactory;
         _newPictureWindowFactory = newPictureWindowFactory;
 
@@ -201,6 +206,16 @@ public class MainViewModel : ViewModelBase
         PasteCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
 
         InitializeConnections();
+        _ = LoadSettingsAsync();
+    }
+
+    private async Task LoadSettingsAsync()
+    {
+        _isInitializing = true;
+        var settings = await _settingsService.GetSettingsAsync();
+        MinCursorWidth = settings.GridWidth;
+        MinCursorHeight = settings.GridHeight;
+        _isInitializing = false;
     }
 
     private void InitializeConnections()
@@ -242,13 +257,17 @@ public class MainViewModel : ViewModelBase
         MinCursorWidth = 32;
         MinCursorHeight = 32;
         _ = this.WhenAnyValue(x => x.MinCursorWidth, x => x.MinCursorHeight)
-            .Subscribe(_ =>
+            .Subscribe(async _ =>
             {
                 PictureSize size = new(MinCursorWidth, MinCursorHeight);
                 CursorSize = size;
                 foreach (DockPictureViewModel vm in Pictures)
                 {
                     vm.MinCursorSize = size;
+                }
+                if (!_isInitializing)
+                {
+                    await _settingsService.SaveGridSizeAsync(MinCursorWidth, MinCursorHeight);
                 }
             });
 

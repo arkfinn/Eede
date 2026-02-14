@@ -7,6 +7,7 @@ using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.Services;
 using Eede.Presentation.Settings;
 using Eede.Application.Infrastructure;
+using Eede.Application.Settings;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Domain.ImageEditing;
@@ -45,6 +46,8 @@ public class MainViewModelTests
     private Mock<IAnimationPatternsProvider> _patternsProviderMock = default!;
     private Mock<IAnimationPatternService> _animationPatternServiceMock = default!;
     private Mock<IFileSystem> _fileSystemMock = default!;
+    private Mock<ISettingsRepository> _settingsRepositoryMock = default!;
+    private SettingsService _settingsService = default!;
 
     private GlobalState _globalState = default!;
     private DrawableCanvasViewModel _drawableCanvasViewModel = default!;
@@ -74,6 +77,8 @@ public class MainViewModelTests
         _patternsProviderMock.Setup(x => x.Current).Returns(new AnimationPatterns());
         _animationPatternServiceMock = new Mock<IAnimationPatternService>();
         _fileSystemMock = new Mock<IFileSystem>();
+        _settingsRepositoryMock = new Mock<ISettingsRepository>();
+        _settingsService = new SettingsService(_settingsRepositoryMock.Object);
 
         _globalState = new GlobalState();
         _animationViewModel = new AnimationViewModel(_patternsProviderMock.Object, _animationPatternServiceMock.Object, _fileSystemMock.Object, new AvaloniaBitmapAdapter());
@@ -109,6 +114,7 @@ public class MainViewModelTests
             _paletteContainerViewModel,
             _pictureIOServiceMock.Object,
             new Mock<IThemeService>().Object,
+            _settingsService,
             () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object),
             () => null!); // NewPictureWindowViewModel はここでは不要なため null!
     }
@@ -231,5 +237,71 @@ public class MainViewModelTests
             Assert.That(mainVM.CursorSize.Width, Is.EqualTo(16));
             Assert.That(canvasVM.CursorSize.Width, Is.EqualTo(16));
         });
+    }
+
+    [AvaloniaTest]
+    public void Initialization_ShouldLoadGridSizeFromSettingsService()
+    {
+        var settings = new AppSettings { GridWidth = 48, GridHeight = 64 };
+        _settingsRepositoryMock.Setup(x => x.LoadAsync()).ReturnsAsync(settings);
+
+        var mainVM = CreateMainViewModel();
+
+        // 反映を待つ
+        // TODO: 非同期ロードの完了を待機する適切な方法を検討
+        // 現状は ReactiveUI のスケジューラなどで制御するか、
+        // プロパティの変更を WhenAnyValue で監視して待つ
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainVM.MinCursorWidth, Is.EqualTo(48));
+            Assert.That(mainVM.MinCursorHeight, Is.EqualTo(64));
+        });
+    }
+
+    [AvaloniaTest]
+    public async Task ChangeGridSize_ShouldCallSaveGridSizeAsync()
+    {
+        var settings = new AppSettings { GridWidth = 32, GridHeight = 32 };
+        _settingsRepositoryMock.Setup(x => x.LoadAsync()).ReturnsAsync(settings);
+
+        var mainVM = CreateMainViewModel();
+
+        // ロード完了 (LoadAsyncの呼び出し) を待つ
+        bool loaded = false;
+        for (int i = 0; i < 50; i++)
+        {
+            if (_settingsRepositoryMock.Invocations.Any(x => x.Method.Name == "LoadAsync"))
+            {
+                loaded = true;
+                break;
+            }
+            await Task.Delay(10);
+        }
+        Assert.That(loaded, Is.True, "LoadAsync should be called during initialization.");
+
+        // 初期化完了 (_isInitializing = false) を待つ
+        // ここでは便宜上、少し追加で待機する
+        await Task.Delay(50);
+
+        _settingsRepositoryMock.Invocations.Clear();
+
+        mainVM.MinCursorWidth = 16;
+        mainVM.MinCursorHeight = 24;
+
+        // 保存処理の実行 (SaveAsyncの呼び出し) を待つ
+        bool saved = false;
+        for (int i = 0; i < 50; i++)
+        {
+            if (_settingsRepositoryMock.Invocations.Any(x => x.Method.Name == "SaveAsync"))
+            {
+                saved = true;
+                break;
+            }
+            await Task.Delay(10);
+        }
+
+        Assert.That(saved, Is.True, "SaveAsync should be called when grid size is changed.");
+        _settingsRepositoryMock.Verify(x => x.SaveAsync(It.Is<AppSettings>(s => s.GridWidth == 16 && s.GridHeight == 24)), Times.AtLeastOnce);
     }
 }

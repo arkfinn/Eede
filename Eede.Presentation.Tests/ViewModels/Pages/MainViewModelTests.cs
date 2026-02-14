@@ -108,6 +108,7 @@ public class MainViewModelTests
             _drawingSessionViewModel,
             _paletteContainerViewModel,
             _pictureIOServiceMock.Object,
+            new Mock<IThemeService>().Object,
             () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object),
             () => null!); // NewPictureWindowViewModel はここでは不要なため null!
     }

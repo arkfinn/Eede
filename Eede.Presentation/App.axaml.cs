@@ -75,6 +75,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<ITransferImageFromCanvasUseCase, TransferImageFromCanvasUseCase>();
         services.AddSingleton<IDrawingSessionProvider, DrawingSessionProvider>();
         services.AddSingleton<IFileSystem, AvaloniaFileSystem>();
+        services.AddSingleton<IThemeService, AvaloniaThemeService>();
         services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();
         services.AddTransient<ICopySelectionUseCase, CopySelectionUseCase>();
         services.AddTransient<ICutSelectionUseCase, CutSelectionUseCase>();

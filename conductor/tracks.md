@@ -17,6 +17,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: 鏡面反転コピー機能の実装（左→右、上→下）**
+- [x] **Track: 鏡面反転コピー機能の実装（左→右、上→下）**
 *Link: [./tracks/mirror_copy_20260215/](./tracks/mirror_copy_20260215/)*
 

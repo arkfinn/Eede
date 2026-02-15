@@ -57,4 +57,19 @@ internal class MirrorCopyRightActionTests
 
         Assert.That(after.CloneImage(), Is.EqualTo(expectedData));
     }
+
+    [Test]
+    public void MirrorCopyRight_PerformanceTest_4096px()
+    {
+        int size = 4096;
+        var picture = Picture.CreateEmpty(new PictureSize(size, size));
+        var action = new MirrorCopyRightAction(picture);
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var result = action.Execute();
+        sw.Stop();
+
+        TestContext.WriteLine($"MirrorCopyRight (4096x4096) took: {sw.ElapsedMilliseconds}ms");
+        Assert.That(sw.ElapsedMilliseconds, Is.LessThan(1000), "Mirror copy should take less than 1000ms even for 4096px");
+    }
 }

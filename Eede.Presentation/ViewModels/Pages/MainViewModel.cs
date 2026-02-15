@@ -313,7 +313,7 @@ public class MainViewModel : ViewModelBase
         DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea, affectedArea) =>
         {
             // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
-            DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea);
+            DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea, previous);
         };
 
         LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);

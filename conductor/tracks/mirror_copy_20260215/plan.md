@@ -25,7 +25,7 @@
 ## 繝輔ぉ繝ｼ繧ｺ 3: UI 螳溷ｮ溯｣・→繧｢繧､繧ｳ繝ｳ縺ｮ驟咲ｽｮ
 繝・・繝ｫ繝舌・縺ｫ繝懊ち繝ｳ繧定ｿｽ蜉縺励∵ｩ溯・繧偵Θ繝ｼ繧ｶ繝ｼ縺ｫ蜈ｬ髢九＠縺ｾ縺吶・
 
-- [ ] Task: `MirrorCopyRight.axaml` 縺翫ｈ縺ｳ `MirrorCopyBottom.axaml` 繧｢繧､繧ｳ繝ｳ繝ｪ繧ｽ繝ｼ繧ｹ縺ｮ蛻ｩ逕ｨ險ｭ螳夂｢ｺ隱・
+- [x] Task: `MirrorCopyRight.axaml` (インクルード確認済み) 縺翫ｈ縺ｳ `MirrorCopyBottom.axaml` 繧｢繧､繧ｳ繝ｳ繝ｪ繧ｽ繝ｼ繧ｹ縺ｮ蛻ｩ逕ｨ險ｭ螳夂｢ｺ隱・
 - [ ] Task: `PictureActionMenu.axaml` 縺ｫ MirrorCopyRight 繝懊ち繝ｳ繧定ｿｽ蜉
 - [ ] Task: `PictureActionMenu.axaml` 縺ｫ MirrorCopyBottom 繝懊ち繝ｳ繧定ｿｽ蜉
 - [ ] Task: 繝・・繝ｫ繝√ャ繝励♀繧医・繧｢繧ｯ繧ｻ繧ｷ繝薙Μ繝・ぅ蟇ｾ蠢懶ｼ域律譛ｬ隱槫ｯｾ蠢懶ｼ・

@@ -20,13 +20,9 @@ namespace Eede.Presentation.Views.DataEntry
                 if (ViewModel != null)
                 {
                     d(ViewModel.OkCommand.Subscribe(context => Close(context)));
+                    d(ViewModel.CancelCommand.Subscribe(_ => Close(null)));
                 }
             });
-        }
-
-        private void CancelButton_Click(object? sender, RoutedEventArgs e)
-        {
-            Close(null);
         }
     }
 }

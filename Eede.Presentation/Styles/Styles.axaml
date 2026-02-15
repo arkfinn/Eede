@@ -127,4 +127,26 @@
     <Setter Property="Margin" Value="2" />
     <Setter Property="common:RenderOptionsHelper.EdgeMode" Value="Aliased" />
   </Style>
+
+  <!-- Dialog Buttons Styles -->
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentContrastBrush}" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight1Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentContrastBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight1Brush}" />
+  </Style>
+  <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentContrastBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorDark1Brush}" />
+  </Style>
+  <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3Brush}" />
+    <Setter Property="Opacity" Value="0.5" />
+  </Style>
 </Styles>

@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
         xmlns:vm="using:Eede.Presentation.ViewModels.DataEntry"
+        xmlns:controls="using:Eede.Presentation.Controls"
         x:Class="Eede.Presentation.Views.DataEntry.ScalingDialogView"
         x:DataType="vm:ScalingDialogViewModel"
         Title="拡大縮小"
@@ -9,10 +10,11 @@
         WindowStartupLocation="CenterOwner"
         CanResize="False">
   <DockPanel Margin="20">
-    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,20,0,0">
-      <Button Content="キャンセル" IsCancel="True" Click="CancelButton_Click" Width="80" HorizontalContentAlignment="Center"/>
-      <Button Content="OK" IsDefault="True" Command="{Binding OkCommand}" Width="80" HorizontalContentAlignment="Center"/>
-    </StackPanel>
+    <controls:DialogButtons DockPanel.Dock="Bottom"
+                            PrimaryText="OK"
+                            PrimaryCommand="{Binding OkCommand}"
+                            CancelCommand="{Binding CancelCommand}"
+                            Margin="0,20,0,0" />
 
     <StackPanel Spacing="15">
       <TextBlock Text="サイズ (ピクセル)" FontWeight="Bold"/>

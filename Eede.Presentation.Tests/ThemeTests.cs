@@ -10,6 +10,7 @@ using Eede.Application.Infrastructure;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Animations;
 using Eede.Application.UseCase.Pictures;
+using Eede.Application.UseCase.Settings;
 using Eede.Domain.Animations;
 using Eede.Domain.Files;
 using Eede.Domain.ImageEditing;
@@ -100,14 +101,16 @@ public class ThemeTests
             new LoadPictureUseCase(pictureRepo)
         );
 
-        var settingsService = new SettingsService(new Mock<ISettingsRepository>().Object);
+        var settingsRepo = new Mock<ISettingsRepository>();
+        var loadUseCase = new LoadSettingsUseCase(settingsRepo.Object);
+        var saveUseCase = new SaveSettingsUseCase(settingsRepo.Object);
 
         return new MainViewModel(
             state, clipboard, bitmapAdapter, pictureRepo, drawStyleFactory,
             transformUseCase, new Mock<IScalingImageUseCase>().Object, transferToCanvas, transferFromCanvas,
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
             paletteVM, pictureIOService, themeService,
-            settingsService,
+            loadUseCase, saveUseCase,
             () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
             () => new NewPictureWindowViewModel()
         );

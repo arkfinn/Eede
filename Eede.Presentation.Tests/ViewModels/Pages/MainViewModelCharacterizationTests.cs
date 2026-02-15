@@ -5,6 +5,7 @@ using Eede.Application.Infrastructure;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.UseCase.Animations;
+using Eede.Application.UseCase.Settings;
 using Eede.Domain.Animations;
 using Eede.Domain.Files;
 using Eede.Domain.ImageEditing.History;
@@ -110,7 +111,9 @@ public class MainViewModelCharacterizationTests
             new SavePictureUseCase(_pictureRepositoryMock.Object),
             new LoadPictureUseCase(_pictureRepositoryMock.Object));
 
-        var settingsService = new SettingsService(new Mock<ISettingsRepository>().Object);
+        var settingsRepo = new Mock<ISettingsRepository>();
+        var loadUseCase = new LoadSettingsUseCase(settingsRepo.Object);
+        var saveUseCase = new SaveSettingsUseCase(settingsRepo.Object);
 
         var vm = new MainViewModel(
             _stateMock.Object,
@@ -129,7 +132,8 @@ public class MainViewModelCharacterizationTests
             _paletteContainerViewModelMock.Object,
             pictureIOService,
             new Mock<IThemeService>().Object,
-            settingsService,
+            loadUseCase,
+            saveUseCase,
             _dockPictureFactory,
             _newPictureWindowFactory
         );

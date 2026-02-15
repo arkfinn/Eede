@@ -6,6 +6,7 @@ using Eede.Application.Infrastructure;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Animations;
 using Eede.Application.UseCase.Pictures;
+using Eede.Application.UseCase.Settings;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
@@ -103,7 +104,8 @@ public partial class App : Avalonia.Application
             var path = System.IO.Path.Combine(appData, "Eede", "settings.json");
             return new Eede.Infrastructure.Settings.JsonSettingsRepository(path);
         });
-        services.AddSingleton<SettingsService>();
+        services.AddTransient<ILoadSettingsUseCase, LoadSettingsUseCase>();
+        services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();
 
         // ViewModels
         services.AddTransient<IInteractionCoordinator, InteractionCoordinator>();

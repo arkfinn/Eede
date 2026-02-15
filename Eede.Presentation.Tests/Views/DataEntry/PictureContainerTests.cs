@@ -7,6 +7,7 @@ using Eede.Application.Pictures;
 using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.UseCase.Animations;
+using Eede.Application.UseCase.Settings;
 using Eede.Domain.Animations;
 using Eede.Domain.Files;
 using Eede.Domain.ImageEditing;
@@ -61,9 +62,9 @@ public class PictureContainerTests
         var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
 
         var mockPictureRepo = new Mock<IPictureRepository>();
-        var saveUseCase = new SavePictureUseCase(mockPictureRepo.Object);
-        var loadUseCase = new LoadPictureUseCase(mockPictureRepo.Object);
-        var pictureIOService = new PictureIOService(saveUseCase, loadUseCase);
+        var savePictureUseCase = new SavePictureUseCase(mockPictureRepo.Object);
+        var loadPictureUseCase = new LoadPictureUseCase(mockPictureRepo.Object);
+        var pictureIOService = new PictureIOService(savePictureUseCase, loadPictureUseCase);
 
         // 2. Sub ViewModels Dependencies
         var patternsProvider = new AnimationPatternsProvider();
@@ -94,7 +95,9 @@ public class PictureContainerTests
 
         var paletteVM = new PaletteContainerViewModel();
         var mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
-        var settingsService = new SettingsService(new Mock<ISettingsRepository>().Object);
+        var settingsRepo = new Mock<ISettingsRepository>().Object;
+        var loadSettingsUseCase = new LoadSettingsUseCase(settingsRepo);
+        var saveSettingsUseCase = new SaveSettingsUseCase(settingsRepo);
 
         // MainViewModel
         _mainViewModel = new MainViewModel(
@@ -114,7 +117,8 @@ public class PictureContainerTests
             paletteVM,
             pictureIOService,
             new Mock<IThemeService>().Object,
-            settingsService,
+            loadSettingsUseCase,
+            saveSettingsUseCase,
             () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
             () => new NewPictureWindowViewModel()
         );

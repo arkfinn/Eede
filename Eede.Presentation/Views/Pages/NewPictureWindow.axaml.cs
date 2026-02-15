@@ -10,12 +10,12 @@ public partial class NewPictureWindow : Window
     public NewPictureWindow()
     {
         InitializeComponent();
-        this.WhenActivated(d =>
+        DataContextChanged += (s, e) =>
         {
             if (DataContext is NewPictureWindowViewModel vm)
             {
                 vm.Close = () => Close();
             }
-        });
+        };
     }
 }

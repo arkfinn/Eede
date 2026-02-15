@@ -12,7 +12,9 @@ public enum PictureActions
     FlipVertical,
     FlipHorizontal,
     RotateRight,
-    RotateLeft
+    RotateLeft,
+    MirrorCopyRight,
+    MirrorCopyBottom
 }
 public static class PictureActionsExtension
 {

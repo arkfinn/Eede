@@ -136,9 +136,9 @@
     <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
   </Style>
   <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight1Brush}" />
+    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2Brush}" />
     <Setter Property="Foreground" Value="{DynamicResource AccentContrastBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight1Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight2Brush}" />
   </Style>
   <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1Brush}" />

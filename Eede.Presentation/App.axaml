@@ -26,7 +26,7 @@
         <ResourceDictionary x:Key='Dark'>
           <SolidColorBrush x:Key='RegionBrush'>Black</SolidColorBrush>
           <SolidColorBrush x:Key='BaseBrush'>#333333</SolidColorBrush>
-          <SolidColorBrush x:Key='AccentContrastBrush' Color='Black' />
+          <SolidColorBrush x:Key='AccentContrastBrush' Color='White' />
           <SolidColorBrush x:Key='TextBrush'>#FFFFFF</SolidColorBrush>
           <Color x:Key='DockApplicationAccentForegroundColor'>#222222</Color>
         </ResourceDictionary>

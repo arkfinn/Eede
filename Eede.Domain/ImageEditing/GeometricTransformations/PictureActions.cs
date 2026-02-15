@@ -32,6 +32,8 @@ public static class PictureActionsExtension
             //case PictureActions.RotateLeft:
             //    return;
             PictureActions.RotateRight => new RotateRightAction(previous).Execute(),
+            PictureActions.MirrorCopyRight => new MirrorCopyRightAction(previous).Execute(),
+            PictureActions.MirrorCopyBottom => new MirrorCopyBottomAction(previous).Execute(),
             _ => throw new ArgumentException(null, nameof(actionType)),
         };
     }

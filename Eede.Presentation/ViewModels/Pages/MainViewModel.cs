@@ -26,6 +26,8 @@ using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
+using Eede.Application.Settings;
+using Eede.Application.UseCase.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -133,13 +135,15 @@ public class MainViewModel : ViewModelBase
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly IPictureIOService _pictureIOService;
     private readonly IThemeService _themeService;
-    private readonly SettingsService _settingsService;
+    private readonly ILoadSettingsUseCase _loadSettingsUseCase;
+    private readonly ISaveSettingsUseCase _saveSettingsUseCase;
     private readonly GlobalState _state;
     private readonly IClipboard _clipboard;
     private readonly Func<DockPictureViewModel> _dockPictureFactory;
     private readonly Func<NewPictureWindowViewModel> _newPictureWindowFactory;
 
     private bool _isInitializing = true;
+    private AppSettings? _appSettings;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; private set; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; private set; }
@@ -162,7 +166,8 @@ public class MainViewModel : ViewModelBase
         PaletteContainerViewModel paletteContainerViewModel,
         IPictureIOService pictureIOService,
         IThemeService themeService,
-        SettingsService settingsService,
+        ILoadSettingsUseCase loadSettingsUseCase,
+        ISaveSettingsUseCase saveSettingsUseCase,
         Func<DockPictureViewModel> dockPictureFactory,
         Func<NewPictureWindowViewModel> newPictureWindowFactory)
     {
@@ -178,7 +183,8 @@ public class MainViewModel : ViewModelBase
         _drawingSessionProvider = drawingSessionProvider;
         _pictureIOService = pictureIOService;
         _themeService = themeService;
-        _settingsService = settingsService;
+        _loadSettingsUseCase = loadSettingsUseCase;
+        _saveSettingsUseCase = saveSettingsUseCase;
         _dockPictureFactory = dockPictureFactory;
         _newPictureWindowFactory = newPictureWindowFactory;
 
@@ -212,9 +218,12 @@ public class MainViewModel : ViewModelBase
     private async Task LoadSettingsAsync()
     {
         _isInitializing = true;
-        var settings = await _settingsService.GetSettingsAsync();
-        MinCursorWidth = settings.GridWidth;
-        MinCursorHeight = settings.GridHeight;
+        _appSettings = await _loadSettingsUseCase.ExecuteAsync();
+        if (_appSettings != null)
+        {
+            MinCursorWidth = _appSettings.GridWidth;
+            MinCursorHeight = _appSettings.GridHeight;
+        }
         _isInitializing = false;
     }
 
@@ -267,7 +276,12 @@ public class MainViewModel : ViewModelBase
                 }
                 if (!_isInitializing)
                 {
-                    await _settingsService.SaveGridSizeAsync(MinCursorWidth, MinCursorHeight);
+                    if (_appSettings != null)
+                    {
+                        _appSettings.GridWidth = MinCursorWidth;
+                        _appSettings.GridHeight = MinCursorHeight;
+                        await _saveSettingsUseCase.ExecuteAsync(_appSettings);
+                    }
                 }
             });
 

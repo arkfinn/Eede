@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StreamGeometry x:Key="MirrorCopyBottomIconGeometry">M110-480v-370h740v370H110ZM110-110v-370h60v310h620v-310h60v370H110ZM300-450h360l-180 300Z</StreamGeometry>
+</ResourceDictionary>

@@ -14,8 +14,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: SVGアイコンの直接埋め込みコンポーネント化と共通スタイルの構築、および透過ボタンのSVG化**
 *Link: [./tracks/svg_icon_migration_20260211/](./tracks/svg_icon_migration_20260211/)*
-
----
-
-- [x] **Track: ツールバーでのグリッドサイズの設定を保存して次回起動時に復元したい**
-*Link: [./tracks/persist_grid_size_20260215/](./tracks/persist_grid_size_20260215/)*

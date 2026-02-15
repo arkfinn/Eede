@@ -1,8 +1,0 @@
-{
-  "track_id": "mirror_copy_20260215",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-15T17:14:00Z",
-  "updated_at": "2026-02-15T17:14:00Z",
-  "description": "鏡面反転コピー機能を作りたい。作業エリアまたは選択範囲の左半分を右半分に反転コピーするMirrorCopyRightと上半分をした半分にコピーするMirrorCopyBottomのアイコンを用意してるのでこれを使って作って"
-}

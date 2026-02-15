@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="50"
+             x:Class="Eede.Presentation.Controls.DialogButtons"
+             x:Name="Root">
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+    <Button Content="{Binding #Root.CancelText}"
+            Command="{Binding #Root.CancelCommand}"
+            IsVisible="{Binding #Root.IsCancelVisible}"
+            MinWidth="80" />
+    <Button Content="{Binding #Root.SecondaryText}"
+            Command="{Binding #Root.SecondaryCommand}"
+            IsVisible="{Binding #Root.IsSecondaryVisible}"
+            MinWidth="80" />
+    <Button Content="{Binding #Root.PrimaryText}"
+            Command="{Binding #Root.PrimaryCommand}"
+            IsVisible="{Binding #Root.IsPrimaryVisible}"
+            Classes="primary"
+            MinWidth="80" />
+  </StackPanel>
+</UserControl>

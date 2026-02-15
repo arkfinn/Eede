@@ -37,6 +37,7 @@ namespace Eede.Presentation.ViewModels.DataEntry
         public bool IsBottomRightEnabled => IsHorizontalShrink && IsVerticalShrink;
 
         public ReactiveCommand<Unit, ResizeContext> OkCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
         public ReactiveCommand<double, Unit> ApplyPreset { get; }
         public ReactiveCommand<string, Unit> SetAnchorCommand { get; }
 
@@ -96,6 +97,8 @@ namespace Eede.Presentation.ViewModels.DataEntry
                 HorizontalAlignment,
                 VerticalAlignment
             ));
+
+            CancelCommand = ReactiveCommand.Create(() => Unit.Default);
         }
 
         private void RefreshStates()

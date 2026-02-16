@@ -11,14 +11,11 @@
       <Setter Property="VerticalContentAlignment" Value="Center"/>
       <Setter Property="MinWidth" Value="80" />
       <Setter Property="Padding" Value="12,4"/>
-      <Setter Property="Background" Value="#00000000" /> <!-- 実色としての透明を設定 -->
+      <Setter Property="Background" Value="Transparent" /> <!-- これで当たり判定を確保 -->
     </Style>
-    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <!-- 標準ボタン（primary以外）のホバー設定 -->
+    <Style Selector="Button:not(.primary):pointerover">
       <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3Brush}" />
-    </Style>
-    <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <!-- PrimaryはStyles.axamlの設定を優先させるため、ここでは上書きしない -->
-      <Setter Property="Background" Value="Transparent" />
     </Style>
   </UserControl.Styles>
   <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">

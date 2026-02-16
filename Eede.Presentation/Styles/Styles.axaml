@@ -138,22 +138,33 @@
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Padding" Value="12,4"/>
   </Style>
-  <!-- Base state background for hit testing -->
+  <!-- Base state background for hit testing (Ensuring button area is filled) -->
   <Style Selector="Button.primary /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
   </Style>
-  <!-- Hover and Focus states -->
+  <!-- Hover, Focus and Focus-Visible states (統一したハイライト色) -->
+  <Style Selector="Button.primary:pointerover,
+                   Button.primary:focus,
+                   Button.primary:focus-visible">
+    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight2Brush}" />
+  </Style>
+  <!-- ContentPresenter handles visual states by using parent's Background -->
   <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter,
                    Button.primary:focus /template/ ContentPresenter#PART_ContentPresenter,
                    Button.primary:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2Brush}" />
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
     <Setter Property="Foreground" Value="{DynamicResource AccentContrastBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight2Brush}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+  </Style>
+  <Style Selector="Button.primary:pressed">
+    <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorDark1Brush}" />
   </Style>
   <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1Brush}" />
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
     <Setter Property="Foreground" Value="{DynamicResource AccentContrastBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorDark1Brush}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
   </Style>
   <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3Brush}" />

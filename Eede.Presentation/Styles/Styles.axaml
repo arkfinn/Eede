@@ -138,34 +138,29 @@
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Padding" Value="12,4"/>
   </Style>
-  <!-- Base state background for hit testing (Ensuring button area is filled) -->
+
+  <!-- テンプレート内部の ContentPresenter がボタン本体の背景色を常に使用するように強制 -->
   <Style Selector="Button.primary /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}" />
   </Style>
-  <!-- Hover, Focus and Focus-Visible states (統一したハイライト色) -->
+
+  <!-- ホバー・フォーカス・アクティブ状態を統合して一貫性を持たせる -->
   <Style Selector="Button.primary:pointerover,
                    Button.primary:focus,
                    Button.primary:focus-visible">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2Brush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight2Brush}" />
   </Style>
-  <!-- ContentPresenter handles visual states by using parent's Background -->
-  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter,
-                   Button.primary:focus /template/ ContentPresenter#PART_ContentPresenter,
-                   Button.primary:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
-    <Setter Property="Foreground" Value="{DynamicResource AccentContrastBrush}" />
-    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
-  </Style>
+
+  <!-- プレス時のスタイル -->
   <Style Selector="Button.primary:pressed">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1Brush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorDark1Brush}" />
   </Style>
-  <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
-    <Setter Property="Foreground" Value="{DynamicResource AccentContrastBrush}" />
-    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
-  </Style>
+
+  <!-- 無効化状態 -->
   <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3Brush}" />
     <Setter Property="Opacity" Value="0.5" />

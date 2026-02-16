@@ -2,6 +2,7 @@ using Avalonia.Media.Imaging;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Infrastructure;
+using Eede.Application.Settings;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.UseCase.Animations;
@@ -78,14 +79,16 @@ public class ViewModelSafetyCharacterizationTests
         var drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(drawingSessionProviderMock.Object);
         var paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>();
 
+        var settingsRepo = new Mock<ISettingsRepository>();
+        settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
+
         var pictureIOService = new PictureIOService(
-            new SavePictureUseCase(pictureRepositoryMock.Object),
-            new LoadPictureUseCase(pictureRepositoryMock.Object));
+            new SavePictureUseCase(pictureRepositoryMock.Object, settingsRepo.Object),
+            new LoadPictureUseCase(pictureRepositoryMock.Object, settingsRepo.Object));
 
         Func<DockPictureViewModel> dockPictureFactory = () => new DockPictureViewModel(stateMock.Object, animationViewModelMock.Object, bitmapAdapterMock.Object, pictureIOService);
         Func<NewPictureWindowViewModel> newPictureWindowFactory = () => new Mock<NewPictureWindowViewModel>().Object;
 
-        var settingsRepo = new Mock<ISettingsRepository>();
         var loadUseCase = new LoadSettingsUseCase(settingsRepo.Object);
         var saveUseCase = new SaveSettingsUseCase(settingsRepo.Object);
 

@@ -139,16 +139,11 @@
     <Setter Property="Padding" Value="12,4"/>
   </Style>
 
-  <!-- 修正：ContentPresenterがボタン本体の背景を「完全に」引き継ぐようにし、隙間をなくす -->
-  <Style Selector="Button.primary /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
-    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
-  </Style>
-
   <Style Selector="Button.primary:pointerover, Button.primary:focus, Button.primary:focus-visible">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2Brush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight2Brush}" />
   </Style>
+
   <Style Selector="Button.primary:pressed">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1Brush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorDark1Brush}" />

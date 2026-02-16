@@ -5,24 +5,29 @@
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="50"
              x:Class="Eede.Presentation.Controls.DialogButtons"
              x:Name="Root">
+  <UserControl.Styles>
+    <Style Selector="Button">
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Background" Value="Transparent" /> <!-- 当たり判定を確保 -->
+      <Setter Property="MinWidth" Value="80" />
+    </Style>
+    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+       <!-- 標準ボタンのホバー時の色を指定（primary以外） -->
+    </Style>
+  </UserControl.Styles>
   <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
     <Button Content="{Binding #Root.CancelText}"
             Command="{Binding #Root.CancelCommand}"
             IsVisible="{Binding #Root.IsCancelVisible}"
-            IsCancel="True"
-            HorizontalContentAlignment="Center"
-            MinWidth="80" />
+            IsCancel="True" />
     <Button Content="{Binding #Root.SecondaryText}"
             Command="{Binding #Root.SecondaryCommand}"
-            IsVisible="{Binding #Root.IsSecondaryVisible}"
-            HorizontalContentAlignment="Center"
-            MinWidth="80" />
+            IsVisible="{Binding #Root.IsSecondaryVisible}" />
     <Button Content="{Binding #Root.PrimaryText}"
             Command="{Binding #Root.PrimaryCommand}"
             IsVisible="{Binding #Root.IsPrimaryVisible}"
             IsDefault="True"
-            Classes="primary"
-            HorizontalContentAlignment="Center"
-            MinWidth="80" />
+            Classes="primary" />
   </StackPanel>
 </UserControl>

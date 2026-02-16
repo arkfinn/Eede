@@ -2,6 +2,7 @@ using Avalonia.Media.Imaging;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Infrastructure;
+using Eede.Application.Settings;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.UseCase.Animations;
@@ -94,12 +95,15 @@ public class MainViewModelCharacterizationTests
 
         _paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>();
 
-        var pictureIOService = new PictureIOService(
-            new SavePictureUseCase(_pictureRepositoryMock.Object),
-            new LoadPictureUseCase(_pictureRepositoryMock.Object));
+        var settingsRepo = new Mock<ISettingsRepository>();
+        settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        _savePictureUseCaseMock = new Mock<SavePictureUseCase>(_pictureRepositoryMock.Object);
-        _loadPictureUseCaseMock = new Mock<LoadPictureUseCase>(_pictureRepositoryMock.Object);
+        var pictureIOService = new PictureIOService(
+            new SavePictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object),
+            new LoadPictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object));
+
+        _savePictureUseCaseMock = new Mock<SavePictureUseCase>(_pictureRepositoryMock.Object, settingsRepo.Object);
+        _loadPictureUseCaseMock = new Mock<LoadPictureUseCase>(_pictureRepositoryMock.Object, settingsRepo.Object);
         _dockPictureFactory = () => new DockPictureViewModel(Mock.Of<GlobalState>(), _animationViewModelMock.Object, _bitmapAdapterMock.Object, pictureIOService);
         _newPictureWindowFactory = () => new Mock<NewPictureWindowViewModel>().Object;
     }
@@ -107,11 +111,13 @@ public class MainViewModelCharacterizationTests
     [Test]
     public void ConstructorTest()
     {
-        var pictureIOService = new PictureIOService(
-            new SavePictureUseCase(_pictureRepositoryMock.Object),
-            new LoadPictureUseCase(_pictureRepositoryMock.Object));
-
         var settingsRepo = new Mock<ISettingsRepository>();
+        settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
+
+        var pictureIOService = new PictureIOService(
+            new SavePictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object),
+            new LoadPictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object));
+
         var loadUseCase = new LoadSettingsUseCase(settingsRepo.Object);
         var saveUseCase = new SaveSettingsUseCase(settingsRepo.Object);
 

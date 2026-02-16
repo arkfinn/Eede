@@ -12,6 +12,7 @@ namespace Eede.Application.Tests.UseCase.Pictures
     public class IOServiceBehaviorTests
     {
         private Mock<IPictureRepository> _repositoryMock;
+        private Mock<Eede.Application.Infrastructure.ISettingsRepository> _settingsRepositoryMock;
         private FilePath _testPath;
         private Picture _testPicture;
 
@@ -19,6 +20,8 @@ namespace Eede.Application.Tests.UseCase.Pictures
         public void SetUp()
         {
             _repositoryMock = new Mock<IPictureRepository>();
+            _settingsRepositoryMock = new Mock<Eede.Application.Infrastructure.ISettingsRepository>();
+            _settingsRepositoryMock.Setup(r => r.LoadAsync()).ReturnsAsync(new Eede.Application.Settings.AppSettings());
             _testPath = new FilePath("test.png");
             _testPicture = Picture.CreateEmpty(new PictureSize(1, 1));
         }
@@ -27,7 +30,7 @@ namespace Eede.Application.Tests.UseCase.Pictures
         public async Task LoadPictureUseCase_ShouldCallRepository()
         {
             _repositoryMock.Setup(r => r.LoadAsync(_testPath)).ReturnsAsync(_testPicture);
-            var useCase = new LoadPictureUseCase(_repositoryMock.Object);
+            var useCase = new LoadPictureUseCase(_repositoryMock.Object, _settingsRepositoryMock.Object);
 
             var result = await useCase.ExecuteAsync(_testPath);
 
@@ -38,7 +41,7 @@ namespace Eede.Application.Tests.UseCase.Pictures
         [Test]
         public async Task SavePictureUseCase_ShouldCallRepository()
         {
-            var useCase = new SavePictureUseCase(_repositoryMock.Object);
+            var useCase = new SavePictureUseCase(_repositoryMock.Object, _settingsRepositoryMock.Object);
 
             await useCase.ExecuteAsync(_testPicture, _testPath);
 

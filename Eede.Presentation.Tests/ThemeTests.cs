@@ -7,6 +7,7 @@ using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Infrastructure;
+using Eede.Application.Settings;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Animations;
 using Eede.Application.UseCase.Pictures;
@@ -96,12 +97,14 @@ public class ThemeTests
 
         var sessionVM = new DrawingSessionViewModel(sessionProvider);
         var paletteVM = new PaletteContainerViewModel();
+        var settingsRepo = new Mock<ISettingsRepository>();
+        settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
+
         var pictureIOService = new PictureIOService(
-            new SavePictureUseCase(pictureRepo),
-            new LoadPictureUseCase(pictureRepo)
+            new SavePictureUseCase(pictureRepo, settingsRepo.Object),
+            new LoadPictureUseCase(pictureRepo, settingsRepo.Object)
         );
 
-        var settingsRepo = new Mock<ISettingsRepository>();
         var loadUseCase = new LoadSettingsUseCase(settingsRepo.Object);
         var saveUseCase = new SaveSettingsUseCase(settingsRepo.Object);
 

@@ -53,9 +53,11 @@ public class BitmapManagementTests
             new Mock<IFileSystem>().Object,
             _mockBitmapAdapter.Object);
         _mockPictureRepository = new Mock<IPictureRepository>();
+        var mockSettingsRepository = new Mock<ISettingsRepository>();
+        mockSettingsRepository.Setup(r => r.LoadAsync()).ReturnsAsync(new Eede.Application.Settings.AppSettings());
         _pictureIOService = new PictureIOService(
-            new SavePictureUseCase(_mockPictureRepository.Object),
-            new LoadPictureUseCase(_mockPictureRepository.Object));
+            new SavePictureUseCase(_mockPictureRepository.Object, mockSettingsRepository.Object),
+            new LoadPictureUseCase(_mockPictureRepository.Object, mockSettingsRepository.Object));
     }
 
     [AvaloniaTest]

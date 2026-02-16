@@ -26,3 +26,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: ダイアログボタンの統一と共通コンポーネントの導入**
 *Link: [./archive/unified_dialog_buttons_20260216/](./archive/unified_dialog_buttons_20260216/)*
+
+---
+
+- [ ] **Track: 「ようこそ」画面の中身を良い感じにかっこよくデザインして作ってください。欲しい情報は「最近編集した画像」を開けるリンク、githubやgithubの儀路板へのリンクです。ロゴ画像も表示します。**
+*Link: [./tracks/welcome_screen_20260217/](./tracks/welcome_screen_20260217/)*

@@ -42,7 +42,7 @@ public interface IInteractionCoordinator
     bool IsShowHandles { get; }
     Picture? PreviewPixels { get; }
     Position PreviewPosition { get; }
-    Cursor ActiveCursor { get; }
+    StandardCursorType ActiveCursor { get; }
     SelectionCursor ActiveSelectionCursor { get; }
     IImageBlender ImageBlender { get; set; }
     ArgbColor BackgroundColor { get; set; }

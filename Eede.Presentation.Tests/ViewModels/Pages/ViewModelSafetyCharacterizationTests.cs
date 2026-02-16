@@ -5,6 +5,7 @@ using Eede.Application.Infrastructure;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.UseCase.Animations;
+using Eede.Application.UseCase.Settings;
 using Eede.Domain.Animations;
 using Eede.Domain.Files;
 using Eede.Domain.ImageEditing.History;
@@ -84,6 +85,10 @@ public class ViewModelSafetyCharacterizationTests
         Func<DockPictureViewModel> dockPictureFactory = () => new DockPictureViewModel(stateMock.Object, animationViewModelMock.Object, bitmapAdapterMock.Object, pictureIOService);
         Func<NewPictureWindowViewModel> newPictureWindowFactory = () => new Mock<NewPictureWindowViewModel>().Object;
 
+        var settingsRepo = new Mock<ISettingsRepository>();
+        var loadUseCase = new LoadSettingsUseCase(settingsRepo.Object);
+        var saveUseCase = new SaveSettingsUseCase(settingsRepo.Object);
+
         _vm = new MainViewModel(
             stateMock.Object,
             clipboardServiceMock.Object,
@@ -101,6 +106,8 @@ public class ViewModelSafetyCharacterizationTests
             paletteContainerViewModelMock.Object,
             pictureIOService,
             new Mock<IThemeService>().Object,
+            loadUseCase,
+            saveUseCase,
             dockPictureFactory,
             newPictureWindowFactory
         );

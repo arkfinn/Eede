@@ -26,6 +26,8 @@ using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
+using Eede.Application.Settings;
+using Eede.Application.UseCase.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -133,10 +135,15 @@ public class MainViewModel : ViewModelBase
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly IPictureIOService _pictureIOService;
     private readonly IThemeService _themeService;
+    private readonly ILoadSettingsUseCase _loadSettingsUseCase;
+    private readonly ISaveSettingsUseCase _saveSettingsUseCase;
     private readonly GlobalState _state;
     private readonly IClipboard _clipboard;
     private readonly Func<DockPictureViewModel> _dockPictureFactory;
     private readonly Func<NewPictureWindowViewModel> _newPictureWindowFactory;
+
+    private bool _isInitializing = true;
+    private AppSettings? _appSettings;
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; private set; }
     public ReactiveCommand<Unit, Unit> CutCommand { get; private set; }
@@ -159,6 +166,8 @@ public class MainViewModel : ViewModelBase
         PaletteContainerViewModel paletteContainerViewModel,
         IPictureIOService pictureIOService,
         IThemeService themeService,
+        ILoadSettingsUseCase loadSettingsUseCase,
+        ISaveSettingsUseCase saveSettingsUseCase,
         Func<DockPictureViewModel> dockPictureFactory,
         Func<NewPictureWindowViewModel> newPictureWindowFactory)
     {
@@ -174,6 +183,8 @@ public class MainViewModel : ViewModelBase
         _drawingSessionProvider = drawingSessionProvider;
         _pictureIOService = pictureIOService;
         _themeService = themeService;
+        _loadSettingsUseCase = loadSettingsUseCase;
+        _saveSettingsUseCase = saveSettingsUseCase;
         _dockPictureFactory = dockPictureFactory;
         _newPictureWindowFactory = newPictureWindowFactory;
 
@@ -201,6 +212,19 @@ public class MainViewModel : ViewModelBase
         PasteCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
 
         InitializeConnections();
+        _ = LoadSettingsAsync();
+    }
+
+    private async Task LoadSettingsAsync()
+    {
+        _isInitializing = true;
+        _appSettings = await _loadSettingsUseCase.ExecuteAsync();
+        if (_appSettings != null)
+        {
+            MinCursorWidth = _appSettings.GridWidth;
+            MinCursorHeight = _appSettings.GridHeight;
+        }
+        _isInitializing = false;
     }
 
     private void InitializeConnections()
@@ -242,13 +266,22 @@ public class MainViewModel : ViewModelBase
         MinCursorWidth = 32;
         MinCursorHeight = 32;
         _ = this.WhenAnyValue(x => x.MinCursorWidth, x => x.MinCursorHeight)
-            .Subscribe(_ =>
+            .Subscribe(async _ =>
             {
                 PictureSize size = new(MinCursorWidth, MinCursorHeight);
                 CursorSize = size;
                 foreach (DockPictureViewModel vm in Pictures)
                 {
                     vm.MinCursorSize = size;
+                }
+                if (!_isInitializing)
+                {
+                    if (_appSettings != null)
+                    {
+                        _appSettings.GridWidth = MinCursorWidth;
+                        _appSettings.GridHeight = MinCursorHeight;
+                        await _saveSettingsUseCase.ExecuteAsync(_appSettings);
+                    }
                 }
             });
 
@@ -280,7 +313,7 @@ public class MainViewModel : ViewModelBase
         DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea, affectedArea) =>
         {
             // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
-            DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea);
+            DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea, previous);
         };
 
         LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);

@@ -143,25 +143,27 @@ namespace Eede.Domain.ImageEditing
         /// <summary>
         /// 新しい画像データを確定させ、履歴に追加する。
         /// </summary>
-        public DrawingSession Push(Picture nextPicture, PictureArea? nextArea = null, PictureArea? previousArea = null)
+        public DrawingSession Push(Picture nextPicture, PictureArea? nextArea = null, PictureArea? previousArea = null, Picture? beforePicture = null)
         {
             var areaToStore = previousArea ?? SelectingArea;
-            if (nextPicture == Buffer.Previous && nextArea == SelectingArea && !IsDrawing() && PreviewContent == null) return this;
+            var pictureToStore = beforePicture ?? Buffer.Previous;
+            if (nextPicture == pictureToStore && nextArea == SelectingArea && !IsDrawing() && PreviewContent == null) return this;
 
             return new DrawingSession(
                 new DrawingBuffer(nextPicture),
                 nextArea,
                 null,
-                UndoStack.Push(new CanvasHistoryItem(Buffer.Previous, areaToStore)),
+                UndoStack.Push(new CanvasHistoryItem(pictureToStore, areaToStore)),
                 ImmutableStack<IHistoryItem>.Empty);
         }
 
-        public DrawingSession PushDiff(Picture nextPicture, PictureRegion region, PictureArea? nextArea = null, PictureArea? previousArea = null)
+        public DrawingSession PushDiff(Picture nextPicture, PictureRegion region, PictureArea? nextArea = null, PictureArea? previousArea = null, Picture? beforePicture = null)
         {
             var areaToStore = previousArea ?? SelectingArea;
+            var pictureToCompare = beforePicture ?? Buffer.Previous;
             var diffs = region.Select(area => new PictureDiff(
                 area,
-                Buffer.Previous.CutOut(area),
+                pictureToCompare.CutOut(area),
                 nextPicture.CutOut(area)
             )).ToList();
 

@@ -62,7 +62,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         }
     }
 
-    public Cursor ActiveCursor { get; private set; } = Cursor.Default;
+    public StandardCursorType ActiveCursor { get; private set; } = StandardCursorType.Arrow;
     public SelectionCursor ActiveSelectionCursor { get; private set; } = SelectionCursor.Default;
     private IImageBlender _imageBlender = new DirectImageBlender();
     public IImageBlender ImageBlender
@@ -126,12 +126,12 @@ public class InteractionCoordinator : IInteractionCoordinator
 
         var nextCursor = selectionCursor switch
         {
-            SelectionCursor.Move => new Cursor(StandardCursorType.SizeAll),
-            SelectionCursor.SizeNWSE => new Cursor(StandardCursorType.TopLeftCorner),
-            SelectionCursor.SizeNESW => new Cursor(StandardCursorType.TopRightCorner),
-            SelectionCursor.SizeNS => new Cursor(StandardCursorType.TopSide),
-            SelectionCursor.SizeWE => new Cursor(StandardCursorType.LeftSide),
-            _ => Cursor.Default
+            SelectionCursor.Move => StandardCursorType.SizeAll,
+            SelectionCursor.SizeNWSE => StandardCursorType.TopLeftCorner,
+            SelectionCursor.SizeNESW => StandardCursorType.TopRightCorner,
+            SelectionCursor.SizeNS => StandardCursorType.TopSide,
+            SelectionCursor.SizeWE => StandardCursorType.LeftSide,
+            _ => StandardCursorType.Arrow
         };
 
         if (isLogicalCursorChanged || ActiveCursor != nextCursor)
@@ -388,11 +388,17 @@ public class InteractionCoordinator : IInteractionCoordinator
             if (result.PictureBuffer != null)
             {
                 _interactionSession = new CanvasInteractionSession(result.PictureBuffer, drawStyle, _interactionSession.SelectionState);
+
+                // セッションを更新する前にイベントを飛ばすことで、
+                // DrawingSession.Push が「現在の Previous」を「変更前」として記録できるようにする。
+                // ただし、ViewModel 側が同期的に Push を呼ぶため、イベント引数として
+                // 更新後の画像を確実に渡す必要がある。
+                Drew?.Invoke(previousImage, result.PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea, result.AffectedArea);
+
                 if (_sessionProvider.CurrentSession != null)
                 {
                     _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
                 }
-                Drew?.Invoke(previousImage, result.PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea, result.AffectedArea);
             }
         }
         NotifyStateChanged();

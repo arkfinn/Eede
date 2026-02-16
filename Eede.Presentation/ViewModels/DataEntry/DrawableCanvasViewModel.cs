@@ -127,7 +127,7 @@ public class DrawableCanvasViewModel : ViewModelBase
             IsShowHandles = _coordinator.IsShowHandles;
             PreviewPixels = _coordinator.PreviewPixels;
             PreviewPosition = _coordinator.PreviewPosition;
-            ActiveCursor = _coordinator.ActiveCursor;
+            ActiveCursor = CreateCursor(_coordinator.ActiveCursor);
             ActiveSelectionCursor = _coordinator.ActiveSelectionCursor;
             this.RaisePropertyChanged(nameof(ActiveCursor));
             this.RaisePropertyChanged(nameof(ActiveSelectionCursor));
@@ -291,6 +291,13 @@ public class DrawableCanvasViewModel : ViewModelBase
     public void SetupRegionSelector(RegionSelector selector)
     {
         _coordinator.SetupRegionSelector(selector, PictureBuffer, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize);
+    }
+
+    private Cursor CreateCursor(StandardCursorType type)
+    {
+        return Avalonia.Application.Current == null
+            ? Cursor.Default
+            : new Cursor(type);
     }
 
     private Bitmap? _bitmap;

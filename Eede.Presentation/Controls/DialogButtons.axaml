@@ -9,11 +9,16 @@
     <Style Selector="Button">
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="Background" Value="Transparent" /> <!-- 当たり判定を確保 -->
       <Setter Property="MinWidth" Value="80" />
+      <Setter Property="Padding" Value="12,4"/>
+      <Setter Property="Background" Value="#00000000" /> <!-- 実色としての透明を設定 -->
     </Style>
     <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-       <!-- 標準ボタンのホバー時の色を指定（primary以外） -->
+      <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3Brush}" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <!-- PrimaryはStyles.axamlの設定を優先させるため、ここでは上書きしない -->
+      <Setter Property="Background" Value="Transparent" />
     </Style>
   </UserControl.Styles>
   <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">

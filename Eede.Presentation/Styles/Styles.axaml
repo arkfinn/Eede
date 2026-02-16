@@ -139,28 +139,23 @@
     <Setter Property="Padding" Value="12,4"/>
   </Style>
 
-  <!-- テンプレート内部の ContentPresenter がボタン本体の背景色を常に使用するように強制 -->
+  <!-- 修正：ContentPresenterがボタン本体の背景を「完全に」引き継ぐようにし、隙間をなくす -->
   <Style Selector="Button.primary /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
     <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
-    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
   </Style>
 
-  <!-- ホバー・フォーカス・アクティブ状態を統合して一貫性を持たせる -->
-  <Style Selector="Button.primary:pointerover,
-                   Button.primary:focus,
-                   Button.primary:focus-visible">
+  <Style Selector="Button.primary:pointerover, Button.primary:focus, Button.primary:focus-visible">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight2Brush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight2Brush}" />
   </Style>
-
-  <!-- プレス時のスタイル -->
   <Style Selector="Button.primary:pressed">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1Brush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorDark1Brush}" />
   </Style>
 
-  <!-- 無効化状態 -->
   <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3Brush}" />
     <Setter Property="Opacity" Value="0.5" />

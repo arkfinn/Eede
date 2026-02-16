@@ -21,6 +21,8 @@
         <ResourceInclude Source="/Resources/Icons/GridOn.axaml" />
         <ResourceInclude Source="/Resources/Icons/GridView.axaml" />
         <ResourceInclude Source="/Resources/Icons/Line.axaml" />
+        <ResourceInclude Source="/Resources/Icons/MirrorCopyBottom.axaml" />
+        <ResourceInclude Source="/Resources/Icons/MirrorCopyRight.axaml" />
         <ResourceInclude Source="/Resources/Icons/NoteAdd.axaml" />
         <ResourceInclude Source="/Resources/Icons/OpenInFull.axaml" />
         <ResourceInclude Source="/Resources/Icons/Redo.axaml" />

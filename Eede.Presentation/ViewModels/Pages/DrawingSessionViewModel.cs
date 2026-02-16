@@ -56,15 +56,15 @@ namespace Eede.Presentation.ViewModels.Pages
             Redone?.Invoke(this, result);
         }
 
-        public void Push(Picture picture, PictureArea? selectingArea = null, PictureArea? previousArea = null, PictureRegion affectedArea = default)
+        public void Push(Picture picture, PictureArea? selectingArea = null, PictureArea? previousArea = null, PictureRegion affectedArea = default, Picture? beforePicture = null)
         {
             if (!affectedArea.IsEmpty)
             {
-                _provider.Update(CurrentSession.PushDiff(picture, affectedArea, selectingArea, previousArea));
+                _provider.Update(CurrentSession.PushDiff(picture, affectedArea, selectingArea, previousArea, beforePicture));
             }
             else
             {
-                _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea));
+                _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea, beforePicture));
             }
         }
 

@@ -24,3 +24,6 @@
 - [x] Task: 設定画面 (`SettingsWindow` 等) のリファクタリング
 - [x] Task: 全体の動作確認と UI の崩れがないかのチェック
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 3: 既存画面のリファクタリング' (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 140e1ba

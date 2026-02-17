@@ -4,6 +4,7 @@ using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.Animations;
+using Eede.Presentation.ViewModels.General;
 using Eede.Presentation.Services;
 using Eede.Presentation.Settings;
 using Eede.Application.Infrastructure;
@@ -102,6 +103,7 @@ public class MainViewModelTests
 
     private MainViewModel CreateMainViewModel()
     {
+        var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object);
         return new MainViewModel(
             _globalState,
             _clipboardMock.Object,
@@ -121,8 +123,9 @@ public class MainViewModelTests
             new Mock<IThemeService>().Object,
             _loadSettingsUseCaseMock.Object,
             _saveSettingsUseCaseMock.Object,
+            welcomeVM,
             () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object),
-            () => null!); // NewPictureWindowViewModel はここでは不要なため null!
+            () => null!);
     }
 
     [AvaloniaTest]
@@ -137,14 +140,11 @@ public class MainViewModelTests
         _transferImageToCanvasUseCaseMock.Setup(x => x.Execute(It.IsAny<Picture>(), It.IsAny<PictureArea>()))
             .Returns(dummyPicture);
 
-        // 初期化時の呼び出しをクリア
         _interactionCoordinatorMock.Invocations.Clear();
 
-        // Act
         dockPictureVM.OnPicturePush.Execute(area).Subscribe();
 
-        // Assert
-        _interactionCoordinatorMock.Verify(x => x.CommitSelection(true), Times.AtLeastOnce, "CommitSelection(true) should be called before pushing image to draw area.");
+        _interactionCoordinatorMock.Verify(x => x.CommitSelection(true), Times.AtLeastOnce);
     }
 
     [AvaloniaTest]
@@ -159,14 +159,11 @@ public class MainViewModelTests
         _transferImageFromCanvasUseCaseMock.Setup(x => x.Execute(It.IsAny<Picture>(), It.IsAny<Picture>(), It.IsAny<Position>(), It.IsAny<Eede.Domain.ImageEditing.Blending.IImageBlender>()))
             .Returns(dummyPicture);
 
-        // 初期化時の呼び出しをクリア
         _interactionCoordinatorMock.Invocations.Clear();
 
-        // Act
         dockPictureVM.OnPicturePull.Execute(pos).Subscribe();
 
-        // Assert
-        _interactionCoordinatorMock.Verify(x => x.CommitSelection(true), Times.AtLeastOnce, "CommitSelection(true) should be called before pulling image from draw area.");
+        _interactionCoordinatorMock.Verify(x => x.CommitSelection(true), Times.AtLeastOnce);
     }
 
     [AvaloniaTest]
@@ -176,8 +173,8 @@ public class MainViewModelTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(mainVM.IsShowPixelGrid, Is.False, "IsShowPixelGrid should be False by default");
-            Assert.That(mainVM.IsShowCursorGrid, Is.False, "IsShowCursorGrid should be False by default");
+            Assert.That(mainVM.IsShowPixelGrid, Is.False);
+            Assert.That(mainVM.IsShowCursorGrid, Is.False);
         });
 
         mainVM.IsShowPixelGrid = true;
@@ -193,34 +190,30 @@ public class MainViewModelTests
         var mainVM = CreateMainViewModel();
         var canvasVM = mainVM.DrawableCanvasViewModel;
 
-        // 初期状態の確認
         Assert.Multiple(() =>
         {
             Assert.That(canvasVM.IsShowPixelGrid, Is.False);
             Assert.That(canvasVM.IsPixelGridEffectivelyVisible, Is.False);
-            Assert.That(canvasVM.Magnification.Value, Is.EqualTo(4.0f), "Default mag should be x4");
+            Assert.That(canvasVM.Magnification.Value, Is.EqualTo(4.0f));
         });
 
-        // 1. MainViewModel で PixelGrid を ON にする -> 伝播して有効になる (x4なので)
         mainVM.IsShowPixelGrid = true;
         Assert.Multiple(() =>
         {
-            Assert.That(canvasVM.IsShowPixelGrid, Is.True, "Flag should propagate to CanvasVM");
-            Assert.That(canvasVM.IsPixelGridEffectivelyVisible, Is.True, "Should be visible at x4");
+            Assert.That(canvasVM.IsShowPixelGrid, Is.True);
+            Assert.That(canvasVM.IsPixelGridEffectivelyVisible, Is.True);
         });
 
-        // 2. 倍率を x2 に下げる -> 内部フラグは ON のままだが、有効表示は False になる
         mainVM.Magnification = new Magnification(2);
         Assert.Multiple(() =>
         {
-            Assert.That(canvasVM.IsShowPixelGrid, Is.True, "Flag should remain True");
-            Assert.That(canvasVM.IsPixelGridEffectivelyVisible, Is.False, "Should be hidden below x4");
+            Assert.That(canvasVM.IsShowPixelGrid, Is.True);
+            Assert.That(canvasVM.IsPixelGridEffectivelyVisible, Is.False);
         });
 
-        // 3. CursorGrid の伝播確認
         mainVM.IsShowCursorGrid = true;
         Assert.That(canvasVM.IsShowCursorGrid, Is.True);
-        Assert.That(canvasVM.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be effectively visible at any magnification");
+        Assert.That(canvasVM.IsCursorGridEffectivelyVisible, Is.True);
     }
 
     [AvaloniaTest]
@@ -232,10 +225,9 @@ public class MainViewModelTests
         Assert.Multiple(() =>
         {
             Assert.That(mainVM.CursorSize.Width, Is.EqualTo(32));
-            Assert.That(canvasVM.CursorSize.Width, Is.EqualTo(32), "CursorSize should propagate to CanvasVM on initialization");
+            Assert.That(canvasVM.CursorSize.Width, Is.EqualTo(32));
         });
 
-        // 最小カーソルサイズの変更が CursorSize に反映されることを確認
         mainVM.MinCursorWidth = 16;
         mainVM.MinCursorHeight = 16;
         Assert.Multiple(() =>
@@ -253,7 +245,6 @@ public class MainViewModelTests
 
         var mainVM = CreateMainViewModel();
 
-        // ロード処理の完了を待機
         for (int i = 0; i < 50; i++)
         {
             if (mainVM.MinCursorWidth == 48) break;
@@ -275,7 +266,6 @@ public class MainViewModelTests
 
         var mainVM = CreateMainViewModel();
 
-        // ロード完了 (ExecuteAsyncの呼び出し) を待つ
         bool loaded = false;
         for (int i = 0; i < 50; i++)
         {
@@ -286,9 +276,8 @@ public class MainViewModelTests
             }
             await Task.Delay(10);
         }
-        Assert.That(loaded, Is.True, "LoadSettingsUseCase.ExecuteAsync should be called during initialization.");
+        Assert.That(loaded, Is.True);
 
-        // 初期化完了 (_isInitializing = false) を待つ
         await Task.Delay(50);
 
         _saveSettingsUseCaseMock.Invocations.Clear();
@@ -296,7 +285,6 @@ public class MainViewModelTests
         mainVM.MinCursorWidth = 16;
         mainVM.MinCursorHeight = 24;
 
-        // 保存処理の実行 (ExecuteAsyncの呼び出し) を待つ
         bool saved = false;
         for (int i = 0; i < 50; i++)
         {
@@ -308,7 +296,7 @@ public class MainViewModelTests
             await Task.Delay(10);
         }
 
-        Assert.That(saved, Is.True, "SaveSettingsUseCase.ExecuteAsync should be called when grid size is changed.");
+        Assert.That(saved, Is.True);
         _saveSettingsUseCaseMock.Verify(x => x.ExecuteAsync(It.Is<AppSettings>(s => s.GridWidth == 16 && s.GridHeight == 24)), Times.AtLeastOnce);
     }
 }

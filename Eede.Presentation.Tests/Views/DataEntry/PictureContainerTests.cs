@@ -23,6 +23,7 @@ using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
+using Eede.Presentation.ViewModels.General;
 using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.Views.DataEntry;
 using Moq;
@@ -122,6 +123,7 @@ public class PictureContainerTests
             new Mock<IThemeService>().Object,
             loadSettingsUseCase,
             saveSettingsUseCase,
+            new WelcomeViewModel(mockSettingsRepoForUseCase.Object),
             () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
             () => new NewPictureWindowViewModel()
         );

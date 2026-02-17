@@ -1,12 +1,12 @@
 # 実装プラン：Velopackによる自動アップデート機能の導入（TDD Edition）
 
 #### フェーズ 1: ドメインとユースケースの構築 (TDD)
-- [ ] Task: アップデート状態を表すドメインモデル（値オブジェクト）の定義
-- [ ] Task: `IUpdateService` インターフェースの設計
-- [ ] Task: **[Red]** `CheckUpdateUseCase` のテスト作成（Mockを使用した異常系・正常系の定義）
-- [ ] Task: **[Green]** `CheckUpdateUseCase` の最小実装
-- [ ] Task: **[Refactor]** ユースケースのリファクタリング
-- [ ] Task: Conductor - User Manual Verification 'フェーズ 1: ドメインとユースケース' (Protocol in workflow.md)
+- [x] Task: アップデート状態を表すドメインモデル（値オブジェクト）の定義 [e5607f0]
+- [x] Task: `IUpdateService` インターフェースの設計 [e5607f0]
+- [x] Task: **[Red]** `CheckUpdateUseCase` のテスト作成（Mockを使用した異常系・正常系の定義） [c119288]
+- [x] Task: **[Green]** `CheckUpdateUseCase` の最小実装 [c119288]
+- [x] Task: **[Refactor]** ユースケースのリファクタリング [c119288]
+- [~] Task: Conductor - User Manual Verification 'フェーズ 1: ドメインとユースケース' (Protocol in workflow.md)
 
 #### フェーズ 2: ViewModel への統合と状態遷移の検証 (TDD)
 - [ ] Task: **[Red]** `WelcomeViewModel` におけるアップデート自動確認のテスト作成

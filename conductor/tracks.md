@@ -27,5 +27,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Velopackを用いてアップデートを自動実施できるようにしたい**
+- [~] **Track: Velopackを用いてアップデートを自動実施できるようにしたい**
 *Link: [./tracks/auto_update_velopack_20260218/](./tracks/auto_update_velopack_20260218/)*

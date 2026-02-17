@@ -16,13 +16,13 @@
 - [x] Task: **[Refactor]** ViewModel のリファクタリング [72f577a]
 - [x] Task: Conductor - User Manual Verification 'フェーズ 2: ViewModel 統合' (Protocol in workflow.md) [72f577a]
 
-#### フェーズ 3: インフラストラクチャ（Velopack 境界）の実装
-- [~] Task: `VelopackUpdateService` の実実装 (`Eede.Infrastructure`)
-- [ ] Task: DI コンテナへの登録と結合確認
-- [ ] Task: Conductor - User Manual Verification 'フェーズ 3: インフラ統合' (Protocol in workflow.md)
+#### フェーズ 3: インフラストラクチャ（Velopack 境界）の実装 [checkpoint: 590af38]
+- [x] Task: `VelopackUpdateService` の実実装 (`Eede.Infrastructure`) [590af38]
+- [x] Task: DI コンテナへの登録と結合確認 [590af38]
+- [x] Task: Conductor - User Manual Verification 'フェーズ 3: インフラ統合' (Protocol in workflow.md) [590af38]
 
 #### フェーズ 4: UI 実装と最終検証 (UX 仕上げ)
-- [ ] Task: `WelcomeView` (ようこそ画面) の XAML 実装とバインディング
+- [~] Task: `WelcomeView` (ようこそ画面) の XAML 実装とバインディング
 - [ ] Task: `MainView` (メインエディタ) へのアップデート通知インジケーターの実装
 - [ ] Task: ヘルプメニューへの「アップデートを確認」の追加
 - [ ] Task: **[Red/Green]** 手動アップデート確認の ViewModel テストと実装

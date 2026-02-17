@@ -7,10 +7,12 @@ using Eede.Application.Pictures;
 using Eede.Application.UseCase.Animations;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.UseCase.Settings;
+using Eede.Application.UseCase.Updates;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
+using Eede.Domain.SharedKernel;
 using Eede.Infrastructure.Settings;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
@@ -25,6 +27,9 @@ using Eede.Presentation.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation;
 
@@ -55,6 +60,15 @@ public partial class App : Avalonia.Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private class DummyUpdateService : IUpdateService
+    {
+        public UpdateStatus Status => UpdateStatus.Idle;
+        public IObservable<UpdateStatus> StatusChanged => Observable.Return(Status);
+        public Task<bool> CheckForUpdatesAsync() => Task.FromResult(false);
+        public Task DownloadUpdateAsync() => Task.CompletedTask;
+        public void ApplyAndRestart() { }
     }
 
     private void ConfigureServices(IServiceCollection services)
@@ -107,6 +121,10 @@ public partial class App : Avalonia.Application
         });
         services.AddTransient<ILoadSettingsUseCase, LoadSettingsUseCase>();
         services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();
+
+        // Updates
+        services.AddSingleton<IUpdateService, DummyUpdateService>();
+        services.AddTransient<CheckUpdateUseCase>();
 
         // ViewModels
         services.AddTransient<IInteractionCoordinator, InteractionCoordinator>();

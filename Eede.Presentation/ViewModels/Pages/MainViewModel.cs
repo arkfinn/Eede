@@ -331,6 +331,7 @@ public class MainViewModel : ViewModelBase
         {
             // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
             DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea, previous);
+            MarkActiveDockEdited();
         };
 
         LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
@@ -403,6 +404,7 @@ public class MainViewModel : ViewModelBase
             if (vm != null)
             {
                 vm.PictureBuffer = dockItem.Before;
+                vm.Edited = dockItem.BeforeEdited;
             }
         }
     }
@@ -419,6 +421,7 @@ public class MainViewModel : ViewModelBase
             if (vm != null)
             {
                 vm.PictureBuffer = dockItem.After;
+                vm.Edited = dockItem.AfterEdited;
             }
         }
     }
@@ -574,6 +577,7 @@ public class MainViewModel : ViewModelBase
             DrawingSessionViewModel.Sync(updated);
             DrawableCanvasViewModel.SyncWithSession(true);
             SetPictureToDrawArea(updated.CurrentPicture);
+            MarkActiveDockEdited();
         }
     }
 
@@ -623,6 +627,14 @@ public class MainViewModel : ViewModelBase
         CursorSize = picture.Size;
     }
 
+    private void MarkActiveDockEdited()
+    {
+        if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
+        {
+            vm.Edited = true;
+        }
+    }
+
     private void OnPictureUpdate(object? sender, PictureUpdateEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
@@ -647,7 +659,7 @@ public class MainViewModel : ViewModelBase
             args.Position,
             PullBlender);
 
-        DrawingSessionViewModel.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer, updated);
+        DrawingSessionViewModel.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer, updated, vm.Edited, true);
 
         vm.PictureBuffer = updated;
     }
@@ -666,6 +678,7 @@ public class MainViewModel : ViewModelBase
         );
 
         DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea);
+        MarkActiveDockEdited();
     }
 
     private DrawStyleType? _lastDrawStyle;

@@ -11,21 +11,21 @@
 - [x] Task: 最近使ったファイルのリストを永続化する `Infrastructure` 層の実装（既存の設定ファイルへの追記など）を行う
 - [x] Task: Phase Completion Verification and Checkpointing Protocol
 
-## Phase 2: ViewModel Implementation
+## Phase 2: ViewModel Implementation [checkpoint: 8033639]
 「ようこそ」画面を表示するための ViewModel を実装します。
 
-- [~] Task: `WelcomeViewModel` を `Eede.Presentation.ViewModels` に新規作成する
-    - [ ] 依存注入（DI）により `ISettingsRepository` や `IPictureIO` 等を受け取る
-    - [ ] 最近使ったファイルのリストを `ObservableCollection` で公開する
-    - [ ] 「新規作成」「開く」のコマンドを実装する
-    - [ ] 外部リンク（GitHub）を開くコマンドを実装する
-- [ ] Task: `App.axaml.cs` で `WelcomeViewModel` を DI コンテナに登録する
-- [ ] Task: Phase Completion Verification and Checkpointing Protocol
+- [x] Task: `WelcomeViewModel` を `Eede.Presentation.ViewModels` に新規作成する
+    - [x] 依存注入（DI）により `ISettingsRepository` や `IPictureIO` 等を受け取る
+    - [x] 最近使ったファイルのリストを `ObservableCollection` で公開する
+    - [x] 「新規作成」「開く」のコマンドを実装する
+    - [x] 外部リンク（GitHub）を開くコマンドを実装する
+- [x] Task: `App.axaml.cs` で `WelcomeViewModel` を DI コンテナに登録する
+- [x] Task: Phase Completion Verification and Checkpointing Protocol
 
 ## Phase 3: UI Design & Implementation (WelcomeView)
 VS Code 風のモダンなデザインで UI を構築します。
 
-- [ ] Task: `WelcomeView.axaml` を `Eede.Presentation.Views` に新規作成し、`WelcomeViewModel` と紐付ける
+- [~] Task: `WelcomeView.axaml` を `Eede.Presentation.Views` に新規作成し、`WelcomeViewModel` と紐付ける
 - [ ] Task: `WelcomeView` のレイアウトを実装する
     - [ ] 上部へのロゴ画像（またはロゴアイコン）の配置
     - [ ] セクション分け（最近使ったもの、開始、リンク、情報）

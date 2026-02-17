@@ -21,3 +21,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./tracks/mirror_copy_20260215/](./tracks/mirror_copy_20260215/)*
 
 
+
+---
+
+- [x] **Track: ダイアログボタンの統一と共通コンポーネントの導入**
+*Link: [./archive/unified_dialog_buttons_20260216/](./archive/unified_dialog_buttons_20260216/)*

@@ -5,6 +5,7 @@
              xmlns:entry="clr-namespace:Eede.Presentation.Views.DataEntry"
              xmlns:display="clr-namespace:Eede.Presentation.Views.DataDisplay"
              xmlns:displayvm="clr-namespace:Eede.Presentation.ViewModels.DataDisplay"
+             xmlns:general="clr-namespace:Eede.Presentation.Views.General"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Presentation.Views.DataDisplay.PictureFrame"
              x:Name="Root">
@@ -24,7 +25,7 @@
             </DocumentTemplate>
           </display:PictureDock.DocumentTemplate>
           <Document CanClose="False" CanFloat="False" CanPin="False" Title="ようこそ">
-            <TextBlock Text="説明など"/>
+            <general:WelcomeView DataContext="{Binding #Root.WelcomeViewModel}"/>
           </Document>
         </display:PictureDock>
       </ProportionalDock>

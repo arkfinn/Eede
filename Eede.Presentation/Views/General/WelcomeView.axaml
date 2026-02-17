@@ -1,0 +1,93 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.General"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="600"
+             x:Class="Eede.Presentation.Views.General.WelcomeView"
+             x:DataType="vm:WelcomeViewModel">
+  <Design.DataContext>
+    <!-- プレビュー用のダミーデータ -->
+  </Design.DataContext>
+
+  <ScrollViewer>
+    <StackPanel Margin="20" Spacing="20">
+      <!-- ロゴ -->
+      <Image Source="/Assets/logo.png" Width="128" Height="128" HorizontalAlignment="Center"/>
+
+      <TextBlock Text="Eede" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+
+      <!-- 開始 -->
+      <StackPanel Spacing="10">
+        <TextBlock Text="開始" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
+        <Button Command="{Binding CreateNewPictureCommand}" Classes="Link">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <PathIcon Data="{StaticResource NoteAddIconGeometry}"/>
+            <TextBlock Text="新しい画像を作成"/>
+          </StackPanel>
+        </Button>
+        <Button Command="{Binding OpenPictureCommand}" Classes="Link">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <PathIcon Data="{StaticResource FolderOpenIconGeometry}"/>
+            <TextBlock Text="画像を開く"/>
+          </StackPanel>
+        </Button>
+      </StackPanel>
+
+      <!-- 最近使ったファイル -->
+      <StackPanel Spacing="10">
+        <TextBlock Text="最近使ったもの" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
+        <ItemsControl ItemsSource="{Binding RecentFiles}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Button Command="{Binding ((vm:WelcomeViewModel)DataContext).OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding Path}"
+                      Classes="Link">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <PathIcon Data="{StaticResource EditIconGeometry}"/>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Path}" TextWrapping="Wrap" MaxWidth="240"/>
+                    <TextBlock Text="{Binding LastAccessed}" FontSize="10" Foreground="Gray"/>
+                  </StackPanel>
+                </StackPanel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <!-- リンク -->
+      <StackPanel Spacing="10">
+        <TextBlock Text="リンク" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
+        <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede" Classes="Link">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <PathIcon Data="{StaticResource OpenInFullIconGeometry}"/>
+            <TextBlock Text="GitHub リポジトリ"/>
+          </StackPanel>
+        </Button>
+        <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede/issues" Classes="Link">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <PathIcon Data="{StaticResource OpenInFullIconGeometry}"/>
+            <TextBlock Text="GitHub 儀路板 (Issues)"/>
+          </StackPanel>
+        </Button>
+      </StackPanel>
+
+      <!-- バージョン情報 -->
+      <TextBlock Text="{Binding Version, StringFormat='Version: {0}'}" FontSize="12" Foreground="Gray" HorizontalAlignment="Center"/>
+    </StackPanel>
+  </ScrollViewer>
+
+  <UserControl.Styles>
+    <Style Selector="Button.Link">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="5"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    </Style>
+    <Style Selector="Button.Link:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight}"/>
+    </Style>
+  </UserControl.Styles>
+</UserControl>

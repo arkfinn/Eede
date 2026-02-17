@@ -1,13 +1,13 @@
-﻿# Project Tracks
+# Project Tracks
 
 This file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.
 
-- [~] **Track: 繧ｼ繝ｭ繧ｯ繝ｭ繝ｼ繝ｳ螟画鋤・・eadOnlySpan<byte> 遲峨ｒ逕ｨ縺・◆繝阪う繝・ぅ繝冶ｻ｢騾・ｼ峨・蟆主・** [baseline: 5fdd9f6]
+- [~] **Track: ゼロクローン変換（ReadOnlySpan<byte> 等を用いたネイティブ転送）の導入** [baseline: 5fdd9f6]
 *Link: [./tracks/zero_clone_20260207/](./tracks/zero_clone_20260207/)*
 
 ---
 
-- [~] **Track: 繝薙Ν繝画凾縺ｮ繝ｯ繝ｼ繝九Φ繧ｰ縺瑚ｧ｣豸医＆繧後ｋ繧医≧縺ｫ繝ｬ繧ｬ繧ｷ繝ｼ繧ｳ繝ｼ繝峨・繝ｪ繝輔ぃ繧ｯ繧ｿ繝ｪ繝ｳ繧ｰ繧定｡後≧縲・*
+- [~] **Track: ビルド時の警告が解消されるようにレガシーコードのリファクタリングを行う。**
 *Link: [./archive/refactor_warnings_20260211/](./archive/refactor_warnings_20260211/)*
 
 ---
@@ -20,9 +20,12 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: 鏡面反転コピー機能の実装（左→右、上→下）**
 *Link: [./tracks/mirror_copy_20260215/](./tracks/mirror_copy_20260215/)*
 
-
-
 ---
 
 - [x] **Track: ダイアログボタンの統一と共通コンポーネントの導入**
 *Link: [./archive/unified_dialog_buttons_20260216/](./archive/unified_dialog_buttons_20260216/)*
+
+---
+
+- [ ] **Track: Velopackを用いてアップデートを自動実施できるようにしたい**
+*Link: [./tracks/auto_update_velopack_20260218/](./tracks/auto_update_velopack_20260218/)*

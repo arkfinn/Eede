@@ -8,16 +8,16 @@
 - [x] Task: **[Refactor]** ユースケースのリファクタリング [c119288]
 - [x] Task: Conductor - User Manual Verification 'フェーズ 1: ドメインとユースケース' (Protocol in workflow.md) [351e92c]
 
-#### フェーズ 2: ViewModel への統合と状態遷移の検証 (TDD)
-- [~] Task: **[Red]** `WelcomeViewModel` におけるアップデート自動確認のテスト作成
-- [ ] Task: **[Green]** `WelcomeViewModel` へのロジック実装
-- [ ] Task: **[Red]** 「再起動して適用」コマンドの実行テスト
-- [ ] Task: **[Green]** `WelcomeViewModel` へのコマンド実装
-- [ ] Task: **[Refactor]** ViewModel のリファクタリング
-- [ ] Task: Conductor - User Manual Verification 'フェーズ 2: ViewModel 統合' (Protocol in workflow.md)
+#### フェーズ 2: ViewModel への統合と状態遷移の検証 (TDD) [checkpoint: 72f577a]
+- [x] Task: **[Red]** `WelcomeViewModel` におけるアップデート自動確認のテスト作成 [72f577a]
+- [x] Task: **[Green]** `WelcomeViewModel` へのロジック実装 [72f577a]
+- [x] Task: **[Red]** 「再起動して適用」コマンドの実行テスト [72f577a]
+- [x] Task: **[Green]** `WelcomeViewModel` へのコマンド実装 [72f577a]
+- [x] Task: **[Refactor]** ViewModel のリファクタリング [72f577a]
+- [x] Task: Conductor - User Manual Verification 'フェーズ 2: ViewModel 統合' (Protocol in workflow.md) [72f577a]
 
 #### フェーズ 3: インフラストラクチャ（Velopack 境界）の実装
-- [ ] Task: `VelopackUpdateService` の実実装 (`Eede.Infrastructure`)
+- [~] Task: `VelopackUpdateService` の実実装 (`Eede.Infrastructure`)
 - [ ] Task: DI コンテナへの登録と結合確認
 - [ ] Task: Conductor - User Manual Verification 'フェーズ 3: インフラ統合' (Protocol in workflow.md)
 

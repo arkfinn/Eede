@@ -31,12 +31,15 @@ public class WelcomeViewModel : ViewModelBase
         CreateNewPictureCommand = ReactiveCommand.Create(() => { });
         OpenPictureCommand = ReactiveCommand.Create(() => { });
         OpenRecentFileCommand = ReactiveCommand.Create<string, string>(path => path);
-        OpenUrlCommand = ReactiveCommand.Create<string, string>(url =>
+        OpenUrlCommand = ReactiveCommand.CreateFromTask<string, string>(async url =>
         {
-            Process.Start(new ProcessStartInfo
+            await Task.Run(() =>
             {
-                FileName = url,
-                UseShellExecute = true
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
             });
             return url;
         });

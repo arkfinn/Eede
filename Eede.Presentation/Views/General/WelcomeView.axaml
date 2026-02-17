@@ -11,11 +11,30 @@
   </Design.DataContext>
 
   <ScrollViewer>
-    <StackPanel Margin="20" Spacing="20">
-      <!-- ロゴ -->
-      <Image Source="/Assets/logo.png" Width="128" Height="128" HorizontalAlignment="Center"/>
-
-      <TextBlock Text="Eede" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+    <StackPanel Margin="24" Spacing="30">
+      <!-- ロゴ・ヘッダーエリア -->
+      <StackPanel Spacing="12">
+        <Border Background="{DynamicResource SystemAccentColorLight}"
+                CornerRadius="16"
+                Padding="16"
+                HorizontalAlignment="Center"
+                BoxShadow="0 4 12 0 #40000000">
+          <Image Source="/Assets/logo.png" Width="96" Height="96"/>
+        </Border>
+        
+        <StackPanel HorizontalAlignment="Center" Spacing="4">
+          <TextBlock Text="EEDE" 
+                     FontSize="32" 
+                     FontWeight="Black" 
+                     LetterSpacing="4"
+                     HorizontalAlignment="Center"/>
+          <TextBlock Text="Excellent Expert Dot Editor" 
+                     FontSize="12" 
+                     Foreground="Gray"
+                     FontWeight="Light"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+      </StackPanel>
 
       <!-- 開始 -->
       <StackPanel Spacing="10">

@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="50"
+             x:Class="Eede.Presentation.Controls.DialogButtons"
+             x:Name="Root">
+  <UserControl.Styles>
+    <Style Selector="Button">
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="MinWidth" Value="80" />
+      <Setter Property="Padding" Value="12,4"/>
+      <Setter Property="Background" Value="Transparent" /> <!-- これで当たり判定を確保 -->
+    </Style>
+    <!-- 標準ボタン（primary以外）のホバー設定 -->
+    <Style Selector="Button:not(.primary):pointerover">
+      <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight3Brush}" />
+    </Style>
+  </UserControl.Styles>
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+    <Button Content="{Binding #Root.CancelText}"
+            Command="{Binding #Root.CancelCommand}"
+            IsVisible="{Binding #Root.IsCancelVisible}"
+            IsCancel="True" />
+    <Button Content="{Binding #Root.SecondaryText}"
+            Command="{Binding #Root.SecondaryCommand}"
+            IsVisible="{Binding #Root.IsSecondaryVisible}" />
+    <Button Content="{Binding #Root.PrimaryText}"
+            Command="{Binding #Root.PrimaryCommand}"
+            IsVisible="{Binding #Root.IsPrimaryVisible}"
+            IsDefault="True"
+            Classes="primary" />
+  </StackPanel>
+</UserControl>

@@ -16,20 +16,15 @@
       <StackPanel Spacing="12">
         <Border Background="{DynamicResource SystemAccentColorLight}"
                 CornerRadius="16"
-                Padding="16"
+                Padding="8"
                 HorizontalAlignment="Center"
                 BoxShadow="0 4 12 0 #40000000">
           <Image Source="/Assets/logo.png" Width="96" Height="96"/>
         </Border>
-        
+
         <StackPanel HorizontalAlignment="Center" Spacing="4">
-          <TextBlock Text="EEDE" 
-                     FontSize="32" 
-                     FontWeight="Black" 
-                     LetterSpacing="4"
-                     HorizontalAlignment="Center"/>
-          <TextBlock Text="Excellent Expert Dot Editor" 
-                     FontSize="12" 
+          <TextBlock Text="Excellent Expert Dot Editor"
+                     FontSize="12"
                      Foreground="Gray"
                      FontWeight="Light"
                      HorizontalAlignment="Center"/>
@@ -80,20 +75,17 @@
         <TextBlock Text="リンク" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
         <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede" Classes="Link">
           <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Data="{StaticResource OpenInFullIconGeometry}"/>
+            <PathIcon Data="{StaticResource FillSquareIconGeometry}"/>
             <TextBlock Text="GitHub リポジトリ"/>
           </StackPanel>
         </Button>
-        <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede/issues" Classes="Link">
+        <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede/discussions" Classes="Link">
           <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Data="{StaticResource OpenInFullIconGeometry}"/>
-            <TextBlock Text="GitHub 儀路板 (Issues)"/>
+            <PathIcon Data="{StaticResource FillSquareIconGeometry}"/>
+            <TextBlock Text="GitHub 議論板 (Discussions)"/>
           </StackPanel>
         </Button>
       </StackPanel>
-
-      <!-- バージョン情報 -->
-      <TextBlock Text="{Binding Version, StringFormat='Version: {0}'}" FontSize="12" Foreground="Gray" HorizontalAlignment="Center"/>
     </StackPanel>
   </ScrollViewer>
 
@@ -127,7 +119,7 @@
     <Style Selector="Button.Link:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="#15FFFFFF"/> <!-- 控えめな白の透過（ダークテーマ向け） -->
     </Style>
-    
+
     <Style Selector="Button.Link:pointerover PathIcon">
       <Setter Property="Opacity" Value="1.0"/>
       <Setter Property="RenderTransform" Value="translateX(2px)"/>

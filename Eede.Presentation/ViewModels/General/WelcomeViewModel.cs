@@ -10,7 +10,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace Eede.Presentation.ViewModels.General;
 
-public class WelcomeViewModel : Eede.Presentation.ViewModels.ViewModelBase
+public class WelcomeViewModel : ViewModelBase
 {
     public ObservableCollection<RecentFile> RecentFiles { get; } = new();
 
@@ -18,8 +18,8 @@ public class WelcomeViewModel : Eede.Presentation.ViewModels.ViewModelBase
 
     public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenPictureCommand { get; }
-    public ReactiveCommand<string, Unit> OpenRecentFileCommand { get; }
-    public ReactiveCommand<string, Unit> OpenUrlCommand { get; }
+    public ReactiveCommand<string, string> OpenRecentFileCommand { get; }
+    public ReactiveCommand<string, string> OpenUrlCommand { get; }
     public ReactiveCommand<Unit, Unit> LoadRecentFilesCommand { get; }
 
     private readonly ISettingsRepository _settingsRepository;
@@ -30,14 +30,15 @@ public class WelcomeViewModel : Eede.Presentation.ViewModels.ViewModelBase
 
         CreateNewPictureCommand = ReactiveCommand.Create(() => { });
         OpenPictureCommand = ReactiveCommand.Create(() => { });
-        OpenRecentFileCommand = ReactiveCommand.Create<string>(path => { });
-        OpenUrlCommand = ReactiveCommand.Create<string>(url =>
+        OpenRecentFileCommand = ReactiveCommand.Create<string, string>(path => path);
+        OpenUrlCommand = ReactiveCommand.Create<string, string>(url =>
         {
             Process.Start(new ProcessStartInfo
             {
                 FileName = url,
                 UseShellExecute = true
             });
+            return url;
         });
 
         LoadRecentFilesCommand = ReactiveCommand.CreateFromTask(async () =>

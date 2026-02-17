@@ -24,6 +24,7 @@ using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
+using Eede.Presentation.ViewModels.General;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Settings;
@@ -91,6 +92,8 @@ public class MainViewModel : ViewModelBase
     [Reactive] public bool IsShowCursorGrid { get; set; } = false;
 
     [Reactive] public int SelectedThemeIndex { get; set; }
+
+    public WelcomeViewModel WelcomeViewModel { get; }
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
@@ -168,6 +171,7 @@ public class MainViewModel : ViewModelBase
         IThemeService themeService,
         ILoadSettingsUseCase loadSettingsUseCase,
         ISaveSettingsUseCase saveSettingsUseCase,
+        WelcomeViewModel welcomeViewModel,
         Func<DockPictureViewModel> dockPictureFactory,
         Func<NewPictureWindowViewModel> newPictureWindowFactory)
     {
@@ -185,6 +189,7 @@ public class MainViewModel : ViewModelBase
         _themeService = themeService;
         _loadSettingsUseCase = loadSettingsUseCase;
         _saveSettingsUseCase = saveSettingsUseCase;
+        WelcomeViewModel = welcomeViewModel;
         _dockPictureFactory = dockPictureFactory;
         _newPictureWindowFactory = newPictureWindowFactory;
 
@@ -194,6 +199,18 @@ public class MainViewModel : ViewModelBase
         PaletteContainerViewModel = paletteContainerViewModel;
 
         SelectedThemeIndex = _themeService.GetActualThemeVariant() == Avalonia.Styling.ThemeVariant.Dark ? 1 : 0;
+
+        welcomeViewModel.CreateNewPictureCommand.Subscribe(_ => CreateNewPictureCommand.Execute().Subscribe());
+        welcomeViewModel.OpenPictureCommand.Subscribe(_ => LoadPictureCommand.Execute(FileStorage).Subscribe());
+        welcomeViewModel.OpenRecentFileCommand.Subscribe(async path =>
+        {
+            DockPictureViewModel? newPicture = await OpenPicture(new Uri(path));
+            if (newPicture != null)
+            {
+                Pictures.Add(newPicture);
+            }
+        });
+        _ = welcomeViewModel.LoadRecentFilesCommand.Execute();
 
         LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
         SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);

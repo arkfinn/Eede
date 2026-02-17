@@ -25,13 +25,18 @@ public class WelcomeViewModelTests
     }
 
     [Test]
-    public async Task RecentFiles_ShouldBeLoadedOnCreation()
+    public async Task LoadRecentFiles_ShouldRefreshList()
     {
         var viewModel = new WelcomeViewModel(_settingsRepoMock.Object);
         
         await viewModel.LoadRecentFilesCommand.Execute().ToTask();
-
         Assert.That(viewModel.RecentFiles.Count, Is.EqualTo(1));
-        Assert.That(viewModel.RecentFiles[0].Path, Is.EqualTo("test1.png"));
+
+        // 設定を更新して再ロード
+        _appSettings.AddRecentFile("test2.png", System.DateTime.Now);
+        await viewModel.LoadRecentFilesCommand.Execute().ToTask();
+
+        Assert.That(viewModel.RecentFiles.Count, Is.EqualTo(2));
+        Assert.That(viewModel.RecentFiles[0].Path, Is.EqualTo("test2.png"));
     }
 }

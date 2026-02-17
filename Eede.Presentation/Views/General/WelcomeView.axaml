@@ -98,15 +98,50 @@
   </ScrollViewer>
 
   <UserControl.Styles>
+    <!-- リンクボタンの基本スタイル -->
     <Style Selector="Button.Link">
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="Padding" Value="5"/>
+      <Setter Property="Padding" Value="12 8"/>
       <Setter Property="HorizontalAlignment" Value="Stretch"/>
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.1"/>
+        </Transitions>
+      </Setter>
     </Style>
+
+    <Style Selector="Button.Link PathIcon">
+      <Setter Property="Opacity" Value="0.6"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.1"/>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
+        </Transitions>
+      </Setter>
+    </Style>
+
+    <!-- ホバー時の演出 -->
     <Style Selector="Button.Link:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight}"/>
+      <Setter Property="Background" Value="#15FFFFFF"/> <!-- 控えめな白の透過（ダークテーマ向け） -->
+    </Style>
+    
+    <Style Selector="Button.Link:pointerover PathIcon">
+      <Setter Property="Opacity" Value="1.0"/>
+      <Setter Property="RenderTransform" Value="translateX(2px)"/>
+    </Style>
+
+    <!-- クリック（アクティブ）時の演出 -->
+    <Style Selector="Button.Link:pressed">
+      <Setter Property="Opacity" Value="0.7"/>
+      <Setter Property="RenderTransform" Value="scale(0.98)"/>
+    </Style>
+
+    <!-- 最近使ったファイルのリストアイテム固有の調整 -->
+    <Style Selector="ItemsControl > ContentPresenter">
+      <Setter Property="Margin" Value="0 2"/>
     </Style>
   </UserControl.Styles>
 </UserControl>

@@ -35,9 +35,9 @@ VS Code 風のモダンなデザインで UI を構築します。
 - [x] Task: 狭いドック幅でも崩れないよう、レスポンシブなスタイル（WrapPanelやScrollViewerの活用）を調整する
 - [x] Task: Phase Completion Verification and Checkpointing Protocol
 
-## Phase 4: Verification & Polishing
-- [~] Task: 実際に画像を作成・保存し、「最近編集した画像」が更新されるか確認する
-- [ ] Task: GitHub リンクが正常にブラウザで開くか確認する
-- [ ] Task: デザインの微調整（余白、フォントサイズ、色味の統一）
-- [ ] Task: Phase Completion Verification and Checkpointing Protocol
-- [ ] Task: Conductor - User Manual Verification 'Welcome Screen Enhancement' (Protocol in workflow.md)
+## Phase 4: Verification & Polishing [checkpoint: 617288f]
+- [x] Task: 実際に画像を作成・保存し、「最近編集した画像」が更新されるか確認する
+- [x] Task: GitHub リンクが正常にブラウザで開くか確認する
+- [x] Task: デザインの微調整（余白、フォントサイズ、色味の統一）
+- [x] Task: Phase Completion Verification and Checkpointing Protocol
+- [~] Task: Conductor - User Manual Verification 'Welcome Screen Enhancement' (Protocol in workflow.md)

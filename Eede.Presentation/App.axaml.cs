@@ -19,6 +19,7 @@ using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
+using Eede.Presentation.ViewModels.General;
 using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
@@ -119,7 +120,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<MainViewModel>();
         services.AddTransient<NewPictureWindowViewModel>();
         services.AddTransient<DockPictureViewModel>();
-        services.AddTransient<Eede.Presentation.ViewModels.General.WelcomeViewModel>();
+        services.AddTransient<WelcomeViewModel>();
 
         // Factories
         services.AddSingleton<Func<DockPictureViewModel>>(sp => () => sp.GetRequiredService<DockPictureViewModel>());

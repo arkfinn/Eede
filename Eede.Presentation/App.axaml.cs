@@ -14,6 +14,7 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.SharedKernel;
 using Eede.Infrastructure.Settings;
+using Eede.Infrastructure.Updates;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
 using Eede.Presentation.Services;
@@ -60,15 +61,6 @@ public partial class App : Avalonia.Application
         }
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    private class DummyUpdateService : IUpdateService
-    {
-        public UpdateStatus Status => UpdateStatus.Idle;
-        public IObservable<UpdateStatus> StatusChanged => Observable.Return(Status);
-        public Task<bool> CheckForUpdatesAsync() => Task.FromResult(false);
-        public Task DownloadUpdateAsync() => Task.CompletedTask;
-        public void ApplyAndRestart() { }
     }
 
     private void ConfigureServices(IServiceCollection services)
@@ -123,7 +115,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();
 
         // Updates
-        services.AddSingleton<IUpdateService, DummyUpdateService>();
+        services.AddSingleton<IUpdateService>(sp => new VelopackUpdateService("https://github.com/arkfinn/EedeWin"));
         services.AddTransient<CheckUpdateUseCase>();
 
         // ViewModels

@@ -2,19 +2,19 @@
 
 ドックエリアの「ようこそ」画面をモダンに刷新し、最近使ったファイルやクイックアクションを提供します。
 
-## Phase 1: Infrastructure & Application Layer (Recent Files Logic)
+## Phase 1: Infrastructure & Application Layer (Recent Files Logic) [checkpoint: 3421446]
 最近編集した画像を保存・追跡するための基盤を整備します。
 
-- [ ] Task: 既存の `ISettingsRepository` に「最近使ったファイル」の保存・取得機能が含まれているか調査する
-- [ ] Task: 最近使ったファイルを管理するための Value Object または DTO を `Eede.Domain` または `Eede.Application` に定義する
-- [ ] Task: ファイル保存・読み込み成功時に「最近使ったファイル」を更新するロジックを `UseCase` または `ApplicationService` に追加する
-- [ ] Task: 最近使ったファイルのリストを永続化する `Infrastructure` 層の実装（既存の設定ファイルへの追記など）を行う
-- [ ] Task: Phase Completion Verification and Checkpointing Protocol
+- [x] Task: 既存の `ISettingsRepository` に「最近使ったファイル」の保存・取得機能が含まれているか調査する
+- [x] Task: 最近使ったファイルを管理するための Value Object または DTO を `Eede.Domain` または `Eede.Application` に定義する
+- [x] Task: ファイル保存・読み込み成功時に「最近使ったファイル」を更新するロジックを `UseCase` または `ApplicationService` に追加する
+- [x] Task: 最近使ったファイルのリストを永続化する `Infrastructure` 層の実装（既存の設定ファイルへの追記など）を行う
+- [x] Task: Phase Completion Verification and Checkpointing Protocol
 
 ## Phase 2: ViewModel Implementation
 「ようこそ」画面を表示するための ViewModel を実装します。
 
-- [ ] Task: `WelcomeViewModel` を `Eede.Presentation.ViewModels` に新規作成する
+- [~] Task: `WelcomeViewModel` を `Eede.Presentation.ViewModels` に新規作成する
     - [ ] 依存注入（DI）により `ISettingsRepository` や `IPictureIO` 等を受け取る
     - [ ] 最近使ったファイルのリストを `ObservableCollection` で公開する
     - [ ] 「新規作成」「開く」のコマンドを実装する

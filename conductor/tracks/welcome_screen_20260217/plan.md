@@ -22,21 +22,21 @@
 - [x] Task: `App.axaml.cs` で `WelcomeViewModel` を DI コンテナに登録する
 - [x] Task: Phase Completion Verification and Checkpointing Protocol
 
-## Phase 3: UI Design & Implementation (WelcomeView)
+## Phase 3: UI Design & Implementation (WelcomeView) [checkpoint: 38279f6]
 VS Code 風のモダンなデザインで UI を構築します。
 
-- [~] Task: `WelcomeView.axaml` を `Eede.Presentation.Views` に新規作成し、`WelcomeViewModel` と紐付ける
-- [ ] Task: `WelcomeView` のレイアウトを実装する
-    - [ ] 上部へのロゴ画像（またはロゴアイコン）の配置
-    - [ ] セクション分け（最近使ったもの、開始、リンク、情報）
-    - [ ] `PathIcon` を使用した視認性の高いアイコン配置
-    - [ ] マウスオーバー時のハイライト効果（VS Code風）
-- [ ] Task: `PictureFrame.axaml` の既存の `<TextBlock Text="説明など"/>` を `WelcomeView` に置き換える
-- [ ] Task: 狭いドック幅でも崩れないよう、レスポンシブなスタイル（WrapPanelやScrollViewerの活用）を調整する
-- [ ] Task: Phase Completion Verification and Checkpointing Protocol
+- [x] Task: `WelcomeView.axaml` を `Eede.Presentation.Views` に新規作成し、`WelcomeViewModel` と紐付ける
+- [x] Task: `WelcomeView` のレイアウトを実装する
+    - [x] 上部へのロゴ画像（またはロゴアイコン）の配置
+    - [x] セクション分け（最近使ったもの、開始、リンク、情報）
+    - [x] `PathIcon` を使用した視認性の高いアイコン配置
+    - [x] マウスオーバー時のハイライト効果（VS Code風）
+- [x] Task: `PictureFrame.axaml` の既存の `<TextBlock Text="説明など"/>` を `WelcomeView` に置き換える
+- [x] Task: 狭いドック幅でも崩れないよう、レスポンシブなスタイル（WrapPanelやScrollViewerの活用）を調整する
+- [x] Task: Phase Completion Verification and Checkpointing Protocol
 
 ## Phase 4: Verification & Polishing
-- [ ] Task: 実際に画像を作成・保存し、「最近編集した画像」が更新されるか確認する
+- [~] Task: 実際に画像を作成・保存し、「最近編集した画像」が更新されるか確認する
 - [ ] Task: GitHub リンクが正常にブラウザで開くか確認する
 - [ ] Task: デザインの微調整（余白、フォントサイズ、色味の統一）
 - [ ] Task: Phase Completion Verification and Checkpointing Protocol

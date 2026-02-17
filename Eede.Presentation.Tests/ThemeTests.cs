@@ -4,6 +4,7 @@ using Eede.Presentation.Services;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
+using Eede.Presentation.ViewModels.General;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Infrastructure;
@@ -114,6 +115,7 @@ public class ThemeTests
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
             paletteVM, pictureIOService, themeService,
             loadUseCase, saveUseCase,
+            new WelcomeViewModel(settingsRepo.Object),
             () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
             () => new NewPictureWindowViewModel()
         );

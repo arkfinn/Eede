@@ -21,6 +21,7 @@ using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
+using Eede.Presentation.ViewModels.General;
 using Eede.Presentation.ViewModels.Pages;
 using Moq;
 using NUnit.Framework;
@@ -231,6 +232,7 @@ public class RegressionTests_PresentationFixes
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
             paletteVM, pictureIOService, new Mock<IThemeService>().Object,
             loadUseCase, saveUseCase,
+            new WelcomeViewModel(settingsRepo.Object),
             () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
             () => new NewPictureWindowViewModel()
         );

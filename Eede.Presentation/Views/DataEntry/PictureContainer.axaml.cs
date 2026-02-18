@@ -121,6 +121,7 @@ namespace Eede.Presentation.Views.DataEntry
                 .Subscribe(bitmap =>
                 {
                     CanvasSize = new PictureSize((int)bitmap!.Size.Width, (int)bitmap!.Size.Height);
+                    UpdateSelectionPreview();
                 });
 
             // GridView のバインディング設定

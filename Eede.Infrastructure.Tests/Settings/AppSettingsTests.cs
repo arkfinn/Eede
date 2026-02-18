@@ -13,7 +13,11 @@ public class AppSettingsTests
         var settings = new AppSettings
         {
             GridWidth = 16,
-            GridHeight = 24
+            GridHeight = 24,
+            RecentFiles = new()
+            {
+                new RecentFile { Path = "test.png", LastAccessed = new System.DateTime(2026, 2, 17) }
+            }
         };
 
         var json = JsonSerializer.Serialize(settings);
@@ -22,5 +26,8 @@ public class AppSettingsTests
         Assert.That(deserialized, Is.Not.Null);
         Assert.That(deserialized!.GridWidth, Is.EqualTo(16));
         Assert.That(deserialized.GridHeight, Is.EqualTo(24));
+        Assert.That(deserialized.RecentFiles.Count, Is.EqualTo(1));
+        Assert.That(deserialized.RecentFiles[0].Path, Is.EqualTo("test.png"));
+        Assert.That(deserialized.RecentFiles[0].LastAccessed, Is.EqualTo(new System.DateTime(2026, 2, 17)));
     }
 }

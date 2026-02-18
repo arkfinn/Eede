@@ -29,6 +29,7 @@ using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Settings;
 using Eede.Application.UseCase.Settings;
+using Eede.Application.UseCase.Updates;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -95,6 +96,10 @@ public class MainViewModel : ViewModelBase
 
     public WelcomeViewModel WelcomeViewModel { get; }
 
+    [ObservableAsProperty] public bool IsUpdateReady { get; }
+    public ReactiveCommand<Unit, Unit> CheckUpdateCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> ApplyUpdateCommand { get; private set; }
+
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
     public ReactiveCommand<IFileStorage, Unit> LoadPictureCommand { get; private set; }
@@ -140,6 +145,8 @@ public class MainViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly ILoadSettingsUseCase _loadSettingsUseCase;
     private readonly ISaveSettingsUseCase _saveSettingsUseCase;
+    private readonly IUpdateService? _updateService;
+    private readonly CheckUpdateUseCase? _checkUpdateUseCase;
     private readonly GlobalState _state;
     private readonly IClipboard _clipboard;
     private readonly Func<DockPictureViewModel> _dockPictureFactory;
@@ -173,7 +180,9 @@ public class MainViewModel : ViewModelBase
         ISaveSettingsUseCase saveSettingsUseCase,
         WelcomeViewModel welcomeViewModel,
         Func<DockPictureViewModel> dockPictureFactory,
-        Func<NewPictureWindowViewModel> newPictureWindowFactory)
+        Func<NewPictureWindowViewModel> newPictureWindowFactory,
+        IUpdateService? updateService = null,
+        CheckUpdateUseCase? checkUpdateUseCase = null)
     {
         _state = State;
         _clipboard = clipboard;
@@ -189,6 +198,8 @@ public class MainViewModel : ViewModelBase
         _themeService = themeService;
         _loadSettingsUseCase = loadSettingsUseCase;
         _saveSettingsUseCase = saveSettingsUseCase;
+        _updateService = updateService;
+        _checkUpdateUseCase = checkUpdateUseCase;
         WelcomeViewModel = welcomeViewModel;
         _dockPictureFactory = dockPictureFactory;
         _newPictureWindowFactory = newPictureWindowFactory;
@@ -227,6 +238,36 @@ public class MainViewModel : ViewModelBase
         CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         PasteCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
+
+        if (_checkUpdateUseCase != null)
+        {
+            CheckUpdateCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                await _checkUpdateUseCase.ExecuteAsync();
+            });
+        }
+        else
+        {
+            CheckUpdateCommand = ReactiveCommand.Create(() => { });
+        }
+
+        if (_updateService != null)
+        {
+            var canApplyUpdate = _updateService.StatusChanged
+                .Select(status => status == UpdateStatus.ReadyToApply);
+            ApplyUpdateCommand = ReactiveCommand.Create(() =>
+            {
+                _updateService.ApplyAndRestart();
+            }, canApplyUpdate);
+
+            _updateService.StatusChanged
+                .Select(status => status == UpdateStatus.ReadyToApply)
+                .ToPropertyEx(this, x => x.IsUpdateReady);
+        }
+        else
+        {
+            ApplyUpdateCommand = ReactiveCommand.Create(() => { });
+        }
 
         InitializeConnections();
         _ = LoadSettingsAsync();

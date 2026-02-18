@@ -24,8 +24,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: ダイアログボタンの統一と共通コンポーネントの導入**
 *Link: [./archive/unified_dialog_buttons_20260216/](./archive/unified_dialog_buttons_20260216/)*
-
----
-
-- [x] **Track: Velopackを用いてアップデートを自動実施できるようにしたい**
-*Link: [./tracks/auto_update_velopack_20260218/](./tracks/auto_update_velopack_20260218/)*

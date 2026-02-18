@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Dock.Model.Core;
+using Eede.Presentation.ViewModels.General;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections;
 
@@ -23,6 +24,19 @@ namespace Eede.Presentation.Views.DataDisplay
                     }
                 };
             }
+        }
+
+        public static readonly DirectProperty<PictureFrame, WelcomeViewModel?> WelcomeViewModelProperty =
+            AvaloniaProperty.RegisterDirect<PictureFrame, WelcomeViewModel?>(
+                nameof(WelcomeViewModel),
+                o => o.WelcomeViewModel,
+                (o, v) => o.WelcomeViewModel = v);
+
+        private WelcomeViewModel? _welcomeViewModel;
+        public WelcomeViewModel? WelcomeViewModel
+        {
+            get => _welcomeViewModel;
+            set => SetAndRaise(WelcomeViewModelProperty, ref _welcomeViewModel, value);
         }
 
         public static readonly DirectProperty<PictureFrame, IList?> PicturesProperty =

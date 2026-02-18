@@ -5,6 +5,7 @@ using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Pictures;
 using Eede.Application.Infrastructure;
+using Eede.Application.Settings;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.UseCase.Animations;
 using Eede.Application.UseCase.Settings;
@@ -22,6 +23,7 @@ using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
+using Eede.Presentation.ViewModels.General;
 using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.Views.DataEntry;
 using Moq;
@@ -62,8 +64,10 @@ public class PictureContainerTests
         var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
 
         var mockPictureRepo = new Mock<IPictureRepository>();
-        var savePictureUseCase = new SavePictureUseCase(mockPictureRepo.Object);
-        var loadPictureUseCase = new LoadPictureUseCase(mockPictureRepo.Object);
+        var mockSettingsRepoForUseCase = new Mock<ISettingsRepository>();
+        mockSettingsRepoForUseCase.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
+        var savePictureUseCase = new SavePictureUseCase(mockPictureRepo.Object, mockSettingsRepoForUseCase.Object);
+        var loadPictureUseCase = new LoadPictureUseCase(mockPictureRepo.Object, mockSettingsRepoForUseCase.Object);
         var pictureIOService = new PictureIOService(savePictureUseCase, loadPictureUseCase);
 
         // 2. Sub ViewModels Dependencies
@@ -119,6 +123,7 @@ public class PictureContainerTests
             new Mock<IThemeService>().Object,
             loadSettingsUseCase,
             saveSettingsUseCase,
+            new WelcomeViewModel(mockSettingsRepoForUseCase.Object),
             () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
             () => new NewPictureWindowViewModel()
         );

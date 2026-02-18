@@ -1,6 +1,7 @@
 using Avalonia.Headless.NUnit;
 using Eede.Application.Animations;
 using Eede.Application.Infrastructure;
+using Eede.Application.Settings;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Animations;
 using Eede.Application.UseCase.Pictures;
@@ -43,9 +44,11 @@ public class DockPictureViewModelMagnificationTests
             patternService,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter()); _mockPictureRepository = new Mock<IPictureRepository>();
+        var mockSettingsRepo = new Mock<ISettingsRepository>();
+        mockSettingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
         _pictureIOService = new PictureIOService(
-            new SavePictureUseCase(_mockPictureRepository.Object),
-            new LoadPictureUseCase(_mockPictureRepository.Object));
+            new SavePictureUseCase(_mockPictureRepository.Object, mockSettingsRepo.Object),
+            new LoadPictureUseCase(_mockPictureRepository.Object, mockSettingsRepo.Object));
     }
 
     [AvaloniaTest]

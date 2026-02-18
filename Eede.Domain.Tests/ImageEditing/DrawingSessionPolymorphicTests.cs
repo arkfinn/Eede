@@ -27,7 +27,7 @@ public class DrawingSessionPolymorphicTests
         var afterPicture = Picture.CreateEmpty(new PictureSize(10, 10));
 
         // Act: Push a Dock Update
-        var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture);
+        var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture, false, false);
 
         // Assert: State immediately after Push
         // Canvas should remain same
@@ -53,7 +53,7 @@ public class DrawingSessionPolymorphicTests
         var beforePicture = Picture.CreateEmpty(new PictureSize(10, 10));
         var afterPicture = Picture.CreateEmpty(new PictureSize(10, 10));
 
-        var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture);
+        var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture, false, false);
 
         // Act: Undo
         // We expect Undo() to return a record containing the new session and the undone item.
@@ -76,7 +76,7 @@ public class DrawingSessionPolymorphicTests
         var beforePicture = Picture.CreateEmpty(new PictureSize(10, 10));
         var afterPicture = Picture.CreateEmpty(new PictureSize(10, 10));
 
-        var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture);
+        var s2 = session.PushDockUpdate(dockId, pos, beforePicture, afterPicture, false, false);
         var s3 = s2.Undo().Session;
 
         // Act: Redo

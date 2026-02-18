@@ -27,3 +27,8 @@
 - [x] Task: ヘルプメニューへの「アップデートを確認」の追加 [da92177]
 - [x] Task: **[Red/Green]** 手動アップデート確認の ViewModel テストと実装 [da92177]
 - [x] Task: Conductor - User Manual Verification 'フェーズ 4: UI 仕上げ' (Protocol in workflow.md) [da92177]
+
+#### フェーズ 5: GitHub Actions リリース自動化の修正 [checkpoint: 0d9de45]
+- [x] Task: GitHub Actions ワークフローの修正 (`dotnet-desktop-release.yml`) [0d9de45]
+- [x] Task: リリースプロセスのドキュメント更新 [0d9de45]
+- [x] Task: Conductor - User Manual Verification 'フェーズ 5: リリース自動化' (Protocol in workflow.md) [0d9de45]

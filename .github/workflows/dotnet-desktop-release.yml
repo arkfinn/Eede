@@ -29,7 +29,10 @@ jobs:
     steps:
       - name: Get the version
         id: get_version
-        run: echo VERSION=$(echo $GITHUB_REF | cut -d / -f 3) >> $GITHUB_OUTPUT
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag.TrimStart('v')
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,37 +45,26 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
-      - name: Setup MSBuild.exe
-        uses: microsoft/setup-msbuild@v2
+      - name: Install Velopack CLI
+        run: dotnet tool install -g vpk
 
       # Execute all unit tests in the solution
       - name: Execute unit tests
-        run: dotnet test
+        run: dotnet test --configuration Release
 
-      # Restore the application to populate the obj folder with RuntimeIdentifiers
-      - name: Restore the application
-        run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
-        env:
-          Configuration: ${{ matrix.configuration }}
+      - name: Publish Application
+        run: dotnet publish ${{ env.Wap_Project_Path }} --configuration Release --output "./publish" /p:Version=${{ steps.get_version.outputs.VERSION }}
 
-      # Create the app package by building and packaging the Windows Application Packaging project
-      - name: Create the app package
-        # run: msbuild $env:Wap_Project_Path /p:Configuration=$env:Configuration /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=${{ secrets.Pfx_Key }}
-        run: msbuild Eede.sln /p:Configuration=$env:Configuration /p:OutDir="dist\Eede\"
-        env:
-          # Appx_Bundle: Always
-          # Appx_Bundle_Platforms: x86|x64
-          # Appx_Package_Build_Mode: StoreUpload
-          Configuration: ${{ matrix.configuration }}
-
-      - name: Package for windows
-        # if: matrix.target == 'windows'
+      - name: Create Velopack Release
         run: |
-          powershell Compress-Archive -Path ${{ env.Wap_Project_Directory }}\dist\* -DestinationPath ./eede.zip
+          vpk pack --packId "Eede" --packVersion "${{ steps.get_version.outputs.VERSION }}" --packDir "./publish" --mainExe "Eede.Presentation.Desktop.exe" --packAuthors "arkfinn" --packTitle "Eede"
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: eede.zip
+          files: |
+            ./Releases/*.nupkg
+            ./Releases/RELEASES
+            ./Releases/*.exe
+            ./Releases/*.zip

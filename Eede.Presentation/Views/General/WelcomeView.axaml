@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.General"
              xmlns:sk="clr-namespace:Eede.Domain.SharedKernel;assembly=Eede.Domain"
-             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="600"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="600"
              x:Class="Eede.Presentation.Views.General.WelcomeView"
              x:DataType="vm:WelcomeViewModel">
   <Design.DataContext>
@@ -32,89 +32,99 @@
         </StackPanel>
       </StackPanel>
 
-      <!-- 開始 -->
-      <StackPanel Spacing="10">
-        <TextBlock Text="開始" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
-        <Button Command="{Binding CreateNewPictureCommand}" Classes="Link">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Data="{StaticResource NoteAddIconGeometry}"/>
-            <TextBlock Text="新しい画像を作成"/>
-          </StackPanel>
-        </Button>
-        <Button Command="{Binding OpenPictureCommand}" Classes="Link">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Data="{StaticResource FolderOpenIconGeometry}"/>
-            <TextBlock Text="画像を開く"/>
-          </StackPanel>
-        </Button>
-      </StackPanel>
-
-      <!-- 最近使ったファイル -->
-      <StackPanel Spacing="10">
-        <TextBlock Text="最近使ったもの" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
-        <ItemsControl ItemsSource="{Binding RecentFiles}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <Button Command="{Binding ((vm:WelcomeViewModel)DataContext).OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                      CommandParameter="{Binding Path}"
-                      Classes="Link">
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                  <PathIcon Data="{StaticResource EditIconGeometry}"/>
-                  <StackPanel>
-                    <TextBlock Text="{Binding Path}" TextWrapping="Wrap" MaxWidth="240"/>
-                    <TextBlock Text="{Binding LastAccessed}" FontSize="10" Foreground="Gray"/>
-                  </StackPanel>
-                </StackPanel>
-              </Button>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-      </StackPanel>
-
-      <!-- リンク -->
-      <StackPanel Spacing="10">
-        <TextBlock Text="リンク" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
-        <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede" Classes="Link">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Data="{StaticResource FillSquareIconGeometry}"/>
-            <TextBlock Text="GitHub リポジトリ"/>
-          </StackPanel>
-        </Button>
-        <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede/discussions" Classes="Link">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Data="{StaticResource FillSquareIconGeometry}"/>
-            <TextBlock Text="GitHub 議論板 (Discussions)"/>
-          </StackPanel>
-        </Button>
-      </StackPanel>
-
-      <!-- アップデートセクション -->
-      <StackPanel Spacing="10" Margin="0 40 0 0">
-        <Border Padding="12" CornerRadius="8" Background="#10FFFFFF"
-                IsVisible="{Binding IsUpdateAvailable}">
+      <Grid ColumnDefinitions="*,*" RowDefinitions="Auto">
+        <!-- 左カラム: 開始, 最近使ったもの -->
+        <StackPanel Grid.Column="0" Spacing="30" Margin="0 0 20 0">
+          <!-- 開始 -->
           <StackPanel Spacing="10">
-            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-              <!-- チェック中・ダウンロード中のリング（インジケーター） -->
-              <ProgressBar IsIndeterminate="True" Width="16" Height="16" Theme="{StaticResource FluentProgressBarRingTheme}"
-                           IsVisible="{Binding IsUpdateChecking}"/>
-              <ProgressBar IsIndeterminate="True" Width="16" Height="16" Theme="{StaticResource FluentProgressBarRingTheme}"
-                           IsVisible="{Binding IsUpdateDownloading}"/>
-              
-              <TextBlock FontSize="12" Foreground="Gray" Text="{Binding UpdateMessage}"/>
-            </StackPanel>
-
-            <Button Command="{Binding ApplyUpdateCommand}"
-                    IsVisible="{Binding IsUpdateReady}"
-                    HorizontalAlignment="Stretch"
-                    Classes="Accent">
-              <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                <PathIcon Data="{StaticResource SyncIconGeometry}"/>
-                <TextBlock Text="再起動してアップデートを適用" VerticalAlignment="Center"/>
+            <TextBlock Text="開始" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
+            <Button Command="{Binding CreateNewPictureCommand}" Classes="Link">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource NoteAddIconGeometry}"/>
+                <TextBlock Text="新しい画像を作成"/>
+              </StackPanel>
+            </Button>
+            <Button Command="{Binding OpenPictureCommand}" Classes="Link">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource FolderOpenIconGeometry}"/>
+                <TextBlock Text="画像を開く"/>
               </StackPanel>
             </Button>
           </StackPanel>
-        </Border>
-      </StackPanel>
+
+          <!-- 最近使ったファイル -->
+          <StackPanel Spacing="10">
+            <TextBlock Text="最近使ったもの" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
+            <ItemsControl ItemsSource="{Binding RecentFiles}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Command="{Binding ((vm:WelcomeViewModel)DataContext).OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          CommandParameter="{Binding Path}"
+                          Classes="Link">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <PathIcon Data="{StaticResource EditIconGeometry}"/>
+                      <StackPanel>
+                        <TextBlock Text="{Binding Path}" TextWrapping="Wrap" MaxWidth="240"/>
+                        <TextBlock Text="{Binding LastAccessed}" FontSize="10" Foreground="Gray"/>
+                      </StackPanel>
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </StackPanel>
+
+        <!-- 右カラム: アップデート, リンク -->
+        <StackPanel Grid.Column="1" Spacing="30" Margin="20 0 0 0">
+          <!-- アップデートセクション -->
+          <StackPanel Spacing="10">
+            <TextBlock Text="アップデート" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
+            <Border Padding="12" CornerRadius="8" Background="#10FFFFFF"
+                    IsVisible="{Binding IsUpdateAvailable}">
+              <StackPanel Spacing="10">
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <!-- チェック中・ダウンロード中のリング（インジケーター） -->
+                  <ProgressBar IsIndeterminate="True" Width="16" Height="16" Theme="{StaticResource FluentProgressBarRingTheme}"
+                               IsVisible="{Binding IsUpdateChecking}"/>
+                  <ProgressBar IsIndeterminate="True" Width="16" Height="16" Theme="{StaticResource FluentProgressBarRingTheme}"
+                               IsVisible="{Binding IsUpdateDownloading}"/>
+
+                  <TextBlock FontSize="12" Foreground="Gray" Text="{Binding UpdateMessage}"/>
+                </StackPanel>
+
+                <Button Command="{Binding ApplyUpdateCommand}"
+                        IsVisible="{Binding IsUpdateReady}"
+                        HorizontalAlignment="Stretch"
+                        Classes="Accent">
+                  <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <PathIcon Data="{StaticResource SyncIconGeometry}"/>
+                    <TextBlock Text="再起動してアップデートを適用" VerticalAlignment="Center"/>
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+            </Border>
+            <TextBlock Text="最新の状態です" FontSize="12" Foreground="Gray" IsVisible="{Binding !IsUpdateAvailable}"/>
+          </StackPanel>
+
+          <!-- リンク -->
+          <StackPanel Spacing="10">
+            <TextBlock Text="リンク" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
+            <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede" Classes="Link">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource FillSquareIconGeometry}"/>
+                <TextBlock Text="GitHub リポジトリ"/>
+              </StackPanel>
+            </Button>
+            <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede/discussions" Classes="Link">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource FillSquareIconGeometry}"/>
+                <TextBlock Text="GitHub 議論板 (Discussions)"/>
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </StackPanel>
+      </Grid>
     </StackPanel>
   </ScrollViewer>
 

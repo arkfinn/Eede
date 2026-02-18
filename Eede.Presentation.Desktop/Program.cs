@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
 using System;
+using Velopack;
 
 namespace Eede.Presentation.Desktop;
 
@@ -12,6 +13,8 @@ internal class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        VelopackApp.Build().Run();
+
         _ = BuildAvaloniaApp()
         .StartWithClassicDesktopLifetime(args);
     }

@@ -17,9 +17,8 @@
       <StackPanel Spacing="12">
         <Border Background="{DynamicResource SystemAccentColorLight}"
                 CornerRadius="16"
-                Padding="8"
-                HorizontalAlignment="Center"
-                BoxShadow="0 4 12 0 #40000000">
+                Padding="0"
+                HorizontalAlignment="Center">
           <Image Source="/Assets/logo.png" Width="96" Height="96"/>
         </Border>
 
@@ -102,9 +101,29 @@
                     <TextBlock Text="再起動してアップデートを適用" VerticalAlignment="Center"/>
                   </StackPanel>
                 </Button>
+
+                <!-- エラー時にも手動チェックボタンを出す -->
+                <Button Command="{Binding ManualCheckUpdateCommand}"
+                        IsVisible="{Binding !IsUpdateReady}"
+                        HorizontalAlignment="Left"
+                        Classes="Link" Padding="4">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource SyncIconGeometry}" Width="12" Height="12"/>
+                    <TextBlock Text="アップデートを再確認" FontSize="12"/>
+                  </StackPanel>
+                </Button>
               </StackPanel>
             </Border>
-            <TextBlock Text="最新の状態です" FontSize="12" Foreground="Gray" IsVisible="{Binding !IsUpdateAvailable}"/>
+
+            <StackPanel Spacing="5" IsVisible="{Binding !IsUpdateAvailable}">
+              <TextBlock Text="最新の状態です" FontSize="12" Foreground="Gray" VerticalAlignment="Center"/>
+              <Button Command="{Binding ManualCheckUpdateCommand}" Classes="Link" Padding="4">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <PathIcon Data="{StaticResource SyncIconGeometry}" Width="12" Height="12"/>
+                  <TextBlock Text="手動でチェック" FontSize="12"/>
+                </StackPanel>
+              </Button>
+            </StackPanel>
           </StackPanel>
 
           <!-- リンク -->

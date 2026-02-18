@@ -17,12 +17,5 @@
     <KeyBinding Gesture="Ctrl+X" Command="{Binding CutCommand}" />
     <KeyBinding Gesture="Ctrl+V" Command="{Binding PasteCommand}" />
   </Window.KeyBindings>
-  <DockPanel LastChildFill="True">
-    <Menu DockPanel.Dock="Top">
-      <MenuItem Header="ヘルプ(_H)">
-        <MenuItem Header="アップデートを確認(_U)..." Command="{Binding CheckUpdateCommand}" />
-      </MenuItem>
-    </Menu>
-    <pages:MainView />
-  </DockPanel>
+  <pages:MainView />
 </Window>

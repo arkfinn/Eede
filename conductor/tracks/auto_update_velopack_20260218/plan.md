@@ -21,9 +21,9 @@
 - [x] Task: DI コンテナへの登録と結合確認 [590af38]
 - [x] Task: Conductor - User Manual Verification 'フェーズ 3: インフラ統合' (Protocol in workflow.md) [590af38]
 
-#### フェーズ 4: UI 実装と最終検証 (UX 仕上げ)
-- [~] Task: `WelcomeView` (ようこそ画面) の XAML 実装とバインディング
-- [ ] Task: `MainView` (メインエディタ) へのアップデート通知インジケーターの実装
-- [ ] Task: ヘルプメニューへの「アップデートを確認」の追加
-- [ ] Task: **[Red/Green]** 手動アップデート確認の ViewModel テストと実装
-- [ ] Task: Conductor - User Manual Verification 'フェーズ 4: UI 仕上げ' (Protocol in workflow.md)
+#### フェーズ 4: UI 実装と最終検証 (UX 仕上げ) [checkpoint: da92177]
+- [x] Task: `WelcomeView` (ようこそ画面) の XAML 実装とバインディング [da92177]
+- [x] Task: `MainView` (メインエディタ) へのアップデート通知インジケーターの実装 [da92177]
+- [x] Task: ヘルプメニューへの「アップデートを確認」の追加 [da92177]
+- [x] Task: **[Red/Green]** 手動アップデート確認の ViewModel テストと実装 [da92177]
+- [x] Task: Conductor - User Manual Verification 'フェーズ 4: UI 仕上げ' (Protocol in workflow.md) [da92177]

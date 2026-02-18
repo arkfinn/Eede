@@ -20,9 +20,10 @@ Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描�
 
 ## Eede のインストールと実行
 
-[![Download](https://img.shields.io/badge/Download-Windows-blue?logo=github)](https://github.com/arkfinn/Eede/releases/latest/download/EedeSetup.exe)
+[![Download](https://img.shields.io/badge/Download-Windows-blue?logo=github)](https://github.com/arkfinn/Eede/releases/latest/download/Eede-win-Setup.exe)
 
-1. [最新の Setup.exe](https://github.com/arkfinn/Eede/releases/latest/download/EedeSetup.exe) をダウンロードして実行してください。
+1. [最新の Setup.exe](https://github.com/arkfinn/Eede/releases/latest/download/
+Eede-win-Setup.exe ) をダウンロードして実行してください。
 2. アプリケーションは自動的にインストールされ、デスクトップにショートカットが作成されます。
 3. アップデートがある場合は、起動時に自動的に確認・適用されます。
 

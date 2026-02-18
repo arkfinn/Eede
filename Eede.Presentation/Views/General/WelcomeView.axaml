@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.General"
+             xmlns:sk="clr-namespace:Eede.Domain.SharedKernel;assembly=Eede.Domain"
              mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="600"
              x:Class="Eede.Presentation.Views.General.WelcomeView"
              x:DataType="vm:WelcomeViewModel">
@@ -85,6 +86,34 @@
             <TextBlock Text="GitHub 議論板 (Discussions)"/>
           </StackPanel>
         </Button>
+      </StackPanel>
+
+      <!-- アップデートセクション -->
+      <StackPanel Spacing="10" Margin="0 40 0 0">
+        <Border Padding="12" CornerRadius="8" Background="#10FFFFFF"
+                IsVisible="{Binding IsUpdateAvailable}">
+          <StackPanel Spacing="10">
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+              <!-- チェック中・ダウンロード中のリング（インジケーター） -->
+              <ProgressBar IsIndeterminate="True" Width="16" Height="16" Theme="{StaticResource FluentProgressBarRingTheme}"
+                           IsVisible="{Binding IsUpdateChecking}"/>
+              <ProgressBar IsIndeterminate="True" Width="16" Height="16" Theme="{StaticResource FluentProgressBarRingTheme}"
+                           IsVisible="{Binding IsUpdateDownloading}"/>
+              
+              <TextBlock FontSize="12" Foreground="Gray" Text="{Binding UpdateMessage}"/>
+            </StackPanel>
+
+            <Button Command="{Binding ApplyUpdateCommand}"
+                    IsVisible="{Binding IsUpdateReady}"
+                    HorizontalAlignment="Stretch"
+                    Classes="Accent">
+              <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource SyncIconGeometry}"/>
+                <TextBlock Text="再起動してアップデートを適用" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Border>
       </StackPanel>
     </StackPanel>
   </ScrollViewer>

@@ -1,8 +1,0 @@
-{
-  "track_id": "auto_update_velopack_20260218",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-18T02:00:00Z",
-  "updated_at": "2026-02-18T02:00:00Z",
-  "description": "Velopackを用いてアップデートを自動実施できるようにしたい"
-}

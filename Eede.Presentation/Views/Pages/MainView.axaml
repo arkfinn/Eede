@@ -180,6 +180,12 @@
 								                                                                        <ComboBoxItem>Light</ComboBoxItem>
 								                                                                        <ComboBoxItem>Dark</ComboBoxItem>
 								                                                                </ComboBox>
+								                                                                <Button Classes="tool"
+								                                                                        IsVisible="{Binding IsUpdateReady}"
+								                                                                        Command="{Binding ApplyUpdateCommand}"
+								                                                                        ToolTip.Tip="新しいバージョンが利用可能です。クリックして再起動し、適用します。">
+								                                                                        <PathIcon Data="{StaticResource SyncIconGeometry}" Classes="icon" Foreground="{DynamicResource SystemAccentColor}" />
+								                                                                </Button>
 								                                                        </StackPanel>						</Panel>
 						<display:PictureFrame Pictures="{Binding Pictures}"
 											  ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"

@@ -21,6 +21,11 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
     public string Version => GetVersion();
 
     [Reactive] public UpdateStatus UpdateStatus { get; set; }
+    [ObservableAsProperty] public bool IsUpdateChecking { get; }
+    [ObservableAsProperty] public bool IsUpdateDownloading { get; }
+    [ObservableAsProperty] public bool IsUpdateReady { get; }
+    [ObservableAsProperty] public bool IsUpdateAvailable { get; }
+    [ObservableAsProperty] public string UpdateMessage { get; }
 
     public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenPictureCommand { get; }
@@ -72,6 +77,33 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
         {
             _updateService?.ApplyAndRestart();
         }, canApplyUpdate);
+
+        this.WhenAnyValue(x => x.UpdateStatus)
+            .Select(x => x == UpdateStatus.Checking)
+            .ToPropertyEx(this, x => x.IsUpdateChecking);
+
+        this.WhenAnyValue(x => x.UpdateStatus)
+            .Select(x => x == UpdateStatus.Downloading)
+            .ToPropertyEx(this, x => x.IsUpdateDownloading);
+
+        this.WhenAnyValue(x => x.UpdateStatus)
+            .Select(x => x == UpdateStatus.ReadyToApply)
+            .ToPropertyEx(this, x => x.IsUpdateReady);
+
+        this.WhenAnyValue(x => x.UpdateStatus)
+            .Select(x => x != UpdateStatus.Idle)
+            .ToPropertyEx(this, x => x.IsUpdateAvailable);
+
+        this.WhenAnyValue(x => x.UpdateStatus)
+            .Select(x => x switch
+            {
+                UpdateStatus.Checking => "アップデートを確認中...",
+                UpdateStatus.Downloading => "最新バージョンをダウンロード中...",
+                UpdateStatus.ReadyToApply => "新しいバージョンの準備ができました",
+                UpdateStatus.Error => "アップデートの確認に失敗しました",
+                _ => ""
+            })
+            .ToPropertyEx(this, x => x.UpdateMessage);
 
         if (_updateService != null)
         {

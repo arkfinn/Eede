@@ -33,6 +33,7 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
     public ReactiveCommand<string, string> OpenUrlCommand { get; }
     public ReactiveCommand<Unit, Unit> LoadRecentFilesCommand { get; }
     public ReactiveCommand<Unit, Unit> ApplyUpdateCommand { get; }
+    public ReactiveCommand<Unit, Unit> ManualCheckUpdateCommand { get; }
 
     private readonly ISettingsRepository _settingsRepository;
     private readonly CheckUpdateUseCase? _checkUpdateUseCase;
@@ -77,6 +78,16 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
         {
             _updateService?.ApplyAndRestart();
         }, canApplyUpdate);
+
+        var canCheckUpdate = this.WhenAnyValue(x => x.UpdateStatus)
+            .Select(status => status == UpdateStatus.Idle || status == UpdateStatus.Error);
+        ManualCheckUpdateCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            if (_checkUpdateUseCase != null)
+            {
+                await _checkUpdateUseCase.ExecuteAsync();
+            }
+        }, canCheckUpdate);
 
         this.WhenAnyValue(x => x.UpdateStatus)
             .Select(x => x == UpdateStatus.Checking)

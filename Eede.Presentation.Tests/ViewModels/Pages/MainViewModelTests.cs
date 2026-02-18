@@ -308,7 +308,7 @@ public class MainViewModelTests
     }
 
     [AvaloniaTest]
-    public async Task CheckUpdateCommand_ShouldCallCheckForUpdates()
+    public async Task ManualCheckUpdateCommand_ShouldCallCheckForUpdates()
     {
         _updateServiceMock.Setup(x => x.CheckForUpdatesAsync()).ReturnsAsync(false);
         var mainVM = CreateMainViewModel();
@@ -316,7 +316,7 @@ public class MainViewModelTests
         // WelcomeViewModel の初期化による呼び出しをクリア
         _updateServiceMock.Invocations.Clear();
 
-        await mainVM.CheckUpdateCommand.Execute().ToTask();
+        await mainVM.WelcomeViewModel.ManualCheckUpdateCommand.Execute().ToTask();
 
         _updateServiceMock.Verify(x => x.CheckForUpdatesAsync(), Times.Once);
     }

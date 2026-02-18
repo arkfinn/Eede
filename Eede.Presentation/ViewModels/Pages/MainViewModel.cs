@@ -97,7 +97,6 @@ public class MainViewModel : ViewModelBase
     public WelcomeViewModel WelcomeViewModel { get; }
 
     [ObservableAsProperty] public bool IsUpdateReady { get; }
-    public ReactiveCommand<Unit, Unit> CheckUpdateCommand { get; private set; }
     public ReactiveCommand<Unit, Unit> ApplyUpdateCommand { get; private set; }
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
@@ -238,18 +237,6 @@ public class MainViewModel : ViewModelBase
         CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         PasteCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
-
-        if (_checkUpdateUseCase != null)
-        {
-            CheckUpdateCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                await _checkUpdateUseCase.ExecuteAsync();
-            });
-        }
-        else
-        {
-            CheckUpdateCommand = ReactiveCommand.Create(() => { });
-        }
 
         if (_updateService != null)
         {

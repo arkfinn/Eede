@@ -57,7 +57,7 @@ jobs:
 
       - name: Create Velopack Release
         run: |
-          vpk pack --packId "Eede" --packVersion "${{ steps.get_version.outputs.VERSION }}" --packDir "./publish" --mainExe "Eede.Presentation.Desktop.exe" --packAuthors "arkfinn" --packTitle "Eede"
+          vpk pack --packId "Eede" --packVersion "${{ steps.get_version.outputs.VERSION }}" --packDir "./publish" --mainExe "Eede.exe" --packAuthors "arkfinn" --packTitle "Eede"
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1

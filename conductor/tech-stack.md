@@ -34,3 +34,4 @@
   - `ViewLocator` および `ServiceResolveExtension` を介して、XAML 側で ViewModel を自動解決する仕組みを導入
 - **Fody (ReactiveUI.Fody):** INotifyPropertyChanged の自動実装
 - **System.Text.Json:** JSON シリアライズ
+- **Velopack:** デスクトップアプリの自動アップデートおよびインストーラー管理。GitHub Releases をリリースソースとして活用し、バックグラウンドでの更新取得を実現している。

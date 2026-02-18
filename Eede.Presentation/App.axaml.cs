@@ -7,11 +7,14 @@ using Eede.Application.Pictures;
 using Eede.Application.UseCase.Animations;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.UseCase.Settings;
+using Eede.Application.UseCase.Updates;
 using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
+using Eede.Domain.SharedKernel;
 using Eede.Infrastructure.Settings;
+using Eede.Infrastructure.Updates;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
 using Eede.Presentation.Services;
@@ -25,6 +28,9 @@ using Eede.Presentation.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading.Tasks;
 
 namespace Eede.Presentation;
 
@@ -107,6 +113,10 @@ public partial class App : Avalonia.Application
         });
         services.AddTransient<ILoadSettingsUseCase, LoadSettingsUseCase>();
         services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();
+
+        // Updates
+        services.AddSingleton<IUpdateService>(sp => new VelopackUpdateService("https://github.com/arkfinn/EedeWin"));
+        services.AddTransient<CheckUpdateUseCase>();
 
         // ViewModels
         services.AddTransient<IInteractionCoordinator, InteractionCoordinator>();

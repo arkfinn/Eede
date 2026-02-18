@@ -22,6 +22,7 @@ using Eede.Application.UseCase.Settings;
 using System;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Avalonia.Headless.NUnit;
 
@@ -52,6 +53,7 @@ public class MainViewModelTests
     private Mock<ISettingsRepository> _settingsRepositoryMock = default!;
     private Mock<ILoadSettingsUseCase> _loadSettingsUseCaseMock = default!;
     private Mock<ISaveSettingsUseCase> _saveSettingsUseCaseMock = default!;
+    private Mock<IUpdateService> _updateServiceMock = default!;
 
     private GlobalState _globalState = default!;
     private DrawableCanvasViewModel _drawableCanvasViewModel = default!;
@@ -85,6 +87,8 @@ public class MainViewModelTests
         _loadSettingsUseCaseMock = new Mock<ILoadSettingsUseCase>();
         _loadSettingsUseCaseMock.Setup(x => x.ExecuteAsync()).ReturnsAsync(new AppSettings { GridWidth = 32, GridHeight = 32 });
         _saveSettingsUseCaseMock = new Mock<ISaveSettingsUseCase>();
+        _updateServiceMock = new Mock<IUpdateService>();
+        _updateServiceMock.SetupGet(x => x.StatusChanged).Returns(System.Reactive.Linq.Observable.Return(UpdateStatus.Idle));
 
         _globalState = new GlobalState();
         _animationViewModel = new AnimationViewModel(_patternsProviderMock.Object, _animationPatternServiceMock.Object, _fileSystemMock.Object, new AvaloniaBitmapAdapter());
@@ -103,7 +107,8 @@ public class MainViewModelTests
 
     private MainViewModel CreateMainViewModel()
     {
-        var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object);
+        var checkUpdateUseCase = new Eede.Application.UseCase.Updates.CheckUpdateUseCase(_updateServiceMock.Object);
+        var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object, _updateServiceMock.Object, checkUpdateUseCase);
         return new MainViewModel(
             _globalState,
             _clipboardMock.Object,
@@ -125,7 +130,9 @@ public class MainViewModelTests
             _saveSettingsUseCaseMock.Object,
             welcomeVM,
             () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object),
-            () => null!);
+            () => null!,
+            _updateServiceMock.Object,
+            checkUpdateUseCase);
     }
 
     [AvaloniaTest]
@@ -298,5 +305,34 @@ public class MainViewModelTests
 
         Assert.That(saved, Is.True);
         _saveSettingsUseCaseMock.Verify(x => x.ExecuteAsync(It.Is<AppSettings>(s => s.GridWidth == 16 && s.GridHeight == 24)), Times.AtLeastOnce);
+    }
+
+    [AvaloniaTest]
+    public async Task CheckUpdateCommand_ShouldCallCheckForUpdates()
+    {
+        _updateServiceMock.Setup(x => x.CheckForUpdatesAsync()).ReturnsAsync(false);
+        var mainVM = CreateMainViewModel();
+
+        // WelcomeViewModel の初期化による呼び出しをクリア
+        _updateServiceMock.Invocations.Clear();
+
+        await mainVM.CheckUpdateCommand.Execute().ToTask();
+
+        _updateServiceMock.Verify(x => x.CheckForUpdatesAsync(), Times.Once);
+    }
+
+    [AvaloniaTest]
+    public void IsUpdateReady_ShouldSyncWithService()
+    {
+        var statusSubject = new System.Reactive.Subjects.BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
+        _updateServiceMock.SetupGet(x => x.StatusChanged).Returns(statusSubject);
+        
+        var mainVM = CreateMainViewModel();
+
+        Assert.That(mainVM.IsUpdateReady, Is.False);
+
+        statusSubject.OnNext(UpdateStatus.ReadyToApply);
+
+        Assert.That(mainVM.IsUpdateReady, Is.True);
     }
 }

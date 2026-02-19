@@ -47,41 +47,44 @@ public class VelopackUpdateService : IUpdateService, IDisposable
 
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            SetStatus(UpdateStatus.Error);
+            // インストールされていない環境（デバッグ時など）では UpdateManager が例外を投げる可能性があります。
+            // その場合はエラー表示にせず、Idle ステータスに戻します。
+            System.Diagnostics.Debug.WriteLine($"Velopack CheckForUpdatesAsync error: {ex.Message}");
+            SetStatus(UpdateStatus.Idle);
             return false;
         }
     }
 
     public async Task DownloadUpdateAsync()
     {
-        if (_updateInfo == null) return;
-
         try
         {
+            if (_updateInfo == null) return;
             SetStatus(UpdateStatus.Downloading);
             var mgr = new UpdateManager(new GithubSource(_githubUrl, null, false));
             await mgr.DownloadUpdatesAsync(_updateInfo);
             SetStatus(UpdateStatus.ReadyToApply);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Velopack DownloadUpdateAsync error: {ex.Message}");
             SetStatus(UpdateStatus.Error);
         }
     }
 
     public void ApplyAndRestart()
     {
-        if (Status != UpdateStatus.ReadyToApply) return;
-
         try
         {
+            if (Status != UpdateStatus.ReadyToApply) return;
             var mgr = new UpdateManager(new GithubSource(_githubUrl, null, false));
             mgr.ApplyUpdatesAndRestart(_updateInfo);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Velopack ApplyAndRestart error: {ex.Message}");
             SetStatus(UpdateStatus.Error);
         }
     }

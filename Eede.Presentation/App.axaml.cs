@@ -115,7 +115,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();
 
         // Updates
-        services.AddSingleton<IUpdateService>(sp => new VelopackUpdateService("https://github.com/arkfinn/EedeWin"));
+        services.AddSingleton<IUpdateService>(sp => new VelopackUpdateService(@"https://github.com/arkfinn/Eede"));
         services.AddTransient<CheckUpdateUseCase>();
 
         // ViewModels

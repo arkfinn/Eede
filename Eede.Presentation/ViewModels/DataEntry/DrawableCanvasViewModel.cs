@@ -90,7 +90,6 @@ public class DrawableCanvasViewModel : ViewModelBase
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly ISelectionService _selectionService;
     private readonly IInteractionCoordinator _coordinator;
-    private readonly PictureSize _gridSize = new(16, 16);
     private readonly IImageTransfer _identityTransfer = new IdentityImageTransfer();
 
     public ReactiveCommand<Unit, Unit> CopyCommand { get; }
@@ -290,7 +289,7 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     public void SetupRegionSelector(RegionSelector selector)
     {
-        _coordinator.SetupRegionSelector(selector, PictureBuffer, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize);
+        _coordinator.SetupRegionSelector(selector, PictureBuffer, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : CursorSize);
     }
 
     private Cursor CreateCursor(StandardCursorType type)
@@ -378,22 +377,22 @@ public class DrawableCanvasViewModel : ViewModelBase
 
     private void ExecuteDrawBeginAction(Position pos)
     {
-        _coordinator.PointerBegin(pos, PictureBuffer, DrawStyle, PenStyle, IsShifted, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize, InternalUpdateCommand);
+        _coordinator.PointerBegin(pos, PictureBuffer, DrawStyle, PenStyle, IsShifted, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : CursorSize, InternalUpdateCommand);
     }
 
     private void ExecutePonterRightButtonPressedAction(Position pos)
     {
-        _coordinator.PointerRightButtonPressed(pos, PictureBuffer, DrawStyle, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize, (color) => ExecuteColorPicked(color), InternalUpdateCommand);
+        _coordinator.PointerRightButtonPressed(pos, PictureBuffer, DrawStyle, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : CursorSize, (color) => ExecuteColorPicked(color), InternalUpdateCommand);
     }
 
     private void ExecuteDrawingAction(Position pos)
     {
-        _coordinator.PointerMoved(pos, PictureBuffer, DrawStyle, PenStyle, IsShifted, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize);
+        _coordinator.PointerMoved(pos, PictureBuffer, DrawStyle, PenStyle, IsShifted, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : CursorSize);
     }
 
     private void ExecuteDrawEndAction(Position pos)
     {
-        _coordinator.PointerLeftButtonReleased(pos, PictureBuffer, DrawStyle, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : _gridSize, PenStyle, IsShifted, InternalUpdateCommand);
+        _coordinator.PointerLeftButtonReleased(pos, PictureBuffer, DrawStyle, IsAnimationMode, IsAnimationMode ? GridSettings.CellSize : CursorSize, PenStyle, IsShifted, InternalUpdateCommand);
     }
 
     private void ExecuteCanvasLeaveAction()

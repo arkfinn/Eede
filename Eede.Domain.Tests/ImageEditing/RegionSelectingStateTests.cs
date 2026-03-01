@@ -15,7 +15,7 @@ public class RegionSelectingStateTests
     {
         var start = new Position(10, 10);
         var now = new Position(13, 13);
-        var state = new RegionSelectingState(start, now, _minSize);
+        var state = new RegionSelectingState(start, now, _minSize, _minSize);
 
         var area = state.GetSelectingArea();
 
@@ -29,7 +29,7 @@ public class RegionSelectingStateTests
     {
         var start = new Position(10, 10);
         var now = new Position(50, 50);
-        var state = new RegionSelectingState(start, now, _minSize);
+        var state = new RegionSelectingState(start, now, _minSize, _minSize);
 
         var area = state.GetSelectingArea();
 
@@ -47,7 +47,7 @@ public class RegionSelectingStateTests
     {
         var start = new Position(0, 0);
         var now = new Position(100, 100);
-        var state = new RegionSelectingState(start, now, _minSize);
+        var state = new RegionSelectingState(start, now, _minSize, _minSize);
 
         var area = state.GetSelectingArea();
 
@@ -66,7 +66,7 @@ public class RegionSelectingStateTests
     public void HandlePointerMoved_Should_Update_NowPosition()
     {
         var start = new Position(0, 0);
-        var state = new RegionSelectingState(start, start, _minSize);
+        var state = new RegionSelectingState(start, start, _minSize, _minSize);
 
         // Initial area (32x32 due to min size and snap)
         var initialArea = state.GetSelectingArea();
@@ -83,7 +83,7 @@ public class RegionSelectingStateTests
     public void HandlePointerMoved_Should_Support_Square_Selection_With_Shift()
     {
         var start = new Position(100, 100);
-        var state = new RegionSelectingState(start, start, _minSize);
+        var state = new RegionSelectingState(start, start, _minSize, _minSize);
 
         // Move to (150, 120) with Shift
         // deltaX = 50, deltaY = 20. Max delta = 50.

@@ -17,6 +17,18 @@ namespace Eede.Domain.Tests.ImageEditing
         }
 
         [Test]
+        public void BoxPositionWithIndependentGridSizeTest()
+        {
+            // ボックスサイズが 64x64 であっても、グリッドサイズ（スナップ単位）として 16x16 (32x32の半分) を指定すれば
+            // 座標 (20, 20) は (16, 16) にスナップされるべき
+            PictureSize boxSize = new(64, 64);
+            PictureSize snappingGridSize = new(16, 16);
+            HalfBoxArea pos = HalfBoxArea.Create(At(20, 20), boxSize, snappingGridSize);
+            
+            Assert.That(pos.RealPosition, Is.EqualTo(At(16, 16)));
+        }
+
+        [Test]
         public void CreateRealRectangleTest()
         {
             HalfBoxArea pos = HalfBoxArea.Create(At(17, 47), new PictureSize(16, 32));

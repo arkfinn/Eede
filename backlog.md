@@ -10,83 +10,23 @@
     - [ ] **[優先度:低] Picture のタイル化 (Tiling)**: 巨大な単一配列をタイル単位の管理に切り替え、部分更新時のコピーコストと履歴サイズを極小化する。
     - [ ] **[優先度:低] ネイティブメモリ管理への移行**: `NativeMemory.Alloc` 等を使用して GC 管理外でバッファを保持し、GC パフォーマンスへの影響をゼロにする。
     - [ ] 超巨大画像（8192px等）を用いたストレステストとピークメモリの監視
-- [ ] 「透過ボタン」のアイコンを正式なものにする
 - [ ] Presentation層全体でのインターフェース依存への移行：テスト容易性の向上
 - [ ] テストケースのリファクタリング。単体テストの使い方・考え方に基づく。
 
-条件は不明、ドックパネルのズームボタンを押したら以下のエラー
-System.NullReferenceException
-  HResult=0x80004003
-  Message=Object reference not set to an instance of an object.
-  Source=Avalonia.Controls
-  スタック トレース:
-   場所 Avalonia.Controls.Image.MeasureOverride(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureOverride(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureOverride(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
-   場所 Avalonia.Layout.LayoutManager.Measure(Layoutable control)
-   場所 Avalonia.Layout.LayoutManager.ExecuteLayoutPass()
-   場所 Avalonia.Media.MediaContext.FireInvokeOnRenderCallbacks()
-   場所 Avalonia.Media.MediaContext.RenderCore()
-   場所 Avalonia.Media.MediaContext.Render()
-   場所 Avalonia.Threading.DispatcherOperation.InvokeCore()
-   場所 Avalonia.Threading.DispatcherOperation.Execute()
-   場所 Avalonia.Threading.Dispatcher.ExecuteJob(DispatcherOperation job)
-   場所 Avalonia.Threading.Dispatcher.ExecuteJobsCore(Boolean fromExplicitBackgroundProcessingCallback)
-   場所 Avalonia.Threading.Dispatcher.Signaled()
-   場所 Avalonia.Win32.Win32Platform.WndProc(IntPtr hWnd, UInt32 msg, IntPtr wParam, IntPtr lParam)
-   場所 Avalonia.Win32.Interop.UnmanagedMethods.DispatchMessage(MSG& lpmsg)
-   場所 Avalonia.Win32.Win32DispatcherImpl.RunLoop(CancellationToken cancellationToken)
-   場所 Avalonia.Threading.DispatcherFrame.Run(IControlledDispatcherImpl impl)
-   場所 Avalonia.Threading.Dispatcher.PushFrame(DispatcherFrame frame)
-   場所 Avalonia.Threading.Dispatcher.MainLoop(CancellationToken cancellationToken)
-   場所 Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime.StartCore(String[] args)
-   場所 Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime.Start(String[] args)
-   場所 Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(AppBuilder builder, String[] args, Action`1 lifetimeBuilder)
-   場所 Eede.Presentation.Desktop.Program.Main(String[] args) (F:\mydata\program\EedeWin\Eede\Eede.Presentation.Desktop\Program.cs):行 15
+## 検討事項
 
-  この例外は、最初にこの呼び出し履歴
-    [外部コード]
-    Eede.Presentation.Desktop.Program.Main(string[]) (Program.cs 内) でスローされましたSystem.NullReferenceException
-  HResult=0x80004003
-  Message=Object reference not set to an instance of an object.
-  Source=Avalonia.Controls
-  スタック トレース:
-   場所 Avalonia.Controls.Image.MeasureOverride(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureOverride(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureOverride(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.MeasureCore(Size availableSize)
-   場所 Avalonia.Layout.Layoutable.Measure(Size availableSize)
-   場所 Avalonia.Layout.LayoutManager.Measure(Layoutable control)
-   場所 Avalonia.Layout.LayoutManager.ExecuteLayoutPass()
-   場所 Avalonia.Media.MediaContext.FireInvokeOnRenderCallbacks()
-   場所 Avalonia.Media.MediaContext.RenderCore()
-   場所 Avalonia.Media.MediaContext.Render()
-   場所 Avalonia.Threading.DispatcherOperation.InvokeCore()
-   場所 Avalonia.Threading.DispatcherOperation.Execute()
-   場所 Avalonia.Threading.Dispatcher.ExecuteJob(DispatcherOperation job)
-   場所 Avalonia.Threading.Dispatcher.ExecuteJobsCore(Boolean fromExplicitBackgroundProcessingCallback)
-   場所 Avalonia.Threading.Dispatcher.Signaled()
-   場所 Avalonia.Win32.Win32Platform.WndProc(IntPtr hWnd, UInt32 msg, IntPtr wParam, IntPtr lParam)
-   場所 Avalonia.Win32.Interop.UnmanagedMethods.DispatchMessage(MSG& lpmsg)
-   場所 Avalonia.Win32.Win32DispatcherImpl.RunLoop(CancellationToken cancellationToken)
-   場所 Avalonia.Threading.DispatcherFrame.Run(IControlledDispatcherImpl impl)
-   場所 Avalonia.Threading.Dispatcher.PushFrame(DispatcherFrame frame)
-   場所 Avalonia.Threading.Dispatcher.MainLoop(CancellationToken cancellationToken)
-   場所 Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime.StartCore(String[] args)
-   場所 Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime.Start(String[] args)
-   場所 Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(AppBuilder builder, String[] args, Action`1 lifetimeBuilder)
-   場所 Eede.Presentation.Desktop.Program.Main(String[] args) (F:\mydata\program\EedeWin\Eede\Eede.Presentation.Desktop\Program.cs):行 15
+### より現代的に
+- [ ] **パレット管理機能の強化**: 「くすみカラー」等の独自パレットを保存・読込・整理できる機能。現在の「一時パレット」のみでは創作の継続性が損なわれる。
+- [ ] **アニメーションの書き出し機能**: SNS（X等）への投稿やUnityでの利用を想定した、アニメーションGIF形式やスプライトシート形式でのエクスポート機能。
+- [ ] **UI/UXのモダン化**: ツールバーやパネルの配置をより整理し、キャンバスへの没入感を高める「ミニマルモード」や、好みのアクセントカラーを設定できるテーマカスタマイズ機能。
+- [ ] **リファレンス（下絵）表示機能**: 写真やイラストをキャンバスの背面に透過表示し、色味や構図を参考にできる機能。
+- [ ] **「映え」のポストプロセス**: SNS投稿用に、ノイズや色収差、走査線などのレトロエフェクトを重畳して書き出す機能。
 
-  この例外は、最初にこの呼び出し履歴
-    [外部コード]
-    Eede.Presentation.Desktop.Program.Main(string[]) (Program.cs 内) でスローされました
+### 熟練向け
+- [ ] **ショートカットキーの完全カスタマイズ**: 全てのツール切り替えやアクションに対して、ユーザーが任意のキーを割り当てられる機能。長年の癖（SFC/アーケード時代からの習慣）への適応。
+- [ ] **オニオンスキン機能**: アニメーション制作時に、前後フレームを半透明で重ねて表示する機能。手打ちでの精密な中割りに必須。
+- [ ] **制限色（インデックスカラー）シミュレーション**: 32bit環境であっても、16色や256色といった制限下での見え方を確認したり、コントラスト比をチェックしたりする機能。
+- [ ] **グリッド設定の柔軟化**: 8x8, 16x16 だけでなく、キャラクターのタイルサイズに合わせた自由なグリッド間隔の設定と、グリッド自体の色や透明度の調整。
+- [ ] **ディザリング（網点）ブラシ**: 職人芸であるディザリングを、自分の手で効率よく、かつ美しく打つための専用ブラシ。
+- [ ] **シームレス・タイルプレビュー**: キャンバスを並べて表示し、床や壁のタイルとしての繋がり（継ぎ目）をリアルタイムに確認できる機能。
+- [ ] **ハードウェア制約モニタリング**: 使用色数やメモリサイズをリアルタイム表示し、特定ハードウェア（SFC等）の制限内であることを確認できるステータス表示。

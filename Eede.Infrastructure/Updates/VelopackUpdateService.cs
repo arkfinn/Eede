@@ -13,6 +13,7 @@ namespace Eede.Infrastructure.Updates;
 public class VelopackUpdateService : IUpdateService, IDisposable
 {
     public UpdateStatus Status { get; private set; } = UpdateStatus.Idle;
+    public string? LatestVersion { get; private set; }
 
     private readonly BehaviorSubject<UpdateStatus> _statusSubject = new(UpdateStatus.Idle);
     public IObservable<UpdateStatus> StatusChanged => _statusSubject.AsObservable();
@@ -37,6 +38,7 @@ public class VelopackUpdateService : IUpdateService, IDisposable
         {
             SetStatus(UpdateStatus.Checking);
             var mgr = new UpdateManager(new GithubSource(_githubUrl, null, false));
+            LatestVersion = mgr.CurrentVersion?.ToString();
             _updateInfo = await mgr.CheckForUpdatesAsync();
 
             if (_updateInfo == null)
@@ -45,6 +47,7 @@ public class VelopackUpdateService : IUpdateService, IDisposable
                 return false;
             }
 
+            LatestVersion = _updateInfo.TargetFullRelease.Version.ToString();
             return true;
         }
         catch (Exception ex)

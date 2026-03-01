@@ -12,13 +12,15 @@ public class RegionSelectingState : ISelectionState
     private Position _startPosition;
     private Position _nowPosition;
     private PictureSize _minSize;
+    private PictureSize _snappingGridSize;
     private bool _isShifted;
 
-    public RegionSelectingState(Position startPosition, Position nowPosition, PictureSize minSize)
+    public RegionSelectingState(Position startPosition, Position nowPosition, PictureSize minSize, PictureSize snappingGridSize)
     {
         _startPosition = startPosition;
         _nowPosition = nowPosition;
         _minSize = minSize;
+        _snappingGridSize = snappingGridSize;
     }
 
     public ISelectionState HandlePointerLeftButtonPressed(HalfBoxArea cursorArea, Position mousePosition, ICommand? pullAction, Func<Picture> getPicture, ICommand? updateAction, int handleSize = 8)
@@ -83,9 +85,9 @@ public class RegionSelectingState : ISelectionState
         // マウスの生座標から暫定的な矩形を作成
         var rawArea = PictureArea.FromPosition(_startPosition, targetPosition, new PictureSize(int.MaxValue, int.MaxValue));
 
-        // グリッドサイズ（スナップ単位）を算出（通常は 16x16）
-        int gridSizeW = _minSize.Width / 2;
-        int gridSizeH = _minSize.Height / 2;
+        // グリッドサイズ（スナップ単位）を算出。設定されたグリッドサイズの半分を使用する。
+        int gridSizeW = _snappingGridSize.Width / 2;
+        int gridSizeH = _snappingGridSize.Height / 2;
 
         // 矩形の各端点をグリッドにスナップさせる
         int left = Snap(rawArea.X, gridSizeW);

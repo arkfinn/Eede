@@ -245,6 +245,25 @@ public class MainViewModelTests
     }
 
     [AvaloniaTest]
+    public void NewDockPicture_ShouldInheritCurrentCursorSize()
+    {
+        var mainVM = CreateMainViewModel();
+        
+        // 1. カーソルサイズを変更
+        mainVM.MinCursorWidth = 48;
+        mainVM.MinCursorHeight = 48;
+        var currentSize = new PictureSize(48, 48);
+        Assert.That(mainVM.CursorSize, Is.EqualTo(currentSize));
+
+        // 2. 新しい画像を追加（Pictures.Add 時に SetupDockPicture が走ることを期待）
+        var newDockVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        mainVM.Pictures.Add(newDockVM);
+
+        // 3. 新しい DockPictureViewModel が現在のサイズを引き継いでいることを確認
+        Assert.That(newDockVM.CursorSize, Is.EqualTo(currentSize), "新規追加された画像はメインの設定からカーソルサイズを引き継ぐべき");
+    }
+
+    [AvaloniaTest]
     public void Initialization_ShouldLoadGridSizeFromUseCase()
     {
         var settings = new AppSettings { GridWidth = 48, GridHeight = 64 };

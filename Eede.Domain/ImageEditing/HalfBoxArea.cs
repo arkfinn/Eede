@@ -30,12 +30,13 @@ namespace Eede.Domain.ImageEditing
         /// <summary>
         /// HalfBoxAreaの新しいインスタンスを生成します。
         /// このメソッドは、defaultBoxSizeとstartPositionがboxSizeとlocalPositionと同じ初期値を持つ場合に利用されます。
+        /// gridSizeが指定されない場合は、boxSizeの半分がグリッドサイズとして使用されます。
         /// </summary>
-        public static HalfBoxArea Create(Position localPosition, PictureSize boxSize)
+        public static HalfBoxArea Create(Position localPosition, PictureSize boxSize, PictureSize? gridSize = null)
         {
-            // GridSizeはdefaultBoxSizeから計算されるため、ここではdefaultBoxSizeをboxSizeとして渡す
-            PictureSize gridSize = new(boxSize.Width / 2, boxSize.Height / 2);
-            return With(localPosition, boxSize, boxSize, localPosition, gridSize);
+            // gridSizeが指定されない場合は、従来通りboxSizeの半分を計算して使用する
+            PictureSize actualGridSize = gridSize ?? new PictureSize(boxSize.Width / 2, boxSize.Height / 2);
+            return With(localPosition, boxSize, boxSize, localPosition, actualGridSize);
         }
 
         private static HalfBoxArea With(Position localPosition, PictureSize boxSize, PictureSize defaultBoxSize, Position startPosition, PictureSize gridSize)

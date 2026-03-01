@@ -19,8 +19,10 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
     public ObservableCollection<RecentFile> RecentFiles { get; } = new();
 
     public string Version => GetVersion();
+    public string DisplayVersion => LatestVersion ?? Version;
 
     [Reactive] public UpdateStatus UpdateStatus { get; set; }
+    [Reactive] public string? LatestVersion { get; set; }
     [ObservableAsProperty] public bool IsUpdateChecking { get; }
     [ObservableAsProperty] public bool IsUpdateDownloading { get; }
     [ObservableAsProperty] public bool IsUpdateReady { get; }
@@ -105,12 +107,12 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
             .Select(x => x != UpdateStatus.Idle)
             .ToPropertyEx(this, x => x.IsUpdateAvailable);
 
-        this.WhenAnyValue(x => x.UpdateStatus)
-            .Select(x => x switch
+        this.WhenAnyValue(x => x.UpdateStatus, x => x.LatestVersion)
+            .Select(x => x.Item1 switch
             {
                 UpdateStatus.Checking => "アップデートを確認中...",
-                UpdateStatus.Downloading => "最新バージョンをダウンロード中...",
-                UpdateStatus.ReadyToApply => "新しいバージョンの準備ができました",
+                UpdateStatus.Downloading => $"最新バージョン ({x.Item2}) をダウンロード中...",
+                UpdateStatus.ReadyToApply => $"新しいバージョン ({x.Item2}) の準備ができました",
                 UpdateStatus.Error => "アップデートの確認に失敗しました",
                 _ => ""
             })
@@ -120,9 +122,17 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
         {
             _updateService.StatusChanged
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(status => UpdateStatus = status)
+                .Subscribe(status =>
+                {
+                    UpdateStatus = status;
+                    LatestVersion = _updateService.LatestVersion;
+                })
                 .DisposeWith(_disposables);
         }
+
+        this.WhenAnyValue(x => x.LatestVersion)
+            .Subscribe(_ => this.RaisePropertyChanged(nameof(DisplayVersion)))
+            .DisposeWith(_disposables);
 
         // 初期化時にアップデートチェックを開始（本来は非同期で実行）
         _ = InitializeAsync();

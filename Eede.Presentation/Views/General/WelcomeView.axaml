@@ -116,7 +116,7 @@
             </Border>
 
             <StackPanel Spacing="5" IsVisible="{Binding !IsUpdateAvailable}">
-              <TextBlock Text="最新の状態です" FontSize="12" Foreground="Gray" VerticalAlignment="Center"/>
+              <TextBlock Text="{Binding DisplayVersion, StringFormat='最新の状態です ({0})'}" FontSize="12" Foreground="Gray" VerticalAlignment="Center"/>
               <Button Command="{Binding ManualCheckUpdateCommand}" Classes="Link" Padding="4">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                   <PathIcon Data="{StaticResource SyncIconGeometry}" Width="12" Height="12"/>

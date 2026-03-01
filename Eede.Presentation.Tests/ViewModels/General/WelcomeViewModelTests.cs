@@ -28,6 +28,7 @@ public class WelcomeViewModelTests
         _updateServiceMock = new Mock<IUpdateService>();
         _statusSubject = new BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
         _updateServiceMock.SetupGet(s => s.StatusChanged).Returns(_statusSubject);
+        _updateServiceMock.SetupGet(s => s.LatestVersion).Returns("1.0.1");
 
         _appSettings = new AppSettings();
         _appSettings.AddRecentFile("test1.png", System.DateTime.Now);

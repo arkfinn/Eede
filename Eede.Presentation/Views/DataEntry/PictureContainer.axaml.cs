@@ -96,7 +96,14 @@ namespace Eede.Presentation.Views.DataEntry
             PictureUpdateAction = _viewModel.OnPictureUpdate;
 
             // 初期カーソルサイズの設定
-            _cursorSize = _viewModel.GlobalState.BoxSize;
+            _cursorSize = _viewModel.CursorSize;
+
+            _viewModel.WhenAnyValue(x => x.CursorSize)
+                .Subscribe(size =>
+                {
+                    _cursorSize = size;
+                    UpdateCursor();
+                });
 
             // SelectionState の初期化
             _localCursorArea = HalfBoxArea.Create(new Position(0, 0), _cursorSize);
@@ -380,11 +387,14 @@ namespace Eede.Presentation.Views.DataEntry
                 _selectionState = CreateInitialState();
             }
 
+            // スナップ単位はツールバー設定（MinCursorSize）の半分を使用
+            var snappingGridSize = new PictureSize(MinCursorSize.Width / 2, MinCursorSize.Height / 2);
+
             // ドックエリアでは _cursorSize を使用して判定する
-            var currentCursorArea = HalfBoxArea.Create(nowPosition, _cursorSize);
+            var currentCursorArea = HalfBoxArea.Create(nowPosition, _cursorSize, snappingGridSize);
             if (_viewModel.AnimationViewModel.IsAnimationMode)
             {
-                currentCursorArea = HalfBoxArea.Create(nowPosition, new PictureSize(_viewModel.AnimationViewModel.GridWidth, _viewModel.AnimationViewModel.GridHeight));
+                currentCursorArea = HalfBoxArea.Create(nowPosition, new PictureSize(_viewModel.AnimationViewModel.GridWidth, _viewModel.AnimationViewModel.GridHeight), snappingGridSize);
             }
 
             switch (e.GetCurrentPoint(canvas).Properties.PointerUpdateKind)
@@ -415,8 +425,9 @@ namespace Eede.Presentation.Views.DataEntry
         {
             if (_viewModel == null) return;
 
-            // ドックエリアでは _cursorSize を使用してカーソル領域を作成
-            var currentCursorArea = HalfBoxArea.Create(nowPosition, _cursorSize);
+            var snappingGridSize = new PictureSize(MinCursorSize.Width / 2, MinCursorSize.Height / 2);
+            // ドックエリアでは _cursorSize を使用してカーソル領域を作成。スナップ単位はツールバー設定。
+            var currentCursorArea = HalfBoxArea.Create(nowPosition, _cursorSize, snappingGridSize);
 
             // 範囲選択を開始するために、現在のステートに右クリックを通知
             var (newState, newArea) = _selectionState.HandlePointerRightButtonPressed(currentCursorArea, nowPosition, MinCursorSize, PictureUpdateAction);
@@ -432,13 +443,14 @@ namespace Eede.Presentation.Views.DataEntry
 
             Position nowPosition = PointToPosition(e.GetPosition(canvas));
 
-            // ドックエリア基準のカーソル領域を作成（_cursorSizeを使用）
-            var cursorArea = HalfBoxArea.Create(nowPosition, _cursorSize);
+            // スナップ単位はツールバー設定（MinCursorSize）の半分を使用する
+            var snappingGridSize = new PictureSize(MinCursorSize.Width / 2, MinCursorSize.Height / 2);
+            var cursorArea = HalfBoxArea.Create(nowPosition, _cursorSize, snappingGridSize);
 
             if (_viewModel.AnimationViewModel.IsAnimationMode && _selectionState is not RegionSelectingState)
             {
-                // アニメーションモード中で、かつ範囲選択中でない場合のみグリッドサイズを適用
-                cursorArea = HalfBoxArea.Create(nowPosition, new PictureSize(_viewModel.AnimationViewModel.GridWidth, _viewModel.AnimationViewModel.GridHeight));
+                // アニメーションモード時もスナップ単位はツールバー設定の半分
+                cursorArea = HalfBoxArea.Create(nowPosition, new PictureSize(_viewModel.AnimationViewModel.GridWidth, _viewModel.AnimationViewModel.GridHeight), snappingGridSize);
             }
 
             bool isShift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);

@@ -9,6 +9,7 @@ public interface IUpdateService
 {
     UpdateStatus Status { get; }
     IObservable<UpdateStatus> StatusChanged { get; }
+    string? LatestVersion { get; }
     Task<bool> CheckForUpdatesAsync();
     Task DownloadUpdateAsync();
     void ApplyAndRestart();

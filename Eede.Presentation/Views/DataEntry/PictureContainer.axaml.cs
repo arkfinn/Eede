@@ -96,7 +96,14 @@ namespace Eede.Presentation.Views.DataEntry
             PictureUpdateAction = _viewModel.OnPictureUpdate;
 
             // 初期カーソルサイズの設定
-            _cursorSize = _viewModel.GlobalState.BoxSize;
+            _cursorSize = _viewModel.CursorSize;
+
+            _viewModel.WhenAnyValue(x => x.CursorSize)
+                .Subscribe(size =>
+                {
+                    _cursorSize = size;
+                    UpdateCursor();
+                });
 
             // SelectionState の初期化
             _localCursorArea = HalfBoxArea.Create(new Position(0, 0), _cursorSize);

@@ -577,6 +577,7 @@ public class MainViewModel : ViewModelBase
         vm.PictureUpdate += OnPictureUpdate;
         vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
+        vm.CursorSize = CursorSize;
         _ = this.WhenAnyValue(x => x.AnimationCursor).BindTo(vm, x => x.AnimationCursor);
     }
 

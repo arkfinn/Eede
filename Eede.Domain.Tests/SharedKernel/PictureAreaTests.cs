@@ -27,5 +27,52 @@ namespace Eede.Domain.Tests.SharedKernel
             new object[] { new Position(110, 0), new Position(120, 10), new PictureSize(100, 100),
                 new PictureArea(new Position(100, 0), new PictureSize(0, 10)) },
         };
+
+        [TestCaseSource(nameof(CombineCases))]
+        public void CombineTest(PictureArea area1, PictureArea area2, PictureArea expected)
+        {
+            PictureArea result = area1.Combine(area2);
+            Assert.That((result.X, result.Y, result.Width, result.Height), Is.EqualTo((expected.X, expected.Y, expected.Width, expected.Height)));
+        }
+
+        private static readonly object[] CombineCases =
+        {
+            // Non-overlapping
+            new object[] {
+                new PictureArea(new Position(0, 0), new PictureSize(10, 10)),
+                new PictureArea(new Position(20, 20), new PictureSize(10, 10)),
+                new PictureArea(new Position(0, 0), new PictureSize(30, 30))
+            },
+            // Partially overlapping
+            new object[] {
+                new PictureArea(new Position(10, 10), new PictureSize(20, 20)),
+                new PictureArea(new Position(20, 20), new PictureSize(20, 20)),
+                new PictureArea(new Position(10, 10), new PictureSize(30, 30))
+            },
+            // Nested areas
+            new object[] {
+                new PictureArea(new Position(10, 10), new PictureSize(50, 50)),
+                new PictureArea(new Position(20, 20), new PictureSize(10, 10)),
+                new PictureArea(new Position(10, 10), new PictureSize(50, 50))
+            },
+            // Empty area 1
+            new object[] {
+                new PictureArea(new Position(10, 10), new PictureSize(0, 0)),
+                new PictureArea(new Position(20, 20), new PictureSize(20, 20)),
+                new PictureArea(new Position(20, 20), new PictureSize(20, 20))
+            },
+            // Empty area 2
+            new object[] {
+                new PictureArea(new Position(10, 10), new PictureSize(20, 20)),
+                new PictureArea(new Position(20, 20), new PictureSize(0, 0)),
+                new PictureArea(new Position(10, 10), new PictureSize(20, 20))
+            },
+            // Both empty
+            new object[] {
+                new PictureArea(new Position(10, 10), new PictureSize(0, 0)),
+                new PictureArea(new Position(20, 20), new PictureSize(0, 0)),
+                new PictureArea(new Position(20, 20), new PictureSize(0, 0))
+            }
+        };
     }
 }

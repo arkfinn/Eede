@@ -19,6 +19,8 @@ internal class PictureAction
         int width = destSize.Width;
         int stride = width * 4;
         byte[] destPixels = new byte[stride * height];
+        ReadOnlySpan<byte> sourceSpan = Source.AsSpan();
+        int sourceStride = Source.Stride;
 
         for (int y = 0; y < height; y++)
         {
@@ -28,9 +30,8 @@ internal class PictureAction
             {
                 int pos = (x * 4) + toY;
                 Position offset = process(new Position(x, y));
-                int offsetY = Source.Stride * offset.Y;
+                int offsetY = sourceStride * offset.Y;
                 int fromPos = (offset.X * 4) + offsetY;
-                ReadOnlySpan<byte> sourceSpan = Source.AsSpan();
                 destPixels[pos + 0] = sourceSpan[fromPos + 0];
                 destPixels[pos + 1] = sourceSpan[fromPos + 1];
                 destPixels[pos + 2] = sourceSpan[fromPos + 2];

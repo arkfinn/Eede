@@ -27,7 +27,7 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
     [ObservableAsProperty] public bool IsUpdateDownloading { get; }
     [ObservableAsProperty] public bool IsUpdateReady { get; }
     [ObservableAsProperty] public bool IsUpdateAvailable { get; }
-    [ObservableAsProperty] public string UpdateMessage { get; }
+    [ObservableAsProperty] public string? UpdateMessage { get; }
 
     public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenPictureCommand { get; }

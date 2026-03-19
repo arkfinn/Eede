@@ -114,7 +114,7 @@ namespace Eede.Presentation.Tests
                 _sessionProvider, drawableCanvasVM, animationVM, sessionVM,
                 paletteVM, pictureIOService, new Mock<IThemeService>().Object,
                 loadUseCase, saveUseCase,
-                new WelcomeViewModel(settingsRepo.Object),
+                new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
                 () => new DockPictureViewModel(_state, animationVM, bitmapAdapter, pictureIOService),
                 () => new NewPictureWindowViewModel()
             );

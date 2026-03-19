@@ -123,7 +123,7 @@ public class PictureContainerTests
             new Mock<IThemeService>().Object,
             loadSettingsUseCase,
             saveSettingsUseCase,
-            new WelcomeViewModel(mockSettingsRepoForUseCase.Object),
+            new WelcomeViewModel(mockSettingsRepoForUseCase.Object, new Mock<IExternalBrowserService>().Object),
             () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
             () => new NewPictureWindowViewModel()
         );

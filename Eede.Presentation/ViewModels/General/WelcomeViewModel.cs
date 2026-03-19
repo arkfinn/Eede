@@ -27,7 +27,7 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
     [ObservableAsProperty] public bool IsUpdateDownloading { get; }
     [ObservableAsProperty] public bool IsUpdateReady { get; }
     [ObservableAsProperty] public bool IsUpdateAvailable { get; }
-    [ObservableAsProperty] public string UpdateMessage { get; }
+    [ObservableAsProperty] public string? UpdateMessage { get; }
 
     public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenPictureCommand { get; }
@@ -38,13 +38,19 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
     public ReactiveCommand<Unit, Unit> ManualCheckUpdateCommand { get; }
 
     private readonly ISettingsRepository _settingsRepository;
+    private readonly IExternalBrowserService _externalBrowserService;
     private readonly CheckUpdateUseCase? _checkUpdateUseCase;
     private readonly IUpdateService? _updateService;
     private readonly CompositeDisposable _disposables = new();
 
-    public WelcomeViewModel(ISettingsRepository settingsRepository, IUpdateService? updateService = null, CheckUpdateUseCase? checkUpdateUseCase = null)
+    public WelcomeViewModel(
+        ISettingsRepository settingsRepository,
+        IExternalBrowserService externalBrowserService,
+        IUpdateService? updateService = null,
+        CheckUpdateUseCase? checkUpdateUseCase = null)
     {
         _settingsRepository = settingsRepository;
+        _externalBrowserService = externalBrowserService;
         _updateService = updateService;
         _checkUpdateUseCase = checkUpdateUseCase;
 
@@ -53,14 +59,14 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
         OpenRecentFileCommand = ReactiveCommand.Create<string, string>(path => path);
         OpenUrlCommand = ReactiveCommand.CreateFromTask<string, string>(async url =>
         {
-            await Task.Run(() =>
+            if (Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
+                (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
             {
-                Process.Start(new ProcessStartInfo
+                await Task.Run(() =>
                 {
-                    FileName = url,
-                    UseShellExecute = true
+                    _externalBrowserService.OpenUrl(url);
                 });
-            });
+            }
             return url;
         });
 

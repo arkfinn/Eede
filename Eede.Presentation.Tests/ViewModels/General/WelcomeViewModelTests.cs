@@ -1,3 +1,5 @@
+using System;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
@@ -16,6 +18,7 @@ namespace Eede.Presentation.Tests.ViewModels.General;
 public class WelcomeViewModelTests
 {
     private Mock<ISettingsRepository> _settingsRepoMock;
+    private Mock<IExternalBrowserService> _browserServiceMock;
     private Mock<IUpdateService> _updateServiceMock;
     private BehaviorSubject<UpdateStatus> _statusSubject;
     private AppSettings _appSettings;
@@ -25,6 +28,7 @@ public class WelcomeViewModelTests
     public void Setup()
     {
         _settingsRepoMock = new Mock<ISettingsRepository>();
+        _browserServiceMock = new Mock<IExternalBrowserService>();
         _updateServiceMock = new Mock<IUpdateService>();
         _statusSubject = new BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
         _updateServiceMock.SetupGet(s => s.StatusChanged).Returns(_statusSubject);
@@ -47,8 +51,8 @@ public class WelcomeViewModelTests
     [Test]
     public async Task LoadRecentFiles_ShouldRefreshList()
     {
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
-        
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+
         await viewModel.LoadRecentFilesCommand.Execute().ToTask();
         Assert.That(viewModel.RecentFiles.Count, Is.EqualTo(1));
 
@@ -64,14 +68,14 @@ public class WelcomeViewModelTests
     public void InitialStatus_ShouldBeIdle()
     {
         // 初期状態は Idle であることを検証
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
         Assert.That(viewModel.UpdateStatus, Is.EqualTo(UpdateStatus.Idle));
     }
 
     [Test]
     public void CheckUpdate_ShouldUpdateStatus()
     {
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
 
         // サービス側のステータスが変更されたら反映されることを検証
         _statusSubject.OnNext(UpdateStatus.Downloading);
@@ -82,7 +86,7 @@ public class WelcomeViewModelTests
     [Test]
     public void ApplyUpdateCommand_ShouldCallApplyAndRestart()
     {
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
 
         // コマンドが実行可能になるステータスに変更
         _statusSubject.OnNext(UpdateStatus.ReadyToApply);
@@ -90,5 +94,27 @@ public class WelcomeViewModelTests
         viewModel.ApplyUpdateCommand.Execute().Subscribe();
 
         _updateServiceMock.Verify(x => x.ApplyAndRestart(), Times.Once);
+    }
+
+    [Test]
+    public async Task OpenUrlCommand_ShouldCallBrowserService_WhenUrlIsSafe()
+    {
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var url = "https://example.com";
+
+        await viewModel.OpenUrlCommand.Execute(url).ToTask();
+
+        _browserServiceMock.Verify(x => x.OpenUrl(url), Times.Once);
+    }
+
+    [Test]
+    public async Task OpenUrlCommand_ShouldNotCallBrowserService_WhenUrlIsUnsafe()
+    {
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var url = "file:///C:/Windows/System32/calc.exe";
+
+        await viewModel.OpenUrlCommand.Execute(url).ToTask();
+
+        _browserServiceMock.Verify(x => x.OpenUrl(It.IsAny<string>()), Times.Never);
     }
 }

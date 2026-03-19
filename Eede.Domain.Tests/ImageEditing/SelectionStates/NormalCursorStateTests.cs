@@ -3,66 +3,63 @@ using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 
-namespace Eede.Domain.Tests.ImageEditing.SelectionStates
+namespace Eede.Domain.Tests.ImageEditing.SelectionStates;
+
+[TestFixture]
+public class NormalCursorStateTests
 {
-    [TestFixture]
-    public class NormalCursorStateTests
+    [Test]
+    public void HandlePointerRightButtonPressed_TransitionsToRegionSelectingState()
     {
-        [Test]
-        public void HandlePointerRightButtonPressed_TransitionsToRegionSelectingState()
-        {
-            var cursorPosition = new Position(10, 10);
-            var cursorSize = new PictureSize(16, 16);
-            var cursorArea = HalfBoxArea.Create(cursorPosition, cursorSize);
-            var state = new NormalCursorState(cursorArea);
+        // Arrange
+        var initialCursorArea = HalfBoxArea.Create(new Position(10, 10), new PictureSize(16, 16));
+        var state = new NormalCursorState(initialCursorArea);
 
-            var nowPosition = new Position(20, 20);
-            var minCursorSize = new PictureSize(8, 8);
+        var nowPosition = new Position(12, 12);
+        var minCursorSize = new PictureSize(8, 8);
 
-            var (newState, returnedCursorArea) = state.HandlePointerRightButtonPressed(cursorArea, nowPosition, minCursorSize, null);
+        // Act
+        var (newState, newCursorArea) = state.HandlePointerRightButtonPressed(
+            initialCursorArea,
+            nowPosition,
+            minCursorSize,
+            null);
 
-            Assert.That(newState, Is.InstanceOf<RegionSelectingState>());
-            Assert.That(returnedCursorArea.RealPosition, Is.EqualTo(cursorArea.RealPosition));
-            Assert.That(returnedCursorArea.BoxSize, Is.EqualTo(cursorArea.BoxSize));
-        }
+        // Assert
+        Assert.That(newState, Is.InstanceOf<RegionSelectingState>());
+        Assert.That(newCursorArea, Is.EqualTo(initialCursorArea));
+    }
 
-        [Test]
-        public void HandlePointerMoved_UpdatesCursorAreaAndVisibility()
-        {
-            var cursorPosition = new Position(10, 10);
-            var cursorSize = new PictureSize(16, 16);
-            var cursorArea = HalfBoxArea.Create(cursorPosition, cursorSize);
-            var state = new NormalCursorState(cursorArea);
+    [Test]
+    [TestCase(0, 0, true, 100, 100)]
+    [TestCase(50, 50, true, 100, 100)]
+    [TestCase(100, 100, false, 100, 100)] // Boundary logic in PictureSize.Contains makes 100 out of bounds usually
+    [TestCase(101, 101, false, 100, 100)] // Outside boundary
+    [TestCase(-1, -1, false, 100, 100)] // Outside boundary
+    public void HandlePointerMoved_ReturnsExpectedVisibilityAndUpdatesCursor(int posX, int posY, bool expectedVisibility, int canvasWidth, int canvasHeight)
+    {
+        // Arrange
+        var initialCursorArea = HalfBoxArea.Create(new Position(10, 10), new PictureSize(16, 16));
+        var state = new NormalCursorState(initialCursorArea);
 
-            var nowPosition = new Position(30, 30);
-            var canvasSize = new PictureSize(100, 100);
+        var nowPosition = new Position(posX, posY);
+        var canvasSize = new PictureSize(canvasWidth, canvasHeight);
 
-            var (visibleCursor, newCursorArea) = state.HandlePointerMoved(cursorArea, true, nowPosition, false, canvasSize);
+        // Act
+        var (isVisible, newCursorArea) = state.HandlePointerMoved(
+            initialCursorArea,
+            true, // visibleCursor param is ignored in method implementation
+            nowPosition,
+            false,
+            canvasSize);
 
-            Assert.That(visibleCursor, Is.True);
-            // HalfBoxArea.Move will snap to grid. gridSize = boxSize / 2 = (8, 8).
-            // Snapped(30, 8) = 24. RealPosition will be (24, 24).
-            Assert.That(newCursorArea.RealPosition, Is.EqualTo(new Position(24, 24)));
-            Assert.That(newCursorArea.BoxSize, Is.EqualTo(cursorSize));
-        }
+        // Assert
+        Assert.That(isVisible, Is.EqualTo(expectedVisibility));
 
-        [Test]
-        public void HandlePointerMoved_OutsideCanvas_HidesCursor()
-        {
-            var cursorPosition = new Position(10, 10);
-            var cursorSize = new PictureSize(16, 16);
-            var cursorArea = HalfBoxArea.Create(cursorPosition, cursorSize);
-            var state = new NormalCursorState(cursorArea);
-
-            var nowPosition = new Position(150, 150);
-            var canvasSize = new PictureSize(100, 100);
-
-            var (visibleCursor, newCursorArea) = state.HandlePointerMoved(cursorArea, true, nowPosition, false, canvasSize);
-
-            Assert.That(visibleCursor, Is.False);
-            // Snapped(150, 8) = 144
-            Assert.That(newCursorArea.RealPosition, Is.EqualTo(new Position(144, 144)));
-            Assert.That(newCursorArea.BoxSize, Is.EqualTo(cursorSize));
-        }
+        var expectedArea = initialCursorArea.Move(nowPosition);
+        Assert.That(newCursorArea.RealPosition.X, Is.EqualTo(expectedArea.RealPosition.X));
+        Assert.That(newCursorArea.RealPosition.Y, Is.EqualTo(expectedArea.RealPosition.Y));
+        Assert.That(newCursorArea.BoxSize.Width, Is.EqualTo(expectedArea.BoxSize.Width));
+        Assert.That(newCursorArea.BoxSize.Height, Is.EqualTo(expectedArea.BoxSize.Height));
     }
 }

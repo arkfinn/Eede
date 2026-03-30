@@ -23,6 +23,8 @@ using ReactiveUI.Testing;
 using ReactiveUI;
 using System;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.Tests.ViewModels.DataEntry;
@@ -202,6 +204,22 @@ public class DrawableCanvasViewModelTests
         vm.CopyCommand.Execute().Subscribe();
 
         _selectionServiceMock.Verify(x => x.CopyAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()), Times.Once);
+    }
+
+    [AvaloniaTest]
+    public async Task CutCommand_ShouldInvokeServiceAndSync()
+    {
+        var vm = CreateViewModel();
+        var initialPicture = Picture.CreateEmpty(new PictureSize(32, 32));
+        vm.PictureBuffer = new DrawingBuffer(initialPicture);
+
+        _selectionServiceMock.Setup(x => x.CutAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()))
+            .ReturnsAsync(initialPicture);
+
+        await vm.CutCommand.Execute().ToTask();
+
+        _selectionServiceMock.Verify(x => x.CutAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()), Times.Once);
+        _interactionCoordinatorMock.Verify(x => x.SyncWithSession(true), Times.Once);
     }
 
     [AvaloniaTest]

@@ -436,8 +436,8 @@ public class DrawableCanvasViewModel : ViewModelBase
             PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
             Picture cleared = await _selectionService.CutAsync(previous, previousArea);
             ExecuteInternalUpdate(cleared);
-            // TODO: Reset selection in coordinator if needed
             Drew?.Invoke(previous, cleared, previousArea, null, default);
+            SyncWithSession(true);
         }
         catch (Exception ex)
         {

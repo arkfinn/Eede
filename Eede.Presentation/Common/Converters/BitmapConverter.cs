@@ -26,12 +26,8 @@ namespace Eede.Presentation.Common.Converters
                 Assembly? assembly = Assembly.GetEntryAssembly();
                 if (assembly != null)
                 {
-                    // string? assemblyName = assembly.GetName().Name;
                     string assemblyName = "Eede.Presentation";
-                    if (assemblyName != null)
-                    {
-                        uri = new Uri($"avares://{assemblyName}{path}");
-                    }
+                    uri = new Uri($"avares://{assemblyName}{path}");
                 }
             }
             if (uri != null)

@@ -91,7 +91,6 @@ namespace Eede.Presentation.Views.DataEntry
         }
 
         private bool IsLeftButtonPressing = false;
-        //private bool IsRightButtonPressing = false;
         private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             canvas.Focus();

@@ -20,5 +20,15 @@ namespace Eede.Domain.Tests.Files
             FilePath p = new(path);
             Assert.That(p.IsEmpty(), Is.EqualTo(expected));
         }
+
+        [TestCase(".png", @"Files\test\test.png")]
+        [TestCase(".jpg", @"Files\test\test.JPG")]
+        [TestCase("", @"Files\test\test")]
+        [TestCase("", "")]
+        public void GetExtensionTest(string expected, string path)
+        {
+            FilePath p = new(path);
+            Assert.That(p.GetExtension(), Is.EqualTo(expected).IgnoreCase);
+        }
     }
 }

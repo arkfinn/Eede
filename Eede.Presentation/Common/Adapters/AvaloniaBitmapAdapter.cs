@@ -135,7 +135,10 @@ namespace Eede.Presentation.Common.Adapters
                 {
                     bitmap.CopyPixels(new PixelRect(0, 0, width, height), pinnedArray.AddrOfPinnedObject(), pixels.Length, width * 4);
                 }
-                catch (Exception) { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
                 finally
                 {
                     pinnedArray.Free();

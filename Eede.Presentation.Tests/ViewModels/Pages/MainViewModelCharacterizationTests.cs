@@ -141,7 +141,7 @@ public class MainViewModelCharacterizationTests
             new Mock<IThemeService>().Object,
             loadUseCase,
             saveUseCase,
-            new WelcomeViewModel(settingsRepo.Object),
+            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
             _dockPictureFactory,
             _newPictureWindowFactory
         );

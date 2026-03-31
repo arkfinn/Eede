@@ -29,8 +29,6 @@ public static class PictureActionsExtension
             PictureActions.ShiftRight => new ShiftRightAction(previous).Execute(),
             PictureActions.FlipHorizontal => new FlipHorizontalAction(previous).Execute(),
             PictureActions.FlipVertical => new FlipVerticalAction(previous).Execute(),
-            //case PictureActions.RotateLeft:
-            //    return;
             PictureActions.RotateRight => new RotateRightAction(previous).Execute(),
             PictureActions.MirrorCopyRight => new MirrorCopyRightAction(previous).Execute(),
             PictureActions.MirrorCopyBottom => new MirrorCopyBottomAction(previous).Execute(),

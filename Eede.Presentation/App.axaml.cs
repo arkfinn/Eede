@@ -24,6 +24,7 @@ using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.General;
 using Eede.Presentation.ViewModels.Pages;
+using Eede.Infrastructure.Services;
 using Eede.Presentation.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -84,6 +85,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<ITransferImageFromCanvasUseCase, TransferImageFromCanvasUseCase>();
         services.AddSingleton<IDrawingSessionProvider, DrawingSessionProvider>();
         services.AddSingleton<IFileSystem, AvaloniaFileSystem>();
+        services.AddSingleton<IExternalBrowserService, ExternalBrowserService>();
         services.AddSingleton<IThemeService, AvaloniaThemeService>();
         services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();
         services.AddTransient<ICopySelectionUseCase, CopySelectionUseCase>();

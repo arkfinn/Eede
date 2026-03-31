@@ -108,7 +108,7 @@ public class MainViewModelTests
     private MainViewModel CreateMainViewModel()
     {
         var checkUpdateUseCase = new Eede.Application.UseCase.Updates.CheckUpdateUseCase(_updateServiceMock.Object);
-        var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object, _updateServiceMock.Object, checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object, new Mock<IExternalBrowserService>().Object, _updateServiceMock.Object, checkUpdateUseCase);
         return new MainViewModel(
             _globalState,
             _clipboardMock.Object,

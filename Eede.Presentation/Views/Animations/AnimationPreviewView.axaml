@@ -7,7 +7,7 @@
 			 x:Class="Eede.Presentation.Views.Animations.AnimationPreviewView"
 			 x:DataType="vm:AnimationViewModel">
 	<Design.DataContext>
-		<!-- TODO: Add design time data context -->
+		<vm:AnimationViewModel />
 	</Design.DataContext>
 
 	<DockPanel LastChildFill="True">

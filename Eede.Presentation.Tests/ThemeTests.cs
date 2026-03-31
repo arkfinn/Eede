@@ -115,7 +115,7 @@ public class ThemeTests
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
             paletteVM, pictureIOService, themeService,
             loadUseCase, saveUseCase,
-            new WelcomeViewModel(settingsRepo.Object),
+            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
             () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
             () => new NewPictureWindowViewModel()
         );

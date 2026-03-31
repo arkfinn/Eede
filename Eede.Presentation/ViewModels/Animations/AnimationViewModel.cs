@@ -77,6 +77,21 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
         AddFrameCommand.Execute(cellIndex).Subscribe();
     }
 
+    public AnimationViewModel() : this(new AnimationPatternsProvider())
+    {
+    }
+
+    private AnimationViewModel(IAnimationPatternsProvider provider) : this(
+        provider,
+        new AnimationPatternService(
+            new AddAnimationPatternUseCase(provider),
+            new ReplaceAnimationPatternUseCase(provider),
+            new RemoveAnimationPatternUseCase(provider)),
+        new AvaloniaFileSystem(),
+        new AvaloniaBitmapAdapter())
+    {
+    }
+
     public AnimationViewModel(
         IAnimationPatternsProvider patternsProvider,
         IAnimationPatternService patternService,

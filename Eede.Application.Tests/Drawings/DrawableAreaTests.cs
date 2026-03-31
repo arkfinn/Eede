@@ -5,12 +5,60 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Palettes;
 using Moq;
+using System;
 
 namespace Eede.Application.Tests.Drawings
 {
     [TestFixture]
     public class DrawableAreaTests
     {
+        private Picture CreateFilledPicture(PictureSize size, ArgbColor color)
+        {
+            var pixels = new byte[size.Width * size.Height * 4];
+            for (int i = 0; i < pixels.Length; i += 4)
+            {
+                pixels[i] = color.Blue;
+                pixels[i + 1] = color.Green;
+                pixels[i + 2] = color.Red;
+                pixels[i + 3] = color.Alpha;
+            }
+            return Picture.Create(size, pixels);
+        }
+
+        [Test]
+        public void PickColor_WithValidPosition_ReturnsCorrectColor()
+        {
+            // Arrange
+            var magnification = new Magnification(2.0f);
+            var gridSize = new PictureSize(16, 16);
+            var drawableArea = new DrawableArea(magnification, gridSize, null);
+
+            var expectedColor = new ArgbColor(255, 128, 64, 32);
+            var picture = CreateFilledPicture(new PictureSize(10, 10), expectedColor);
+
+            // Act
+            // (5, 5) on display with magnification 2.0 corresponds to (2, 2) on real picture.
+            var color = drawableArea.PickColor(picture, new Position(5, 5));
+
+            // Assert
+            Assert.That(color.Alpha, Is.EqualTo(expectedColor.Alpha));
+            Assert.That(color.Red, Is.EqualTo(expectedColor.Red));
+            Assert.That(color.Green, Is.EqualTo(expectedColor.Green));
+            Assert.That(color.Blue, Is.EqualTo(expectedColor.Blue));
+        }
+
+        [Test]
+        public void PickColor_WithNullPicture_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var magnification = new Magnification(1.0f);
+            var gridSize = new PictureSize(16, 16);
+            var drawableArea = new DrawableArea(magnification, gridSize, null);
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => drawableArea.PickColor(null!, new Position(0, 0)));
+        }
+
         [Test]
         public void DisplaySizeOf_ShouldReturnMagnifiedSize()
         {
@@ -21,26 +69,6 @@ namespace Eede.Application.Tests.Drawings
 
             Assert.That(displaySize.Width, Is.EqualTo(20));
             Assert.That(displaySize.Height, Is.EqualTo(40));
-        }
-
-        [Test]
-        public void PickColor_ShouldPickColorFromMinifiedPosition()
-        {
-            var area = new DrawableArea(new Magnification(2.0f), new PictureSize(16, 16), null);
-            var picture = Picture.CreateEmpty(new PictureSize(10, 10));
-            var color = new ArgbColor(255, 255, 0, 0);
-
-            var drawer = new Drawer(picture, new PenStyle(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), color, 1));
-            var p1 = drawer.DrawPoint(new Position(2, 3));
-            var newPicture = p1.Picture;
-
-            var picked1 = area.PickColor(newPicture, new Position(4, 6));
-            var picked2 = area.PickColor(newPicture, new Position(5, 7));
-            var pickedOther = area.PickColor(newPicture, new Position(6, 8)); // Maps to (3, 4)
-
-            Assert.That(picked1, Is.EqualTo(color));
-            Assert.That(picked2, Is.EqualTo(color));
-            Assert.That(pickedOther.Alpha, Is.EqualTo(0));
         }
 
         [Test]

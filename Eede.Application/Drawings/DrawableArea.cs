@@ -43,8 +43,6 @@ namespace Eede.Application.Drawings
             Picture picture = source;
             // 表示上のサイズ・ポジション DisplaySize DisplayPosition
             MagnifiedSize displaySize = Magnify(source.Size);
-            //PaintBackgroundLayer backgroundLayer = new(Background);
-            //var picture = backgroundLayer.Painted(null);
 
             if (!buffer.IsDrawing() && PositionHistory != null)
             {
@@ -57,8 +55,6 @@ namespace Eede.Application.Drawings
                 picture = bufferLayer.Painted(picture);
             }
 
-            //PaintGridLayer gridLayer = new(displaySize, Magnify(GridSize));
-            //picture = gridLayer.Paint(picture);
             return picture;
         }
 

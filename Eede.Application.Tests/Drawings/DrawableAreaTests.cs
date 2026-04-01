@@ -56,5 +56,35 @@ namespace Eede.Application.Tests.Drawings
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() => drawableArea.PickColor(null, new Position(0, 0)));
         }
+
+        [Test]
+        public void DisplaySizeOf_ReturnsCorrectSizeBasedOnMagnification()
+        {
+            // Arrange
+            var magnification = new Magnification(2.0f);
+            var gridSize = new PictureSize(16, 16);
+            var drawableArea = new DrawableArea(magnification, gridSize, null);
+
+            var picture = Picture.CreateEmpty(new PictureSize(10, 15));
+
+            // Act
+            var displaySize = drawableArea.DisplaySizeOf(picture);
+
+            // Assert
+            Assert.That(displaySize.Width, Is.EqualTo(20));
+            Assert.That(displaySize.Height, Is.EqualTo(30));
+        }
+
+        [Test]
+        public void DisplaySizeOf_WithNullPicture_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var magnification = new Magnification(1.0f);
+            var gridSize = new PictureSize(16, 16);
+            var drawableArea = new DrawableArea(magnification, gridSize, null);
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => drawableArea.DisplaySizeOf(null));
+        }
     }
 }

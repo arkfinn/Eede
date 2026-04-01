@@ -86,5 +86,24 @@ namespace Eede.Application.Tests.Drawings
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() => drawableArea.DisplaySizeOf(null));
         }
+
+        [Test]
+        public void UpdateMagnification_ReturnsNewInstanceWithUpdatedMagnification()
+        {
+            // Arrange
+            var initialMagnification = new Magnification(1.0f);
+            var newMagnification = new Magnification(3.0f);
+            var gridSize = new PictureSize(16, 16);
+            var drawableArea = new DrawableArea(initialMagnification, gridSize, null);
+
+            // Act
+            var updatedArea = drawableArea.UpdateMagnification(newMagnification);
+
+            // Assert
+            Assert.That(updatedArea, Is.Not.Null);
+            Assert.That(updatedArea, Is.Not.SameAs(drawableArea));
+            Assert.That(updatedArea.Magnification, Is.EqualTo(newMagnification));
+            Assert.That(drawableArea.Magnification, Is.EqualTo(initialMagnification), "Original instance should remain unchanged.");
+        }
     }
 }

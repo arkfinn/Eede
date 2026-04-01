@@ -39,6 +39,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.ViewModels.Pages;
@@ -749,14 +750,40 @@ public class MainViewModel : ViewModelBase
         {
 
             // 各PictureViewModelのクローズ確認処理を実行
+            // 未編集タブ（UIプロンプトなし）は可能な限り並行処理して高速化しつつ、
+            // 編集済みタブ（UIプロンプトあり）は順次処理し、キャンセル時のタブ処理順序の仕様を維持する。
+            var uneditedTasks = new List<Task<bool>>();
             foreach (DockPictureViewModel picture in Pictures.ToList())
             {
-                // ここは前回提案の通り、コマンドがboolを返す設計が望ましい
-                bool canClosePicture = await picture.CloseCommand.Execute();
-                if (!canClosePicture)
+                if (picture.Edited)
                 {
-                    return; // ユーザーがキャンセルしたため、処理を中断
+                    // 編集済みタブの処理前に、これより左にある未編集タブの完了を待機（順序の担保）
+                    if (uneditedTasks.Count > 0)
+                    {
+                        var results = await Task.WhenAll(uneditedTasks);
+                        if (results.Any(r => !r)) return;
+                        uneditedTasks.Clear();
+                    }
+
+                    // ここは前回提案の通り、コマンドがboolを返す設計が望ましい
+                    bool canClosePicture = await picture.CloseCommand.Execute().ToTask();
+                    if (!canClosePicture)
+                    {
+                        return; // ユーザーがキャンセルしたため、処理を中断
+                    }
                 }
+                else
+                {
+                    // 未編集タブはタスクとしてまとめ、後で一斉に待機する
+                    uneditedTasks.Add(picture.CloseCommand.Execute().ToTask());
+                }
+            }
+
+            // 残りの未編集タスクを完了させる
+            if (uneditedTasks.Count > 0)
+            {
+                var results = await Task.WhenAll(uneditedTasks);
+                if (results.Any(r => !r)) return;
             }
 
             IsCloseConfirmed = true;

@@ -1,7 +1,6 @@
 using Avalonia;
+using ReactiveUI.Avalonia;
 using Avalonia.Headless;
-using Avalonia.Media.Imaging;
-using Avalonia.ReactiveUI;
 using Eede.Presentation.Tests;
 
 [assembly: AvaloniaTestApplication(typeof(TestAppBuilder))]
@@ -12,5 +11,5 @@ public static class TestAppBuilder
 {
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
         .UseHeadless(new AvaloniaHeadlessPlatformOptions())
-        .UseReactiveUI();
+        .UseReactiveUI(_ => { });
 }

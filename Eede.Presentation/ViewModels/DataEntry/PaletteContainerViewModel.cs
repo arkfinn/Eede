@@ -3,18 +3,16 @@ using Eede.Domain.Palettes;
 using Eede.Infrastructure.Palettes.Persistence;
 using Eede.Infrastructure.Palettes.Persistence.ActFileFormat;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using System;
 using System.IO;
 using System.Reactive;
 
 namespace Eede.Presentation.ViewModels.DataEntry;
 
-#nullable enable
-
-public class PaletteContainerViewModel : ViewModelBase
+public partial class PaletteContainerViewModel : ViewModelBase
 {
-    [Reactive] public Palette Palette { get; set; }
+    [Reactive] public partial Palette Palette { get; set; }
 
     public ReactiveCommand<int, Unit> ApplyColorCommand { get; }
     public ReactiveCommand<int, Unit> FetchColorCommand { get; }

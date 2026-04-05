@@ -32,7 +32,6 @@ using Eede.Application.UseCase.Settings;
 using Eede.Application.UseCase.Updates;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -41,18 +40,19 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using ReactiveUI.SourceGenerators;
 
 namespace Eede.Presentation.ViewModels.Pages;
 
 #nullable enable
 
-public class MainViewModel : ViewModelBase
+public partial class MainViewModel : ViewModelBase
 {
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
     public DrawableCanvasViewModel DrawableCanvasViewModel { get; }
     public AnimationViewModel AnimationViewModel { get; }
 
-    [Reactive] public BackgroundColor CurrentBackgroundColor { get; set; } = BackgroundColor.Default;
+    [Reactive] public partial BackgroundColor CurrentBackgroundColor { get; set; }
 
     public Magnification Magnification
     {
@@ -60,15 +60,14 @@ public class MainViewModel : ViewModelBase
         set => DrawableCanvasViewModel.Magnification = value;
     }
 
-    [Reactive] public DrawStyleType DrawStyle { get; set; }
+    [Reactive] public partial DrawStyleType DrawStyle { get; set; }
 
-    [Reactive] public IImageBlender ImageBlender { get; set; } = new DirectImageBlender();
+    [Reactive] public partial IImageBlender ImageBlender { get; set; }
+    [Reactive] public partial IImageTransfer ImageTransfer { get; set; }
 
-    [Reactive] public IImageTransfer ImageTransfer { get; set; } = new DirectImageTransfer();
-
-    [Reactive] public ArgbColor PenColor { get; set; } = new ArgbColor(255, 0, 0, 0);
-    [Reactive] public Color NowPenColor { get; set; }
-    [Reactive] public Color SampleColor { get; set; }
+    [Reactive] public partial ArgbColor PenColor { get; set; }
+    [Reactive] public partial Color NowPenColor { get; set; }
+    [Reactive] public partial Color SampleColor { get; set; }
 
     public int PenWidth
     {
@@ -76,28 +75,28 @@ public class MainViewModel : ViewModelBase
         set => DrawableCanvasViewModel.PenSize = value;
     }
 
-    [Reactive] public IImageBlender PullBlender { get; set; } = new DirectImageBlender();
-    [Reactive] public IDockable? ActiveDockable { get; set; }
+    [Reactive] public partial IImageBlender PullBlender { get; set; }
+    [Reactive] public partial IDockable? ActiveDockable { get; set; }
 
-    [Reactive] public ObservableCollection<int> MinCursorSizeList { get; set; } = new([8, 16, 24, 32, 48, 64]);
-    [Reactive] public int MinCursorWidth { get; set; } = 32;
-    [Reactive] public int MinCursorHeight { get; set; } = 32;
-    [Reactive] public PictureSize CursorSize { get; set; } = new PictureSize(32, 32);
+    [Reactive] public partial ObservableCollection<int> MinCursorSizeList { get; set; }
+    [Reactive] public partial int MinCursorWidth { get; set; }
+    [Reactive] public partial int MinCursorHeight { get; set; }
+    [Reactive] public partial PictureSize CursorSize { get; set; }
 
-    [Reactive] public DrawingSessionViewModel DrawingSessionViewModel { get; private set; }
-    [Reactive] public IFileStorage? FileStorage { get; set; }
-    [Reactive] public Cursor? AnimationCursor { get; set; }
-    [Reactive] public bool IsAnimationPanelExpanded { get; set; } = false;
-    [Reactive] public bool HasClipboardPicture { get; set; } = false;
-    [Reactive] public bool IsTransparencyEnabled { get; set; } = false;
-    [Reactive] public bool IsShowPixelGrid { get; set; } = false;
-    [Reactive] public bool IsShowCursorGrid { get; set; } = false;
+    [Reactive] public partial DrawingSessionViewModel DrawingSessionViewModel { get; set; }
+    [Reactive] public partial IFileStorage? FileStorage { get; set; }
+    [Reactive] public partial Cursor? AnimationCursor { get; set; }
+    [Reactive] public partial bool IsAnimationPanelExpanded { get; set; }
+    [Reactive] public partial bool HasClipboardPicture { get; set; }
+    [Reactive] public partial bool IsTransparencyEnabled { get; set; }
+    [Reactive] public partial bool IsShowPixelGrid { get; set; }
+    [Reactive] public partial bool IsShowCursorGrid { get; set; }
 
-    [Reactive] public int SelectedThemeIndex { get; set; }
+    [Reactive] public partial int SelectedThemeIndex { get; set; }
 
     public WelcomeViewModel WelcomeViewModel { get; }
 
-    [ObservableAsProperty] public bool IsUpdateReady { get; }
+    [ObservableAsProperty] private bool _isUpdateReady;
     public ReactiveCommand<Unit, Unit> ApplyUpdateCommand { get; private set; }
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
@@ -204,6 +203,12 @@ public class MainViewModel : ViewModelBase
         _dockPictureFactory = dockPictureFactory;
         _newPictureWindowFactory = newPictureWindowFactory;
 
+        _isUpdateReadyHelper = null!;
+        _imageBlender = null!;
+        _imageTransfer = null!;
+        _pullBlender = null!;
+        _minCursorSizeList = null!;
+
         DrawableCanvasViewModel = drawableCanvasViewModel;
         AnimationViewModel = animationViewModel;
         DrawingSessionViewModel = drawingSessionViewModel;
@@ -250,7 +255,7 @@ public class MainViewModel : ViewModelBase
 
             _updateService.StatusChanged
                 .Select(status => status == UpdateStatus.ReadyToApply)
-                .ToPropertyEx(this, x => x.IsUpdateReady);
+                .ToProperty(this, nameof(IsUpdateReady), out _isUpdateReadyHelper);
         }
         else
         {

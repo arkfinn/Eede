@@ -1,21 +1,19 @@
+using Avalonia.Headless.NUnit;
 using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.ViewModels.Pages;
-using NUnit.Framework;
-using Avalonia.Headless.NUnit;
 using Microsoft.Reactive.Testing;
-using ReactiveUI.Testing;
-using ReactiveUI;
-using System.Reactive;
 using Moq;
+using ReactiveUI;
+using ReactiveUI.Testing;
 
 namespace Eede.Presentation.Tests.ViewModels.Pages;
 
 public class DrawingSessionViewModelTests
 {
     private Picture _initialPicture;
-    private PictureSize _size = new(32, 32);
+    private readonly PictureSize _size = new(32, 32);
     private Mock<IDrawingSessionProvider> _mockProvider;
 
     [SetUp]
@@ -30,11 +28,11 @@ public class DrawingSessionViewModelTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
-            var session = new DrawingSession(_initialPicture);
-            _mockProvider.Setup(p => p.CurrentSession).Returns(session);
+            RxSchedulers.MainThreadScheduler = scheduler;
+            DrawingSession session = new(_initialPicture);
+            _ = _mockProvider.Setup(p => p.CurrentSession).Returns(session);
 
-            var viewModel = new DrawingSessionViewModel(_mockProvider.Object);
+            DrawingSessionViewModel viewModel = new(_mockProvider.Object);
 
             Assert.Multiple(() =>
             {
@@ -50,19 +48,19 @@ public class DrawingSessionViewModelTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
-            var session = new DrawingSession(_initialPicture);
-            var nextPicture = Picture.CreateEmpty(_size);
-            var session2 = session.Push(nextPicture);
+            RxSchedulers.MainThreadScheduler = scheduler;
+            DrawingSession session = new(_initialPicture);
+            Picture nextPicture = Picture.CreateEmpty(_size);
+            DrawingSession session2 = session.Push(nextPicture);
 
-            _mockProvider.Setup(p => p.CurrentSession).Returns(session2);
-            var viewModel = new DrawingSessionViewModel(_mockProvider.Object);
+            _ = _mockProvider.Setup(p => p.CurrentSession).Returns(session2);
+            DrawingSessionViewModel viewModel = new(_mockProvider.Object);
             scheduler.AdvanceBy(1);
 
             Assert.That(((System.Windows.Input.ICommand)viewModel.UndoCommand).CanExecute(null), Is.True);
 
             // Undo実行時に Provider.Update が呼ばれることを確認
-            viewModel.UndoCommand.Execute().Subscribe();
+            _ = viewModel.UndoCommand.Execute().Subscribe();
             scheduler.AdvanceBy(1);
 
             _mockProvider.Verify(p => p.Update(It.Is<DrawingSession>(s => s.CurrentPicture == _initialPicture)), Times.Once);

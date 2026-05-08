@@ -11,7 +11,7 @@ using Eede.Presentation.Files;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using System;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -21,7 +21,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 {
 #nullable enable
 
-    public class DockPictureViewModel : ViewModelBase
+    public partial class DockPictureViewModel : ViewModelBase
     {
 
         public static DockPictureViewModel FromFile(Picture picture, FilePath filePath, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureIOService pictureIOService)
@@ -38,7 +38,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             return vm;
         }
 
-        [Reactive] public Picture PictureBuffer { get; set; } = Picture.CreateEmpty(new PictureSize(1, 1));
+        [Reactive] public partial Picture PictureBuffer { get; set; }
         private Bitmap? _premultipliedBitmap;
         public Bitmap? PremultipliedBitmap
         {
@@ -52,21 +52,21 @@ namespace Eede.Presentation.ViewModels.DataDisplay
                 _ = this.RaiseAndSetIfChanged(ref _premultipliedBitmap, value);
             }
         }
-        [Reactive] public string Id { get; private set; }
-        [Reactive] public PictureSize MinCursorSize { get; set; } = new PictureSize(32, 32);
-        [Reactive] public PictureSize CursorSize { get; set; } = new PictureSize(32, 32);
-        [Reactive] public Avalonia.Input.Cursor ActiveCursor { get; set; } = Avalonia.Input.Cursor.Default;
-        [Reactive] public Avalonia.Input.Cursor? AnimationCursor { get; set; }
-        [Reactive] public bool Enabled { get; set; }
-        [Reactive] public bool Closable { get; set; }
-        [Reactive] public string Subject { get; private set; } = "";
-        [Reactive] public string Title { get; private set; } = "";
-        [Reactive] public bool Edited { get; set; }
-        [Reactive] public FilePath FilePath { get; private set; } = FilePath.Empty();
-        [Reactive] public SaveAlertResult SaveAlertResult { get; private set; }
-        [Reactive] public Magnification Magnification { get; set; } = new Magnification(1);
-        [Reactive] public double DisplayWidth { get; private set; }
-        [Reactive] public double DisplayHeight { get; private set; }
+        [Reactive] public partial string Id { get; set; }
+        [Reactive] public partial PictureSize MinCursorSize { get; set; }
+        [Reactive] public partial PictureSize CursorSize { get; set; }
+        [Reactive] public partial Avalonia.Input.Cursor ActiveCursor { get; set; }
+        [Reactive] public partial Avalonia.Input.Cursor? AnimationCursor { get; set; }
+        [Reactive] public partial bool Enabled { get; set; }
+        [Reactive] public partial bool Closable { get; set; }
+        [Reactive] public partial string Subject { get; set; }
+        [Reactive] public partial string Title { get; set; }
+        [Reactive] public partial bool Edited { get; set; }
+        [Reactive] public partial FilePath FilePath { get; set; }
+        [Reactive] public partial SaveAlertResult SaveAlertResult { get; set; }
+        [Reactive] public partial Magnification Magnification { get; set; }
+        [Reactive] public partial double DisplayWidth { get; set; }
+        [Reactive] public partial double DisplayHeight { get; set; }
         public ReactiveCommand<Unit, Unit> ZoomInCommand { get; }
         public ReactiveCommand<Unit, Unit> ZoomOutCommand { get; }
         public ReactiveCommand<float, Unit> SetMagnificationCommand { get; }
@@ -132,6 +132,11 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             ActiveCursor = Avalonia.Input.Cursor.Default;
             Enabled = true;
             Closable = true;
+
+            PictureBuffer = null!;
+            Subject = null!;
+            Title = null!;
+            FilePath = null!;
 
             SetupObservations();
             Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());

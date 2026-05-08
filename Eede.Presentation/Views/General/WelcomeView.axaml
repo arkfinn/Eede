@@ -16,7 +16,7 @@
       <!-- ロゴ・ヘッダーエリア -->
       <StackPanel Spacing="12">
         <Border Background="{DynamicResource SystemAccentColorLight}"
-                CornerRadius="16"
+                CornerRadius="0"
                 Padding="0"
                 HorizontalAlignment="Center">
           <Image Source="/Assets/logo.png" Width="96" Height="96"/>
@@ -79,7 +79,7 @@
           <!-- アップデートセクション -->
           <StackPanel Spacing="10">
             <TextBlock Text="アップデート" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
-            <Border Padding="12" CornerRadius="8" Background="#10FFFFFF"
+            <Border Padding="12" CornerRadius="0" Background="#10FFFFFF"
                     IsVisible="{Binding IsUpdateAvailable}">
               <StackPanel Spacing="10">
                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">

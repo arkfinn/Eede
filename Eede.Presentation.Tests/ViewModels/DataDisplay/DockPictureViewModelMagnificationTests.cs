@@ -56,7 +56,7 @@ public class DockPictureViewModelMagnificationTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
 
             Assert.That(viewModel.Magnification.Value, Is.EqualTo(1f));
@@ -68,10 +68,11 @@ public class DockPictureViewModelMagnificationTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
-            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
-
-            viewModel.Magnification = new Magnification(2);
+            RxSchedulers.MainThreadScheduler = scheduler;
+            var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService)
+            {
+                Magnification = new Magnification(2)
+            };
 
             Assert.That(viewModel.Magnification.Value, Is.EqualTo(2f));
         });
@@ -82,7 +83,7 @@ public class DockPictureViewModelMagnificationTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
             // Default is 1
             viewModel.ZoomIn();
@@ -105,7 +106,7 @@ public class DockPictureViewModelMagnificationTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
             viewModel.Magnification = new Magnification(12);
 
@@ -129,7 +130,7 @@ public class DockPictureViewModelMagnificationTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
 
             viewModel.ZoomInCommand.Execute().Subscribe();
@@ -144,7 +145,7 @@ public class DockPictureViewModelMagnificationTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
             viewModel.Magnification = new Magnification(4);
 
@@ -160,7 +161,7 @@ public class DockPictureViewModelMagnificationTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
             viewModel.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), new FilePath("test.png"));
 
@@ -189,7 +190,7 @@ public class DockPictureViewModelMagnificationTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
 
             viewModel.SetMagnificationCommand.Execute(8f).Subscribe();

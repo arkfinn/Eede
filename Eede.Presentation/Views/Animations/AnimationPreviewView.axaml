@@ -3,6 +3,7 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:Eede.Presentation.ViewModels.Animations"
+			 xmlns:view="using:Eede.Presentation.Views.Animations"
 			 mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="450"
 			 x:Class="Eede.Presentation.Views.Animations.AnimationPreviewView"
 			 x:DataType="vm:AnimationViewModel">
@@ -90,13 +91,13 @@
 					</Button>
 					<Button Grid.Column="3" Classes="tool" ToolTip.Tip="読み込み"
 							Command="{Binding ImportCommand}"
-							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType=view:AnimationPreviewView}}"
 							Margin="2,0,0,0">
 						<PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
 					</Button>
 					<Button Grid.Column="4" Classes="tool" ToolTip.Tip="保存"
 							Command="{Binding ExportCommand}"
-							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType=view:AnimationPreviewView}}"
 							Margin="2,0,0,0">
 						<PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
 					</Button>

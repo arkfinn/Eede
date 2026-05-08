@@ -216,8 +216,14 @@ public partial class MainViewModel : ViewModelBase
 
         SelectedThemeIndex = _themeService.GetActualThemeVariant() == Avalonia.Styling.ThemeVariant.Dark ? 1 : 0;
 
-        welcomeViewModel.CreateNewPictureCommand.Subscribe(_ => CreateNewPictureCommand.Execute().Subscribe());
-        welcomeViewModel.OpenPictureCommand.Subscribe(_ => LoadPictureCommand.Execute(FileStorage).Subscribe());
+        welcomeViewModel.CreateNewPictureCommand.Subscribe(_ => CreateNewPictureCommand?.Execute().Subscribe());
+        welcomeViewModel.OpenPictureCommand.Subscribe(_ =>
+        {
+            if (FileStorage != null)
+            {
+                LoadPictureCommand?.Execute(FileStorage).Subscribe();
+            }
+        });
         welcomeViewModel.OpenRecentFileCommand.Subscribe(async path =>
         {
             DockPictureViewModel? newPicture = await OpenPicture(new Uri(path));
@@ -465,18 +471,7 @@ public partial class MainViewModel : ViewModelBase
         e.DragEffects = DragDropEffects.None;
         e.Handled = false;
 
-        if (e.Data is not IDataObject dataObject)
-        {
-            return;
-        }
-
-        if (dataObject.GetDataFormats().Contains(DataFormats.Files) == false)
-        {
-            return;
-        }
-
-        IEnumerable<IStorageItem>? files = dataObject.GetFiles();
-        if (files is null || !files.Any(f => IsSupportedImageFile(f)))
+        if (e.DataTransfer.Contains(DataFormat.File) == false)
         {
             return;
         }
@@ -487,17 +482,12 @@ public partial class MainViewModel : ViewModelBase
 
     public async void DropPicture(object? sender, DragEventArgs e)
     {
-        if (e.Data is not IDataObject dataObject)
+        if (e.DataTransfer.Contains(DataFormat.File) == false)
         {
             return;
         }
 
-        if (dataObject.GetDataFormats().Contains(DataFormats.Files) == false)
-        {
-            return;
-        }
-
-        IEnumerable<IStorageItem>? files = dataObject.GetFiles();
+        IEnumerable<IStorageItem>? files = e.DataTransfer.TryGetFiles();
         if (files is null)
         {
             return;

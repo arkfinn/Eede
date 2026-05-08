@@ -29,19 +29,22 @@ public class AvaloniaClipboard : IClipboard
         if (clipboard == null) return;
 
         var bitmap = AvaloniaBitmapAdapter.StaticConvertToBitmap(picture);
-        var dataObject = new DataObject();
+        var item = new DataTransferItem();
 
         // 1. 標準のBitmapオブジェクトとしてセット
-        dataObject.Set("Bitmap", bitmap);
+        item.Set(DataFormat.Bitmap, bitmap);
 
         // 2. PNG形式としてバイナリをセット（互換性向上）
         using (var ms = new MemoryStream())
         {
             bitmap.Save(ms);
-            dataObject.Set("PNG", ms.ToArray());
+            item.Set(DataFormat.CreateBytesPlatformFormat("PNG"), ms.ToArray());
         }
 
-        await clipboard.SetDataObjectAsync(dataObject);
+        var dataTransfer = new DataTransfer();
+        dataTransfer.Add(item);
+
+        await clipboard.SetDataAsync(dataTransfer);
         System.Diagnostics.Debug.WriteLine("Copy: Set Bitmap and PNG data.");
     }
 
@@ -50,86 +53,39 @@ public class AvaloniaClipboard : IClipboard
         var clipboard = GetClipboard();
         if (clipboard == null) return null;
 
-        var formats = (await clipboard.GetFormatsAsync()).ToList();
-        System.Diagnostics.Debug.WriteLine($"Paste: Clipboard formats: {string.Join(", ", formats)}");
+        var dataTransfer = await clipboard.TryGetDataAsync();
+        if (dataTransfer == null) return null;
 
         // 1. 既知の画像フォーマットを順に試す
-        foreach (var format in ImageFormats)
+        var bitmap = await dataTransfer.TryGetBitmapAsync();
+        if (bitmap != null)
         {
-            if (formats.Contains(format, StringComparer.OrdinalIgnoreCase))
-            {
-                var picture = await TryGetFromFormat(clipboard, format);
-                if (picture != null) return picture;
-            }
+            return AvaloniaBitmapAdapter.StaticConvertToPicture(bitmap);
         }
 
         // 2. ファイルドロップ形式を試す
-        if (formats.Contains(DataFormats.Files))
+        try
         {
-            try
+            var items = await dataTransfer.TryGetFilesAsync();
+            if (items != null)
             {
-                var data = await clipboard.GetDataAsync(DataFormats.Files);
-                IEnumerable<IStorageItem>? items = data as IEnumerable<IStorageItem>;
-                if (items == null && data is IDataObject dataObject)
-                {
-                    items = dataObject.GetFiles();
-                }
-
-                var firstFile = items?.OfType<IStorageFile>().FirstOrDefault();
+                var firstFile = items.OfType<IStorageFile>().FirstOrDefault();
                 if (firstFile != null)
                 {
                     using (var stream = await firstFile.OpenReadAsync())
                     {
-                        var bitmap = new Bitmap(stream);
-                        return AvaloniaBitmapAdapter.StaticConvertToPicture(bitmap);
+                        var bitmapFromFile = new Bitmap(stream);
+                        return AvaloniaBitmapAdapter.StaticConvertToPicture(bitmapFromFile);
                     }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Paste: Files format error: {ex.Message}");
-            }
-        }
-
-        System.Diagnostics.Debug.WriteLine("Paste: No image data found.");
-        return null;
-    }
-
-    private async Task<Picture?> TryGetFromFormat(AvaloniaIClipboard clipboard, string format)
-    {
-        try
-        {
-            object? data = await clipboard.GetDataAsync(format);
-            if (data == null)
-            {
-                System.Diagnostics.Debug.WriteLine($"Paste: GetDataAsync('{format}') returned null.");
-                return null;
-            }
-
-            System.Diagnostics.Debug.WriteLine($"Paste: GetDataAsync('{format}') type: {data.GetType().FullName}");
-
-            if (data is Bitmap bitmap)
-            {
-                return AvaloniaBitmapAdapter.StaticConvertToPicture(bitmap);
-            }
-
-            if (data is Stream stream)
-            {
-                return AvaloniaBitmapAdapter.StaticConvertToPicture(new Bitmap(stream));
-            }
-
-            if (data is byte[] bytes)
-            {
-                using (var ms = new MemoryStream(bytes))
-                {
-                    return AvaloniaBitmapAdapter.StaticConvertToPicture(new Bitmap(ms));
                 }
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Paste: Error in format '{format}': {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Paste: Files format error: {ex.Message}");
         }
+
+        System.Diagnostics.Debug.WriteLine("Paste: No image data found.");
         return null;
     }
 
@@ -138,10 +94,10 @@ public class AvaloniaClipboard : IClipboard
         var clipboard = GetClipboard();
         if (clipboard == null) return false;
 
-        var formats = await clipboard.GetFormatsAsync();
-        if (formats == null) return false;
+        var dataTransfer = await clipboard.TryGetDataAsync();
+        if (dataTransfer == null) return false;
 
-        return formats.Any(f => ImageFormats.Contains(f, StringComparer.OrdinalIgnoreCase) || f == DataFormats.Files);
+        return dataTransfer.Contains(DataFormat.Bitmap) || dataTransfer.Contains(DataFormat.File);
     }
 
     private AvaloniaIClipboard? GetClipboard()

@@ -10,7 +10,6 @@ using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,12 +19,13 @@ using System.Reactive.Linq;
 using System.Text.Json;
 using System.IO;
 using System.Threading.Tasks;
+using ReactiveUI.SourceGenerators;
 
 namespace Eede.Presentation.ViewModels.Animations;
 
 #nullable enable
 
-public class AnimationViewModel : ViewModelBase, IAddFrameProvider
+public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
 {
     private readonly IAnimationPatternsProvider _patternsProvider;
     private readonly IAnimationPatternService _patternService;
@@ -33,23 +33,22 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
     private readonly IImageTransfer _imageTransfer = new DirectImageTransfer();
 
-    [Reactive] public AnimationPattern? SelectedPattern { get; set; }
+    [Reactive] public partial AnimationPattern? SelectedPattern { get; set; }
     public ObservableCollection<AnimationPattern> Patterns { get; } = new();
 
-    [Reactive] public bool IsPlaying { get; set; }
-    [Reactive] public int CurrentFrameIndex { get; set; }
-    private readonly ObservableAsPropertyHelper<AnimationFrame?>? _currentFrame;
-    public AnimationFrame? CurrentFrame => _currentFrame?.Value;
+    [Reactive] public partial bool IsPlaying { get; set; }
+    [Reactive] public partial int CurrentFrameIndex { get; set; }
+    [ObservableAsProperty] private AnimationFrame? _currentFrame;
 
-    [Reactive] public bool IsAnimationMode { get; set; }
-    [Reactive] public int GridWidth { get; set; }
-    [Reactive] public int GridHeight { get; set; }
+    [Reactive] public partial bool IsAnimationMode { get; set; }
+    [Reactive] public partial int GridWidth { get; set; }
+    [Reactive] public partial int GridHeight { get; set; }
     public ObservableCollection<int> GridSizeList { get; } = new([8, 16, 24, 32, 48, 64]);
 
-    [Reactive] public int WaitTime { get; set; }
+    [Reactive] public partial int WaitTime { get; set; }
 
-    [Reactive] public Magnification Magnification { get; set; } = new(1);
-    [Reactive] public Picture? ActivePicture { get; set; }
+    [Reactive] public partial Magnification Magnification { get; set; }
+    [Reactive] public partial Picture? ActivePicture { get; set; }
     private Bitmap? _previewBitmap;
     public Bitmap? PreviewBitmap
     {
@@ -103,12 +102,15 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
         _fileSystem = fileSystem;
         _bitmapAdapter = bitmapAdapter;
 
-        _currentFrame = this.WhenAnyValue(x => x.SelectedPattern, x => x.CurrentFrameIndex)
+        _currentFrameHelper = null!;
+
+        this.WhenAnyValue(x => x.SelectedPattern, x => x.CurrentFrameIndex)
             .Select(x => (x.Item1 != null && x.Item2 >= 0 && x.Item2 < x.Item1.Frames.Count)
                 ? x.Item1.Frames[x.Item2]
                 : null)
-            .ToProperty(this, x => x.CurrentFrame, scheduler: RxApp.MainThreadScheduler);
+            .ToProperty(this, nameof(CurrentFrame), out _currentFrameHelper, scheduler: ReactiveUI.Avalonia.AvaloniaScheduler.Instance);
 
+        Magnification = new Magnification(1);
         GridWidth = 32;
         GridHeight = 32;
         WaitTime = 100;
@@ -300,7 +302,7 @@ public class AnimationViewModel : ViewModelBase, IAddFrameProvider
                         }
                         return TimeSpan.FromMilliseconds(SelectedPattern.Frames[CurrentFrameIndex].Duration);
                     },
-                    RxApp.MainThreadScheduler
+                    ReactiveUI.Avalonia.AvaloniaScheduler.Instance
                 );
             })
             .Switch()

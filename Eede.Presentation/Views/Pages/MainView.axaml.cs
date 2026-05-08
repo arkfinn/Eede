@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Avalonia.ReactiveUI;
 using Avalonia.Styling;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.ViewModels.Pages;
@@ -15,6 +14,8 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using ReactiveUI.Avalonia;
+using System.Reactive.Disposables.Fluent;
 
 namespace Eede.Presentation.Views.Pages;
 

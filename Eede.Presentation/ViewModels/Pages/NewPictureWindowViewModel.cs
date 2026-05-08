@@ -1,16 +1,15 @@
 using Eede.Domain.SharedKernel;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using System;
 using System.Reactive;
 
 namespace Eede.Presentation.ViewModels.Pages
 {
-#nullable enable
 
-    public class NewPictureWindowViewModel : ViewModelBase
+    public partial class NewPictureWindowViewModel : ViewModelBase
     {
-        [Reactive] public PictureSize Size { get; set; }
+        [Reactive] public partial PictureSize Size { get; set; }
         public int Width
         {
             get => Size.Width;

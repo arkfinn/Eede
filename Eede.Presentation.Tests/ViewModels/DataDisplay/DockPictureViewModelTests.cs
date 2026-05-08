@@ -59,7 +59,7 @@ public class DockPictureViewModelTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
 
             var size = new PictureSize(32, 32);
@@ -83,7 +83,7 @@ public class DockPictureViewModelTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
 
             var initialSize = new PictureSize(32, 32);
@@ -109,7 +109,7 @@ public class DockPictureViewModelTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
 
             var mockFile = new Mock<IImageFile>();

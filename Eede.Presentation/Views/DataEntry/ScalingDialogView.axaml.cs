@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
 using Eede.Presentation.ViewModels.DataEntry;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using System;
 
 namespace Eede.Presentation.Views.DataEntry

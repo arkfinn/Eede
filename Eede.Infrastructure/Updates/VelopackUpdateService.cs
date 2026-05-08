@@ -36,8 +36,15 @@ public class VelopackUpdateService : IUpdateService, IDisposable
     {
         try
         {
-            SetStatus(UpdateStatus.Checking);
             var mgr = new UpdateManager(new GithubSource(_githubUrl, null, false));
+            if (!mgr.IsInstalled)
+            {
+                System.Diagnostics.Debug.WriteLine("Velopack: Application is not installed. Skipping update check.");
+                SetStatus(UpdateStatus.Idle);
+                return false;
+            }
+
+            SetStatus(UpdateStatus.Checking);
             LatestVersion = mgr.CurrentVersion?.ToString();
             _updateInfo = await mgr.CheckForUpdatesAsync();
 
@@ -52,8 +59,8 @@ public class VelopackUpdateService : IUpdateService, IDisposable
         }
         catch (Exception ex)
         {
-            // インストールされていない環境（デバッグ時など）では UpdateManager が例外を投げる可能性があります。
-            // その場合はエラー表示にせず、Idle ステータスに戻します。
+            // すでに IsInstalled でチェックしていますが、念のため例外もハンドリングします。
+            // インストールされていない環境（デバッグ時など）ではエラー表示にせず、Idle ステータスに戻します。
             System.Diagnostics.Debug.WriteLine($"Velopack CheckForUpdatesAsync error: {ex.Message}");
             SetStatus(UpdateStatus.Idle);
             return false;
@@ -65,8 +72,15 @@ public class VelopackUpdateService : IUpdateService, IDisposable
         try
         {
             if (_updateInfo == null) return;
-            SetStatus(UpdateStatus.Downloading);
+
             var mgr = new UpdateManager(new GithubSource(_githubUrl, null, false));
+            if (!mgr.IsInstalled)
+            {
+                SetStatus(UpdateStatus.Idle);
+                return;
+            }
+
+            SetStatus(UpdateStatus.Downloading);
             await mgr.DownloadUpdatesAsync(_updateInfo);
             SetStatus(UpdateStatus.ReadyToApply);
         }
@@ -83,6 +97,10 @@ public class VelopackUpdateService : IUpdateService, IDisposable
         {
             if (Status != UpdateStatus.ReadyToApply) return;
             var mgr = new UpdateManager(new GithubSource(_githubUrl, null, false));
+            if (!mgr.IsInstalled)
+            {
+                return;
+            }
             mgr.ApplyUpdatesAndRestart(_updateInfo);
         }
         catch (Exception ex)

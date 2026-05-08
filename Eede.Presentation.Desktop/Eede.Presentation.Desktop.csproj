@@ -12,8 +12,8 @@
     <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.13" />
-    <PackageReference Include="ReactiveUI.Avalonia" Version="11.4.12" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.0.2" />
+    <PackageReference Include="ReactiveUI.Avalonia" Version="12.0.1" />
     <PackageReference Include="Velopack" Version="0.0.1298" />
   </ItemGroup>
 

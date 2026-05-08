@@ -7,7 +7,8 @@
              xmlns:c="clr-namespace:Eede.Presentation.Common.Converters"
              xmlns:p="using:Eede.Domain.ImageEditing.DrawingTools"
              mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="450"
-             x:Class="Eede.Presentation.Views.Navigation.DrawStyleMenu">
+             x:Class="Eede.Presentation.Views.Navigation.DrawStyleMenu"
+             x:DataType="local:DrawStyleMenu">
   <Grid>
     <Grid.Styles>
       <StyleInclude Source="/Styles/Styles.axaml" />
@@ -18,49 +19,49 @@
       </WrapPanel.Resources>
       <ToggleButton x:Name="ButtonRegionSelector" Classes="tool tool-flat"
                     ToolTip.Tip="領域選択"
-                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=local:DrawStyleMenu}}"
                     CommandParameter="{x:Static p:DrawStyleType.RegionSelect}" >
         <PathIcon Data="{StaticResource SelectIconGeometry}" Classes="icon" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonFreeCurve" Classes="tool tool-flat"
                     ToolTip.Tip="自由曲線"
-                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=local:DrawStyleMenu}}"
                     CommandParameter="{x:Static p:DrawStyleType.FreeCurve}" >
         <PathIcon Data="{StaticResource EditIconGeometry}" Classes="icon" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonLine" Classes="tool tool-flat"
                     ToolTip.Tip="直線"
-                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=local:DrawStyleMenu}}"
                     CommandParameter="{x:Static p:DrawStyleType.Line}" >
         <PathIcon Data="{StaticResource LineIconGeometry}" Classes="icon" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonFill" Classes="tool tool-flat"
                     ToolTip.Tip="塗りつぶし"
-                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=local:DrawStyleMenu}}"
                     CommandParameter="{x:Static p:DrawStyleType.Fill}" >
         <PathIcon Data="{StaticResource FormatColorFillIconGeometry}" Classes="icon" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonRect" Classes="tool tool-flat"
                     ToolTip.Tip="矩形"
-                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=local:DrawStyleMenu}}"
                     CommandParameter="{x:Static p:DrawStyleType.Rectangle}" >
         <PathIcon Data="{StaticResource SquareIconGeometry}" Classes="icon" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonRectFill" Classes="tool tool-flat"
                     ToolTip.Tip="矩形（塗りつぶし）"
-                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=local:DrawStyleMenu}}"
                     CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" >
         <PathIcon Data="{StaticResource FillSquareIconGeometry}" Classes="icon" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonEllipse" Classes="tool tool-flat"
                     ToolTip.Tip="円"
-                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=local:DrawStyleMenu}}"
                     CommandParameter="{x:Static p:DrawStyleType.Ellipse}" >
         <PathIcon Data="{StaticResource CircleIconGeometry}" Classes="icon" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonEllipseFill" Classes="tool tool-flat"
                     ToolTip.Tip="円（塗りつぶし）"
-                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Command="{Binding UpdateDrawStyleCommand, RelativeSource={RelativeSource AncestorType=local:DrawStyleMenu}}"
                     CommandParameter="{x:Static p:DrawStyleType.FilledEllipse}" >
         <PathIcon Data="{StaticResource FillCircleIconGeometry}" Classes="icon" />
       </ToggleButton>

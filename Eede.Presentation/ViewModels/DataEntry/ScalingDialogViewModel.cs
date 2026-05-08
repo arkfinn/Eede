@@ -1,7 +1,7 @@
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using System;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -10,21 +10,21 @@ namespace Eede.Presentation.ViewModels.DataEntry
 {
 #nullable enable
 
-    public class ScalingDialogViewModel : ReactiveObject
+    public partial class ScalingDialogViewModel : ReactiveObject
     {
         private readonly PictureSize OriginalSize;
 
-        [Reactive] public int Width { get; set; }
-        [Reactive] public int Height { get; set; }
-        [Reactive] public double WidthPercent { get; set; }
-        [Reactive] public double HeightPercent { get; set; }
+        [Reactive] public partial int Width { get; set; }
+        [Reactive] public partial int Height { get; set; }
+        [Reactive] public partial double WidthPercent { get; set; }
+        [Reactive] public partial double HeightPercent { get; set; }
 
-        [Reactive] public bool IsLockAspectRatio { get; set; } = true;
-        [Reactive] public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
-        [Reactive] public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Top;
+        [Reactive] public partial bool IsLockAspectRatio { get; set; }
+        [Reactive] public partial HorizontalAlignment HorizontalAlignment { get; set; }
+        [Reactive] public partial VerticalAlignment VerticalAlignment { get; set; }
 
-        [Reactive] public bool IsHorizontalShrink { get; private set; }
-        [Reactive] public bool IsVerticalShrink { get; private set; }
+        [Reactive] public partial bool IsHorizontalShrink { get; set; }
+        [Reactive] public partial bool IsVerticalShrink { get; set; }
 
         public bool IsTopLeftEnabled => true;
         public bool IsTopCenterEnabled => IsHorizontalShrink;
@@ -50,6 +50,9 @@ namespace Eede.Presentation.ViewModels.DataEntry
             Height = originalSize.Height;
             WidthPercent = 100.0;
             HeightPercent = 100.0;
+            IsLockAspectRatio = true;
+            HorizontalAlignment = HorizontalAlignment.Left;
+            VerticalAlignment = VerticalAlignment.Top;
             RefreshStates();
 
             this.WhenAnyValue(x => x.Width)

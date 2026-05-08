@@ -55,24 +55,28 @@
 
   <ItemGroup>
 
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.2.3" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.13" Condition="'$(Configuration)' == 'Debug'" />
 
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.13" />
 
-    <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.13" />
 
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Win32.Interoperability" Version="11.3.13" />
 
-    <PackageReference Include="Avalonia.Win32.Interoperability" Version="11.2.3" />
+    <PackageReference Include="Dock.Avalonia" Version="11.3.11.22" />
 
-    <PackageReference Include="Dock.Avalonia" Version="11.2.0" />
+    <PackageReference Include="Dock.Avalonia.Themes.Fluent" Version="11.3.11.22" />
 
-    <PackageReference Include="Dock.Model.Avalonia" Version="11.2.0" />
+    <PackageReference Include="Dock.Model.Avalonia" Version="11.3.11.22" />
 
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
-    <PackageReference Include="ReactiveUI" Version="20.1.63" />
-    <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
-    <PackageReference Include="System.Text.Json" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+    <PackageReference Include="ReactiveUI" Version="23.2.1" />
+    <PackageReference Include="ReactiveUI.Avalonia" Version="11.4.12" />
+    <PackageReference Include="ReactiveUI.SourceGenerators" Version="2.6.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Text.Json" Version="10.0.5" />
     <PackageReference Include="Velopack" Version="0.0.1298" />
 
   </ItemGroup>

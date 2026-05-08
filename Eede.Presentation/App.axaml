@@ -1,71 +1,222 @@
 <Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="using:Eede.Presentation"
-             xmlns:converters="using:Eede.Presentation.Common.Converters"
-             x:Class="Eede.Presentation.App"
-             RequestedThemeVariant="Default">
-  <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-  <Application.DataTemplates>
-    <local:ViewLocator/>
-  </Application.DataTemplates>
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:local="using:Eede.Presentation"
+			 xmlns:converters="using:Eede.Presentation.Common.Converters"
+			 x:Class="Eede.Presentation.App"
+			 RequestedThemeVariant="Dark">
+	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+	<Application.DataTemplates>
+		<local:ViewLocator/>
+	</Application.DataTemplates>
 
-  <Application.Resources>
-    <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="/Resources/Icons.axaml"/>
-      </ResourceDictionary.MergedDictionaries>
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="/Resources/Icons.axaml"/>
+			</ResourceDictionary.MergedDictionaries>
 
-      <ResourceDictionary.ThemeDictionaries>
-        <ResourceDictionary x:Key='Light'>
-          <SolidColorBrush x:Key='RegionBrush'>#FFFFFF</SolidColorBrush>
-          <SolidColorBrush x:Key='BaseBrush'>#CCCCCC</SolidColorBrush>
-          <SolidColorBrush x:Key='AccentContrastBrush' Color='White' />
-          <SolidColorBrush x:Key='TextBrush'>#000000</SolidColorBrush>
-          <Color x:Key='DockApplicationAccentForegroundColor'>White</Color>
-        </ResourceDictionary>
-        <ResourceDictionary x:Key='Dark'>
-          <SolidColorBrush x:Key='RegionBrush'>Black</SolidColorBrush>
-          <SolidColorBrush x:Key='BaseBrush'>#333333</SolidColorBrush>
-          <SolidColorBrush x:Key='AccentContrastBrush' Color='White' />
-          <SolidColorBrush x:Key='TextBrush'>#FFFFFF</SolidColorBrush>
-          <Color x:Key='DockApplicationAccentForegroundColor'>#222222</Color>
-        </ResourceDictionary>
-      </ResourceDictionary.ThemeDictionaries>
+			<ResourceDictionary.ThemeDictionaries>
+				<ResourceDictionary x:Key='Light'>
+					<SolidColorBrush x:Key='RegionBrush'>#FFFFFF</SolidColorBrush>
+					<SolidColorBrush x:Key='BaseBrush'>#CCCCCC</SolidColorBrush>
+					<SolidColorBrush x:Key='AccentContrastBrush' Color='White' />
+					<SolidColorBrush x:Key='TextBrush'>#000000</SolidColorBrush>
+					<Color x:Key='DockApplicationAccentForegroundColor'>White</Color>
+					
+					<Color x:Key='PrimaryColor'>#00C853</Color>
+					<SolidColorBrush x:Key='PrimaryBrush' Color='{DynamicResource PrimaryColor}' />
+					
+					<Color x:Key='DockThemeBackgroundColor'>#F3F3F3</Color>
+					<Color x:Key='DockThemeBorderColor'>#E0E0E0</Color>
 
-      <!-- Globally defined brushes to ensure priority and reactivity -->
-      <SolidColorBrush x:Key='PrimaryBrush' Color='{DynamicResource SystemAccentColor}' />
-      <SolidColorBrush x:Key='DockApplicationAccentBrush' Color='{DynamicResource SystemAccentColor}' />
-      <SolidColorBrush x:Key='DockApplicationAccentBrushLow' Color='{DynamicResource SystemAccentColor}' />
-      <SolidColorBrush x:Key='DockApplicationAccentBrushMedium' Color='{DynamicResource SystemAccentColorLight2}' />
-      <SolidColorBrush x:Key='DockApplicationAccentBrushHigh' Color='{DynamicResource SystemAccentColorLight1}' />
-      <SolidColorBrush x:Key='DockThemeAccentBrush' Color='{DynamicResource SystemAccentColor}' />
-      <SolidColorBrush x:Key='DockApplicationAccentForegroundBrush' Color='{DynamicResource DockApplicationAccentForegroundColor}' />
+					<!-- Neutral Dock Color Keys for Light Mode -->
+					<Color x:Key='DockAccentColor'>#00C853</Color>
+					<Color x:Key='DockAccentLowColor'>#4000C853</Color>
+					<Color x:Key='DockAccentHighColor'>#FF00C853</Color>
+
+					<!-- System Accent Color Keys for Dock/Fluent compatibility -->
+					<!-- System Accent Color Keys for Dock/Fluent compatibility (Color type) -->
+					<Color x:Key="SystemAccentColor">#00C853</Color>
+					<Color x:Key="SystemAccentColorDark1">#00A343</Color>
+					<Color x:Key="SystemAccentColorDark2">#007E34</Color>
+					<Color x:Key="SystemAccentColorDark3">#005924</Color>
+					<Color x:Key="SystemAccentColorLight1">#3300C853</Color>
+					<Color x:Key="SystemAccentColorLight2">#6600C853</Color>
+					<Color x:Key="SystemAccentColorLight3">#9900C853</Color>
+
+					<!-- Dock Internal Hardcoded Brush Overrides (Light Mode) -->
+					<!-- Dock Fluent theme uses these hardcoded hexes, so we MUST override them by key -->
+					<SolidColorBrush x:Key='DockApplicationAccentBrushLow'>#00C853</SolidColorBrush>
+					<SolidColorBrush x:Key='DockApplicationAccentBrushMed'>#69F0AE</SolidColorBrush>
+					<SolidColorBrush x:Key='DockApplicationAccentBrushHigh'>#B9F6CA</SolidColorBrush>
+
+					<!-- Mapping Dock internal Tab brushes to our theme-aware brushes -->
+					<SolidColorBrush x:Key='DockTabActiveBackgroundBrush' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockTabActiveForegroundBrush' Color='White' />
+					<SolidColorBrush x:Key='DockDocumentTabPointerOverForegroundBrush' Color='White' />
+					<SolidColorBrush x:Key='DockTabHoverBackgroundBrush' Color='{StaticResource SystemAccentColorLight2}' />
+					<SolidColorBrush x:Key='DockTabHoverForegroundBrush' Color='White' />
+					<SolidColorBrush x:Key='DockTabInactiveHoverForegroundBrush' Color='White' />
+					<SolidColorBrush x:Key='DockTabActiveIndicatorBrush' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockTabCloseHoverBackgroundBrush' Color='{StaticResource SystemAccentColorLight1}' />
+
+					<SolidColorBrush x:Key='DockApplicationAccentBrush' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockApplicationAccentBrushMedium' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockThemeAccentBrush' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockApplicationAccentForegroundBrush' Color='White' />
+					<Color x:Key='AccentContrastColor'>White</Color>
+					<SolidColorBrush x:Key='DockThemeBackgroundBrush' Color='{StaticResource DockThemeBackgroundColor}' />
+					<SolidColorBrush x:Key='DockThemeBorderBrush' Color='{StaticResource DockThemeBorderColor}' />
+					
+					<!-- Tool Button Light Brushes (Vivid Green) -->
+					<SolidColorBrush x:Key='ToolBorderedBackgroundChecked'>#4000C853</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolBorderedBorderChecked'>#FF00C853</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolBorderedBackgroundPointerOverChecked'>#6000C853</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolBorderedBorderPointerOverChecked'>#FF00C853</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolFlatBackgroundChecked'>#E6E6E6</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolFlatBackgroundPointerOverChecked'>#CCCCCC</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolBackgroundPointerOver'>#E6E6E6</SolidColorBrush>
+				</ResourceDictionary>
+				
+				<ResourceDictionary x:Key='Dark'>
+					<!-- Global Corner Radius Zero for Obsidian Drafting Table -->
+					<CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+					<CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+
+					<Color x:Key='PrimaryColor'>#8eff71</Color>
+					<SolidColorBrush x:Key='PrimaryBrush' Color='{DynamicResource PrimaryColor}' />
+
+					<!-- The Obsidian Drafting Table Colors -->
+					<SolidColorBrush x:Key='RegionBrush'>#0e0e0e</SolidColorBrush>
+					<SolidColorBrush x:Key='SurfaceBrush'>#0e0e0e</SolidColorBrush>
+					<SolidColorBrush x:Key='SurfaceContainerLowBrush'>#131313</SolidColorBrush>
+					<SolidColorBrush x:Key='SurfaceContainerHighBrush'>#201f1f</SolidColorBrush>
+					<SolidColorBrush x:Key='SurfaceContainerHighestBrush'>#262626</SolidColorBrush>
+
+					<SolidColorBrush x:Key='BaseBrush'>#131313</SolidColorBrush>
+					<SolidColorBrush x:Key='AccentContrastBrush' Color='Black' />
+					<SolidColorBrush x:Key='TextBrush'>#FFFFFF</SolidColorBrush>
+					<Color x:Key='DockApplicationAccentForegroundColor'>Black</Color>
+					<Color x:Key='AccentContrastColor'>Black</Color>
+					<SolidColorBrush x:Key='OutlineVariantBrush'>#484847</SolidColorBrush>
+					
+					<Color x:Key='DockThemeBackgroundColor'>#201f1f</Color>
+					<Color x:Key='DockThemeBorderColor'>#262626</Color>
+					<!-- System Accent Color Keys for Dock/Fluent compatibility (Dark) -->
+					<Color x:Key="SystemAccentColor">#8eff71</Color>
+					<Color x:Key="SystemAccentColorDark1">#2ff801</Color>
+					<Color x:Key="SystemAccentColorDark2">#1bc700</Color>
+					<Color x:Key="SystemAccentColorDark3">#159600</Color>
+					<Color x:Key="SystemAccentColorLight1">#b3ff99</Color>
+					<Color x:Key="SystemAccentColorLight2">#ccffbb</Color>
+					<Color x:Key="SystemAccentColorLight3">#1A8eff71</Color>
+
+					<!-- Dock Internal Hardcoded Brush Overrides (Dark Mode) -->
+					<!-- Dock Fluent theme uses these hardcoded hexes, so we MUST override them by key -->
+					<SolidColorBrush x:Key='DockApplicationAccentBrushLow'>#8eff71</SolidColorBrush>
+					<SolidColorBrush x:Key='DockApplicationAccentBrushMed'>#2ff801</SolidColorBrush>
+					<SolidColorBrush x:Key='DockApplicationAccentBrushHigh'>#b3ff99</SolidColorBrush>
+
+					<!-- Mapping Dock internal Tab brushes to our theme-aware brushes (Dark Mode) -->
+					<SolidColorBrush x:Key='DockTabActiveBackgroundBrush' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockTabActiveForegroundBrush' Color='Black' />
+					<SolidColorBrush x:Key='DockDocumentTabPointerOverForegroundBrush' Color='Black' />
+					<SolidColorBrush x:Key='DockTabHoverBackgroundBrush' Color='#2ff801' />
+					<SolidColorBrush x:Key='DockTabHoverForegroundBrush' Color='Black' />
+					<SolidColorBrush x:Key='DockTabInactiveHoverForegroundBrush' Color='Black' />
+					<SolidColorBrush x:Key='DockTabActiveIndicatorBrush' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockTabCloseHoverBackgroundBrush' Color='#2ff801' />
+
+					<SolidColorBrush x:Key='DockApplicationAccentBrush' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockApplicationAccentBrushMedium' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockThemeAccentBrush' Color='{StaticResource SystemAccentColor}' />
+					<SolidColorBrush x:Key='DockApplicationAccentForegroundBrush' Color='{StaticResource DockApplicationAccentForegroundColor}' />
+					<SolidColorBrush x:Key='DockThemeBackgroundBrush' Color='{StaticResource DockThemeBackgroundColor}' />
+					<SolidColorBrush x:Key='DockThemeBorderBrush' Color='{StaticResource DockThemeBorderColor}' />
+
+					<!-- Neutral Dock Color Keys for Dark Mode -->
+					<Color x:Key='DockAccentColor'>#8eff71</Color>
+					<Color x:Key='DockAccentLowColor'>#2ff801</Color>
+					<Color x:Key='DockAccentHighColor'>#b3ff99</Color>
+
+					<SolidColorBrush x:Key='ToolBorderedBackgroundChecked'>#408eff71</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolBorderedBorderChecked'>#FF8eff71</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolBorderedBackgroundPointerOverChecked'>#608eff71</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolBorderedBorderPointerOverChecked'>#FF8eff71</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolFlatBackgroundChecked'>#262626</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolFlatBackgroundPointerOverChecked'>#333333</SolidColorBrush>
+					<SolidColorBrush x:Key='ToolBackgroundPointerOver'>#333333</SolidColorBrush>
+
+					<!-- ComboBox Icon Contrast Adjustments (Dark Mode Only) -->
+					<SolidColorBrush x:Key='ComboBoxDropDownGlyphForeground' Color='#999999' />
+					<SolidColorBrush x:Key='ComboBoxDropDownGlyphForegroundPointerOver' Color='#CCCCCC' />
+					<SolidColorBrush x:Key='ComboBoxDropDownGlyphForegroundDisabled' Color='#4D4D4D' />
+
+					<!-- ScrollBar Brushes (Dark Mode Only) -->
+					<SolidColorBrush x:Key='ScrollBarPanningThumbBackground' Color='#4D4D4D' />
+					<SolidColorBrush x:Key='ScrollBarThumbFillPointerOver' Color='#8eff71' />
+					<SolidColorBrush x:Key='ScrollBarThumbFillPressed' Color='#2ff801' />
+					<SolidColorBrush x:Key='ScrollBarTrackFill' Color='Transparent' />
+					<SolidColorBrush x:Key='ScrollBarTrackFillPointerOver' Color='#11FFFFFF' />
+
+					<!-- Component Contrast Adjustments (Dark Mode Only) -->
+					<!-- Ensure glyphs and text are black on our neongreen accent -->
+					<SolidColorBrush x:Key='ToggleButtonForegroundChecked' Color='{StaticResource AccentContrastColor}' />
+					<SolidColorBrush x:Key='CheckBoxCheckGlyphForegroundChecked' Color='{StaticResource AccentContrastColor}' />
+					<SolidColorBrush x:Key='CheckBoxForegroundChecked' Color='White' />
+				</ResourceDictionary>
+			</ResourceDictionary.ThemeDictionaries>
 
 
-      <converters:PlayPauseTextConverter x:Key="PlayPauseTextConverter" />
-      <x:Single x:Key="Single1">1</x:Single>
-      <x:Single x:Key="Single2">2</x:Single>
-      <x:Single x:Key="Single4">4</x:Single>
-      <x:Single x:Key="Single6">6</x:Single>
-      <x:Single x:Key="Single8">8</x:Single>
-      <x:Single x:Key="Single12">12</x:Single>
-    </ResourceDictionary>
-  </Application.Resources>
-  <Application.Styles>
-    <FluentTheme>
-      <FluentTheme.Palettes>
-        <ColorPaletteResources x:Key="Light"
-                               Accent="#00C853"
-                               RegionColor="White"
-                               ErrorText="Red" />
-        <ColorPaletteResources x:Key="Dark"
-                               Accent="#19e68a"
-                               RegionColor="Black"
-                               ErrorText="Red" />
-      </FluentTheme.Palettes>
-    </FluentTheme>
+			<converters:PlayPauseTextConverter x:Key="PlayPauseTextConverter" />
+			<x:Single x:Key="Single1">1</x:Single>
+			<x:Single x:Key="Single2">2</x:Single>
+			<x:Single x:Key="Single4">4</x:Single>
+			<x:Single x:Key="Single6">6</x:Single>
+			<x:Single x:Key="Single8">8</x:Single>
+			<x:Single x:Key="Single12">12</x:Single>
+		</ResourceDictionary>
+		<x:Double x:Key="ScrollBarSize">8</x:Double>
+	</Application.Resources>
+	<Application.Styles>
+		<FluentTheme>
+			<FluentTheme.Palettes>
+				<ColorPaletteResources x:Key="Light"
+									   Accent="#00C853"
+									   RegionColor="White"
+									   ErrorText="Red" />
+				<ColorPaletteResources x:Key="Dark"
+									   Accent="#8eff71"
+									   AltHigh="#0e0e0e"
+									   AltLow="#0e0e0e"
+									   AltMedium="#0e0e0e"
+									   AltMediumHigh="#0e0e0e"
+									   AltMediumLow="#0e0e0e"
+									   BaseHigh="White"
+									   BaseLow="#262626"
+									   BaseMedium="#201f1f"
+									   BaseMediumHigh="#131313"
+									   BaseMediumLow="#131313"
+									   ChromeAltLow="#0e0e0e"
+									   ChromeBlackHigh="Black"
+									   ChromeBlackLow="Black"
+									   ChromeBlackMedium="Black"
+									   ChromeBlackMediumLow="Black"
+									   ChromeDisabledHigh="#131313"
+									   ChromeDisabledLow="#131313"
+									   ChromeHigh="#131313"
+									   ChromeLow="#201f1f"
+									   ChromeMedium="#262626"
+									   ChromeMediumLow="#262626"
+									   ChromeWhite="White"
+									   ListLow="#201f1f"
+									   ListMedium="#262626"
+									   RegionColor="#0e0e0e"
+									   ErrorText="Red" />
+			</FluentTheme.Palettes>
+		</FluentTheme>
 
-    <StyleInclude Source="avares://Dock.Avalonia/Themes/DockFluentTheme.axaml" />
-    <StyleInclude Source="/Styles/Styles.axaml"/>
-  </Application.Styles>
+		<StyleInclude Source="avares://Dock.Avalonia.Themes.Fluent/DockFluentTheme.axaml" />
+		<StyleInclude Source="/Styles/Styles.axaml"/>
+	</Application.Styles>
 </Application>

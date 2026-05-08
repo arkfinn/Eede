@@ -3,7 +3,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.History;
 using Eede.Domain.SharedKernel;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using System;
 using System.Reactive;
 
@@ -11,11 +11,11 @@ namespace Eede.Presentation.ViewModels.Pages
 {
 #nullable enable
 
-    public class DrawingSessionViewModel : ViewModelBase
+    public partial class DrawingSessionViewModel : ViewModelBase
     {
         private readonly IDrawingSessionProvider _provider;
 
-        [Reactive] public DrawingSession CurrentSession { get; private set; }
+        [Reactive] public partial DrawingSession CurrentSession { get; set; }
 
         public ReactiveCommand<Unit, Unit> UndoCommand { get; }
         public ReactiveCommand<Unit, Unit> RedoCommand { get; }

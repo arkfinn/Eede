@@ -10,24 +10,24 @@ using Eede.Application.Settings;
 using Eede.Application.UseCase.Updates;
 using Eede.Domain.SharedKernel;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 
 namespace Eede.Presentation.ViewModels.General;
 
-public class WelcomeViewModel : ViewModelBase, IDisposable
+public partial class WelcomeViewModel : ViewModelBase, IDisposable
 {
     public ObservableCollection<RecentFile> RecentFiles { get; } = new();
 
     public string Version => GetVersion();
     public string DisplayVersion => LatestVersion ?? Version;
 
-    [Reactive] public UpdateStatus UpdateStatus { get; set; }
-    [Reactive] public string? LatestVersion { get; set; }
-    [ObservableAsProperty] public bool IsUpdateChecking { get; }
-    [ObservableAsProperty] public bool IsUpdateDownloading { get; }
-    [ObservableAsProperty] public bool IsUpdateReady { get; }
-    [ObservableAsProperty] public bool IsUpdateAvailable { get; }
-    [ObservableAsProperty] public string? UpdateMessage { get; }
+    [Reactive] public partial UpdateStatus UpdateStatus { get; set; }
+    [Reactive] public partial string? LatestVersion { get; set; }
+    [ObservableAsProperty] private bool _isUpdateChecking;
+    [ObservableAsProperty] private bool _isUpdateDownloading;
+    [ObservableAsProperty] private bool _isUpdateReady;
+    [ObservableAsProperty] private bool _isUpdateAvailable;
+    [ObservableAsProperty] private string? _updateMessage;
 
     public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenPictureCommand { get; }
@@ -97,21 +97,27 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
             }
         }, canCheckUpdate);
 
+        _isUpdateCheckingHelper = null!;
+        _isUpdateDownloadingHelper = null!;
+        _isUpdateReadyHelper = null!;
+        _isUpdateAvailableHelper = null!;
+        _updateMessageHelper = null!;
+
         this.WhenAnyValue(x => x.UpdateStatus)
             .Select(x => x == UpdateStatus.Checking)
-            .ToPropertyEx(this, x => x.IsUpdateChecking);
+            .ToProperty(this, nameof(IsUpdateChecking), out _isUpdateCheckingHelper);
 
         this.WhenAnyValue(x => x.UpdateStatus)
             .Select(x => x == UpdateStatus.Downloading)
-            .ToPropertyEx(this, x => x.IsUpdateDownloading);
+            .ToProperty(this, nameof(IsUpdateDownloading), out _isUpdateDownloadingHelper);
 
         this.WhenAnyValue(x => x.UpdateStatus)
             .Select(x => x == UpdateStatus.ReadyToApply)
-            .ToPropertyEx(this, x => x.IsUpdateReady);
+            .ToProperty(this, nameof(IsUpdateReady), out _isUpdateReadyHelper);
 
         this.WhenAnyValue(x => x.UpdateStatus)
             .Select(x => x != UpdateStatus.Idle)
-            .ToPropertyEx(this, x => x.IsUpdateAvailable);
+            .ToProperty(this, nameof(IsUpdateAvailable), out _isUpdateAvailableHelper);
 
         this.WhenAnyValue(x => x.UpdateStatus, x => x.LatestVersion)
             .Select(x => x.Item1 switch
@@ -122,23 +128,21 @@ public class WelcomeViewModel : ViewModelBase, IDisposable
                 UpdateStatus.Error => "アップデートの確認に失敗しました",
                 _ => ""
             })
-            .ToPropertyEx(this, x => x.UpdateMessage);
+            .ToProperty(this, nameof(UpdateMessage), out _updateMessageHelper);
 
         if (_updateService != null)
         {
-            _updateService.StatusChanged
-                .ObserveOn(RxApp.MainThreadScheduler)
+            _disposables.Add(_updateService.StatusChanged
+                .ObserveOn(ReactiveUI.Avalonia.AvaloniaScheduler.Instance)
                 .Subscribe(status =>
                 {
                     UpdateStatus = status;
                     LatestVersion = _updateService.LatestVersion;
-                })
-                .DisposeWith(_disposables);
+                }));
         }
 
-        this.WhenAnyValue(x => x.LatestVersion)
-            .Subscribe(_ => this.RaisePropertyChanged(nameof(DisplayVersion)))
-            .DisposeWith(_disposables);
+        _disposables.Add(this.WhenAnyValue(x => x.LatestVersion)
+            .Subscribe(_ => this.RaisePropertyChanged(nameof(DisplayVersion))));
 
         // 初期化時にアップデートチェックを開始（本来は非同期で実行）
         _ = InitializeAsync();

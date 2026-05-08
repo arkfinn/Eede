@@ -139,3 +139,5 @@ public partial class App : Avalonia.Application
         services.AddSingleton<Func<NewPictureWindowViewModel>>(sp => () => sp.GetRequiredService<NewPictureWindowViewModel>());
     }
 }
+
+

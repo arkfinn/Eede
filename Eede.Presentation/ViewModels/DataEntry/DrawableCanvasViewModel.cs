@@ -16,40 +16,40 @@ using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
 using Eede.Presentation.Settings;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Pictures;
+using ReactiveUI.SourceGenerators;
 
 namespace Eede.Presentation.ViewModels.DataEntry;
 
 #nullable enable
 
-public class DrawableCanvasViewModel : ViewModelBase
+public partial class DrawableCanvasViewModel : ViewModelBase
 {
-    [Reactive] public BackgroundColor BackgroundColor { get; set; } = BackgroundColor.Default;
-    [Reactive] public Magnification Magnification { get; set; } = new Magnification(1);
-    [Reactive] public IDrawStyle DrawStyle { get; set; } = new FreeCurve();
-    [Reactive] public IImageBlender ImageBlender { get; set; } = new DirectImageBlender();
-    [Reactive] public ArgbColor PenColor { get; set; } = new ArgbColor(255, 0, 0, 0);
-    [Reactive] public int PenSize { get; set; } = 1;
-    [Reactive] public PenStyle PenStyle { get; set; }
-    [Reactive] public IImageTransfer ImageTransfer { get; set; } = new DirectImageTransfer();
-    [Reactive] public bool IsShifted { get; set; }
-    [Reactive] public bool IsRegionSelecting { get; set; }
-    [Reactive] public bool IsShowHandles { get; set; }
-    [Reactive] public PictureArea? SelectingArea { get; set; }
-    [Reactive] public Thickness SelectingThickness { get; set; }
-    [Reactive] public PictureSize SelectingSize { get; set; } = new PictureSize(0, 0);
-    [Reactive] public Position PreviewPosition { get; set; } = new Position(0, 0);
-    [Reactive] public Picture? PreviewPixels { get; set; }
-    [Reactive] public Thickness PreviewThickness { get; set; }
-    [Reactive] public PictureSize PreviewSize { get; set; } = new PictureSize(0, 0);
-    [Reactive] public Thickness RawPreviewThickness { get; set; }
-    [Reactive] public PictureSize RawPreviewSize { get; set; } = new PictureSize(0, 0);
+    [Reactive] public partial BackgroundColor BackgroundColor { get; set; }
+    [Reactive] public partial Magnification Magnification { get; set; }
+    [Reactive] public partial IDrawStyle DrawStyle { get; set; }
+    [Reactive] public partial IImageBlender ImageBlender { get; set; }
+    [Reactive] public partial ArgbColor PenColor { get; set; }
+    [Reactive] public partial int PenSize { get; set; }
+    [Reactive] public partial PenStyle PenStyle { get; set; }
+    [Reactive] public partial IImageTransfer ImageTransfer { get; set; }
+    [Reactive] public partial bool IsShifted { get; set; }
+    [Reactive] public partial bool IsRegionSelecting { get; set; }
+    [Reactive] public partial bool IsShowHandles { get; set; }
+    [Reactive] public partial PictureArea? SelectingArea { get; set; }
+    [Reactive] public partial Thickness SelectingThickness { get; set; }
+    [Reactive] public partial PictureSize SelectingSize { get; set; }
+    [Reactive] public partial Position PreviewPosition { get; set; }
+    [Reactive] public partial Picture? PreviewPixels { get; set; }
+    [Reactive] public partial Thickness PreviewThickness { get; set; }
+    [Reactive] public partial PictureSize PreviewSize { get; set; }
+    [Reactive] public partial Thickness RawPreviewThickness { get; set; }
+    [Reactive] public partial PictureSize RawPreviewSize { get; set; }
     private Bitmap? _magnifiedPreviewBitmap;
     public Bitmap? MagnifiedPreviewBitmap
     {
@@ -63,25 +63,22 @@ public class DrawableCanvasViewModel : ViewModelBase
             _ = this.RaiseAndSetIfChanged(ref _magnifiedPreviewBitmap, value);
         }
     }
-    [Reactive] public bool IsAnimationMode { get; set; }
-    [Reactive] public GridSettings GridSettings { get; set; } = new GridSettings(new(32, 32), new(0, 0), 0);
-    [Reactive] public Cursor ActiveCursor { get; set; } = Cursor.Default;
-    [Reactive] public SelectionCursor ActiveSelectionCursor { get; set; } = SelectionCursor.Default;
-    [Reactive] public double HandleSize { get; set; }
-    [Reactive] public Thickness HandleMargin { get; set; }
+    [Reactive] public partial bool IsAnimationMode { get; set; }
+    [Reactive] public partial GridSettings GridSettings { get; set; }
+    [Reactive] public partial Cursor ActiveCursor { get; set; }
+    [Reactive] public partial SelectionCursor ActiveSelectionCursor { get; set; }
+    [Reactive] public partial double HandleSize { get; set; }
+    [Reactive] public partial Thickness HandleMargin { get; set; }
 
-    [Reactive] public double DisplayWidth { get; set; }
-    [Reactive] public double DisplayHeight { get; set; }
+    [Reactive] public partial double DisplayWidth { get; set; }
+    [Reactive] public partial double DisplayHeight { get; set; }
 
-    [Reactive] public bool IsShowPixelGrid { get; set; }
-    [Reactive] public bool IsShowCursorGrid { get; set; }
-    [Reactive] public PictureSize CursorSize { get; set; } = new PictureSize(32, 32);
+    [Reactive] public partial bool IsShowPixelGrid { get; set; }
+    [Reactive] public partial bool IsShowCursorGrid { get; set; }
+    [Reactive] public partial PictureSize CursorSize { get; set; }
 
-    private readonly ObservableAsPropertyHelper<bool> _isPixelGridEffectivelyVisible;
-    public bool IsPixelGridEffectivelyVisible => _isPixelGridEffectivelyVisible.Value;
-
-    private readonly ObservableAsPropertyHelper<bool> _isCursorGridEffectivelyVisible;
-    public bool IsCursorGridEffectivelyVisible => _isCursorGridEffectivelyVisible.Value;
+    [ObservableAsProperty] private bool _isPixelGridEffectivelyVisible;
+    [ObservableAsProperty] private bool _isCursorGridEffectivelyVisible;
 
     private readonly GlobalState _globalState;
     private readonly IAddFrameProvider _addFrameProvider;
@@ -150,13 +147,17 @@ public class DrawableCanvasViewModel : ViewModelBase
             UpdateImage();
         };
 
+        _isPixelGridEffectivelyVisibleHelper = null!;
+        _isCursorGridEffectivelyVisibleHelper = null!;
+        _imageBlender = null!;
+
+        BackgroundColor = BackgroundColor.Default;
         GridSettings = new GridSettings(new(32, 32), new(0, 0), 0);
         InternalUpdateCommand = ReactiveCommand.Create<Picture>(ExecuteInternalUpdate);
 
         Picture initialPicture = Picture.CreateEmpty(_globalState.BoxSize);
         _bitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(initialPicture);
         _pictureBuffer = ContextFactory.Create(initialPicture);
-        SetPicture(initialPicture);
 
         Magnification = new Magnification(4);
         DrawStyle = new FreeCurve();
@@ -168,6 +169,9 @@ public class DrawableCanvasViewModel : ViewModelBase
         IsRegionSelecting = false;
         SelectingThickness = new Thickness(0, 0, 0, 0);
         SelectingSize = new PictureSize(0, 0);
+        PreviewPosition = new Position(0, 0);
+        PreviewSize = new PictureSize(0, 0);
+        RawPreviewSize = new PictureSize(0, 0);
         ActiveCursor = Cursor.Default;
         ActiveSelectionCursor = SelectionCursor.Default;
         HandleSize = 4.0;
@@ -186,15 +190,15 @@ public class DrawableCanvasViewModel : ViewModelBase
         CutCommand = ReactiveCommand.CreateFromTask(ExecuteCutAction);
         PasteCommand = ReactiveCommand.CreateFromTask(ExecutePasteAction);
 
-        _isPixelGridEffectivelyVisible = this.WhenAnyValue(
+        this.WhenAnyValue(
             x => x.IsShowPixelGrid,
             x => x.Magnification,
             (isShow, mag) => isShow && (mag.Value >= 4))
-            .ToProperty(this, x => x.IsPixelGridEffectivelyVisible);
+            .ToProperty(this, nameof(IsPixelGridEffectivelyVisible), out _isPixelGridEffectivelyVisibleHelper);
 
-        _isCursorGridEffectivelyVisible = this.WhenAnyValue(
+        this.WhenAnyValue(
             x => x.IsShowCursorGrid)
-            .ToProperty(this, x => x.IsCursorGridEffectivelyVisible);
+            .ToProperty(this, nameof(IsCursorGridEffectivelyVisible), out _isCursorGridEffectivelyVisibleHelper);
 
         _ = this.WhenAnyValue(x => x.DrawStyle)
             .DistinctUntilChanged()

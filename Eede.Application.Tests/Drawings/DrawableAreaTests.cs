@@ -184,5 +184,54 @@ namespace Eede.Application.Tests.Drawings
             var cancelResult = startResult.DrawableArea.DrawCancel(startResult.PictureBuffer);
             Assert.That(cancelResult.PictureBuffer!.IsDrawing(), Is.False);
         }
+
+        [Test]
+        public void DisplaySizeOf_ReturnsCorrectSizeBasedOnMagnification()
+        {
+            // Arrange
+            var magnification = new Magnification(2.0f);
+            var gridSize = new PictureSize(16, 16);
+            var drawableArea = new DrawableArea(magnification, gridSize, null);
+
+            var picture = Picture.CreateEmpty(new PictureSize(10, 15));
+
+            // Act
+            var displaySize = drawableArea.DisplaySizeOf(picture);
+
+            // Assert
+            Assert.That(displaySize.Width, Is.EqualTo(20));
+            Assert.That(displaySize.Height, Is.EqualTo(30));
+        }
+
+        [Test]
+        public void DisplaySizeOf_WithNullPicture_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var magnification = new Magnification(1.0f);
+            var gridSize = new PictureSize(16, 16);
+            var drawableArea = new DrawableArea(magnification, gridSize, null);
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => drawableArea.DisplaySizeOf(null));
+        }
+
+        [Test]
+        public void UpdateMagnification_ReturnsNewInstanceWithUpdatedMagnification()
+        {
+            // Arrange
+            var initialMagnification = new Magnification(1.0f);
+            var newMagnification = new Magnification(3.0f);
+            var gridSize = new PictureSize(16, 16);
+            var drawableArea = new DrawableArea(initialMagnification, gridSize, null);
+
+            // Act
+            var updatedArea = drawableArea.UpdateMagnification(newMagnification);
+
+            // Assert
+            Assert.That(updatedArea, Is.Not.Null);
+            Assert.That(updatedArea, Is.Not.SameAs(drawableArea));
+            Assert.That(updatedArea.Magnification, Is.EqualTo(newMagnification));
+            Assert.That(drawableArea.Magnification, Is.EqualTo(initialMagnification), "Original instance should remain unchanged.");
+        }
     }
 }

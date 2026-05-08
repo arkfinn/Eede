@@ -1,5 +1,5 @@
-﻿using Avalonia;
-using Avalonia.ReactiveUI;
+using Avalonia;
+using ReactiveUI.Avalonia;
 using System;
 using Velopack;
 
@@ -26,6 +26,6 @@ internal class Program
                 .UsePlatformDetect()
                 .WithInterFont()
                 .LogToTrace()
-                .UseReactiveUI();
+                .UseReactiveUI(_ => { });
     }
 }

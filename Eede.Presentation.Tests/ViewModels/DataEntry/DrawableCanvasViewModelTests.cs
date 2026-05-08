@@ -25,6 +25,8 @@ using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.Tests.ViewModels.DataEntry;
@@ -74,7 +76,7 @@ public class DrawableCanvasViewModelTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var vm = CreateViewModel();
 
             // Case 1: Initial state (usually empty picture from GlobalState)
@@ -112,7 +114,7 @@ public class DrawableCanvasViewModelTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var vm = CreateViewModel();
             vm.Magnification = new Magnification(4);
             vm.SelectingArea = new PictureArea(new Position(10, 20), new PictureSize(30, 40));
@@ -132,7 +134,7 @@ public class DrawableCanvasViewModelTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var vm = CreateViewModel();
             vm.Magnification = new Magnification(2);
             vm.PreviewPosition = new Position(5, 15);
@@ -251,7 +253,7 @@ public class DrawableCanvasViewModelTests
     {
         new TestScheduler().With(scheduler =>
         {
-            RxApp.MainThreadScheduler = scheduler;
+            RxSchedulers.MainThreadScheduler = scheduler;
             var vm = CreateViewModel();
 
             // Default: All False

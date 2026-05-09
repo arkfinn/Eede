@@ -97,7 +97,7 @@ public class PictureContainerTests
             mockCoordinator.Object
         );
 
-        var paletteVM = new PaletteContainerViewModel();
+        var paletteVM = new PaletteContainerViewModel(new Mock<Eede.Application.Infrastructure.IPaletteRepository>().Object, new Mock<Eede.Application.Infrastructure.IPaletteSessionRepository>().Object);
         var mockDrawStyleFactory = new Mock<IDrawStyleFactory>();
         var settingsRepo = new Mock<ISettingsRepository>().Object;
         var loadSettingsUseCase = new LoadSettingsUseCase(settingsRepo);

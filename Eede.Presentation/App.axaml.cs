@@ -105,6 +105,13 @@ public partial class App : Avalonia.Application
         services.AddSingleton<ISavePictureUseCase, SavePictureUseCase>();
         services.AddSingleton<ILoadPictureUseCase, LoadPictureUseCase>();
         services.AddSingleton<IPictureIOService, PictureIOService>();
+        services.AddSingleton<IPaletteRepository, Eede.Infrastructure.Palettes.Persistence.PaletteRepository>();
+        services.AddSingleton<IPaletteSessionRepository>(sp =>
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var path = System.IO.Path.Combine(appData, "Eede", "palettes_session.json");
+            return new Eede.Infrastructure.Palettes.Persistence.PaletteSessionRepository(path);
+        });
 
         // Settings
         services.AddSingleton<ISettingsRepository>(sp =>

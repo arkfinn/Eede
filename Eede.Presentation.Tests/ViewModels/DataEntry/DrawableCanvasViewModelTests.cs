@@ -25,6 +25,8 @@ using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
 namespace Eede.Presentation.Tests.ViewModels.DataEntry;

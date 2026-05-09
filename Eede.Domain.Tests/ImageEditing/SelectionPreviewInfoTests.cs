@@ -1,6 +1,6 @@
+using NUnit.Framework;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
-using NUnit.Framework;
 
 namespace Eede.Domain.Tests.ImageEditing;
 
@@ -10,11 +10,14 @@ public class SelectionPreviewInfoTests
     [Test]
     public void Constructor_WithoutSourcePixels_SetsSourcePixelsToPixels()
     {
+        // Arrange
         var pixels = Picture.CreateEmpty(new PictureSize(10, 10));
         var position = new Position(5, 5);
 
+        // Act
         var info = new SelectionPreviewInfo(pixels, position);
 
+        // Assert
         Assert.That(info.SourcePixels, Is.SameAs(pixels));
     }
 

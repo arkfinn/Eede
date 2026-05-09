@@ -20,6 +20,7 @@ public class AlphaOnlyImageBlender : IImageBlender
         int maxY = Math.Min(toPosition.Y + from.Height, to.Height);
         int maxX = Math.Min(toPosition.X + from.Width, to.Width);
 
+        ReadOnlySpan<byte> fromSpan = from.AsSpan();
         for (int y = startY; y < maxY; y++)
         {
             for (int x = startX; x < maxX; x++)
@@ -27,7 +28,7 @@ public class AlphaOnlyImageBlender : IImageBlender
                 int toPos = (x * 4) + (to.Stride * y);
                 int fromPos = ((x - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
 
-                toPixels[toPos + 3] = from.AsSpan()[fromPos + 3];
+                toPixels[toPos + 3] = fromSpan[fromPos + 3];
             }
         }
         return Picture.Create(to.Size, toPixels);

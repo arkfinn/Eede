@@ -3,9 +3,8 @@ using System.IO;
 
 namespace Eede.Infrastructure.Palettes.Persistence.ActFileFormat;
 
-public class AlphaActFileWriter : IPaletteFileWriter
+public class ActFileWriter : IPaletteFileWriter
 {
-
     public void Write(Stream stream, Palette palette)
     {
         palette.ForEach((color, no) =>
@@ -13,7 +12,6 @@ public class AlphaActFileWriter : IPaletteFileWriter
             stream.WriteByte(color.Red);
             stream.WriteByte(color.Green);
             stream.WriteByte(color.Blue);
-            stream.WriteByte(color.Alpha);
         });
     }
 }

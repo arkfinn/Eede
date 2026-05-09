@@ -93,7 +93,7 @@ public class MainViewModelTests
         _globalState = new GlobalState();
         _animationViewModel = new AnimationViewModel(_patternsProviderMock.Object, _animationPatternServiceMock.Object, _fileSystemMock.Object, new AvaloniaBitmapAdapter());
         _drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProviderMock.Object);
-        _paletteContainerViewModel = new PaletteContainerViewModel();
+        _paletteContainerViewModel = new PaletteContainerViewModel(new Mock<Eede.Application.Infrastructure.IPaletteRepository>().Object, new Mock<Eede.Application.Infrastructure.IPaletteSessionRepository>().Object);
 
         _drawableCanvasViewModel = new DrawableCanvasViewModel(
             _globalState,

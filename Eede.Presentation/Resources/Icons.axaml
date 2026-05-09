@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="/Resources/Icons/ArrowBack.axaml" />
@@ -11,6 +11,7 @@
         <ResourceInclude Source="/Resources/Icons/ContentCopy.axaml" />
         <ResourceInclude Source="/Resources/Icons/ContentCut.axaml" />
         <ResourceInclude Source="/Resources/Icons/ContentPaste.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Dismiss.axaml" />
         <ResourceInclude Source="/Resources/Icons/CropFree.axaml" />
         <ResourceInclude Source="/Resources/Icons/Edit.axaml" />
         <ResourceInclude Source="/Resources/Icons/FillCircle.axaml" />

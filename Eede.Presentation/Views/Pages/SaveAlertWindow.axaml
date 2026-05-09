@@ -10,7 +10,7 @@
         MinWidth="400"
         Width="400"
         MinHeight="130"
-        Height="130"
+        SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         Title="Eede">
   <Window.Styles>
@@ -41,11 +41,11 @@
         <RowDefinition Height="15" />
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
-      <StackPanel Grid.Row="2"
-                  Orientation="Horizontal" >
-        <TextBlock Text="{Binding FileName}"/>
-        <TextBlock Text="への変更内容を保存しますか？"/>
-      </StackPanel>
+      <TextBlock Grid.Row="2"
+                 TextWrapping="Wrap">
+        <Run Text="{Binding FileName}"/>
+        <Run Text="への変更内容を保存しますか？"/>
+      </TextBlock>
     </Grid>
     <controls:DialogButtons Grid.Row="3"
                             Grid.Column="1"

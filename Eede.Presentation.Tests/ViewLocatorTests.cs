@@ -1,3 +1,4 @@
+using Moq;
 using NUnit.Framework;
 using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.Views.Pages;
@@ -45,7 +46,7 @@ public class ViewLocatorTests
     [AvaloniaTest]
     public void Build_ShouldReturnPaletteContainer_ForPaletteContainerViewModel()
     {
-        var viewModel = new PaletteContainerViewModel();
+        var viewModel = new PaletteContainerViewModel(new Mock<Eede.Application.Infrastructure.IPaletteRepository>().Object, new Mock<Eede.Application.Infrastructure.IPaletteSessionRepository>().Object);
         var result = _viewLocator.Build(viewModel);
         Assert.That(result, Is.InstanceOf<PaletteContainer>());
     }

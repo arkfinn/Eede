@@ -78,7 +78,7 @@ public class ViewModelSafetyCharacterizationTests
             bitmapAdapterMock.Object);
 
         var drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(drawingSessionProviderMock.Object);
-        var paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>();
+        var paletteContainerViewModelMock = new Mock<PaletteContainerViewModel>(new Mock<Eede.Application.Infrastructure.IPaletteRepository>().Object, new Mock<Eede.Application.Infrastructure.IPaletteSessionRepository>().Object);
 
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());

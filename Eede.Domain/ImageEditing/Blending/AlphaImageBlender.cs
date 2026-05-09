@@ -19,6 +19,7 @@ public class AlphaImageBlender : IImageBlender
         int startX = Math.Max(0, toPosition.X);
         int maxY = Math.Min(toPosition.Y + from.Height, to.Height);
         int maxX = Math.Min(toPosition.X + from.Width, to.Width);
+        ReadOnlySpan<byte> fromSpan = from.AsSpan();
 
         for (int y = startY; y < maxY; y++)
         {
@@ -28,7 +29,7 @@ public class AlphaImageBlender : IImageBlender
                 int fromPos = ((x - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
 
                 // 転送元がアルファ0なら転送しない
-                ReadOnlySpan<byte> fromSpan = from.AsSpan();
+
                 byte fromA = fromSpan[fromPos + 3];
                 if (fromA == 0)
                 {

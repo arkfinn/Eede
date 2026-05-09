@@ -7,24 +7,64 @@
              mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
              x:DataType="vm:PaletteContainerViewModel"
              x:Class="Eede.Presentation.Views.DataEntry.PaletteContainer">
-  <WrapPanel>
-    <local:PaletteForm BorderBrush="Black"
-                       BorderThickness="1"
-                       Palette="{Binding Palette}"
-                       PointerLeftButtonPressedCommand="{Binding FetchColorCommand}"
-                       PointerRightButtonPressedCommand="{Binding ApplyColorCommand}" />
-    <StackPanel Orientation="Vertical" Margin="4 0">
-      <Button Classes="tool" ToolTip.Tip="パレットを開く"
-              Command="{Binding LoadPaletteCommand}"
-              CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
-        <PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
-      </Button>
+  <TabControl ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}">
+    <TabControl.ItemTemplate>
+      <DataTemplate x:DataType="vm:PaletteTabViewModel">
+        <StackPanel Orientation="Horizontal" Spacing="4" Background="Transparent">
+          <StackPanel.ContextMenu>
+            <ContextMenu>
+              <MenuItem Header="保存"
+                        Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).SaveTabCommand}"
+                        CommandParameter="{Binding}"
+                        IsEnabled="{Binding FilePath, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <Separator />
+              <MenuItem Header="閉じる"
+                        Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).CloseTabCommand}"
+                        CommandParameter="{Binding}" />
+              <MenuItem Header="これ以外をすべて閉じる"
+                        Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).CloseOthersCommand}"
+                        CommandParameter="{Binding}" />
+            </ContextMenu>
+          </StackPanel.ContextMenu>
+          <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+          <Button Classes="tool" Padding="2"
+                  IsVisible="{Binding IsClosable}"
+                  Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).CloseTabCommand}"
+                  CommandParameter="{Binding}">
+            <PathIcon Data="{StaticResource DismissIconGeometry}" Width="10" Height="10" />
+          </Button>
+        </StackPanel>
+      </DataTemplate>
+    </TabControl.ItemTemplate>
+    <TabControl.ContentTemplate>
+      <DataTemplate x:DataType="vm:PaletteTabViewModel">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" Orientation="Vertical" Margin="4 0">
+            <Button Classes="tool" ToolTip.Tip="パレットを開く"
+                    Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).LoadPaletteCommand}"
+                    CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
+              <PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
+            </Button>
 
-      <Button Classes="tool" ToolTip.Tip="パレットを保存する"
-              Command="{Binding SavePaletteCommand}"
-              CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
-        <PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
-      </Button>
-    </StackPanel>
-  </WrapPanel>
+            <Button Classes="tool" ToolTip.Tip="パレットを保存する"
+                    Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).SavePaletteCommand}"
+                    CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
+              <PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
+            </Button>
+
+            <Button Classes="tool" ToolTip.Tip="名前を付けて保存"
+                    Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).SavePaletteAsCommand}"
+                    CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
+              <PathIcon Data="{StaticResource SaveAsIconGeometry}" Classes="icon" />
+            </Button>
+          </StackPanel>
+          <local:PaletteForm BorderBrush="Black"
+                             BorderThickness="1"
+                             Palette="{Binding Palette}"
+                             PointerLeftButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).FetchColorCommand}"
+                             PointerRightButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ApplyColorCommand}" />
+        </DockPanel>
+      </DataTemplate>
+    </TabControl.ContentTemplate>
+  </TabControl>
 </UserControl>

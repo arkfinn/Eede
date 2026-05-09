@@ -214,7 +214,7 @@ public class RegressionTests_PresentationFixes
         );
 
         var sessionVM = new DrawingSessionViewModel(sessionProvider);
-        var paletteVM = new PaletteContainerViewModel();
+        var paletteVM = new PaletteContainerViewModel(new Mock<Eede.Application.Infrastructure.IPaletteRepository>().Object, new Mock<Eede.Application.Infrastructure.IPaletteSessionRepository>().Object);
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 

@@ -503,7 +503,17 @@ public partial class MainViewModel : ViewModelBase
                     Pictures.Add(newPicture);
                 }
             }
+            else if (IsSupportedPaletteFile(file))
+            {
+                PaletteContainerViewModel.LoadPalette(file.Path.LocalPath);
+            }
         }
+    }
+
+    private bool IsSupportedPaletteFile(IStorageItem file)
+    {
+        var path = file.Path.LocalPath.ToLower();
+        return path.EndsWith(".act") || path.EndsWith(".aact");
     }
 
     private bool IsSupportedImageFile(IStorageItem file)
@@ -779,6 +789,11 @@ public partial class MainViewModel : ViewModelBase
             {
                 var results = await Task.WhenAll(uneditedTasks);
                 if (results.Any(r => !r)) return;
+            }
+
+            if (!await PaletteContainerViewModel.TryCloseAllAsync())
+            {
+                return;
             }
 
             IsCloseConfirmed = true;

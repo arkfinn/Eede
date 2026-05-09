@@ -78,13 +78,9 @@
 					<Panel DockPanel.Dock="Bottom" Background="Transparent">
 						<StackPanel Orientation="Horizontal">
 							<Panel>
-								<TabControl>
-									<TabItem Header="一時パレット">
-										<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
-																FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
-																Margin="4 2 4 8"/>
-									</TabItem>
-								</TabControl>
+								<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
+														FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
+														Margin="4 2 4 8"/>
 							</Panel>
 							<Panel Margin="0" Width="100" />
 						</StackPanel>

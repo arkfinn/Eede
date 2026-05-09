@@ -15,6 +15,7 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.GeometricTransformations;
+using Eede.Domain.ImageEditing.Filters;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
@@ -28,6 +29,7 @@ using Eede.Presentation.ViewModels.Pages;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using ReactiveUI;
@@ -58,10 +60,10 @@ namespace Eede.Presentation.Tests
             var pictureRepo = new Mock<IPictureRepository>().Object;
             var drawStyleFactory = new Mock<IDrawStyleFactory>().Object;
             var transformUseCaseMock = new Mock<ITransformImageUseCase>();
-            transformUseCaseMock.Setup(x => x.Execute(It.IsAny<Picture>(), It.IsAny<PictureActions>()))
-                .Returns((Picture p, PictureActions a) => p);
-            transformUseCaseMock.Setup(x => x.Execute(It.IsAny<Picture>(), It.IsAny<PictureActions>(), It.IsAny<PictureArea>()))
-                .Returns((Picture p, PictureActions a, PictureArea area) => p);
+            transformUseCaseMock.Setup(x => x.Execute(It.IsAny<Picture>(), It.IsAny<PictureActions>(), It.IsAny<AntiAliasMode>()))
+                .Returns((Picture p, PictureActions a, AntiAliasMode m) => p);
+            transformUseCaseMock.Setup(x => x.Execute(It.IsAny<Picture>(), It.IsAny<PictureActions>(), It.IsAny<PictureArea>(), It.IsAny<AntiAliasMode>()))
+                .Returns((Picture p, PictureActions a, PictureArea area, AntiAliasMode m) => p);
             var transformUseCase = transformUseCaseMock.Object;
 
             var transferToCanvas = new TransferImageToCanvasUseCase();

@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -78,6 +78,13 @@
 			ToolTip.Tip="拡大縮小: 画像全体（または選択範囲）を指定した数値でリサイズします"
 			Command="{ Binding ScalingCommand, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }" >
 				<PathIcon Data="{StaticResource OpenInFullIconGeometry}" Classes="icon" />
+			</Button>
+			<Button
+			Classes="tool"
+			ToolTip.Tip="アンチエイリアス: 画像全体（または選択範囲）に対して形態学的アンチエイリアスを適用します"
+			Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+			CommandParameter="{ x:Static p:PictureActions.AntiAlias }" >
+				<PathIcon Data="{StaticResource AntiAliasIconGeometry}" Classes="icon" />
 			</Button>
 		</StackPanel>
 	</Grid>

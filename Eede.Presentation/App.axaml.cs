@@ -136,7 +136,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<AnimationDockViewModel>();
         services.AddTransient<DrawableCanvasViewModel>();
         services.AddTransient<DrawingSessionViewModel>();
-        services.AddTransient<MainViewModel>();
+        services.AddSingleton<MainViewModel>();
         services.AddTransient<NewPictureWindowViewModel>();
         services.AddTransient<DockPictureViewModel>();
         services.AddTransient<WelcomeViewModel>();

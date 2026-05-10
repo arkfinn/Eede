@@ -81,10 +81,17 @@
 			</Button>
 			<Button
 			Classes="tool"
-			ToolTip.Tip="アンチエイリアス: 画像全体（または選択範囲）に対して形態学的アンチエイリアスを適用します"
+			ToolTip.Tip="強アンチエイリアス: 1ピクセル単位で強力に平滑化します（がっつり）"
 			Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
-			CommandParameter="{ x:Static p:PictureActions.AntiAlias }" >
-				<PathIcon Data="{StaticResource AntiAliasIconGeometry}" Classes="icon" />
+			CommandParameter="{ x:Static p:PictureActions.AntiAliasStrong }" >
+				<PathIcon Data="{StaticResource AntiAliasStrongIconGeometry}" Classes="icon" />
+			</Button>
+			<Button
+			Classes="tool"
+			ToolTip.Tip="弱アンチエイリアス: 2倍オーバーサンプリングで繊細に平滑化します（隠し味）"
+			Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
+			CommandParameter="{ x:Static p:PictureActions.AntiAliasSubtle }" >
+				<PathIcon Data="{StaticResource AntiAliasSubtleIconGeometry}" Classes="icon" />
 			</Button>
 		</StackPanel>
 	</Grid>

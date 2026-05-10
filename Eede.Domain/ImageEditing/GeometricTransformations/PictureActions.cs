@@ -15,7 +15,8 @@ public enum PictureActions
     RotateLeft,
     MirrorCopyRight,
     MirrorCopyBottom,
-    AntiAlias
+    AntiAliasStrong,
+    AntiAliasSubtle
 }
 public static class PictureActionsExtension
 {
@@ -33,7 +34,8 @@ public static class PictureActionsExtension
             PictureActions.RotateRight => new RotateRightAction(previous).Execute(),
             PictureActions.MirrorCopyRight => new MirrorCopyRightAction(previous).Execute(),
             PictureActions.MirrorCopyBottom => new MirrorCopyBottomAction(previous).Execute(),
-            PictureActions.AntiAlias => Filters.AntiAliasFilterFactory.Create(mode).Apply(previous),
+            PictureActions.AntiAliasStrong => Filters.AntiAliasFilterFactory.Create(mode, 1).Apply(previous),
+            PictureActions.AntiAliasSubtle => Filters.AntiAliasFilterFactory.Create(mode, 2).Apply(previous),
             _ => throw new ArgumentException(null, nameof(actionType)),
         };
     }

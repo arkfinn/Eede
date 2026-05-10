@@ -9,7 +9,7 @@ public enum AntiAliasMode
 
 public static class AntiAliasFilterFactory
 {
-    public static AntiAliasFilter Create(AntiAliasMode mode)
+    public static AntiAliasFilter Create(AntiAliasMode mode, int magnificationFactor = 1)
     {
         IAntiAliasStrategy strategy = mode switch
         {
@@ -18,6 +18,6 @@ public static class AntiAliasFilterFactory
             AntiAliasMode.Argb => new ArgbAntiAliasStrategy(),
             _ => throw new System.ArgumentException(null, nameof(mode))
         };
-        return new AntiAliasFilter(strategy);
+        return new AntiAliasFilter(strategy, magnificationFactor);
     }
 }

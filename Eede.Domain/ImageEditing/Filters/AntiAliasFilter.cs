@@ -10,13 +10,28 @@ public unsafe class AntiAliasFilter
     private const int MaxSearchDistance = 3;
 
     private readonly IAntiAliasStrategy Strategy;
+    private readonly int MagnificationFactor;
 
-    public AntiAliasFilter(IAntiAliasStrategy strategy)
+    public AntiAliasFilter(IAntiAliasStrategy strategy, int magnificationFactor = 1)
     {
         Strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
+        MagnificationFactor = magnificationFactor;
     }
 
     public Picture Apply(Picture source)
+    {
+        if (MagnificationFactor <= 1)
+        {
+            return ApplyInternal(source);
+        }
+
+        var upSize = new SharedKernel.PictureSize(source.Width * MagnificationFactor, source.Height * MagnificationFactor);
+        var upscaled = new GeometricTransformations.NearestNeighborResampler().Resize(source, upSize);
+        var filtered = ApplyInternal(upscaled);
+        return new GeometricTransformations.BoxResampler().Resize(filtered, source.Size);
+    }
+
+    private Picture ApplyInternal(Picture source)
     {
         int width = source.Width;
         int height = source.Height;

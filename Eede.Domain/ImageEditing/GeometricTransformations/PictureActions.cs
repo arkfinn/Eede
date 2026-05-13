@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 #nullable enable
 namespace Eede.Domain.ImageEditing.GeometricTransformations;
@@ -14,12 +14,14 @@ public enum PictureActions
     RotateRight,
     RotateLeft,
     MirrorCopyRight,
-    MirrorCopyBottom
+    MirrorCopyBottom,
+    AntiAliasStrong,
+    AntiAliasSubtle
 }
 public static class PictureActionsExtension
 {
 
-    public static Picture Execute(this PictureActions actionType, Picture previous)
+    public static Picture Execute(this PictureActions actionType, Picture previous, Filters.AntiAliasMode mode = Filters.AntiAliasMode.Argb)
     {
         return actionType switch
         {
@@ -32,6 +34,8 @@ public static class PictureActionsExtension
             PictureActions.RotateRight => new RotateRightAction(previous).Execute(),
             PictureActions.MirrorCopyRight => new MirrorCopyRightAction(previous).Execute(),
             PictureActions.MirrorCopyBottom => new MirrorCopyBottomAction(previous).Execute(),
+            PictureActions.AntiAliasStrong => Filters.AntiAliasFilterFactory.Create(mode, 1).Apply(previous),
+            PictureActions.AntiAliasSubtle => Filters.AntiAliasFilterFactory.Create(mode, 2).Apply(previous),
             _ => throw new ArgumentException(null, nameof(actionType)),
         };
     }

@@ -1,3 +1,4 @@
+using Eede.Domain.ImageEditing.Filters;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
@@ -374,12 +375,6 @@ public partial class MainViewModel : ViewModelBase
             MarkActiveDockEdited();
         };
 
-        LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
-        SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);
-        PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
-
-        CreateNewPictureCommand = ReactiveCommand.Create(ExecuteCreateNewPicture);
-
         PutBackgroundColorCommand = ReactiveCommand.Create(() =>
         {
             CurrentBackgroundColor = new BackgroundColor(new ArgbColor(NowPenColor.A, NowPenColor.R, NowPenColor.G, NowPenColor.B));
@@ -395,8 +390,6 @@ public partial class MainViewModel : ViewModelBase
         this.WhenAnyValue(x => x.IsAnimationPanelExpanded)
             .Where(expanded => !expanded)
             .Subscribe(_ => AnimationViewModel.IsAnimationMode = false);
-
-        RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
 
         var canCopyCut = this.WhenAnyValue(
             x => x.DrawStyle,
@@ -703,17 +696,30 @@ public partial class MainViewModel : ViewModelBase
     {
         DrawableCanvasViewModel.CommitSelection();
         PictureArea? area = DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null;
+        var mode = GetAntiAliasMode(ImageBlender);
         Picture updated = area.HasValue ? _transformImageUseCase.Execute(
             DrawableCanvasViewModel.PictureBuffer.Previous,
             actionType,
-            area.Value
+            area.Value,
+            mode
         ) : _transformImageUseCase.Execute(
             DrawableCanvasViewModel.PictureBuffer.Previous,
-            actionType
+            actionType,
+            mode
         );
 
         DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea);
         MarkActiveDockEdited();
+    }
+
+    private AntiAliasMode GetAntiAliasMode(IImageBlender blender)
+    {
+        return blender switch
+        {
+            RGBOnlyImageBlender => AntiAliasMode.Rgb,
+            AlphaOnlyImageBlender => AntiAliasMode.Alpha,
+            _ => AntiAliasMode.Argb
+        };
     }
 
     private DrawStyleType? _lastDrawStyle;

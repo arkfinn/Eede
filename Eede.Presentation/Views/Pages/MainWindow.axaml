@@ -1,10 +1,12 @@
-<Window xmlns="https://github.com/avaloniaui"
+<reactiveUi:ReactiveWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:Eede.Presentation.ViewModels.Pages"
         xmlns:pages="clr-namespace:Eede.Presentation.Views.Pages"
         xmlns:ext="using:Eede.Presentation.Common.MarkupExtensions"
+        xmlns:reactiveUi="http://reactiveui.net"
+        x:TypeArguments="vm:MainViewModel"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Eede.Presentation.Views.Pages.MainWindow"
         Icon="/Assets/logo.png"
@@ -12,10 +14,10 @@
         ExtendClientAreaToDecorationsHint="False"
         x:DataType="vm:MainViewModel"
         DataContext="{ext:ServiceResolve vm:MainViewModel}">
-  <Window.KeyBindings>
+  <reactiveUi:ReactiveWindow.KeyBindings>
     <KeyBinding Gesture="Ctrl+C" Command="{Binding CopyCommand}" />
     <KeyBinding Gesture="Ctrl+X" Command="{Binding CutCommand}" />
     <KeyBinding Gesture="Ctrl+V" Command="{Binding PasteCommand}" />
-  </Window.KeyBindings>
+  </reactiveUi:ReactiveWindow.KeyBindings>
   <pages:MainView />
-</Window>
+</reactiveUi:ReactiveWindow>

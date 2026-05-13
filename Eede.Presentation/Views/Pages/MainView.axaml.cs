@@ -26,7 +26,6 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
     public MainView()
     {
         InitializeComponent();
-        FileStorage = new AvaloniaFileStorage(new Window().StorageProvider);
 
         DataContextChanged += (sender, e) =>
         {
@@ -34,17 +33,19 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             {
                 return;
             }
-            AddHandler(DragDrop.DragOverEvent, viewModel.DragOverPicture);
-            AddHandler(DragDrop.DropEvent, viewModel.DropPicture);
-            _ = this.BindInteraction(
-                viewModel,
-                vm => vm.ShowCreateNewPictureModal, DoShowCreateNewFileWindowAsync);
-
-            _ = this.BindInteraction(
-                viewModel,
-                vm => vm.ShowScalingModal, DoShowScalingWindowAsync);
-
-            viewModel.FileStorage = FileStorage;
+            if (FileStorage == null)
+            {
+                var topLevel = TopLevel.GetTopLevel(this);
+                if (topLevel != null)
+                {
+                    FileStorage = new AvaloniaFileStorage(topLevel.StorageProvider);
+                    viewModel.FileStorage = FileStorage;
+                }
+            }
+            else
+            {
+                viewModel.FileStorage = FileStorage;
+            }
 
             // Load Custom Cursor for Animation Mode
             try
@@ -61,45 +62,60 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
 
         _ = this.WhenActivated(disposables =>
         {
-            if (TopLevel.GetTopLevel(this) is not Window window)
-            {
-                return;
-            }
+            if (ViewModel == null) return;
 
-            if (ViewModel != null)
+            // ViewModelの初期化
+            if (FileStorage == null)
             {
-                // ViewModelのInteractionを購読し、通知が来たらウィンドウを閉じる
-                _ = ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
+                var topLevel = TopLevel.GetTopLevel(this);
+                if (topLevel != null)
                 {
-                    window.Close();
-                    interaction.SetOutput(Unit.Default);
-                }).DisposeWith(disposables);
-
-
-                // WindowのClosingイベントをObservableに変換
-                _ = Observable.FromEventPattern<EventHandler<WindowClosingEventArgs>, WindowClosingEventArgs>(
-                    handler => window.Closing += handler,
-                    handler => window.Closing -= handler)
-                    .Subscribe(args =>
-                    {
-                        // ViewModelが既にクローズを確定している場合は、何もしないで通過させる
-                        if (ViewModel.IsCloseConfirmed)
-                        {
-                            return;
-                        }
-
-                        // イベントをキャンセルして、ViewModelに処理を委譲する
-                        args.EventArgs.Cancel = true;
-
-                        // ViewModelのコマンドを実行
-                        _ = ViewModel.RequestCloseCommand.Execute().Subscribe();
-
-                    }).DisposeWith(disposables);
+                    FileStorage = new AvaloniaFileStorage(topLevel.StorageProvider);
+                    ViewModel.FileStorage = FileStorage;
+                }
             }
+            else
+            {
+                ViewModel.FileStorage = FileStorage;
+            }
+
+            // DragDropハンドラの登録
+            AddHandler(DragDrop.DragOverEvent, ViewModel.DragOverPicture);
+            AddHandler(DragDrop.DropEvent, ViewModel.DropPicture);
+            Disposable.Create(() =>
+            {
+                RemoveHandler(DragDrop.DragOverEvent, ViewModel.DragOverPicture);
+                RemoveHandler(DragDrop.DropEvent, ViewModel.DropPicture);
+            }).DisposeWith(disposables);
+
+            // Window依存の登録
+            this.WhenAnyValue(x => x.VisualRoot)
+                .Where(vr => vr is Window)
+                .Cast<Window>()
+                .Subscribe(window =>
+                {
+                    // ViewModelのInteractionを購読し、通知が来たらウィンドウを閉じる
+                    ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
+                    {
+                        window.Close();
+                        interaction.SetOutput(Unit.Default);
+                    }).DisposeWith(disposables);
+
+                    // WindowのClosingイベントをObservableに変換
+                    Observable.FromEventPattern<EventHandler<WindowClosingEventArgs>, WindowClosingEventArgs>(
+                        handler => window.Closing += handler,
+                        handler => window.Closing -= handler)
+                        .Subscribe(args =>
+                        {
+                            if (ViewModel.IsCloseConfirmed) return;
+                            args.EventArgs.Cancel = true;
+                            ViewModel.RequestCloseCommand.Execute().Subscribe();
+                        }).DisposeWith(disposables);
+                }).DisposeWith(disposables);
         });
     }
 
-    public AvaloniaFileStorage FileStorage { get; private set; }
+    public AvaloniaFileStorage? FileStorage { get; private set; }
 
     public void OnClickThemeSelect(object? sender, SelectionChangedEventArgs e)
     {
@@ -117,37 +133,6 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             case 1:
                 app.RequestedThemeVariant = ThemeVariant.Dark;
                 break;
-        }
-    }
-
-    private async Task DoShowScalingWindowAsync(IInteractionContext<ScalingDialogViewModel, ResizeContext?> interaction)
-    {
-        var dialog = new Views.DataEntry.ScalingDialogView()
-        {
-            DataContext = interaction.Input
-        };
-
-        if (VisualRoot is Window currentWindow)
-        {
-            var result = await dialog.ShowDialog<ResizeContext?>(currentWindow);
-            interaction.SetOutput(result);
-        }
-    }
-
-    private async Task DoShowCreateNewFileWindowAsync(IInteractionContext<NewPictureWindowViewModel, NewPictureWindowViewModel> interaction)
-    {
-        NewPictureWindow dialog = new()
-        {
-            DataContext = interaction.Input,
-            Width = 300,
-            Height = 350
-        };
-        interaction.Input.Close = new Action(dialog.Close);
-
-        if (VisualRoot is Window currentWindow)
-        {
-            _ = await dialog.ShowDialog<NewPictureWindowViewModel>(currentWindow);
-            interaction.SetOutput(interaction.Input);
         }
     }
 }

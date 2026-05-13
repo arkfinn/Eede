@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- 強アンチエイリアス（1倍）: 粗い段差（がっつり） -->
+    <StreamGeometry x:Key="AntiAliasStrongIconGeometry">M160-160v-320h320v-320h320v640H160Z</StreamGeometry>
+    <!-- 弱アンチエイリアス（2倍）: 細かな段差（隠し味） -->
+    <StreamGeometry x:Key="AntiAliasSubtleIconGeometry">M160-160v-160h160v-160h160v-160h160v-160h160v640H160Z</StreamGeometry>
+    
+    <StreamGeometry x:Key="AntiAliasIconGeometry">M200-200v-160h160v160H200Zm0-240v-160h160v160H200Zm240 240v-160h160v160H440Zm0-240v-160h160v160H440Zm240 240v-160h160v160H680Zm0-240v-160h160v160H680ZM120-120v-720h720v720H120Zm80-80h560v-560H200v560Z</StreamGeometry>
+</ResourceDictionary>

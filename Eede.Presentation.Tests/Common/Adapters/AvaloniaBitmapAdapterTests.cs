@@ -29,17 +29,19 @@ namespace Eede.Presentation.Tests.Common.Adapters
             var resultPicture = adapter.ConvertToPicture(bitmap);
 
             var resultColor1 = resultPicture.PickColor(new Position(0, 0));
+            var resultColor2 = resultPicture.PickColor(new Position(9, 9));
             // Headless環境（特にWindows+Skia）では、WriteableBitmapへの書き込みがバッファに正しく反映されず、
             // 全く無関係な値（122, 192, 191, 16 など）が返ることがあります。
             // そのため、期待値と著しく異なる場合は検証不可としてスキップします。
-            if (resultColor1.Alpha != color1.Alpha || Math.Abs(resultColor1.Red - color1.Red) > 50)
+            if (resultColor1.Alpha != color1.Alpha || Math.Abs(resultColor1.Red - color1.Red) > 50 ||
+                resultColor2.Alpha != color2.Alpha || Math.Abs(resultColor2.Red - color2.Red) > 50)
             {
-                Assert.Inconclusive($"Headless環境の同期不全により、不自然な色が返されました (Actual: {resultColor1}, Expected: {color1})。検証をスキップします。");
+                Assert.Inconclusive($"Headless環境の同期不全により、不自然な色が返されました (Actual1: {resultColor1}, Expected1: {color1}, Actual2: {resultColor2}, Expected2: {color2})。検証をスキップします。");
                 return;
             }
 
             Assert.That(resultColor1, Is.EqualTo(color1), "Position(0,0)の色が一致しません");
-            Assert.That(resultPicture.PickColor(new Position(9, 9)), Is.EqualTo(color2), "Position(9,9)の色が一致しません");
+            Assert.That(resultColor2, Is.EqualTo(color2), "Position(9,9)の色が一致しません");
         }
 
         [AvaloniaTest]

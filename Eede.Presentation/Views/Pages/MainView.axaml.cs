@@ -33,19 +33,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             {
                 return;
             }
-            if (FileStorage == null)
-            {
-                var topLevel = TopLevel.GetTopLevel(this);
-                if (topLevel != null)
-                {
-                    FileStorage = new AvaloniaFileStorage(topLevel.StorageProvider);
-                    viewModel.FileStorage = FileStorage;
-                }
-            }
-            else
-            {
-                viewModel.FileStorage = FileStorage;
-            }
+            InitializeFileStorage();
 
             // Load Custom Cursor for Animation Mode
             try
@@ -65,19 +53,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             if (ViewModel == null) return;
 
             // ViewModelの初期化
-            if (FileStorage == null)
-            {
-                var topLevel = TopLevel.GetTopLevel(this);
-                if (topLevel != null)
-                {
-                    FileStorage = new AvaloniaFileStorage(topLevel.StorageProvider);
-                    ViewModel.FileStorage = FileStorage;
-                }
-            }
-            else
-            {
-                ViewModel.FileStorage = FileStorage;
-            }
+            InitializeFileStorage();
 
             // DragDropハンドラの登録
             AddHandler(DragDrop.DragOverEvent, ViewModel.DragOverPicture);
@@ -116,6 +92,29 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
     }
 
     public AvaloniaFileStorage? FileStorage { get; private set; }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        InitializeFileStorage();
+    }
+
+    private void InitializeFileStorage()
+    {
+        if (FileStorage == null)
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+            if (topLevel != null)
+            {
+                FileStorage = new AvaloniaFileStorage(topLevel.StorageProvider);
+            }
+        }
+
+        if (FileStorage != null && DataContext is MainViewModel viewModel)
+        {
+            viewModel.FileStorage = FileStorage;
+        }
+    }
 
     public void OnClickThemeSelect(object? sender, SelectionChangedEventArgs e)
     {

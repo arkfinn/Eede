@@ -24,10 +24,10 @@ public partial class PaletteContainerViewModel : ViewModelBase
     public event Action<ArgbColor>? OnFetchColor;
     public event Func<ArgbColor>? OnApplyColor;
 
-    public ReactiveCommand<IFileStorage, Unit> LoadPaletteCommand { get; }
+    public ReactiveCommand<IFileStorage?, Unit> LoadPaletteCommand { get; }
     public ReactiveCommand<PaletteTabViewModel, Unit> SaveTabCommand { get; }
-    public ReactiveCommand<IFileStorage, Unit> SavePaletteAsCommand { get; }
-    public ReactiveCommand<IFileStorage, Unit> SavePaletteCommand { get; }
+    public ReactiveCommand<IFileStorage?, Unit> SavePaletteAsCommand { get; }
+    public ReactiveCommand<IFileStorage?, Unit> SavePaletteCommand { get; }
     public ReactiveCommand<PaletteTabViewModel, Unit> CloseTabCommand { get; }
     public ReactiveCommand<PaletteTabViewModel, Unit> CloseOthersCommand { get; }
 
@@ -60,10 +60,10 @@ public partial class PaletteContainerViewModel : ViewModelBase
         ApplyColorCommand = ReactiveCommand.Create<int>(ExecuteApplyColor);
         FetchColorCommand = ReactiveCommand.Create<int>(ExecuteFetchColor);
 
-        LoadPaletteCommand = ReactiveCommand.CreateFromTask<IFileStorage>(ExecuteLoadPalette);
+        LoadPaletteCommand = ReactiveCommand.CreateFromTask<IFileStorage?>(ExecuteLoadPalette);
         SaveTabCommand = ReactiveCommand.CreateFromTask<PaletteTabViewModel>(ExecuteSaveTab);
-        SavePaletteCommand = ReactiveCommand.CreateFromTask<IFileStorage>(ExecuteSavePalette);
-        SavePaletteAsCommand = ReactiveCommand.CreateFromTask<IFileStorage>(ExecuteSavePaletteAs);
+        SavePaletteCommand = ReactiveCommand.CreateFromTask<IFileStorage?>(ExecuteSavePalette);
+        SavePaletteAsCommand = ReactiveCommand.CreateFromTask<IFileStorage?>(ExecuteSavePaletteAs);
         CloseTabCommand = ReactiveCommand.CreateFromTask<PaletteTabViewModel>(TryCloseTabAsync);
         CloseOthersCommand = ReactiveCommand.CreateFromTask<PaletteTabViewModel>(ExecuteCloseOthers);
 
@@ -92,8 +92,9 @@ public partial class PaletteContainerViewModel : ViewModelBase
         OnFetchColor?.Invoke(SelectedTab.Palette.Fetch(number));
     }
 
-    private async Task ExecuteLoadPalette(IFileStorage storage)
+    private async Task ExecuteLoadPalette(IFileStorage? storage)
     {
+        if (storage == null) return;
         Uri? result = await storage.OpenPaletteFilePickerAsync();
         if (result == null) return;
 
@@ -123,7 +124,7 @@ public partial class PaletteContainerViewModel : ViewModelBase
         tab.ResetDirty();
     }
 
-    private async Task ExecuteSavePalette(IFileStorage storage)
+    private async Task ExecuteSavePalette(IFileStorage? storage)
     {
         if (SelectedTab == null) return;
 
@@ -137,9 +138,9 @@ public partial class PaletteContainerViewModel : ViewModelBase
         SelectedTab.ResetDirty();
     }
 
-    private async Task ExecuteSavePaletteAs(IFileStorage storage)
+    private async Task ExecuteSavePaletteAs(IFileStorage? storage)
     {
-        if (SelectedTab == null) return;
+        if (SelectedTab == null || storage == null) return;
 
         Uri? result = await storage.SavePaletteFilePickerAsync();
         if (result == null) return;

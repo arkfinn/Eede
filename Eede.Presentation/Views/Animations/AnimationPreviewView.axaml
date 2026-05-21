@@ -164,6 +164,7 @@
 				</Panel.Background>
 				<Image Source="{Binding PreviewBitmap}"
 					   Stretch="Uniform"
+					   RenderOptions.BitmapInterpolationMode="None"
 					   HorizontalAlignment="Center" VerticalAlignment="Center"/>
 			</Panel>
 		</Border>

@@ -14,5 +14,6 @@ namespace Eede.Presentation.Files
         IImageFile WithBitmap(Bitmap bitmap);
         string Subject();
         Task<SaveImageResult> SaveAsync(IFileStorage storage);
+        Task<SaveImageResult> SaveAsAsync(IFileStorage storage);
     }
 }

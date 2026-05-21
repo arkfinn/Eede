@@ -118,6 +118,43 @@ public class DockPictureViewModelSaveTests
         _fileStorageMock.Verify(x => x.SaveFilePickerAsync(), Times.Once);
     }
 
+    [AvaloniaTest]
+    public async Task SaveAs_WhenPngFile_ShouldShowFilePicker()
+    {
+        // Arrange
+        var path = new FilePath("test.png");
+        var vm = CreateViewModel(path);
+
+        vm.PictureSave += async (s, e) =>
+        {
+            await e.File.SaveAsAsync(_fileStorageMock.Object);
+        };
+
+        // Act
+        await vm.SaveAs();
+
+        // Assert
+        _fileStorageMock.Verify(x => x.SaveFilePickerAsync(), Times.Once);
+    }
+
+    [AvaloniaTest]
+    public async Task SaveAs_WhenNewFile_ShouldShowFilePicker()
+    {
+        // Arrange
+        var vm = CreateViewModel(FilePath.Empty());
+
+        vm.PictureSave += async (s, e) =>
+        {
+            await e.File.SaveAsAsync(_fileStorageMock.Object);
+        };
+
+        // Act
+        await vm.SaveAs();
+
+        // Assert
+        _fileStorageMock.Verify(x => x.SaveFilePickerAsync(), Times.Once);
+    }
+
     private DockPictureViewModel CreateViewModel(FilePath path)
     {
         var vm = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);

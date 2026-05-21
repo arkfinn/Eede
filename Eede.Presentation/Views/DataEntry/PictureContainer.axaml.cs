@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.VisualTree;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Eede.Application.Pictures;
 using Eede.Domain.Animations;
@@ -26,6 +28,7 @@ namespace Eede.Presentation.Views.DataEntry
     {
         private ISelectionState _selectionState;
         private DockPictureViewModel? _viewModel;
+        private readonly List<IDisposable> _parentOpacityDisposables = new();
         private bool _visibleCursor = false;
         private HalfBoxArea _localCursorArea;
         private PictureSize _cursorSize = new(32, 32);
@@ -42,6 +45,103 @@ namespace Eede.Presentation.Views.DataEntry
             _selectionState = new NormalCursorState(_localCursorArea);
         }
 
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            ClearParentOpacityObservations();
+            base.OnDetachedFromVisualTree(e);
+        }
+
+        private void ClearParentOpacityObservations()
+        {
+            foreach (var disposable in _parentOpacityDisposables)
+            {
+                disposable.Dispose();
+            }
+            _parentOpacityDisposables.Clear();
+        }
+
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            base.OnAttachedToVisualTree(e);
+            
+            // 既存の監視をクリア
+            ClearParentOpacityObservations();
+            
+            // 1. ビジュアルツリーを上に辿り、自分自身とすべてのビジュアル親コントロールの Opacity を 1.0 に強制固定＆監視
+            // （Dock の非同期フェードアニメーションや VisualState による「透けにじみ」をビジュアルツリー全体でリアルタイムで強制ブロック）
+            
+            // 自分自身（this）の Opacity も 1.0 に強制設定＆監視
+            this.Opacity = 1.0;
+            var selfDisposable = this.GetObservable(Visual.OpacityProperty).Subscribe(opacity =>
+            {
+                if (opacity < 1.0)
+                {
+                    this.Opacity = 1.0;
+                }
+            });
+            _parentOpacityDisposables.Add(selfDisposable);
+
+            // ビジュアル親を上に辿る
+            var visualParent = this.GetVisualParent();
+            while (visualParent != null)
+            {
+                var target = visualParent;
+                
+                // 初期状態で 1.0 に強制設定
+                target.Opacity = 1.0;
+                
+                // OpacityProperty の変更をリアルタイム監視し、1.0 未満への変更をその場で物理遮断
+                var disposable = target.GetObservable(Visual.OpacityProperty).Subscribe(opacity =>
+                {
+                    if (opacity < 1.0)
+                    {
+                        target.Opacity = 1.0;
+                    }
+                });
+                _parentOpacityDisposables.Add(disposable);
+                
+                visualParent = visualParent.GetVisualParent();
+            }
+            
+            // 2. scrollViewerを一度DockPanelからデタッチし、次のフレームで再アタッチする（手動ドック再ドッキングのツリー物理挙動を完全シミュレート）
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (scrollViewer != null && mainDockPanel != null)
+                {
+                    mainDockPanel.Children.Remove(scrollViewer);
+                    
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        mainDockPanel.Children.Add(scrollViewer);
+                        
+                        // 再アタッチ後に強制描画更新を叩く
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            if (_viewModel == null)
+                            {
+                                _viewModel = FetchViewModel();
+                            }
+                            
+                            if (_viewModel != null)
+                            {
+                                mainImage.InvalidateVisual();
+                                mainImage.InvalidateMeasure();
+                                mainImage.InvalidateArrange();
+                                renderingRoot.InvalidateVisual();
+                                renderingRoot.InvalidateMeasure();
+                                renderingRoot.InvalidateArrange();
+                                this.InvalidateVisual();
+                                this.InvalidateMeasure();
+                                this.InvalidateArrange();
+                            }
+                        }, DispatcherPriority.Render);
+                    }, DispatcherPriority.Render);
+                }
+            }, DispatcherPriority.Render);
+        }
+
+
+
         private DockPictureViewModel? FetchViewModel()
         {
             return DataContext is DockPictureViewModel vm ? vm : DataContext is StyledElement e ? e.DataContext as DockPictureViewModel : null;
@@ -55,12 +155,12 @@ namespace Eede.Presentation.Views.DataEntry
                 return;
             }
 
-            _ = background.Bind(WidthProperty, new Binding
+            _ = renderingRoot.Bind(WidthProperty, new Binding
             {
                 Source = _viewModel,
                 Path = nameof(_viewModel.DisplayWidth)
             });
-            _ = background.Bind(HeightProperty, new Binding
+            _ = renderingRoot.Bind(HeightProperty, new Binding
             {
                 Source = _viewModel,
                 Path = nameof(_viewModel.DisplayHeight)
@@ -94,6 +194,11 @@ namespace Eede.Presentation.Views.DataEntry
             PicturePushAction = _viewModel.OnPicturePush;
             PicturePullAction = _viewModel.OnPicturePull;
             PictureUpdateAction = _viewModel.OnPictureUpdate;
+            _ = this.Bind(BackgroundColorProperty, new Binding
+            {
+                Source = _viewModel,
+                Path = nameof(_viewModel.BackgroundColor)
+            });
 
             // 初期カーソルサイズの設定
             _cursorSize = _viewModel.CursorSize;
@@ -129,6 +234,29 @@ namespace Eede.Presentation.Views.DataEntry
                 {
                     CanvasSize = new PictureSize((int)bitmap!.Size.Width, (int)bitmap!.Size.Height);
                     UpdateSelectionPreview();
+                    
+                    // 初期表示時および更新時のビットマップ描画キャッシュの強制破壊と再生成
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        mainImage.InvalidateVisual();
+                        mainImage.InvalidateMeasure();
+                        mainImage.InvalidateArrange();
+                    }, DispatcherPriority.Render);
+                });
+
+            // 表示サイズ変更時に描画とレイアウトを能動的に完全同期・強制再評価する
+            _viewModel.WhenAnyValue(x => x.DisplayWidth, x => x.DisplayHeight)
+                .Subscribe(_ =>
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        mainImage.InvalidateVisual();
+                        mainImage.InvalidateMeasure();
+                        mainImage.InvalidateArrange();
+                        renderingRoot.InvalidateVisual();
+                        renderingRoot.InvalidateMeasure();
+                        renderingRoot.InvalidateArrange();
+                    }, DispatcherPriority.Render);
                 });
 
             // GridView のバインディング設定
@@ -363,7 +491,7 @@ namespace Eede.Presentation.Views.DataEntry
         }
 
         public static readonly StyledProperty<Eede.Domain.Palettes.ArgbColor> BackgroundColorProperty =
-            AvaloniaProperty.Register<PictureContainer, Eede.Domain.Palettes.ArgbColor>(nameof(BackgroundColor), new Eede.Domain.Palettes.ArgbColor(0, 0, 0, 0));
+            AvaloniaProperty.Register<PictureContainer, Eede.Domain.Palettes.ArgbColor>(nameof(BackgroundColor), new Eede.Domain.Palettes.ArgbColor(255, 255, 255, 255));
         public Eede.Domain.Palettes.ArgbColor BackgroundColor
         {
             get => GetValue(BackgroundColorProperty);
@@ -371,6 +499,7 @@ namespace Eede.Presentation.Views.DataEntry
         }
 
         private PictureSize CanvasSize = new(32, 32);
+
 
         private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {

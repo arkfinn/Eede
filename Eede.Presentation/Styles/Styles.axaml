@@ -7,8 +7,6 @@
     </Border>
   </Design.PreviewWith>
 
-
-
   <Style Selector="Button.tool">
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -51,6 +49,36 @@
   </Style>
 
   <!-- Explicit Theme Overrides for Dock Components (Document/Tool Tabs) -->
+  <!-- Dock.Avalonia のフェードインアニメーションのフリーズによる半透明バグを完全に破壊するため、
+       TransitioningContentControl の ControlTemplate をアニメーションレスな超軽量構造に強制オーバーライドする -->
+  <Style Selector="TransitioningContentControl">
+    <Setter Property="PageTransition" Value="{x:Null}" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="TransitioningContentControl">
+        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Background="{TemplateBinding Background}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Padding="{TemplateBinding Padding}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="DocumentControl /template/ TransitioningContentControl">
+    <Setter Property="PageTransition" Value="{x:Null}" />
+  </Style>
+  <Style Selector="ToolControl /template/ TransitioningContentControl">
+    <Setter Property="PageTransition" Value="{x:Null}" />
+  </Style>
+  <Style Selector="DockControl /template/ TransitioningContentControl">
+    <Setter Property="PageTransition" Value="{x:Null}" />
+  </Style>
+
   <Style Selector="DocumentControl, ToolControl">
     <Setter Property="Background" Value="{DynamicResource SurfaceContainerHighBrush}" />
   </Style>

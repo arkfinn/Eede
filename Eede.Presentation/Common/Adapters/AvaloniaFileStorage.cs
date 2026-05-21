@@ -79,8 +79,7 @@ namespace Eede.Presentation.Common.Adapters
             [
                  new("Palette File")
                  {
-                    Patterns = ["*.aact", "*.act"],
-                    MimeTypes = ["image/*"]
+                    Patterns = ["*.aact", "*.act"]
                  },
                  new("Palette File (RGBA)")
                  {
@@ -112,8 +111,7 @@ namespace Eede.Presentation.Common.Adapters
                 new("All Images")
                 {
                     Patterns = ["*.png", "*.bmp", "*.arv"],
-                    AppleUniformTypeIdentifiers = ["public.image"],
-                    MimeTypes = ["image/*"]
+                    AppleUniformTypeIdentifiers = ["public.image"]
                 },
                 new("PNG Image")
                 {
@@ -135,8 +133,7 @@ namespace Eede.Presentation.Common.Adapters
                 },
                 new("All")
                 {
-                    Patterns = ["*.*"],
-                    MimeTypes = ["*/*"]
+                    Patterns = ["*.*"]
                 }
             ];
         }

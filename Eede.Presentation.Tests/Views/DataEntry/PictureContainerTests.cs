@@ -30,6 +30,9 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Avalonia.Media;
+using Avalonia.VisualTree;
+using System.Linq;
 using Avalonia.Media.Imaging;
 
 namespace Eede.Presentation.Tests.Views.DataEntry;
@@ -157,5 +160,41 @@ public class PictureContainerTests
         // 3. 内部の _cursorSize が更新されていることを確認
         var updatedSize = (PictureSize)field.GetValue(_container);
         Assert.That(updatedSize, Is.EqualTo(new PictureSize(64, 64)), "ViewModel の CursorSize 変更は即座に PictureContainer に反映されるべき");
+    }
+    
+    [AvaloniaTest]
+    public void Should_HaveOpaqueBackground_ToPreventTransparencyBleed()
+    {
+        // テンプレートの適用とビジュアルツリーの構築を強制
+        _container.ApplyTemplate();
+        var window = new Avalonia.Controls.Window { Content = _container };
+        window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        // ルート背景の検証
+        // ドック内での透過漏れを防ぐため、ルート要素は不透明である必要がある
+        Assert.That(_container.Opacity, Is.EqualTo(1.0), "PictureContainer は不透明度 1.0 であるべきです");
+        
+        var background = _container.Background;
+        Assert.That(background, Is.Not.Null, "背景色が設定されている必要があります");
+        // 1. ルート要素の不透明性検証
+        Assert.That(_container.Opacity, Is.EqualTo(1.0), "PictureContainer 自体が不透明である必要があります");
+        Assert.That(_container.Background is ISolidColorBrush b && b.Color == Color.Parse("#0e0e0e"), "ルート背景が #0e0e0e である必要があります");
+
+        var allChildren = _container.GetVisualDescendants();
+        
+        // 2. 外側のタイルシールド（ドックのグレーを遮断する最大の壁）
+        var outsideTilePanel = allChildren.OfType<Avalonia.Controls.Panel>().FirstOrDefault(p => p.Name == "outsideTilePanel");
+        Assert.That(outsideTilePanel, Is.Not.Null, "outsideTilePanel が見つかりません");
+        var outsideBrush = outsideTilePanel!.Background as ISolidColorBrush;
+        Assert.That(outsideBrush?.Color, Is.EqualTo(Color.Parse("#0e0e0e")), 
+            "outsideTilePanel の背景は不透明な黒 (#0e0e0e) であるべきです。タイルの隙間からの透過を防ぎます。");
+
+        // 3. 画像直下のシールド（透過を妨げないよう Transparent であること）
+        var renderingRoot = allChildren.OfType<Avalonia.Controls.Panel>().FirstOrDefault(p => p.Name == "renderingRoot");
+        Assert.That(renderingRoot, Is.Not.Null, "renderingRoot が見つかりません");
+        var rootBrush = renderingRoot!.Background as Avalonia.Media.ISolidColorBrush;
+        Assert.That(rootBrush == null || rootBrush.Color == Avalonia.Media.Brushes.Transparent.Color, 
+            "renderingRoot の背景は Transparent であるべきです。背後の OutsideBackGround.bmp を透過させて正しい市松模様を表示します。");
     }
 }

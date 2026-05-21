@@ -206,7 +206,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public async Task Save()
         {
             if (PictureSave == null) return;
-            PictureSaveEventArgs args = CreateSaveEventArgs();
+            PictureSaveEventArgs args = CreateSaveEventArgs(false);
             try
             {
                 await PictureSave.Invoke(this, args);
@@ -218,7 +218,22 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             }
         }
 
-        private PictureSaveEventArgs CreateSaveEventArgs()
+        public async Task SaveAs()
+        {
+            if (PictureSave == null) return;
+            PictureSaveEventArgs args = CreateSaveEventArgs(true);
+            try
+            {
+                await PictureSave.Invoke(this, args);
+                HandleSaveResult(args);
+            }
+            finally
+            {
+                args.File?.Bitmap?.Dispose();
+            }
+        }
+
+        private PictureSaveEventArgs CreateSaveEventArgs(bool isSaveAs)
         {
             Bitmap bitmap = BitmapAdapter.ConvertToBitmap(PictureBuffer);
             IImageFile file = FilePath.IsEmpty() ? new NewFile(bitmap) :
@@ -229,7 +244,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
                                  ".arv" => new ArvFile(bitmap, FilePath),
                                  _ => new BitmapFile(bitmap, FilePath) // フォールバック
                              };
-            return new PictureSaveEventArgs(file);
+            return new PictureSaveEventArgs(file, isSaveAs);
         }
 
         private void HandleSaveResult(PictureSaveEventArgs args)

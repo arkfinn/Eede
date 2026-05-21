@@ -165,6 +165,12 @@
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
 								</Button>
+								<Button Classes="tool"
+										ToolTip.Tip="名前を付けて保存"
+										Command="{Binding SavePictureAsCommand}"
+										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+									<PathIcon Data="{StaticResource SaveAsIconGeometry}" Classes="icon" />
+								</Button>
 								<Panel Classes="horizontal-separator" />
 								<ComboBox ItemsSource="{Binding MinCursorSizeList}"
 										  SelectedItem="{Binding MinCursorWidth, Mode=TwoWay}"/>

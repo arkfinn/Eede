@@ -38,7 +38,19 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             return vm;
         }
 
-        [Reactive] public partial Picture PictureBuffer { get; set; }
+        private Picture _pictureBuffer = null!;
+        public Picture PictureBuffer
+        {
+            get => _pictureBuffer;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _pictureBuffer, value);
+                if (value != null && BitmapAdapter != null)
+                {
+                    PremultipliedBitmap = BitmapAdapter.ConvertToPremultipliedBitmap(value);
+                }
+            }
+        }
         private Bitmap? _premultipliedBitmap;
         public Bitmap? PremultipliedBitmap
         {
@@ -67,6 +79,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public partial Magnification Magnification { get; set; }
         [Reactive] public partial double DisplayWidth { get; set; }
         [Reactive] public partial double DisplayHeight { get; set; }
+        [Reactive] public partial BackgroundColor BackgroundColor { get; set; }
         public ReactiveCommand<Unit, Unit> ZoomInCommand { get; }
         public ReactiveCommand<Unit, Unit> ZoomOutCommand { get; }
         public ReactiveCommand<float, Unit> SetMagnificationCommand { get; }
@@ -129,6 +142,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             MinCursorSize = new PictureSize(32, 32);
             CursorSize = new PictureSize(32, 32);
             Magnification = new Magnification(1);
+            BackgroundColor = BackgroundColor.Default;
             ActiveCursor = Avalonia.Input.Cursor.Default;
             Enabled = true;
             Closable = true;
@@ -147,7 +161,6 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             SetupAnimationCursorObservation();
             SetupEditStateObservation();
             SetupTitleObservation();
-            SetupBitmapObservation();
             SetupDisplaySizeObservation();
         }
 
@@ -189,20 +202,11 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             });
         }
 
-        private void SetupBitmapObservation()
-        {
-            _ = this.WhenAnyValue(x => x.PictureBuffer)
-                .Where(x => x != null)
-                .Subscribe(_ =>
-             {
-                 PremultipliedBitmap = BitmapAdapter.ConvertToPremultipliedBitmap(PictureBuffer);
-             });
-        }
 
         public async Task Save()
         {
             if (PictureSave == null) return;
-            PictureSaveEventArgs args = CreateSaveEventArgs();
+            PictureSaveEventArgs args = CreateSaveEventArgs(false);
             try
             {
                 await PictureSave.Invoke(this, args);
@@ -214,7 +218,22 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             }
         }
 
-        private PictureSaveEventArgs CreateSaveEventArgs()
+        public async Task SaveAs()
+        {
+            if (PictureSave == null) return;
+            PictureSaveEventArgs args = CreateSaveEventArgs(true);
+            try
+            {
+                await PictureSave.Invoke(this, args);
+                HandleSaveResult(args);
+            }
+            finally
+            {
+                args.File?.Bitmap?.Dispose();
+            }
+        }
+
+        private PictureSaveEventArgs CreateSaveEventArgs(bool isSaveAs)
         {
             Bitmap bitmap = BitmapAdapter.ConvertToBitmap(PictureBuffer);
             IImageFile file = FilePath.IsEmpty() ? new NewFile(bitmap) :
@@ -225,7 +244,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
                                  ".arv" => new ArvFile(bitmap, FilePath),
                                  _ => new BitmapFile(bitmap, FilePath) // フォールバック
                              };
-            return new PictureSaveEventArgs(file);
+            return new PictureSaveEventArgs(file, isSaveAs);
         }
 
         private void HandleSaveResult(PictureSaveEventArgs args)

@@ -102,8 +102,9 @@ public partial class MainViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
     public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
-    public ReactiveCommand<IFileStorage, Unit> LoadPictureCommand { get; private set; }
-    public ReactiveCommand<IFileStorage, Unit> SavePictureCommand { get; private set; }
+    public ReactiveCommand<IFileStorage?, Unit> LoadPictureCommand { get; private set; }
+    public ReactiveCommand<IFileStorage?, Unit> SavePictureCommand { get; private set; }
+    public ReactiveCommand<IFileStorage?, Unit> SavePictureAsCommand { get; private set; }
     public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; private set; }
     public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; private set; }
     public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; private set; }
@@ -235,8 +236,9 @@ public partial class MainViewModel : ViewModelBase
         });
         _ = welcomeViewModel.LoadRecentFilesCommand.Execute();
 
-        LoadPictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteLoadPicture);
-        SavePictureCommand = ReactiveCommand.Create<IFileStorage>(ExecuteSavePicture);
+        LoadPictureCommand = ReactiveCommand.Create<IFileStorage?>(ExecuteLoadPicture);
+        SavePictureCommand = ReactiveCommand.Create<IFileStorage?>(ExecuteSavePicture);
+        SavePictureAsCommand = ReactiveCommand.Create<IFileStorage?>(ExecuteSavePictureAs);
         PictureActionCommand = ReactiveCommand.Create<PictureActions>(ExecutePictureAction);
         PutPaletteColorCommand = ReactiveCommand.Create<int>(_ => { });
         GetPaletteColorCommand = ReactiveCommand.Create<int>(_ => { });
@@ -359,6 +361,15 @@ public partial class MainViewModel : ViewModelBase
             {
                 ImageBlender = enabled ? new AlphaImageBlender() : new DirectImageBlender();
                 PullBlender = enabled ? new AlphaImageBlender() : new DirectImageBlender();
+            });
+
+        _ = this.WhenAnyValue(x => x.CurrentBackgroundColor)
+            .Subscribe(color =>
+            {
+                foreach (var vm in Pictures)
+                {
+                    vm.BackgroundColor = color;
+                }
             });
 
         this.WhenAnyValue(x => x.ActiveDockable)
@@ -515,8 +526,12 @@ public partial class MainViewModel : ViewModelBase
         return path.EndsWith(".png") || path.EndsWith(".bmp") || path.EndsWith(".arv");
     }
 
-    private async void ExecuteLoadPicture(IFileStorage storage)
+    private async void ExecuteLoadPicture(IFileStorage? storage)
     {
+        if (storage == null)
+        {
+            return;
+        }
         Uri? result = await storage.OpenFilePickerAsync();
         if (result == null)
         {
@@ -574,6 +589,7 @@ public partial class MainViewModel : ViewModelBase
         vm.PicturePush += OnPushToDrawArea;
         vm.PicturePull += OnPullFromDrawArea;
         vm.PictureUpdate += OnPictureUpdate;
+        vm.BackgroundColor = CurrentBackgroundColor;
         vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
         vm.CursorSize = CursorSize;
@@ -609,7 +625,7 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
-    private void ExecuteSavePicture(IFileStorage storage)
+    private void ExecuteSavePicture(IFileStorage? storage)
     {
         if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc)
         {
@@ -620,10 +636,23 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
+    private void ExecuteSavePictureAs(IFileStorage? storage)
+    {
+        if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc)
+        {
+            if (doc.DataContext is DockPictureViewModel vm)
+            {
+                _ = vm.SaveAs();
+            }
+        }
+    }
+
     private async Task OnPictureSave(object? sender, PictureSaveEventArgs e)
     {
         if (FileStorage == null) return;
-        SaveImageResult saveResult = await e.File.SaveAsync(FileStorage);
+        SaveImageResult saveResult = e.IsSaveAs
+            ? await e.File.SaveAsAsync(FileStorage)
+            : await e.File.SaveAsync(FileStorage);
         if (saveResult.IsCanceled)
         {
             e.Cancel();

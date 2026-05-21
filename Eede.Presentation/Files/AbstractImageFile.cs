@@ -19,6 +19,11 @@ namespace Eede.Presentation.Files
 
         public abstract Task<SaveImageResult> SaveAsync(IFileStorage storage);
 
+        public virtual async Task<SaveImageResult> SaveAsAsync(IFileStorage storage)
+        {
+            return await SaveWithFilePickerAsync(storage);
+        }
+
         // 共通 WithFilePathロジック（PNG変換）
         protected IImageFile CreatePngFileWithCheck(Bitmap bitmap, FilePath filePath)
         {

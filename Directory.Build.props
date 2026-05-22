@@ -2,5 +2,6 @@
   <PropertyGroup>
     <Version>0.12.0</Version>
     <LangVersion>13.0</LangVersion>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 </Project>

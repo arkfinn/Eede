@@ -65,38 +65,86 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             }).DisposeWith(disposables);
 
             // Window依存の登録
-            this.WhenAnyValue(x => x.VisualRoot)
-                .Where(vr => vr is Window)
-                .Cast<Window>()
-                .Subscribe(window =>
+            var window = TopLevel.GetTopLevel(this) as Window;
+            if (window != null)
+            {
+                // ViewModelのInteractionを購読し、通知が来たらウィンドウを閉じる
+                ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
                 {
-                    // ViewModelのInteractionを購読し、通知が来たらウィンドウを閉じる
-                    ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
-                    {
-                        window.Close();
-                        interaction.SetOutput(Unit.Default);
-                    }).DisposeWith(disposables);
-
-                    // WindowのClosingイベントをObservableに変換
-                    Observable.FromEventPattern<EventHandler<WindowClosingEventArgs>, WindowClosingEventArgs>(
-                        handler => window.Closing += handler,
-                        handler => window.Closing -= handler)
-                        .Subscribe(args =>
-                        {
-                            if (ViewModel.IsCloseConfirmed) return;
-                            args.EventArgs.Cancel = true;
-                            ViewModel.RequestCloseCommand.Execute().Subscribe();
-                        }).DisposeWith(disposables);
+                    window.Close();
+                    interaction.SetOutput(Unit.Default);
                 }).DisposeWith(disposables);
+
+                // WindowのClosingイベントを登録
+                EventHandler<WindowClosingEventArgs> closingHandler = (s, args) =>
+                {
+                    if (ViewModel.IsCloseConfirmed) return;
+                    args.Cancel = true;
+                    ViewModel.RequestCloseCommand.Execute().Subscribe();
+                };
+                window.Closing += closingHandler;
+                Disposable.Create(() => window.Closing -= closingHandler).DisposeWith(disposables);
+            }
         });
     }
 
     public AvaloniaFileStorage? FileStorage { get; private set; }
 
+    private CompositeDisposable? _visualTreeDisposables;
+
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
         InitializeFileStorage();
+
+        var topLevelWindow = TopLevel.GetTopLevel(this) as Window;
+
+
+        _visualTreeDisposables?.Dispose();
+        _visualTreeDisposables = new CompositeDisposable();
+
+        if (topLevelWindow is Window window)
+        {
+            // Window の Activated イベントが発生した際にクリップボードをチェックする
+            EventHandler activatedHandler = (s, ev) =>
+            {
+                if (DataContext is MainViewModel viewModel)
+                {
+                    _ = viewModel.UpdateClipboardStatusAsync();
+                }
+            };
+            window.Activated += activatedHandler;
+            Disposable.Create(() => window.Activated -= activatedHandler).DisposeWith(_visualTreeDisposables);
+
+            // マウスがウィンドウ内に入ったときにもクリップボードをチェックする
+            EventHandler<PointerEventArgs> pointerEnteredHandler = (s, ev) =>
+            {
+                if (DataContext is MainViewModel viewModel)
+                {
+                    _ = viewModel.UpdateClipboardStatusAsync();
+                }
+            };
+            this.PointerEntered += pointerEnteredHandler;
+            Disposable.Create(() => this.PointerEntered -= pointerEnteredHandler).DisposeWith(_visualTreeDisposables);
+
+            // フォーカスを得たときにもクリップボードをチェックする
+            EventHandler<FocusChangedEventArgs> gotFocusHandler = (s, ev) =>
+            {
+                if (DataContext is MainViewModel viewModel)
+                {
+                    _ = viewModel.UpdateClipboardStatusAsync();
+                }
+            };
+            this.GotFocus += gotFocusHandler;
+            Disposable.Create(() => this.GotFocus -= gotFocusHandler).DisposeWith(_visualTreeDisposables);
+        }
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        _visualTreeDisposables?.Dispose();
+        _visualTreeDisposables = null;
     }
 
     private void InitializeFileStorage()

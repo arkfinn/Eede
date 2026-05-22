@@ -20,8 +20,12 @@ namespace Eede.Presentation.Common.Adapters;
 
 public class AvaloniaClipboard : IClipboard
 {
-    // 一般的な画像形式の識別子
-    private static readonly string[] ImageFormats = { "PNG", "Bitmap", "DeviceIndependentBitmap", "TIFF" };
+    private static readonly DataFormat<byte[]>[] ImageFormats = new[]
+    {
+        DataFormat.CreateBytesPlatformFormat("PNG"),
+        DataFormat.CreateBytesPlatformFormat("DeviceIndependentBitmap"),
+        DataFormat.CreateBytesPlatformFormat("TIFF")
+    };
 
     public async Task CopyAsync(Picture picture)
     {
@@ -31,10 +35,10 @@ public class AvaloniaClipboard : IClipboard
         var bitmap = AvaloniaBitmapAdapter.StaticConvertToBitmap(picture);
         var item = new DataTransferItem();
 
-        // 1. 標準のBitmapオブジェクトとしてセット
+        // 1. 標準 of Bitmap
         item.Set(DataFormat.Bitmap, bitmap);
 
-        // 2. PNG形式としてバイナリをセット（互換性向上）
+        // 2. PNG
         using (var ms = new MemoryStream())
         {
             bitmap.Save(ms);
@@ -63,7 +67,31 @@ public class AvaloniaClipboard : IClipboard
             return AvaloniaBitmapAdapter.StaticConvertToPicture(bitmap);
         }
 
-        // 2. ファイルドロップ形式を試す
+        // 2. カスタムフォーマット（PNG等）を試す
+        foreach (var format in ImageFormats)
+        {
+            if (dataTransfer.Contains(format))
+            {
+                try
+                {
+                    var bytes = await dataTransfer.TryGetValueAsync(format);
+                    if (bytes != null && bytes.Length > 0)
+                    {
+                        using (var ms = new MemoryStream(bytes))
+                        {
+                            var bmp = new Bitmap(ms);
+                            return AvaloniaBitmapAdapter.StaticConvertToPicture(bmp);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Paste: Format error: {ex.Message}");
+                }
+            }
+        }
+
+        // 3. ファイルドロップ形式を試す
         try
         {
             var items = await dataTransfer.TryGetFilesAsync();
@@ -85,6 +113,54 @@ public class AvaloniaClipboard : IClipboard
             System.Diagnostics.Debug.WriteLine($"Paste: Files format error: {ex.Message}");
         }
 
+        // Windows 環境における、遅延レンダリングされた Snipping Tool や PrintScreen 等の画像データのネイティブ fallback 処理
+        if (OperatingSystem.IsWindows())
+        {
+            try
+            {
+                var tcs = new TaskCompletionSource<Picture?>();
+                var thread = new System.Threading.Thread(() =>
+                {
+                    try
+                    {
+                        if (System.Windows.Forms.Clipboard.ContainsImage())
+                        {
+                            using (var img = System.Windows.Forms.Clipboard.GetImage())
+                            {
+                                if (img != null)
+                                {
+                                    using (var ms = new MemoryStream())
+                                    {
+                                        img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                                        ms.Position = 0;
+                                        var avaloniaBmp = new Avalonia.Media.Imaging.Bitmap(ms);
+                                        tcs.SetResult(AvaloniaBitmapAdapter.StaticConvertToPicture(avaloniaBmp));
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        tcs.SetResult(null);
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                    }
+                });
+                thread.SetApartmentState(System.Threading.ApartmentState.STA);
+                thread.Start();
+                var nativePic = await tcs.Task;
+                if (nativePic != null)
+                {
+                    return nativePic;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Windows native clipboard fallback failed: {ex.Message}");
+            }
+        }
+
         System.Diagnostics.Debug.WriteLine("Paste: No image data found.");
         return null;
     }
@@ -97,7 +173,51 @@ public class AvaloniaClipboard : IClipboard
         var dataTransfer = await clipboard.TryGetDataAsync();
         if (dataTransfer == null) return false;
 
-        return dataTransfer.Contains(DataFormat.Bitmap) || dataTransfer.Contains(DataFormat.File);
+        bool hasBitmap = false;
+        try
+        {
+            var bitmap = await dataTransfer.TryGetBitmapAsync();
+            hasBitmap = (bitmap != null);
+        }
+        catch {}
+
+        bool containsFile = dataTransfer.Contains(DataFormat.File);
+
+        bool containsCustom = false;
+        foreach (var format in ImageFormats)
+        {
+            if (dataTransfer.Contains(format))
+            {
+                containsCustom = true;
+                break;
+            }
+        }
+
+        bool result = hasBitmap || containsFile || containsCustom;
+        if (!result && OperatingSystem.IsWindows())
+        {
+            try
+            {
+                var tcs = new TaskCompletionSource<bool>();
+                var thread = new System.Threading.Thread(() =>
+                {
+                    try
+                    {
+                        tcs.SetResult(System.Windows.Forms.Clipboard.ContainsImage());
+                    }
+                    catch
+                    {
+                        tcs.SetResult(false);
+                    }
+                });
+                thread.SetApartmentState(System.Threading.ApartmentState.STA);
+                thread.Start();
+                result = await tcs.Task;
+            }
+            catch {}
+        }
+
+        return result;
     }
 
     private AvaloniaIClipboard? GetClipboard()

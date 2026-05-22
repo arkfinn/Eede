@@ -7,34 +7,39 @@ namespace Eede.Infrastructure.Tests.Services;
 [TestFixture]
 public class ExternalBrowserServiceTests
 {
-    private ExternalBrowserService _service;
+    private TestExternalBrowserService _service;
+
+    private class TestExternalBrowserService : ExternalBrowserService
+    {
+        public bool ProcessStarted { get; set; }
+        public string LastUrl { get; set; } = string.Empty;
+
+        protected override void StartProcess(string url)
+        {
+            ProcessStarted = true;
+            LastUrl = url;
+        }
+    }
 
     [SetUp]
     public void Setup()
     {
-        _service = new ExternalBrowserService();
+        _service = new TestExternalBrowserService();
     }
 
     [TestCase("http://example.com")]
     [TestCase("https://example.com")]
     public void OpenUrl_ShouldNotThrow_WhenUrlIsSafe(string url)
     {
-        // We can't easily verify Process.Start actually ran in this environment,
-        // but we can verify it doesn't throw a validation exception for safe URLs.
-        // If Process.Start fails due to environment (no browser), it might throw,
-        // so we'll just check it doesn't throw our ArgumentException.
         try
         {
             _service.OpenUrl(url);
+            Assert.That(_service.ProcessStarted, Is.True, "Should trigger process start");
+            Assert.That(_service.LastUrl, Is.EqualTo(url), "Should pass the correct URL");
         }
         catch (ArgumentException ex)
         {
             Assert.Fail($"Should not throw ArgumentException for safe URL: {url}. Error: {ex.Message}");
-        }
-        catch (Exception)
-        {
-            // Other exceptions (like Process.Start failing in Linux) are acceptable here
-            // as we are testing the validation logic.
         }
     }
 

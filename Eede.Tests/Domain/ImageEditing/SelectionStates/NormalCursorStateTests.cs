@@ -100,7 +100,7 @@ public class NormalCursorStateTests
     }
 
     [Test]
-    public void HandlePointerRightButtonReleased_ReturnsSameStateAndArea()
+    public void HandlePointerRightButtonPressed_ReturnsSameStateAndArea()
     {
         // Arrange
         var initialArea = HalfBoxArea.Create(new Position(5, 5), new PictureSize(10, 10));
@@ -113,5 +113,42 @@ public class NormalCursorStateTests
         Assert.That(newState, Is.SameAs(state), "Should return the same state instance");
         Assert.That(newArea.RealPosition, Is.EqualTo(initialArea.RealPosition), "Position should remain unchanged");
         Assert.That(newArea.BoxSize, Is.EqualTo(initialArea.BoxSize), "Box size should remain unchanged");
+    }
+
+    [Test]
+    public void HandlePointerRightButtonPressed_ShouldUseMinCursorSizeAsMinSizeConstraint()
+    {
+        // Arrange
+        var initialCursorArea = HalfBoxArea.Create(new Position(10, 10), new PictureSize(32, 32));
+        var state = new NormalCursorState(initialCursorArea);
+
+        var startPosition = new Position(10, 10);
+        var minCursorSize = new PictureSize(16, 16);
+
+        // Act
+        var (newState, _) = state.HandlePointerRightButtonPressed(
+            initialCursorArea,
+            startPosition,
+            minCursorSize,
+            null);
+
+        var selectingState = newState as RegionSelectingState;
+        Assert.That(selectingState, Is.Not.Null, "Should transition to RegionSelectingState");
+
+        var nowPosition = new Position(20, 20);
+        var canvasSize = new PictureSize(100, 100);
+        var (_, _) = selectingState.HandlePointerMoved(
+            initialCursorArea,
+            true,
+            nowPosition,
+            false,
+            canvasSize);
+
+        var selectingArea = selectingState.GetSelectingArea();
+
+        // Assert
+        Assert.That(selectingArea, Is.Not.Null);
+        Assert.That(selectingArea.Value.Width, Is.EqualTo(16), "Width should be restricted by GUI minCursorSize, not current cursor size");
+        Assert.That(selectingArea.Value.Height, Is.EqualTo(16), "Height should be restricted by GUI minCursorSize, not current cursor size");
     }
 }

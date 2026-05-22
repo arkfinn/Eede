@@ -273,6 +273,7 @@ public partial class MainViewModel : ViewModelBase
 
         InitializeConnections();
         _ = LoadSettingsAsync();
+        _ = UpdateClipboardStatusAsync();
     }
 
     private async Task LoadSettingsAsync()
@@ -421,6 +422,7 @@ public partial class MainViewModel : ViewModelBase
             await DrawableCanvasViewModel.PasteCommand.Execute();
             DrawStyle = DrawStyleType.RegionSelect;
         }, this.WhenAnyValue(x => x.HasClipboardPicture));
+
 
         DrawingSessionViewModel.Undone += OnUndone;
         DrawingSessionViewModel.Redone += OnRedone;
@@ -837,6 +839,26 @@ public partial class MainViewModel : ViewModelBase
         }
         finally
         {
+        }
+    }
+
+    public async Task UpdateClipboardStatusAsync()
+    {
+        try
+        {
+            var hasPicture = await _clipboard.HasPictureAsync();
+            global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                HasClipboardPicture = hasPicture;
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to check clipboard: {ex.Message}");
+            global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                HasClipboardPicture = false;
+            });
         }
     }
 }

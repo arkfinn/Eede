@@ -30,8 +30,8 @@ public class NormalCursorState : ISelectionState
     public (ISelectionState, HalfBoxArea) HandlePointerRightButtonPressed(HalfBoxArea cursorArea, Position nowPosition, PictureSize minCursorSize, ICommand? pictureUpdateAction)
     {
         _cursorArea = cursorArea;
-        // 表示サイズ（cursorArea.BoxSize）と、スナップの基準となるツールバー設定（minCursorSize）の両方を渡す。
-        return (new RegionSelectingState(nowPosition, nowPosition, cursorArea.BoxSize, minCursorSize), cursorArea);
+        // 最小サイズはGUIで設定された minCursorSize を使用し、スナップの基準となるサイズも minCursorSize とする。
+        return (new RegionSelectingState(nowPosition, nowPosition, minCursorSize, minCursorSize), cursorArea);
     }
 
     public (bool, HalfBoxArea) HandlePointerMoved(HalfBoxArea cursorArea, bool visibleCursor, Position nowPosition, bool isShift, PictureSize canvasSize)

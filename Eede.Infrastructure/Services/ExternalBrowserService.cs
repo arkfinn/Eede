@@ -14,6 +14,11 @@ public class ExternalBrowserService : IExternalBrowserService
             throw new ArgumentException("Invalid URL scheme. Only http and https are allowed.", nameof(url));
         }
 
+        StartProcess(url);
+    }
+
+    protected virtual void StartProcess(string url)
+    {
         Process.Start(new ProcessStartInfo
         {
             FileName = url,

@@ -106,6 +106,11 @@ public record Picture
         return blender.Blend(src, this, toPosition);
     }
 
+    public Picture Blend(IImageBlender blender, System.Collections.Generic.IEnumerable<(Picture Picture, Position Position)> sources)
+    {
+        return blender.Blend(sources, this);
+    }
+
     public Picture Draw(Func<Picture, Picture> function, IImageBlender blender)
     {
         Picture data = function(this);

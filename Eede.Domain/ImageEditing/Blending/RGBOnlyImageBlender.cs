@@ -14,7 +14,22 @@ public class RGBOnlyImageBlender : IImageBlender
     public Picture Blend(Picture from, Picture to, Position toPosition)
     {
         byte[] toPixels = to.CloneImage();
+        BlendInternal(from, to, toPosition, toPixels);
+        return Picture.Create(to.Size, toPixels);
+    }
 
+    public Picture Blend(System.Collections.Generic.IEnumerable<(Picture Picture, Position Position)> sources, Picture destination)
+    {
+        byte[] toPixels = destination.CloneImage();
+        foreach (var source in sources)
+        {
+            BlendInternal(source.Picture, destination, source.Position, toPixels);
+        }
+        return Picture.Create(destination.Size, toPixels);
+    }
+
+    private void BlendInternal(Picture from, Picture to, Position toPosition, byte[] toPixels)
+    {
         int startY = Math.Max(0, toPosition.Y);
         int startX = Math.Max(0, toPosition.X);
         int maxY = Math.Min(toPosition.Y + from.Height, to.Height);
@@ -33,7 +48,5 @@ public class RGBOnlyImageBlender : IImageBlender
                 toPixels[toPos + 2] = fromSpan[fromPos + 2];
             }
         }
-
-        return Picture.Create(to.Size, toPixels);
     }
 }

@@ -211,11 +211,7 @@ namespace Eede.Domain.ImageEditing
             }
             else if (historyItem is DiffHistoryItem diffItem)
             {
-                var restoredPicture = Buffer.Previous;
-                foreach (var diff in diffItem.Diffs)
-                {
-                    restoredPicture = restoredPicture.Blend(new DirectImageBlender(), diff.Before, diff.Area.Position);
-                }
+                var restoredPicture = Buffer.Previous.Blend(new DirectImageBlender(), diffItem.Diffs.Select(d => (d.Before, d.Area.Position)));
                 var nextSession = new DrawingSession(
                     new DrawingBuffer(restoredPicture),
                     diffItem.SelectingArea,
@@ -260,11 +256,7 @@ namespace Eede.Domain.ImageEditing
             }
             else if (historyItem is DiffHistoryItem diffItem)
             {
-                var restoredPicture = Buffer.Previous;
-                foreach (var diff in diffItem.Diffs)
-                {
-                    restoredPicture = restoredPicture.Blend(new DirectImageBlender(), diff.Before, diff.Area.Position);
-                }
+                var restoredPicture = Buffer.Previous.Blend(new DirectImageBlender(), diffItem.Diffs.Select(d => (d.Before, d.Area.Position)));
                 var nextSession = new DrawingSession(
                     new DrawingBuffer(restoredPicture),
                     diffItem.SelectingArea,

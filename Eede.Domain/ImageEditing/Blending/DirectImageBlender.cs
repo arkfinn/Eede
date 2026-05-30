@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using Eede.Domain.SharedKernel;
 using System;
 
@@ -23,14 +23,16 @@ public class DirectImageBlender : IImageBlender
         ReadOnlySpan<byte> fromSpan = from.AsSpan();
         for (int y = startY; y < maxY; y++)
         {
+            int toPos = (startX * 4) + (to.Stride * y);
+            int fromPos = ((startX - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
             for (int x = startX; x < maxX; x++)
             {
-                int toPos = (x * 4) + (to.Stride * y);
-                int fromPos = ((x - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
                 toPixels[toPos + 0] = fromSpan[fromPos + 0];
                 toPixels[toPos + 1] = fromSpan[fromPos + 1];
                 toPixels[toPos + 2] = fromSpan[fromPos + 2];
                 toPixels[toPos + 3] = fromSpan[fromPos + 3];
+                toPos += 4;
+                fromPos += 4;
             }
         }
         return Picture.Create(to.Size, toPixels);

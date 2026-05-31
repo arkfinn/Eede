@@ -19,11 +19,13 @@ public class DirectImageTransfer : IImageTransfer
         for (int y = 0; y < destHeight; y++)
         {
             int srcY = (int)(y / factor);
+            int srcYOffset = srcY * srcStride;
+            int destYOffset = y * toStride;
             for (int x = 0; x < destWidth; x++)
             {
                 int srcX = (int)(x / factor);
-                int srcIdx = (srcY * srcStride) + (srcX * 4);
-                int destIdx = (y * toStride) + (x * 4);
+                int srcIdx = srcYOffset + (srcX * 4);
+                int destIdx = destYOffset + (x * 4);
 
                 destPixels[destIdx + 0] = srcSpan[srcIdx + 0];
                 destPixels[destIdx + 1] = srcSpan[srcIdx + 1];

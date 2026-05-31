@@ -45,13 +45,14 @@ namespace Eede.Domain.ImageEditing.GeometricTransformations
                     for (int sy = srcYStart; sy < srcYEnd; sy++)
                     {
                         int rowOffset = sy * srcStride;
+                        int idx = rowOffset + srcXStart * 4;
                         for (int sx = srcXStart; sx < srcXEnd; sx++)
                         {
-                            int idx = rowOffset + sx * 4;
                             sumB += srcSpan[idx];
                             sumG += srcSpan[idx + 1];
                             sumR += srcSpan[idx + 2];
                             sumA += srcSpan[idx + 3];
+                            idx += 4;
                             count++;
                         }
                     }

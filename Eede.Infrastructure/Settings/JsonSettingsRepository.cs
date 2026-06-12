@@ -29,12 +29,12 @@ public class JsonSettingsRepository : ISettingsRepository
         }
         catch (System.Exception ex)
         {
-            System.Diagnostics.Trace.WriteLine(ex);
+            System.Diagnostics.Trace.WriteLine($"Failed to load settings: {ex.Message}");
             return new AppSettings { GridWidth = 32, GridHeight = 32 };
         }
     }
 
-    public async Task SaveAsync(AppSettings settings)
+    public async Task<bool> SaveAsync(AppSettings settings)
     {
         try
         {
@@ -46,11 +46,13 @@ public class JsonSettingsRepository : ISettingsRepository
 
             using var stream = File.Create(_filePath);
             await JsonSerializer.SerializeAsync(stream, settings);
+            return true;
         }
         catch (System.Exception ex)
         {
-            // 保存失敗してもアプリケーションが続行できるように例外を飲み込む
-            System.Diagnostics.Trace.WriteLine(ex);
+            // 保存失敗時はfalseを返して呼び出し元に通知する
+            System.Diagnostics.Trace.WriteLine($"Failed to save settings: {ex.Message}");
+            return false;
         }
     }
 }

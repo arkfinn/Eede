@@ -6,5 +6,5 @@ namespace Eede.Application.Infrastructure;
 public interface ISettingsRepository
 {
     Task<AppSettings> LoadAsync();
-    Task SaveAsync(AppSettings settings);
+    Task<bool> SaveAsync(AppSettings settings);
 }

@@ -6,10 +6,10 @@ namespace Eede.Application.UseCase.Settings;
 
 public interface ISaveSettingsUseCase
 {
-    Task ExecuteAsync(AppSettings settings);
+    Task<bool> ExecuteAsync(AppSettings settings);
 }
 
 public class SaveSettingsUseCase(ISettingsRepository repository) : ISaveSettingsUseCase
 {
-    public Task ExecuteAsync(AppSettings settings) => repository.SaveAsync(settings);
+    public Task<bool> ExecuteAsync(AppSettings settings) => repository.SaveAsync(settings);
 }

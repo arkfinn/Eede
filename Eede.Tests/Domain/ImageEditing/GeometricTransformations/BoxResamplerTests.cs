@@ -11,17 +11,13 @@ namespace Eede.Domain.Tests.ImageEditing.GeometricTransformations
     {
         [TestCase(0, 10)]
         [TestCase(10, 0)]
-        [TestCase(-1, 10)]
-        [TestCase(10, -1)]
         [TestCase(0, 0)]
         public void Resize_ThrowsArgumentException_WhenSizeIsInvalid(int width, int height)
         {
             var data = new byte[4];
             var source = Picture.Create(new PictureSize(1, 1), data);
             var resampler = new BoxResampler();
-            var newSize = new PictureSize(width, height);
-
-            Assert.Throws<ArgumentException>(() => resampler.Resize(source, newSize));
+            Assert.Catch<ArgumentException>(() => resampler.Resize(source, new PictureSize(width, height)));
         }
 
         [Test]

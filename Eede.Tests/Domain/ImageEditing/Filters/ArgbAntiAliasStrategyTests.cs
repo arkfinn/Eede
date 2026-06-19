@@ -54,6 +54,24 @@ namespace Eede.Domain.Tests.ImageEditing.Filters
         }
 
         [Test]
+        public unsafe void IsDifferent_ExactlyAtThreshold_ReturnsFalse()
+        {
+            // Set threshold to a value that will exactly match the difference
+            // p1 luminance = 0
+            byte[] p1 = new byte[] { 0, 0, 0, 255 };
+            // p2 luminance: R=255, G=0, B=0 -> 0.299
+            byte[] p2 = new byte[] { 0, 0, 255, 255 };
+            float diff = 0.299f;
+
+            fixed (byte* ptr1 = p1)
+            fixed (byte* ptr2 = p2)
+            {
+                // IsDifferent checks Math.Abs(l1 - l2) > threshold, so it should be false
+                Assert.That(_strategy.IsDifferent(ptr1, ptr2, diff), Is.False);
+            }
+        }
+
+        [Test]
         public unsafe void GetValueForEdgeDetection_ReturnsLuminance()
         {
             // Luminance = (0.299f * R + 0.587f * G + 0.114f * B) / 255.0f
@@ -134,6 +152,66 @@ namespace Eede.Domain.Tests.ImageEditing.Filters
                 Assert.That(dst[1], Is.EqualTo(100));
                 Assert.That(dst[2], Is.EqualTo(100));
                 Assert.That(dst[3], Is.EqualTo(100));
+            });
+        }
+
+        [Test]
+        public unsafe void Blend_NegativeWeight_ClampsToZero()
+        {
+            byte[] src = new byte[] { 255, 255, 255, 255 }; // White
+            byte[] dst = new byte[] { 50, 50, 50, 50 }; // Dark Gray
+
+            fixed (byte* srcPtr = src)
+            fixed (byte* dstPtr = dst)
+            {
+                // Math.Clamp(a * 0.85, 0, 1) should clamp negative to 0
+                _strategy.Blend(srcPtr, dstPtr, 0, 0, 0, 0, 4, -1.0f);
+            }
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(dst[0], Is.EqualTo(50));
+                Assert.That(dst[1], Is.EqualTo(50));
+                Assert.That(dst[2], Is.EqualTo(50));
+                Assert.That(dst[3], Is.EqualTo(50));
+            });
+        }
+
+        [Test]
+        public unsafe void Blend_WithOffsets_BlendsCorrectPixels()
+        {
+            // Stride = 8 (2 pixels per row)
+            // 2x2 image buffer
+            byte[] src = new byte[] {
+                0, 0, 0, 0,       255, 255, 255, 255, // Pixel (1,0) is white
+                0, 0, 0, 0,       0, 0, 0, 0
+            };
+
+            byte[] dst = new byte[] {
+                0, 0, 0, 0,       0, 0, 0, 0,
+                0, 0, 0, 0,       0, 0, 0, 0  // We will blend into Pixel (1,1)
+            };
+
+            int stride = 8;
+
+            fixed (byte* srcPtr = src)
+            fixed (byte* dstPtr = dst)
+            {
+                // Target: dst (xT=1, yT=1)
+                // Source: src (xN=1, yN=0)
+                _strategy.Blend(srcPtr, dstPtr, 1, 1, 1, 0, stride, 1.0f);
+            }
+
+            // Verify dst pixel at (1,1) which is index 12
+            Assert.Multiple(() =>
+            {
+                Assert.That(dst[12], Is.EqualTo(216), "Blue channel blended incorrectly at offset");
+                Assert.That(dst[13], Is.EqualTo(216), "Green channel blended incorrectly at offset");
+                Assert.That(dst[14], Is.EqualTo(216), "Red channel blended incorrectly at offset");
+                Assert.That(dst[15], Is.EqualTo(216), "Alpha channel blended incorrectly at offset");
+
+                // Verify dst pixel at (0,0) is untouched
+                Assert.That(dst[0], Is.EqualTo(0));
             });
         }
     }

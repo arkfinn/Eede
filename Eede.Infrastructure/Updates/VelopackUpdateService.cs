@@ -57,11 +57,11 @@ public class VelopackUpdateService : IUpdateService, IDisposable
             LatestVersion = _updateInfo.TargetFullRelease.Version.ToString();
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // すでに IsInstalled でチェックしていますが、念のため例外もハンドリングします。
             // インストールされていない環境（デバッグ時など）ではエラー表示にせず、Idle ステータスに戻します。
-            System.Diagnostics.Debug.WriteLine($"Velopack CheckForUpdatesAsync error: {ex.Message}");
+            System.Diagnostics.Trace.WriteLine("Velopack CheckForUpdatesAsync failed due to an internal error.");
             SetStatus(UpdateStatus.Idle);
             return false;
         }
@@ -84,9 +84,9 @@ public class VelopackUpdateService : IUpdateService, IDisposable
             await mgr.DownloadUpdatesAsync(_updateInfo);
             SetStatus(UpdateStatus.ReadyToApply);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"Velopack DownloadUpdateAsync error: {ex.Message}");
+            System.Diagnostics.Trace.WriteLine("Velopack DownloadUpdateAsync failed due to an internal error.");
             SetStatus(UpdateStatus.Error);
         }
     }
@@ -103,9 +103,9 @@ public class VelopackUpdateService : IUpdateService, IDisposable
             }
             mgr.ApplyUpdatesAndRestart(_updateInfo);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"Velopack ApplyAndRestart error: {ex.Message}");
+            System.Diagnostics.Trace.WriteLine("Velopack ApplyAndRestart failed due to an internal error.");
             SetStatus(UpdateStatus.Error);
         }
     }

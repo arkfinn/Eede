@@ -43,7 +43,7 @@ namespace Eede.Presentation.Files
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine(ex);
+                System.Diagnostics.Trace.WriteLine($"Failed to save image: {ex.Message}");
                 return Task.FromResult(SaveImageResult.Canceled()); // エラーが発生した場合
             }
         }

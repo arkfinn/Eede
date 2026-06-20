@@ -29,13 +29,16 @@ public class ExternalBrowserServiceTests
 
     [TestCase("http://example.com")]
     [TestCase("https://example.com")]
-    public void OpenUrl_ShouldNotThrow_WhenUrlIsSafe(string url)
+    [TestCase("http://example.com/unencoded space")]
+    [TestCase("http://example.com/\"&calc.exe")]
+    public void OpenUrl_ShouldNotThrow_AndUrlShouldBeEncoded_WhenUrlIsSafe(string url)
     {
         try
         {
             _service.OpenUrl(url);
+            var expectedUrl = new Uri(url).AbsoluteUri;
             Assert.That(_service.ProcessStarted, Is.True, "Should trigger process start");
-            Assert.That(_service.LastUrl, Is.EqualTo(url), "Should pass the correct URL");
+            Assert.That(_service.LastUrl, Is.EqualTo(expectedUrl), "Should pass the URL-encoded URL");
         }
         catch (ArgumentException ex)
         {

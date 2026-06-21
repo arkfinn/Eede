@@ -49,4 +49,27 @@ public class JsonSettingsRepositoryTests
         Assert.That(loaded.GridWidth, Is.EqualTo(48));
         Assert.That(loaded.GridHeight, Is.EqualTo(64));
     }
+
+    [Test]
+    public async Task LoadAsync_HandlesExceptionGracefully()
+    {
+        // Using an invalid path containing null character to force an exception
+        var repository = new JsonSettingsRepository("invalid\0path");
+        var settings = await repository.LoadAsync();
+
+        Assert.That(settings, Is.Not.Null);
+        Assert.That(settings.GridWidth, Is.EqualTo(32));
+    }
+
+    [Test]
+    public async Task SaveAsync_HandlesExceptionGracefully()
+    {
+        // Using an invalid path containing null character to force an exception
+        var repository = new JsonSettingsRepository("invalid\0path");
+        var settings = new AppSettings { GridWidth = 48, GridHeight = 64 };
+
+        var result = await repository.SaveAsync(settings);
+
+        Assert.That(result, Is.False);
+    }
 }

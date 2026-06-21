@@ -27,9 +27,9 @@ public class JsonSettingsRepository : ISettingsRepository
             using var stream = File.OpenRead(_filePath);
             return await JsonSerializer.DeserializeAsync<AppSettings>(stream) ?? new AppSettings { GridWidth = 32, GridHeight = 32 };
         }
-        catch (System.Exception ex)
+        catch (System.Exception)
         {
-            System.Diagnostics.Trace.WriteLine($"Failed to load settings: {ex.Message}");
+            System.Diagnostics.Trace.WriteLine("Failed to load settings.");
             return new AppSettings { GridWidth = 32, GridHeight = 32 };
         }
     }
@@ -48,10 +48,10 @@ public class JsonSettingsRepository : ISettingsRepository
             await JsonSerializer.SerializeAsync(stream, settings);
             return true;
         }
-        catch (System.Exception ex)
+        catch (System.Exception)
         {
             // 保存失敗時はfalseを返して呼び出し元に通知する
-            System.Diagnostics.Trace.WriteLine($"Failed to save settings: {ex.Message}");
+            System.Diagnostics.Trace.WriteLine("Failed to save settings.");
             return false;
         }
     }

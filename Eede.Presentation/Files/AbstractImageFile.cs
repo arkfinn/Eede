@@ -41,9 +41,9 @@ namespace Eede.Presentation.Files
                 Bitmap.Save(filePath.ToString());
                 return Task.FromResult(SaveImageResult.Saved(WithFilePath(filePath))); // 保存完了
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Trace.WriteLine($"Failed to save image: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine("Failed to save image.");
                 return Task.FromResult(SaveImageResult.Canceled()); // エラーが発生した場合
             }
         }

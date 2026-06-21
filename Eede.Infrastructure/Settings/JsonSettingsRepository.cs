@@ -29,7 +29,7 @@ public class JsonSettingsRepository : ISettingsRepository
         }
         catch (System.Exception)
         {
-            System.Diagnostics.Trace.WriteLine("Failed to load settings.");
+            System.Diagnostics.Trace.WriteLine("Failed to load settings securely.");
             return new AppSettings { GridWidth = 32, GridHeight = 32 };
         }
     }
@@ -51,7 +51,7 @@ public class JsonSettingsRepository : ISettingsRepository
         catch (System.Exception)
         {
             // 保存失敗時はfalseを返して呼び出し元に通知する
-            System.Diagnostics.Trace.WriteLine("Failed to save settings.");
+            System.Diagnostics.Trace.WriteLine("Failed to save settings securely.");
             return false;
         }
     }

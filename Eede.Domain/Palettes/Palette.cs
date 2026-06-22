@@ -46,9 +46,9 @@ public class Palette
 
     public void ForEach(Action<ArgbColor, int> action)
     {
-        foreach (var item in Colors.Select((value, index) => new { value, index }))
+        for (int i = 0; i < Colors.Count; i++)
         {
-            action.Invoke(item.value, item.index);
+            action.Invoke(Colors[i], i);
         }
     }
 }

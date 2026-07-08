@@ -20,13 +20,39 @@ namespace Eede.Domain.SharedKernel
             Areas = areas ?? Array.Empty<PictureArea>();
         }
 
-        public bool IsEmpty => Areas == null || !Areas.Any() || Areas.All(a => a.IsEmpty);
+        public bool IsEmpty
+        {
+            get
+            {
+                if (Areas == null) return true;
+                foreach (var area in Areas)
+                {
+                    if (!area.IsEmpty) return false;
+                }
+                return true;
+            }
+        }
 
         public PictureArea GetBoundingBox()
         {
-            if (IsEmpty || Areas == null) return new PictureArea(new Position(0, 0), new PictureSize(0, 0));
-            var first = Areas.First(a => !a.IsEmpty);
-            return Areas.Where(a => !a.IsEmpty).Aggregate(first, (current, next) => current.Combine(next));
+            if (Areas == null) return new PictureArea(new Position(0, 0), new PictureSize(0, 0));
+
+            PictureArea? combined = null;
+            foreach (var area in Areas)
+            {
+                if (area.IsEmpty) continue;
+
+                if (combined == null)
+                {
+                    combined = area;
+                }
+                else
+                {
+                    combined = combined.Value.Combine(area);
+                }
+            }
+
+            return combined ?? new PictureArea(new Position(0, 0), new PictureSize(0, 0));
         }
 
         public IEnumerator<PictureArea> GetEnumerator() => (Areas ?? Array.Empty<PictureArea>()).GetEnumerator();

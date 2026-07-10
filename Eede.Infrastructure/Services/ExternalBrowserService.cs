@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Eede.Application.Infrastructure;
 
 namespace Eede.Infrastructure.Services;
@@ -19,10 +20,37 @@ public class ExternalBrowserService : IExternalBrowserService
 
     protected virtual void StartProcess(string url)
     {
-        Process.Start(new ProcessStartInfo
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            FileName = url,
-            UseShellExecute = true
-        });
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "xdg-open",
+                UseShellExecute = false
+            };
+            psi.ArgumentList.Add(url);
+            Process.Start(psi);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "open",
+                UseShellExecute = false
+            };
+            psi.ArgumentList.Add(url);
+            Process.Start(psi);
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("Operating system not supported for opening external URLs.");
+        }
     }
 }

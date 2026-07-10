@@ -1,4 +1,5 @@
-﻿using Eede.Application.Infrastructure;
+﻿using System;
+using Eede.Application.Infrastructure;
 using Eede.Application.Settings;
 using System.IO;
 using System.Text.Json;
@@ -27,7 +28,7 @@ public class JsonSettingsRepository : ISettingsRepository
             using var stream = File.OpenRead(_filePath);
             return await JsonSerializer.DeserializeAsync<AppSettings>(stream) ?? new AppSettings { GridWidth = 32, GridHeight = 32 };
         }
-        catch (System.Exception)
+        catch (Exception ex) when (ex is JsonException || ex is IOException || ex is UnauthorizedAccessException || ex is ArgumentException || ex is NotSupportedException)
         {
             System.Diagnostics.Trace.WriteLine("Failed to load settings securely.");
             return new AppSettings { GridWidth = 32, GridHeight = 32 };
@@ -48,7 +49,7 @@ public class JsonSettingsRepository : ISettingsRepository
             await JsonSerializer.SerializeAsync(stream, settings);
             return true;
         }
-        catch (System.Exception)
+        catch (Exception ex) when (ex is JsonException || ex is IOException || ex is UnauthorizedAccessException || ex is ArgumentException || ex is NotSupportedException)
         {
             // 保存失敗時はfalseを返して呼び出し元に通知する
             System.Diagnostics.Trace.WriteLine("Failed to save settings securely.");

@@ -46,7 +46,7 @@ namespace PerfBench
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<AlphaToneImageTransferBenchmark>();
+            var summary = BenchmarkRunner.Run<AlphaImageBlenderBenchmark>();
         }
     }
 }

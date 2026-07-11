@@ -26,19 +26,19 @@ public class AlphaImageBlender : ImageBlenderBase
         }
 
         // それ以外の場合、アルファ値・カラーを合成する
-        decimal fromAlpha = decimal.Divide(fromA, 255);
-        decimal toAlpha = decimal.Divide(toA, 255);
-        decimal alpha = fromAlpha + toAlpha - (fromAlpha * toAlpha);
-        toPixels[toPos + 3] = (byte)decimal.Add(decimal.Multiply(alpha, 255), 0.5m);
+        float fromAlpha = fromA / 255f;
+        float toAlpha = toA / 255f;
+        float alpha = fromAlpha + toAlpha - (fromAlpha * toAlpha);
+        toPixels[toPos + 3] = (byte)(alpha * 255f + 0.5f);
 
         if (alpha == 0)
         {
             return;
         }
 
-        decimal blendedAlpha = toAlpha * (1 - fromAlpha);
-        toPixels[toPos + 0] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 0] * blendedAlpha) + (fromSpan[fromPos + 0] * fromAlpha), alpha), 0.5m);
-        toPixels[toPos + 1] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 1] * blendedAlpha) + (fromSpan[fromPos + 1] * fromAlpha), alpha), 0.5m);
-        toPixels[toPos + 2] = (byte)decimal.Add(decimal.Divide((toPixels[toPos + 2] * blendedAlpha) + (fromSpan[fromPos + 2] * fromAlpha), alpha), 0.5m);
+        float blendedAlpha = toAlpha * (1f - fromAlpha);
+        toPixels[toPos + 0] = (byte)(((toPixels[toPos + 0] * blendedAlpha) + (fromSpan[fromPos + 0] * fromAlpha)) / alpha + 0.5f);
+        toPixels[toPos + 1] = (byte)(((toPixels[toPos + 1] * blendedAlpha) + (fromSpan[fromPos + 1] * fromAlpha)) / alpha + 0.5f);
+        toPixels[toPos + 2] = (byte)(((toPixels[toPos + 2] * blendedAlpha) + (fromSpan[fromPos + 2] * fromAlpha)) / alpha + 0.5f);
     }
 }

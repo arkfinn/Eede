@@ -16,21 +16,28 @@ public class DirectImageTransfer : IImageTransfer
         System.ReadOnlySpan<byte> srcSpan = src.AsSpan();
         int srcStride = src.Stride;
 
-        for (int y = 0; y < destHeight; y++)
+        if (factor == 1.0f)
         {
-            int srcY = (int)(y / factor);
-            int srcYOffset = srcY * srcStride;
-            int destYOffset = y * toStride;
-            for (int x = 0; x < destWidth; x++)
+            srcSpan.CopyTo(destPixels);
+        }
+        else
+        {
+            for (int y = 0; y < destHeight; y++)
             {
-                int srcX = (int)(x / factor);
-                int srcIdx = srcYOffset + (srcX * 4);
-                int destIdx = destYOffset + (x * 4);
+                int srcY = (int)(y / factor);
+                int srcYOffset = srcY * srcStride;
+                int destYOffset = y * toStride;
+                for (int x = 0; x < destWidth; x++)
+                {
+                    int srcX = (int)(x / factor);
+                    int srcIdx = srcYOffset + (srcX * 4);
+                    int destIdx = destYOffset + (x * 4);
 
-                destPixels[destIdx + 0] = srcSpan[srcIdx + 0];
-                destPixels[destIdx + 1] = srcSpan[srcIdx + 1];
-                destPixels[destIdx + 2] = srcSpan[srcIdx + 2];
-                destPixels[destIdx + 3] = srcSpan[srcIdx + 3];
+                    destPixels[destIdx + 0] = srcSpan[srcIdx + 0];
+                    destPixels[destIdx + 1] = srcSpan[srcIdx + 1];
+                    destPixels[destIdx + 2] = srcSpan[srcIdx + 2];
+                    destPixels[destIdx + 3] = srcSpan[srcIdx + 3];
+                }
             }
         }
 

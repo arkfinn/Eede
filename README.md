@@ -16,7 +16,7 @@ Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描�
 
 ### 開発環境
 
-- Visual Studio 2022 以上
+- Visual Studio 2026 以上
 
 ## Eede のインストールと実行
 

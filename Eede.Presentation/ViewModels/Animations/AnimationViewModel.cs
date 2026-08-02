@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 using System.Reactive.Linq;
 using System.Text.Json;
 using System.IO;
@@ -63,13 +64,13 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
         }
     }
 
-    public ReactiveCommand<string, Unit> CreatePatternCommand { get; }
-    public ReactiveCommand<Unit, Unit> RemovePatternCommand { get; }
-    public ReactiveCommand<int, Unit> AddFrameCommand { get; }
-    public ReactiveCommand<AnimationFrame, Unit> RemoveFrameAtCommand { get; }
-    public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
-    public ReactiveCommand<IFileStorage, Unit> ExportCommand { get; }
-    public ReactiveCommand<IFileStorage, Unit> ImportCommand { get; }
+    public ReactiveCommand<string, RxVoid> CreatePatternCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> RemovePatternCommand { get; }
+    public ReactiveCommand<int, RxVoid> AddFrameCommand { get; }
+    public ReactiveCommand<AnimationFrame, RxVoid> RemoveFrameAtCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> TogglePlayCommand { get; }
+    public ReactiveCommand<IFileStorage, RxVoid> ExportCommand { get; }
+    public ReactiveCommand<IFileStorage, RxVoid> ImportCommand { get; }
 
     public void AddFrame(int cellIndex)
     {
@@ -108,7 +109,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
             .Select(x => (x.Item1 != null && x.Item2 >= 0 && x.Item2 < x.Item1.Frames.Count)
                 ? x.Item1.Frames[x.Item2]
                 : null)
-            .ToProperty(this, nameof(CurrentFrame), out _currentFrameHelper, scheduler: ReactiveUI.Avalonia.AvaloniaScheduler.Instance);
+            .ToProperty(this, nameof(CurrentFrame), out _currentFrameHelper);
 
         Magnification = new Magnification(1);
         GridWidth = 32;
@@ -301,8 +302,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
                             return TimeSpan.FromMilliseconds(100);
                         }
                         return TimeSpan.FromMilliseconds(SelectedPattern.Frames[CurrentFrameIndex].Duration);
-                    },
-                    ReactiveUI.Avalonia.AvaloniaScheduler.Instance
+                    }
                 );
             })
             .Switch()

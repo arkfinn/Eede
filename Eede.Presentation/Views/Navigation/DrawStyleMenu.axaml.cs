@@ -5,11 +5,13 @@ using ReactiveUI;
 using System;
 using System.Reactive;
 
+using RxVoid = ReactiveUI.Primitives.RxVoid;
+
 namespace Eede.Presentation.Views.Navigation
 {
     public partial class DrawStyleMenu : UserControl
     {
-        public ReactiveCommand<DrawStyleType, Unit> UpdateDrawStyleCommand { get; }
+        public ReactiveCommand<DrawStyleType, RxVoid> UpdateDrawStyleCommand { get; }
 
         public DrawStyleMenu()
         {

@@ -74,6 +74,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
 
     public void AddFrame(int cellIndex)
     {
+        // Safe execution when patterns might be empty
         AddFrameCommand.Execute(cellIndex).Subscribe();
     }
 

@@ -64,12 +64,24 @@ public class JsonSettingsRepositoryTests
     [Test]
     public async Task SaveAsync_HandlesExceptionGracefully()
     {
-        // Using an invalid path containing null character to force an exception
-        var repository = new JsonSettingsRepository("invalid\0path");
-        var settings = new AppSettings { GridWidth = 48, GridHeight = 64 };
+        // Using a directory path to force an UnauthorizedAccessException
+        var dirPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(dirPath);
+        try
+        {
+            var repository = new JsonSettingsRepository(dirPath);
+            var settings = new AppSettings { GridWidth = 48, GridHeight = 64 };
 
-        var result = await repository.SaveAsync(settings);
+            var result = await repository.SaveAsync(settings);
 
-        Assert.That(result, Is.False);
+            Assert.That(result, Is.False);
+        }
+        finally
+        {
+            if (Directory.Exists(dirPath))
+            {
+                Directory.Delete(dirPath, true);
+            }
+        }
     }
 }

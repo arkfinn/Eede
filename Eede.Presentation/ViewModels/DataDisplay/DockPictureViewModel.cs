@@ -16,6 +16,7 @@ using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 
 namespace Eede.Presentation.ViewModels.DataDisplay
 {
@@ -80,11 +81,11 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public partial double DisplayWidth { get; set; }
         [Reactive] public partial double DisplayHeight { get; set; }
         [Reactive] public partial BackgroundColor BackgroundColor { get; set; }
-        public ReactiveCommand<Unit, Unit> ZoomInCommand { get; }
-        public ReactiveCommand<Unit, Unit> ZoomOutCommand { get; }
-        public ReactiveCommand<float, Unit> SetMagnificationCommand { get; }
-        public ReactiveCommand<Unit, bool> OnClosing { get; }
-        public ReactiveCommand<Unit, bool> CloseCommand { get; }
+        public ReactiveCommand<RxVoid, RxVoid> ZoomInCommand { get; }
+        public ReactiveCommand<RxVoid, RxVoid> ZoomOutCommand { get; }
+        public ReactiveCommand<float, RxVoid> SetMagnificationCommand { get; }
+        public ReactiveCommand<RxVoid, bool> OnClosing { get; }
+        public ReactiveCommand<RxVoid, bool> CloseCommand { get; }
         public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
         public event AsyncEventHandler<PictureSaveEventArgs>? PictureSave;
         public event AsyncEventHandler<EventArgs>? RequestClose;
@@ -302,7 +303,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         }
 
 
-        public ReactiveCommand<Picture, Unit> OnPictureUpdate { get; }
+        public ReactiveCommand<Picture, RxVoid> OnPictureUpdate { get; }
         public event EventHandler<PictureUpdateEventArgs>? PictureUpdate;
         private void ExecutePictureUpdate(Picture picture)
         {
@@ -314,14 +315,14 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             }
         }
 
-        public ReactiveCommand<PictureArea, Unit> OnPicturePush { get; }
+        public ReactiveCommand<PictureArea, RxVoid> OnPicturePush { get; }
         public event EventHandler<PicturePushEventArgs>? PicturePush;
         private void ExecutePicturePush(PictureArea area)
         {
             PicturePush?.Invoke(this, new PicturePushEventArgs(BringPictureBuffer(), area));
         }
 
-        public ReactiveCommand<Position, Unit> OnPicturePull { get; }
+        public ReactiveCommand<Position, RxVoid> OnPicturePull { get; }
         public event EventHandler<PicturePullEventArgs>? PicturePull;
         private void ExecutePicturePull(Position position)
         {

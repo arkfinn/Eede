@@ -58,22 +58,22 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             // DragDropハンドラの登録
             AddHandler(DragDrop.DragOverEvent, ViewModel.DragOverPicture);
             AddHandler(DragDrop.DropEvent, ViewModel.DropPicture);
-            Disposable.Create(() =>
+            disposables.Add(Disposable.Create(() =>
             {
                 RemoveHandler(DragDrop.DragOverEvent, ViewModel.DragOverPicture);
                 RemoveHandler(DragDrop.DropEvent, ViewModel.DropPicture);
-            }).DisposeWith(disposables);
+            }));
 
             // Window依存の登録
             var window = TopLevel.GetTopLevel(this) as Window;
             if (window != null)
             {
                 // ViewModelのInteractionを購読し、通知が来たらウィンドウを閉じる
-                ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
+                disposables.Add(ViewModel.CloseWindowInteraction.RegisterHandler(interaction =>
                 {
                     window.Close();
                     interaction.SetOutput(Unit.Default);
-                }).DisposeWith(disposables);
+                }));
 
                 // WindowのClosingイベントを登録
                 EventHandler<WindowClosingEventArgs> closingHandler = (s, args) =>
@@ -83,7 +83,7 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
                     ViewModel.RequestCloseCommand.Execute().Subscribe();
                 };
                 window.Closing += closingHandler;
-                Disposable.Create(() => window.Closing -= closingHandler).DisposeWith(disposables);
+                disposables.Add(Disposable.Create(() => window.Closing -= closingHandler));
             }
         });
     }

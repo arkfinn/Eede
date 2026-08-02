@@ -33,6 +33,7 @@ using Eede.Application.UseCase.Settings;
 using Eede.Application.UseCase.Updates;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -98,34 +99,34 @@ public partial class MainViewModel : ViewModelBase
     public WelcomeViewModel WelcomeViewModel { get; }
 
     [ObservableAsProperty] private bool _isUpdateReady;
-    public ReactiveCommand<Unit, Unit> ApplyUpdateCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ApplyUpdateCommand { get; private set; }
 
-    public ReactiveCommand<Unit, Unit> UndoCommand => DrawingSessionViewModel.UndoCommand;
-    public ReactiveCommand<Unit, Unit> RedoCommand => DrawingSessionViewModel.RedoCommand;
-    public ReactiveCommand<IFileStorage?, Unit> LoadPictureCommand { get; private set; }
-    public ReactiveCommand<IFileStorage?, Unit> SavePictureCommand { get; private set; }
-    public ReactiveCommand<IFileStorage?, Unit> SavePictureAsCommand { get; private set; }
-    public ReactiveCommand<PictureActions, Unit> PictureActionCommand { get; private set; }
-    public ReactiveCommand<int, Unit> PutPaletteColorCommand { get; private set; }
-    public ReactiveCommand<int, Unit> GetPaletteColorCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> UndoCommand => DrawingSessionViewModel.UndoCommand;
+    public ReactiveCommand<RxVoid, RxVoid> RedoCommand => DrawingSessionViewModel.RedoCommand;
+    public ReactiveCommand<IFileStorage?, RxVoid> LoadPictureCommand { get; private set; }
+    public ReactiveCommand<IFileStorage?, RxVoid> SavePictureCommand { get; private set; }
+    public ReactiveCommand<IFileStorage?, RxVoid> SavePictureAsCommand { get; private set; }
+    public ReactiveCommand<PictureActions, RxVoid> PictureActionCommand { get; private set; }
+    public ReactiveCommand<int, RxVoid> PutPaletteColorCommand { get; private set; }
+    public ReactiveCommand<int, RxVoid> GetPaletteColorCommand { get; private set; }
 
     public Interaction<NewPictureWindowViewModel, NewPictureWindowViewModel> ShowCreateNewPictureModal { get; private set; } = new();
-    public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> CreateNewPictureCommand { get; private set; }
 
-    public ReactiveCommand<IFileStorage, Unit> LoadPaletteCommand { get; private set; }
-    public ReactiveCommand<IFileStorage, Unit> SavePaletteCommand { get; private set; }
-    public ReactiveCommand<Unit, Unit> PutBackgroundColorCommand { get; private set; }
-    public ReactiveCommand<Unit, Unit> GetBackgroundColorCommand { get; private set; }
+    public ReactiveCommand<IFileStorage, RxVoid> LoadPaletteCommand { get; private set; }
+    public ReactiveCommand<IFileStorage, RxVoid> SavePaletteCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> PutBackgroundColorCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> GetBackgroundColorCommand { get; private set; }
     public PaletteContainerViewModel PaletteContainerViewModel { get; private set; }
 
     public Interaction<ScalingDialogViewModel, ResizeContext?> ShowScalingModal { get; private set; } = new();
-    public ReactiveCommand<Unit, Unit> ScalingCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ScalingCommand { get; private set; }
 
     // Viewにウィンドウを閉じるよう通知するためのInteraction
     public Interaction<Unit, Unit> CloseWindowInteraction { get; private set; } = new();
 
     // Viewからのクローズ要求を受け取るためのコマンド
-    public ReactiveCommand<Unit, Unit> RequestCloseCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> RequestCloseCommand { get; private set; }
 
     private bool _isCloseConfirmed;
     public bool IsCloseConfirmed
@@ -156,9 +157,9 @@ public partial class MainViewModel : ViewModelBase
     private bool _isInitializing = true;
     private AppSettings? _appSettings;
 
-    public ReactiveCommand<Unit, Unit> CopyCommand { get; private set; }
-    public ReactiveCommand<Unit, Unit> CutCommand { get; private set; }
-    public ReactiveCommand<Unit, Unit> PasteCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> CopyCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> CutCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> PasteCommand { get; private set; }
 
     public MainViewModel(
         GlobalState State,

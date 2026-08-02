@@ -11,6 +11,8 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
+using RxVoid = ReactiveUI.Primitives.RxVoid;
+
 namespace Eede.Presentation.ViewModels.DataEntry;
 
 public partial class PaletteContainerViewModel : ViewModelBase
@@ -18,18 +20,18 @@ public partial class PaletteContainerViewModel : ViewModelBase
     public ObservableCollection<PaletteTabViewModel> Tabs { get; } = new();
     [Reactive] public partial PaletteTabViewModel? SelectedTab { get; set; }
 
-    public ReactiveCommand<int, Unit> ApplyColorCommand { get; }
-    public ReactiveCommand<int, Unit> FetchColorCommand { get; }
+    public ReactiveCommand<int, RxVoid> ApplyColorCommand { get; }
+    public ReactiveCommand<int, RxVoid> FetchColorCommand { get; }
 
     public event Action<ArgbColor>? OnFetchColor;
     public event Func<ArgbColor>? OnApplyColor;
 
-    public ReactiveCommand<IFileStorage?, Unit> LoadPaletteCommand { get; }
-    public ReactiveCommand<PaletteTabViewModel, Unit> SaveTabCommand { get; }
-    public ReactiveCommand<IFileStorage?, Unit> SavePaletteAsCommand { get; }
-    public ReactiveCommand<IFileStorage?, Unit> SavePaletteCommand { get; }
-    public ReactiveCommand<PaletteTabViewModel, Unit> CloseTabCommand { get; }
-    public ReactiveCommand<PaletteTabViewModel, Unit> CloseOthersCommand { get; }
+    public ReactiveCommand<IFileStorage?, RxVoid> LoadPaletteCommand { get; }
+    public ReactiveCommand<PaletteTabViewModel, RxVoid> SaveTabCommand { get; }
+    public ReactiveCommand<IFileStorage?, RxVoid> SavePaletteAsCommand { get; }
+    public ReactiveCommand<IFileStorage?, RxVoid> SavePaletteCommand { get; }
+    public ReactiveCommand<PaletteTabViewModel, RxVoid> CloseTabCommand { get; }
+    public ReactiveCommand<PaletteTabViewModel, RxVoid> CloseOthersCommand { get; }
 
     private readonly IPaletteRepository _paletteRepository;
     private readonly IPaletteSessionRepository _sessionRepository;

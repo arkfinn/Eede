@@ -18,6 +18,7 @@ using Eede.Presentation.Settings;
 using ReactiveUI;
 using System;
 using System.Reactive;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Eede.Application.Infrastructure;
@@ -89,10 +90,10 @@ public partial class DrawableCanvasViewModel : ViewModelBase
     private readonly IInteractionCoordinator _coordinator;
     private readonly IImageTransfer _identityTransfer = new IdentityImageTransfer();
 
-    public ReactiveCommand<Unit, Unit> CopyCommand { get; }
-    public ReactiveCommand<Unit, Unit> CutCommand { get; }
-    public ReactiveCommand<Unit, Unit> PasteCommand { get; }
-    public ReactiveCommand<Picture, Unit> InternalUpdateCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> CopyCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> CutCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> PasteCommand { get; }
+    public ReactiveCommand<Picture, RxVoid> InternalUpdateCommand { get; }
 
     public DrawableCanvasViewModel(
         GlobalState globalState,
@@ -334,7 +335,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
     }
     private Picture? _currentPicture = null;
 
-    public ReactiveCommand<ArgbColor, Unit> OnColorPicked { get; }
+    public ReactiveCommand<ArgbColor, RxVoid> OnColorPicked { get; }
     public event EventHandler<ColorPickedEventArgs>? ColorPicked;
     private void ExecuteColorPicked(ArgbColor color)
     {
@@ -342,7 +343,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         ColorPicked?.Invoke(this, new ColorPickedEventArgs(color));
     }
 
-    public ReactiveCommand<Picture, Unit> OnDrew { get; }
+    public ReactiveCommand<Picture, RxVoid> OnDrew { get; }
     public event Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion>? Drew;
     private void ExecuteDrew(Picture previous)
     {
@@ -373,11 +374,11 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         MyBitmap = _bitmapAdapter.ConvertToPremultipliedBitmap(_currentPicture);
     }
 
-    public ReactiveCommand<Position, Unit> DrawBeginCommand { get; }
-    public ReactiveCommand<Position, Unit> PointerRightButtonPressedCommand { get; }
-    public ReactiveCommand<Position, Unit> DrawingCommand { get; }
-    public ReactiveCommand<Position, Unit> DrawEndCommand { get; }
-    public ReactiveCommand<Unit, Unit> CanvasLeaveCommand { get; }
+    public ReactiveCommand<Position, RxVoid> DrawBeginCommand { get; }
+    public ReactiveCommand<Position, RxVoid> PointerRightButtonPressedCommand { get; }
+    public ReactiveCommand<Position, RxVoid> DrawingCommand { get; }
+    public ReactiveCommand<Position, RxVoid> DrawEndCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> CanvasLeaveCommand { get; }
 
     private void ExecuteDrawBeginAction(Position pos)
     {

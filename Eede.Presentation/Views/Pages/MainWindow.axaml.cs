@@ -23,8 +23,8 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
         {
             if (ViewModel != null)
             {
-                ViewModel.ShowCreateNewPictureModal.RegisterHandler(DoShowCreateNewFileWindowAsync).DisposeWith(disposables);
-                ViewModel.ShowScalingModal.RegisterHandler(DoShowScalingWindowAsync).DisposeWith(disposables);
+                disposables.Add(ViewModel.ShowCreateNewPictureModal.RegisterHandler(DoShowCreateNewFileWindowAsync));
+                disposables.Add(ViewModel.ShowScalingModal.RegisterHandler(DoShowScalingWindowAsync));
             }
         });
     }

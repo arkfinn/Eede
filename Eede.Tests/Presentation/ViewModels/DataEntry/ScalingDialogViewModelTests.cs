@@ -204,8 +204,7 @@ public class ScalingDialogViewModelTests
         vm.SetAnchorCommand.Execute("TopLeft").Subscribe(); // 拡大時はTopLeftのみ有効
 
         ResizeContext? result = null;
-        vm.OkCommand.Subscribe(ctx => result = ctx);
-        vm.OkCommand.Execute().Subscribe();
+        vm.OkCommand.Execute().Subscribe(ctx => result = ctx);
 
         Assert.That(result, Is.Not.Null);
         Assert.Multiple(() =>

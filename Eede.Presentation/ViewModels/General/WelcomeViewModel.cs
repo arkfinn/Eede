@@ -2,6 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
+using ReactiveUI;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -9,7 +11,6 @@ using Eede.Application.Infrastructure;
 using Eede.Application.Settings;
 using Eede.Application.UseCase.Updates;
 using Eede.Domain.SharedKernel;
-using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 
 namespace Eede.Presentation.ViewModels.General;
@@ -29,13 +30,13 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
     [ObservableAsProperty] private bool _isUpdateAvailable;
     [ObservableAsProperty] private string? _updateMessage;
 
-    public ReactiveCommand<Unit, Unit> CreateNewPictureCommand { get; }
-    public ReactiveCommand<Unit, Unit> OpenPictureCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> CreateNewPictureCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> OpenPictureCommand { get; }
     public ReactiveCommand<string, string> OpenRecentFileCommand { get; }
     public ReactiveCommand<string, string> OpenUrlCommand { get; }
-    public ReactiveCommand<Unit, Unit> LoadRecentFilesCommand { get; }
-    public ReactiveCommand<Unit, Unit> ApplyUpdateCommand { get; }
-    public ReactiveCommand<Unit, Unit> ManualCheckUpdateCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> LoadRecentFilesCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> ApplyUpdateCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> ManualCheckUpdateCommand { get; }
 
     private readonly ISettingsRepository _settingsRepository;
     private readonly IExternalBrowserService _externalBrowserService;
@@ -133,7 +134,7 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
         if (_updateService != null)
         {
             _disposables.Add(_updateService.StatusChanged
-                .ObserveOn(ReactiveUI.Avalonia.AvaloniaScheduler.Instance)
+                .ObserveOn(System.Reactive.Concurrency.ImmediateScheduler.Instance)
                 .Subscribe(status =>
                 {
                     UpdateStatus = status;

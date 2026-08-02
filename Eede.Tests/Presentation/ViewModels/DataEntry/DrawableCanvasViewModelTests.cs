@@ -21,6 +21,7 @@ using Avalonia.Media.Imaging;
 using Microsoft.Reactive.Testing;
 using ReactiveUI.Testing;
 using ReactiveUI;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 using System;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -74,84 +75,74 @@ public class DrawableCanvasViewModelTests
     [AvaloniaTest]
     public void DisplaySize_Calculation_Test()
     {
-        new TestScheduler().With(scheduler =>
-        {
-            RxSchedulers.MainThreadScheduler = scheduler;
-            var vm = CreateViewModel();
+        var scheduler = new TestScheduler();
+        var vm = CreateViewModel();
 
-            // Case 1: Initial state (usually empty picture from GlobalState)
-            vm.Magnification = new Magnification(1);
-            var picture32 = Picture.CreateEmpty(new PictureSize(32, 32));
-            vm.PictureBuffer = new DrawingBuffer(picture32);
-            scheduler.AdvanceBy(1);
-            Assert.That(vm.DisplayWidth, Is.EqualTo(32));
-            Assert.That(vm.DisplayHeight, Is.EqualTo(32));
+        // Case 1: Initial state (usually empty picture from GlobalState)
+        vm.Magnification = new Magnification(1);
+        var picture32 = Picture.CreateEmpty(new PictureSize(32, 32));
+        vm.PictureBuffer = new DrawingBuffer(picture32);
+        scheduler.AdvanceBy(1);
+        Assert.That(vm.DisplayWidth, Is.EqualTo(32));
+        Assert.That(vm.DisplayHeight, Is.EqualTo(32));
 
-            // Case 2: Change magnification to x4
-            vm.Magnification = new Magnification(4);
-            scheduler.AdvanceBy(1);
-            Assert.That(vm.DisplayWidth, Is.EqualTo(128));
-            Assert.That(vm.DisplayHeight, Is.EqualTo(128));
+        // Case 2: Change magnification to x4
+        vm.Magnification = new Magnification(4);
+        scheduler.AdvanceBy(1);
+        Assert.That(vm.DisplayWidth, Is.EqualTo(128));
+        Assert.That(vm.DisplayHeight, Is.EqualTo(128));
 
-            // Case 3: Change picture to a larger one (e.g. 2046x2048) at x1
-            vm.Magnification = new Magnification(1);
-            var largePicture = Picture.CreateEmpty(new PictureSize(2046, 2048));
-            vm.PictureBuffer = new DrawingBuffer(largePicture);
-            scheduler.AdvanceBy(1);
-            Assert.That(vm.DisplayWidth, Is.EqualTo(2046));
-            Assert.That(vm.DisplayHeight, Is.EqualTo(2048));
+        // Case 3: Change picture to a larger one (e.g. 2046x2048) at x1
+        vm.Magnification = new Magnification(1);
+        var largePicture = Picture.CreateEmpty(new PictureSize(2046, 2048));
+        vm.PictureBuffer = new DrawingBuffer(largePicture);
+        scheduler.AdvanceBy(1);
+        Assert.That(vm.DisplayWidth, Is.EqualTo(2046));
+        Assert.That(vm.DisplayHeight, Is.EqualTo(2048));
 
-            // Case 4: Large picture at x2
-            vm.Magnification = new Magnification(2);
-            scheduler.AdvanceBy(1);
-            Assert.That(vm.DisplayWidth, Is.EqualTo(4092));
-            Assert.That(vm.DisplayHeight, Is.EqualTo(4096));
-        });
+        // Case 4: Large picture at x2
+        vm.Magnification = new Magnification(2);
+        scheduler.AdvanceBy(1);
+        Assert.That(vm.DisplayWidth, Is.EqualTo(4092));
+        Assert.That(vm.DisplayHeight, Is.EqualTo(4096));
     }
 
     [AvaloniaTest]
     public void SelectingArea_Calculation_Test()
     {
-        new TestScheduler().With(scheduler =>
-        {
-            RxSchedulers.MainThreadScheduler = scheduler;
-            var vm = CreateViewModel();
-            vm.Magnification = new Magnification(4);
-            vm.SelectingArea = new PictureArea(new Position(10, 20), new PictureSize(30, 40));
+        var scheduler = new TestScheduler();
+        var vm = CreateViewModel();
+        vm.Magnification = new Magnification(4);
+        vm.SelectingArea = new PictureArea(new Position(10, 20), new PictureSize(30, 40));
 
-            scheduler.AdvanceBy(1);
+        scheduler.AdvanceBy(1);
 
-            // 10 * 4 = 40, 20 * 4 = 80
-            Assert.That(vm.SelectingThickness, Is.EqualTo(new Thickness(40, 80, 0, 0)));
-            // 30 * 4 = 120, 40 * 4 = 160
-            Assert.That(vm.SelectingSize.Width, Is.EqualTo(120));
-            Assert.That(vm.SelectingSize.Height, Is.EqualTo(160));
-        });
+        // 10 * 4 = 40, 20 * 4 = 80
+        Assert.That(vm.SelectingThickness, Is.EqualTo(new Thickness(40, 80, 0, 0)));
+        // 30 * 4 = 120, 40 * 4 = 160
+        Assert.That(vm.SelectingSize.Width, Is.EqualTo(120));
+        Assert.That(vm.SelectingSize.Height, Is.EqualTo(160));
     }
 
     [AvaloniaTest]
     public void Preview_Calculation_Test()
     {
-        new TestScheduler().With(scheduler =>
-        {
-            RxSchedulers.MainThreadScheduler = scheduler;
-            var vm = CreateViewModel();
-            vm.Magnification = new Magnification(2);
-            vm.PreviewPosition = new Position(5, 15);
-            vm.PreviewPixels = Picture.CreateEmpty(new PictureSize(10, 10));
+        var scheduler = new TestScheduler();
+        var vm = CreateViewModel();
+        vm.Magnification = new Magnification(2);
+        vm.PreviewPosition = new Position(5, 15);
+        vm.PreviewPixels = Picture.CreateEmpty(new PictureSize(10, 10));
 
-            scheduler.AdvanceBy(1);
+        scheduler.AdvanceBy(1);
 
-            // 5 * 2 = 10, 15 * 2 = 30
-            Assert.That(vm.PreviewThickness, Is.EqualTo(new Thickness(10, 30, 0, 0)));
-            // 10 * 2 = 20
-            Assert.That(vm.PreviewSize.Width, Is.EqualTo(20));
-            Assert.That(vm.PreviewSize.Height, Is.EqualTo(20));
+        // 5 * 2 = 10, 15 * 2 = 30
+        Assert.That(vm.PreviewThickness, Is.EqualTo(new Thickness(10, 30, 0, 0)));
+        // 10 * 2 = 20
+        Assert.That(vm.PreviewSize.Width, Is.EqualTo(20));
+        Assert.That(vm.PreviewSize.Height, Is.EqualTo(20));
 
-            // Raw
-            Assert.That(vm.RawPreviewThickness, Is.EqualTo(new Thickness(5, 15, 0, 0)));
-            Assert.That(vm.RawPreviewSize.Width, Is.EqualTo(10));
-        });
+        // Raw
+        Assert.That(vm.RawPreviewSize.Width, Is.EqualTo(10));
     }
 
     [AvaloniaTest]
@@ -239,8 +230,8 @@ public class DrawableCanvasViewModelTests
             It.IsAny<bool>(),
             It.IsAny<PictureSize>(),
             It.IsAny<Action<ArgbColor>>(),
-            It.IsAny<ReactiveCommand<Picture, Unit>>()))
-            .Callback<Position, DrawingBuffer, IDrawStyle, bool, PictureSize, Action<ArgbColor>, ReactiveCommand<Picture, Unit>>(
+            It.IsAny<ReactiveCommand<Picture, RxVoid>>()))
+            .Callback<Position, DrawingBuffer, IDrawStyle, bool, PictureSize, Action<ArgbColor>, ReactiveCommand<Picture, RxVoid>>(
             (p, b, s, anim, grid, callback, cmd) => callback(expectedColor));
 
         vm.PointerRightButtonPressedCommand.Execute(pos).Subscribe();
@@ -251,41 +242,38 @@ public class DrawableCanvasViewModelTests
     [AvaloniaTest]
     public void GridVisibility_Logic_Test()
     {
-        new TestScheduler().With(scheduler =>
+        var scheduler = new TestScheduler();
+        var vm = CreateViewModel();
+
+        // Default: All False
+        Assert.Multiple(() =>
         {
-            RxSchedulers.MainThreadScheduler = scheduler;
-            var vm = CreateViewModel();
-
-            // Default: All False
-            Assert.Multiple(() =>
-            {
-                Assert.That(vm.IsShowPixelGrid, Is.False);
-                Assert.That(vm.IsShowCursorGrid, Is.False);
-                Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False);
-                Assert.That(vm.IsCursorGridEffectivelyVisible, Is.False);
-            });
-
-            // Case 1: Enable Pixel Grid at x1 -> effectively hidden
-            vm.Magnification = new Magnification(1);
-            vm.IsShowPixelGrid = true;
-            scheduler.AdvanceBy(1);
-            Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False, "Pixel grid should be effectively hidden below x4 even if ON");
-
-            // Case 2: Increase magnification to x4 -> effectively visible
-            vm.Magnification = new Magnification(4);
-            scheduler.AdvanceBy(1);
-            Assert.That(vm.IsPixelGridEffectivelyVisible, Is.True, "Pixel grid should be effectively visible at x4 or higher when ON");
-
-            // Case 3: Disable Pixel Grid at x4 -> effectively hidden
-            vm.IsShowPixelGrid = false;
-            scheduler.AdvanceBy(1);
+            Assert.That(vm.IsShowPixelGrid, Is.False);
+            Assert.That(vm.IsShowCursorGrid, Is.False);
             Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False);
-
-            // Case 4: Enable Cursor Grid at x1 -> effectively visible
-            vm.Magnification = new Magnification(1);
-            vm.IsShowCursorGrid = true;
-            scheduler.AdvanceBy(1);
-            Assert.That(vm.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be effectively visible at any magnification when ON");
+            Assert.That(vm.IsCursorGridEffectivelyVisible, Is.False);
         });
+
+        // Case 1: Enable Pixel Grid at x1 -> effectively hidden
+        vm.Magnification = new Magnification(1);
+        vm.IsShowPixelGrid = true;
+        scheduler.AdvanceBy(1);
+        Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False, "Pixel grid should be effectively hidden below x4 even if ON");
+
+        // Case 2: Increase magnification to x4 -> effectively visible
+        vm.Magnification = new Magnification(4);
+        scheduler.AdvanceBy(1);
+        Assert.That(vm.IsPixelGridEffectivelyVisible, Is.True, "Pixel grid should be effectively visible at x4 or higher when ON");
+
+        // Case 3: Disable Pixel Grid at x4 -> effectively hidden
+        vm.IsShowPixelGrid = false;
+        scheduler.AdvanceBy(1);
+        Assert.That(vm.IsPixelGridEffectivelyVisible, Is.False);
+
+        // Case 4: Enable Cursor Grid at x1 -> effectively visible
+        vm.Magnification = new Magnification(1);
+        vm.IsShowCursorGrid = true;
+        scheduler.AdvanceBy(1);
+        Assert.That(vm.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be effectively visible at any magnification when ON");
     }
 }

@@ -3,6 +3,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.History;
 using Eede.Domain.SharedKernel;
 using ReactiveUI;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 using ReactiveUI.SourceGenerators;
 using System;
 using System.Reactive;
@@ -17,8 +18,8 @@ namespace Eede.Presentation.ViewModels.Pages
 
         [Reactive] public partial DrawingSession CurrentSession { get; set; }
 
-        public ReactiveCommand<Unit, Unit> UndoCommand { get; }
-        public ReactiveCommand<Unit, Unit> RedoCommand { get; }
+        public ReactiveCommand<RxVoid, RxVoid> UndoCommand { get; }
+        public ReactiveCommand<RxVoid, RxVoid> RedoCommand { get; }
 
         public event EventHandler<UndoResult>? Undone;
         public event EventHandler<RedoResult>? Redone;

@@ -31,7 +31,7 @@ public class BitmapManagementTests
     [SetUp]
     public void Setup()
     {
-        RxSchedulers.MainThreadScheduler = ReactiveUI.Avalonia.AvaloniaScheduler.Instance;
+        // RxSchedulers.MainThreadScheduler = RxApp.MainThreadScheduler;
         _globalState = new GlobalState();
         AnimationPatternsProvider patternsProvider = new();
         _mockBitmapAdapter = new Mock<IBitmapAdapter<Bitmap>>();

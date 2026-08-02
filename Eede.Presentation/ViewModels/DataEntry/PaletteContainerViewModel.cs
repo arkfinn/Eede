@@ -45,17 +45,24 @@ public partial class PaletteContainerViewModel : ViewModelBase
         Tabs.Add(new PaletteTabViewModel(Palette.Create()));
 
         var sessionPaths = _sessionRepository.Load();
-        foreach (var path in sessionPaths)
+        _ = Task.Run(() =>
         {
-            try
+            foreach (var path in sessionPaths)
             {
-                if (System.IO.File.Exists(path))
+                try
                 {
-                    Tabs.Add(new PaletteTabViewModel(_paletteRepository.Find(path), path));
+                    if (System.IO.File.Exists(path))
+                    {
+                        var palette = _paletteRepository.Find(path);
+                        global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        {
+                            Tabs.Add(new PaletteTabViewModel(palette, path));
+                        });
+                    }
                 }
+                catch { /* Ignore invalid session files */ }
             }
-            catch { /* Ignore invalid session files */ }
-        }
+        });
 
         SelectedTab = Tabs[0];
 

@@ -12,6 +12,7 @@ using Eede.Domain.SharedKernel;
 using ReactiveUI;
 using System;
 using System.Reactive;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 
 namespace Eede.Presentation.Services;
 
@@ -152,7 +153,7 @@ public class InteractionCoordinator : IInteractionCoordinator
 
     private bool IsOperating => CurrentBuffer != null && (CurrentBuffer.IsDrawing() || _interactionSession?.SelectionState is DraggingState or RegionSelectingState or AnimationEditingState or ResizingState);
 
-    public void PointerBegin(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, PenStyle penStyle, bool isShift, bool isAnimationMode, PictureSize gridSize, ReactiveCommand<Picture, Unit> internalUpdateCommand)
+    public void PointerBegin(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, PenStyle penStyle, bool isShift, bool isAnimationMode, PictureSize gridSize, ReactiveCommand<Picture, RxVoid> internalUpdateCommand)
     {
         _lastMousePosition = pos;
         var canvasPos = new Position(_magnification.Minify(pos.X), _magnification.Minify(pos.Y));
@@ -288,7 +289,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         NotifyStateChanged();
     }
 
-    public void PointerRightButtonPressed(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, Action<ArgbColor> colorPickedAction, ReactiveCommand<Picture, Unit> internalUpdateCommand)
+    public void PointerRightButtonPressed(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, Action<ArgbColor> colorPickedAction, ReactiveCommand<Picture, RxVoid> internalUpdateCommand)
     {
         _lastMousePosition = pos;
         var currentBuffer = CurrentBuffer;
@@ -343,7 +344,7 @@ public class InteractionCoordinator : IInteractionCoordinator
         NotifyStateChanged();
     }
 
-    public void PointerLeftButtonReleased(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, PenStyle penStyle, bool isShift, ReactiveCommand<Picture, Unit> internalUpdateCommand)
+    public void PointerLeftButtonReleased(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, PenStyle penStyle, bool isShift, ReactiveCommand<Picture, RxVoid> internalUpdateCommand)
     {
         _lastMousePosition = pos;
         var canvasPos = new Position(_magnification.Minify(pos.X), _magnification.Minify(pos.Y));

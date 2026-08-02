@@ -4,6 +4,7 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using System;
 using System.Reactive;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 using System.Reactive.Linq;
 
 namespace Eede.Presentation.ViewModels.DataEntry
@@ -36,10 +37,10 @@ namespace Eede.Presentation.ViewModels.DataEntry
         public bool IsBottomCenterEnabled => IsHorizontalShrink && IsVerticalShrink;
         public bool IsBottomRightEnabled => IsHorizontalShrink && IsVerticalShrink;
 
-        public ReactiveCommand<Unit, ResizeContext> OkCommand { get; }
-        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
-        public ReactiveCommand<double, Unit> ApplyPreset { get; }
-        public ReactiveCommand<string, Unit> SetAnchorCommand { get; }
+        public ReactiveCommand<RxVoid, ResizeContext> OkCommand { get; }
+        public ReactiveCommand<RxVoid, RxVoid> CancelCommand { get; }
+        public ReactiveCommand<double, RxVoid> ApplyPreset { get; }
+        public ReactiveCommand<string, RxVoid> SetAnchorCommand { get; }
 
         private bool isUpdating = false;
 
@@ -101,7 +102,7 @@ namespace Eede.Presentation.ViewModels.DataEntry
                 VerticalAlignment
             ));
 
-            CancelCommand = ReactiveCommand.Create(() => Unit.Default);
+            CancelCommand = ReactiveCommand.Create(() => { });
         }
 
         private void RefreshStates()

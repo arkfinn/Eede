@@ -1,28 +1,42 @@
 using Eede.Domain.SharedKernel;
 using ReactiveUI;
-using ReactiveUI.SourceGenerators;
 using System;
 using System.Reactive;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 
 namespace Eede.Presentation.ViewModels.Pages
 {
-
-    public partial class NewPictureWindowViewModel : ViewModelBase
+    public class NewPictureWindowViewModel : ViewModelBase
     {
-        [Reactive] public partial PictureSize Size { get; set; }
+        public PictureSize Size
+        {
+            get => new(_width, _height);
+            set
+            {
+                _width = value.Width;
+                _height = value.Height;
+                this.RaisePropertyChanged(nameof(Size));
+                this.RaisePropertyChanged(nameof(Width));
+                this.RaisePropertyChanged(nameof(Height));
+            }
+        }
+
+        private int _width = 32;
         public int Width
         {
             get => Size.Width;
             set => Size = new(value, Size.Height);
         }
+
+        private int _height = 32;
         public int Height
         {
             get => Size.Height;
             set => Size = new(Size.Width, value);
         }
 
-        public ReactiveCommand<Unit, Unit> ConfirmCommand { get; }
-        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
+        public ReactiveCommand<RxVoid, RxVoid> ConfirmCommand { get; }
+        public ReactiveCommand<RxVoid, RxVoid> CancelCommand { get; }
 
         public bool Result { get; private set; }
         public Action? Close { get; set; }

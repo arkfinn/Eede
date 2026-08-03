@@ -12,11 +12,10 @@ namespace Eede.Application.Tests.Pictures
         [Test]
         public void PicturePulledEventArgsTest()
         {
-            Picture b = Picture.CreateEmpty(new PictureSize(10, 10));
-            PicturePushEventArgs p = new(b, new PictureArea(new Position(2, 2), new PictureSize(3, 3)));
-            Picture image = p.CutOutImage();
-
-            Assert.That(Tuple.Create(image.Size.Width, image.Size.Height), Is.EqualTo(Tuple.Create(3, 3)));
+            Picture b = Picture.CreateEmpty(new PictureSize(1, 1));
+            PicturePullEventArgs p = new(b, new Position(2, 2));
+            Assert.That(p.Picture, Is.EqualTo(b));
+            Assert.That(p.Position, Is.EqualTo(new Position(2, 2)));
         }
 
         [Test]
@@ -24,7 +23,7 @@ namespace Eede.Application.Tests.Pictures
         {
             _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                PicturePushEventArgs p = new(null, new PictureArea(new Position(2, 2), new PictureSize(3, 3)));
+                PicturePullEventArgs h = new(null, new Position(2, 2));
             });
         }
     }

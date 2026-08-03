@@ -22,20 +22,10 @@ public abstract class ImageBlenderBase : IImageBlender
 
         ReadOnlySpan<byte> fromSpan = from.AsSpan();
 
-        for (int y = startY; y < maxY; y++)
-        {
-            int toPos = (startX * 4) + (to.Stride * y);
-            int fromPos = ((startX - toPosition.X) * 4) + (from.Stride * (y - toPosition.Y));
+        ExecuteBlend(fromSpan, toPixels, from.Stride, to.Stride, startX, startY, maxX, maxY, toPosition);
 
-            for (int x = startX; x < maxX; x++)
-            {
-                BlendInternal(fromSpan, toPixels, fromPos, toPos);
-                toPos += 4;
-                fromPos += 4;
-            }
-        }
         return Picture.Create(to.Size, toPixels);
     }
 
-    protected abstract void BlendInternal(ReadOnlySpan<byte> fromSpan, byte[] toPixels, int fromPos, int toPos);
+    protected abstract void ExecuteBlend(ReadOnlySpan<byte> fromSpan, byte[] toPixels, int fromStride, int toStride, int startX, int startY, int maxX, int maxY, Position toPosition);
 }

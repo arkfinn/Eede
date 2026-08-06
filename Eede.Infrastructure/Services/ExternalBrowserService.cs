@@ -22,11 +22,13 @@ public class ExternalBrowserService : IExternalBrowserService
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            Process.Start(new ProcessStartInfo
+            var psi = new ProcessStartInfo
             {
-                FileName = url,
-                UseShellExecute = true
-            });
+                FileName = "explorer",
+                UseShellExecute = false
+            };
+            psi.ArgumentList.Add(url);
+            Process.Start(psi);
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {

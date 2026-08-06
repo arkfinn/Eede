@@ -6,7 +6,7 @@ namespace PerfBench
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<DirectImageTransferBenchmark>();
+            var summary = BenchmarkRunner.Run<AnimationWaitTimeBenchmark>();
         }
     }
 }

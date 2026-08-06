@@ -165,7 +165,12 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
             {
                 if (SelectedPattern != null)
                 {
-                    var newFrames = SelectedPattern.Frames.Select(f => new AnimationFrame(f.CellIndex, waitTime)).ToList();
+                    var count = SelectedPattern.Frames.Count;
+                    var newFrames = new AnimationFrame[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        newFrames[i] = new AnimationFrame(SelectedPattern.Frames[i].CellIndex, waitTime);
+                    }
                     var newPattern = new AnimationPattern(SelectedPattern.Name, newFrames, SelectedPattern.Grid);
                     UpdatePattern(newPattern);
                 }

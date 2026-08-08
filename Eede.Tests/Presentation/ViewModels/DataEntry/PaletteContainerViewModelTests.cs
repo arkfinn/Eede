@@ -110,7 +110,7 @@ public class PaletteContainerViewModelTests
     public void Constructor_ShouldLoadSessionPaths()
     {
         var filePath = @"C:\session_test.aact";
-        _paletteSessionRepositoryMock.Setup(x => x.Load()).Returns(new[] { filePath });
+        _paletteSessionRepositoryMock.Setup(x => x.LoadAsync()).Returns(Task.FromResult((IEnumerable<string>)new[] { filePath }));
         _paletteRepositoryMock.Setup(x => x.Find(filePath)).Returns(Palette.Create());
         
         // Mock File.Exists is hard. But let's assume it exists if I don't mock it? 
@@ -119,6 +119,6 @@ public class PaletteContainerViewModelTests
         
         var sut = new PaletteContainerViewModel(_paletteRepositoryMock.Object, _paletteSessionRepositoryMock.Object);
         
-        _paletteSessionRepositoryMock.Verify(x => x.Load(), Times.Once);
+        _paletteSessionRepositoryMock.Verify(x => x.LoadAsync(), Times.Once);
     }
 }

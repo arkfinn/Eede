@@ -28,7 +28,7 @@ public class PaletteSessionRepository : IPaletteSessionRepository
         await File.WriteAllTextAsync(_filePath, json);
     }
 
-    public IEnumerable<string> Load()
+    public async Task<IEnumerable<string>> LoadAsync()
     {
         if (!File.Exists(_filePath))
         {
@@ -37,8 +37,8 @@ public class PaletteSessionRepository : IPaletteSessionRepository
 
         try
         {
-            var json = File.ReadAllText(_filePath);
-            return JsonSerializer.Deserialize<IEnumerable<string>>(json) ?? Array.Empty<string>();
+            using var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+            return await JsonSerializer.DeserializeAsync<IEnumerable<string>>(fs) ?? Array.Empty<string>();
         }
         catch
         {

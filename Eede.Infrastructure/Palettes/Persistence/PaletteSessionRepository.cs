@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Eede.Infrastructure.Palettes.Persistence;
 
@@ -15,7 +16,7 @@ public class PaletteSessionRepository : IPaletteSessionRepository
         _filePath = filePath;
     }
 
-    public void Save(IEnumerable<string> filePaths)
+    public async Task SaveAsync(IEnumerable<string> filePaths)
     {
         var directory = Path.GetDirectoryName(_filePath);
         if (directory != null && !Directory.Exists(directory))
@@ -24,7 +25,7 @@ public class PaletteSessionRepository : IPaletteSessionRepository
         }
 
         var json = JsonSerializer.Serialize(filePaths);
-        File.WriteAllText(_filePath, json);
+        await File.WriteAllTextAsync(_filePath, json);
     }
 
     public IEnumerable<string> Load()

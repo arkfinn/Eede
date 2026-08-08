@@ -46,9 +46,9 @@ public partial class PaletteContainerViewModel : ViewModelBase
         // 一時パレットを最初に追加
         Tabs.Add(new PaletteTabViewModel(Palette.Create()));
 
-        var sessionPaths = _sessionRepository.Load();
-        _ = Task.Run(() =>
+        _ = Task.Run(async () =>
         {
+            var sessionPaths = await _sessionRepository.LoadAsync();
             foreach (var path in sessionPaths)
             {
                 try

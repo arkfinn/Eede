@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 
 using RxVoid = ReactiveUI.Primitives.RxVoid;
@@ -35,6 +36,7 @@ public partial class PaletteContainerViewModel : ViewModelBase
 
     private readonly IPaletteRepository _paletteRepository;
     private readonly IPaletteSessionRepository _sessionRepository;
+    private readonly SemaphoreSlim _saveSemaphore = new(1, 1);
 
     public PaletteContainerViewModel(IPaletteRepository paletteRepository, IPaletteSessionRepository sessionRepository)
     {
@@ -79,10 +81,23 @@ public partial class PaletteContainerViewModel : ViewModelBase
         Tabs.CollectionChanged += (s, e) => SaveSession();
     }
 
-    private void SaveSession()
+    private async void SaveSession()
     {
-        var paths = Tabs.Where(t => t.FilePath != null).Select(t => t.FilePath!);
-        _sessionRepository.Save(paths);
+        var paths = Tabs.Where(t => t.FilePath != null).Select(t => t.FilePath!).ToList();
+
+        await _saveSemaphore.WaitAsync();
+        try
+        {
+            await _sessionRepository.SaveAsync(paths);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine($"Failed to save session: {ex.Message}");
+        }
+        finally
+        {
+            _saveSemaphore.Release();
+        }
     }
 
     private void ExecuteApplyColor(int number)

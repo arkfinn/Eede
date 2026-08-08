@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Eede.Application.Infrastructure;
 
 public interface IPaletteSessionRepository
 {
-    void Save(IEnumerable<string> filePaths);
+    Task SaveAsync(IEnumerable<string> filePaths);
     IEnumerable<string> Load();
 }

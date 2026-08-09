@@ -165,7 +165,7 @@ namespace Eede.Domain.ImageEditing
                 area,
                 pictureToCompare.CutOut(area),
                 nextPicture.CutOut(area)
-            )).ToList();
+            )).ToList().AsReadOnly();
 
             return new DrawingSession(
                 new DrawingBuffer(nextPicture),
@@ -221,9 +221,7 @@ namespace Eede.Domain.ImageEditing
                     diffItem.SelectingArea,
                     null,
                     newUndoStack,
-                    RedoStack.Push(new DiffHistoryItem(
-                        diffItem.Diffs.Select(d => new PictureDiff(d.Area, d.After, d.Before)).ToList(),
-                        SelectingArea)));
+                    RedoStack.Push(diffItem.Reverse(SelectingArea)));
                 return new UndoResult(nextSession, diffItem);
             }
             else if (historyItem is DockActiveHistoryItem dockItem)
@@ -269,9 +267,7 @@ namespace Eede.Domain.ImageEditing
                     new DrawingBuffer(restoredPicture),
                     diffItem.SelectingArea,
                     null,
-                    UndoStack.Push(new DiffHistoryItem(
-                        diffItem.Diffs.Select(d => new PictureDiff(d.Area, d.After, d.Before)).ToList(),
-                        SelectingArea)),
+                    UndoStack.Push(diffItem.Reverse(SelectingArea)),
                     newRedoStack);
                 return new RedoResult(nextSession, diffItem);
             }

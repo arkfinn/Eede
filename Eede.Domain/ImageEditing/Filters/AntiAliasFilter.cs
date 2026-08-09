@@ -42,18 +42,34 @@ public unsafe class AntiAliasFilter
         bool[] edgeHoriz = new bool[width * height];
         bool[] edgeVert = new bool[width * height];
 
+        float[] edgeValues = new float[width * height];
+
         fixed (byte* srcPtr = sourceData)
         fixed (byte* dstPtr = resultData)
         fixed (bool* hEdgePtr = edgeHoriz)
         fixed (bool* vEdgePtr = edgeVert)
+        fixed (float* edgeValuesPtr = edgeValues)
         {
+            PrecalculateEdgeValues(srcPtr, width, height, stride, edgeValuesPtr);
+
             DetectEdges(srcPtr, width, height, stride, hEdgePtr, vEdgePtr);
             
-            ApplyVerticalMLAA(srcPtr, dstPtr, width, height, stride, hEdgePtr, vEdgePtr);
-            ApplyHorizontalMLAA(srcPtr, dstPtr, width, height, stride, hEdgePtr, vEdgePtr);
+            ApplyVerticalMLAA(srcPtr, dstPtr, width, height, stride, hEdgePtr, vEdgePtr, edgeValuesPtr);
+            ApplyHorizontalMLAA(srcPtr, dstPtr, width, height, stride, hEdgePtr, vEdgePtr, edgeValuesPtr);
         }
 
         return Picture.Create(source.Size, resultData);
+    }
+
+    private void PrecalculateEdgeValues(byte* srcPtr, int width, int height, int stride, float* edgeValuesPtr)
+    {
+        Parallel.For(0, height, y =>
+        {
+            for (int x = 0; x < width; x++)
+            {
+                edgeValuesPtr[y * width + x] = Strategy.GetValueForEdgeDetection(srcPtr + y * stride + x * 4);
+            }
+        });
     }
 
     private void DetectEdges(byte* srcPtr, int width, int height, int stride, bool* hEdgePtr, bool* vEdgePtr)
@@ -74,7 +90,7 @@ public unsafe class AntiAliasFilter
         });
     }
 
-    private void ApplyVerticalMLAA(byte* srcPtr, byte* dstPtr, int width, int height, int stride, bool* hEdgePtr, bool* vEdgePtr)
+    private void ApplyVerticalMLAA(byte* srcPtr, byte* dstPtr, int width, int height, int stride, bool* hEdgePtr, bool* vEdgePtr, float* edgeValuesPtr)
     {
         for (int x = 0; x < width - 1; x++)
         {
@@ -112,13 +128,13 @@ public unsafe class AntiAliasFilter
 
                             if (weightStart != 0)
                             {
-                                if (d1 == -1) ApplyAdaptiveBlend(srcPtr, dstPtr, x, yStart + i, x + 1, yStart + i, width, height, stride, Math.Abs(weightStart));
-                                else if (d1 == 1) ApplyAdaptiveBlend(srcPtr, dstPtr, x + 1, yStart + i, x, yStart + i, width, height, stride, Math.Abs(weightStart));
+                                if (d1 == -1) ApplyAdaptiveBlend(srcPtr, dstPtr, x, yStart + i, x + 1, yStart + i, width, height, stride, Math.Abs(weightStart), edgeValuesPtr);
+                                else if (d1 == 1) ApplyAdaptiveBlend(srcPtr, dstPtr, x + 1, yStart + i, x, yStart + i, width, height, stride, Math.Abs(weightStart), edgeValuesPtr);
                             }
                             if (weightEnd != 0)
                             {
-                                if (d2 == -1) ApplyAdaptiveBlend(srcPtr, dstPtr, x, yStart + i, x + 1, yStart + i, width, height, stride, Math.Abs(weightEnd));
-                                else if (d2 == 1) ApplyAdaptiveBlend(srcPtr, dstPtr, x + 1, yStart + i, x, yStart + i, width, height, stride, Math.Abs(weightEnd));
+                                if (d2 == -1) ApplyAdaptiveBlend(srcPtr, dstPtr, x, yStart + i, x + 1, yStart + i, width, height, stride, Math.Abs(weightEnd), edgeValuesPtr);
+                                else if (d2 == 1) ApplyAdaptiveBlend(srcPtr, dstPtr, x + 1, yStart + i, x, yStart + i, width, height, stride, Math.Abs(weightEnd), edgeValuesPtr);
                             }
                         }
                     }
@@ -128,7 +144,7 @@ public unsafe class AntiAliasFilter
         }
     }
 
-    private void ApplyHorizontalMLAA(byte* srcPtr, byte* dstPtr, int width, int height, int stride, bool* hEdgePtr, bool* vEdgePtr)
+    private void ApplyHorizontalMLAA(byte* srcPtr, byte* dstPtr, int width, int height, int stride, bool* hEdgePtr, bool* vEdgePtr, float* edgeValuesPtr)
     {
         for (int y = 0; y < height - 1; y++)
         {
@@ -166,13 +182,13 @@ public unsafe class AntiAliasFilter
 
                             if (weightStart != 0)
                             {
-                                if (d1 == -1) ApplyAdaptiveBlend(srcPtr, dstPtr, xStart + i, y, xStart + i, y + 1, width, height, stride, Math.Abs(weightStart));
-                                else if (d1 == 1) ApplyAdaptiveBlend(srcPtr, dstPtr, xStart + i, y + 1, xStart + i, y, width, height, stride, Math.Abs(weightStart));
+                                if (d1 == -1) ApplyAdaptiveBlend(srcPtr, dstPtr, xStart + i, y, xStart + i, y + 1, width, height, stride, Math.Abs(weightStart), edgeValuesPtr);
+                                else if (d1 == 1) ApplyAdaptiveBlend(srcPtr, dstPtr, xStart + i, y + 1, xStart + i, y, width, height, stride, Math.Abs(weightStart), edgeValuesPtr);
                             }
                             if (weightEnd != 0)
                             {
-                                if (d2 == -1) ApplyAdaptiveBlend(srcPtr, dstPtr, xStart + i, y, xStart + i, y + 1, width, height, stride, Math.Abs(weightEnd));
-                                else if (d2 == 1) ApplyAdaptiveBlend(srcPtr, dstPtr, xStart + i, y + 1, xStart + i, y, width, height, stride, Math.Abs(weightEnd));
+                                if (d2 == -1) ApplyAdaptiveBlend(srcPtr, dstPtr, xStart + i, y, xStart + i, y + 1, width, height, stride, Math.Abs(weightEnd), edgeValuesPtr);
+                                else if (d2 == 1) ApplyAdaptiveBlend(srcPtr, dstPtr, xStart + i, y + 1, xStart + i, y, width, height, stride, Math.Abs(weightEnd), edgeValuesPtr);
                             }
                         }
                     }
@@ -182,9 +198,9 @@ public unsafe class AntiAliasFilter
         }
     }
 
-    private void ApplyAdaptiveBlend(byte* srcPtr, byte* dstPtr, int xT, int yT, int xN, int yN, int width, int height, int stride, float weight)
+    private void ApplyAdaptiveBlend(byte* srcPtr, byte* dstPtr, int xT, int yT, int xN, int yN, int width, int height, int stride, float weight, float* edgeValuesPtr)
     {
-        int countT = CountSimilarNeighbors(srcPtr, xT, yT, width, height, stride);
+        int countT = CountSimilarNeighbors(xT, yT, width, height, edgeValuesPtr);
         
         float finalWeight = weight;
         if (countT <= 3) finalWeight *= 0.35f;
@@ -193,10 +209,9 @@ public unsafe class AntiAliasFilter
         Strategy.Blend(srcPtr, dstPtr, xT, yT, xN, yN, stride, finalWeight);
     }
 
-    private int CountSimilarNeighbors(byte* ptr, int x, int y, int width, int height, int stride)
+    private int CountSimilarNeighbors(int x, int y, int width, int height, float* edgeValuesPtr)
     {
-        byte* pRef = ptr + y * stride + x * 4;
-        float refVal = Strategy.GetValueForEdgeDetection(pRef);
+        float refVal = edgeValuesPtr[y * width + x];
         int count = 0;
         for (int dy = -1; dy <= 1; dy++)
         {
@@ -206,8 +221,7 @@ public unsafe class AntiAliasFilter
                 int nx = x + dx, ny = y + dy;
                 if (nx >= 0 && nx < width && ny >= 0 && ny < height)
                 {
-                    byte* pCur = ptr + ny * stride + nx * 4;
-                    if (Math.Abs(Strategy.GetValueForEdgeDetection(pCur) - refVal) < Threshold)
+                    if (Math.Abs(edgeValuesPtr[ny * width + nx] - refVal) < Threshold)
                     {
                         count++;
                     }

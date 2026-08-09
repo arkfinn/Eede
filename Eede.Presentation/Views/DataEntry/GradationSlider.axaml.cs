@@ -199,7 +199,6 @@ namespace Eede.Presentation.Views.DataEntry
         }
         private void UpdateValueByPositionY(double value)
         {
-            Console.WriteLine($"Height: {Height}, TickPolygon.Height: {TickPolygon.Height}, Mouse Y: {value}");
             Value = (int)(MaxValue - ((value - (TickPolygon.Height / 2)) / (Height - TickPolygon.Height) * (MaxValue - MinValue)));
         }
 

@@ -179,7 +179,10 @@ public class AvaloniaClipboard : IClipboard
             var bitmap = await dataTransfer.TryGetBitmapAsync();
             hasBitmap = (bitmap != null);
         }
-        catch {}
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine($"ContainsImageAsync: TryGetBitmapAsync error: {ex.Message}");
+        }
 
         bool containsFile = dataTransfer.Contains(DataFormat.File);
 
@@ -205,8 +208,9 @@ public class AvaloniaClipboard : IClipboard
                     {
                         tcs.SetResult(System.Windows.Forms.Clipboard.ContainsImage());
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        System.Diagnostics.Trace.WriteLine($"ContainsImageAsync: Windows Forms Clipboard check error: {ex.Message}");
                         tcs.SetResult(false);
                     }
                 });
@@ -214,7 +218,10 @@ public class AvaloniaClipboard : IClipboard
                 thread.Start();
                 result = await tcs.Task;
             }
-            catch {}
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"ContainsImageAsync: Fallback thread error: {ex.Message}");
+            }
         }
 
         return result;

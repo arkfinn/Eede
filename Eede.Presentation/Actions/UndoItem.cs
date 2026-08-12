@@ -14,11 +14,6 @@ namespace Eede.Presentation.Actions
             RedoAction = redoAction ?? throw new ArgumentNullException(nameof(redoAction));
         }
 
-        public void Dispose()
-        {
-            // nothing
-        }
-
         public void Redo()
         {
             RedoAction.Invoke();

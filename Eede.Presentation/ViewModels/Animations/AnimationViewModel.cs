@@ -267,8 +267,15 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
             var uri = await storage.SaveAnimationFilePickerAsync();
             if (uri == null) return;
 
-            var json = JsonSerializer.Serialize(SelectedPattern);
-            await _fileSystem.WriteAllTextAsync(uri.LocalPath, json);
+            try
+            {
+                var json = JsonSerializer.Serialize(SelectedPattern);
+                await _fileSystem.WriteAllTextAsync(uri.LocalPath, json);
+            }
+            catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            {
+                System.Diagnostics.Trace.WriteLine($"Failed to export animation file: {ex.GetType().Name}");
+            }
         });
 
         ImportCommand = ReactiveCommand.CreateFromTask<IFileStorage>(async storage =>
@@ -276,12 +283,19 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
             var uri = await storage.OpenAnimationFilePickerAsync();
             if (uri == null) return;
 
-            var json = await _fileSystem.ReadAllTextAsync(uri.LocalPath);
-            var pattern = JsonSerializer.Deserialize<AnimationPattern>(json);
-            if (pattern != null)
+            try
             {
-                _patternService.Add(pattern);
-                SelectedPattern = Patterns.LastOrDefault();
+                var json = await _fileSystem.ReadAllTextAsync(uri.LocalPath);
+                var pattern = JsonSerializer.Deserialize<AnimationPattern>(json);
+                if (pattern != null)
+                {
+                    _patternService.Add(pattern);
+                    SelectedPattern = Patterns.LastOrDefault();
+                }
+            }
+            catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            {
+                System.Diagnostics.Trace.WriteLine($"Failed to import animation file: {ex.GetType().Name}");
             }
         });
 

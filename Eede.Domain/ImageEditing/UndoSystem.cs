@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace Eede.Domain.ImageEditing
 {
-    public sealed record UndoSystem : IDisposable
+    public sealed record UndoSystem
     {
         public UndoSystem() : this([], [])
         {
@@ -35,7 +35,6 @@ namespace Eede.Domain.ImageEditing
 
         public UndoSystem Add(IUndoItem item)
         {
-            DisposeRedoList();
             return new UndoSystem(UndoList.Push(item), []);
         }
 
@@ -47,28 +46,6 @@ namespace Eede.Domain.ImageEditing
         public bool CanRedo()
         {
             return !RedoList.IsEmpty;
-        }
-
-        public void Dispose()
-        {
-            DisposeUndoList();
-            DisposeRedoList();
-        }
-
-        private void DisposeUndoList()
-        {
-            foreach (IUndoItem item in UndoList)
-            {
-                item.Dispose();
-            }
-        }
-
-        private void DisposeRedoList()
-        {
-            foreach (IUndoItem item in RedoList)
-            {
-                item.Dispose();
-            }
         }
     }
 }

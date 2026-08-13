@@ -107,7 +107,7 @@ public class PaletteContainerViewModelTests
     }
 
     [AvaloniaTest]
-    public void Constructor_ShouldLoadSessionPaths()
+    public async Task Constructor_ShouldLoadSessionPaths()
     {
         var filePath = @"C:\session_test.aact";
         _paletteSessionRepositoryMock.Setup(x => x.LoadAsync()).Returns(Task.FromResult((IEnumerable<string>)new[] { filePath }));
@@ -118,6 +118,7 @@ public class PaletteContainerViewModelTests
         // But here I'll just check if it calls Load().
         
         var sut = new PaletteContainerViewModel(_paletteRepositoryMock.Object, _paletteSessionRepositoryMock.Object);
+        await Task.Delay(100); // Allow Task.Run in constructor to execute
         
         _paletteSessionRepositoryMock.Verify(x => x.LoadAsync(), Times.Once);
     }

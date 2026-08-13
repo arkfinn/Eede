@@ -3,7 +3,7 @@ using System;
 
 namespace Eede.Domain.ImageEditing
 {
-    public interface IUndoItem : IDisposable
+    public interface IUndoItem
     {
         void Undo();
 

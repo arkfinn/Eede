@@ -40,44 +40,14 @@ namespace Eede.Domain.Tests.ImageEditing
             undo = undo.Undo();
             undo = undo.Add(new TestUndoItem());
 
-            Assert.That(item.Disposed, Is.EqualTo(true));
             Assert.That(undo.CanUndo(), Is.EqualTo(true));
             Assert.That(undo.CanRedo(), Is.EqualTo(false));
         }
 
-        [Test()]
-        public void DosposeUndoListTest()
-        {
-            UndoSystem undo = new();
-            TestUndoItem item = new();
-
-            undo = undo.Add(item);
-            undo.Dispose();
-            Assert.That(item.Disposed, Is.EqualTo(true));
-        }
-
-        [Test()]
-        public void DosposeRedoListTest()
-        {
-            UndoSystem undo = new();
-            TestUndoItem item = new();
-
-            undo = undo.Add(item);
-            undo = undo.Undo();
-            undo.Dispose();
-            Assert.That(item.Disposed, Is.EqualTo(true));
-        }
-
         private sealed class TestUndoItem : IUndoItem
         {
-            public bool Disposed = false;
             public bool Undone = false;
             public bool Redone = false;
-
-            public void Dispose()
-            {
-                Disposed = true;
-            }
 
             public void Redo()
             {

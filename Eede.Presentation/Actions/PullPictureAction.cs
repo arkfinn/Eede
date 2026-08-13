@@ -30,9 +30,5 @@ namespace Eede.Presentation.Actions
         {
             UpdatePicture(NowPicture);
         }
-
-        public void Dispose()
-        {
-        }
     }
 }

@@ -40,8 +40,9 @@ public class PaletteSessionRepository : IPaletteSessionRepository
             using var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
             return await JsonSerializer.DeserializeAsync<IEnumerable<string>>(fs) ?? Array.Empty<string>();
         }
-        catch
+        catch (Exception ex) when (ex is JsonException || ex is IOException || ex is UnauthorizedAccessException || ex is ArgumentException || ex is NotSupportedException)
         {
+            System.Diagnostics.Trace.WriteLine("Failed to load palette session due to invalid format or access issue.");
             return Array.Empty<string>();
         }
     }

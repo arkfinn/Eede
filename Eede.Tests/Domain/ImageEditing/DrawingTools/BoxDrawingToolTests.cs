@@ -81,7 +81,7 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             Assert.That(result.AffectedArea.GetBoundingBox().Size.Height, Is.EqualTo(expectedCombinedArea.Size.Height));
         }
 
-        [TestCase(10, 10, 15, 20, 15, 15)] // positive shift, height diff > width diff
+        [TestCase(10, 10, 15, 20, 20, 20)] // positive shift, height diff > width diff
         [TestCase(10, 10, 20, 15, 20, 20)] // positive shift, width diff > height diff
         [TestCase(10, 10, 5, 2, 2, 2)] // negative shift, height diff > width diff (8)
         [TestCase(10, 10, 2, 5, 2, 2)] // negative shift, width diff > height diff (8)

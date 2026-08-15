@@ -89,6 +89,27 @@ namespace Eede.Domain.Tests.ImageEditing
             }));
         }
 
+        [Test]
+        public void ApplyTransparencyTest()
+        {
+            // BGRA layout: { Blue, Green, Red, Alpha }
+            byte[] originalPixels = new byte[]
+            {
+                100, 150, 200, 255, // Pixel 1 (Match)
+                50, 60, 70, 255     // Pixel 2 (No match)
+            };
+            Picture picture = Picture.Create(new PictureSize(2, 1), originalPixels);
+
+            ArgbColor targetColor = new ArgbColor(255, 200, 150, 100);
+            Picture after = picture.ApplyTransparency(targetColor);
+
+            Assert.That(after.CloneImage(), Is.EqualTo(new byte[]
+            {
+                100, 150, 200, 0,   // Alpha becomes 0
+                50, 60, 70, 255     // Remains unchanged
+            }));
+        }
+
         private Picture CreateSamplePicture(int width, int height, params (int x, int y, ArgbColor color)[] pixels)
         {
             var data = new byte[width * height * 4];

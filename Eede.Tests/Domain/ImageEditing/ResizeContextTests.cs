@@ -91,6 +91,60 @@ namespace Eede.Domain.Tests.ImageEditing
         }
 
         [Test]
+        public void GetWidthPercentTest()
+        {
+            // Arrange
+            var context = new ResizeContext(originalSize, new PictureSize(50, 200), true, HorizontalAlignment.Left, VerticalAlignment.Top);
+
+            // Act
+            var percent = context.GetWidthPercent();
+
+            // Assert
+            Assert.That(percent, Is.EqualTo(50.0));
+        }
+
+        [Test]
+        public void GetWidthPercent_WithZeroOriginalWidth_Returns100()
+        {
+            // Arrange
+            var zeroOriginalSize = new PictureSize(0, 200);
+            var context = new ResizeContext(zeroOriginalSize, new PictureSize(50, 200), true, HorizontalAlignment.Left, VerticalAlignment.Top);
+
+            // Act
+            var percent = context.GetWidthPercent();
+
+            // Assert
+            Assert.That(percent, Is.EqualTo(100.0));
+        }
+
+        [Test]
+        public void GetHeightPercentTest()
+        {
+            // Arrange
+            var context = new ResizeContext(originalSize, new PictureSize(100, 400), true, HorizontalAlignment.Left, VerticalAlignment.Top);
+
+            // Act
+            var percent = context.GetHeightPercent();
+
+            // Assert
+            Assert.That(percent, Is.EqualTo(200.0));
+        }
+
+        [Test]
+        public void GetHeightPercent_WithZeroOriginalHeight_Returns100()
+        {
+            // Arrange
+            var zeroOriginalSize = new PictureSize(100, 0);
+            var context = new ResizeContext(zeroOriginalSize, new PictureSize(100, 400), true, HorizontalAlignment.Left, VerticalAlignment.Top);
+
+            // Act
+            var percent = context.GetHeightPercent();
+
+            // Assert
+            Assert.That(percent, Is.EqualTo(100.0));
+        }
+
+        [Test]
         public void CalculateOffsetTest()
         {
             // Arrange

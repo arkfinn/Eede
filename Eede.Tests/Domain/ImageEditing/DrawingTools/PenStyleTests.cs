@@ -39,5 +39,54 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
                 _ = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 0);
             });
         }
+
+        [Test()]
+        public void UpdateBlender_UpdatesBlenderCorrectly()
+        {
+            var originalBlender = new DirectImageBlender();
+            var newBlender = new DirectImageBlender();
+            var originalColor = new ArgbColor(255, 10, 20, 30);
+            var originalWidth = 5;
+
+            var penStyle = new PenStyle(originalBlender, originalColor, originalWidth);
+            var updatedPenStyle = penStyle.UpdateBlender(newBlender);
+
+            Assert.That(updatedPenStyle.Blender, Is.SameAs(newBlender));
+            Assert.That(updatedPenStyle.Color, Is.EqualTo(originalColor));
+            Assert.That(updatedPenStyle.Width, Is.EqualTo(originalWidth));
+            Assert.That(updatedPenStyle.Blender, Is.Not.SameAs(originalBlender));
+        }
+
+        [Test()]
+        public void UpdateColor_UpdatesColorCorrectly()
+        {
+            var blender = new DirectImageBlender();
+            var originalColor = new ArgbColor(255, 10, 20, 30);
+            var newColor = new ArgbColor(128, 40, 50, 60);
+            var width = 5;
+
+            var penStyle = new PenStyle(blender, originalColor, width);
+            var updatedPenStyle = penStyle.UpdateColor(newColor);
+
+            Assert.That(updatedPenStyle.Blender, Is.SameAs(blender));
+            Assert.That(updatedPenStyle.Color, Is.EqualTo(newColor));
+            Assert.That(updatedPenStyle.Width, Is.EqualTo(width));
+        }
+
+        [Test()]
+        public void UpdateWidth_UpdatesWidthCorrectly()
+        {
+            var blender = new DirectImageBlender();
+            var color = new ArgbColor(255, 10, 20, 30);
+            var originalWidth = 5;
+            var newWidth = 10;
+
+            var penStyle = new PenStyle(blender, color, originalWidth);
+            var updatedPenStyle = penStyle.UpdateWidth(newWidth);
+
+            Assert.That(updatedPenStyle.Blender, Is.SameAs(blender));
+            Assert.That(updatedPenStyle.Color, Is.EqualTo(color));
+            Assert.That(updatedPenStyle.Width, Is.EqualTo(newWidth));
+        }
     }
 }

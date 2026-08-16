@@ -6,7 +6,7 @@ namespace PerfBench
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<AntiAliasFilterBenchmark>();
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
     }
 }

@@ -20,6 +20,17 @@ namespace Eede.Domain.SharedKernel
             Areas = areas ?? Array.Empty<PictureArea>();
         }
 
+        public int Count
+        {
+            get
+            {
+                if (Areas == null) return 0;
+                if (Areas is ICollection<PictureArea> c) return c.Count;
+                if (Areas is IReadOnlyCollection<PictureArea> r) return r.Count;
+                return Areas.Count();
+            }
+        }
+
         public bool IsEmpty
         {
             get

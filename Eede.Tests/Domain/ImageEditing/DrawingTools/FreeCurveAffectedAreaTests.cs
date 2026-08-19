@@ -62,7 +62,7 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
 
             // Assert
             // One for DrawStart (Point at 10,10), one for Drawing (Line 10,10 to 20,20)
-            Assert.That(result.AffectedArea.Count(), Is.EqualTo(2));
+            Assert.That(result.AffectedArea.Count, Is.EqualTo(2));
         }
     }
 }

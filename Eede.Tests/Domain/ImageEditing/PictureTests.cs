@@ -29,6 +29,29 @@ namespace Eede.Domain.Tests.ImageEditing
             new object[] { 2, 3, new ArgbColor(255, 245, 245, 220) },
         };
 
+        [TestCaseSource(nameof(CreateEmptyCases))]
+        public void CreateEmptyTest(int width, int height, int expectedLength)
+        {
+            var size = new PictureSize(width, height);
+            Picture picture = Picture.CreateEmpty(size);
+
+            Assert.That(picture.Size, Is.EqualTo(size));
+            Assert.That(picture.Width, Is.EqualTo(width));
+            Assert.That(picture.Height, Is.EqualTo(height));
+            Assert.That(picture.Length, Is.EqualTo(expectedLength));
+
+            // Check if all elements are zero
+            byte[] imageBytes = picture.CloneImage();
+            Assert.That(imageBytes, Is.All.Zero);
+        }
+
+        private static readonly object[] CreateEmptyCases =
+        {
+            new object[] { 10, 10, 400 },
+            new object[] { 1, 1, 4 },
+            new object[] { 0, 0, 0 },
+        };
+
         [Test]
         public void PickColorの引数posはbitmapの範囲外を許容しない()
         {

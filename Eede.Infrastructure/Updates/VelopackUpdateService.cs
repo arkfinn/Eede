@@ -57,7 +57,7 @@ public class VelopackUpdateService : IUpdateService, IDisposable
             LatestVersion = _updateInfo.TargetFullRelease.Version.ToString();
             return true;
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is System.Net.Http.HttpRequestException || ex is System.IO.IOException || ex is UnauthorizedAccessException)
         {
             // すでに IsInstalled でチェックしていますが、念のため例外もハンドリングします。
             // インストールされていない環境（デバッグ時など）ではエラー表示にせず、Idle ステータスに戻します。
@@ -84,7 +84,7 @@ public class VelopackUpdateService : IUpdateService, IDisposable
             await mgr.DownloadUpdatesAsync(_updateInfo);
             SetStatus(UpdateStatus.ReadyToApply);
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is System.Net.Http.HttpRequestException || ex is System.IO.IOException || ex is UnauthorizedAccessException)
         {
             System.Diagnostics.Trace.WriteLine("Velopack DownloadUpdateAsync failed due to an internal error.");
             SetStatus(UpdateStatus.Error);
@@ -103,7 +103,7 @@ public class VelopackUpdateService : IUpdateService, IDisposable
             }
             mgr.ApplyUpdatesAndRestart(_updateInfo);
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is System.Net.Http.HttpRequestException || ex is System.IO.IOException || ex is UnauthorizedAccessException)
         {
             System.Diagnostics.Trace.WriteLine("Velopack ApplyAndRestart failed due to an internal error.");
             SetStatus(UpdateStatus.Error);

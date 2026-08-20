@@ -264,7 +264,7 @@ public class MainViewModelTests
     }
 
     [AvaloniaTest]
-    public void Initialization_ShouldLoadGridSizeFromUseCase()
+    public async Task Initialization_ShouldLoadGridSizeFromUseCase()
     {
         var settings = new AppSettings { GridWidth = 48, GridHeight = 64 };
         _loadSettingsUseCaseMock.Setup(x => x.ExecuteAsync()).ReturnsAsync(settings);
@@ -274,7 +274,7 @@ public class MainViewModelTests
         for (int i = 0; i < 50; i++)
         {
             if (mainVM.MinCursorWidth == 48) break;
-            System.Threading.Tasks.Task.Delay(10).Wait();
+            await System.Threading.Tasks.Task.Delay(10);
         }
 
         Assert.Multiple(() =>

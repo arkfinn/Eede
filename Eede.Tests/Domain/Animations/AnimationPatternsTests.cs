@@ -59,6 +59,10 @@ public class AnimationPatternsTests
 
         var grid = new GridSettings(new PictureSize(16, 16), new Position(0, 0), 0);
         var pattern = new AnimationPattern("Test", new List<AnimationFrame>(), grid);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => patterns.Replace(0, pattern));
+        Assert.Throws<ArgumentOutOfRangeException>(() => patterns.Replace(-1, pattern));
+
         var patternsWithOne = patterns.Add(pattern);
 
         Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.Replace(-1, pattern));

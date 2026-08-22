@@ -136,6 +136,16 @@ namespace Eede.Application.Tests.Drawings
         }
 
         [Test]
+        public void Move_WithNullDrawStyle_ThrowsArgumentNullException()
+        {
+            var area = new DrawableArea(new Magnification(2.0f), new PictureSize(16, 16), null);
+            var buffer = new DrawingBuffer(Picture.CreateEmpty(new PictureSize(10, 10)));
+            var penStyle = new PenStyle(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), new ArgbColor(255, 255, 255, 255), 1);
+
+            Assert.Throws<ArgumentNullException>(() => area.Move(null!, penStyle, buffer, new Position(0, 0), false));
+        }
+
+        [Test]
         public void DrawEnd_WithNullDrawStyle_ThrowsArgumentNullException()
         {
             var area = new DrawableArea(new Magnification(2.0f), new PictureSize(16, 16), null);

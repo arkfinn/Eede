@@ -150,8 +150,10 @@ public class AnimationPatternTests
         var frames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
         var pattern = new AnimationPattern("Test", frames, grid);
 
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, 1));
         Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, 2));
         Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, -1));
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(1, 0));
         Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(2, 0));
         Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(-1, 0));
     }

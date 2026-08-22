@@ -186,6 +186,17 @@ namespace Eede.Application.Tests.Drawings
         }
 
         [Test]
+        public void DrawCancel_WithNullPicture_ReturnsResultWithNullBuffer()
+        {
+            var area = new DrawableArea(new Magnification(2.0f), new PictureSize(16, 16), null);
+
+            var result = area.DrawCancel(null);
+
+            Assert.That(result.PictureBuffer, Is.Null);
+            Assert.That(result.DrawableArea, Is.SameAs(area));
+        }
+
+        [Test]
         public void DisplaySizeOf_ReturnsCorrectSizeBasedOnMagnification()
         {
             // Arrange

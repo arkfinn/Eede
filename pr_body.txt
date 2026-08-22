@@ -1,0 +1,3 @@
+🎯 **What:** The missing edge case test for DrawableArea.DrawCancel when picture is null.
+📊 **Coverage:** Added test `DrawCancel_WithNullPicture_ReturnsResultWithNullBuffer` to cover the early return when `picture` is null.
+✨ **Result:** Improved test coverage and reliability for edge cases in `DrawableArea.DrawCancel`.

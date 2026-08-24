@@ -796,7 +796,7 @@ public partial class MainViewModel : ViewModelBase
             // 各タブを順次クローズ処理する
             // 未編集タブはExecuteCloseが即座に完了するため、Task.WhenAllやList<Task>の確保による
             // メモリアロケーションとオーバーヘッドを避ける
-            foreach (DockPictureViewModel picture in Pictures.ToList())
+            foreach (DockPictureViewModel picture in Pictures)
             {
                 bool canClosePicture = await picture.CloseCommand.Execute().ToTask();
                 if (!canClosePicture)

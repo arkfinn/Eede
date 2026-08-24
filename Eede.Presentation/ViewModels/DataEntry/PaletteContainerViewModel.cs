@@ -62,7 +62,10 @@ public partial class PaletteContainerViewModel : ViewModelBase
                         });
                     }
                 }
-                catch { /* Ignore invalid session files */ }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.WriteLine($"Failed to load session file '{path}': {ex.Message}");
+                }
             }
         });
 

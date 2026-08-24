@@ -99,7 +99,7 @@ public class DockPictureViewModelTests
     }
 
     [AvaloniaTest]
-    public void Characterization_Save()
+    public async Task Characterization_Save()
     {
         var scheduler = new TestScheduler();
         var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
@@ -120,7 +120,7 @@ public class DockPictureViewModelTests
             await Task.CompletedTask;
         };
 
-        viewModel.Save().Wait();
+        await viewModel.Save();
 
         Assert.That(saveEventCalled, Is.True);
         Assert.That(viewModel.Edited, Is.False, "Save successful should reset Edited flag");

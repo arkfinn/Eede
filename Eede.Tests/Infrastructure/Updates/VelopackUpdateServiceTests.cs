@@ -94,6 +94,14 @@ public class VelopackUpdateServiceTests
         var statusProperty = typeof(VelopackUpdateService).GetProperty("Status");
         statusProperty.SetValue(_service, UpdateStatus.ReadyToApply);
 
+        #pragma warning disable SYSLIB0050 // FormatterServices is obsolete
+        var dummyInfo = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(UpdateInfo)) as UpdateInfo;
+        #pragma warning restore SYSLIB0050
+
+        // We set _updateInfo via reflection so that it's not null
+        var updateInfoField = typeof(VelopackUpdateService).GetField("_updateInfo", BindingFlags.NonPublic | BindingFlags.Instance);
+        updateInfoField.SetValue(_service, dummyInfo);
+
         _mockManager.Setup(m => m.IsInstalled).Returns(true);
         _mockManager.Setup(m => m.ApplyUpdatesAndRestart(It.IsAny<UpdateInfo>()))
             .Throws(new UnauthorizedAccessException("Permission denied"));

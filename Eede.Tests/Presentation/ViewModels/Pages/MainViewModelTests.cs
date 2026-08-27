@@ -19,6 +19,8 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Animations;
 using Eede.Application.Animations;
 using Eede.Application.UseCase.Settings;
+using Eede.Domain.Files;
+using Eede.Presentation.Common.Enums;
 using System;
 using System.Linq;
 using System.Reactive;
@@ -354,4 +356,75 @@ public class MainViewModelTests
 
         Assert.That(mainVM.IsUpdateReady, Is.True);
     }
+
+    [AvaloniaTest]
+    public async Task RequestCloseCommand_WhenUserCancelsEditedTab_ShouldAbortClosing()
+    {
+        var mainVM = CreateMainViewModel();
+
+        // 未編集タブと編集済みタブを用意
+        var uneditedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        uneditedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
+        uneditedTab.Edited = false;
+
+        var editedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        editedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
+        editedTab.Edited = true;
+        // キャンセルをシミュレート（Closable = false）
+        editedTab.RequestClose += async (s, e) =>
+        {
+            editedTab.SaveAlertResult = SaveAlertResult.Cancel;
+            await editedTab.ExecuteClosing();
+        };
+
+        mainVM.Pictures.Add(uneditedTab);
+        mainVM.Pictures.Add(editedTab);
+
+        bool windowCloseInvoked = false;
+        mainVM.CloseWindowInteraction.RegisterHandler(interaction =>
+        {
+            windowCloseInvoked = true;
+            interaction.SetOutput(Unit.Default);
+        });
+
+        await mainVM.RequestCloseCommand.Execute().ToTask();
+
+        Assert.That(mainVM.IsCloseConfirmed, Is.False);
+        Assert.That(windowCloseInvoked, Is.False);
+    }
+
+    [AvaloniaTest]
+    public async Task RequestCloseCommand_WhenAllTabsConfirmed_ShouldInvokeCloseWindowInteraction()
+    {
+        var mainVM = CreateMainViewModel();
+
+        var uneditedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        uneditedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
+        uneditedTab.Edited = false;
+
+        var editedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        editedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
+        editedTab.Edited = true;
+        editedTab.RequestClose += async (s, e) =>
+        {
+            editedTab.SaveAlertResult = SaveAlertResult.NoSave;
+            await editedTab.ExecuteClosing();
+        };
+
+        mainVM.Pictures.Add(uneditedTab);
+        mainVM.Pictures.Add(editedTab);
+
+        bool windowCloseInvoked = false;
+        mainVM.CloseWindowInteraction.RegisterHandler(interaction =>
+        {
+            windowCloseInvoked = true;
+            interaction.SetOutput(Unit.Default);
+        });
+
+        await mainVM.RequestCloseCommand.Execute().ToTask();
+
+        Assert.That(mainVM.IsCloseConfirmed, Is.True);
+        Assert.That(windowCloseInvoked, Is.True);
+    }
 }
+

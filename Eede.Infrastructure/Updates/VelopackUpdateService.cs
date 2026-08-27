@@ -18,11 +18,18 @@ public class VelopackUpdateService : IUpdateService, IDisposable
     private readonly BehaviorSubject<UpdateStatus> _statusSubject = new(UpdateStatus.Idle);
     public IObservable<UpdateStatus> StatusChanged => _statusSubject.AsObservable();
 
+    private readonly Func<IUpdateManagerWrapper> _managerFactory;
     private readonly string _githubUrl;
     private UpdateInfo? _updateInfo;
 
     public VelopackUpdateService(string githubUrl)
+        : this(() => new UpdateManagerWrapper(githubUrl), githubUrl)
     {
+    }
+
+    internal VelopackUpdateService(Func<IUpdateManagerWrapper> managerFactory, string githubUrl)
+    {
+        _managerFactory = managerFactory;
         _githubUrl = githubUrl;
     }
 
@@ -36,7 +43,7 @@ public class VelopackUpdateService : IUpdateService, IDisposable
     {
         try
         {
-            var mgr = new UpdateManager(new GithubSource(_githubUrl, null, false));
+            var mgr = _managerFactory();
             if (!mgr.IsInstalled)
             {
                 System.Diagnostics.Debug.WriteLine("Velopack: Application is not installed. Skipping update check.");
@@ -73,7 +80,7 @@ public class VelopackUpdateService : IUpdateService, IDisposable
         {
             if (_updateInfo == null) return;
 
-            var mgr = new UpdateManager(new GithubSource(_githubUrl, null, false));
+            var mgr = _managerFactory();
             if (!mgr.IsInstalled)
             {
                 SetStatus(UpdateStatus.Idle);
@@ -96,12 +103,15 @@ public class VelopackUpdateService : IUpdateService, IDisposable
         try
         {
             if (Status != UpdateStatus.ReadyToApply) return;
-            var mgr = new UpdateManager(new GithubSource(_githubUrl, null, false));
+            var mgr = _managerFactory();
             if (!mgr.IsInstalled)
             {
                 return;
             }
-            mgr.ApplyUpdatesAndRestart(_updateInfo);
+            if (_updateInfo != null)
+            {
+                mgr.ApplyUpdatesAndRestart(_updateInfo);
+            }
         }
         catch (Exception ex) when (ex is System.Net.Http.HttpRequestException || ex is System.IO.IOException || ex is UnauthorizedAccessException)
         {

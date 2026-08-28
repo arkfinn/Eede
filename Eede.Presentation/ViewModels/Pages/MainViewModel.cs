@@ -273,7 +273,7 @@ public partial class MainViewModel : ViewModelBase
                 WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
             }
         });
-        _ = welcomeViewModel.LoadRecentFilesCommand.Execute();
+        welcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
 
         LoadPictureCommand = ReactiveCommand.Create<IFileStorage?>(ExecuteLoadPicture);
         SavePictureCommand = ReactiveCommand.Create<IFileStorage?>(ExecuteSavePicture);

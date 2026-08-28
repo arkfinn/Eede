@@ -967,7 +967,9 @@ public partial class MainViewModel : ViewModelBase
         {
 
             // 各PictureViewModelのクローズ確認処理を実行
-            // 各タブを順次クローズ処理する（コレクション変更によるInvalidOperationExceptionを防ぐためスナップショットで走査）
+            // 【重要】ToList() は意図的なスナップショット生成（削除・インライン化禁止）。
+            // CloseCommand の非同期実行中に UI や Dock 側で Pictures コレクションが変更され、
+            // InvalidOperationException (Collection was modified) が発生するのを防ぐために必須。
             var picturesSnapshot = Pictures.ToList();
             foreach (DockPictureViewModel picture in picturesSnapshot)
             {

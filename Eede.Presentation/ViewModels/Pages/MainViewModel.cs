@@ -967,10 +967,9 @@ public partial class MainViewModel : ViewModelBase
         {
 
             // 各PictureViewModelのクローズ確認処理を実行
-            // 各タブを順次クローズ処理する
-            // 未編集タブはExecuteCloseが即座に完了するため、Task.WhenAllやList<Task>の確保による
-            // メモリアロケーションとオーバーヘッドを避ける
-            foreach (DockPictureViewModel picture in Pictures)
+            // 各タブを順次クローズ処理する（コレクション変更によるInvalidOperationExceptionを防ぐためスナップショットで走査）
+            var picturesSnapshot = Pictures.ToList();
+            foreach (DockPictureViewModel picture in picturesSnapshot)
             {
                 bool canClosePicture = await picture.CloseCommand.Execute().ToTask();
                 if (!canClosePicture)

@@ -535,8 +535,8 @@ namespace Eede.Presentation.Views.DataEntry
                     }
                     else
                     {
-                        // ドックエリアでは移動機能は不要なため、常に転送（Pull）を実行する
-                        PicturePullAction?.Execute(currentCursorArea.RealPosition);
+                        // ドックエリアでは移動機能は不要なため、常にドックへ転送・書き戻し（Push）を実行する
+                        PicturePushAction?.Execute(currentCursorArea.RealPosition);
                         // 状態は NormalCursorState にリセット/維持する
                         _selectionState = new NormalCursorState(currentCursorArea);
                     }
@@ -611,16 +611,16 @@ namespace Eede.Presentation.Views.DataEntry
         {
             // 範囲選択状態からの遷移を確認
             var selectingState = _selectionState as RegionSelectingState;
-            var (newState, newArea) = _selectionState.HandlePointerRightButtonReleased(_localCursorArea, PicturePushAction);
+            var (newState, newArea) = _selectionState.HandlePointerRightButtonReleased(_localCursorArea, PicturePullAction);
 
-            // 範囲選択が終わった直後なら、作業エリアへ転送を実行する
+            // 範囲選択が終わった直後なら、作業エリアへ読込（Pull）を実行する
             if (selectingState != null)
             {
                 var finalArea = selectingState.GetSelectingArea();
                 if (finalArea.HasValue)
                 {
-                    // ドラッグ範囲が確定している場合、その正確な範囲を転送
-                    PicturePushAction?.Execute(finalArea.Value);
+                    // ドラッグ範囲が確定している場合、その正確な範囲を読込 (Pull)
+                    PicturePullAction?.Execute(finalArea.Value);
                     // 作業エリア側の選択状態も同期させる
                     vm.GlobalState.CursorArea = HalfBoxArea.Create(finalArea.Value.Position, finalArea.Value.Size);
 
@@ -629,13 +629,9 @@ namespace Eede.Presentation.Views.DataEntry
                 }
                 else
                 {
-                    // 単なる右クリックの場合、スナップされた位置から固定サイズで転送
-                    PicturePushAction?.Execute(new PictureArea(newArea.RealPosition, MinCursorSize));
+                    // 単なる右クリックの場合、スナップされた位置から固定サイズで読込 (Pull)
+                    PicturePullAction?.Execute(new PictureArea(newArea.RealPosition, MinCursorSize));
                     vm.GlobalState.CursorArea = newArea;
-                    // 必要ならここでも _cursorSize を MinCursorSize にリセットする？
-                    // いや、前回の選択サイズを維持するなら変更しないほうがいいかもしれないが、
-                    // クリックだけなら MinCursorSize を使うのが自然か。
-                    // とりあえず今回は「選択完了後」の話なので、クリック時の挙動は変えない。
                 }
                 // 状態をリセットする（マウス追従と次の選択開始のため）
                 _selectionState = CreateInitialState();

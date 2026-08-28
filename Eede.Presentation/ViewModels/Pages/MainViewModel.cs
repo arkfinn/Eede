@@ -409,18 +409,18 @@ public partial class MainViewModel : ViewModelBase
         {
             if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
             {
-                // メインキャンバスの内容をドック側のカーソル位置へ転送・書き戻し
+                // メインキャンバスの内容をドック側のカーソル位置へ転送・書き戻し (Push)
                 Position targetPos = vm.GlobalState.CursorArea.RealPosition;
-                OnPullFromDrawArea(vm, new PicturePullEventArgs(vm.PictureBuffer, targetPos));
+                OnPushFromDrawArea(vm, new PicturePushEventArgs(vm.PictureBuffer, targetPos));
             }
         });
         PullFromActiveDockCommand = ReactiveCommand.Create(() =>
         {
             if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
             {
-                // ドック側のカーソル位置の画像をメインキャンバスへ再読み込み
+                // ドック側のカーソル位置の画像をメインキャンバスへ再読み込み (Pull)
                 Position targetPos = vm.GlobalState.CursorArea.RealPosition;
-                OnPushToDrawArea(vm, new PicturePushEventArgs(vm.PictureBuffer, new PictureArea(targetPos, CursorSize)));
+                OnPullToDrawArea(vm, new PicturePullEventArgs(vm.PictureBuffer, new PictureArea(targetPos, CursorSize)));
             }
         });
         CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
@@ -742,8 +742,8 @@ public partial class MainViewModel : ViewModelBase
 
     private void CleanupDockPicture(DockPictureViewModel vm)
     {
-        vm.PicturePush -= OnPushToDrawArea;
-        vm.PicturePull -= OnPullFromDrawArea;
+        vm.PicturePull -= OnPullToDrawArea;
+        vm.PicturePush -= OnPushFromDrawArea;
         vm.PictureUpdate -= OnPictureUpdate;
         vm.PictureSave -= OnPictureSave;
     }
@@ -763,8 +763,8 @@ public partial class MainViewModel : ViewModelBase
 
     private void SetupDockPicture(DockPictureViewModel vm)
     {
-        vm.PicturePush += OnPushToDrawArea;
-        vm.PicturePull += OnPullFromDrawArea;
+        vm.PicturePull += OnPullToDrawArea;
+        vm.PicturePush += OnPushFromDrawArea;
         vm.PictureUpdate += OnPictureUpdate;
         vm.BackgroundColor = CurrentBackgroundColor;
         vm.PictureSave += OnPictureSave;
@@ -841,7 +841,7 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
-    private void OnPushToDrawArea(object? sender, PicturePushEventArgs args)
+    private void OnPullToDrawArea(object? sender, PicturePullEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {
@@ -879,7 +879,7 @@ public partial class MainViewModel : ViewModelBase
         vm.PictureBuffer = args.Updated;
     }
 
-    private void OnPullFromDrawArea(object? sender, PicturePullEventArgs args)
+    private void OnPushFromDrawArea(object? sender, PicturePushEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {

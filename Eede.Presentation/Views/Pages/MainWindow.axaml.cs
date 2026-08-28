@@ -132,6 +132,33 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
                     ViewModel?.SetMagnificationCommand.Execute(12f).Subscribe();
                     e.Handled = true;
                     break;
+                case Key.F5:
+                    ViewModel?.PullFromActiveDockCommand.Execute().Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.Enter:
+                case Key.Space:
+                    ViewModel?.AnimationViewModel.TogglePlayCommand.Execute().Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.OemComma:
+                    ViewModel?.AnimationViewModel.PreviousFrameCommand.Execute().Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.OemPeriod:
+                    ViewModel?.AnimationViewModel.NextFrameCommand.Execute().Subscribe();
+                    e.Handled = true;
+                    break;
+            }
+        }
+        else if (e.KeyModifiers == KeyModifiers.Control)
+        {
+            switch (e.Key)
+            {
+                case Key.Enter:
+                    ViewModel?.PushToActiveDockCommand.Execute().Subscribe();
+                    e.Handled = true;
+                    break;
             }
         }
         else if (e.KeyModifiers == KeyModifiers.Shift)

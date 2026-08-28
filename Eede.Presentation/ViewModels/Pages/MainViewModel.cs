@@ -120,6 +120,15 @@ public partial class MainViewModel : ViewModelBase
     public ReactiveCommand<RxVoid, RxVoid> ZoomOutCommand { get; private set; }
     public ReactiveCommand<RxVoid, RxVoid> ResetZoomCommand { get; private set; }
     public ReactiveCommand<float, RxVoid> SetMagnificationCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> CloseActivePictureCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ToggleAnimationPanelCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> SetLayerStyleRgbCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> SetLayerStyleAlphaCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> SetLayerStyleArgbCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> IncreaseMinCursorSizeCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> DecreaseMinCursorSizeCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> PushToActiveDockCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> PullFromActiveDockCommand { get; private set; }
     public ReactiveCommand<PictureActions, RxVoid> PictureActionCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> PutPaletteColorCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> GetPaletteColorCommand { get; private set; }
@@ -339,6 +348,77 @@ public partial class MainViewModel : ViewModelBase
         SetMagnificationCommand = ReactiveCommand.Create<float>((mag) =>
         {
             Magnification = new Magnification(mag);
+        });
+        CloseActivePictureCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
+            {
+                bool canClose = await vm.ExecuteClosing();
+                if (canClose)
+                {
+                    Pictures.Remove(vm);
+                }
+            }
+        });
+        ToggleAnimationPanelCommand = ReactiveCommand.Create(() =>
+        {
+            IsAnimationPanelExpanded = !IsAnimationPanelExpanded;
+        });
+        SetLayerStyleRgbCommand = ReactiveCommand.Create(() =>
+        {
+            ImageTransfer = new RGBToneImageTransfer();
+            ImageBlender = new RGBOnlyImageBlender();
+        });
+        SetLayerStyleAlphaCommand = ReactiveCommand.Create(() =>
+        {
+            ImageTransfer = new AlphaToneImageTransfer();
+            ImageBlender = new AlphaOnlyImageBlender();
+        });
+        SetLayerStyleArgbCommand = ReactiveCommand.Create(() =>
+        {
+            ImageTransfer = new DirectImageTransfer();
+            ImageBlender = new DirectImageBlender();
+        });
+        IncreaseMinCursorSizeCommand = ReactiveCommand.Create(() =>
+        {
+            if (MinCursorSizeList != null && MinCursorSizeList.Count > 0)
+            {
+                int currentIdx = MinCursorSizeList.IndexOf(MinCursorWidth);
+                if (currentIdx >= 0 && currentIdx < MinCursorSizeList.Count - 1)
+                {
+                    int next = MinCursorSizeList[currentIdx + 1];
+                    MinCursorWidth = next;
+                    MinCursorHeight = next;
+                }
+            }
+        });
+        DecreaseMinCursorSizeCommand = ReactiveCommand.Create(() =>
+        {
+            if (MinCursorSizeList != null && MinCursorSizeList.Count > 0)
+            {
+                int currentIdx = MinCursorSizeList.IndexOf(MinCursorWidth);
+                if (currentIdx > 0)
+                {
+                    int prev = MinCursorSizeList[currentIdx - 1];
+                    MinCursorWidth = prev;
+                    MinCursorHeight = prev;
+                }
+            }
+        });
+        PushToActiveDockCommand = ReactiveCommand.Create(() =>
+        {
+            if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
+            {
+                // ドック枠の位置に対してPushを実行
+                OnPushToDrawArea(vm, new PicturePushEventArgs(vm.PictureBuffer, new PictureArea(new Position(0, 0), CursorSize)));
+            }
+        });
+        PullFromActiveDockCommand = ReactiveCommand.Create(() =>
+        {
+            if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
+            {
+                OnPullFromDrawArea(vm, new PicturePullEventArgs(vm.PictureBuffer, new Position(0, 0)));
+            }
         });
         CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);

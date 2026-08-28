@@ -54,8 +54,18 @@
     <KeyBinding Gesture="Ctrl+D0" Command="{Binding ResetZoomCommand}" />
     <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding ZoomInCommand}" />
     <KeyBinding Gesture="Ctrl+Add" Command="{Binding ZoomInCommand}" />
-    <KeyBinding Gesture="Ctrl+OemMinus" Command="{Binding ZoomOutCommand}" />
     <KeyBinding Gesture="Ctrl+Subtract" Command="{Binding ZoomOutCommand}" />
+    <!-- Document & Tab Management -->
+    <KeyBinding Gesture="Ctrl+W" Command="{Binding CloseActivePictureCommand}" />
+    <!-- Layer Styles -->
+    <KeyBinding Gesture="F1" Command="{Binding SetLayerStyleRgbCommand}" />
+    <KeyBinding Gesture="F2" Command="{Binding SetLayerStyleAlphaCommand}" />
+    <KeyBinding Gesture="F3" Command="{Binding SetLayerStyleArgbCommand}" />
+    <!-- Animation & Workspace -->
+    <KeyBinding Gesture="F4" Command="{Binding ToggleAnimationPanelCommand}" />
+    <KeyBinding Gesture="Ctrl+E" Command="{Binding ToggleAnimationPanelCommand}" />
+    <KeyBinding Gesture="Ctrl+OemOpenBrackets" Command="{Binding DecreaseMinCursorSizeCommand}" />
+    <KeyBinding Gesture="Ctrl+OemCloseBrackets" Command="{Binding IncreaseMinCursorSizeCommand}" />
   </reactiveUi:ReactiveWindow.KeyBindings>
   <pages:MainView />
 </reactiveUi:ReactiveWindow>

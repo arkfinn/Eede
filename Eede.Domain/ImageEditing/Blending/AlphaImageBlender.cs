@@ -38,22 +38,22 @@ public class AlphaImageBlender : ImageBlenderBase
                 }
 
                 // それ以外の場合、アルファ値・カラーを合成する
-                float fromAlpha = fromA / 255f;
-                float toAlpha = toA / 255f;
-                float alpha = fromAlpha + toAlpha - (fromAlpha * toAlpha);
-                toPixels[toPos + 3] = (byte)(alpha * 255f + 0.5f);
+                int exactOutA = fromA * 255 + toA * 255 - fromA * toA;
+                toPixels[toPos + 3] = (byte)((exactOutA + 127) / 255);
 
-                if (alpha == 0)
+                if (exactOutA == 0)
                 {
                     toPos += 4;
                     fromPos += 4;
                     continue;
                 }
 
-                float blendedAlpha = toAlpha * (1f - fromAlpha);
-                toPixels[toPos + 0] = (byte)(((toPixels[toPos + 0] * blendedAlpha) + (fromSpan[fromPos + 0] * fromAlpha)) / alpha + 0.5f);
-                toPixels[toPos + 1] = (byte)(((toPixels[toPos + 1] * blendedAlpha) + (fromSpan[fromPos + 1] * fromAlpha)) / alpha + 0.5f);
-                toPixels[toPos + 2] = (byte)(((toPixels[toPos + 2] * blendedAlpha) + (fromSpan[fromPos + 2] * fromAlpha)) / alpha + 0.5f);
+                int fromA255 = fromA * 255;
+                int toAFactor = toA * (255 - fromA);
+
+                toPixels[toPos + 0] = (byte)((fromSpan[fromPos + 0] * fromA255 + toPixels[toPos + 0] * toAFactor + (exactOutA >> 1)) / exactOutA);
+                toPixels[toPos + 1] = (byte)((fromSpan[fromPos + 1] * fromA255 + toPixels[toPos + 1] * toAFactor + (exactOutA >> 1)) / exactOutA);
+                toPixels[toPos + 2] = (byte)((fromSpan[fromPos + 2] * fromA255 + toPixels[toPos + 2] * toAFactor + (exactOutA >> 1)) / exactOutA);
 
                 toPos += 4;
                 fromPos += 4;

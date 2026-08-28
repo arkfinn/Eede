@@ -212,8 +212,16 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
         {
             if (SelectedPattern != null && frame != null)
             {
-                var frames = SelectedPattern.Frames.ToList();
-                int index = frames.IndexOf(frame);
+                var frames = SelectedPattern.Frames;
+                int index = -1;
+                for (int i = 0; i < frames.Count; i++)
+                {
+                    if (frames[i] == frame)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
                 if (index >= 0)
                 {
                     var newPattern = SelectedPattern.RemoveFrame(index);

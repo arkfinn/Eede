@@ -106,6 +106,7 @@ public partial class MainViewModel : ViewModelBase
     public ReactiveCommand<IFileStorage?, RxVoid> LoadPictureCommand { get; private set; }
     public ReactiveCommand<IFileStorage?, RxVoid> SavePictureCommand { get; private set; }
     public ReactiveCommand<IFileStorage?, RxVoid> SavePictureAsCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> DeselectCommand { get; private set; }
     public ReactiveCommand<PictureActions, RxVoid> PictureActionCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> PutPaletteColorCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> GetPaletteColorCommand { get; private set; }
@@ -250,6 +251,10 @@ public partial class MainViewModel : ViewModelBase
         GetBackgroundColorCommand = ReactiveCommand.Create(() => { });
         ScalingCommand = ReactiveCommand.CreateFromTask(ExecuteScalingAsync);
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
+        DeselectCommand = ReactiveCommand.Create(() =>
+        {
+            DrawableCanvasViewModel.CommitSelection(true);
+        });
         CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         PasteCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
@@ -531,11 +536,12 @@ public partial class MainViewModel : ViewModelBase
 
     private async void ExecuteLoadPicture(IFileStorage? storage)
     {
-        if (storage == null)
+        var targetStorage = storage ?? FileStorage;
+        if (targetStorage == null)
         {
             return;
         }
-        Uri? result = await storage.OpenFilePickerAsync();
+        Uri? result = await targetStorage.OpenFilePickerAsync();
         if (result == null)
         {
             return;

@@ -41,13 +41,13 @@
 								<PathIcon Data="{StaticResource RedoIconGeometry}" Classes="icon" />
 							</Button>
 							<Panel Classes="horizontal-separator" />
-							<Button Classes="tool" Command="{Binding CopyCommand}" ToolTip.Tip="コピー(Ctrl+C): 選択範囲をクリップボードにコピー" HotKey="Ctrl+C">
+							<Button Classes="tool" Command="{Binding CopyCommand}" ToolTip.Tip="コピー(Ctrl+C): 選択範囲をクリップボードにコピー">
 								<PathIcon Data="{StaticResource ContentCopyIconGeometry}" Classes="icon" />
 							</Button>
-							<Button Classes="tool" Command="{Binding CutCommand}" ToolTip.Tip="切り取り(Ctrl+X): 選択範囲を切り取ってクリップボードに保存" HotKey="Ctrl+X">
+							<Button Classes="tool" Command="{Binding CutCommand}" ToolTip.Tip="切り取り(Ctrl+X): 選択範囲を切り取ってクリップボードに保存">
 								<PathIcon Data="{StaticResource ContentCutIconGeometry}" Classes="icon" />
 							</Button>
-							<Button Classes="tool" Command="{Binding PasteCommand}" ToolTip.Tip="貼り付け(Ctrl+V): クリップボードの内容を現在のキャンバスに貼り付け" HotKey="Ctrl+V">
+							<Button Classes="tool" Command="{Binding PasteCommand}" ToolTip.Tip="貼り付け(Ctrl+V): クリップボードの内容を現在のキャンバスに貼り付け">
 								<PathIcon Data="{StaticResource ContentPasteIconGeometry}" Classes="icon" />
 							</Button>
 							<Panel Classes="horizontal-separator" />
@@ -146,27 +146,24 @@
 						<Panel DockPanel.Dock="Top">
 							<StackPanel Orientation="Horizontal" Margin="2">
 								<Button Classes="tool"
-										ToolTip.Tip="新規作成(N)"
-										HotKey="N"
+										ToolTip.Tip="新規作成(Ctrl+N)"
 										Command="{Binding CreateNewPictureCommand}">
 									<PathIcon Data="{StaticResource NoteAddIconGeometry}" Classes="icon" />
 								</Button>
 								<Button Classes="tool"
-										ToolTip.Tip="開く(O)"
-										HotKey="O"
+										ToolTip.Tip="開く(Ctrl+O)"
 										Command="{Binding LoadPictureCommand}"
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
 								</Button>
 								<Button Classes="tool"
 										ToolTip.Tip="保存(Ctrl+S)"
-										HotKey="Ctrl+S"
 										Command="{Binding SavePictureCommand}"
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
 								</Button>
 								<Button Classes="tool"
-										ToolTip.Tip="名前を付けて保存"
+										ToolTip.Tip="名前を付けて保存(Ctrl+Shift+S)"
 										Command="{Binding SavePictureAsCommand}"
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource SaveAsIconGeometry}" Classes="icon" />

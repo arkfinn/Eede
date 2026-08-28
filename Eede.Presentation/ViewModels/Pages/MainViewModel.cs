@@ -107,6 +107,12 @@ public partial class MainViewModel : ViewModelBase
     public ReactiveCommand<IFileStorage?, RxVoid> SavePictureCommand { get; private set; }
     public ReactiveCommand<IFileStorage?, RxVoid> SavePictureAsCommand { get; private set; }
     public ReactiveCommand<RxVoid, RxVoid> DeselectCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> SwapColorsCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ResetDefaultColorsCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> IncreasePenWidthCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> DecreasePenWidthCommand { get; private set; }
+    public ReactiveCommand<int, RxVoid> SetPenWidthCommand { get; private set; }
+    public ReactiveCommand<DrawStyleType, RxVoid> SetDrawStyleCommand { get; private set; }
     public ReactiveCommand<PictureActions, RxVoid> PictureActionCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> PutPaletteColorCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> GetPaletteColorCommand { get; private set; }
@@ -254,6 +260,33 @@ public partial class MainViewModel : ViewModelBase
         DeselectCommand = ReactiveCommand.Create(() =>
         {
             DrawableCanvasViewModel.CommitSelection(true);
+        });
+        SwapColorsCommand = ReactiveCommand.Create(() =>
+        {
+            var temp = PenColor;
+            PenColor = CurrentBackgroundColor.Value;
+            CurrentBackgroundColor = new BackgroundColor(temp);
+        });
+        ResetDefaultColorsCommand = ReactiveCommand.Create(() =>
+        {
+            PenColor = new ArgbColor(255, 0, 0, 0); // 前景: 黒
+            CurrentBackgroundColor = new BackgroundColor(new ArgbColor(255, 255, 255, 255)); // 背景: 白
+        });
+        IncreasePenWidthCommand = ReactiveCommand.Create(() =>
+        {
+            PenWidth = Math.Min(64, PenWidth + 1);
+        });
+        DecreasePenWidthCommand = ReactiveCommand.Create(() =>
+        {
+            PenWidth = Math.Max(1, PenWidth - 1);
+        });
+        SetPenWidthCommand = ReactiveCommand.Create<int>((size) =>
+        {
+            PenWidth = Math.Clamp(size, 1, 64);
+        });
+        SetDrawStyleCommand = ReactiveCommand.Create<DrawStyleType>((style) =>
+        {
+            DrawStyle = style;
         });
         CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);

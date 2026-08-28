@@ -5,6 +5,7 @@
         xmlns:vm="using:Eede.Presentation.ViewModels.Pages"
         xmlns:pages="clr-namespace:Eede.Presentation.Views.Pages"
         xmlns:ext="using:Eede.Presentation.Common.MarkupExtensions"
+        xmlns:p="using:Eede.Domain.ImageEditing.DrawingTools"
         xmlns:reactiveUi="http://reactiveui.net"
         x:TypeArguments="vm:MainViewModel"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -30,6 +31,10 @@
     <KeyBinding Gesture="Ctrl+V" Command="{Binding PasteCommand}" />
     <KeyBinding Gesture="Escape" Command="{Binding DeselectCommand}" />
     <KeyBinding Gesture="Ctrl+D" Command="{Binding DeselectCommand}" />
+    <!-- Shape Modifiers -->
+    <KeyBinding Gesture="Shift+U" Command="{Binding SetDrawStyleCommand}" CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" />
+    <KeyBinding Gesture="Shift+R" Command="{Binding SetDrawStyleCommand}" CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" />
+    <KeyBinding Gesture="Shift+C" Command="{Binding SetDrawStyleCommand}" CommandParameter="{x:Static p:DrawStyleType.FilledEllipse}" />
   </reactiveUi:ReactiveWindow.KeyBindings>
   <pages:MainView />
 </reactiveUi:ReactiveWindow>

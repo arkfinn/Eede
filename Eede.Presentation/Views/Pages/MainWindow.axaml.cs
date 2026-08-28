@@ -14,6 +14,7 @@ using System.Reactive.Disposables.Fluent;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.GeometricTransformations;
 
 namespace Eede.Presentation.Views.Pages;
 
@@ -89,6 +90,46 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
                     break;
                 case Key.OemCloseBrackets:
                     ViewModel?.IncreasePenWidthCommand.Execute().Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.Up:
+                    ViewModel?.PictureActionCommand.Execute(PictureActions.ShiftUp).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.Down:
+                    ViewModel?.PictureActionCommand.Execute(PictureActions.ShiftDown).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.Left:
+                    ViewModel?.PictureActionCommand.Execute(PictureActions.ShiftLeft).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.Right:
+                    ViewModel?.PictureActionCommand.Execute(PictureActions.ShiftRight).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.D1:
+                    ViewModel?.SetMagnificationCommand.Execute(1f).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.D2:
+                    ViewModel?.SetMagnificationCommand.Execute(2f).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.D3:
+                    ViewModel?.SetMagnificationCommand.Execute(4f).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.D4:
+                    ViewModel?.SetMagnificationCommand.Execute(6f).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.D5:
+                    ViewModel?.SetMagnificationCommand.Execute(8f).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.D6:
+                    ViewModel?.SetMagnificationCommand.Execute(12f).Subscribe();
                     e.Handled = true;
                     break;
             }

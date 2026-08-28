@@ -113,6 +113,13 @@ public partial class MainViewModel : ViewModelBase
     public ReactiveCommand<RxVoid, RxVoid> DecreasePenWidthCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> SetPenWidthCommand { get; private set; }
     public ReactiveCommand<DrawStyleType, RxVoid> SetDrawStyleCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> TogglePixelGridCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ToggleCursorGridCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ToggleTransparencyCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ZoomInCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ZoomOutCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ResetZoomCommand { get; private set; }
+    public ReactiveCommand<float, RxVoid> SetMagnificationCommand { get; private set; }
     public ReactiveCommand<PictureActions, RxVoid> PictureActionCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> PutPaletteColorCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> GetPaletteColorCommand { get; private set; }
@@ -287,6 +294,51 @@ public partial class MainViewModel : ViewModelBase
         SetDrawStyleCommand = ReactiveCommand.Create<DrawStyleType>((style) =>
         {
             DrawStyle = style;
+        });
+        TogglePixelGridCommand = ReactiveCommand.Create(() =>
+        {
+            IsShowPixelGrid = !IsShowPixelGrid;
+        });
+        ToggleCursorGridCommand = ReactiveCommand.Create(() =>
+        {
+            IsShowCursorGrid = !IsShowCursorGrid;
+        });
+        ToggleTransparencyCommand = ReactiveCommand.Create(() =>
+        {
+            IsTransparencyEnabled = !IsTransparencyEnabled;
+        });
+        float[] magnificationSteps = [1f, 2f, 4f, 6f, 8f, 12f];
+        ZoomInCommand = ReactiveCommand.Create(() =>
+        {
+            float current = Magnification.Value;
+            foreach (float step in magnificationSteps)
+            {
+                if (step > current)
+                {
+                    Magnification = new Magnification(step);
+                    return;
+                }
+            }
+        });
+        ZoomOutCommand = ReactiveCommand.Create(() =>
+        {
+            float current = Magnification.Value;
+            for (int i = magnificationSteps.Length - 1; i >= 0; i--)
+            {
+                if (magnificationSteps[i] < current)
+                {
+                    Magnification = new Magnification(magnificationSteps[i]);
+                    return;
+                }
+            }
+        });
+        ResetZoomCommand = ReactiveCommand.Create(() =>
+        {
+            Magnification = new Magnification(1f);
+        });
+        SetMagnificationCommand = ReactiveCommand.Create<float>((mag) =>
+        {
+            Magnification = new Magnification(mag);
         });
         CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);

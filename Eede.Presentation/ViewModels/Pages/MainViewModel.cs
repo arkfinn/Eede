@@ -409,15 +409,18 @@ public partial class MainViewModel : ViewModelBase
         {
             if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
             {
-                // ドック枠の位置に対してPushを実行
-                OnPushToDrawArea(vm, new PicturePushEventArgs(vm.PictureBuffer, new PictureArea(new Position(0, 0), CursorSize)));
+                // メインキャンバスの内容をドック側のカーソル位置へ転送・書き戻し
+                Position targetPos = vm.GlobalState.CursorArea.RealPosition;
+                OnPullFromDrawArea(vm, new PicturePullEventArgs(vm.PictureBuffer, targetPos));
             }
         });
         PullFromActiveDockCommand = ReactiveCommand.Create(() =>
         {
             if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
             {
-                OnPullFromDrawArea(vm, new PicturePullEventArgs(vm.PictureBuffer, new Position(0, 0)));
+                // ドック側のカーソル位置の画像をメインキャンバスへ再読み込み
+                Position targetPos = vm.GlobalState.CursorArea.RealPosition;
+                OnPushToDrawArea(vm, new PicturePushEventArgs(vm.PictureBuffer, new PictureArea(targetPos, CursorSize)));
             }
         });
         CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);

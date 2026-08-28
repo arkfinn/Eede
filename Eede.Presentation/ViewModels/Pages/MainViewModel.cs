@@ -252,10 +252,25 @@ public partial class MainViewModel : ViewModelBase
         });
         welcomeViewModel.OpenRecentFileCommand.Subscribe(async path =>
         {
+            if (!System.IO.File.Exists(path))
+            {
+                // ファイルが存在しない場合はリストから削除して更新
+                var settings = await _loadSettingsUseCase.ExecuteAsync();
+                var item = settings.RecentFiles.FirstOrDefault(f => f.Path == path);
+                if (item != null)
+                {
+                    settings.RecentFiles.Remove(item);
+                    await _saveSettingsUseCase.ExecuteAsync(settings);
+                    WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
+                }
+                return;
+            }
+
             DockPictureViewModel? newPicture = await OpenPicture(new Uri(path));
             if (newPicture != null)
             {
                 Pictures.Add(newPicture);
+                WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
             }
         });
         _ = welcomeViewModel.LoadRecentFilesCommand.Execute();
@@ -718,6 +733,7 @@ public partial class MainViewModel : ViewModelBase
         if (newPicture != null)
         {
             Pictures.Add(newPicture);
+            WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
         }
 
     }
@@ -736,6 +752,10 @@ public partial class MainViewModel : ViewModelBase
             foreach (DockPictureViewModel vm in e.OldItems)
             {
                 CleanupDockPicture(vm);
+            }
+            if (Pictures.Count == 0)
+            {
+                WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
             }
         }
     }
@@ -838,6 +858,11 @@ public partial class MainViewModel : ViewModelBase
         if (saveResult.IsSaved && saveResult.File != null)
         {
             e.UpdateFile(saveResult.File);
+
+            var settings = await _loadSettingsUseCase.ExecuteAsync();
+            settings.AddRecentFile(saveResult.File.Path.ToString(), DateTime.Now);
+            await _saveSettingsUseCase.ExecuteAsync(settings);
+            WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
         }
     }
 

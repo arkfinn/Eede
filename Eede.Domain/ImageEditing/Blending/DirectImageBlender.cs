@@ -13,15 +13,8 @@ public class DirectImageBlender : ImageBlenderBase
             int toPos = (startX * 4) + (toStride * y);
             int fromPos = ((startX - toPosition.X) * 4) + (fromStride * (y - toPosition.Y));
 
-            for (int x = startX; x < maxX; x++)
-            {
-                toPixels[toPos + 0] = fromSpan[fromPos + 0];
-                toPixels[toPos + 1] = fromSpan[fromPos + 1];
-                toPixels[toPos + 2] = fromSpan[fromPos + 2];
-                toPixels[toPos + 3] = fromSpan[fromPos + 3];
-                toPos += 4;
-                fromPos += 4;
-            }
+            int length = (maxX - startX) * 4;
+            fromSpan.Slice(fromPos, length).CopyTo(new Span<byte>(toPixels).Slice(toPos, length));
         }
     }
 }

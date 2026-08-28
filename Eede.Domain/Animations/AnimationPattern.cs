@@ -16,7 +16,16 @@ public class AnimationPattern
     {
         if (frames == null) throw new ArgumentNullException(nameof(frames));
         Name = name;
-        Frames = frames.ToList();
+
+        if (frames is System.Collections.Immutable.IImmutableList<AnimationFrame> || frames is System.Collections.ObjectModel.ReadOnlyCollection<AnimationFrame>)
+        {
+            Frames = frames;
+        }
+        else
+        {
+            Frames = frames.ToList();
+        }
+
         Grid = grid;
     }
 

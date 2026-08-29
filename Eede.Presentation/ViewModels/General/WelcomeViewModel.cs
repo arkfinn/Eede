@@ -151,6 +151,8 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
 
     private async Task InitializeAsync()
     {
+        LoadRecentFilesCommand.Execute().Subscribe();
+
         if (_checkUpdateUseCase == null) return;
 
         await _checkUpdateUseCase.ExecuteAsync();

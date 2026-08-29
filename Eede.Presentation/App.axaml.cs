@@ -139,7 +139,7 @@ public partial class App : Avalonia.Application
         services.AddSingleton<MainViewModel>();
         services.AddTransient<NewPictureWindowViewModel>();
         services.AddTransient<DockPictureViewModel>();
-        services.AddTransient<WelcomeViewModel>();
+        services.AddSingleton<WelcomeViewModel>();
 
         // Factories
         services.AddSingleton<Func<DockPictureViewModel>>(sp => () => sp.GetRequiredService<DockPictureViewModel>());

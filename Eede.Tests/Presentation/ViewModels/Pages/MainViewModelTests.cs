@@ -138,7 +138,7 @@ public class MainViewModelTests
     }
 
     [AvaloniaTest]
-    public void OnPushToDrawArea_ShouldCallCommitSelectionWithTrue()
+    public void OnPullToDrawArea_ShouldCallCommitSelectionWithTrue()
     {
         var mainVM = CreateMainViewModel();
         var dockPictureVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
@@ -151,13 +151,13 @@ public class MainViewModelTests
 
         _interactionCoordinatorMock.Invocations.Clear();
 
-        dockPictureVM.OnPicturePush.Execute(area).Subscribe();
+        dockPictureVM.OnPicturePull.Execute(area).Subscribe();
 
         _interactionCoordinatorMock.Verify(x => x.CommitSelection(true), Times.AtLeastOnce);
     }
 
     [AvaloniaTest]
-    public void OnPullFromDrawArea_ShouldCallCommitSelectionWithTrue()
+    public void OnPushFromDrawArea_ShouldCallCommitSelectionWithTrue()
     {
         var mainVM = CreateMainViewModel();
         var dockPictureVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
@@ -170,7 +170,7 @@ public class MainViewModelTests
 
         _interactionCoordinatorMock.Invocations.Clear();
 
-        dockPictureVM.OnPicturePull.Execute(pos).Subscribe();
+        dockPictureVM.OnPicturePush.Execute(pos).Subscribe();
 
         _interactionCoordinatorMock.Verify(x => x.CommitSelection(true), Times.AtLeastOnce);
     }

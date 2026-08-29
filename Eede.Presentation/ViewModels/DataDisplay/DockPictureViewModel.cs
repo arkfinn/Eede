@@ -131,8 +131,8 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
             Id = Guid.NewGuid().ToString();
 
-            OnPicturePush = ReactiveCommand.Create<PictureArea>(ExecutePicturePush);
-            OnPicturePull = ReactiveCommand.Create<Position>(ExecutePicturePull);
+            OnPicturePush = ReactiveCommand.Create<Position>(ExecutePicturePush);
+            OnPicturePull = ReactiveCommand.Create<PictureArea>(ExecutePicturePull);
             OnPictureUpdate = ReactiveCommand.Create<Picture>(ExecutePictureUpdate);
             OnClosing = ReactiveCommand.CreateFromTask(ExecuteClosing);
             CloseCommand = ReactiveCommand.CreateFromTask(ExecuteClose);
@@ -315,22 +315,22 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             }
         }
 
-        public ReactiveCommand<PictureArea, RxVoid> OnPicturePush { get; }
+        public ReactiveCommand<Position, RxVoid> OnPicturePush { get; }
         public event EventHandler<PicturePushEventArgs>? PicturePush;
-        private void ExecutePicturePush(PictureArea area)
+        private void ExecutePicturePush(Position position)
         {
-            PicturePush?.Invoke(this, new PicturePushEventArgs(BringPictureBuffer(), area));
-        }
-
-        public ReactiveCommand<Position, RxVoid> OnPicturePull { get; }
-        public event EventHandler<PicturePullEventArgs>? PicturePull;
-        private void ExecutePicturePull(Position position)
-        {
-            PicturePull?.Invoke(this, new PicturePullEventArgs(BringPictureBuffer(), position));
+            PicturePush?.Invoke(this, new PicturePushEventArgs(BringPictureBuffer(), position));
             if (!Edited)
             {
                 Edited = true;
             }
+        }
+
+        public ReactiveCommand<PictureArea, RxVoid> OnPicturePull { get; }
+        public event EventHandler<PicturePullEventArgs>? PicturePull;
+        private void ExecutePicturePull(PictureArea area)
+        {
+            PicturePull?.Invoke(this, new PicturePullEventArgs(BringPictureBuffer(), area));
         }
 
         private Picture BringPictureBuffer()

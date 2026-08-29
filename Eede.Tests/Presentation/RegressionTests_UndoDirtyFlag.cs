@@ -133,9 +133,9 @@ namespace Eede.Presentation.Tests
 
             Assert.That(vm.Edited, Is.False, "Initially not edited");
 
-            // Perform Pull
-            vm.OnPicturePull.Execute(new Position(0, 0)).Subscribe();
-            Assert.That(vm.Edited, Is.True, "Marked as edited after Pull");
+            // Perform Push to dock
+            vm.OnPicturePush.Execute(new Position(0, 0)).Subscribe();
+            Assert.That(vm.Edited, Is.True, "Marked as edited after Push");
 
             // Undo
             _mainViewModel.UndoCommand.Execute().Subscribe();
@@ -156,8 +156,8 @@ namespace Eede.Presentation.Tests
             _mainViewModel.Pictures.Add(vm);
             _mainViewModel.ActiveDockable = new Document { DataContext = vm };
 
-            vm.OnPicturePush.Execute(new PictureArea(new Position(0, 0), picture.Size)).Subscribe();
-            Assert.That(vm.Edited, Is.False, "Not edited after Push");
+            vm.OnPicturePull.Execute(new PictureArea(new Position(0, 0), picture.Size)).Subscribe();
+            Assert.That(vm.Edited, Is.False, "Not edited after Pull");
 
             // Perform PictureAction
             _mainViewModel.PictureActionCommand.Execute(PictureActions.RotateLeft).Subscribe();
@@ -173,7 +173,7 @@ namespace Eede.Presentation.Tests
             vm.Initialize(picture, new FilePath("test.png"));
             _mainViewModel.Pictures.Add(vm);
             _mainViewModel.ActiveDockable = new Document { DataContext = vm };
-            vm.OnPicturePush.Execute(new PictureArea(new Position(0, 0), picture.Size)).Subscribe();
+            vm.OnPicturePull.Execute(new PictureArea(new Position(0, 0), picture.Size)).Subscribe();
 
             _mainViewModel.PictureActionCommand.Execute(PictureActions.RotateLeft).Subscribe();
             

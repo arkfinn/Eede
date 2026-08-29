@@ -6,6 +6,7 @@
              xmlns:sk="clr-namespace:Eede.Domain.SharedKernel;assembly=Eede.Domain"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="600"
              x:Class="Eede.Presentation.Views.General.WelcomeView"
+             x:Name="WelcomeViewRoot"
              x:DataType="vm:WelcomeViewModel">
   <Design.DataContext>
     <!-- プレビュー用のダミーデータ -->
@@ -57,7 +58,7 @@
             <ItemsControl ItemsSource="{Binding RecentFiles}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <Button Command="{Binding ((vm:WelcomeViewModel)DataContext).OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  <Button Command="{Binding #WelcomeViewRoot.((vm:WelcomeViewModel)DataContext).OpenRecentFileCommand}"
                           CommandParameter="{Binding Path}"
                           Classes="Link">
                     <StackPanel Orientation="Horizontal" Spacing="10">

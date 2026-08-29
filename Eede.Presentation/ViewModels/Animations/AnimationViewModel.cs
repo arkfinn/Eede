@@ -69,6 +69,8 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
     public ReactiveCommand<int, RxVoid> AddFrameCommand { get; }
     public ReactiveCommand<AnimationFrame, RxVoid> RemoveFrameAtCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> TogglePlayCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> NextFrameCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> PreviousFrameCommand { get; }
     public ReactiveCommand<IFileStorage, RxVoid> ExportCommand { get; }
     public ReactiveCommand<IFileStorage, RxVoid> ImportCommand { get; }
 
@@ -268,6 +270,20 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
             });
 
         TogglePlayCommand = ReactiveCommand.Create(() => { IsPlaying = !IsPlaying; });
+        NextFrameCommand = ReactiveCommand.Create(() =>
+        {
+            if (SelectedPattern != null && SelectedPattern.Frames.Count > 0)
+            {
+                CurrentFrameIndex = (CurrentFrameIndex + 1) % SelectedPattern.Frames.Count;
+            }
+        });
+        PreviousFrameCommand = ReactiveCommand.Create(() =>
+        {
+            if (SelectedPattern != null && SelectedPattern.Frames.Count > 0)
+            {
+                CurrentFrameIndex = (CurrentFrameIndex - 1 + SelectedPattern.Frames.Count) % SelectedPattern.Frames.Count;
+            }
+        });
 
         ExportCommand = ReactiveCommand.CreateFromTask<IFileStorage>(async storage =>
         {

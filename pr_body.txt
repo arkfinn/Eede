@@ -1,3 +1,0 @@
-💡 **What:** Moved `DirectImageBlender` instantiation outside of `foreach` loops in `DrawingSession`'s `Undo()` and `Redo()` methods.
-🎯 **Why:** To eliminate repeated object allocations during tight loop iterations in image history operations, reducing memory churn and execution time.
-📊 **Measured Improvement:** Baseline Undo was 449.3 ms, optimized to 453.3 ms. Baseline Redo was 457.8 ms, optimized to 450.7 ms. The change removes one `DirectImageBlender` allocation per sub-area in a diff batch which scales better with the number of discrete regions modified.

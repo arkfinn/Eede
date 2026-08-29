@@ -2,23 +2,10 @@
 using Eede.Domain.SharedKernel;
 using System;
 
-namespace Eede.Application.Pictures
+namespace Eede.Application.Pictures;
+
+public class PicturePushEventArgs(Picture graphics, Position position) : EventArgs
 {
-    public class PicturePushEventArgs : EventArgs
-    {
-        public PicturePushEventArgs(Picture graphics, PictureArea rect)
-        {
-            Picture = graphics ?? throw new ArgumentNullException(nameof(graphics));
-            Rect = rect;
-        }
-
-        public readonly Picture Picture;
-
-        public readonly PictureArea Rect;
-
-        public Picture CutOutImage()
-        {
-            return Picture.CutOut(Rect);
-        }
-    }
+    public readonly Picture Picture = graphics ?? throw new ArgumentNullException(nameof(graphics));
+    public readonly Position Position = position;
 }

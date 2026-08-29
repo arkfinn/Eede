@@ -1,4 +1,4 @@
-# Eede - Excellent Expert Dot Editor
+﻿# Eede - Excellent Expert Dot Editor
 [![.NET Core Desktop CI](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-ci.yml/badge.svg?branch=master)](https://github.com/arkfinn/Eede/actions/workflows/dotnet-desktop-ci.yml)
 ![](https://img.shields.io/github/license/arkfinn/Eede)
 ![](https://img.shields.io/github/v/release/arkfinn/Eede)
@@ -6,7 +6,6 @@
 ## 概要
 
 Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描くための専用ツールです。
-EDGE2 や Aseprite の操作性を融合した高速・直感的なキーボードショートカットを備えています。
 
 📖 **[キーボードショートカット一覧・操作ガイドはこちら (Keybindings Reference)](Documents/features/keybindings.md)**
 

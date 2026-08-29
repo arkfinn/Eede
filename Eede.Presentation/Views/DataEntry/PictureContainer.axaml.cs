@@ -11,6 +11,7 @@ using Eede.Domain.Animations;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.SharedKernel;
+using Eede.Presentation.Common;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.ViewModels.DataDisplay;
 using ReactiveUI;
@@ -27,6 +28,7 @@ namespace Eede.Presentation.Views.DataEntry
     public partial class PictureContainer : UserControl
     {
         private ISelectionState _selectionState;
+        private readonly ZoomAndPanController _zoomAndPanController = new();
         private DockPictureViewModel? _viewModel;
         private readonly List<IDisposable> _parentOpacityDisposables = new();
         private bool _visibleCursor = false;
@@ -37,12 +39,63 @@ namespace Eede.Presentation.Views.DataEntry
         {
             InitializeComponent();
             DataContextChanged += PictureContainer_DataContextChanged;
+
+            this.PointerWheelChanged += OnPointerWheelChanged;
+            this.PointerEntered += OnPointerEntered;
+            this.PointerCaptureLost += OnPointerCaptureLost;
+            _zoomAndPanController.SpaceStateChanged += OnSpaceStateChanged;
+
+            this.KeyDown += OnKeyDown;
+            this.KeyUp += OnKeyUp;
+            canvas.KeyDown += OnKeyDown;
+            canvas.KeyUp += OnKeyUp;
+
             canvas.PointerPressed += OnPointerPressed;
             canvas.PointerMoved += OnPointerMoved;
             canvas.PointerReleased += OnPointerReleased;
             canvas.PointerExited += OnPointerExited;
             _localCursorArea = HalfBoxArea.Create(new Position(0, 0), new PictureSize(32, 32));
             _selectionState = new NormalCursorState(_localCursorArea);
+        }
+
+        private void OnPointerEntered(object? sender, PointerEventArgs e)
+        {
+            this.Focus();
+        }
+
+        private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+        {
+            if (_viewModel != null && scrollViewer != null)
+            {
+                _zoomAndPanController.HandleWheel(
+                    scrollViewer,
+                    e,
+                    _viewModel.Magnification,
+                    mag => _viewModel.Magnification = mag,
+                    () => this.UpdateLayout());
+            }
+        }
+
+        private void OnKeyDown(object? sender, KeyEventArgs e)
+        {
+            _zoomAndPanController.HandleKeyDown(e);
+        }
+
+        private void OnKeyUp(object? sender, KeyEventArgs e)
+        {
+            _zoomAndPanController.HandleKeyUp(e);
+        }
+
+        private void OnSpaceStateChanged(bool isSpacePressed)
+        {
+            if (isSpacePressed)
+            {
+                Cursor = new Cursor(StandardCursorType.Hand);
+            }
+            else
+            {
+                Cursor = Cursor.Default;
+            }
         }
 
         protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -503,6 +556,13 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
+            this.Focus();
+
+            if (_zoomAndPanController.HandlePointerPressed(scrollViewer, canvas, e))
+            {
+                return;
+            }
+
             if (_viewModel == null)
             {
                 return;
@@ -568,6 +628,11 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerMoved(object? sender, PointerEventArgs e)
         {
+            if (_zoomAndPanController.HandlePointerMoved(scrollViewer, canvas, e))
+            {
+                return;
+            }
+
             if (_viewModel == null) return;
 
             Position nowPosition = PointToPosition(e.GetPosition(canvas));
@@ -592,6 +657,11 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
+            if (_zoomAndPanController.HandlePointerReleased(canvas, e))
+            {
+                return;
+            }
+
             if (_viewModel == null) return;
 
             var nowPosition = PointToPosition(e.GetPosition(canvas));
@@ -605,6 +675,11 @@ namespace Eede.Presentation.Views.DataEntry
                     OnPointerRightButtonReleased(_viewModel);
                     break;
             }
+        }
+
+        private void OnPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
+        {
+            _zoomAndPanController.HandlePointerCaptureLost(e);
         }
 
         private void OnPointerRightButtonReleased(DockPictureViewModel vm)
@@ -651,6 +726,7 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerExited(object? sender, PointerEventArgs e)
         {
+            _zoomAndPanController.Reset();
             VisibleCursor = false;
             UpdateCursor();
         }

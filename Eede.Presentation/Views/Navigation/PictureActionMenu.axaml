@@ -15,51 +15,51 @@
 		</Grid.Styles>
 		<StackPanel Orientation="Vertical" >
 			<Button Classes="tool"
-					ToolTip.Tip="上にシフト: 画像全体（または選択範囲）を1ピクセル上にずらします"
+					ToolTip.Tip="上にシフト(↑): 画像全体（または選択範囲）を1ピクセル上にずらします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.ShiftUp }" >
 				<PathIcon Data="{StaticResource ArrowUpwardIconGeometry}" Classes="icon" />
 			</Button>
 			<Button Classes="tool"
-					ToolTip.Tip="右にシフト: 画像全体（または選択範囲）を1ピクセル右にずらします"
+					ToolTip.Tip="右にシフト(→): 画像全体（または選択範囲）を1ピクセル右にずらします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.ShiftRight }" >
 				<PathIcon Data="{StaticResource ArrowForwardIconGeometry}" Classes="icon" />
 			</Button>
 			<Button Classes="tool"
-					ToolTip.Tip="左にシフト: 画像全体（または選択範囲）を1ピクセル左にずらします"
+					ToolTip.Tip="左にシフト(←): 画像全体（または選択範囲）を1ピクセル左にずらします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.ShiftLeft }" >
 				<PathIcon Data="{StaticResource ArrowBackIconGeometry}" Classes="icon" />
 			</Button>
 			<Button Classes="tool"
-					ToolTip.Tip="下にシフト: 画像全体（または選択範囲）を1ピクセル下にずらします"
+					ToolTip.Tip="下にシフト(↓): 画像全体（または選択範囲）を1ピクセル下にずらします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.ShiftDown }" >
 				<PathIcon Data="{StaticResource ArrowDownwardIconGeometry}" Classes="icon" />
 			</Button>
 			<Panel Classes="vertical-separator" />
 			<Button Classes="tool"
-					ToolTip.Tip="左右反転: 画像（または選択範囲）を左右逆にひっくり返します"
+					ToolTip.Tip="左右反転(Shift+H): 画像（または選択範囲）を左右逆にひっくり返します"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.FlipHorizontal }" >
 				<PathIcon Data="{StaticResource SwapHorizIconGeometry}" Classes="icon" />
 			</Button>
 			<Button Classes="tool"
-					ToolTip.Tip="上下反転: 画像（または選択範囲）を上下逆にひっくり返します"
+					ToolTip.Tip="上下反転(Shift+V): 画像（または選択範囲）を上下逆にひっくり返します"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.FlipVertical }" >
 				<PathIcon Data="{StaticResource SwapVertIconGeometry}" Classes="icon" />
 			</Button>
 			<Panel Classes="vertical-separator" />
 			<Button Classes="tool"
-					ToolTip.Tip="左を右に鏡面コピー: 左半分を右半分に反転してコピーします"
+					ToolTip.Tip="左を右に鏡面コピー(Alt+H): 左半分を右半分に反転してコピーします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.MirrorCopyRight }" >
 				<PathIcon Data="{StaticResource MirrorCopyRightIconGeometry}" Classes="icon" />
 			</Button>
 			<Button Classes="tool"
-					ToolTip.Tip="上を下に鏡面コピー: 上半分を下半分に反転してコピーします"
+					ToolTip.Tip="上を下に鏡面コピー(Alt+V): 上半分を下半分に反転してコピーします"
 					Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 					CommandParameter="{ x:Static p:PictureActions.MirrorCopyBottom }" >
 				<PathIcon Data="{StaticResource MirrorCopyBottomIconGeometry}" Classes="icon" />
@@ -67,7 +67,7 @@
 			<Panel Classes="vertical-separator" />
 			<Button
 			Classes="tool"
-			ToolTip.Tip="右90度回転: 画像（または選択範囲）を時計回りに90度回転させます"
+			ToolTip.Tip="右90度回転(Ctrl+R): 画像（または選択範囲）を時計回りに90度回転させます"
 			Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 			CommandParameter="{ x:Static p:PictureActions.RotateRight }" >
 				<PathIcon Data="{StaticResource SubdirectoryArrowLeftIconGeometry}" Classes="icon" />
@@ -75,20 +75,20 @@
 			<Panel Classes="vertical-separator" />
 			<Button
 			Classes="tool"
-			ToolTip.Tip="拡大縮小: 画像全体（または選択範囲）を指定した数値でリサイズします"
+			ToolTip.Tip="拡大縮小(Ctrl+T): 画像全体（または選択範囲）を指定した数値でリサイズします"
 			Command="{ Binding ScalingCommand, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }" >
 				<PathIcon Data="{StaticResource OpenInFullIconGeometry}" Classes="icon" />
 			</Button>
 			<Button
 			Classes="tool"
-			ToolTip.Tip="強アンチエイリアス: 1ピクセル単位で強力に平滑化します（がっつり）"
+			ToolTip.Tip="強アンチエイリアス(Ctrl+Alt+A): 1ピクセル単位で強力に平滑化します（がっつり）"
 			Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 			CommandParameter="{ x:Static p:PictureActions.AntiAliasStrong }" >
 				<PathIcon Data="{StaticResource AntiAliasStrongIconGeometry}" Classes="icon" />
 			</Button>
 			<Button
 			Classes="tool"
-			ToolTip.Tip="弱アンチエイリアス: 2倍オーバーサンプリングで繊細に平滑化します（隠し味）"
+			ToolTip.Tip="弱アンチエイリアス(Ctrl+Shift+Alt+A): 2倍オーバーサンプリングで繊細に平滑化します（隠し味）"
 			Command="{ Binding Command, RelativeSource={ RelativeSource AncestorType={ x:Type local:PictureActionMenu } } }"
 			CommandParameter="{ x:Static p:PictureActions.AntiAliasSubtle }" >
 				<PathIcon Data="{StaticResource AntiAliasSubtleIconGeometry}" Classes="icon" />

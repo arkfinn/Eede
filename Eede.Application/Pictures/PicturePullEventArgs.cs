@@ -4,9 +4,20 @@ using System;
 
 namespace Eede.Application.Pictures;
 
-public class PicturePullEventArgs(Picture graphics, Position position) : EventArgs
+public class PicturePullEventArgs : EventArgs
 {
-    public readonly Picture Picture = graphics ?? throw new ArgumentNullException(nameof(graphics));
-    public readonly Position Position = position;
-}
+    public PicturePullEventArgs(Picture graphics, PictureArea rect)
+    {
+        Picture = graphics ?? throw new ArgumentNullException(nameof(graphics));
+        Rect = rect;
+    }
 
+    public readonly Picture Picture;
+
+    public readonly PictureArea Rect;
+
+    public Picture CutOutImage()
+    {
+        return Picture.CutOut(Rect);
+    }
+}

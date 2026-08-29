@@ -106,6 +106,29 @@ public partial class MainViewModel : ViewModelBase
     public ReactiveCommand<IFileStorage?, RxVoid> LoadPictureCommand { get; private set; }
     public ReactiveCommand<IFileStorage?, RxVoid> SavePictureCommand { get; private set; }
     public ReactiveCommand<IFileStorage?, RxVoid> SavePictureAsCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> DeselectCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> SwapColorsCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ResetDefaultColorsCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> IncreasePenWidthCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> DecreasePenWidthCommand { get; private set; }
+    public ReactiveCommand<int, RxVoid> SetPenWidthCommand { get; private set; }
+    public ReactiveCommand<DrawStyleType, RxVoid> SetDrawStyleCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> TogglePixelGridCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ToggleCursorGridCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ToggleTransparencyCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ZoomInCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ZoomOutCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ResetZoomCommand { get; private set; }
+    public ReactiveCommand<float, RxVoid> SetMagnificationCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> CloseActivePictureCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> ToggleAnimationPanelCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> SetLayerStyleRgbCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> SetLayerStyleAlphaCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> SetLayerStyleArgbCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> IncreaseMinCursorSizeCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> DecreaseMinCursorSizeCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> PushToActiveDockCommand { get; private set; }
+    public ReactiveCommand<RxVoid, RxVoid> PullFromActiveDockCommand { get; private set; }
     public ReactiveCommand<PictureActions, RxVoid> PictureActionCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> PutPaletteColorCommand { get; private set; }
     public ReactiveCommand<int, RxVoid> GetPaletteColorCommand { get; private set; }
@@ -229,13 +252,28 @@ public partial class MainViewModel : ViewModelBase
         });
         welcomeViewModel.OpenRecentFileCommand.Subscribe(async path =>
         {
+            if (!System.IO.File.Exists(path))
+            {
+                // ファイルが存在しない場合はリストから削除して更新
+                var settings = await _loadSettingsUseCase.ExecuteAsync();
+                var item = settings.RecentFiles.FirstOrDefault(f => f.Path == path);
+                if (item != null)
+                {
+                    settings.RecentFiles.Remove(item);
+                    await _saveSettingsUseCase.ExecuteAsync(settings);
+                    WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
+                }
+                return;
+            }
+
             DockPictureViewModel? newPicture = await OpenPicture(new Uri(path));
             if (newPicture != null)
             {
                 Pictures.Add(newPicture);
+                WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
             }
         });
-        _ = welcomeViewModel.LoadRecentFilesCommand.Execute();
+        welcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
 
         LoadPictureCommand = ReactiveCommand.Create<IFileStorage?>(ExecuteLoadPicture);
         SavePictureCommand = ReactiveCommand.Create<IFileStorage?>(ExecuteSavePicture);
@@ -250,6 +288,156 @@ public partial class MainViewModel : ViewModelBase
         GetBackgroundColorCommand = ReactiveCommand.Create(() => { });
         ScalingCommand = ReactiveCommand.CreateFromTask(ExecuteScalingAsync);
         RequestCloseCommand = ReactiveCommand.CreateFromTask(RequestCloseAsync);
+        DeselectCommand = ReactiveCommand.Create(() =>
+        {
+            DrawableCanvasViewModel.CommitSelection(true);
+        });
+        SwapColorsCommand = ReactiveCommand.Create(() =>
+        {
+            var temp = PenColor;
+            PenColor = CurrentBackgroundColor.Value;
+            CurrentBackgroundColor = new BackgroundColor(temp);
+        });
+        ResetDefaultColorsCommand = ReactiveCommand.Create(() =>
+        {
+            PenColor = new ArgbColor(255, 0, 0, 0); // 前景: 黒
+            CurrentBackgroundColor = new BackgroundColor(new ArgbColor(255, 255, 255, 255)); // 背景: 白
+        });
+        IncreasePenWidthCommand = ReactiveCommand.Create(() =>
+        {
+            PenWidth = Math.Min(64, PenWidth + 1);
+        });
+        DecreasePenWidthCommand = ReactiveCommand.Create(() =>
+        {
+            PenWidth = Math.Max(1, PenWidth - 1);
+        });
+        SetPenWidthCommand = ReactiveCommand.Create<int>((size) =>
+        {
+            PenWidth = Math.Clamp(size, 1, 64);
+        });
+        SetDrawStyleCommand = ReactiveCommand.Create<DrawStyleType>((style) =>
+        {
+            DrawStyle = style;
+        });
+        TogglePixelGridCommand = ReactiveCommand.Create(() =>
+        {
+            IsShowPixelGrid = !IsShowPixelGrid;
+        });
+        ToggleCursorGridCommand = ReactiveCommand.Create(() =>
+        {
+            IsShowCursorGrid = !IsShowCursorGrid;
+        });
+        ToggleTransparencyCommand = ReactiveCommand.Create(() =>
+        {
+            IsTransparencyEnabled = !IsTransparencyEnabled;
+        });
+        float[] magnificationSteps = [1f, 2f, 4f, 6f, 8f, 12f];
+        ZoomInCommand = ReactiveCommand.Create(() =>
+        {
+            float current = Magnification.Value;
+            foreach (float step in magnificationSteps)
+            {
+                if (step > current)
+                {
+                    Magnification = new Magnification(step);
+                    return;
+                }
+            }
+        });
+        ZoomOutCommand = ReactiveCommand.Create(() =>
+        {
+            float current = Magnification.Value;
+            for (int i = magnificationSteps.Length - 1; i >= 0; i--)
+            {
+                if (magnificationSteps[i] < current)
+                {
+                    Magnification = new Magnification(magnificationSteps[i]);
+                    return;
+                }
+            }
+        });
+        ResetZoomCommand = ReactiveCommand.Create(() =>
+        {
+            Magnification = new Magnification(1f);
+        });
+        SetMagnificationCommand = ReactiveCommand.Create<float>((mag) =>
+        {
+            Magnification = new Magnification(mag);
+        });
+        CloseActivePictureCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
+            {
+                bool canClose = await vm.ExecuteClosing();
+                if (canClose)
+                {
+                    Pictures.Remove(vm);
+                }
+            }
+        });
+        ToggleAnimationPanelCommand = ReactiveCommand.Create(() =>
+        {
+            IsAnimationPanelExpanded = !IsAnimationPanelExpanded;
+        });
+        SetLayerStyleRgbCommand = ReactiveCommand.Create(() =>
+        {
+            ImageTransfer = new RGBToneImageTransfer();
+            ImageBlender = new RGBOnlyImageBlender();
+        });
+        SetLayerStyleAlphaCommand = ReactiveCommand.Create(() =>
+        {
+            ImageTransfer = new AlphaToneImageTransfer();
+            ImageBlender = new AlphaOnlyImageBlender();
+        });
+        SetLayerStyleArgbCommand = ReactiveCommand.Create(() =>
+        {
+            ImageTransfer = new DirectImageTransfer();
+            ImageBlender = new DirectImageBlender();
+        });
+        IncreaseMinCursorSizeCommand = ReactiveCommand.Create(() =>
+        {
+            if (MinCursorSizeList != null && MinCursorSizeList.Count > 0)
+            {
+                int currentIdx = MinCursorSizeList.IndexOf(MinCursorWidth);
+                if (currentIdx >= 0 && currentIdx < MinCursorSizeList.Count - 1)
+                {
+                    int next = MinCursorSizeList[currentIdx + 1];
+                    MinCursorWidth = next;
+                    MinCursorHeight = next;
+                }
+            }
+        });
+        DecreaseMinCursorSizeCommand = ReactiveCommand.Create(() =>
+        {
+            if (MinCursorSizeList != null && MinCursorSizeList.Count > 0)
+            {
+                int currentIdx = MinCursorSizeList.IndexOf(MinCursorWidth);
+                if (currentIdx > 0)
+                {
+                    int prev = MinCursorSizeList[currentIdx - 1];
+                    MinCursorWidth = prev;
+                    MinCursorHeight = prev;
+                }
+            }
+        });
+        PushToActiveDockCommand = ReactiveCommand.Create(() =>
+        {
+            if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
+            {
+                // メインキャンバスの内容をドック側のカーソル位置へ転送・書き戻し (Push)
+                Position targetPos = vm.GlobalState.CursorArea.RealPosition;
+                OnPushFromDrawArea(vm, new PicturePushEventArgs(vm.PictureBuffer, targetPos));
+            }
+        });
+        PullFromActiveDockCommand = ReactiveCommand.Create(() =>
+        {
+            if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
+            {
+                // ドック側のカーソル位置の画像をメインキャンバスへ再読み込み (Pull)
+                Position targetPos = vm.GlobalState.CursorArea.RealPosition;
+                OnPullToDrawArea(vm, new PicturePullEventArgs(vm.PictureBuffer, new PictureArea(targetPos, CursorSize)));
+            }
+        });
         CopyCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         PasteCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
@@ -531,11 +719,12 @@ public partial class MainViewModel : ViewModelBase
 
     private async void ExecuteLoadPicture(IFileStorage? storage)
     {
-        if (storage == null)
+        var targetStorage = storage ?? FileStorage;
+        if (targetStorage == null)
         {
             return;
         }
-        Uri? result = await storage.OpenFilePickerAsync();
+        Uri? result = await targetStorage.OpenFilePickerAsync();
         if (result == null)
         {
             return;
@@ -544,6 +733,7 @@ public partial class MainViewModel : ViewModelBase
         if (newPicture != null)
         {
             Pictures.Add(newPicture);
+            WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
         }
 
     }
@@ -563,13 +753,17 @@ public partial class MainViewModel : ViewModelBase
             {
                 CleanupDockPicture(vm);
             }
+            if (Pictures.Count == 0)
+            {
+                WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
+            }
         }
     }
 
     private void CleanupDockPicture(DockPictureViewModel vm)
     {
-        vm.PicturePush -= OnPushToDrawArea;
-        vm.PicturePull -= OnPullFromDrawArea;
+        vm.PicturePull -= OnPullToDrawArea;
+        vm.PicturePush -= OnPushFromDrawArea;
         vm.PictureUpdate -= OnPictureUpdate;
         vm.PictureSave -= OnPictureSave;
     }
@@ -589,8 +783,8 @@ public partial class MainViewModel : ViewModelBase
 
     private void SetupDockPicture(DockPictureViewModel vm)
     {
-        vm.PicturePush += OnPushToDrawArea;
-        vm.PicturePull += OnPullFromDrawArea;
+        vm.PicturePull += OnPullToDrawArea;
+        vm.PicturePush += OnPushFromDrawArea;
         vm.PictureUpdate += OnPictureUpdate;
         vm.BackgroundColor = CurrentBackgroundColor;
         vm.PictureSave += OnPictureSave;
@@ -664,10 +858,15 @@ public partial class MainViewModel : ViewModelBase
         if (saveResult.IsSaved && saveResult.File != null)
         {
             e.UpdateFile(saveResult.File);
+
+            var settings = await _loadSettingsUseCase.ExecuteAsync();
+            settings.AddRecentFile(saveResult.File.Path.ToString(), DateTime.Now);
+            await _saveSettingsUseCase.ExecuteAsync(settings);
+            WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
         }
     }
 
-    private void OnPushToDrawArea(object? sender, PicturePushEventArgs args)
+    private void OnPullToDrawArea(object? sender, PicturePullEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {
@@ -705,7 +904,7 @@ public partial class MainViewModel : ViewModelBase
         vm.PictureBuffer = args.Updated;
     }
 
-    private void OnPullFromDrawArea(object? sender, PicturePullEventArgs args)
+    private void OnPushFromDrawArea(object? sender, PicturePushEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
         {
@@ -793,10 +992,11 @@ public partial class MainViewModel : ViewModelBase
         {
 
             // 各PictureViewModelのクローズ確認処理を実行
-            // 各タブを順次クローズ処理する
-            // 未編集タブはExecuteCloseが即座に完了するため、Task.WhenAllやList<Task>の確保による
-            // メモリアロケーションとオーバーヘッドを避ける
-            foreach (DockPictureViewModel picture in Pictures)
+            // 【重要】ToList() は意図的なスナップショット生成（削除・インライン化禁止）。
+            // CloseCommand の非同期実行中に UI や Dock 側で Pictures コレクションが変更され、
+            // InvalidOperationException (Collection was modified) が発生するのを防ぐために必須。
+            var picturesSnapshot = Pictures.ToList();
+            foreach (DockPictureViewModel picture in picturesSnapshot)
             {
                 bool canClosePicture = await picture.CloseCommand.Execute().ToTask();
                 if (!canClosePicture)

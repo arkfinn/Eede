@@ -47,5 +47,22 @@ namespace Eede.Domain.Tests.Palettes
             Assert.That(argb.Green, Is.EqualTo(expectedG));
             Assert.That(argb.Blue, Is.EqualTo(expectedB));
         }
+
+        [TestCase(255, 0, 0, 0, 255, 255)] // Red
+        [TestCase(255, 255, 0, 60, 255, 255)] // Yellow
+        [TestCase(0, 255, 0, 120, 255, 255)] // Green
+        [TestCase(0, 255, 255, 180, 255, 255)] // Cyan
+        [TestCase(0, 0, 255, 240, 255, 255)] // Blue
+        [TestCase(255, 0, 255, 300, 255, 255)] // Magenta
+        [TestCase(0, 0, 0, 0, 0, 0)] // Black
+        [TestCase(255, 255, 255, 0, 0, 255)] // White
+        [TestCase(128, 128, 128, 0, 0, 128)] // Gray
+        public void FromRgbTest(int r, int g, int b, int expectedH, int expectedS, int expectedV)
+        {
+            var hsv = HsvColor.FromRgb(r, g, b);
+            Assert.That(hsv.Hue, Is.EqualTo(expectedH));
+            Assert.That(hsv.Saturation, Is.EqualTo(expectedS));
+            Assert.That(hsv.Value, Is.EqualTo(expectedV));
+        }
     }
 }

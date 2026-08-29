@@ -2,6 +2,7 @@ using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.History;
 using Eede.Domain.SharedKernel;
+using Eede.Presentation.ViewModels.DataEntry;
 using ReactiveUI;
 using RxVoid = ReactiveUI.Primitives.RxVoid;
 using ReactiveUI.SourceGenerators;
@@ -23,6 +24,7 @@ namespace Eede.Presentation.ViewModels.Pages
 
         public event EventHandler<UndoResult>? Undone;
         public event EventHandler<RedoResult>? Redone;
+        public event EventHandler? Pushed;
 
         public DrawingSessionViewModel(IDrawingSessionProvider provider)
         {
@@ -67,6 +69,15 @@ namespace Eede.Presentation.ViewModels.Pages
             {
                 _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea, beforePicture));
             }
+            Pushed?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void Attach(DrawableCanvasViewModel canvasViewModel)
+        {
+            canvasViewModel.Drew += (previous, now, previousArea, nowArea, affectedArea) =>
+            {
+                Push(now, nowArea, previousArea, affectedArea, previous);
+            };
         }
 
         public void PushDockUpdate(string dockId, Position position, Picture before, Picture after, bool beforeEdited, bool afterEdited)

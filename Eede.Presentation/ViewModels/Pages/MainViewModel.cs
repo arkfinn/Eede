@@ -569,10 +569,9 @@ public partial class MainViewModel : ViewModelBase
             .Switch()
             .BindTo(this, x => x.AnimationViewModel.ActivePicture);
 
-        DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea, affectedArea) =>
+        DrawingSessionViewModel.Attach(DrawableCanvasViewModel);
+        DrawingSessionViewModel.Pushed += (sender, e) =>
         {
-            // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
-            DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea, previous);
             MarkActiveDockEdited();
         };
 

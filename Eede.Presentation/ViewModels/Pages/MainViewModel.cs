@@ -570,7 +570,7 @@ public partial class MainViewModel : ViewModelBase
             .BindTo(this, x => x.AnimationViewModel.ActivePicture);
 
         DrawingSessionViewModel.Attach(DrawableCanvasViewModel);
-        DrawingSessionViewModel.Pushed += (sender, e) =>
+        DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea, affectedArea) =>
         {
             MarkActiveDockEdited();
         };

@@ -1,0 +1,42 @@
+diff --git a/Eede.Presentation/ViewModels/Pages/DrawingSessionViewModel.cs b/Eede.Presentation/ViewModels/Pages/DrawingSessionViewModel.cs
+index 8299805..163c467 100644
+--- a/Eede.Presentation/ViewModels/Pages/DrawingSessionViewModel.cs
++++ b/Eede.Presentation/ViewModels/Pages/DrawingSessionViewModel.cs
+@@ -2,6 +2,7 @@
+ using Eede.Domain.ImageEditing;
+ using Eede.Domain.ImageEditing.History;
+ using Eede.Domain.SharedKernel;
++using Eede.Presentation.ViewModels.DataEntry;
+ using ReactiveUI;
+ using RxVoid = ReactiveUI.Primitives.RxVoid;
+ using ReactiveUI.SourceGenerators;
+@@ -69,6 +70,14 @@
+             }
+         }
+
++        public void Attach(DrawableCanvasViewModel canvasViewModel)
++        {
++            canvasViewModel.Drew += (previous, now, previousArea, nowArea, affectedArea) =>
++            {
++                Push(now, nowArea, previousArea, affectedArea, previous);
++            };
++        }
++
+         public void PushDockUpdate(string dockId, Position position, Picture before, Picture after, bool beforeEdited, bool afterEdited)
+         {
+             _provider.Update(CurrentSession.PushDockUpdate(dockId, position, before, after, beforeEdited, afterEdited));
+diff --git a/Eede.Presentation/ViewModels/Pages/MainViewModel.cs b/Eede.Presentation/ViewModels/Pages/MainViewModel.cs
+index 7a8db67..03f0b2f 100644
+--- a/Eede.Presentation/ViewModels/Pages/MainViewModel.cs
++++ b/Eede.Presentation/ViewModels/Pages/MainViewModel.cs
+@@ -569,9 +569,9 @@
+             .Switch()
+             .BindTo(this, x => x.AnimationViewModel.ActivePicture);
+
++        DrawingSessionViewModel.Attach(DrawableCanvasViewModel);
+         DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea, affectedArea) =>
+         {
+-            // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
+-            DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea, previous);
+             MarkActiveDockEdited();
+         };

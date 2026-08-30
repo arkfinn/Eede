@@ -24,7 +24,6 @@ namespace Eede.Presentation.ViewModels.Pages
 
         public event EventHandler<UndoResult>? Undone;
         public event EventHandler<RedoResult>? Redone;
-        public event EventHandler? Pushed;
 
         public DrawingSessionViewModel(IDrawingSessionProvider provider)
         {
@@ -69,7 +68,6 @@ namespace Eede.Presentation.ViewModels.Pages
             {
                 _provider.Update(CurrentSession.Push(picture, selectingArea, previousArea, beforePicture));
             }
-            Pushed?.Invoke(this, EventArgs.Empty);
         }
 
         public void Attach(DrawableCanvasViewModel canvasViewModel)

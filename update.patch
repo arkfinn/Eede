@@ -1,0 +1,17 @@
+diff --git a/Eede.Domain/ImageEditing/DrawingSession.cs b/Eede.Domain/ImageEditing/DrawingSession.cs
+index f21ed3e..29fc427 100644
+--- a/Eede.Domain/ImageEditing/DrawingSession.cs
++++ b/Eede.Domain/ImageEditing/DrawingSession.cs
+@@ -198,6 +198,14 @@ namespace Eede.Domain.ImageEditing
+             var historyItem = UndoStack.Peek();
+             var newUndoStack = UndoStack.Pop();
+
++            if (historyItem is DockActiveHistoryItem dockActiveHistoryItem)
++            {
++                var nextSession = new DrawingSession(Buffer, SelectingArea, PreviewContent, newUndoStack, RedoStack.Push(dockActiveHistoryItem));
++                return new UndoResult(nextSession, dockActiveHistoryItem);
++            }
++
+             if (historyItem is CanvasHistoryItem canvasItem)
+             {
+                 var nextSession = new DrawingSession(

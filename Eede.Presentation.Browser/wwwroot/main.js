@@ -35,13 +35,26 @@ const { setModuleImports, getAssemblyExports, getConfig } = await dotnet
 
 const config = getConfig();
 
-// ローディング完了時のUI非表示
-const loader = document.getElementById('loading-screen');
-if (loader) {
-    loader.style.opacity = '0';
-    setTimeout(() => {
-        loader.style.display = 'none';
-    }, 300);
+try {
+    if (progressText) progressText.innerText = "Starting Eede application...";
+    await dotnet.run();
+    
+    // ローディング完了時のUI非表示
+    const loader = document.getElementById('loading-screen');
+    if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 300);
+    }
+} catch (err) {
+    console.error("[Eede JS Bootstrap Error]", err);
+    if (progressText) {
+        progressText.style.color = '#ef4444';
+        progressText.style.fontWeight = 'bold';
+        progressText.innerText = `起動エラー: ${err.message || err}`;
+    }
+    if (progressBar) {
+        progressBar.style.background = '#ef4444';
+    }
 }
-
-await dotnet.run();

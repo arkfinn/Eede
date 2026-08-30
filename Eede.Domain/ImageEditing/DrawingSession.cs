@@ -201,7 +201,7 @@ namespace Eede.Domain.ImageEditing
 
             if (historyItem is DockActiveHistoryItem dockActiveHistoryItem)
             {
-                var nextSession = new DrawingSession(Buffer, SelectingArea, PreviewContent, newUndoStack, RedoStack.Push(dockActiveHistoryItem));
+                var nextSession = new DrawingSession(Buffer, SelectingArea, null, newUndoStack, RedoStack.Push(dockActiveHistoryItem));
                 return new UndoResult(nextSession, dockActiveHistoryItem);
             }
             else if (historyItem is CanvasHistoryItem canvasItem)
@@ -243,7 +243,7 @@ namespace Eede.Domain.ImageEditing
 
             if (historyItem is DockActiveHistoryItem dockActiveHistoryItem)
             {
-                var nextSession = new DrawingSession(Buffer, SelectingArea, PreviewContent, UndoStack.Push(dockActiveHistoryItem), newRedoStack);
+                var nextSession = new DrawingSession(Buffer, SelectingArea, null, UndoStack.Push(dockActiveHistoryItem), newRedoStack);
                 return new RedoResult(nextSession, dockActiveHistoryItem);
             }
             else if (historyItem is CanvasHistoryItem canvasItem)

@@ -331,10 +331,6 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         private void ExecutePicturePull(PictureArea area)
         {
             PicturePull?.Invoke(this, new PicturePullEventArgs(BringPictureBuffer(), area));
-            if (!Edited)
-            {
-                Edited = true;
-            }
         }
 
         private Picture BringPictureBuffer()

@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>embedded</DebugType>
     <Nullable>enable</Nullable>
     <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
-    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -62,7 +61,6 @@
 
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.1" />
 
-    <PackageReference Include="Avalonia.Win32.Interoperability" Version="12.1.1" />
 
     <PackageReference Include="Dock.Avalonia" Version="12.1.0" />
 

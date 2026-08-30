@@ -13,6 +13,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.SharedKernel;
+using Eede.Infrastructure.Palettes.Persistence;
 using Eede.Infrastructure.Settings;
 using Eede.Infrastructure.Updates;
 using Eede.Presentation.Common.Adapters;
@@ -75,7 +76,15 @@ public partial class App : Avalonia.Application
             {
                 return new AvaloniaFileStorage(desktop.MainWindow.StorageProvider);
             }
-            throw new InvalidOperationException("ClassicDesktopStyleApplicationLifetime is not available or MainWindow is null.");
+            if (Avalonia.Application.Current?.ApplicationLifetime is ISingleViewApplicationLifetime singleView && singleView.MainView != null)
+            {
+                var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(singleView.MainView);
+                if (topLevel != null)
+                {
+                    return new AvaloniaFileStorage(topLevel.StorageProvider);
+                }
+            }
+            throw new InvalidOperationException("StorageProvider is not available.");
         });
         services.AddSingleton<IDrawStyleFactory, DrawStyleFactory>();
         services.AddTransient<ITransformImageUseCase, TransformImageUseCase>();
@@ -85,7 +94,14 @@ public partial class App : Avalonia.Application
         services.AddTransient<ITransferImageFromCanvasUseCase, TransferImageFromCanvasUseCase>();
         services.AddSingleton<IDrawingSessionProvider, DrawingSessionProvider>();
         services.AddSingleton<IFileSystem, AvaloniaFileSystem>();
-        services.AddSingleton<IExternalBrowserService, ExternalBrowserService>();
+        if (OperatingSystem.IsBrowser())
+        {
+            services.AddSingleton<IExternalBrowserService, WebExternalBrowserService>();
+        }
+        else
+        {
+            services.AddSingleton<IExternalBrowserService, ExternalBrowserService>();
+        }
         services.AddSingleton<IThemeService, AvaloniaThemeService>();
         services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();
         services.AddTransient<ICopySelectionUseCase, CopySelectionUseCase>();
@@ -106,25 +122,30 @@ public partial class App : Avalonia.Application
         services.AddSingleton<ILoadPictureUseCase, LoadPictureUseCase>();
         services.AddSingleton<IPictureIOService, PictureIOService>();
         services.AddSingleton<IPaletteRepository, Eede.Infrastructure.Palettes.Persistence.PaletteRepository>();
-        services.AddSingleton<IPaletteSessionRepository>(sp =>
+        if (OperatingSystem.IsBrowser())
         {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var path = System.IO.Path.Combine(appData, "Eede", "palettes_session.json");
-            return new Eede.Infrastructure.Palettes.Persistence.PaletteSessionRepository(path);
-        });
-
-        // Settings
-        services.AddSingleton<ISettingsRepository>(sp =>
+            services.AddSingleton<IPaletteSessionRepository, LocalStoragePaletteSessionRepository>();
+            services.AddSingleton<ISettingsRepository, LocalStorageSettingsRepository>();
+            services.AddSingleton<IUpdateService, NullUpdateService>();
+        }
+        else
         {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var path = System.IO.Path.Combine(appData, "Eede", "settings.json");
-            return new Eede.Infrastructure.Settings.JsonSettingsRepository(path);
-        });
+            services.AddSingleton<IPaletteSessionRepository>(sp =>
+            {
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var path = System.IO.Path.Combine(appData, "Eede", "palettes_session.json");
+                return new Eede.Infrastructure.Palettes.Persistence.PaletteSessionRepository(path);
+            });
+            services.AddSingleton<ISettingsRepository>(sp =>
+            {
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var path = System.IO.Path.Combine(appData, "Eede", "settings.json");
+                return new Eede.Infrastructure.Settings.JsonSettingsRepository(path);
+            });
+            services.AddSingleton<IUpdateService>(sp => new VelopackUpdateService(@"https://github.com/arkfinn/Eede"));
+        }
         services.AddTransient<ILoadSettingsUseCase, LoadSettingsUseCase>();
         services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();
-
-        // Updates
-        services.AddSingleton<IUpdateService>(sp => new VelopackUpdateService(@"https://github.com/arkfinn/Eede"));
         services.AddTransient<CheckUpdateUseCase>();
 
         // ViewModels

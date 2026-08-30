@@ -12,9 +12,11 @@
 			 xmlns:converters="using:Eede.Presentation.Common.Converters"
 			 xmlns:p="using:Eede.Domain.ImageEditing.DrawingTools"
 			 xmlns:geo="using:Eede.Domain.ImageEditing.GeometricTransformations"
+			 xmlns:ext="using:Eede.Presentation.Common.MarkupExtensions"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
 			 x:Class="Eede.Presentation.Views.Pages.MainView"
 			 x:DataType="vm:MainViewModel"
+			 DataContext="{ext:ServiceResolve vm:MainViewModel}"
 			 DragDrop.AllowDrop="True">
 	<UserControl.KeyBindings>
 		<!-- Undo / Redo -->

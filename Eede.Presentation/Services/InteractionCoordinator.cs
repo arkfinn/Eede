@@ -394,12 +394,19 @@ public class InteractionCoordinator : IInteractionCoordinator
                 // DrawingSession.Push が「現在の Previous」を「変更前」として記録できるようにする。
                 // ただし、ViewModel 側が同期的に Push を呼ぶため、イベント引数として
                 // 更新後の画像を確実に渡す必要がある。
-                Drew?.Invoke(previousImage, result.PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea, result.AffectedArea);
-
                 if (_sessionProvider.CurrentSession != null)
                 {
-                    _sessionProvider.Update(_sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer));
+                    if (!result.AffectedArea.IsEmpty)
+                    {
+                        _sessionProvider.Update(_sessionProvider.CurrentSession.PushDiff(result.PictureBuffer.Previous, result.AffectedArea, SelectingArea, _operationInitialSelectingArea, previousImage));
+                    }
+                    else
+                    {
+                        _sessionProvider.Update(_sessionProvider.CurrentSession.Push(result.PictureBuffer.Previous, SelectingArea, _operationInitialSelectingArea, previousImage));
+                    }
                 }
+
+                Drew?.Invoke(previousImage, result.PictureBuffer.Previous, _operationInitialSelectingArea, SelectingArea, result.AffectedArea);
             }
         }
         NotifyStateChanged();

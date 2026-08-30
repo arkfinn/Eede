@@ -2,13 +2,11 @@ using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.History;
 using Eede.Domain.SharedKernel;
-using Eede.Presentation.ViewModels.DataEntry;
 using ReactiveUI;
 using RxVoid = ReactiveUI.Primitives.RxVoid;
 using ReactiveUI.SourceGenerators;
 using System;
 using System.Reactive;
-using System.Reactive.Linq;
 
 namespace Eede.Presentation.ViewModels.Pages
 {
@@ -71,17 +69,6 @@ namespace Eede.Presentation.ViewModels.Pages
             }
         }
 
-        public IDisposable Attach(DrawableCanvasViewModel canvasViewModel)
-        {
-            return Observable.FromEvent<Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion>, (Picture previous, Picture now, PictureArea? previousArea, PictureArea? nowArea, PictureRegion affectedArea)>(
-                handler => (prev, now, prevArea, nArea, affected) => handler((prev, now, prevArea, nArea, affected)),
-                h => canvasViewModel.Drew += h,
-                h => canvasViewModel.Drew -= h)
-                .Subscribe(args =>
-                {
-                    Push(args.now, args.nowArea, args.previousArea, args.affectedArea, args.previous);
-                });
-        }
 
         public void PushDockUpdate(string dockId, Position position, Picture before, Picture after, bool beforeEdited, bool afterEdited)
         {

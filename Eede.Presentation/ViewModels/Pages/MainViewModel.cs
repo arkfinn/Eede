@@ -569,7 +569,6 @@ public partial class MainViewModel : ViewModelBase
             .Switch()
             .BindTo(this, x => x.AnimationViewModel.ActivePicture);
 
-        _ = DrawingSessionViewModel.Attach(DrawableCanvasViewModel);
         DrawableCanvasViewModel.Drew += (previous, now, previousArea, nowArea, affectedArea) =>
         {
             MarkActiveDockEdited();
@@ -876,7 +875,7 @@ public partial class MainViewModel : ViewModelBase
             vm.PictureBuffer,
             args.Rect);
 
-        DrawingSessionViewModel.Push(updated, null, DrawableCanvasViewModel.SelectingArea);
+        _drawingSessionProvider.Update(_drawingSessionProvider.CurrentSession.Push(updated, null, DrawableCanvasViewModel.SelectingArea));
     }
 
     private void SetPictureToDrawArea(Picture picture)
@@ -917,7 +916,7 @@ public partial class MainViewModel : ViewModelBase
             args.Position,
             PullBlender);
 
-        DrawingSessionViewModel.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer, updated, vm.Edited, true);
+        _drawingSessionProvider.Update(_drawingSessionProvider.CurrentSession.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer, updated, vm.Edited, true));
 
         vm.PictureBuffer = updated;
     }
@@ -938,7 +937,7 @@ public partial class MainViewModel : ViewModelBase
             mode
         );
 
-        DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea);
+        _drawingSessionProvider.Update(_drawingSessionProvider.CurrentSession.Push(updated, area, DrawableCanvasViewModel.SelectingArea));
         MarkActiveDockEdited();
     }
 

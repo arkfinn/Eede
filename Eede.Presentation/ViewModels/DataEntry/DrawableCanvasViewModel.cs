@@ -441,6 +441,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
             PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
             Picture cleared = await _selectionService.CutAsync(previous, previousArea);
             ExecuteInternalUpdate(cleared);
+            _drawingSessionProvider.Update(_drawingSessionProvider.CurrentSession.Push(cleared, null, previousArea, previous));
             Drew?.Invoke(previous, cleared, previousArea, null, default);
             SyncWithSession(true);
         }

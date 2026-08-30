@@ -2,14 +2,14 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
-    <WasmMainAssemblyFileName>Eede.Browser.dll</WasmMainAssemblyFileName>
+    <WasmMainAssemblyFileName>Eede.Presentation.Browser.dll</WasmMainAssemblyFileName>
     <OutputType>Exe</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
     <PublishTrimmed>false</PublishTrimmed>
     <WasmBuildNative>true</WasmBuildNative>
-    <RootNamespace>Eede.Browser</RootNamespace>
-    <AssemblyName>Eede.Browser</AssemblyName>
+    <RootNamespace>Eede.Presentation.Browser</RootNamespace>
+    <AssemblyName>Eede.Presentation.Browser</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

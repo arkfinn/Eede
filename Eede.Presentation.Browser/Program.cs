@@ -7,7 +7,7 @@ using Eede.Presentation;
 
 [assembly: SupportedOSPlatform("browser")]
 
-namespace Eede.Browser;
+namespace Eede.Presentation.Browser;
 
 internal partial class Program
 {

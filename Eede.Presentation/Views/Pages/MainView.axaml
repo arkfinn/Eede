@@ -301,19 +301,19 @@
 
 		<!-- Web/SingleView 用モーダルダイアログオーバーレイ -->
 		<Panel x:Name="ModalOverlayHost"
-			   Background="#80000000"
+			   Background="#B0000000"
 			   IsVisible="False"
 			   ZIndex="1000">
-			<Border Background="{DynamicResource ThemeBackgroundBrush}"
+			<Border Background="#201f1f"
 					BorderBrush="{DynamicResource OutlineVariantBrush}"
 					BorderThickness="1"
 					CornerRadius="8"
-					BoxShadow="0 8 32 #40000000"
+					BoxShadow="0 8 32 #A0000000"
 					HorizontalAlignment="Center"
 					VerticalAlignment="Center"
 					MinWidth="320"
 					MaxWidth="500">
-				<ContentControl x:Name="ModalContentControl" />
+				<ContentControl x:Name="ModalContentControl" Background="#201f1f" />
 			</Border>
 		</Panel>
 	</Panel>

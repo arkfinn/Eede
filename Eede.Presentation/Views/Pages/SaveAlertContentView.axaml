@@ -9,7 +9,8 @@
              x:DataType="local:SaveAlertWindow"
              MinWidth="400"
              Width="400"
-             MinHeight="130">
+             MinHeight="130"
+             Background="#201f1f">
   <UserControl.Styles>
     <Style Selector="Button">
       <Setter Property="Margin" Value="15 0 0 0" />

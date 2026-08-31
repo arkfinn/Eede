@@ -7,6 +7,7 @@
              x:Name="Root">
   <UserControl.Styles>
     <Style Selector="Button">
+      <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
       <Setter Property="MinWidth" Value="80" />

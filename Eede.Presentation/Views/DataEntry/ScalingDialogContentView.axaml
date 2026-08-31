@@ -5,7 +5,8 @@
              xmlns:controls="using:Eede.Presentation.Controls"
              x:Class="Eede.Presentation.Views.DataEntry.ScalingDialogContentView"
              x:DataType="vm:ScalingDialogViewModel"
-             Width="350">
+             Width="350"
+             Background="#201f1f">
   <DockPanel Margin="20">
     <controls:DialogButtons DockPanel.Dock="Bottom"
                             PrimaryText="OK"

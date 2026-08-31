@@ -6,7 +6,8 @@
              xmlns:controls="using:Eede.Presentation.Controls"
              mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="250"
              x:Class="Eede.Presentation.Views.Pages.NewPictureView"
-             x:DataType="vm:NewPictureWindowViewModel">
+             x:DataType="vm:NewPictureWindowViewModel"
+             Background="#201f1f">
   <StackPanel Margin="20" Spacing="10">
     <TextBlock Text="新規ピクチャのサイズを指定してください" FontWeight="Bold"/>
 

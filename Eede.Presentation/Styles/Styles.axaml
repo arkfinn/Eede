@@ -217,9 +217,12 @@
     <Setter Property="Opacity" Value="0.5" />
   </Style>
 
-  <!-- Global Window and Typography Styles -->
-  <Style Selector="Window">
-    <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif" />
+  <!-- Global Typography Styles -->
+  <Style Selector="TextBlock">
+    <Setter Property="FontFamily" Value="Inter, Yu Gothic UI, Meiryo, Hiragino Sans, Noto Sans CJK JP, Noto Sans JP, sans-serif" />
+  </Style>
+  <Style Selector="TemplatedControl">
+    <Setter Property="FontFamily" Value="Inter, Yu Gothic UI, Meiryo, Hiragino Sans, Noto Sans CJK JP, Noto Sans JP, sans-serif" />
   </Style>
 
   <Style Selector="TextBlock.headline-lg">

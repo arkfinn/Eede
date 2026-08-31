@@ -118,9 +118,22 @@ public partial class App : Avalonia.Application
         services.AddTransient<IRemoveAnimationPatternUseCase, RemoveAnimationPatternUseCase>();
         services.AddTransient<IAnimationPatternService, AnimationPatternService>();
 
-        // Adapters / Infrastructure
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();
-        services.AddSingleton<IPictureRepository, PictureRepository>();
+        services.AddSingleton<IPictureRepository>(sp =>
+            new PictureRepository(
+                sp.GetRequiredService<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>>(),
+                () =>
+                {
+                    try
+                    {
+                        return sp.GetService<IFileStorage>();
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                }
+            ));
         services.AddSingleton<ISavePictureUseCase, SavePictureUseCase>();
         services.AddSingleton<ILoadPictureUseCase, LoadPictureUseCase>();
         services.AddSingleton<IPictureIOService, PictureIOService>();

@@ -9,6 +9,43 @@ namespace Eede.Presentation.Common.Adapters
     public class AvaloniaFileStorage(IStorageProvider storageProvider) : IFileStorage
     {
         public readonly IStorageProvider StorageProvider = storageProvider;
+        private readonly Dictionary<Uri, IStorageFile> _fileCache = [];
+
+        public async Task<System.IO.Stream> OpenReadStreamAsync(Uri uri)
+        {
+            if (_fileCache.TryGetValue(uri, out var cachedFile))
+            {
+                return await cachedFile.OpenReadAsync();
+            }
+            var file = await StorageProvider.TryGetFileFromPathAsync(uri);
+            if (file != null)
+            {
+                return await file.OpenReadAsync();
+            }
+            if (uri.IsFile && System.IO.File.Exists(uri.LocalPath))
+            {
+                return new System.IO.FileStream(uri.LocalPath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            }
+            throw new System.IO.FileNotFoundException($"Could not open file at {uri}");
+        }
+
+        public async Task<System.IO.Stream> OpenWriteStreamAsync(Uri uri)
+        {
+            if (_fileCache.TryGetValue(uri, out var cachedFile))
+            {
+                return await cachedFile.OpenWriteAsync();
+            }
+            var file = await StorageProvider.TryGetFileFromPathAsync(uri);
+            if (file != null)
+            {
+                return await file.OpenWriteAsync();
+            }
+            if (uri.IsFile)
+            {
+                return new System.IO.FileStream(uri.LocalPath, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+            }
+            throw new System.IO.FileNotFoundException($"Could not open write stream at {uri}");
+        }
 
         public async Task<Uri?> OpenFilePickerAsync()
         {
@@ -19,8 +56,11 @@ namespace Eede.Presentation.Common.Adapters
             };
 
             IReadOnlyList<IStorageFile> result = await StorageProvider.OpenFilePickerAsync(options);
+            if (result == null || result.Count == 0) return null;
 
-            return result == null || result.Count == 0 ? null : result[0].Path;
+            var path = result[0].Path;
+            _fileCache[path] = result[0];
+            return path;
         }
 
         public async Task<Uri?> OpenAnimationFilePickerAsync()
@@ -32,8 +72,11 @@ namespace Eede.Presentation.Common.Adapters
             };
 
             IReadOnlyList<IStorageFile> result = await StorageProvider.OpenFilePickerAsync(options);
+            if (result == null || result.Count == 0) return null;
 
-            return result == null || result.Count == 0 ? null : result[0].Path;
+            var path = result[0].Path;
+            _fileCache[path] = result[0];
+            return path;
         }
 
         public async Task<Uri?> SaveAnimationFilePickerAsync()
@@ -44,8 +87,10 @@ namespace Eede.Presentation.Common.Adapters
                 SuggestedFileName = "animation_pattern.json"
             };
             IStorageFile? result = await StorageProvider.SaveFilePickerAsync(options);
+            if (result == null) return null;
 
-            return result?.Path;
+            _fileCache[result.Path] = result;
+            return result.Path;
         }
 
         public async Task<Uri?> OpenPaletteFilePickerAsync()
@@ -57,8 +102,11 @@ namespace Eede.Presentation.Common.Adapters
             };
 
             IReadOnlyList<IStorageFile> result = await StorageProvider.OpenFilePickerAsync(options);
+            if (result == null || result.Count == 0) return null;
 
-            return result == null || result.Count == 0 ? null : result[0].Path;
+            var path = result[0].Path;
+            _fileCache[path] = result[0];
+            return path;
         }
 
         public async Task<Uri?> SavePaletteFilePickerAsync()
@@ -69,8 +117,10 @@ namespace Eede.Presentation.Common.Adapters
                 SuggestedFileName = "palette.aact"
             };
             IStorageFile? result = await StorageProvider.SaveFilePickerAsync(options);
+            if (result == null) return null;
 
-            return result?.Path;
+            _fileCache[result.Path] = result;
+            return result.Path;
         }
 
         private static List<FilePickerFileType> GetPaletteFileTypes()
@@ -153,8 +203,10 @@ namespace Eede.Presentation.Common.Adapters
                 ]
             };
             IStorageFile? result = await StorageProvider.SaveFilePickerAsync(options);
+            if (result == null) return null;
 
-            return result?.Path;
+            _fileCache[result.Path] = result;
+            return result.Path;
         }
     }
 }

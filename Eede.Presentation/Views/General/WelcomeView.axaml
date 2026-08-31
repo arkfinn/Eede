@@ -20,7 +20,7 @@
                 CornerRadius="0"
                 Padding="0"
                 HorizontalAlignment="Center">
-          <Image Source="/Assets/logo.png" Width="96" Height="96"/>
+          <Image Source="avares://Eede.Presentation/Assets/logo.png" Width="96" Height="96"/>
         </Border>
 
         <StackPanel HorizontalAlignment="Center" Spacing="4">

@@ -11,4 +11,6 @@ public interface IFileStorage
     Task<Uri?> SaveAnimationFilePickerAsync();
     Task<Uri?> SavePaletteFilePickerAsync();
     Task<Uri?> SaveFilePickerAsync();
+    Task<System.IO.Stream> OpenReadStreamAsync(Uri uri);
+    Task<System.IO.Stream> OpenWriteStreamAsync(Uri uri);
 }

@@ -27,6 +27,9 @@ public partial class PaletteContainerViewModel : ViewModelBase
     public event Action<ArgbColor>? OnFetchColor;
     public event Func<ArgbColor>? OnApplyColor;
 
+    public bool IsBrowserPlatform => OperatingSystem.IsBrowser();
+    public bool IsDesktopPlatform => !OperatingSystem.IsBrowser();
+
     public ReactiveCommand<IFileStorage?, RxVoid> LoadPaletteCommand { get; }
     public ReactiveCommand<PaletteTabViewModel, RxVoid> SaveTabCommand { get; }
     public ReactiveCommand<IFileStorage?, RxVoid> SavePaletteAsCommand { get; }
@@ -58,7 +61,8 @@ public partial class PaletteContainerViewModel : ViewModelBase
                         var palette = _paletteRepository.Find(path);
                         global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                         {
-                            Tabs.Add(new PaletteTabViewModel(palette, path));
+                            var tab = new PaletteTabViewModel(palette, path);
+                            Tabs.Add(tab);
                         });
                     }
                 }
@@ -125,7 +129,34 @@ public partial class PaletteContainerViewModel : ViewModelBase
         Uri? result = await storage.OpenPaletteFilePickerAsync();
         if (result == null) return;
 
-        LoadPalette(result.LocalPath);
+        string pathStr = result.IsAbsoluteUri ? (result.IsFile ? result.LocalPath : result.ToString()) : result.OriginalString;
+
+        var existingTab = Tabs.FirstOrDefault(t => t.FilePath == pathStr);
+        if (existingTab != null)
+        {
+            SelectedTab = existingTab;
+            return;
+        }
+
+        if (!IsBrowserPlatform && (result.IsAbsoluteUri && result.IsFile || System.IO.File.Exists(pathStr)))
+        {
+            LoadPalette(pathStr);
+            return;
+        }
+
+        try
+        {
+            string extension = System.IO.Path.GetExtension(pathStr);
+            await using var stream = await storage.OpenReadStreamAsync(result);
+            var palette = _paletteRepository.Find(stream, extension);
+            var newTab = new PaletteTabViewModel(palette, pathStr);
+            Tabs.Add(newTab);
+            SelectedTab = newTab;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine($"Failed to load palette: {ex.Message}");
+        }
     }
 
     public void LoadPalette(string localPath)
@@ -145,7 +176,7 @@ public partial class PaletteContainerViewModel : ViewModelBase
 
     private async Task ExecuteSaveTab(PaletteTabViewModel tab)
     {
-        if (tab.FilePath == null) return; // 一時パレットはコンテキストメニューからは保存させない（または何も言わずに無視）
+        if (tab.FilePath == null) return;
         
         _paletteRepository.Save(tab.Palette, tab.FilePath);
         tab.ResetDirty();
@@ -155,7 +186,7 @@ public partial class PaletteContainerViewModel : ViewModelBase
     {
         if (SelectedTab == null) return;
 
-        if (string.IsNullOrEmpty(SelectedTab.FilePath))
+        if (string.IsNullOrEmpty(SelectedTab.FilePath) || IsBrowserPlatform)
         {
             await ExecuteSavePaletteAs(storage);
             return;
@@ -172,10 +203,28 @@ public partial class PaletteContainerViewModel : ViewModelBase
         Uri? result = await storage.SavePaletteFilePickerAsync();
         if (result == null) return;
 
-        string localPath = result.LocalPath;
-        _paletteRepository.Save(SelectedTab.Palette, localPath);
-        SelectedTab.FilePath = localPath;
-        SelectedTab.ResetDirty();
+        string pathStr = result.IsAbsoluteUri ? (result.IsFile ? result.LocalPath : result.ToString()) : result.OriginalString;
+
+        if (!IsBrowserPlatform && (result.IsAbsoluteUri && result.IsFile))
+        {
+            _paletteRepository.Save(SelectedTab.Palette, pathStr);
+            SelectedTab.FilePath = pathStr;
+            SelectedTab.ResetDirty();
+            return;
+        }
+
+        string extension = System.IO.Path.GetExtension(pathStr);
+        try
+        {
+            await using var stream = await storage.OpenWriteStreamAsync(result);
+            _paletteRepository.Save(SelectedTab.Palette, stream, extension);
+            SelectedTab.FilePath = pathStr;
+            SelectedTab.ResetDirty();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine($"Failed to save palette: {ex.Message}");
+        }
     }
 
     public Interaction<PaletteTabViewModel, SaveAlertResult> ConfirmCloseInteraction { get; } = new();

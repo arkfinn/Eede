@@ -48,6 +48,9 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
 
     [Reactive] public partial int WaitTime { get; set; }
 
+    public bool IsBrowserPlatform => OperatingSystem.IsBrowser();
+    public bool IsDesktopPlatform => !OperatingSystem.IsBrowser();
+
     [Reactive] public partial Magnification Magnification { get; set; }
     [Reactive] public partial Picture? ActivePicture { get; set; }
     private Bitmap? _previewBitmap;
@@ -294,11 +297,20 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
             try
             {
                 var json = JsonSerializer.Serialize(SelectedPattern);
-                await _fileSystem.WriteAllTextAsync(uri.LocalPath, json);
+                if (!IsBrowserPlatform && uri.IsAbsoluteUri && uri.IsFile)
+                {
+                    await _fileSystem.WriteAllTextAsync(uri.LocalPath, json);
+                    return;
+                }
+
+                await using var stream = await storage.OpenWriteStreamAsync(uri);
+                using var writer = new StreamWriter(stream);
+                await writer.WriteAsync(json);
+                await writer.FlushAsync();
             }
-            catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Failed to export animation file: {ex.GetType().Name}");
+                System.Diagnostics.Trace.WriteLine($"Failed to export animation file: {ex.Message}");
             }
         });
 
@@ -309,7 +321,18 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
 
             try
             {
-                var json = await _fileSystem.ReadAllTextAsync(uri.LocalPath);
+                string json;
+                if (!IsBrowserPlatform && uri.IsAbsoluteUri && uri.IsFile)
+                {
+                    json = await _fileSystem.ReadAllTextAsync(uri.LocalPath);
+                }
+                else
+                {
+                    await using var stream = await storage.OpenReadStreamAsync(uri);
+                    using var reader = new StreamReader(stream);
+                    json = await reader.ReadToEndAsync();
+                }
+
                 var pattern = JsonSerializer.Deserialize<AnimationPattern>(json);
                 if (pattern != null)
                 {
@@ -317,9 +340,9 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
                     SelectedPattern = Patterns.LastOrDefault();
                 }
             }
-            catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Failed to import animation file: {ex.GetType().Name}");
+                System.Diagnostics.Trace.WriteLine($"Failed to import animation file: {ex.Message}");
             }
         });
 

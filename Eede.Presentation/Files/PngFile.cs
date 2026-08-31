@@ -27,7 +27,7 @@ namespace Eede.Presentation.Files
             // 自身の不変条件（Pathが.pngであること）により、安全に上書き保存を試行できる
             if (!Path.IsEmpty())
             {
-                return await SaveToPathAsync(Path);
+                return await SaveToPathAsync(Path, storage);
             }
             return await SaveWithFilePickerAsync(storage);
         }

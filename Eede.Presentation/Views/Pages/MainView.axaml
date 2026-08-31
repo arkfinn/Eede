@@ -10,10 +10,65 @@
 			 xmlns:general="clr-namespace:Eede.Presentation.Views.General"
 			 xmlns:animations="clr-namespace:Eede.Presentation.Views.Animations"
 			 xmlns:converters="using:Eede.Presentation.Common.Converters"
+			 xmlns:p="using:Eede.Domain.ImageEditing.DrawingTools"
+			 xmlns:geo="using:Eede.Domain.ImageEditing.GeometricTransformations"
+			 xmlns:ext="using:Eede.Presentation.Common.MarkupExtensions"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
 			 x:Class="Eede.Presentation.Views.Pages.MainView"
 			 x:DataType="vm:MainViewModel"
+			 DataContext="{ext:ServiceResolve vm:MainViewModel}"
 			 DragDrop.AllowDrop="True">
+	<UserControl.KeyBindings>
+		<!-- Undo / Redo -->
+		<KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoCommand}" />
+		<KeyBinding Gesture="Ctrl+Y" Command="{Binding RedoCommand}" />
+		<KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoCommand}" />
+		<!-- File Operations -->
+		<KeyBinding Gesture="Ctrl+N" Command="{Binding CreateNewPictureCommand}" />
+		<KeyBinding Gesture="Ctrl+O" Command="{Binding LoadPictureCommand}" />
+		<KeyBinding Gesture="Ctrl+S" Command="{Binding SavePictureCommand}" />
+		<KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SavePictureAsCommand}" />
+		<!-- Clipboard & Selection -->
+		<KeyBinding Gesture="Ctrl+C" Command="{Binding CopyCommand}" />
+		<KeyBinding Gesture="Ctrl+X" Command="{Binding CutCommand}" />
+		<KeyBinding Gesture="Ctrl+V" Command="{Binding PasteCommand}" />
+		<KeyBinding Gesture="Escape" Command="{Binding DeselectCommand}" />
+		<KeyBinding Gesture="Ctrl+D" Command="{Binding DeselectCommand}" />
+		<!-- Shape Modifiers -->
+		<KeyBinding Gesture="Shift+U" Command="{Binding SetDrawStyleCommand}" CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" />
+		<KeyBinding Gesture="Shift+R" Command="{Binding SetDrawStyleCommand}" CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" />
+		<KeyBinding Gesture="Shift+C" Command="{Binding SetDrawStyleCommand}" CommandParameter="{x:Static p:DrawStyleType.FilledEllipse}" />
+		<!-- Geometric Transformations -->
+		<KeyBinding Gesture="Shift+H" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.FlipHorizontal}" />
+		<KeyBinding Gesture="Shift+V" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.FlipVertical}" />
+		<KeyBinding Gesture="Ctrl+R" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.RotateRight}" />
+		<KeyBinding Gesture="Alt+H" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.MirrorCopyRight}" />
+		<KeyBinding Gesture="Alt+V" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.MirrorCopyBottom}" />
+		<KeyBinding Gesture="Ctrl+T" Command="{Binding ScalingCommand}" />
+		<KeyBinding Gesture="Ctrl+Alt+A" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.AntiAliasStrong}" />
+		<KeyBinding Gesture="Ctrl+Shift+Alt+A" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.AntiAliasSubtle}" />
+		<!-- View, Grid & Transparency -->
+		<KeyBinding Gesture="Alt+T" Command="{Binding ToggleTransparencyCommand}" />
+		<KeyBinding Gesture="Ctrl+OemQuotes" Command="{Binding TogglePixelGridCommand}" />
+		<KeyBinding Gesture="Shift+G" Command="{Binding TogglePixelGridCommand}" />
+		<KeyBinding Gesture="Ctrl+OemSemicolon" Command="{Binding ToggleCursorGridCommand}" />
+		<KeyBinding Gesture="Alt+G" Command="{Binding ToggleCursorGridCommand}" />
+		<KeyBinding Gesture="Ctrl+D0" Command="{Binding ResetZoomCommand}" />
+		<KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding ZoomInCommand}" />
+		<KeyBinding Gesture="Ctrl+Add" Command="{Binding ZoomInCommand}" />
+		<KeyBinding Gesture="Ctrl+Subtract" Command="{Binding ZoomOutCommand}" />
+		<!-- Document & Tab Management -->
+		<KeyBinding Gesture="Ctrl+W" Command="{Binding CloseActivePictureCommand}" />
+		<!-- Layer Styles -->
+		<KeyBinding Gesture="F1" Command="{Binding SetLayerStyleRgbCommand}" />
+		<KeyBinding Gesture="F2" Command="{Binding SetLayerStyleAlphaCommand}" />
+		<KeyBinding Gesture="F3" Command="{Binding SetLayerStyleArgbCommand}" />
+		<!-- Animation & Workspace -->
+		<KeyBinding Gesture="F4" Command="{Binding ToggleAnimationPanelCommand}" />
+		<KeyBinding Gesture="Ctrl+E" Command="{Binding ToggleAnimationPanelCommand}" />
+		<KeyBinding Gesture="Ctrl+OemOpenBrackets" Command="{Binding DecreaseMinCursorSizeCommand}" />
+		<KeyBinding Gesture="Ctrl+OemCloseBrackets" Command="{Binding IncreaseMinCursorSizeCommand}" />
+	</UserControl.KeyBindings>
 	<UserControl.Resources>
 		<converters:BackgroundColorConverter x:Key="BackgroundColorConverter"/>
 	</UserControl.Resources>
@@ -102,7 +157,7 @@
 										Padding="0" Margin="4">
 									<Panel Width="32" Height="20">
 										<Panel.Background>
-											<ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+											<ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
 														Stretch="None"
 														TileMode="Tile"
 														SourceRect="0,0,16,16"
@@ -156,17 +211,29 @@
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
 								</Button>
+								<!-- Desktop 保存ボタン群 -->
 								<Button Classes="tool"
 										ToolTip.Tip="保存(Ctrl+S)"
+										IsVisible="{Binding IsDesktopPlatform}"
 										Command="{Binding SavePictureCommand}"
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
 								</Button>
 								<Button Classes="tool"
 										ToolTip.Tip="名前を付けて保存(Ctrl+Shift+S)"
+										IsVisible="{Binding IsDesktopPlatform}"
 										Command="{Binding SavePictureAsCommand}"
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource SaveAsIconGeometry}" Classes="icon" />
+								</Button>
+
+								<!-- Web/Browser ダウンロードボタン -->
+								<Button Classes="tool"
+										ToolTip.Tip="画像をダウンロード(Ctrl+S)"
+										IsVisible="{Binding IsBrowserPlatform}"
+										Command="{Binding SavePictureCommand}"
+										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+									<PathIcon Data="{StaticResource DownloadIconGeometry}" Classes="icon" />
 								</Button>
 								<Panel Classes="horizontal-separator" />
 								<ComboBox ItemsSource="{Binding MinCursorSizeList}"
@@ -243,5 +310,23 @@
 				</Grid>
 			</Grid>
 		</DockPanel>
+
+		<!-- Web/SingleView 用モーダルダイアログオーバーレイ -->
+		<Panel x:Name="ModalOverlayHost"
+			   Background="#B0000000"
+			   IsVisible="False"
+			   ZIndex="1000">
+			<Border Background="#201f1f"
+					BorderBrush="{DynamicResource OutlineVariantBrush}"
+					BorderThickness="1"
+					CornerRadius="8"
+					BoxShadow="0 8 32 #A0000000"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					MinWidth="320"
+					MaxWidth="500">
+				<ContentControl x:Name="ModalContentControl" Background="#201f1f" />
+			</Border>
+		</Panel>
 	</Panel>
 </UserControl>

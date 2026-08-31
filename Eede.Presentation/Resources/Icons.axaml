@@ -40,5 +40,6 @@
         <ResourceInclude Source="/Resources/Icons/Transform.axaml" />
         <ResourceInclude Source="/Resources/Icons/Undo.axaml" />
         <ResourceInclude Source="/Resources/Icons/AntiAlias.axaml" />
+        <ResourceInclude Source="/Resources/Icons/Download.axaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

@@ -46,16 +46,27 @@
               <PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
             </Button>
 
+            <!-- Desktop 保存ボタン群 -->
             <Button Classes="tool" ToolTip.Tip="パレットを保存する"
+                    IsVisible="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).IsDesktopPlatform}"
                     Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).SavePaletteCommand}"
                     CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
               <PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
             </Button>
 
             <Button Classes="tool" ToolTip.Tip="名前を付けて保存"
+                    IsVisible="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).IsDesktopPlatform}"
                     Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).SavePaletteAsCommand}"
                     CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
               <PathIcon Data="{StaticResource SaveAsIconGeometry}" Classes="icon" />
+            </Button>
+
+            <!-- Web/Browser ダウンロードボタン -->
+            <Button Classes="tool" ToolTip.Tip="パレットをダウンロード"
+                    IsVisible="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).IsBrowserPlatform}"
+                    Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).SavePaletteCommand}"
+                    CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
+              <PathIcon Data="{StaticResource DownloadIconGeometry}" Classes="icon" />
             </Button>
           </StackPanel>
           <local:PaletteForm BorderBrush="Black"

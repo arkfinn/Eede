@@ -11,6 +11,8 @@
 
 	<Application.Resources>
 		<ResourceDictionary>
+			<FontFamily x:Key="AppFontFamily">avares://Eede.Presentation/Assets/Fonts#Noto Sans JP, Inter, Yu Gothic UI, Meiryo, sans-serif</FontFamily>
+
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceInclude Source="/Resources/Icons.axaml"/>
 			</ResourceDictionary.MergedDictionaries>
@@ -218,5 +220,12 @@
 
 		<StyleInclude Source="avares://Dock.Avalonia.Themes.Fluent/DockFluentTheme.axaml" />
 		<StyleInclude Source="/Styles/Styles.axaml"/>
+
+		<Style Selector="TextBlock">
+			<Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+		</Style>
+		<Style Selector="TemplatedControl">
+			<Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+		</Style>
 	</Application.Styles>
 </Application>

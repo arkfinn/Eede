@@ -11,41 +11,53 @@ namespace Eede.Infrastructure.Palettes.Persistence
         public Palette Find(string filePath)
         {
             // Factory Methodのロジック
-            IPaletteFileReader reader = CreateReader(filePath);
+            IPaletteFileReader reader = CreateReader(Path.GetExtension(filePath));
             using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read);
             return reader.Read(fs);
         }
 
+        public Palette Find(Stream stream, string extension)
+        {
+            IPaletteFileReader reader = CreateReader(extension);
+            return reader.Read(stream);
+        }
+
         public void Save(Palette palette, string filePath)
         {
-            IPaletteFileWriter writer = CreateWriter(filePath);
+            IPaletteFileWriter writer = CreateWriter(Path.GetExtension(filePath));
             using FileStream fs = new(filePath, FileMode.Create, FileAccess.Write);
             writer.Write(fs, palette);
         }
 
-        // privateなFactory Methodとして責務を分離
-        private IPaletteFileReader CreateReader(string filePath)
+        public void Save(Palette palette, Stream stream, string extension)
         {
-            string extension = Path.GetExtension(filePath).ToLower();
-            if (extension == ".act")
+            IPaletteFileWriter writer = CreateWriter(extension);
+            writer.Write(stream, palette);
+        }
+
+        // privateなFactory Methodとして責務を分離
+        private IPaletteFileReader CreateReader(string extension)
+        {
+            string ext = extension.ToLower();
+            if (ext == ".act")
             {
                 return new ActFileReader();
             }
-            if (extension == ".aact")
+            if (ext == ".aact")
             {
                 return new AlphaActFileReader();
             }
             throw new NotSupportedException($"Unsupported file extension: {extension}");
         }
 
-        private IPaletteFileWriter CreateWriter(string filePath)
+        private IPaletteFileWriter CreateWriter(string extension)
         {
-            string extension = Path.GetExtension(filePath).ToLower();
-            if (extension == ".act")
+            string ext = extension.ToLower();
+            if (ext == ".act")
             {
                 return new ActFileWriter();
             }
-            if (extension == ".aact")
+            if (ext == ".aact")
             {
                 return new AlphaActFileWriter();
             }

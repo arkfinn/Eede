@@ -95,11 +95,22 @@
 							Margin="2,0,0,0">
 						<PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
 					</Button>
+					<!-- Desktop 保存ボタン -->
 					<Button Grid.Column="4" Classes="tool" ToolTip.Tip="保存"
+							IsVisible="{Binding IsDesktopPlatform}"
 							Command="{Binding ExportCommand}"
 							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType=view:AnimationPreviewView}}"
 							Margin="2,0,0,0">
 						<PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
+					</Button>
+
+					<!-- Web/Browser ダウンロードボタン -->
+					<Button Grid.Column="4" Classes="tool" ToolTip.Tip="ダウンロード"
+							IsVisible="{Binding IsBrowserPlatform}"
+							Command="{Binding ExportCommand}"
+							CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType=view:AnimationPreviewView}}"
+							Margin="2,0,0,0">
+						<PathIcon Data="{StaticResource DownloadIconGeometry}" Classes="icon" />
 					</Button>
 				</Grid>
 			</StackPanel>

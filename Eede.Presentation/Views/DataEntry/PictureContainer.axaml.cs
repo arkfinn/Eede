@@ -172,8 +172,6 @@ namespace Eede.Presentation.Views.DataEntry
             }, DispatcherPriority.Render);
         }
 
-
-
         private DockPictureViewModel? FetchViewModel()
         {
             return DataContext is DockPictureViewModel vm ? vm : DataContext is StyledElement e ? e.DataContext as DockPictureViewModel : null;

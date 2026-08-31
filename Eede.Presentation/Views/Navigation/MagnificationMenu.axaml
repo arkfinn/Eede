@@ -31,7 +31,6 @@
       <ToggleButton x:Name="m12" Classes="tool" Click="SetMagnification12" ToolTip.Tip="倍率 12x(6)" >
         <Image Source="avares://Eede.Presentation/Assets/Tools/mag12.png" Stretch="None" />
       </ToggleButton>
-
     </WrapPanel>
   </Grid>
 </UserControl>

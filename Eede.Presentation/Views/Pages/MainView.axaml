@@ -211,17 +211,29 @@
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource FolderOpenIconGeometry}" Classes="icon" />
 								</Button>
+								<!-- Desktop 保存ボタン群 -->
 								<Button Classes="tool"
 										ToolTip.Tip="保存(Ctrl+S)"
+										IsVisible="{Binding IsDesktopPlatform}"
 										Command="{Binding SavePictureCommand}"
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource SaveIconGeometry}" Classes="icon" />
 								</Button>
 								<Button Classes="tool"
 										ToolTip.Tip="名前を付けて保存(Ctrl+Shift+S)"
+										IsVisible="{Binding IsDesktopPlatform}"
 										Command="{Binding SavePictureAsCommand}"
 										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
 									<PathIcon Data="{StaticResource SaveAsIconGeometry}" Classes="icon" />
+								</Button>
+
+								<!-- Web/Browser ダウンロードボタン -->
+								<Button Classes="tool"
+										ToolTip.Tip="画像をダウンロード(Ctrl+S)"
+										IsVisible="{Binding IsBrowserPlatform}"
+										Command="{Binding SavePictureCommand}"
+										CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}">
+									<PathIcon Data="{StaticResource DownloadIconGeometry}" Classes="icon" />
 								</Button>
 								<Panel Classes="horizontal-separator" />
 								<ComboBox ItemsSource="{Binding MinCursorSizeList}"

@@ -96,6 +96,9 @@ public partial class MainViewModel : ViewModelBase
 
     [Reactive] public partial int SelectedThemeIndex { get; set; }
 
+    public bool IsBrowserPlatform => OperatingSystem.IsBrowser();
+    public bool IsDesktopPlatform => !OperatingSystem.IsBrowser();
+
     public WelcomeViewModel WelcomeViewModel { get; }
 
     [ObservableAsProperty] private bool _isUpdateReady;

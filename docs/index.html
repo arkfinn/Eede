@@ -130,17 +130,115 @@
             align-items: center;
         }
 
-        .hero-image {
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--brand-teal);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(45, 212, 191, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(45, 212, 191, 0);
+            }
+        }
+
+        .hero-image-wrapper {
+            position: relative;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            display: block;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .hero-image img {
+        .hero-image-wrapper:hover {
+            border-color: var(--brand-teal);
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 25px 50px rgba(45, 212, 191, 0.15), 0 0 30px rgba(45, 212, 191, 0.1);
+        }
+
+        .hero-image-wrapper img {
             width: 100%;
             display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .hero-image-wrapper:hover img {
+            transform: scale(1.02);
+        }
+
+        .hero-image-badge {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--brand-teal);
+            color: var(--brand-teal);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .hero-image-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.1) 0%, rgba(2, 6, 23, 0.75) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 24px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .hero-image-wrapper:hover .hero-image-overlay {
+            opacity: 1;
+        }
+
+        .hero-overlay-btn {
+            background: var(--brand-teal);
+            color: var(--bg-main);
+            font-weight: 700;
+            font-size: 15px;
+            padding: 10px 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            transform: translateY(8px);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-image-wrapper:hover .hero-overlay-btn {
+            transform: translateY(0);
         }
 
         .section-title {
@@ -330,7 +428,7 @@
             </div>
             <div style="display: flex; gap: 20px; align-items: center;">
                 <a href="app/" class="nav-link" style="color: var(--brand-teal); font-weight: 700;">
-                    <i class="fas fa-play"></i> Web版を起動
+                    <span class="live-dot"></span> Web版を起動
                 </a>
                 <a href="https://github.com/arkfinn/Eede" class="nav-link" target="_blank" rel="noopener noreferrer">
                     <i class="fab fa-github"></i> GitHub
@@ -361,9 +459,17 @@
                     </a>
                 </div>
             </div>
-            <div class="hero-image">
-                <img src="assets/screenshots/main_ui.png" alt="Eedeのメイン画面：直感的なドット絵編集UI">
-            </div>
+            <a href="app/" class="hero-image-wrapper" title="クリックしてブラウザ版 Eede を起動 (WebAssembly)">
+                <div class="hero-image-badge">
+                    <span class="live-dot"></span> Web Edition 🌐
+                </div>
+                <img src="assets/screenshots/main_ui.png" alt="Eedeのメイン画面：クリックしてブラウザ版を起動">
+                <div class="hero-image-overlay">
+                    <div class="hero-overlay-btn">
+                        <i class="fas fa-play"></i> ブラウザで今すぐ体験
+                    </div>
+                </div>
+            </a>
         </section>
 
         <div class="section-title">

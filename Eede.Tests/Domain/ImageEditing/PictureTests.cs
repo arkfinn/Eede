@@ -101,6 +101,44 @@ namespace Eede.Domain.Tests.ImageEditing
         }
 
         [Test]
+        public void CutOut_WithNegativeCoordinates_FillsOutsideWithTransparentAndCopiesInside()
+        {
+            // 2x2 画像に対して (-1, -1) から 3x3 で切り出す
+            // 画像は (0,0)〜(1,1) に存在し、切り出し結果の (1,1)〜(2,2) にマッピングされる
+            Picture picture = Picture.Create(new PictureSize(2, 2), new byte[] {
+                10, 20, 30, 40,  50, 60, 70, 80,
+                11, 21, 31, 41,  51, 61, 71, 81
+            });
+            Picture after = picture.CutOut(new PictureArea(new Position(-1, -1), new PictureSize(3, 3)));
+
+            Assert.That(after.Size, Is.EqualTo(new PictureSize(3, 3)));
+            byte[] bytes = after.CloneImage();
+            // row 0 (y=-1): 全部 0
+            // row 1 (y=0): x=-1(0), x=0(10..40), x=1(50..80)
+            // row 2 (y=1): x=-1(0), x=0(11..41), x=1(51..81)
+            byte[] expected = new byte[]
+            {
+                0, 0, 0, 0,    0, 0, 0, 0,     0, 0, 0, 0,
+                0, 0, 0, 0,   10, 20, 30, 40, 50, 60, 70, 80,
+                0, 0, 0, 0,   11, 21, 31, 41, 51, 61, 71, 81,
+            };
+            Assert.That(bytes, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CutOut_CompletelyOutside_ReturnsEmptyTransparentPicture()
+        {
+            Picture picture = Picture.Create(new PictureSize(2, 2), new byte[] {
+                10, 20, 30, 40,  50, 60, 70, 80,
+                11, 21, 31, 41,  51, 61, 71, 81
+            });
+            Picture after = picture.CutOut(new PictureArea(new Position(-10, -10), new PictureSize(2, 2)));
+
+            Assert.That(after.Size, Is.EqualTo(new PictureSize(2, 2)));
+            Assert.That(after.CloneImage(), Is.All.Zero);
+        }
+
+        [Test]
         public void ClearTest()
         {
             Picture picture = Picture.Create(new PictureSize(2, 2), new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8 });

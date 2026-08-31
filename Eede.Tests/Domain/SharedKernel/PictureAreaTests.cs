@@ -1,4 +1,4 @@
-﻿using Eede.Domain.SharedKernel;
+using Eede.Domain.SharedKernel;
 using NUnit.Framework;
 
 namespace Eede.Domain.Tests.SharedKernel
@@ -72,6 +72,41 @@ namespace Eede.Domain.Tests.SharedKernel
                 new PictureArea(new Position(10, 10), new PictureSize(0, 0)),
                 new PictureArea(new Position(20, 20), new PictureSize(0, 0)),
                 new PictureArea(new Position(20, 20), new PictureSize(0, 0))
+            }
+        };
+
+        [TestCaseSource(nameof(IntersectCases))]
+        public void IntersectTest(PictureArea area1, PictureArea area2, PictureArea expected)
+        {
+            PictureArea result = area1.Intersect(area2);
+            Assert.That((result.X, result.Y, result.Width, result.Height), Is.EqualTo((expected.X, expected.Y, expected.Width, expected.Height)));
+        }
+
+        private static readonly object[] IntersectCases =
+        {
+            // Partially overlapping
+            new object[] {
+                new PictureArea(new Position(10, 10), new PictureSize(20, 20)),
+                new PictureArea(new Position(20, 20), new PictureSize(20, 20)),
+                new PictureArea(new Position(20, 20), new PictureSize(10, 10))
+            },
+            // Non-overlapping
+            new object[] {
+                new PictureArea(new Position(0, 0), new PictureSize(10, 10)),
+                new PictureArea(new Position(20, 20), new PictureSize(10, 10)),
+                new PictureArea(new Position(0, 0), new PictureSize(0, 0))
+            },
+            // Negative coordinates overlapping
+            new object[] {
+                new PictureArea(new Position(-10, -10), new PictureSize(20, 20)),
+                new PictureArea(new Position(0, 0), new PictureSize(32, 32)),
+                new PictureArea(new Position(0, 0), new PictureSize(10, 10))
+            },
+            // Fully contained
+            new object[] {
+                new PictureArea(new Position(0, 0), new PictureSize(50, 50)),
+                new PictureArea(new Position(10, 10), new PictureSize(20, 20)),
+                new PictureArea(new Position(10, 10), new PictureSize(20, 20))
             }
         };
     }

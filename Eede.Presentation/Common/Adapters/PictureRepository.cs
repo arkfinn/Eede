@@ -37,13 +37,25 @@ namespace Eede.Presentation.Common.Adapters
             {
                 await using (cachedStream)
                 {
+                    using var ms = new MemoryStream();
+                    await cachedStream.CopyToAsync(ms);
+                    ms.Position = 0;
+
                     if (extension == ".arv")
                     {
                         ArvFileReader reader = new();
-                        return reader.Read(cachedStream);
+                        return reader.Read(ms);
                     }
-                    using var bitmap = new Bitmap(cachedStream);
-                    return _bitmapAdapter.ConvertToPicture(bitmap);
+                    try
+                    {
+                        using var bitmap = new Bitmap(ms);
+                        return _bitmapAdapter.ConvertToPicture(bitmap);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Eede] Error decoding bitmap from cached stream: {ex}");
+                        throw;
+                    }
                 }
             }
 
@@ -56,17 +68,21 @@ namespace Eede.Presentation.Common.Adapters
                     try
                     {
                         await using var stream = await fileStorage.OpenReadStreamAsync(uri);
+                        using var ms = new MemoryStream();
+                        await stream.CopyToAsync(ms);
+                        ms.Position = 0;
+
                         if (extension == ".arv")
                         {
                             ArvFileReader reader = new();
-                            return reader.Read(stream);
+                            return reader.Read(ms);
                         }
-                        using var bitmap = new Bitmap(stream);
+                        using var bitmap = new Bitmap(ms);
                         return _bitmapAdapter.ConvertToPicture(bitmap);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // フォールバック
+                        Console.WriteLine($"[Eede] FileStorage fallback exception: {ex.Message}");
                     }
                 }
             }

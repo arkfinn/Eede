@@ -12,7 +12,7 @@
              x:CompileBindings="False"
              Background="#0e0e0e"
              Opacity="1.0"
-             UseLayoutRounding="False">
+             UseLayoutRounding="True">
   <UserControl.Resources>
     <converters:BackgroundColorConverter x:Key="BackgroundColorConverter" />
   </UserControl.Resources>
@@ -64,7 +64,7 @@
               HorizontalAlignment="Center"
               VerticalAlignment="Center"
               Opacity="1.0"
-              UseLayoutRounding="False">
+              UseLayoutRounding="True">
           <!-- 1. 画像エリア直下の不透明レイヤーは不要（背後の outsideTilePanel のグレーを透過させるため） -->
           
           <!-- 2. 市松模様レイヤー -->
@@ -72,9 +72,9 @@
                  Width="{Binding DataContext.DisplayWidth}"
                  Height="{Binding DataContext.DisplayHeight}"
                  Background="Transparent"
-                 UseLayoutRounding="False"
+                 UseLayoutRounding="True"
                  ZIndex="1">
-            <Panel x:Name="backgroundPanel" Opacity="1.0" UseLayoutRounding="False">
+            <Panel x:Name="backgroundPanel" Opacity="1.0" UseLayoutRounding="True">
               <Panel.Background>
                 <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
                             TileMode="Tile"
@@ -88,7 +88,7 @@
           <Panel Width="{Binding DataContext.DisplayWidth}"
                  Height="{Binding DataContext.DisplayHeight}"
                  Opacity="1.0"
-                 UseLayoutRounding="False"
+                 UseLayoutRounding="True"
                  ZIndex="2">
             <Panel.Background>
               <SolidColorBrush Color="{Binding DataContext.BackgroundColor, Converter={StaticResource BackgroundColorConverter}}"/>
@@ -104,7 +104,7 @@
                  RenderOptions.BitmapInterpolationMode="None"
                  common:RenderOptionsHelper.EdgeMode="Aliased"
                  Opacity="1.0"
-                 UseLayoutRounding="False"
+                 UseLayoutRounding="True"
                  ZIndex="3" />
 
           <!-- 5. インタラクションレイヤー -->

@@ -156,39 +156,18 @@ namespace Eede.Presentation.Views.DataEntry
                 visualParent = visualParent.GetVisualParent();
             }
             
-            // 2. scrollViewerを一度DockPanelからデタッチし、次のフレームで再アタッチする（手動ドック再ドッキングのツリー物理挙動を完全シミュレート）
+            // 2. 初期表示時の描画更新
             Dispatcher.UIThread.Post(() =>
             {
-                if (scrollViewer != null && mainDockPanel != null)
+                if (_viewModel == null)
                 {
-                    mainDockPanel.Children.Remove(scrollViewer);
-                    
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        mainDockPanel.Children.Add(scrollViewer);
-                        
-                        // 再アタッチ後に強制描画更新を叩く
-                        Dispatcher.UIThread.Post(() =>
-                        {
-                            if (_viewModel == null)
-                            {
-                                _viewModel = FetchViewModel();
-                            }
-                            
-                            if (_viewModel != null)
-                            {
-                                mainImage.InvalidateVisual();
-                                mainImage.InvalidateMeasure();
-                                mainImage.InvalidateArrange();
-                                renderingRoot.InvalidateVisual();
-                                renderingRoot.InvalidateMeasure();
-                                renderingRoot.InvalidateArrange();
-                                this.InvalidateVisual();
-                                this.InvalidateMeasure();
-                                this.InvalidateArrange();
-                            }
-                        }, DispatcherPriority.Render);
-                    }, DispatcherPriority.Render);
+                    _viewModel = FetchViewModel();
+                }
+                
+                if (_viewModel != null)
+                {
+                    mainImage.InvalidateVisual();
+                    renderingRoot.InvalidateVisual();
                 }
             }, DispatcherPriority.Render);
         }
@@ -394,56 +373,50 @@ namespace Eede.Presentation.Views.DataEntry
             return new NormalCursorState(_localCursorArea);
         }
 
-        public override void Render(DrawingContext context)
-        {
-            base.Render(context);
-            UpdateCursor();
-        }
-
         private void UpdateCursor()
         {
-            Dispatcher.UIThread.Post(() =>
+            if (_viewModel == null) return;
+
+            var mag = _viewModel.Magnification;
+            HalfBoxArea cursorArea = _localCursorArea;
+            if (_viewModel.AnimationViewModel.IsAnimationMode)
             {
-                if (_viewModel == null) return;
+                // アニメーションモード時はアニメーション設定のグリッドサイズを使用
+                var animVM = _viewModel.AnimationViewModel;
+                cursorArea = HalfBoxArea.Create(cursorArea.RealPosition, new PictureSize(animVM.GridWidth, animVM.GridHeight));
+            }
 
-                var mag = _viewModel.Magnification;
-                HalfBoxArea cursorArea = _localCursorArea;
-                if (_viewModel.AnimationViewModel.IsAnimationMode)
-                {
-                    // アニメーションモード時はアニメーション設定のグリッドサイズを使用
-                    var animVM = _viewModel.AnimationViewModel;
-                    cursorArea = HalfBoxArea.Create(cursorArea.RealPosition, new PictureSize(animVM.GridWidth, animVM.GridHeight));
-                }
+            var selectingArea = _selectionState.GetSelectingArea();
+            if (selectingArea.HasValue)
+            {
+                var displayPos = new CanvasCoordinate(selectingArea.Value.X, selectingArea.Value.Y).ToDisplay(mag);
+                var displaySize = new CanvasCoordinate(selectingArea.Value.Width, selectingArea.Value.Height).ToDisplay(mag);
 
-                var selectingArea = _selectionState.GetSelectingArea();
-                if (selectingArea.HasValue)
-                {
-                    var displayPos = new CanvasCoordinate(selectingArea.Value.X, selectingArea.Value.Y).ToDisplay(mag);
-                    var displaySize = new CanvasCoordinate(selectingArea.Value.Width, selectingArea.Value.Height).ToDisplay(mag);
+                if (cursor.Width != displaySize.X) cursor.Width = displaySize.X;
+                if (cursor.Height != displaySize.Y) cursor.Height = displaySize.Y;
+                var targetMargin = new Thickness(displayPos.X, displayPos.Y, 0, 0);
+                if (cursor.Margin != targetMargin) cursor.Margin = targetMargin;
+                cursor.ShowHandles = _selectionState is SelectedState || _selectionState is ResizingState;
 
-                    cursor.Width = displaySize.X;
-                    cursor.Height = displaySize.Y;
-                    cursor.Margin = new Thickness(displayPos.X, displayPos.Y, 0, 0);
-                    cursor.ShowHandles = _selectionState is SelectedState || _selectionState is ResizingState;
+                // ハンドルサイズはキャンバス上の 4ピクセル固定
+                double visualSize = 4.0;
+                if (cursor.HandleSize != visualSize) cursor.HandleSize = visualSize;
+                var targetHandleMargin = new Thickness(-2, -2, 0, 0);
+                if (cursor.HandleMargin != targetHandleMargin) cursor.HandleMargin = targetHandleMargin;
+            }
+            else
+            {
+                var displayPos = new CanvasCoordinate(cursorArea.RealPosition.X, cursorArea.RealPosition.Y).ToDisplay(mag);
+                var displaySize = new CanvasCoordinate(cursorArea.BoxSize.Width, cursorArea.BoxSize.Height).ToDisplay(mag);
 
-                    // ハンドルサイズはキャンバス上の 4ピクセル固定
-                    double visualSize = 4.0;
-                    cursor.HandleSize = visualSize;
-                    cursor.HandleMargin = new Thickness(-2, -2, 0, 0);
-                }
-                else
-                {
-                    var displayPos = new CanvasCoordinate(cursorArea.RealPosition.X, cursorArea.RealPosition.Y).ToDisplay(mag);
-                    var displaySize = new CanvasCoordinate(cursorArea.BoxSize.Width, cursorArea.BoxSize.Height).ToDisplay(mag);
+                if (cursor.Width != displaySize.X) cursor.Width = displaySize.X;
+                if (cursor.Height != displaySize.Y) cursor.Height = displaySize.Y;
+                var targetMargin = new Thickness(displayPos.X, displayPos.Y, 0, 0);
+                if (cursor.Margin != targetMargin) cursor.Margin = targetMargin;
+                cursor.ShowHandles = false;
+            }
 
-                    cursor.Width = displaySize.X;
-                    cursor.Height = displaySize.Y;
-                    cursor.Margin = new Thickness(displayPos.X, displayPos.Y, 0, 0);
-                    cursor.ShowHandles = false;
-                }
-
-                UpdateSelectionPreview();
-            });
+            UpdateSelectionPreview();
         }
 
         private void UpdateCursorCursor(Position mousePos)
@@ -466,8 +439,8 @@ namespace Eede.Presentation.Views.DataEntry
             var info = _selectionState.GetSelectionPreviewInfo();
             if (info == null || _viewModel == null)
             {
-                selectionPreview.IsVisible = false;
-                if (_viewModel != null)
+                if (selectionPreview.IsVisible) selectionPreview.IsVisible = false;
+                if (_viewModel != null && !ReferenceEquals(mainImage.Source, _viewModel.PremultipliedBitmap))
                 {
                     mainImage.Source = _viewModel.PremultipliedBitmap;
                 }
@@ -490,7 +463,7 @@ namespace Eede.Presentation.Views.DataEntry
             picture = picture.Blend(blender, pixels, info.Position);
 
             mainImage.Source = AvaloniaBitmapAdapter.StaticConvertToPremultipliedBitmap(picture);
-            selectionPreview.IsVisible = false;
+            if (selectionPreview.IsVisible) selectionPreview.IsVisible = false;
         }
 
         public bool VisibleCursor

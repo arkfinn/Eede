@@ -11,6 +11,8 @@
 
 	<Application.Resources>
 		<ResourceDictionary>
+			<FontFamily x:Key="AppFontFamily">avares://Eede.Presentation/Assets/Fonts#Noto Sans JP, Inter, Yu Gothic UI, Meiryo, sans-serif</FontFamily>
+
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceInclude Source="/Resources/Icons.axaml"/>
 			</ResourceDictionary.MergedDictionaries>

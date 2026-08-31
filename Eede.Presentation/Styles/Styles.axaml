@@ -219,33 +219,33 @@
 
   <!-- Global Typography Styles -->
   <Style Selector="TextBlock">
-    <Setter Property="FontFamily" Value="Inter, Yu Gothic UI, Meiryo, Hiragino Sans, Noto Sans CJK JP, Noto Sans JP, sans-serif" />
+    <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
   </Style>
   <Style Selector="TemplatedControl">
-    <Setter Property="FontFamily" Value="Inter, Yu Gothic UI, Meiryo, Hiragino Sans, Noto Sans CJK JP, Noto Sans JP, sans-serif" />
+    <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
   </Style>
 
   <Style Selector="TextBlock.headline-lg">
-    <Setter Property="FontFamily" Value="Space Grotesk, Arial, sans-serif" />
+    <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
     <Setter Property="FontSize" Value="32" />
     <Setter Property="FontWeight" Value="Bold" />
   </Style>
 
   <Style Selector="TextBlock.label-md">
-    <Setter Property="FontFamily" Value="Space Grotesk, Arial, sans-serif" />
+    <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
     <Setter Property="FontSize" Value="12" />
   </Style>
   <Style Selector="Label.label-md">
-    <Setter Property="FontFamily" Value="Space Grotesk, Arial, sans-serif" />
+    <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
     <Setter Property="FontSize" Value="12" />
   </Style>
 
   <Style Selector="TextBlock.body-sm">
-    <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif" />
+    <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
     <Setter Property="FontSize" Value="12" />
   </Style>
   <Style Selector="Label.body-sm">
-    <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif" />
+    <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
     <Setter Property="FontSize" Value="12" />
   </Style>
 

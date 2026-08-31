@@ -770,7 +770,8 @@ public partial class MainViewModel : ViewModelBase
 
     private async Task<DockPictureViewModel?> OpenPicture(Uri path)
     {
-        FilePath filePath = new(path.LocalPath);
+        string pathStr = path.IsAbsoluteUri ? (path.IsFile ? path.LocalPath : path.ToString()) : path.OriginalString;
+        FilePath filePath = new(pathStr);
         Picture? picture = await _pictureIOService.LoadAsync(filePath);
         if (picture == null)
         {

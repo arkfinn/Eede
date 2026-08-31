@@ -19,11 +19,7 @@ jobs:
       matrix:
         configuration: [Debug]
 
-    runs-on: windows-latest  # For a list of available runner types, refer to
-                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
-
-    env:
-      Solution_Name: Eede.sln
+    runs-on: windows-latest
 
     steps:
     - name: Checkout
@@ -31,17 +27,12 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Install the .NET Core workload
+    # Install .NET 8 for desktop testing
     - name: Install .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: |
-          8.0.x
-          10.0.x
-
-    - name: Install WebAssembly workload
-      run: dotnet workload install wasm-tools
+        dotnet-version: 8.0.x
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
-      run: dotnet test ${{ env.Solution_Name }} --configuration ${{ matrix.configuration }} --logger "console;verbosity=normal"
+      run: dotnet test Eede.Tests/Eede.Tests.csproj --configuration ${{ matrix.configuration }} --logger "console;verbosity=normal"

@@ -257,8 +257,33 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
         }
         else
         {
-            // Web / SingleView フォールバック: 現状のサイズで即座に設定
-            interaction.SetOutput(null);
+            // Web / SingleView 用インラインモーダル
+            var tcs = new TaskCompletionSource<ResizeContext?>();
+            var view = new Views.DataEntry.ScalingDialogContentView()
+            {
+                DataContext = interaction.Input
+            };
+
+            IDisposable? subOk = null;
+            IDisposable? subCancel = null;
+
+            void CloseOverlay(ResizeContext? result)
+            {
+                subOk?.Dispose();
+                subCancel?.Dispose();
+                ModalOverlayHost.IsVisible = false;
+                ModalContentControl.Content = null;
+                tcs.TrySetResult(result);
+            }
+
+            subOk = interaction.Input.OkCommand.Subscribe(ctx => CloseOverlay(ctx));
+            subCancel = interaction.Input.CancelCommand.Subscribe(_ => CloseOverlay(null));
+
+            ModalContentControl.Content = view;
+            ModalOverlayHost.IsVisible = true;
+
+            var result = await tcs.Task;
+            interaction.SetOutput(result);
         }
     }
 
@@ -280,8 +305,25 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
         }
         else
         {
-            // Web / SingleView フォールバック: デフォルト新規作成
-            interaction.SetOutput(interaction.Input);
+            // Web / SingleView 用インラインモーダル
+            var tcs = new TaskCompletionSource<NewPictureWindowViewModel>();
+            var view = new NewPictureView()
+            {
+                DataContext = interaction.Input
+            };
+
+            interaction.Input.Close = new Action(() =>
+            {
+                ModalOverlayHost.IsVisible = false;
+                ModalContentControl.Content = null;
+                tcs.TrySetResult(interaction.Input);
+            });
+
+            ModalContentControl.Content = view;
+            ModalOverlayHost.IsVisible = true;
+
+            var result = await tcs.Task;
+            interaction.SetOutput(result);
         }
     }
 

@@ -120,6 +120,9 @@ namespace Eede.Presentation.Common.Adapters
             }
 
             using var bitmap = _bitmapAdapter.ConvertToBitmap(picture);
+            using var ms = new MemoryStream();
+            bitmap.Save(ms);
+            ms.Position = 0;
 
             // 1. 静的キャッシュ経由で保存（最優先）
             var cachedStream = await AvaloniaFileStorage.TryOpenWriteStreamStaticAsync(pathStr);
@@ -127,7 +130,8 @@ namespace Eede.Presentation.Common.Adapters
             {
                 await using (cachedStream)
                 {
-                    bitmap.Save(cachedStream);
+                    await ms.CopyToAsync(cachedStream);
+                    await cachedStream.FlushAsync();
                     return;
                 }
             }
@@ -140,8 +144,10 @@ namespace Eede.Presentation.Common.Adapters
                 {
                     try
                     {
+                        ms.Position = 0;
                         await using var stream = await fileStorage.OpenWriteStreamAsync(uri);
-                        bitmap.Save(stream);
+                        await ms.CopyToAsync(stream);
+                        await stream.FlushAsync();
                         return;
                     }
                     catch

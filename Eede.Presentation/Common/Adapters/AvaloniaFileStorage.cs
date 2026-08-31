@@ -276,6 +276,8 @@ namespace Eede.Presentation.Common.Adapters
         {
             FilePickerSaveOptions options = new()
             {
+                SuggestedFileName = "image.png",
+                DefaultExtension = "png",
                 FileTypeChoices =
                 [
                     new("PNG Image")

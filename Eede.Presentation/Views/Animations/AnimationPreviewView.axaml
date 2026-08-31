@@ -41,7 +41,7 @@
 						<Setter Property="Content">
 							<Template>
 								<StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-									<Image Source="/Assets/Tools/tool_animation_record.png" Width="16" Height="16"/>
+									<Image Source="avares://Eede.Presentation/Assets/Tools/tool_animation_record.png" Width="16" Height="16"/>
 									<TextBlock Text="アニメーション編集モード" VerticalAlignment="Center"/>
 								</StackPanel>
 							</Template>
@@ -52,7 +52,7 @@
 						<Setter Property="Content">
 							<Template>
 								<StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-									<Image Source="/Assets/Tools/tool_animation_record.png" Width="16" Height="16"/>
+									<Image Source="avares://Eede.Presentation/Assets/Tools/tool_animation_record.png" Width="16" Height="16"/>
 									<TextBlock Text="アニメーション編集モード" Foreground="{DynamicResource AccentContrastBrush}" VerticalAlignment="Center"/>
 								</StackPanel>
 							</Template>
@@ -158,7 +158,7 @@
 		<Border BorderBrush="{DynamicResource OutlineVariantBrush}" BorderThickness="1" Margin="8" MinHeight="120" CornerRadius="0">
 			<Panel Background="DarkGray">
 				<Panel.Background>
-					<ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+					<ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
 								Stretch="None" TileMode="Tile"
 								SourceRect="0,0,16,16" DestinationRect="0,0,16,16"/>
 				</Panel.Background>

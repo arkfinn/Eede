@@ -10,13 +10,13 @@
     </Grid.Styles>
     <WrapPanel>
       <ToggleButton x:Name="ButtonRgb" Classes="tool" Click="SetRgbLayer" ToolTip.Tip="RGBレイヤースタイル(F1)" >
-        <Image Source="/Assets/Tools/layer_rgb.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/layer_rgb.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonAlpha" Classes="tool" Click="SetAlphaLayer" ToolTip.Tip="Alphaレイヤースタイル(F2)" >
-        <Image Source="/Assets/Tools/layer_alpha.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/layer_alpha.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="ButtonArgb" Classes="tool" Click="SetArgbLayer" ToolTip.Tip="ARGBレイヤースタイル(F3)" >
-        <Image Source="/Assets/Tools/layer_full.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/layer_full.png" Stretch="None" />
       </ToggleButton>
     </WrapPanel>
   </Grid>

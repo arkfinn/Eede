@@ -35,7 +35,12 @@ jobs:
     - name: Install .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: |
+          8.0.x
+          10.0.x
+
+    - name: Install WebAssembly workload
+      run: dotnet workload install wasm-tools
 
     # Execute all unit tests in the solution
     - name: Execute unit tests

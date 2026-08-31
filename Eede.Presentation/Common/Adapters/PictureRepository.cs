@@ -31,8 +31,24 @@ namespace Eede.Presentation.Common.Adapters
             string pathStr = path.ToString();
             string extension = path.GetExtension().ToLowerInvariant();
 
-            // 1. IFileStorage 経由で Stream を開く（ブラウザ環境または Uri パス）
-            if (Uri.TryCreate(pathStr, UriKind.Absolute, out var uri))
+            // 1. 静的キャッシュからブラウザ/選択済みファイルを読み込む（最優先）
+            var cachedStream = await AvaloniaFileStorage.TryOpenReadStreamStaticAsync(pathStr);
+            if (cachedStream != null)
+            {
+                await using (cachedStream)
+                {
+                    if (extension == ".arv")
+                    {
+                        ArvFileReader reader = new();
+                        return reader.Read(cachedStream);
+                    }
+                    using var bitmap = new Bitmap(cachedStream);
+                    return _bitmapAdapter.ConvertToPicture(bitmap);
+                }
+            }
+
+            // 2. IFileStorage 経由で Stream を開く
+            if (Uri.TryCreate(pathStr, UriKind.RelativeOrAbsolute, out var uri))
             {
                 var fileStorage = _fileStorageProvider();
                 if (fileStorage != null)
@@ -55,7 +71,7 @@ namespace Eede.Presentation.Common.Adapters
                 }
             }
 
-            // 2. 物理ローカルファイルが存在する場合
+            // 3. 物理ローカルファイルが存在する場合
             if (File.Exists(pathStr))
             {
                 await using var fs = new FileStream(pathStr, FileMode.Open, FileAccess.Read);
@@ -68,7 +84,7 @@ namespace Eede.Presentation.Common.Adapters
                 return _bitmapAdapter.ConvertToPicture(bitmap);
             }
 
-            // 3. 直接パス指定フォールバック
+            // 4. 直接パス指定フォールバック
             using var directBitmap = new Bitmap(pathStr);
             return _bitmapAdapter.ConvertToPicture(directBitmap);
         }
@@ -89,8 +105,19 @@ namespace Eede.Presentation.Common.Adapters
 
             using var bitmap = _bitmapAdapter.ConvertToBitmap(picture);
 
-            // 1. IFileStorage 経由で保存
-            if (Uri.TryCreate(pathStr, UriKind.Absolute, out var uri))
+            // 1. 静的キャッシュ経由で保存（最優先）
+            var cachedStream = await AvaloniaFileStorage.TryOpenWriteStreamStaticAsync(pathStr);
+            if (cachedStream != null)
+            {
+                await using (cachedStream)
+                {
+                    bitmap.Save(cachedStream);
+                    return;
+                }
+            }
+
+            // 2. IFileStorage 経由で保存
+            if (Uri.TryCreate(pathStr, UriKind.RelativeOrAbsolute, out var uri))
             {
                 var fileStorage = _fileStorageProvider();
                 if (fileStorage != null)
@@ -108,7 +135,7 @@ namespace Eede.Presentation.Common.Adapters
                 }
             }
 
-            // 2. 物理ファイルパスに直接保存
+            // 3. 物理ファイルパスに直接保存
             bitmap.Save(pathStr);
         }
     }

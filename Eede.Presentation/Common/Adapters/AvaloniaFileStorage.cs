@@ -11,7 +11,7 @@ namespace Eede.Presentation.Common.Adapters
         public readonly IStorageProvider StorageProvider = storageProvider;
         private static readonly Dictionary<string, IStorageFile> StaticFileCache = new(StringComparer.OrdinalIgnoreCase);
 
-        private static void CacheFile(IStorageFile file)
+        public static void CacheFile(IStorageFile? file)
         {
             if (file == null) return;
             if (file.Path != null)
@@ -30,6 +30,34 @@ namespace Eede.Presentation.Common.Adapters
                 StaticFileCache["/" + file.Name] = file;
                 StaticFileCache["\\" + file.Name] = file;
             }
+        }
+
+        public static async Task<System.IO.Stream?> TryOpenReadStreamStaticAsync(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+
+            string fileName = System.IO.Path.GetFileName(path);
+            if (StaticFileCache.TryGetValue(path, out var file) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)))
+            {
+                return await file.OpenReadAsync();
+            }
+            return null;
+        }
+
+        public static async Task<System.IO.Stream?> TryOpenWriteStreamStaticAsync(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+
+            string fileName = System.IO.Path.GetFileName(path);
+            if (StaticFileCache.TryGetValue(path, out var file) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)))
+            {
+                return await file.OpenWriteAsync();
+            }
+            return null;
         }
 
         private static bool TryGetCachedFile(Uri uri, out IStorageFile? file)

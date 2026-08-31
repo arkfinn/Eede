@@ -45,7 +45,7 @@ jobs:
 
       - name: Publish WebAssembly SPA
         run: |
-          dotnet publish Eede.Presentation.Browser/Eede.Presentation.Browser.csproj -c Release -o ./publish_temp
+          dotnet publish Eede.Presentation.Browser/Eede.Presentation.Browser.csproj -c Release -r browser-wasm -o ./publish_temp
           mkdir -p ./docs/app
           cp -r ./publish_temp/wwwroot/* ./docs/app/
           rm -rf ./publish_temp

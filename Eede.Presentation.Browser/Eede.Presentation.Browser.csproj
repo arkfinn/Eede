@@ -1,17 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
-    <WasmMainAssemblyFileName>Eede.Presentation.Browser.dll</WasmMainAssemblyFileName>
     <OutputType>Exe</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
     <PublishTrimmed>false</PublishTrimmed>
+    <RootNamespace>Eede.Presentation.Browser</RootNamespace>
+    <AssemblyName>Eede.Presentation.Browser</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'browser-wasm'">
+    <WasmMainAssemblyFileName>Eede.Presentation.Browser.dll</WasmMainAssemblyFileName>
     <WasmBuildNative>true</WasmBuildNative>
     <WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
     <WasmEnableSIMD>true</WasmEnableSIMD>
-    <RootNamespace>Eede.Presentation.Browser</RootNamespace>
-    <AssemblyName>Eede.Presentation.Browser</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

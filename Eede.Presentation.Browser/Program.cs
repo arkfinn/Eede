@@ -21,7 +21,8 @@ internal partial class Program
                 .WithInterFont()
                 .UseReactiveUI(_ => { })
                 .StartBrowserAppAsync("out");
-            Console.WriteLine("[Eede] Avalonia Browser App started successfully.");
+            Console.WriteLine("[Eede] Avalonia Browser App initialized successfully. Keeping runtime active...");
+            await Task.Delay(-1);
         }
         catch (Exception ex)
         {

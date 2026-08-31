@@ -8,6 +8,8 @@
     <Nullable>enable</Nullable>
     <PublishTrimmed>false</PublishTrimmed>
     <WasmBuildNative>true</WasmBuildNative>
+    <WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
+    <WasmEnableSIMD>true</WasmEnableSIMD>
     <RootNamespace>Eede.Presentation.Browser</RootNamespace>
     <AssemblyName>Eede.Presentation.Browser</AssemblyName>
   </PropertyGroup>

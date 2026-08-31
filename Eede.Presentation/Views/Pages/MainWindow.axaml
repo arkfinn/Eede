@@ -5,8 +5,6 @@
         xmlns:vm="using:Eede.Presentation.ViewModels.Pages"
         xmlns:pages="clr-namespace:Eede.Presentation.Views.Pages"
         xmlns:ext="using:Eede.Presentation.Common.MarkupExtensions"
-        xmlns:p="using:Eede.Domain.ImageEditing.DrawingTools"
-        xmlns:geo="using:Eede.Domain.ImageEditing.GeometricTransformations"
         xmlns:reactiveUi="http://reactiveui.net"
         x:TypeArguments="vm:MainViewModel"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -16,56 +14,5 @@
         ExtendClientAreaToDecorationsHint="False"
         x:DataType="vm:MainViewModel"
         DataContext="{ext:ServiceResolve vm:MainViewModel}">
-  <reactiveUi:ReactiveWindow.KeyBindings>
-    <!-- Undo / Redo -->
-    <KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoCommand}" />
-    <KeyBinding Gesture="Ctrl+Y" Command="{Binding RedoCommand}" />
-    <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoCommand}" />
-    <!-- File Operations -->
-    <KeyBinding Gesture="Ctrl+N" Command="{Binding CreateNewPictureCommand}" />
-    <KeyBinding Gesture="Ctrl+O" Command="{Binding LoadPictureCommand}" />
-    <KeyBinding Gesture="Ctrl+S" Command="{Binding SavePictureCommand}" />
-    <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SavePictureAsCommand}" />
-    <!-- Clipboard & Selection -->
-    <KeyBinding Gesture="Ctrl+C" Command="{Binding CopyCommand}" />
-    <KeyBinding Gesture="Ctrl+X" Command="{Binding CutCommand}" />
-    <KeyBinding Gesture="Ctrl+V" Command="{Binding PasteCommand}" />
-    <KeyBinding Gesture="Escape" Command="{Binding DeselectCommand}" />
-    <KeyBinding Gesture="Ctrl+D" Command="{Binding DeselectCommand}" />
-    <!-- Shape Modifiers -->
-    <KeyBinding Gesture="Shift+U" Command="{Binding SetDrawStyleCommand}" CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" />
-    <KeyBinding Gesture="Shift+R" Command="{Binding SetDrawStyleCommand}" CommandParameter="{x:Static p:DrawStyleType.FilledRectangle}" />
-    <KeyBinding Gesture="Shift+C" Command="{Binding SetDrawStyleCommand}" CommandParameter="{x:Static p:DrawStyleType.FilledEllipse}" />
-    <!-- Geometric Transformations -->
-    <KeyBinding Gesture="Shift+H" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.FlipHorizontal}" />
-    <KeyBinding Gesture="Shift+V" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.FlipVertical}" />
-    <KeyBinding Gesture="Ctrl+R" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.RotateRight}" />
-    <KeyBinding Gesture="Alt+H" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.MirrorCopyRight}" />
-    <KeyBinding Gesture="Alt+V" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.MirrorCopyBottom}" />
-    <KeyBinding Gesture="Ctrl+T" Command="{Binding ScalingCommand}" />
-    <KeyBinding Gesture="Ctrl+Alt+A" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.AntiAliasStrong}" />
-    <KeyBinding Gesture="Ctrl+Shift+Alt+A" Command="{Binding PictureActionCommand}" CommandParameter="{x:Static geo:PictureActions.AntiAliasSubtle}" />
-    <!-- View, Grid & Transparency -->
-    <KeyBinding Gesture="Alt+T" Command="{Binding ToggleTransparencyCommand}" />
-    <KeyBinding Gesture="Ctrl+OemQuotes" Command="{Binding TogglePixelGridCommand}" />
-    <KeyBinding Gesture="Shift+G" Command="{Binding TogglePixelGridCommand}" />
-    <KeyBinding Gesture="Ctrl+OemSemicolon" Command="{Binding ToggleCursorGridCommand}" />
-    <KeyBinding Gesture="Alt+G" Command="{Binding ToggleCursorGridCommand}" />
-    <KeyBinding Gesture="Ctrl+D0" Command="{Binding ResetZoomCommand}" />
-    <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding ZoomInCommand}" />
-    <KeyBinding Gesture="Ctrl+Add" Command="{Binding ZoomInCommand}" />
-    <KeyBinding Gesture="Ctrl+Subtract" Command="{Binding ZoomOutCommand}" />
-    <!-- Document & Tab Management -->
-    <KeyBinding Gesture="Ctrl+W" Command="{Binding CloseActivePictureCommand}" />
-    <!-- Layer Styles -->
-    <KeyBinding Gesture="F1" Command="{Binding SetLayerStyleRgbCommand}" />
-    <KeyBinding Gesture="F2" Command="{Binding SetLayerStyleAlphaCommand}" />
-    <KeyBinding Gesture="F3" Command="{Binding SetLayerStyleArgbCommand}" />
-    <!-- Animation & Workspace -->
-    <KeyBinding Gesture="F4" Command="{Binding ToggleAnimationPanelCommand}" />
-    <KeyBinding Gesture="Ctrl+E" Command="{Binding ToggleAnimationPanelCommand}" />
-    <KeyBinding Gesture="Ctrl+OemOpenBrackets" Command="{Binding DecreaseMinCursorSizeCommand}" />
-    <KeyBinding Gesture="Ctrl+OemCloseBrackets" Command="{Binding IncreaseMinCursorSizeCommand}" />
-  </reactiveUi:ReactiveWindow.KeyBindings>
   <pages:MainView />
 </reactiveUi:ReactiveWindow>

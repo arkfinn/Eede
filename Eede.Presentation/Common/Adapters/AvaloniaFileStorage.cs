@@ -9,6 +9,130 @@ namespace Eede.Presentation.Common.Adapters
     public class AvaloniaFileStorage(IStorageProvider storageProvider) : IFileStorage
     {
         public readonly IStorageProvider StorageProvider = storageProvider;
+        private static readonly Dictionary<string, IStorageFile> StaticFileCache = new(StringComparer.OrdinalIgnoreCase);
+
+        public static void CacheFile(IStorageFile? file)
+        {
+            if (file == null) return;
+            if (file.Path != null)
+            {
+                StaticFileCache[file.Path.ToString()] = file;
+                StaticFileCache[file.Path.OriginalString] = file;
+                if (file.Path.IsAbsoluteUri)
+                {
+                    StaticFileCache[file.Path.LocalPath] = file;
+                    StaticFileCache[file.Path.AbsoluteUri] = file;
+                }
+            }
+            if (!string.IsNullOrEmpty(file.Name))
+            {
+                StaticFileCache[file.Name] = file;
+                StaticFileCache["/" + file.Name] = file;
+                StaticFileCache["\\" + file.Name] = file;
+            }
+        }
+
+        public static async Task<System.IO.Stream?> TryOpenReadStreamStaticAsync(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+
+            string fileName = System.IO.Path.GetFileName(path);
+            if (StaticFileCache.TryGetValue(path, out var file) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)))
+            {
+                return await file.OpenReadAsync();
+            }
+            return null;
+        }
+
+        public static async Task<System.IO.Stream?> TryOpenWriteStreamStaticAsync(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+
+            string fileName = System.IO.Path.GetFileName(path);
+            if (StaticFileCache.TryGetValue(path, out var file) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)))
+            {
+                return await file.OpenWriteAsync();
+            }
+            return null;
+        }
+
+        private static bool TryGetCachedFile(Uri uri, out IStorageFile? file)
+        {
+            string uriStr = uri.ToString();
+            string origStr = uri.OriginalString;
+            string fileName = System.IO.Path.GetFileName(origStr);
+
+            if (StaticFileCache.TryGetValue(uriStr, out file) ||
+                StaticFileCache.TryGetValue(origStr, out file) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
+                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)) ||
+                (uri.IsAbsoluteUri && StaticFileCache.TryGetValue(uri.LocalPath, out file)))
+            {
+                return true;
+            }
+            file = null;
+            return false;
+        }
+
+        public async Task<System.IO.Stream> OpenReadStreamAsync(Uri uri)
+        {
+            if (TryGetCachedFile(uri, out var cachedFile) && cachedFile != null)
+            {
+                return await cachedFile.OpenReadAsync();
+            }
+            try
+            {
+                var file = await StorageProvider.TryGetFileFromPathAsync(uri);
+                if (file != null)
+                {
+                    return await file.OpenReadAsync();
+                }
+            }
+            catch
+            {
+                // StorageProvider unsupported or failed
+            }
+
+            if (uri.IsAbsoluteUri && uri.IsFile && System.IO.File.Exists(uri.LocalPath))
+            {
+                return new System.IO.FileStream(uri.LocalPath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            }
+            if (System.IO.File.Exists(uri.OriginalString))
+            {
+                return new System.IO.FileStream(uri.OriginalString, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            }
+            throw new System.IO.FileNotFoundException($"Could not open file at {uri}");
+        }
+
+        public async Task<System.IO.Stream> OpenWriteStreamAsync(Uri uri)
+        {
+            if (TryGetCachedFile(uri, out var cachedFile) && cachedFile != null)
+            {
+                return await cachedFile.OpenWriteAsync();
+            }
+            try
+            {
+                var file = await StorageProvider.TryGetFileFromPathAsync(uri);
+                if (file != null)
+                {
+                    return await file.OpenWriteAsync();
+                }
+            }
+            catch
+            {
+                // StorageProvider unsupported or failed
+            }
+
+            if (uri.IsAbsoluteUri && uri.IsFile)
+            {
+                return new System.IO.FileStream(uri.LocalPath, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+            }
+            return new System.IO.FileStream(uri.OriginalString, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+        }
 
         public async Task<Uri?> OpenFilePickerAsync()
         {
@@ -19,8 +143,10 @@ namespace Eede.Presentation.Common.Adapters
             };
 
             IReadOnlyList<IStorageFile> result = await StorageProvider.OpenFilePickerAsync(options);
+            if (result == null || result.Count == 0) return null;
 
-            return result == null || result.Count == 0 ? null : result[0].Path;
+            CacheFile(result[0]);
+            return result[0].Path;
         }
 
         public async Task<Uri?> OpenAnimationFilePickerAsync()
@@ -32,8 +158,10 @@ namespace Eede.Presentation.Common.Adapters
             };
 
             IReadOnlyList<IStorageFile> result = await StorageProvider.OpenFilePickerAsync(options);
+            if (result == null || result.Count == 0) return null;
 
-            return result == null || result.Count == 0 ? null : result[0].Path;
+            CacheFile(result[0]);
+            return result[0].Path;
         }
 
         public async Task<Uri?> SaveAnimationFilePickerAsync()
@@ -44,8 +172,10 @@ namespace Eede.Presentation.Common.Adapters
                 SuggestedFileName = "animation_pattern.json"
             };
             IStorageFile? result = await StorageProvider.SaveFilePickerAsync(options);
+            if (result == null) return null;
 
-            return result?.Path;
+            CacheFile(result);
+            return result.Path;
         }
 
         public async Task<Uri?> OpenPaletteFilePickerAsync()
@@ -57,8 +187,10 @@ namespace Eede.Presentation.Common.Adapters
             };
 
             IReadOnlyList<IStorageFile> result = await StorageProvider.OpenFilePickerAsync(options);
+            if (result == null || result.Count == 0) return null;
 
-            return result == null || result.Count == 0 ? null : result[0].Path;
+            CacheFile(result[0]);
+            return result[0].Path;
         }
 
         public async Task<Uri?> SavePaletteFilePickerAsync()
@@ -69,8 +201,10 @@ namespace Eede.Presentation.Common.Adapters
                 SuggestedFileName = "palette.aact"
             };
             IStorageFile? result = await StorageProvider.SaveFilePickerAsync(options);
+            if (result == null) return null;
 
-            return result?.Path;
+            CacheFile(result);
+            return result.Path;
         }
 
         private static List<FilePickerFileType> GetPaletteFileTypes()
@@ -142,6 +276,8 @@ namespace Eede.Presentation.Common.Adapters
         {
             FilePickerSaveOptions options = new()
             {
+                SuggestedFileName = "image.png",
+                DefaultExtension = "png",
                 FileTypeChoices =
                 [
                     new("PNG Image")
@@ -153,8 +289,9 @@ namespace Eede.Presentation.Common.Adapters
                 ]
             };
             IStorageFile? result = await StorageProvider.SaveFilePickerAsync(options);
-
-            return result?.Path;
+            if (result == null) return null;
+            CacheFile(result);
+            return result.Path;
         }
     }
 }

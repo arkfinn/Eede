@@ -6,7 +6,7 @@
              x:Class="Eede.Presentation.Views.DataEntry.PaletteForm">
   <Panel x:Name="panel">
     <Panel.Background>
-      <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+      <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
                   Stretch="None"
                   TileMode="Tile"
                   SourceRect="0,0,16,16"

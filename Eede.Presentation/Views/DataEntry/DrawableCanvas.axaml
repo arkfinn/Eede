@@ -28,7 +28,7 @@
   <Panel Background="{DynamicResource BaseBrush}">
     <Panel>
       <Panel.Background>
-        <ImageBrush Source="/Assets/Tiles/OutsideBackGround.bmp"
+        <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/OutsideBackGround.png"
                     Stretch="None"
                     TileMode="Tile"
                     SourceRect="0,0,16,16"
@@ -40,7 +40,7 @@
              Width="{Binding DisplayWidth}"
              Height="{Binding DisplayHeight}">
         <Panel.Background>
-          <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+          <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
                       Stretch="None"
                       TileMode="Tile"
                       SourceRect="0,0,16,16"

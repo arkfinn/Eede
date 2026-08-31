@@ -113,54 +113,6 @@ public class AvaloniaClipboard : IClipboard
             System.Diagnostics.Debug.WriteLine($"Paste: Files format error: {ex.Message}");
         }
 
-        // Windows 環境における、遅延レンダリングされた Snipping Tool や PrintScreen 等の画像データのネイティブ fallback 処理
-        if (OperatingSystem.IsWindows())
-        {
-            try
-            {
-                var tcs = new TaskCompletionSource<Picture?>();
-                var thread = new System.Threading.Thread(() =>
-                {
-                    try
-                    {
-                        if (System.Windows.Forms.Clipboard.ContainsImage())
-                        {
-                            using (var img = System.Windows.Forms.Clipboard.GetImage())
-                            {
-                                if (img != null)
-                                {
-                                    using (var ms = new MemoryStream())
-                                    {
-                                        img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                                        ms.Position = 0;
-                                        var avaloniaBmp = new Avalonia.Media.Imaging.Bitmap(ms);
-                                        tcs.SetResult(AvaloniaBitmapAdapter.StaticConvertToPicture(avaloniaBmp));
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                        tcs.SetResult(null);
-                    }
-                    catch (Exception ex)
-                    {
-                        tcs.SetException(ex);
-                    }
-                });
-                thread.SetApartmentState(System.Threading.ApartmentState.STA);
-                thread.Start();
-                var nativePic = await tcs.Task;
-                if (nativePic != null)
-                {
-                    return nativePic;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Windows native clipboard fallback failed: {ex.Message}");
-            }
-        }
-
         System.Diagnostics.Debug.WriteLine("Paste: No image data found.");
         return null;
     }
@@ -196,35 +148,7 @@ public class AvaloniaClipboard : IClipboard
             }
         }
 
-        bool result = hasBitmap || containsFile || containsCustom;
-        if (!result && OperatingSystem.IsWindows())
-        {
-            try
-            {
-                var tcs = new TaskCompletionSource<bool>();
-                var thread = new System.Threading.Thread(() =>
-                {
-                    try
-                    {
-                        tcs.SetResult(System.Windows.Forms.Clipboard.ContainsImage());
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Trace.WriteLine($"ContainsImageAsync: Windows Forms Clipboard check error: {ex.Message}");
-                        tcs.SetResult(false);
-                    }
-                });
-                thread.SetApartmentState(System.Threading.ApartmentState.STA);
-                thread.Start();
-                result = await tcs.Task;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.WriteLine($"ContainsImageAsync: Fallback thread error: {ex.Message}");
-            }
-        }
-
-        return result;
+        return hasBitmap || containsFile || containsCustom;
     }
 
     private AvaloniaIClipboard? GetClipboard()
@@ -232,6 +156,10 @@ public class AvaloniaClipboard : IClipboard
         if (global::Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             return desktop.MainWindow?.Clipboard;
+        }
+        if (global::Avalonia.Application.Current?.ApplicationLifetime is ISingleViewApplicationLifetime singleView && singleView.MainView != null)
+        {
+            return TopLevel.GetTopLevel(singleView.MainView)?.Clipboard;
         }
         return null;
     }

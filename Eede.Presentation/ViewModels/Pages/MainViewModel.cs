@@ -96,6 +96,9 @@ public partial class MainViewModel : ViewModelBase
 
     [Reactive] public partial int SelectedThemeIndex { get; set; }
 
+    public bool IsBrowserPlatform => OperatingSystem.IsBrowser();
+    public bool IsDesktopPlatform => !OperatingSystem.IsBrowser();
+
     public WelcomeViewModel WelcomeViewModel { get; }
 
     [ObservableAsProperty] private bool _isUpdateReady;
@@ -770,15 +773,24 @@ public partial class MainViewModel : ViewModelBase
 
     private async Task<DockPictureViewModel?> OpenPicture(Uri path)
     {
-        FilePath filePath = new(path.LocalPath);
-        Picture? picture = await _pictureIOService.LoadAsync(filePath);
-        if (picture == null)
+        try
         {
+            string pathStr = path.IsAbsoluteUri ? (path.IsFile ? path.LocalPath : path.ToString()) : path.OriginalString;
+            FilePath filePath = new(pathStr);
+            Picture? picture = await _pictureIOService.LoadAsync(filePath);
+            if (picture == null)
+            {
+                return null;
+            }
+            DockPictureViewModel vm = _dockPictureFactory();
+            vm.Initialize(picture, filePath);
+            return vm;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Eede] OpenPicture failed for path '{path}': {ex}");
             return null;
         }
-        DockPictureViewModel vm = _dockPictureFactory();
-        vm.Initialize(picture, filePath);
-        return vm;
     }
 
     private void SetupDockPicture(DockPictureViewModel vm)

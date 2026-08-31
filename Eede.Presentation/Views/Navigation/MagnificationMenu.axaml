@@ -14,24 +14,23 @@
         <c:BitmapConverter x:Key="bitmapConverter" />
       </WrapPanel.Resources>
       <ToggleButton x:Name="m1" Classes="tool" Click="SetMagnification1" ToolTip.Tip="倍率 1x(1)" >
-        <Image Source="/Assets/Tools/mag1.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag1.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m2" Classes="tool" Click="SetMagnification2" ToolTip.Tip="倍率 2x(2)" >
-        <Image Source="/Assets/Tools/mag2.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag2.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m4" Classes="tool" Click="SetMagnification4" ToolTip.Tip="倍率 4x(3)" >
-        <Image Source="/Assets/Tools/mag4.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag4.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m6" Classes="tool" Click="SetMagnification6" ToolTip.Tip="倍率 6x(4)" >
-        <Image Source="/Assets/Tools/mag6.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag6.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m8" Classes="tool" Click="SetMagnification8" ToolTip.Tip="倍率 8x(5)" >
-        <Image Source="/Assets/Tools/mag8.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag8.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m12" Classes="tool" Click="SetMagnification12" ToolTip.Tip="倍率 12x(6)" >
-        <Image Source="/Assets/Tools/mag12.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag12.png" Stretch="None" />
       </ToggleButton>
-
     </WrapPanel>
   </Grid>
 </UserControl>

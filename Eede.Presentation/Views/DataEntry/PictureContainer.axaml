@@ -12,29 +12,29 @@
              x:CompileBindings="False"
              Background="#0e0e0e"
              Opacity="1.0"
-             UseLayoutRounding="False">
+             UseLayoutRounding="True">
   <UserControl.Resources>
     <converters:BackgroundColorConverter x:Key="BackgroundColorConverter" />
   </UserControl.Resources>
   <DockPanel x:Name="mainDockPanel">
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
       <ToggleButton x:Name="m1" Classes="tool" Click="SetMagnification1">
-        <Image Source="/Assets/Tools/mag1.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag1.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m2" Classes="tool" Click="SetMagnification2">
-        <Image Source="/Assets/Tools/mag2.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag2.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m4" Classes="tool" Click="SetMagnification4">
-        <Image Source="/Assets/Tools/mag4.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag4.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m6" Classes="tool" Click="SetMagnification6">
-        <Image Source="/Assets/Tools/mag6.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag6.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m8" Classes="tool" Click="SetMagnification8">
-        <Image Source="/Assets/Tools/mag8.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag8.png" Stretch="None" />
       </ToggleButton>
       <ToggleButton x:Name="m12" Classes="tool" Click="SetMagnification12">
-        <Image Source="/Assets/Tools/mag12.bmp" Stretch="None" />
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag12.png" Stretch="None" />
       </ToggleButton>
     </StackPanel>
     <ScrollViewer x:Name="scrollViewer"
@@ -48,7 +48,7 @@
         <Panel x:Name="outsideTilePanel" Background="#0e0e0e" Opacity="1.0">
           <Panel Opacity="1.0">
             <Panel.Background>
-              <ImageBrush Source="/Assets/Tiles/OutsideBackGround.bmp"
+              <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/OutsideBackGround.png"
                           Stretch="None"
                           TileMode="Tile"
                           SourceRect="0,0,16,16"
@@ -64,7 +64,7 @@
               HorizontalAlignment="Center"
               VerticalAlignment="Center"
               Opacity="1.0"
-              UseLayoutRounding="False">
+              UseLayoutRounding="True">
           <!-- 1. 画像エリア直下の不透明レイヤーは不要（背後の outsideTilePanel のグレーを透過させるため） -->
           
           <!-- 2. 市松模様レイヤー -->
@@ -72,11 +72,11 @@
                  Width="{Binding DataContext.DisplayWidth}"
                  Height="{Binding DataContext.DisplayHeight}"
                  Background="Transparent"
-                 UseLayoutRounding="False"
+                 UseLayoutRounding="True"
                  ZIndex="1">
-            <Panel x:Name="backgroundPanel" Opacity="1.0" UseLayoutRounding="False">
+            <Panel x:Name="backgroundPanel" Opacity="1.0" UseLayoutRounding="True">
               <Panel.Background>
-                <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+                <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
                             TileMode="Tile"
                             Stretch="None"
                             DestinationRect="0,0,16,16" />
@@ -88,7 +88,7 @@
           <Panel Width="{Binding DataContext.DisplayWidth}"
                  Height="{Binding DataContext.DisplayHeight}"
                  Opacity="1.0"
-                 UseLayoutRounding="False"
+                 UseLayoutRounding="True"
                  ZIndex="2">
             <Panel.Background>
               <SolidColorBrush Color="{Binding DataContext.BackgroundColor, Converter={StaticResource BackgroundColorConverter}}"/>
@@ -104,7 +104,7 @@
                  RenderOptions.BitmapInterpolationMode="None"
                  common:RenderOptionsHelper.EdgeMode="Aliased"
                  Opacity="1.0"
-                 UseLayoutRounding="False"
+                 UseLayoutRounding="True"
                  ZIndex="3" />
 
           <!-- 5. インタラクションレイヤー -->

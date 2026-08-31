@@ -12,7 +12,7 @@
         Padding="0" Margin="4">
     <Panel Width="32" Height="20">
       <Panel.Background>
-        <ImageBrush Source="/Assets/Tiles/InvisibleBackground.png"
+        <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
           Stretch="None"
           TileMode="Tile"
           SourceRect="0,0,16,16"

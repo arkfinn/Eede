@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:controls="using:Eede.Presentation.Controls"
         xmlns:local="using:Eede.Views.Pages"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="130"
         x:Class="Eede.Views.Pages.SaveAlertWindow"
@@ -13,49 +12,5 @@
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         Title="Eede">
-  <Window.Styles>
-    <Style Selector="Button">
-      <Setter Property="Margin" Value="15 0 0 0" />
-      <Setter Property="MinHeight" Value="24" />
-      <Setter Property="MinWidth" Value="75" />
-    </Style>
-  </Window.Styles>
-  <Grid>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="15" />
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="15" />
-      <ColumnDefinition Width="*" />
-      <ColumnDefinition Width="15" />
-    </Grid.ColumnDefinitions>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="15" />
-      <RowDefinition Height="*" />
-      <RowDefinition Height="15" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="15" />
-    </Grid.RowDefinitions>
-    <Grid Grid.Row="1" Grid.Column="3">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="15" />
-        <RowDefinition Height="*" />
-      </Grid.RowDefinitions>
-      <TextBlock Grid.Row="2"
-                 TextWrapping="Wrap">
-        <Run Text="{Binding FileName}"/>
-        <Run Text="への変更内容を保存しますか？"/>
-      </TextBlock>
-    </Grid>
-    <controls:DialogButtons Grid.Row="3"
-                            Grid.Column="1"
-                            Grid.ColumnSpan="3"
-                            PrimaryText="保存する(S)"
-                            PrimaryCommand="{Binding SaveCommand}"
-                            SecondaryText="保存しない(N)"
-                            SecondaryCommand="{Binding NoSaveCommand}"
-                            IsSecondaryVisible="True"
-                            CancelText="キャンセル"
-                            CancelCommand="{Binding CancelCommand}" />
-  </Grid>
+  <local:SaveAlertContentView DataContext="{Binding}" />
 </Window>

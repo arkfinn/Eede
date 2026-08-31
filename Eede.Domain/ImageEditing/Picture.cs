@@ -69,23 +69,40 @@ public record Picture
 
     public Picture CutOut(PictureArea area)
     {
-        int destinationStride = area.Width * PixelSizeInBytes;
-        int length = Math.Min((Width - area.X) * PixelSizeInBytes, destinationStride);
-        int destinationX = area.X * PixelSizeInBytes;
-        byte[] cutoutImageData = new byte[destinationStride * area.Height];
-        ReadOnlySpan<byte> sourceSpan = AsSpan();
-        Span<byte> destinationSpan = new(cutoutImageData);
-
-        for (int y = 0; y < area.Height; y++)
+        if (area.IsEmpty)
         {
-            if (area.Y + y >= Height)
-            {
-                break;
-            }
+            return Create(new PictureSize(0, 0), Array.Empty<byte>());
+        }
 
-            int sourceStartIndex = destinationX + (area.Y + y) * Stride;
-            int destinationStartIndex = y * destinationStride;
-            sourceSpan.Slice(sourceStartIndex, length).CopyTo(destinationSpan.Slice(destinationStartIndex, length));
+        int destinationStride = area.Width * PixelSizeInBytes;
+        byte[] cutoutImageData = new byte[destinationStride * area.Height];
+
+        // 画像の有効領域 (0, 0, Width, Height) と area の交差範囲を計算
+        int startX = Math.Max(0, area.X);
+        int startY = Math.Max(0, area.Y);
+        int endX = Math.Min(Width, area.X + area.Width);
+        int endY = Math.Min(Height, area.Y + area.Height);
+
+        int copyWidth = Math.Max(0, endX - startX);
+        int copyHeight = Math.Max(0, endY - startY);
+
+        if (copyWidth > 0 && copyHeight > 0)
+        {
+            int copyBytesPerLine = copyWidth * PixelSizeInBytes;
+            ReadOnlySpan<byte> sourceSpan = AsSpan();
+            Span<byte> destinationSpan = new(cutoutImageData);
+
+            for (int y = 0; y < copyHeight; y++)
+            {
+                int currentSourceY = startY + y;
+                int currentDestY = (startY - area.Y) + y;
+
+                int sourceStartIndex = (startX * PixelSizeInBytes) + (currentSourceY * Stride);
+                int destinationStartIndex = ((startX - area.X) * PixelSizeInBytes) + (currentDestY * destinationStride);
+
+                sourceSpan.Slice(sourceStartIndex, copyBytesPerLine)
+                          .CopyTo(destinationSpan.Slice(destinationStartIndex, copyBytesPerLine));
+            }
         }
 
         return Create(area.Size, cutoutImageData);

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 
 namespace Eede.Domain.SharedKernel;
@@ -50,5 +50,25 @@ public readonly record struct PictureArea
         int maxY = Math.Max(Y + Height, other.Y + other.Height);
 
         return new PictureArea(new Position(minX, minY), new PictureSize(maxX - minX, maxY - minY));
+    }
+
+    public PictureArea Intersect(PictureArea other)
+    {
+        if (IsEmpty || other.IsEmpty) return new PictureArea(new Position(0, 0), new PictureSize(0, 0));
+
+        int startX = Math.Max(X, other.X);
+        int startY = Math.Max(Y, other.Y);
+        int endX = Math.Min(X + Width, other.X + other.Width);
+        int endY = Math.Min(Y + Height, other.Y + other.Height);
+
+        int width = Math.Max(0, endX - startX);
+        int height = Math.Max(0, endY - startY);
+
+        if (width <= 0 || height <= 0)
+        {
+            return new PictureArea(new Position(0, 0), new PictureSize(0, 0));
+        }
+
+        return new PictureArea(new Position(startX, startY), new PictureSize(width, height));
     }
 }

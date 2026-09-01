@@ -1209,16 +1209,21 @@ public partial class MainViewModel : ViewModelBase
 
     private PullSnapshot? CapturePullSnapshot(Dictionary<string, Picture> picturesDict)
     {
-        var pullContext = _pullContextTracker.CurrentContext;
-        if (pullContext == null) return null;
+        var canvasPicture = DrawableCanvasViewModel.PictureBuffer?.Previous;
+        if (canvasPicture == null) return null;
 
         var canvasPayloadRef = "canvas_pull.png";
-        picturesDict[canvasPayloadRef] = DrawableCanvasViewModel.PictureBuffer.Previous;
+        picturesDict[canvasPayloadRef] = canvasPicture;
+
+        var pullContext = _pullContextTracker.CurrentContext;
+        var sourceDocId = pullContext?.SourceDocumentId ?? GetActiveDocumentId();
+        var sourceArea = pullContext?.SourceArea ?? new PictureArea(new Position(0, 0), canvasPicture.Size);
+        bool hasUnpushed = pullContext != null;
 
         return new PullSnapshot(
-            pullContext.SourceDocumentId,
-            pullContext.SourceArea,
-            hasUnpushedChanges: true,
+            sourceDocId,
+            sourceArea,
+            hasUnpushedChanges: hasUnpushed,
             canvasPayloadRef
         );
     }
@@ -1322,15 +1327,23 @@ public partial class MainViewModel : ViewModelBase
         if (pullState == null) return;
 
         var snapshot = pullState.Snapshot;
-        if (!docMap.TryGetValue(snapshot.SourceDocumentId, out var sourceVm)) return;
+        var canvasPicture = pullState.CanvasPicture;
+        if (canvasPicture == null && docMap.TryGetValue(snapshot.SourceDocumentId, out var sourceVm))
+        {
+            canvasPicture = _transferImageToCanvasUseCase.Execute(sourceVm.PictureBuffer, snapshot.SourceArea);
+        }
 
-        var canvasPicture = pullState.CanvasPicture ??
-            _transferImageToCanvasUseCase.Execute(sourceVm.PictureBuffer, snapshot.SourceArea);
+        if (canvasPicture != null)
+        {
+            DrawingSessionViewModel.Sync(new DrawingSession(canvasPicture));
+            DrawableCanvasViewModel.SyncWithSession(true);
+            SetPictureToDrawArea(canvasPicture);
 
-        DrawingSessionViewModel.Sync(new DrawingSession(canvasPicture));
-        DrawableCanvasViewModel.SyncWithSession(true);
-        SetPictureToDrawArea(canvasPicture);
-        _pullContextTracker.SetPullContext(sourceVm.Id, snapshot.SourceArea);
+            if (snapshot.HasUnpushedChanges && docMap.ContainsKey(snapshot.SourceDocumentId))
+            {
+                _pullContextTracker.SetPullContext(snapshot.SourceDocumentId, snapshot.SourceArea);
+            }
+        }
     }
 
     private void RestorePaletteState(PaletteSnapshot? paletteState)

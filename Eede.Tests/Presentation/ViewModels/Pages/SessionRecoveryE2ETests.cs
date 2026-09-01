@@ -149,6 +149,18 @@ public class SessionRecoveryE2ETests
             _updateServiceMock.Object,
             checkUpdateUseCase);
 
+        var sessionProvider = new DrawingSessionProvider();
+        var interactionCoord = new InteractionCoordinator(sessionProvider);
+        var canvasVM = new DrawableCanvasViewModel(
+            _globalState,
+            _addFrameProviderMock.Object,
+            _clipboardMock.Object,
+            _bitmapAdapterMock.Object,
+            sessionProvider,
+            _selectionServiceMock.Object,
+            interactionCoord);
+        var drawingSessionVM = new DrawingSessionViewModel(sessionProvider);
+
         return new MainViewModel(
             _globalState,
             _clipboardMock.Object,
@@ -159,10 +171,10 @@ public class SessionRecoveryE2ETests
             _scalingImageUseCaseMock.Object,
             _transferImageToCanvasUseCase,
             _transferImageFromCanvasUseCase,
-            _drawingSessionProvider,
-            _drawableCanvasViewModel,
+            sessionProvider,
+            canvasVM,
             _animationViewModel,
-            _drawingSessionViewModel,
+            drawingSessionVM,
             _paletteContainerViewModel,
             _pictureIOServiceMock.Object,
             _themeServiceMock.Object,
@@ -278,7 +290,7 @@ public class SessionRecoveryE2ETests
         Assert.That(_pullTracker.CurrentContext, Is.Not.Null);
         Assert.That(_pullTracker.CurrentContext!.SourceDocumentId, Is.EqualTo(doc1Id));
         Assert.That(_pullTracker.CurrentContext!.SourceArea, Is.EqualTo(pullArea));
-        Assert.That(_drawableCanvasViewModel.PictureBuffer.Previous.PickColor(new Position(0, 0)), Is.EqualTo(blueColor));
+        Assert.That(mainVM.DrawableCanvasViewModel.PictureBuffer.Previous.PickColor(new Position(0, 0)), Is.EqualTo(blueColor));
 
         // パレット状態
         Assert.That(mainVM.PenColor, Is.EqualTo(selectedColor));
@@ -541,6 +553,63 @@ public class SessionRecoveryE2ETests
 
         // 選択中タブは Tabs[1] (ファイルパレット)
         Assert.That(paletteVM.SelectedTab, Is.EqualTo(paletteVM.Tabs[1]));
+    }
+
+    [AvaloniaTest]
+    public async Task Pull_ThenPushToDock_ThenExitAndResume_CanvasPictureIsStillRestored()
+    {
+        // 1. Arrange: ドックを作成し、キャンバスに Pull して編集し、ドックに Push して書き戻す
+        var mainVM = CreateMainViewModel();
+        mainVM.CloseWindowInteraction.RegisterHandler(c => c.SetOutput(System.Reactive.Unit.Default));
+
+        var redColor = new ArgbColor(255, 255, 0, 0);
+        var initialPic = CreateFilledPicture(new PictureSize(32, 32), redColor);
+        var dockVm = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        dockVm.Initialize(initialPic, FilePath.Empty());
+        mainVM.Pictures.Add(dockVm);
+
+        // ドックから Pull (8x8)
+        var pullArea = new PictureArea(new Position(0, 0), new PictureSize(8, 8));
+        await dockVm.OnPicturePull.Execute(pullArea).ToTask();
+
+        // キャンバスに青色を塗る
+        var blueColor = new ArgbColor(255, 0, 0, 255);
+        var bluePic = CreateFilledPicture(new PictureSize(8, 8), blueColor);
+        mainVM.DrawingSessionViewModel.Push(bluePic, null, null);
+
+        // ドックへ Push (書き戻し) -> これにより _pullContextTracker.ClearPullContext() が呼ばれる！
+        await dockVm.OnPicturePush.Execute(new Position(0, 0)).ToTask();
+        Assert.That(_pullTracker.CurrentContext, Is.Null, "Push後はPullContextがクリアされているはず");
+        dockVm.Edited = false;
+
+        Assert.That(mainVM.DrawableCanvasViewModel.PictureBuffer.Previous.Size, Is.EqualTo(new PictureSize(8, 8)), "クローズ直前のキャンバスサイズは8x8のはず");
+
+        // 2. Act: ウィンドウのクローズ要求 (セッション保存＆正常終了)
+        await mainVM.RequestCloseCommand.Execute().ToTask();
+        Assert.That(_storage.IsCleanExitMarked, Is.True);
+
+        var savedSnapshot = await _storage.LoadLatestSnapshotAsync();
+        Assert.That(savedSnapshot, Is.Not.Null);
+        Assert.That(savedSnapshot!.PullState, Is.Not.Null, "PullState must not be null in saved snapshot");
+        Assert.That(savedSnapshot.PullState!.CanvasImagePayloadRef, Is.Not.Null);
+
+        // 3. 次回起動: 同じストレージを用いて再度 MainViewModel を初期化＆再開
+        var nextMainVM = CreateMainViewModel();
+        await nextMainVM.InitializeAsync();
+        Assert.That(nextMainVM.WelcomeViewModel.HasPreviousSession, Is.True);
+
+        var service = new SessionRecoveryService(_storage, _codec);
+        var restoredData = await service.RestoreSessionAsync();
+        Assert.That(restoredData.PullState, Is.Not.Null, "Restored PullState must not be null");
+        Assert.That(restoredData.PullState!.CanvasPicture, Is.Not.Null, "Restored CanvasPicture must not be null");
+        Assert.That(restoredData.PullState!.CanvasPicture!.Size, Is.EqualTo(new PictureSize(8, 8)));
+
+        await nextMainVM.WelcomeViewModel.ResumeLastSessionCommand!.Execute().ToTask();
+
+        // 4. Assert: Push後であってもキャンバスに描いていた画像 (8x8, blueColor) が確実に復元されること！
+        Assert.That(nextMainVM.DrawableCanvasViewModel.PictureBuffer.Previous.Size, Is.EqualTo(new PictureSize(8, 8)));
+        Assert.That(nextMainVM.DrawableCanvasViewModel.PictureBuffer.Previous.PickColor(new Position(0, 0)), Is.EqualTo(blueColor));
+        Assert.That(nextMainVM.DrawingSessionViewModel.CurrentSession.Buffer.Previous.PickColor(new Position(0, 0)), Is.EqualTo(blueColor));
     }
 
     private static Picture CreateFilledPicture(PictureSize size, ArgbColor color)

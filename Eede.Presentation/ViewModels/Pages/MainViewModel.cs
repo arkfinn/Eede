@@ -1132,16 +1132,40 @@ public partial class MainViewModel : ViewModelBase
 
     public SessionCapture? CaptureSession()
     {
-        if (Pictures.Count == 0)
+        if (!global::Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
         {
-            return null;
+            return global::Avalonia.Threading.Dispatcher.UIThread.Invoke(CaptureSession);
         }
 
-        var activeDocId = (ActiveDockable as Dock.Model.Avalonia.Controls.Document)?.DataContext is DockPictureViewModel activeVm
+        if (Pictures.Count == 0) return null;
+
+        var activeDocId = GetActiveDocumentId();
+        var docSnapshots = CaptureDocumentSnapshots(out var picturesDict);
+        var pullSnapshot = CapturePullSnapshot(picturesDict);
+        var paletteSnapshot = CapturePaletteSnapshot();
+
+        var sessionSnapshot = new SessionSnapshot(
+            _sessionId,
+            DateTimeOffset.UtcNow,
+            activeDocId,
+            docSnapshots,
+            pullSnapshot,
+            paletteSnapshot
+        );
+
+        return new SessionCapture(sessionSnapshot, picturesDict);
+    }
+
+    private string GetActiveDocumentId()
+    {
+        return (ActiveDockable as Dock.Model.Avalonia.Controls.Document)?.DataContext is DockPictureViewModel activeVm
             ? activeVm.Id
             : Pictures[0].Id;
+    }
 
-        var picturesDict = new Dictionary<string, Picture>();
+    private List<DocumentSnapshot> CaptureDocumentSnapshots(out Dictionary<string, Picture> picturesDict)
+    {
+        picturesDict = new Dictionary<string, Picture>();
         var docSnapshots = new List<DocumentSnapshot>();
 
         foreach (var picVm in Pictures)
@@ -1164,20 +1188,27 @@ public partial class MainViewModel : ViewModelBase
             docSnapshots.Add(docSnapshot);
         }
 
-        PullSnapshot? pullSnapshot = null;
-        var pullContext = _pullContextTracker.CurrentContext;
-        if (pullContext != null)
-        {
-            var canvasPayloadRef = "canvas_pull.png";
-            picturesDict[canvasPayloadRef] = DrawableCanvasViewModel.PictureBuffer.Previous;
-            pullSnapshot = new PullSnapshot(
-                pullContext.SourceDocumentId,
-                pullContext.SourceArea,
-                hasUnpushedChanges: true,
-                canvasPayloadRef
-            );
-        }
+        return docSnapshots;
+    }
 
+    private PullSnapshot? CapturePullSnapshot(Dictionary<string, Picture> picturesDict)
+    {
+        var pullContext = _pullContextTracker.CurrentContext;
+        if (pullContext == null) return null;
+
+        var canvasPayloadRef = "canvas_pull.png";
+        picturesDict[canvasPayloadRef] = DrawableCanvasViewModel.PictureBuffer.Previous;
+
+        return new PullSnapshot(
+            pullContext.SourceDocumentId,
+            pullContext.SourceArea,
+            hasUnpushedChanges: true,
+            canvasPayloadRef
+        );
+    }
+
+    private PaletteSnapshot CapturePaletteSnapshot()
+    {
         var paletteColors = new List<ArgbColor>();
         var activeTab = PaletteContainerViewModel.SelectedTab;
         if (activeTab != null)
@@ -1194,22 +1225,11 @@ public partial class MainViewModel : ViewModelBase
         int activeTabIndex = activeTab != null ? PaletteContainerViewModel.Tabs.IndexOf(activeTab) : 0;
         if (activeTabIndex < 0) activeTabIndex = 0;
 
-        var paletteSnapshot = new PaletteSnapshot(
+        return new PaletteSnapshot(
             PenColor,
             activeTabIndex,
             paletteColors
         );
-
-        var sessionSnapshot = new SessionSnapshot(
-            _sessionId,
-            DateTimeOffset.UtcNow,
-            activeDocId,
-            docSnapshots,
-            pullSnapshot,
-            paletteSnapshot
-        );
-
-        return new SessionCapture(sessionSnapshot, picturesDict);
     }
 
     private async Task ExecuteRestoreRecoveryAsync()
@@ -1220,64 +1240,15 @@ public partial class MainViewModel : ViewModelBase
         {
             var restored = await _recoveryService.RestoreSessionAsync();
 
-            DockPictureViewModel? activeVm = null;
-            var docMap = new Dictionary<string, DockPictureViewModel>();
+            var docMap = RestoreDocuments(restored.Documents, restored.Snapshot.ActiveDocumentId);
+            RestorePullState(restored.PullState, docMap);
+            RestorePaletteState(restored.PaletteState);
 
-            foreach (var doc in restored.Documents)
+            if (restored.CorruptedDocuments.Count > 0)
             {
-                var vm = _dockPictureFactory();
-                var filePath = string.IsNullOrEmpty(doc.Snapshot.OriginalFilePath)
-                    ? FilePath.Empty()
-                    : new FilePath(doc.Snapshot.OriginalFilePath);
-
-                vm.Initialize(doc.Picture, filePath);
-                vm.Id = doc.Snapshot.DocumentId;
-                vm.Edited = doc.Snapshot.IsEdited;
-                vm.Magnification = new Magnification(doc.Snapshot.Magnification);
-
-                Pictures.Add(vm);
-                docMap[doc.Snapshot.DocumentId] = vm;
-
-                if (doc.Snapshot.DocumentId == restored.Snapshot.ActiveDocumentId)
-                {
-                    activeVm = vm;
-                }
-            }
-
-            // Pull 状態の復元
-            if (restored.PullState != null)
-            {
-                var pullSnapshot = restored.PullState.Snapshot;
-                if (docMap.TryGetValue(pullSnapshot.SourceDocumentId, out var sourceVm))
-                {
-                    var canvasPicture = restored.PullState.CanvasPicture ??
-                        _transferImageToCanvasUseCase.Execute(sourceVm.PictureBuffer, pullSnapshot.SourceArea);
-
-                    SetPictureToDrawArea(canvasPicture);
-                    DrawingSessionViewModel.Push(canvasPicture, null, null);
-                    _pullContextTracker.SetPullContext(sourceVm.Id, pullSnapshot.SourceArea);
-                }
-            }
-
-            // パレット状態の復元
-            if (restored.PaletteState != null)
-            {
-                PenColor = restored.PaletteState.SelectedColor;
-                if (restored.PaletteState.PaletteColors.Count == Palette.MAX_LENGTH)
-                {
-                    var palette = Palette.FromColors(restored.PaletteState.PaletteColors.ToArray());
-                    var tabIndex = restored.PaletteState.ActiveTabIndex;
-                    if (tabIndex >= 0 && tabIndex < PaletteContainerViewModel.Tabs.Count)
-                    {
-                        PaletteContainerViewModel.Tabs[tabIndex].Palette = palette;
-                        PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[tabIndex];
-                    }
-                    else if (PaletteContainerViewModel.Tabs.Count > 0)
-                    {
-                        PaletteContainerViewModel.Tabs[0].Palette = palette;
-                        PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[0];
-                    }
-                }
+                var corruptedNames = string.Join(", ", restored.CorruptedDocuments.Select(c => c.Snapshot.DocumentId));
+                RecoveryPromptMessage = $"一部のファイル（{corruptedNames}）は破損していたため復元できませんでした。";
+                return;
             }
 
             IsRecoveryPromptVisible = false;
@@ -1288,7 +1259,71 @@ public partial class MainViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Eede] RestoreSession failed: {ex}");
+            RecoveryPromptMessage = $"セッションの復元中にエラーが発生しました: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine($"[Eede] RestoreSession failed: {ex}");
+        }
+    }
+
+    private Dictionary<string, DockPictureViewModel> RestoreDocuments(
+        IReadOnlyList<RestoredDocument> documents,
+        string activeDocumentId)
+    {
+        var docMap = new Dictionary<string, DockPictureViewModel>();
+
+        foreach (var doc in documents)
+        {
+            var vm = _dockPictureFactory();
+            var filePath = string.IsNullOrEmpty(doc.Snapshot.OriginalFilePath)
+                ? FilePath.Empty()
+                : new FilePath(doc.Snapshot.OriginalFilePath);
+
+            vm.Initialize(doc.Picture, filePath);
+            vm.Id = doc.Snapshot.DocumentId;
+            vm.Edited = doc.Snapshot.IsEdited;
+            vm.Magnification = new Magnification(doc.Snapshot.Magnification);
+
+            Pictures.Add(vm);
+            docMap[doc.Snapshot.DocumentId] = vm;
+        }
+
+        return docMap;
+    }
+
+    private void RestorePullState(
+        RestoredPullState? pullState,
+        IReadOnlyDictionary<string, DockPictureViewModel> docMap)
+    {
+        if (pullState == null) return;
+
+        var snapshot = pullState.Snapshot;
+        if (!docMap.TryGetValue(snapshot.SourceDocumentId, out var sourceVm)) return;
+
+        var canvasPicture = pullState.CanvasPicture ??
+            _transferImageToCanvasUseCase.Execute(sourceVm.PictureBuffer, snapshot.SourceArea);
+
+        SetPictureToDrawArea(canvasPicture);
+        DrawingSessionViewModel.Push(canvasPicture, null, null);
+        _pullContextTracker.SetPullContext(sourceVm.Id, snapshot.SourceArea);
+    }
+
+    private void RestorePaletteState(PaletteSnapshot? paletteState)
+    {
+        if (paletteState == null) return;
+
+        PenColor = paletteState.SelectedColor;
+        if (paletteState.PaletteColors.Count != Palette.MAX_LENGTH) return;
+
+        var palette = Palette.FromColors(paletteState.PaletteColors.ToArray());
+        var tabIndex = paletteState.ActiveTabIndex;
+        if (tabIndex >= 0 && tabIndex < PaletteContainerViewModel.Tabs.Count)
+        {
+            PaletteContainerViewModel.Tabs[tabIndex].Palette = palette;
+            PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[tabIndex];
+        }
+        else if (PaletteContainerViewModel.Tabs.Count > 0)
+        {
+            PaletteContainerViewModel.Tabs[0].Palette = palette;
+            PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[0];
         }
     }
 

@@ -689,6 +689,7 @@ public partial class MainViewModel : ViewModelBase
                 vm.Edited = dockItem.BeforeEdited;
             }
         }
+        _coordinator?.NotifyDirty();
     }
 
     private void OnRedone(object? sender, RedoResult e)
@@ -706,6 +707,7 @@ public partial class MainViewModel : ViewModelBase
                 vm.Edited = dockItem.AfterEdited;
             }
         }
+        _coordinator?.NotifyDirty();
     }
 
     public void DragOverPicture(object? sender, DragEventArgs e)
@@ -897,6 +899,7 @@ public partial class MainViewModel : ViewModelBase
             DrawableCanvasViewModel.SyncWithSession(true);
             SetPictureToDrawArea(updated.CurrentPicture);
             MarkActiveDockEdited();
+            _coordinator?.NotifyDirty();
         }
     }
 
@@ -957,6 +960,7 @@ public partial class MainViewModel : ViewModelBase
 
         DrawingSessionViewModel.Push(updated, null, DrawableCanvasViewModel.SelectingArea);
         _pullContextTracker.SetPullContext(vm.Id, args.Rect);
+        _coordinator?.NotifyDirty();
     }
 
     private void SetPictureToDrawArea(Picture picture)
@@ -1001,6 +1005,7 @@ public partial class MainViewModel : ViewModelBase
 
         vm.PictureBuffer = updated;
         _pullContextTracker.ClearPullContext();
+        _coordinator?.NotifyDirty();
     }
 
     private void ExecutePictureAction(PictureActions actionType)
@@ -1021,6 +1026,7 @@ public partial class MainViewModel : ViewModelBase
 
         DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea);
         MarkActiveDockEdited();
+        _coordinator?.NotifyDirty();
     }
 
     private AntiAliasMode GetAntiAliasMode(IImageBlender blender)
@@ -1219,17 +1225,25 @@ public partial class MainViewModel : ViewModelBase
 
     private PaletteSnapshot CapturePaletteSnapshot()
     {
-        var paletteColors = new List<ArgbColor>();
+        var tabSnapshots = new List<PaletteTabSnapshot>();
+        foreach (var tab in PaletteContainerViewModel.Tabs)
+        {
+            var colors = new List<ArgbColor>();
+            tab.Palette.ForEach((c, i) => colors.Add(c));
+            tabSnapshots.Add(new PaletteTabSnapshot(tab.FilePath, tab.IsDirty, colors));
+        }
+
         var activeTab = PaletteContainerViewModel.SelectedTab;
+        var activeColors = new List<ArgbColor>();
         if (activeTab != null)
         {
-            activeTab.Palette.ForEach((c, i) => paletteColors.Add(c));
+            activeTab.Palette.ForEach((c, i) => activeColors.Add(c));
         }
         else
         {
             for (int i = 0; i < Palette.MAX_LENGTH; i++)
             {
-                paletteColors.Add(new ArgbColor(0, 0, 0, 0));
+                activeColors.Add(new ArgbColor(0, 0, 0, 0));
             }
         }
         int activeTabIndex = activeTab != null ? PaletteContainerViewModel.Tabs.IndexOf(activeTab) : 0;
@@ -1238,7 +1252,8 @@ public partial class MainViewModel : ViewModelBase
         return new PaletteSnapshot(
             PenColor,
             activeTabIndex,
-            paletteColors
+            activeColors,
+            tabSnapshots
         );
     }
 
@@ -1312,8 +1327,9 @@ public partial class MainViewModel : ViewModelBase
         var canvasPicture = pullState.CanvasPicture ??
             _transferImageToCanvasUseCase.Execute(sourceVm.PictureBuffer, snapshot.SourceArea);
 
+        DrawingSessionViewModel.Sync(new DrawingSession(canvasPicture));
+        DrawableCanvasViewModel.SyncWithSession(true);
         SetPictureToDrawArea(canvasPicture);
-        DrawingSessionViewModel.Push(canvasPicture, null, null);
         _pullContextTracker.SetPullContext(sourceVm.Id, snapshot.SourceArea);
     }
 
@@ -1322,19 +1338,65 @@ public partial class MainViewModel : ViewModelBase
         if (paletteState == null) return;
 
         PenColor = paletteState.SelectedColor;
-        if (paletteState.PaletteColors.Count != Palette.MAX_LENGTH) return;
 
-        var palette = Palette.FromColors(paletteState.PaletteColors.ToArray());
-        var tabIndex = paletteState.ActiveTabIndex;
-        if (tabIndex >= 0 && tabIndex < PaletteContainerViewModel.Tabs.Count)
+        if (paletteState.Tabs.Count > 0)
         {
-            PaletteContainerViewModel.Tabs[tabIndex].Palette = palette;
-            PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[tabIndex];
+            // 全タブを完全復元
+            // 既存タブのうち一時パレット（Tabs[0]）以外をクリア
+            while (PaletteContainerViewModel.Tabs.Count > 1)
+            {
+                PaletteContainerViewModel.Tabs.RemoveAt(PaletteContainerViewModel.Tabs.Count - 1);
+            }
+
+            // 0番目（一時パレット）の色を復元
+            var tempTabSnapshot = paletteState.Tabs[0];
+            if (tempTabSnapshot.Colors.Count == Palette.MAX_LENGTH)
+            {
+                PaletteContainerViewModel.Tabs[0].Palette = Palette.FromColors(tempTabSnapshot.Colors.ToArray());
+            }
+
+            // 1番目以降（ファイルパレット）を復元
+            for (int i = 1; i < paletteState.Tabs.Count; i++)
+            {
+                var tabSnapshot = paletteState.Tabs[i];
+                if (tabSnapshot.Colors.Count == Palette.MAX_LENGTH)
+                {
+                    var palette = Palette.FromColors(tabSnapshot.Colors.ToArray());
+                    var newTab = new PaletteTabViewModel(palette, tabSnapshot.FilePath);
+                    newTab.IsDirty = tabSnapshot.IsDirty;
+                    PaletteContainerViewModel.Tabs.Add(newTab);
+                }
+            }
+
+            // アクティブタブの復元
+            var activeIdx = paletteState.ActiveTabIndex;
+            if (activeIdx >= 0 && activeIdx < PaletteContainerViewModel.Tabs.Count)
+            {
+                PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[activeIdx];
+            }
+            else if (PaletteContainerViewModel.Tabs.Count > 0)
+            {
+                PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[0];
+            }
         }
-        else if (PaletteContainerViewModel.Tabs.Count > 0)
+        else
         {
-            PaletteContainerViewModel.Tabs[0].Palette = palette;
-            PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[0];
+            // 旧スナップショットとの後方互換性フォールバック（Tabsが空の場合）
+            if (paletteState.PaletteColors.Count == Palette.MAX_LENGTH)
+            {
+                var palette = Palette.FromColors(paletteState.PaletteColors.ToArray());
+                var tabIndex = paletteState.ActiveTabIndex;
+                if (tabIndex >= 0 && tabIndex < PaletteContainerViewModel.Tabs.Count)
+                {
+                    PaletteContainerViewModel.Tabs[tabIndex].Palette = palette;
+                    PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[tabIndex];
+                }
+                else if (tabIndex == 0 && PaletteContainerViewModel.Tabs.Count > 0)
+                {
+                    PaletteContainerViewModel.Tabs[0].Palette = palette;
+                    PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[0];
+                }
+            }
         }
     }
 

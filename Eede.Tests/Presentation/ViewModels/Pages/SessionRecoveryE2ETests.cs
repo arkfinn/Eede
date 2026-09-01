@@ -447,4 +447,112 @@ public class SessionRecoveryE2ETests
         // 5. Assert: リカバリプロンプトは表示されない
         Assert.That(nextMainVM.IsRecoveryPromptVisible, Is.False);
     }
+
+    [AvaloniaTest]
+    public async Task PullToCanvas_RestoresCanvasPictureAndSessionCorrectly()
+    {
+        // 1. Arrange: 復元用セッションデータを作成 (ドキュメント + キャンバスPullスナップショット)
+        var redColor = new ArgbColor(255, 255, 0, 0);
+        var blueColor = new ArgbColor(255, 0, 0, 255);
+        var pullArea = new PictureArea(new Position(0, 0), new PictureSize(8, 8));
+
+        var docPicture = CreateFilledPicture(new PictureSize(32, 32), redColor);
+        var canvasPicture = CreateFilledPicture(new PictureSize(8, 8), blueColor);
+
+        var docSnapshot = new DocumentSnapshot("doc-1", null, true, new PictureSize(32, 32), 1.0f, "doc_1.png");
+        var pullSnapshot = new PullSnapshot("doc-1", pullArea, hasUnpushedChanges: true, "canvas_pull.png");
+        var paletteSnapshot = new PaletteSnapshot(new ArgbColor(255, 0, 0, 0), 0, new ArgbColor[256]);
+        var sessionSnapshot = new SessionSnapshot(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            "doc-1",
+            new[] { docSnapshot },
+            pullSnapshot,
+            paletteSnapshot);
+
+        var payloads = new Dictionary<string, byte[]>
+        {
+            ["doc_1.png"] = _codec.EncodeToPng(docPicture),
+            ["canvas_pull.png"] = _codec.EncodeToPng(canvasPicture)
+        };
+
+        await _storage.SaveSnapshotAsync(sessionSnapshot, payloads);
+
+        // 2. Act: MainViewModel 初期化 & 再開実行
+        var mainVM = CreateMainViewModel();
+        await mainVM.InitializeAsync();
+        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.True);
+
+        await mainVM.WelcomeViewModel.ResumeLastSessionCommand!.Execute().ToTask();
+
+        // 3. Assert: キャンバスの画像バッファが確実に blueColor (復帰した画像) になっていること
+        Assert.That(mainVM.DrawableCanvasViewModel.PictureBuffer.Previous.Size, Is.EqualTo(new PictureSize(8, 8)));
+        Assert.That(mainVM.DrawableCanvasViewModel.PictureBuffer.Previous.PickColor(new Position(0, 0)), Is.EqualTo(blueColor));
+        Assert.That(mainVM.DrawingSessionViewModel.CurrentSession.Buffer.Previous.PickColor(new Position(0, 0)), Is.EqualTo(blueColor));
+    }
+
+    [AvaloniaTest]
+    public async Task RestoreRecovery_RestoresMultiplePaletteTabs_WithoutOverwritingTemporaryPalette()
+    {
+        // 1. Arrange: 一時パレット(Tabs[0])とファイルパレット(Tabs[1])のタブ情報を持ったセッション
+        var tempColor = new ArgbColor(255, 10, 20, 30);
+        var fileColor = new ArgbColor(255, 200, 100, 50);
+
+        var tempColors = Enumerable.Repeat(tempColor, 256).ToArray();
+        var fileColors = Enumerable.Repeat(fileColor, 256).ToArray();
+
+        var tab0Snapshot = new PaletteTabSnapshot(null, false, tempColors);
+        var tab1Snapshot = new PaletteTabSnapshot("C:/palettes/custom.eede", false, fileColors);
+
+        var paletteSnapshot = new PaletteSnapshot(
+            fileColor,
+            1, // ファイルパレットを選択状態に
+            fileColors,
+            new[] { tab0Snapshot, tab1Snapshot });
+
+        var docSnapshot = new DocumentSnapshot("doc-1", null, false, new PictureSize(16, 16), 1.0f, null);
+        var sessionSnapshot = new SessionSnapshot(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            "doc-1",
+            new[] { docSnapshot },
+            null,
+            paletteSnapshot);
+
+        await _storage.SaveSnapshotAsync(sessionSnapshot, new Dictionary<string, byte[]>());
+
+        // 2. Act: MainViewModel 初期化 & 再開実行
+        var mainVM = CreateMainViewModel();
+        await mainVM.InitializeAsync();
+
+        await mainVM.WelcomeViewModel.ResumeLastSessionCommand!.Execute().ToTask();
+
+        // 3. Assert: パレットタブが2つ復元され、一時パレットが上書きされていないこと！
+        var paletteVM = mainVM.PaletteContainerViewModel;
+        Assert.That(paletteVM.Tabs.Count, Is.EqualTo(2));
+
+        // Tabs[0] は一時パレット (FilePath == null, tempColor)
+        Assert.That(paletteVM.Tabs[0].FilePath, Is.Null);
+        Assert.That(paletteVM.Tabs[0].Palette.Fetch(0), Is.EqualTo(tempColor));
+
+        // Tabs[1] はファイルパレット (FilePath == "C:/palettes/custom.eede", fileColor)
+        Assert.That(paletteVM.Tabs[1].FilePath, Is.EqualTo("C:/palettes/custom.eede"));
+        Assert.That(paletteVM.Tabs[1].Palette.Fetch(0), Is.EqualTo(fileColor));
+
+        // 選択中タブは Tabs[1] (ファイルパレット)
+        Assert.That(paletteVM.SelectedTab, Is.EqualTo(paletteVM.Tabs[1]));
+    }
+
+    private static Picture CreateFilledPicture(PictureSize size, ArgbColor color)
+    {
+        var bytes = new byte[size.Width * size.Height * 4];
+        for (int i = 0; i < bytes.Length; i += 4)
+        {
+            bytes[i] = color.Blue;
+            bytes[i + 1] = color.Green;
+            bytes[i + 2] = color.Red;
+            bytes[i + 3] = color.Alpha;
+        }
+        return Picture.Create(size, bytes);
+    }
 }

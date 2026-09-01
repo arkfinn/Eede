@@ -25,6 +25,11 @@ public sealed class SessionRecoveryService : ISessionRecoveryService
         return await _storage.HasActiveSessionAsync(ct);
     }
 
+    public async Task<bool> IsCrashRecoveryAsync(CancellationToken ct = default)
+    {
+        return !await _storage.HasCleanExitMarkerAsync(ct);
+    }
+
     public async Task<SessionSnapshot?> GetRecoveryMetadataAsync(CancellationToken ct = default)
     {
         return await _storage.LoadLatestSnapshotAsync(ct);

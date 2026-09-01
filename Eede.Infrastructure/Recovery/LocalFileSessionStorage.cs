@@ -237,10 +237,13 @@ public class LocalFileSessionStorage : ISessionStorage
     {
         ct.ThrowIfCancellationRequested();
         var sessionJsonPath = Path.Combine(_currentDirectory, "session.json");
-        bool hasSession = File.Exists(sessionJsonPath);
-        bool hasCleanMarker = File.Exists(_cleanExitMarkerPath);
+        return Task.FromResult(File.Exists(sessionJsonPath));
+    }
 
-        return Task.FromResult(hasSession && !hasCleanMarker);
+    public virtual Task<bool> HasCleanExitMarkerAsync(CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        return Task.FromResult(File.Exists(_cleanExitMarkerPath));
     }
 
     public virtual async Task MarkCleanExitAsync(CancellationToken ct = default)

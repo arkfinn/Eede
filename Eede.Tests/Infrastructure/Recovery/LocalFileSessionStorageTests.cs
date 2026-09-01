@@ -225,22 +225,26 @@ public class LocalFileSessionStorageTests
     {
         var storage = new LocalFileSessionStorage(_testDirectory);
 
-        // 初期状態: セッションなし
+        // 初期状態: セッションなし、マーカーなし
         Assert.That(await storage.HasActiveSessionAsync(), Is.False);
+        Assert.That(await storage.HasCleanExitMarkerAsync(), Is.False);
 
-        // スナップショット保存直後: アクティブセッションあり
+        // スナップショット保存直後: セッションあり、マーカーなし
         var snapshot1 = CreateSampleSnapshot();
         await storage.SaveSnapshotAsync(snapshot1, new Dictionary<string, byte[]>());
         Assert.That(await storage.HasActiveSessionAsync(), Is.True);
+        Assert.That(await storage.HasCleanExitMarkerAsync(), Is.False);
 
-        // クリーン終了マーク後: アクティブセッションなし
+        // クリーン終了マーク後: セッション保持、マーカーあり
         await storage.MarkCleanExitAsync();
-        Assert.That(await storage.HasActiveSessionAsync(), Is.False);
+        Assert.That(await storage.HasActiveSessionAsync(), Is.True);
+        Assert.That(await storage.HasCleanExitMarkerAsync(), Is.True);
 
-        // 新しいセッション保存: clean_exit.marker が解除され再びアクティブに
+        // 新しいセッション保存: clean_exit.marker が解除され再びマーカーなしに
         var snapshot2 = CreateSampleSnapshot();
         await storage.SaveSnapshotAsync(snapshot2, new Dictionary<string, byte[]>());
         Assert.That(await storage.HasActiveSessionAsync(), Is.True);
+        Assert.That(await storage.HasCleanExitMarkerAsync(), Is.False);
     }
 
     [Test]

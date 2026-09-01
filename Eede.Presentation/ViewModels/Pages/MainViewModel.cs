@@ -495,6 +495,8 @@ public partial class MainViewModel : ViewModelBase
         }
         RestoreRecoveryCommand = ReactiveCommand.CreateFromTask(ExecuteRestoreRecoveryAsync);
         DiscardRecoveryCommand = ReactiveCommand.CreateFromTask(ExecuteDiscardRecoveryAsync);
+        welcomeViewModel.ResumeLastSessionCommand = RestoreRecoveryCommand;
+        welcomeViewModel.DiscardLastSessionCommand = DiscardRecoveryCommand;
 
         InitializeConnections();
         _ = LoadSettingsAsync();
@@ -1117,11 +1119,19 @@ public partial class MainViewModel : ViewModelBase
                 var metadata = await _recoveryService.GetRecoveryMetadataAsync();
                 if (metadata != null)
                 {
+                    bool isCrash = await _recoveryService.IsCrashRecoveryAsync();
+                    WelcomeViewModel.SetPreviousSessionInfo(metadata, isCrash);
+
                     var docCount = metadata.Documents.Count;
                     var timeStr = metadata.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss");
-                    RecoveryPromptMessage = $"前回のクラッシュ時の未保存セッションが見つかりました（{docCount} 件のファイル、最終保存: {timeStr}）。";
-                    IsRecoveryPromptVisible = true;
+                    RecoveryPromptMessage = isCrash
+                        ? $"前回の未保存セッションが見つかりました（{docCount} 件のファイル、最終保存: {timeStr}）。"
+                        : $"前回の作業セッションが見つかりました（{docCount} 件のファイル、最終保存: {timeStr}）。";
                 }
+            }
+            else
+            {
+                WelcomeViewModel.ClearPreviousSessionInfo();
             }
         }
         catch (Exception ex)
@@ -1252,6 +1262,7 @@ public partial class MainViewModel : ViewModelBase
             }
 
             IsRecoveryPromptVisible = false;
+            WelcomeViewModel.ClearPreviousSessionInfo();
             if (_sessionStorage != null)
             {
                 await _sessionStorage.ClearSessionAsync();
@@ -1334,6 +1345,7 @@ public partial class MainViewModel : ViewModelBase
             await _recoveryService.DiscardSessionAsync();
         }
         IsRecoveryPromptVisible = false;
+        WelcomeViewModel.ClearPreviousSessionInfo();
     }
 
     private void OnPaletteTabsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

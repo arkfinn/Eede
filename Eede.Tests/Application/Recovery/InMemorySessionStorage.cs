@@ -100,6 +100,7 @@ public sealed class InMemorySessionStorage : ISessionStorage
             _latestSnapshot = null;
             _payloads.Clear();
             _hasActiveSession = false;
+            IsCleanExitMarked = false;
             return Task.CompletedTask;
         }
     }
@@ -113,6 +114,15 @@ public sealed class InMemorySessionStorage : ISessionStorage
         }
     }
 
+    public Task<bool> HasCleanExitMarkerAsync(CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        lock (_lock)
+        {
+            return Task.FromResult(IsCleanExitMarked);
+        }
+    }
+
     public bool IsCleanExitMarked { get; private set; }
 
     public Task MarkCleanExitAsync(CancellationToken ct = default)
@@ -120,7 +130,6 @@ public sealed class InMemorySessionStorage : ISessionStorage
         ct.ThrowIfCancellationRequested();
         lock (_lock)
         {
-            _hasActiveSession = false;
             IsCleanExitMarked = true;
             return Task.CompletedTask;
         }

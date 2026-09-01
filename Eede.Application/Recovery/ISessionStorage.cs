@@ -13,5 +13,6 @@ public interface ISessionStorage
     Task<byte[]?> LoadImagePayloadAsync(string payloadRef, CancellationToken ct = default);
     Task ClearSessionAsync(CancellationToken ct = default);
     Task<bool> HasActiveSessionAsync(CancellationToken ct = default);
+    Task<bool> HasCleanExitMarkerAsync(CancellationToken ct = default);
     Task MarkCleanExitAsync(CancellationToken ct = default);
 }

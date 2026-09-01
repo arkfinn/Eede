@@ -245,17 +245,17 @@ public class SessionRecoveryE2ETests
         var mainVM = CreateMainViewModel();
         await mainVM.InitializeAsync();
 
-        // 3. Assert (起動時チェック): リカバリバナーが表示され、メッセージに件数が含まれる
-        Assert.That(mainVM.IsRecoveryPromptVisible, Is.True);
-        Assert.That(mainVM.RecoveryPromptMessage, Does.Contain("2 件のファイル"));
+        // 3. Assert (起動時チェック): WelcomeViewModel にセッション再開情報が表示される
+        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.True);
+        Assert.That(mainVM.WelcomeViewModel.PreviousSessionDescription, Does.Contain("2 件のファイル"));
         Assert.That(mainVM.Pictures, Is.Empty);
 
-        // 4. Act: 復元コマンドを実行
-        await mainVM.RestoreRecoveryCommand.Execute().ToTask();
+        // 4. Act: WelcomeViewModel から再開コマンドを実行
+        await mainVM.WelcomeViewModel.ResumeLastSessionCommand.Execute().ToTask();
 
         // 5. Assert (復元結果):
-        // バナー非表示
-        Assert.That(mainVM.IsRecoveryPromptVisible, Is.False);
+        // 再開カード非表示
+        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.False);
 
         // タブ数
         Assert.That(mainVM.Pictures.Count, Is.EqualTo(2));
@@ -309,15 +309,49 @@ public class SessionRecoveryE2ETests
         var mainVM = CreateMainViewModel();
         await mainVM.InitializeAsync();
 
-        Assert.That(mainVM.IsRecoveryPromptVisible, Is.True);
+        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.True);
 
         // 3. Act: 破棄コマンドを実行
-        await mainVM.DiscardRecoveryCommand.Execute().ToTask();
+        await mainVM.WelcomeViewModel.DiscardLastSessionCommand.Execute().ToTask();
 
         // 4. Assert: プロンプトが非表示になり、ストレージがクリアされている
-        Assert.That(mainVM.IsRecoveryPromptVisible, Is.False);
+        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.False);
         Assert.That(mainVM.Pictures, Is.Empty);
         Assert.That(await _storage.HasActiveSessionAsync(), Is.False);
+    }
+
+    [AvaloniaTest]
+    public async Task CleanExit_ShowsResumeOptionOnWelcomeView_AndCanRestore()
+    {
+        // 1. Arrange: 正常終了時のセッションデータを用意 (clean_exit.marker あり)
+        var docSnapshot = new DocumentSnapshot("doc-1", null, true, new PictureSize(16, 16), 1.0f, null);
+        var paletteSnapshot = new PaletteSnapshot(new ArgbColor(255, 0, 0, 0), 0, new ArgbColor[256]);
+        var sessionSnapshot = new SessionSnapshot(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            "doc-1",
+            new[] { docSnapshot },
+            null,
+            paletteSnapshot);
+
+        await _storage.SaveSnapshotAsync(sessionSnapshot, new Dictionary<string, byte[]>());
+        await _storage.MarkCleanExitAsync(); // 正常終了マーク！
+
+        // 2. Act: MainViewModel を初期化
+        var mainVM = CreateMainViewModel();
+        await mainVM.InitializeAsync();
+
+        // 3. Assert: 正常終了後でも WelcomeViewModel に「前回の作業を再開」が表示される
+        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.True);
+        Assert.That(mainVM.WelcomeViewModel.IsCrashRecovery, Is.False);
+        Assert.That(mainVM.WelcomeViewModel.PreviousSessionTitle, Is.EqualTo("前回の作業を再開"));
+
+        // 4. Act: 再開コマンドを実行
+        await mainVM.WelcomeViewModel.ResumeLastSessionCommand.Execute().ToTask();
+
+        // 5. Assert: 正常にタブが復元される
+        Assert.That(mainVM.Pictures.Count, Is.EqualTo(1));
+        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.False);
     }
 
     [AvaloniaTest]

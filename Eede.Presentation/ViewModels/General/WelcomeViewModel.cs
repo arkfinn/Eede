@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Eede.Application.Infrastructure;
 using Eede.Application.Settings;
 using Eede.Application.UseCase.Updates;
+using Eede.Domain.ImageEditing.Recovery;
 using Eede.Domain.SharedKernel;
 using ReactiveUI.SourceGenerators;
 
@@ -30,6 +31,11 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
     [ObservableAsProperty] private bool _isUpdateAvailable;
     [ObservableAsProperty] private string? _updateMessage;
 
+    [Reactive] public partial bool HasPreviousSession { get; set; }
+    [Reactive] public partial bool IsCrashRecovery { get; set; }
+    [Reactive] public partial string PreviousSessionTitle { get; set; }
+    [Reactive] public partial string PreviousSessionDescription { get; set; }
+
     public ReactiveCommand<RxVoid, RxVoid> CreateNewPictureCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> OpenPictureCommand { get; }
     public ReactiveCommand<string, string> OpenRecentFileCommand { get; }
@@ -37,6 +43,34 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
     public ReactiveCommand<RxVoid, RxVoid> LoadRecentFilesCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> ApplyUpdateCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> ManualCheckUpdateCommand { get; }
+    [Reactive] public partial ReactiveCommand<RxVoid, RxVoid>? ResumeLastSessionCommand { get; set; }
+    [Reactive] public partial ReactiveCommand<RxVoid, RxVoid>? DiscardLastSessionCommand { get; set; }
+
+    public void SetPreviousSessionInfo(SessionSnapshot? metadata, bool isCrash)
+    {
+        if (metadata == null)
+        {
+            ClearPreviousSessionInfo();
+            return;
+        }
+
+        HasPreviousSession = true;
+        IsCrashRecovery = isCrash;
+        PreviousSessionTitle = isCrash ? "前回の未保存作業を復元" : "前回の作業を再開";
+
+        var count = metadata.Documents.Count;
+        var timeStr = metadata.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm");
+        var pullNote = metadata.PullState != null ? "（編集中エリアあり）" : "";
+        PreviousSessionDescription = $"{count} 件のファイル{pullNote}・最終保存: {timeStr}";
+    }
+
+    public void ClearPreviousSessionInfo()
+    {
+        HasPreviousSession = false;
+        IsCrashRecovery = false;
+        PreviousSessionTitle = string.Empty;
+        PreviousSessionDescription = string.Empty;
+    }
 
     private readonly ISettingsRepository _settingsRepository;
     private readonly IExternalBrowserService _externalBrowserService;
@@ -55,6 +89,10 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
         _updateService = updateService;
         _checkUpdateUseCase = checkUpdateUseCase;
 
+        PreviousSessionTitle = string.Empty;
+        PreviousSessionDescription = string.Empty;
+        ResumeLastSessionCommand = ReactiveCommand.Create(() => { });
+        DiscardLastSessionCommand = ReactiveCommand.Create(() => { });
         CreateNewPictureCommand = ReactiveCommand.Create(() => { });
         OpenPictureCommand = ReactiveCommand.Create(() => { });
         OpenRecentFileCommand = ReactiveCommand.Create<string, string>(path => path);

@@ -38,6 +38,46 @@
           <!-- 開始 -->
           <StackPanel Spacing="10">
             <TextBlock Text="開始" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
+
+            <!-- 前回の作業を再開（セッションが存在する場合のみ表示） -->
+            <Border IsVisible="{Binding HasPreviousSession}"
+                    Background="#10FFFFFF"
+                    BorderBrush="{DynamicResource SystemAccentColor}"
+                    BorderThickness="1"
+                    Padding="2"
+                    Margin="0 0 0 4">
+              <Grid ColumnDefinitions="*,Auto">
+                <Button Grid.Column="0"
+                        Command="{Binding ResumeLastSessionCommand}"
+                        Classes="Link"
+                        Padding="10 8">
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="{StaticResource SyncIconGeometry}"
+                              Foreground="{DynamicResource SystemAccentColor}"
+                              Width="18" Height="18"
+                              VerticalAlignment="Center"/>
+                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding PreviousSessionTitle}"
+                                 FontWeight="SemiBold"
+                                 FontSize="13"/>
+                      <TextBlock Text="{Binding PreviousSessionDescription}"
+                                 FontSize="11"
+                                 Foreground="Gray"/>
+                    </StackPanel>
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="1"
+                        Command="{Binding DiscardLastSessionCommand}"
+                        Classes="Link"
+                        ToolTip.Tip="前回の作業データを破棄"
+                        Padding="8"
+                        VerticalAlignment="Center"
+                        Margin="0 0 4 0">
+                  <PathIcon Data="{StaticResource DismissIconGeometry}" Width="12" Height="12" Opacity="0.6"/>
+                </Button>
+              </Grid>
+            </Border>
+
             <Button Command="{Binding CreateNewPictureCommand}" Classes="Link">
               <StackPanel Orientation="Horizontal" Spacing="10">
                 <PathIcon Data="{StaticResource NoteAddIconGeometry}"/>

@@ -14,7 +14,7 @@ Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描�
 ### 動作環境
 
 - Windows
-- .NET 8.0 以上
+- .NET 10.0 以上
 
 ### 開発環境
 

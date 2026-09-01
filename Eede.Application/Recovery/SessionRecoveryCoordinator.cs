@@ -17,7 +17,7 @@ public sealed class SessionRecoveryCoordinator : IDisposable
 {
     private readonly ISessionStorage _storage;
     private readonly IPictureCodec _codec;
-    private readonly Func<SessionCapture?> _captureFactory;
+    private Func<SessionCapture?>? _captureFactory;
     private readonly TimeSpan _debounceDuration;
     private readonly IScheduler _scheduler;
 
@@ -39,14 +39,14 @@ public sealed class SessionRecoveryCoordinator : IDisposable
     public SessionRecoveryCoordinator(
         ISessionStorage storage,
         IPictureCodec codec,
-        Func<SessionCapture?> captureFactory,
+        Func<SessionCapture?>? captureFactory = null,
         IObservable<object>? dirtyStream = null,
         TimeSpan? debounceDuration = null,
         IScheduler? scheduler = null)
     {
         _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         _codec = codec ?? throw new ArgumentNullException(nameof(codec));
-        _captureFactory = captureFactory ?? throw new ArgumentNullException(nameof(captureFactory));
+        _captureFactory = captureFactory;
         _debounceDuration = debounceDuration ?? TimeSpan.FromSeconds(1.5);
         _scheduler = scheduler ?? TaskPoolScheduler.Default;
 
@@ -66,7 +66,7 @@ public sealed class SessionRecoveryCoordinator : IDisposable
                 SessionCapture? capture;
                 try
                 {
-                    capture = _captureFactory();
+                    capture = _captureFactory?.Invoke();
                 }
                 catch (Exception ex)
                 {
@@ -86,6 +86,12 @@ public sealed class SessionRecoveryCoordinator : IDisposable
         _disposables.Add(_errorSubject);
     }
 
+    public void SetCaptureFactory(Func<SessionCapture?> captureFactory)
+    {
+        ThrowIfDisposed();
+        _captureFactory = captureFactory ?? throw new ArgumentNullException(nameof(captureFactory));
+    }
+
     public void NotifyDirty()
     {
         ThrowIfDisposed();
@@ -97,7 +103,7 @@ public sealed class SessionRecoveryCoordinator : IDisposable
         ThrowIfDisposed();
 
         // Phase 1: スナップショット抽出
-        var capture = directCapture ?? _captureFactory();
+        var capture = directCapture ?? _captureFactory?.Invoke();
         if (capture is null) return;
 
         // Phase 2: 直ちに実行・待機

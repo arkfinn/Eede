@@ -83,6 +83,38 @@
 		</Panel.Styles>
 		<DockPanel LastChildFill="True">
 
+			<!-- クラッシュリカバリー通知バナー -->
+			<Border DockPanel.Dock="Top"
+					Background="#2a2215"
+					BorderBrush="#d48806"
+					BorderThickness="0,0,0,1"
+					Padding="16,6"
+					IsVisible="{Binding IsRecoveryPromptVisible}">
+				<Grid ColumnDefinitions="Auto,*,Auto,Auto">
+					<TextBlock Grid.Column="0"
+							   Text="⚠️"
+							   FontSize="14"
+							   VerticalAlignment="Center"
+							   Margin="0,0,10,0" />
+					<TextBlock Grid.Column="1"
+							   Text="{Binding RecoveryPromptMessage}"
+							   VerticalAlignment="Center"
+							   FontSize="13"
+							   TextWrapping="Wrap" />
+					<Button Grid.Column="2"
+							Content="前回の作業を復元"
+							Command="{Binding RestoreRecoveryCommand}"
+							Margin="12,0,6,0"
+							Classes="accent"
+							VerticalAlignment="Center" />
+					<Button Grid.Column="3"
+							Content="破棄"
+							Command="{Binding DiscardRecoveryCommand}"
+							Margin="2,0,0,0"
+							VerticalAlignment="Center" />
+				</Grid>
+			</Border>
+
 			<Grid ColumnDefinitions="*, 4, *" DockPanel.Dock="Bottom">
 				<DockPanel Grid.Column="0" LastChildFill="True">
 					<Panel DockPanel.Dock="Top" >

@@ -28,9 +28,11 @@ using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.General;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
+using Eede.Application.Recovery;
 using Eede.Application.Settings;
 using Eede.Application.UseCase.Settings;
 using Eede.Application.UseCase.Updates;
+using Eede.Domain.ImageEditing.Recovery;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using RxVoid = ReactiveUI.Primitives.RxVoid;
@@ -39,6 +41,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
@@ -53,6 +56,11 @@ public partial class MainViewModel : ViewModelBase
     public ObservableCollection<DockPictureViewModel> Pictures { get; } = [];
     public DrawableCanvasViewModel DrawableCanvasViewModel { get; }
     public AnimationViewModel AnimationViewModel { get; }
+
+    [Reactive] public partial bool IsRecoveryPromptVisible { get; set; }
+    [Reactive] public partial string RecoveryPromptMessage { get; set; }
+    public ReactiveCommand<RxVoid, RxVoid> RestoreRecoveryCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> DiscardRecoveryCommand { get; }
 
     [Reactive] public partial BackgroundColor CurrentBackgroundColor { get; set; }
 
@@ -180,6 +188,14 @@ public partial class MainViewModel : ViewModelBase
     private readonly Func<DockPictureViewModel> _dockPictureFactory;
     private readonly Func<NewPictureWindowViewModel> _newPictureWindowFactory;
 
+    private readonly IPullContextTracker _pullContextTracker;
+    private readonly SessionRecoveryCoordinator? _coordinator;
+    private readonly ISessionRecoveryService? _recoveryService;
+    private readonly ISessionStorage? _sessionStorage;
+    private readonly Guid _sessionId = Guid.NewGuid();
+    private readonly Dictionary<DockPictureViewModel, CompositeDisposable> _pictureSubscriptions = new();
+    private readonly Dictionary<PaletteTabViewModel, IDisposable> _paletteTabSubscriptions = new();
+
     private bool _isInitializing = true;
     private AppSettings? _appSettings;
 
@@ -210,7 +226,11 @@ public partial class MainViewModel : ViewModelBase
         Func<DockPictureViewModel> dockPictureFactory,
         Func<NewPictureWindowViewModel> newPictureWindowFactory,
         IUpdateService? updateService = null,
-        CheckUpdateUseCase? checkUpdateUseCase = null)
+        CheckUpdateUseCase? checkUpdateUseCase = null,
+        IPullContextTracker? pullContextTracker = null,
+        SessionRecoveryCoordinator? sessionRecoveryCoordinator = null,
+        ISessionRecoveryService? sessionRecoveryService = null,
+        ISessionStorage? sessionStorage = null)
     {
         _state = State;
         _clipboard = clipboard;
@@ -232,11 +252,22 @@ public partial class MainViewModel : ViewModelBase
         _dockPictureFactory = dockPictureFactory;
         _newPictureWindowFactory = newPictureWindowFactory;
 
+        _pullContextTracker = pullContextTracker ?? new PullContextTracker();
+        _coordinator = sessionRecoveryCoordinator;
+        _recoveryService = sessionRecoveryService;
+        _sessionStorage = sessionStorage;
+
+        if (_coordinator != null)
+        {
+            _coordinator.SetCaptureFactory(CaptureSession);
+        }
+
         _isUpdateReadyHelper = null!;
         _imageBlender = null!;
         _imageTransfer = null!;
         _pullBlender = null!;
         _minCursorSizeList = null!;
+        RecoveryPromptMessage = string.Empty;
 
         DrawableCanvasViewModel = drawableCanvasViewModel;
         AnimationViewModel = animationViewModel;
@@ -462,10 +493,13 @@ public partial class MainViewModel : ViewModelBase
         {
             ApplyUpdateCommand = ReactiveCommand.Create(() => { });
         }
+        RestoreRecoveryCommand = ReactiveCommand.CreateFromTask(ExecuteRestoreRecoveryAsync);
+        DiscardRecoveryCommand = ReactiveCommand.CreateFromTask(ExecuteDiscardRecoveryAsync);
 
         InitializeConnections();
         _ = LoadSettingsAsync();
         _ = UpdateClipboardStatusAsync();
+        _ = InitializeAsync();
     }
 
     private async Task LoadSettingsAsync()
@@ -628,6 +662,14 @@ public partial class MainViewModel : ViewModelBase
                     // TODO: DrawingSessionProvider 側の切り替えと同期させる
                 }
             });
+
+        DrawableCanvasViewModel.OnDrew.Subscribe(_ => _coordinator?.NotifyDirty());
+
+        PaletteContainerViewModel.Tabs.CollectionChanged += OnPaletteTabsCollectionChanged;
+        foreach (var tab in PaletteContainerViewModel.Tabs)
+        {
+            SetupPaletteTab(tab);
+        }
     }
 
     private void OnUndone(object? sender, UndoResult e)
@@ -761,6 +803,7 @@ public partial class MainViewModel : ViewModelBase
                 WelcomeViewModel.LoadRecentFilesCommand.Execute().Subscribe();
             }
         }
+        _coordinator?.NotifyDirty();
     }
 
     private void CleanupDockPicture(DockPictureViewModel vm)
@@ -769,6 +812,16 @@ public partial class MainViewModel : ViewModelBase
         vm.PicturePush -= OnPushFromDrawArea;
         vm.PictureUpdate -= OnPictureUpdate;
         vm.PictureSave -= OnPictureSave;
+
+        if (_pictureSubscriptions.Remove(vm, out var disposables))
+        {
+            disposables.Dispose();
+        }
+
+        if (_pullContextTracker.CurrentContext?.SourceDocumentId == vm.Id)
+        {
+            _pullContextTracker.ClearPullContext();
+        }
     }
 
     private async Task<DockPictureViewModel?> OpenPicture(Uri path)
@@ -803,6 +856,17 @@ public partial class MainViewModel : ViewModelBase
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
         vm.CursorSize = CursorSize;
         _ = this.WhenAnyValue(x => x.AnimationCursor).BindTo(vm, x => x.AnimationCursor);
+
+        var disposables = new CompositeDisposable
+        {
+            vm.WhenAnyValue(x => x.Edited)
+                .Skip(1)
+                .Subscribe(_ => _coordinator?.NotifyDirty()),
+            vm.WhenAnyValue(x => x.PictureBuffer)
+                .Skip(1)
+                .Subscribe(_ => _coordinator?.NotifyDirty())
+        };
+        _pictureSubscriptions[vm] = disposables;
     }
 
     private async void ExecuteCreateNewPicture()
@@ -890,6 +954,7 @@ public partial class MainViewModel : ViewModelBase
             args.Rect);
 
         DrawingSessionViewModel.Push(updated, null, DrawableCanvasViewModel.SelectingArea);
+        _pullContextTracker.SetPullContext(vm.Id, args.Rect);
     }
 
     private void SetPictureToDrawArea(Picture picture)
@@ -933,6 +998,7 @@ public partial class MainViewModel : ViewModelBase
         DrawingSessionViewModel.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer, updated, vm.Edited, true);
 
         vm.PictureBuffer = updated;
+        _pullContextTracker.ClearPullContext();
     }
 
     private void ExecutePictureAction(PictureActions actionType)
@@ -1002,6 +1068,10 @@ public partial class MainViewModel : ViewModelBase
 
         try
         {
+            if (_coordinator != null)
+            {
+                await _coordinator.FlushAsync();
+            }
 
             // 各PictureViewModelのクローズ確認処理を実行
             // 【重要】ToList() は意図的なスナップショット生成（削除・インライン化禁止）。
@@ -1022,12 +1092,247 @@ public partial class MainViewModel : ViewModelBase
                 return;
             }
 
+            if (_sessionStorage != null)
+            {
+                await _sessionStorage.MarkCleanExitAsync();
+            }
+
             IsCloseConfirmed = true;
             // すべての確認が通ったら、Interactionを通じてViewに通知
             _ = await CloseWindowInteraction.Handle(Unit.Default);
         }
         finally
         {
+        }
+    }
+
+    public async Task InitializeAsync()
+    {
+        if (_recoveryService == null) return;
+
+        try
+        {
+            if (await _recoveryService.HasPendingRecoveryAsync())
+            {
+                var metadata = await _recoveryService.GetRecoveryMetadataAsync();
+                if (metadata != null)
+                {
+                    var docCount = metadata.Documents.Count;
+                    var timeStr = metadata.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss");
+                    RecoveryPromptMessage = $"前回のクラッシュ時の未保存セッションが見つかりました（{docCount} 件のファイル、最終保存: {timeStr}）。";
+                    IsRecoveryPromptVisible = true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Eede] InitializeAsync recovery check failed: {ex}");
+        }
+    }
+
+    public SessionCapture? CaptureSession()
+    {
+        if (Pictures.Count == 0)
+        {
+            return null;
+        }
+
+        var activeDocId = (ActiveDockable as Dock.Model.Avalonia.Controls.Document)?.DataContext is DockPictureViewModel activeVm
+            ? activeVm.Id
+            : Pictures[0].Id;
+
+        var picturesDict = new Dictionary<string, Picture>();
+        var docSnapshots = new List<DocumentSnapshot>();
+
+        foreach (var picVm in Pictures)
+        {
+            string? payloadRef = null;
+            if (picVm.Edited)
+            {
+                payloadRef = $"doc_{picVm.Id}.png";
+                picturesDict[payloadRef] = picVm.PictureBuffer;
+            }
+
+            var docSnapshot = new DocumentSnapshot(
+                picVm.Id,
+                picVm.FilePath?.IsEmpty() == false ? picVm.FilePath.ToString() : null,
+                picVm.Edited,
+                picVm.PictureBuffer.Size,
+                picVm.Magnification.Value,
+                payloadRef
+            );
+            docSnapshots.Add(docSnapshot);
+        }
+
+        PullSnapshot? pullSnapshot = null;
+        var pullContext = _pullContextTracker.CurrentContext;
+        if (pullContext != null)
+        {
+            var canvasPayloadRef = "canvas_pull.png";
+            picturesDict[canvasPayloadRef] = DrawableCanvasViewModel.PictureBuffer.Previous;
+            pullSnapshot = new PullSnapshot(
+                pullContext.SourceDocumentId,
+                pullContext.SourceArea,
+                hasUnpushedChanges: true,
+                canvasPayloadRef
+            );
+        }
+
+        var paletteColors = new List<ArgbColor>();
+        var activeTab = PaletteContainerViewModel.SelectedTab;
+        if (activeTab != null)
+        {
+            activeTab.Palette.ForEach((c, i) => paletteColors.Add(c));
+        }
+        else
+        {
+            for (int i = 0; i < Palette.MAX_LENGTH; i++)
+            {
+                paletteColors.Add(new ArgbColor(0, 0, 0, 0));
+            }
+        }
+        int activeTabIndex = activeTab != null ? PaletteContainerViewModel.Tabs.IndexOf(activeTab) : 0;
+        if (activeTabIndex < 0) activeTabIndex = 0;
+
+        var paletteSnapshot = new PaletteSnapshot(
+            PenColor,
+            activeTabIndex,
+            paletteColors
+        );
+
+        var sessionSnapshot = new SessionSnapshot(
+            _sessionId,
+            DateTimeOffset.UtcNow,
+            activeDocId,
+            docSnapshots,
+            pullSnapshot,
+            paletteSnapshot
+        );
+
+        return new SessionCapture(sessionSnapshot, picturesDict);
+    }
+
+    private async Task ExecuteRestoreRecoveryAsync()
+    {
+        if (_recoveryService == null) return;
+
+        try
+        {
+            var restored = await _recoveryService.RestoreSessionAsync();
+
+            DockPictureViewModel? activeVm = null;
+            var docMap = new Dictionary<string, DockPictureViewModel>();
+
+            foreach (var doc in restored.Documents)
+            {
+                var vm = _dockPictureFactory();
+                var filePath = string.IsNullOrEmpty(doc.Snapshot.OriginalFilePath)
+                    ? FilePath.Empty()
+                    : new FilePath(doc.Snapshot.OriginalFilePath);
+
+                vm.Initialize(doc.Picture, filePath);
+                vm.Id = doc.Snapshot.DocumentId;
+                vm.Edited = doc.Snapshot.IsEdited;
+                vm.Magnification = new Magnification(doc.Snapshot.Magnification);
+
+                Pictures.Add(vm);
+                docMap[doc.Snapshot.DocumentId] = vm;
+
+                if (doc.Snapshot.DocumentId == restored.Snapshot.ActiveDocumentId)
+                {
+                    activeVm = vm;
+                }
+            }
+
+            // Pull 状態の復元
+            if (restored.PullState != null)
+            {
+                var pullSnapshot = restored.PullState.Snapshot;
+                if (docMap.TryGetValue(pullSnapshot.SourceDocumentId, out var sourceVm))
+                {
+                    var canvasPicture = restored.PullState.CanvasPicture ??
+                        _transferImageToCanvasUseCase.Execute(sourceVm.PictureBuffer, pullSnapshot.SourceArea);
+
+                    SetPictureToDrawArea(canvasPicture);
+                    DrawingSessionViewModel.Push(canvasPicture, null, null);
+                    _pullContextTracker.SetPullContext(sourceVm.Id, pullSnapshot.SourceArea);
+                }
+            }
+
+            // パレット状態の復元
+            if (restored.PaletteState != null)
+            {
+                PenColor = restored.PaletteState.SelectedColor;
+                if (restored.PaletteState.PaletteColors.Count == Palette.MAX_LENGTH)
+                {
+                    var palette = Palette.FromColors(restored.PaletteState.PaletteColors.ToArray());
+                    var tabIndex = restored.PaletteState.ActiveTabIndex;
+                    if (tabIndex >= 0 && tabIndex < PaletteContainerViewModel.Tabs.Count)
+                    {
+                        PaletteContainerViewModel.Tabs[tabIndex].Palette = palette;
+                        PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[tabIndex];
+                    }
+                    else if (PaletteContainerViewModel.Tabs.Count > 0)
+                    {
+                        PaletteContainerViewModel.Tabs[0].Palette = palette;
+                        PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[0];
+                    }
+                }
+            }
+
+            IsRecoveryPromptVisible = false;
+            if (_sessionStorage != null)
+            {
+                await _sessionStorage.ClearSessionAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Eede] RestoreSession failed: {ex}");
+        }
+    }
+
+    private async Task ExecuteDiscardRecoveryAsync()
+    {
+        if (_recoveryService != null)
+        {
+            await _recoveryService.DiscardSessionAsync();
+        }
+        IsRecoveryPromptVisible = false;
+    }
+
+    private void OnPaletteTabsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+        {
+            foreach (PaletteTabViewModel tab in e.NewItems)
+            {
+                SetupPaletteTab(tab);
+            }
+        }
+        if (e.OldItems != null)
+        {
+            foreach (PaletteTabViewModel tab in e.OldItems)
+            {
+                CleanupPaletteTab(tab);
+            }
+        }
+        _coordinator?.NotifyDirty();
+    }
+
+    private void SetupPaletteTab(PaletteTabViewModel tab)
+    {
+        var subscription = tab.WhenAnyValue(x => x.Palette)
+            .Skip(1)
+            .Subscribe(_ => _coordinator?.NotifyDirty());
+        _paletteTabSubscriptions[tab] = subscription;
+    }
+
+    private void CleanupPaletteTab(PaletteTabViewModel tab)
+    {
+        if (_paletteTabSubscriptions.Remove(tab, out var subscription))
+        {
+            subscription.Dispose();
         }
     }
 

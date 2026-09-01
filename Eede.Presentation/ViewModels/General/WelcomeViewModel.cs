@@ -75,9 +75,12 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
         {
             var settings = await _settingsRepository.LoadAsync();
             RecentFiles.Clear();
-            foreach (var file in settings.RecentFiles)
+            if (settings?.RecentFiles != null)
             {
-                RecentFiles.Add(file);
+                foreach (var file in settings.RecentFiles)
+                {
+                    RecentFiles.Add(file);
+                }
             }
         });
 

@@ -113,12 +113,15 @@ public sealed class InMemorySessionStorage : ISessionStorage
         }
     }
 
+    public bool IsCleanExitMarked { get; private set; }
+
     public Task MarkCleanExitAsync(CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();
         lock (_lock)
         {
             _hasActiveSession = false;
+            IsCleanExitMarked = true;
             return Task.CompletedTask;
         }
     }

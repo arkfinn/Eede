@@ -55,7 +55,7 @@ public class AnimationPatternsTests
     public void InvalidArgumentsTest()
     {
         var patterns = new AnimationPatterns();
-        Assert.Throws<ArgumentNullException>(() => patterns.Add(null));
+        Assert.Throws<ArgumentNullException>(() => patterns.Add(null!));
 
         var grid = new GridSettings(new PictureSize(16, 16), new Position(0, 0), 0);
         var pattern = new AnimationPattern("Test", new List<AnimationFrame>(), grid);
@@ -67,7 +67,7 @@ public class AnimationPatternsTests
 
         Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.Replace(-1, pattern));
         Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.Replace(1, pattern));
-        Assert.Throws<ArgumentNullException>(() => patternsWithOne.Replace(0, null));
+        Assert.Throws<ArgumentNullException>(() => patternsWithOne.Replace(0, null!));
 
         Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.RemoveAt(-1));
         Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.RemoveAt(1));

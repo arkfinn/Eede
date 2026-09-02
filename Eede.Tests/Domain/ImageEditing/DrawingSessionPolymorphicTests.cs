@@ -61,7 +61,7 @@ public class DrawingSessionPolymorphicTests
 
         Assert.That(result.Session.CanUndo(), Is.False);
         Assert.That(result.Item, Is.InstanceOf<DockActiveHistoryItem>());
-        var undoneItem = result.Item as DockActiveHistoryItem;
+        var undoneItem = (DockActiveHistoryItem)result.Item!;
         Assert.That(undoneItem.DockId, Is.EqualTo(dockId));
         Assert.That(undoneItem.Before, Is.EqualTo(beforePicture));
         Assert.That(undoneItem.After, Is.EqualTo(afterPicture));
@@ -84,7 +84,7 @@ public class DrawingSessionPolymorphicTests
 
         Assert.That(result.Session.CanUndo(), Is.True);
         Assert.That(result.Item, Is.InstanceOf<DockActiveHistoryItem>());
-        var redoneItem = result.Item as DockActiveHistoryItem;
+        var redoneItem = (DockActiveHistoryItem)result.Item!;
         Assert.That(redoneItem.DockId, Is.EqualTo(dockId));
         Assert.That(redoneItem.Before, Is.EqualTo(beforePicture));
         Assert.That(redoneItem.After, Is.EqualTo(afterPicture));

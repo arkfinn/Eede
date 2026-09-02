@@ -121,7 +121,7 @@ namespace Eede.Presentation.Common.Adapters
 
             using var bitmap = _bitmapAdapter.ConvertToBitmap(picture);
             using var ms = new MemoryStream();
-            bitmap.Save(ms);
+            bitmap.Save(ms, new PngBitmapEncoderOptions());
             ms.Position = 0;
 
             // 1. 静的キャッシュ経由で保存（最優先）
@@ -158,7 +158,7 @@ namespace Eede.Presentation.Common.Adapters
             }
 
             // 3. 物理ファイルパスに直接保存
-            bitmap.Save(pathStr);
+            bitmap.Save(pathStr, new PngBitmapEncoderOptions());
         }
     }
 }

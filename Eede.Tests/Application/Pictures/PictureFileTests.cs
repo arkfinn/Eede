@@ -29,11 +29,10 @@ namespace Eede.Application.Tests.Pictures
         public void Constructor_WithNullFilePath_ThrowsArgumentNullException()
         {
             // Arrange
-            FilePath filePath = null;
             var picture = Picture.CreateEmpty(new PictureSize(32, 32));
 
             // Act & Assert
-            var ex = Assert.Throws<ArgumentNullException>(() => new PictureFile(filePath, picture));
+            var ex = Assert.Throws<ArgumentNullException>(() => new PictureFile(null!, picture));
             Assert.That(ex.ParamName, Is.EqualTo("filePath"));
         }
 
@@ -42,10 +41,9 @@ namespace Eede.Application.Tests.Pictures
         {
             // Arrange
             var filePath = new FilePath("test.png");
-            Picture picture = null;
 
             // Act & Assert
-            var ex = Assert.Throws<ArgumentNullException>(() => new PictureFile(filePath, picture));
+            var ex = Assert.Throws<ArgumentNullException>(() => new PictureFile(filePath, null!));
             Assert.That(ex.ParamName, Is.EqualTo("picture"));
         }
     }

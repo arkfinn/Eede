@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reflection;
 using ReactiveUI;
 using RxVoid = ReactiveUI.Primitives.RxVoid;
 using System.Reactive.Disposables;
@@ -212,10 +213,37 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private string GetVersion()
+    private static string GetVersion()
     {
-        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-        return fvi.FileVersion ?? "0.0.0";
+        var assembly = typeof(WelcomeViewModel).Assembly;
+
+        // 1. MinVer 等で付与された InformationalVersion (メモリ内アセンブリメタデータ属性。WASM / Desktop 共通)
+        var infoVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (!string.IsNullOrWhiteSpace(infoVersion))
+        {
+            var plusIndex = infoVersion.IndexOf('+');
+            return plusIndex > 0 ? infoVersion[..plusIndex] : infoVersion;
+        }
+
+        // 2. 物理ファイルが存在するデスクトップ環境での FileVersionInfo
+        if (!string.IsNullOrEmpty(assembly.Location))
+        {
+            try
+            {
+                var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+                if (!string.IsNullOrWhiteSpace(fvi.FileVersion))
+                {
+                    return fvi.FileVersion;
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[WelcomeViewModel] Failed to get FileVersionInfo: {ex.Message}");
+            }
+        }
+
+        // 3. アセンブリバージョンへのフォールバック
+        var version = assembly.GetName().Version;
+        return version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "0.0.0";
     }
 }

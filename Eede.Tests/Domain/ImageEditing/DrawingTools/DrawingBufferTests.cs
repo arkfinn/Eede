@@ -123,7 +123,7 @@ public class DrawingBufferTests
     [Test]
     public void Constructor_WithNullPreviousPicture_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => new DrawingBuffer(null));
+        Assert.Throws<ArgumentNullException>(() => new DrawingBuffer(null!));
     }
 
     [Test]
@@ -145,7 +145,7 @@ public class DrawingBufferTests
     public void UpdateDrawing_WithNullPicture_ThrowsArgumentNullException()
     {
         var buffer = new DrawingBuffer(_previousPicture);
-        Assert.Throws<ArgumentNullException>(() => buffer.UpdateDrawing(null));
+        Assert.Throws<ArgumentNullException>(() => buffer.UpdateDrawing(null!));
     }
 
     [Test]

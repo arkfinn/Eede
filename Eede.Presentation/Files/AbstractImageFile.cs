@@ -41,7 +41,7 @@ namespace Eede.Presentation.Files
             try
             {
                 using var ms = new System.IO.MemoryStream();
-                Bitmap.Save(ms);
+                Bitmap.Save(ms, new PngBitmapEncoderOptions());
                 ms.Position = 0;
 
                 // 1. 静的キャッシュ経由（ブラウザ環境 / 選択済みファイル）
@@ -74,7 +74,7 @@ namespace Eede.Presentation.Files
                 }
 
                 // 3. 物理ファイルパスに直接保存
-                Bitmap.Save(pathStr);
+                Bitmap.Save(pathStr, new PngBitmapEncoderOptions());
                 return SaveImageResult.Saved(WithFilePath(filePath));
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ namespace Eede.Presentation.Files
             try
             {
                 using var ms = new System.IO.MemoryStream();
-                Bitmap.Save(ms);
+                Bitmap.Save(ms, new PngBitmapEncoderOptions());
                 ms.Position = 0;
 
                 await using var stream = await storage.OpenWriteStreamAsync(result);

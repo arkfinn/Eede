@@ -263,7 +263,7 @@ namespace Eede.Application.Tests.Drawings
             var drawableArea = new DrawableArea(magnification, gridSize, null);
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => drawableArea.DisplaySizeOf(null));
+            Assert.Throws<ArgumentNullException>(() => drawableArea.DisplaySizeOf(null!));
         }
 
         [Test]

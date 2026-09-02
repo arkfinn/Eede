@@ -152,14 +152,14 @@ public class PictureContainerTests
         
         // 1. 最初はデフォルト（32x32）であることを確認（SetupDockPicture 等で上書きされる前の初期値）
         var field = typeof(PictureContainer).GetField("_cursorSize", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var initialSize = (PictureSize)field.GetValue(_container);
+        var initialSize = (PictureSize)field!.GetValue(_container)!;
         Assert.That(initialSize, Is.EqualTo(new PictureSize(32, 32)));
 
         // 2. ViewModel のサイズを変更
         _dockViewModel.CursorSize = new PictureSize(64, 64);
 
         // 3. 内部の _cursorSize が更新されていることを確認
-        var updatedSize = (PictureSize)field.GetValue(_container);
+        var updatedSize = (PictureSize)field!.GetValue(_container)!;
         Assert.That(updatedSize, Is.EqualTo(new PictureSize(64, 64)), "ViewModel の CursorSize 変更は即座に PictureContainer に反映されるべき");
     }
     

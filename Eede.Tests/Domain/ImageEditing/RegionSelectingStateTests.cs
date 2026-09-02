@@ -38,7 +38,7 @@ public class RegionSelectingStateTests
         // snap(10+40+16-1, 16) = 64
         Assert.That(area.Value.X, Is.EqualTo(0));
         Assert.That(area.Value.Y, Is.EqualTo(0));
-        Assert.That(area.Value.Width, Is.EqualTo(64));
+        Assert.That(area!.Value.Width, Is.EqualTo(64));
         Assert.That(area.Value.Height, Is.EqualTo(64));
     }
 
@@ -70,13 +70,15 @@ public class RegionSelectingStateTests
 
         // Initial area (32x32 due to min size and snap)
         var initialArea = state.GetSelectingArea();
-        Assert.That(initialArea.Value.Width, Is.EqualTo(32));
+        Assert.That(initialArea, Is.Not.Null);
+        Assert.That(initialArea!.Value.Width, Is.EqualTo(32));
 
         // Move to (100, 100)
         var cursorArea = HalfBoxArea.Create(start, _minSize);
         state.HandlePointerMoved(cursorArea, true, new Position(100, 100), false, new PictureSize(200, 200));
         var movedArea = state.GetSelectingArea();
-        Assert.That(movedArea.Value.Width, Is.EqualTo(112)); // Updated!
+        Assert.That(movedArea, Is.Not.Null);
+        Assert.That(movedArea!.Value.Width, Is.EqualTo(112)); // Updated!
     }
 
     [Test]
@@ -94,7 +96,7 @@ public class RegionSelectingStateTests
         // Snap(100, 16) = 96
         // Snap(150 + 16 - 1, 16) = Snap(165, 16) = 160
         // Size = 160 - 96 = 64
-        Assert.That(area.Value.Width, Is.EqualTo(64));
+        Assert.That(area!.Value.Width, Is.EqualTo(64));
         Assert.That(area.Value.Height, Is.EqualTo(64));
     }
 }

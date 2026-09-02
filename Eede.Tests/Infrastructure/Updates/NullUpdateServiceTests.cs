@@ -11,6 +11,13 @@ namespace Eede.Tests.Infrastructure.Updates;
 public class NullUpdateServiceTests
 {
     [Test]
+    public void IsSupported_ReturnsFalse()
+    {
+        var service = new NullUpdateService();
+        Assert.That(service.IsSupported, Is.False);
+    }
+
+    [Test]
     public async Task CheckForUpdatesAsync_AlwaysReturnsFalse()
     {
         var service = new NullUpdateService();

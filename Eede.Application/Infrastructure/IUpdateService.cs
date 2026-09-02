@@ -7,6 +7,7 @@ namespace Eede.Application.Infrastructure;
 
 public interface IUpdateService
 {
+    bool IsSupported { get; }
     UpdateStatus Status { get; }
     IObservable<UpdateStatus> StatusChanged { get; }
     string? LatestVersion { get; }

@@ -11,14 +11,14 @@ namespace Eede.Application.Tests.Pictures;
 [TestFixture]
 public class CutSelectionUseCaseTests
 {
-    private Mock<IClipboard> _clipboardServiceMock;
+    private Mock<IClipboard> _clipboardMock;
     private CutSelectionUseCase _useCase;
 
     [SetUp]
     public void Setup()
     {
-        _clipboardServiceMock = new Mock<IClipboard>();
-        _useCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
+        _clipboardMock = new Mock<IClipboard>();
+        _useCase = new CutSelectionUseCase(_clipboardMock.Object);
     }
 
     [Test]
@@ -28,12 +28,13 @@ public class CutSelectionUseCaseTests
         var area = new PictureArea(new Position(0, 0), new PictureSize(5, 5));
 
         // Setup mock to verify CopyAsync is called
-        _clipboardServiceMock.Setup(x => x.CopyAsync(It.IsAny<Picture>())).Returns(Task.CompletedTask);
+        _clipboardMock.Setup(x => x.CopyAsync(It.IsAny<Picture>())).Returns(Task.CompletedTask);
 
         var result = await _useCase.ExecuteAsync(picture, area);
 
         Assert.That(result, Is.Not.Null);
         // Verify that CopyAsync was called once
-        _clipboardServiceMock.Verify(x => x.CopyAsync(It.IsAny<Picture>()), Times.Once);
+        _clipboardMock.Verify(x => x.CopyAsync(It.IsAny<Picture>()), Times.Once);
     }
 }
+

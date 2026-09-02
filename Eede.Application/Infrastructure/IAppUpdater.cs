@@ -1,0 +1,17 @@
+#nullable enable
+using System;
+using System.Threading.Tasks;
+using Eede.Domain.SharedKernel;
+
+namespace Eede.Application.Infrastructure;
+
+public interface IAppUpdater
+{
+    bool IsSupported { get; }
+    UpdateStatus Status { get; }
+    IObservable<UpdateStatus> StatusChanged { get; }
+    string? LatestVersion { get; }
+    Task<bool> CheckForUpdatesAsync();
+    Task DownloadUpdateAsync();
+    void ApplyAndRestart();
+}

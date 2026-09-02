@@ -4,7 +4,7 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Moq;
 using NUnit.Framework;
 
@@ -67,3 +67,4 @@ namespace Eede.Presentation.Tests
         }
     }
 }
+

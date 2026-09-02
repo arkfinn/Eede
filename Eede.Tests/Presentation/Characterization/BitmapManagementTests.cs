@@ -10,7 +10,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.SharedKernel;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -25,7 +25,7 @@ public class BitmapManagementTests
     private GlobalState _globalState;
     private AnimationViewModel _animationViewModel;
     private Mock<IPictureRepository> _mockPictureRepository;
-    private IPictureIOService _pictureIOService;
+    private IPictureFileIO _PictureFileIO;
     private Mock<IBitmapAdapter<Bitmap>> _mockBitmapAdapter;
 
     [SetUp]
@@ -35,19 +35,19 @@ public class BitmapManagementTests
         _globalState = new GlobalState();
         AnimationPatternsProvider patternsProvider = new();
         _mockBitmapAdapter = new Mock<IBitmapAdapter<Bitmap>>();
-        AnimationPatternService patternService = new(
+        AnimationPatternEditor patternEditor = new(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         _animationViewModel = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             _mockBitmapAdapter.Object);
         _mockPictureRepository = new Mock<IPictureRepository>();
         Mock<ISettingsRepository> mockSettingsRepository = new();
         _ = mockSettingsRepository.Setup(r => r.LoadAsync()).ReturnsAsync(new Eede.Application.Settings.AppSettings());
-        _pictureIOService = new PictureIOService(
+        _PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(_mockPictureRepository.Object, mockSettingsRepository.Object),
             new LoadPictureUseCase(_mockPictureRepository.Object, mockSettingsRepository.Object));
     }
@@ -61,7 +61,7 @@ public class BitmapManagementTests
             .Callback(() => mockCalled = true)
             .Returns(mockBitmap);
 
-        DockPictureViewModel viewModel = new(_globalState, _animationViewModel, _mockBitmapAdapter.Object, _pictureIOService)
+        DockPictureViewModel viewModel = new(_globalState, _animationViewModel, _mockBitmapAdapter.Object, _PictureFileIO)
         {
             // 手動で PictureBuffer をセットして発火を促す
             PictureBuffer = Picture.CreateEmpty(new PictureSize(32, 32))
@@ -83,7 +83,7 @@ public class BitmapManagementTests
     {
         Mock<IInteractionCoordinator> mockCoordinator = new();
         Mock<IDrawingSessionProvider> mockSessionProvider = new();
-        Mock<ISelectionService> mockSelectionService = new();
+        Mock<ISelectionClipboard> mockSelectionClipboard = new();
         Mock<IClipboard> mockClipboard = new();
         Mock<IAddFrameProvider> mockAddFrameProvider = new();
 
@@ -93,7 +93,7 @@ public class BitmapManagementTests
             mockClipboard.Object,
             _mockBitmapAdapter.Object,
             mockSessionProvider.Object,
-            mockSelectionService.Object,
+            mockSelectionClipboard.Object,
             mockCoordinator.Object);
 
         Picture dummyPicture = Picture.CreateEmpty(new PictureSize(32, 32));
@@ -174,3 +174,6 @@ public class BitmapManagementTests
         Assert.That(_animationViewModel.PreviewBitmap, Is.SameAs(secondBitmap));
     }
 }
+
+
+

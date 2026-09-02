@@ -18,7 +18,8 @@ using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -64,24 +65,24 @@ public class PictureContainerTests
         var copyUseCase = new CopySelectionUseCase(mockClipboard.Object);
         var cutUseCase = new CutSelectionUseCase(mockClipboard.Object);
         var pasteUseCase = new PasteFromClipboardUseCase(mockClipboard.Object, mockDrawingSessionProvider.Object);
-        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+        var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         var mockPictureRepo = new Mock<IPictureRepository>();
         var mockSettingsRepoForUseCase = new Mock<ISettingsRepository>();
         mockSettingsRepoForUseCase.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
         var savePictureUseCase = new SavePictureUseCase(mockPictureRepo.Object, mockSettingsRepoForUseCase.Object);
         var loadPictureUseCase = new LoadPictureUseCase(mockPictureRepo.Object, mockSettingsRepoForUseCase.Object);
-        var pictureIOService = new PictureIOService(savePictureUseCase, loadPictureUseCase);
+        var PictureFileIO = new PictureFileIO(savePictureUseCase, loadPictureUseCase);
 
         // 2. Sub ViewModels Dependencies
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         var animationVM = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter());
 
@@ -96,7 +97,7 @@ public class PictureContainerTests
             mockClipboard.Object,
             bitmapAdapter,
             mockDrawingSessionProvider.Object,
-            selectionService,
+            SelectionClipboard,
             mockCoordinator.Object
         );
 
@@ -122,17 +123,17 @@ public class PictureContainerTests
             animationVM,
             drawingSessionVM,
             paletteVM,
-            pictureIOService,
-            new Mock<IThemeService>().Object,
+            PictureFileIO,
+            new Mock<IThemeDetector>().Object,
             loadSettingsUseCase,
             saveSettingsUseCase,
-            new WelcomeViewModel(mockSettingsRepoForUseCase.Object, new Mock<IExternalBrowserService>().Object),
-            () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
+            new WelcomeViewModel(mockSettingsRepoForUseCase.Object, new Mock<IExternalBrowserLauncher>().Object),
+            () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, PictureFileIO),
             () => new NewPictureWindowViewModel()
         );
 
         // DockPictureViewModel
-        _dockViewModel = new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService);
+        _dockViewModel = new DockPictureViewModel(globalState, animationVM, bitmapAdapter, PictureFileIO);
         _dockViewModel.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), new FilePath("test.png"));
 
         // Setup Window and Container
@@ -198,3 +199,9 @@ public class PictureContainerTests
             "renderingRoot の背景は Transparent であるべきです。背後の OutsideBackGround.bmp を透過させて正しい市松模様を表示します。");
     }
 }
+
+
+
+
+
+

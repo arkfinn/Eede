@@ -26,13 +26,13 @@ public class AnimationIOViewModelTests
     {
         _fileSystemMock = new Mock<IFileSystem>();
         _patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(_patternsProvider),
             new ReplaceAnimationPatternUseCase(_patternsProvider),
             new RemoveAnimationPatternUseCase(_patternsProvider));
         _viewModel = new AnimationViewModel(
             _patternsProvider,
-            patternService,
+            patternEditor,
             _fileSystemMock.Object,
             new AvaloniaBitmapAdapter());
     }
@@ -69,3 +69,4 @@ public class AnimationIOViewModelTests
         Assert.That(_viewModel.Patterns.Last().Name, Is.EqualTo("ImportTest"));
     }
 }
+

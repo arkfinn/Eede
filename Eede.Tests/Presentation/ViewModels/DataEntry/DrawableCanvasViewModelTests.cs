@@ -11,7 +11,7 @@ using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
 using Eede.Domain.Palettes;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataEntry;
 using Moq;
@@ -38,11 +38,11 @@ namespace Eede.Presentation.Tests.ViewModels.DataEntry;
 public class DrawableCanvasViewModelTests
 {
     private Mock<IAddFrameProvider> _addFrameProviderMock = default!;
-    private Mock<IClipboard> _clipboardServiceMock = default!;
+    private Mock<IClipboard> _clipboardMock = default!;
     private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock = default!;
     private Mock<IDrawActionUseCase> _drawActionUseCaseMock = default!;
     private Mock<IDrawingSessionProvider> _drawingSessionProviderMock = default!;
-    private Mock<ISelectionService> _selectionServiceMock = default!;
+    private Mock<ISelectionClipboard> _SelectionClipboardMock = default!;
     private Mock<IInteractionCoordinator> _interactionCoordinatorMock = default!;
     private GlobalState _globalState = default!;
 
@@ -50,12 +50,12 @@ public class DrawableCanvasViewModelTests
     public void SetUp()
     {
         _addFrameProviderMock = new Mock<IAddFrameProvider>();
-        _clipboardServiceMock = new Mock<IClipboard>();
+        _clipboardMock = new Mock<IClipboard>();
         _bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
         _drawActionUseCaseMock = new Mock<IDrawActionUseCase>();
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
-        _selectionServiceMock = new Mock<ISelectionService>();
-        _selectionServiceMock.Setup(x => x.PasteAsync()).Returns(Task.CompletedTask);
+        _SelectionClipboardMock = new Mock<ISelectionClipboard>();
+        _SelectionClipboardMock.Setup(x => x.PasteAsync()).Returns(Task.CompletedTask);
         _interactionCoordinatorMock = new Mock<IInteractionCoordinator>();
         _globalState = new GlobalState();
     }
@@ -65,10 +65,10 @@ public class DrawableCanvasViewModelTests
         return new DrawableCanvasViewModel(
             _globalState,
             _addFrameProviderMock.Object,
-            _clipboardServiceMock.Object,
+            _clipboardMock.Object,
             _bitmapAdapterMock.Object,
             _drawingSessionProviderMock.Object,
-            _selectionServiceMock.Object,
+            _SelectionClipboardMock.Object,
             _interactionCoordinatorMock.Object);
     }
 
@@ -189,29 +189,29 @@ public class DrawableCanvasViewModelTests
     }
 
     [AvaloniaTest]
-    public void CopyCommand_ShouldInvokeService()
+    public void CopyCommand_ShouldInvokeClipboard()
     {
         var vm = CreateViewModel();
         vm.PictureBuffer = new DrawingBuffer(Picture.CreateEmpty(new PictureSize(32, 32)));
 
         vm.CopyCommand.Execute().Subscribe();
 
-        _selectionServiceMock.Verify(x => x.CopyAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()), Times.Once);
+        _SelectionClipboardMock.Verify(x => x.CopyAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()), Times.Once);
     }
 
     [AvaloniaTest]
-    public async Task CutCommand_ShouldInvokeServiceAndSync()
+    public async Task CutCommand_ShouldInvokeClipboardAndSync()
     {
         var vm = CreateViewModel();
         var initialPicture = Picture.CreateEmpty(new PictureSize(32, 32));
         vm.PictureBuffer = new DrawingBuffer(initialPicture);
 
-        _selectionServiceMock.Setup(x => x.CutAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()))
+        _SelectionClipboardMock.Setup(x => x.CutAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()))
             .ReturnsAsync(initialPicture);
 
         await vm.CutCommand.Execute().ToTask();
 
-        _selectionServiceMock.Verify(x => x.CutAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()), Times.Once);
+        _SelectionClipboardMock.Verify(x => x.CutAsync(It.IsAny<Picture>(), It.IsAny<PictureArea?>()), Times.Once);
         _interactionCoordinatorMock.Verify(x => x.SyncWithSession(true), Times.Once);
     }
 
@@ -277,3 +277,6 @@ public class DrawableCanvasViewModelTests
         Assert.That(vm.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be effectively visible at any magnification when ON");
     }
 }
+
+
+

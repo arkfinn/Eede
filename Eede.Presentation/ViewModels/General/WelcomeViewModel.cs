@@ -22,7 +22,7 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
 
     public string Version => GetVersion();
     public string DisplayVersion => LatestVersion ?? Version;
-    public bool IsUpdateSupported => _updateService?.IsSupported ?? false;
+    public bool IsUpdateSupported => _appUpdater?.IsSupported ?? false;
 
     [Reactive] public partial UpdateStatus UpdateStatus { get; set; }
     [Reactive] public partial string? LatestVersion { get; set; }
@@ -75,20 +75,20 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
     }
 
     private readonly ISettingsRepository _settingsRepository;
-    private readonly IExternalBrowserService _externalBrowserService;
+    private readonly IExternalBrowserLauncher _browserLauncher;
     private readonly CheckUpdateUseCase? _checkUpdateUseCase;
-    private readonly IUpdateService? _updateService;
+    private readonly IAppUpdater? _appUpdater;
     private readonly CompositeDisposable _disposables = new();
 
     public WelcomeViewModel(
         ISettingsRepository settingsRepository,
-        IExternalBrowserService externalBrowserService,
-        IUpdateService? updateService = null,
+        IExternalBrowserLauncher browserLauncher,
+        IAppUpdater? appUpdater = null,
         CheckUpdateUseCase? checkUpdateUseCase = null)
     {
         _settingsRepository = settingsRepository;
-        _externalBrowserService = externalBrowserService;
-        _updateService = updateService;
+        _browserLauncher = browserLauncher;
+        _appUpdater = appUpdater;
         _checkUpdateUseCase = checkUpdateUseCase;
 
         PreviousSessionTitle = string.Empty;
@@ -105,7 +105,7 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
             {
                 await Task.Run(() =>
                 {
-                    _externalBrowserService.OpenUrl(url);
+                    _browserLauncher.OpenUrl(url);
                 });
             }
             return url;
@@ -128,7 +128,7 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
             .Select(status => status == UpdateStatus.ReadyToApply);
         ApplyUpdateCommand = ReactiveCommand.Create(() =>
         {
-            _updateService?.ApplyAndRestart();
+            _appUpdater?.ApplyAndRestart();
         }, canApplyUpdate);
 
         var canCheckUpdate = this.WhenAnyValue(x => x.UpdateStatus)
@@ -179,14 +179,14 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
             })
             .ToProperty(this, nameof(UpdateMessage), out _updateMessageHelper);
 
-        if (_updateService != null)
+        if (_appUpdater != null)
         {
-            _disposables.Add(_updateService.StatusChanged
+            _disposables.Add(_appUpdater.StatusChanged
                 .ObserveOn(System.Reactive.Concurrency.ImmediateScheduler.Instance)
                 .Subscribe(status =>
                 {
                     UpdateStatus = status;
-                    LatestVersion = _updateService.LatestVersion;
+                    LatestVersion = _appUpdater.LatestVersion;
                 }));
         }
 

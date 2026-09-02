@@ -13,7 +13,7 @@ using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Settings;
 using ReactiveUI;
 using System;
@@ -86,7 +86,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
     private readonly IClipboard _clipboard;
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
-    private readonly ISelectionService _selectionService;
+    private readonly ISelectionClipboard _selectionClipboard;
     private readonly IInteractionCoordinator _coordinator;
     private readonly IImageTransfer _identityTransfer = new IdentityImageTransfer();
 
@@ -101,7 +101,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         IClipboard clipboard,
         IBitmapAdapter<Bitmap> bitmapAdapter,
         IDrawingSessionProvider drawingSessionProvider,
-        ISelectionService selectionService,
+        ISelectionClipboard selectionClipboard,
         IInteractionCoordinator coordinator)
     {
         _globalState = globalState;
@@ -110,7 +110,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
 
         _bitmapAdapter = bitmapAdapter;
         _drawingSessionProvider = drawingSessionProvider;
-        _selectionService = selectionService;
+        _selectionClipboard = selectionClipboard;
         _coordinator = coordinator;
 
         _coordinator.StateChanged += () =>
@@ -422,7 +422,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         try
         {
             CommitSelection();
-            await _selectionService.CopyAsync(PictureBuffer.Previous, IsRegionSelecting ? SelectingArea : null);
+            await _selectionClipboard.CopyAsync(PictureBuffer.Previous, IsRegionSelecting ? SelectingArea : null);
         }
         catch (Exception ex)
         {
@@ -439,7 +439,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
             CommitSelection();
             Picture previous = PictureBuffer.Previous;
             PictureArea? previousArea = IsRegionSelecting ? SelectingArea : null;
-            Picture cleared = await _selectionService.CutAsync(previous, previousArea);
+            Picture cleared = await _selectionClipboard.CutAsync(previous, previousArea);
             ExecuteInternalUpdate(cleared);
             Drew?.Invoke(previous, cleared, previousArea, null, default);
             SyncWithSession(true);
@@ -457,7 +457,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         try
         {
             CommitSelection();
-            await _selectionService.PasteAsync();
+            await _selectionClipboard.PasteAsync();
             _coordinator.SyncWithSession();
         }
         catch (Exception ex)
@@ -466,3 +466,5 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         }
     }
 }
+
+

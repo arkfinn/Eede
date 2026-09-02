@@ -19,16 +19,18 @@ using Eede.Infrastructure.Pictures;
 using Eede.Infrastructure.Recovery;
 using Eede.Infrastructure.Settings;
 using Eede.Infrastructure.Updates;
+using Eede.Infrastructure.Launchers;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
-using Eede.Presentation.Services;
+using Eede.Presentation.Launchers;
+using Eede.Presentation.Coordinators;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.General;
 using Eede.Presentation.ViewModels.Pages;
-using Eede.Infrastructure.Services;
 using Eede.Presentation.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -74,7 +76,7 @@ public partial class App : Avalonia.Application
 
     private void ConfigureServices(IServiceCollection services)
     {
-        // Core/Domain/Application Services
+        // Core/Domain/Application Dependencies
         services.AddSingleton<GlobalState>();
         services.AddSingleton<IClipboard, AvaloniaClipboard>();
         services.AddTransient<IFileStorage>(sp =>
@@ -103,24 +105,24 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IFileSystem, AvaloniaFileSystem>();
         if (OperatingSystem.IsBrowser())
         {
-            services.AddSingleton<IExternalBrowserService, WebExternalBrowserService>();
+            services.AddSingleton<IExternalBrowserLauncher, WebExternalBrowserLauncher>();
         }
         else
         {
-            services.AddSingleton<IExternalBrowserService, ExternalBrowserService>();
+            services.AddSingleton<IExternalBrowserLauncher, ExternalBrowserLauncher>();
         }
-        services.AddSingleton<IThemeService, AvaloniaThemeService>();
+        services.AddSingleton<IThemeDetector, AvaloniaThemeDetector>();
         services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();
         services.AddTransient<ICopySelectionUseCase, CopySelectionUseCase>();
         services.AddTransient<ICutSelectionUseCase, CutSelectionUseCase>();
         services.AddTransient<IPasteFromClipboardUseCase, PasteFromClipboardUseCase>();
-        services.AddTransient<ISelectionService, SelectionService>();
+        services.AddTransient<ISelectionClipboard, SelectionClipboard>();
 
         services.AddSingleton<IAnimationPatternsProvider, AnimationPatternsProvider>();
         services.AddTransient<IAddAnimationPatternUseCase, AddAnimationPatternUseCase>();
         services.AddTransient<IReplaceAnimationPatternUseCase, ReplaceAnimationPatternUseCase>();
         services.AddTransient<IRemoveAnimationPatternUseCase, RemoveAnimationPatternUseCase>();
-        services.AddTransient<IAnimationPatternService, AnimationPatternService>();
+        services.AddTransient<IAnimationPatternEditor, AnimationPatternEditor>();
 
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();
         services.AddSingleton<IPictureRepository>(sp =>
@@ -140,13 +142,13 @@ public partial class App : Avalonia.Application
             ));
         services.AddSingleton<ISavePictureUseCase, SavePictureUseCase>();
         services.AddSingleton<ILoadPictureUseCase, LoadPictureUseCase>();
-        services.AddSingleton<IPictureIOService, PictureIOService>();
+        services.AddSingleton<IPictureFileIO, PictureFileIO>();
         services.AddSingleton<IPaletteRepository, Eede.Infrastructure.Palettes.Persistence.PaletteRepository>();
         if (OperatingSystem.IsBrowser())
         {
             services.AddSingleton<IPaletteSessionRepository, LocalStoragePaletteSessionRepository>();
             services.AddSingleton<ISettingsRepository, LocalStorageSettingsRepository>();
-            services.AddSingleton<IUpdateService, NullUpdateService>();
+            services.AddSingleton<IAppUpdater, NullAppUpdater>();
         }
         else
         {
@@ -162,13 +164,13 @@ public partial class App : Avalonia.Application
                 var path = System.IO.Path.Combine(appData, "Eede", "settings.json");
                 return new Eede.Infrastructure.Settings.JsonSettingsRepository(path);
             });
-            services.AddSingleton<IUpdateService>(sp => new VelopackUpdateService(@"https://github.com/arkfinn/Eede"));
+            services.AddSingleton<IAppUpdater>(sp => new VelopackAppUpdater(@"https://github.com/arkfinn/Eede"));
         }
         services.AddTransient<ILoadSettingsUseCase, LoadSettingsUseCase>();
         services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();
         services.AddTransient<CheckUpdateUseCase>();
 
-        // Session Recovery Services
+        // Session Recovery
         services.AddSingleton<IPictureCodec, SkiaSharpPictureCodec>();
         services.AddSingleton<IPullContextTracker, PullContextTracker>();
         services.AddSingleton<ISessionStorage>(sp =>
@@ -181,7 +183,7 @@ public partial class App : Avalonia.Application
             var recoveryDir = System.IO.Path.Combine(appData, "Eede", "session_recovery");
             return new LocalFileSessionStorage(recoveryDir);
         });
-        services.AddSingleton<ISessionRecoveryService, SessionRecoveryService>();
+        services.AddSingleton<ISessionRecoverer, SessionRecoverer>();
         services.AddSingleton<SessionRecoveryCoordinator>(sp =>
             new SessionRecoveryCoordinator(
                 sp.GetRequiredService<ISessionStorage>(),

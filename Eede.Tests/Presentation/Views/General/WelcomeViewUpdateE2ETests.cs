@@ -21,8 +21,8 @@ namespace Eede.Presentation.Tests.Views.General;
 public class WelcomeViewUpdateE2ETests
 {
     private Mock<ISettingsRepository> _settingsRepoMock = default!;
-    private Mock<IExternalBrowserService> _browserServiceMock = default!;
-    private Mock<IUpdateService> _updateServiceMock = default!;
+    private Mock<IExternalBrowserLauncher> _browserLauncherMock = default!;
+    private Mock<IAppUpdater> _appUpdaterMock = default!;
     private BehaviorSubject<UpdateStatus> _statusSubject = default!;
     private CheckUpdateUseCase _checkUpdateUseCase = default!;
     private Window _window = default!;
@@ -35,14 +35,14 @@ public class WelcomeViewUpdateE2ETests
         _settingsRepoMock = new Mock<ISettingsRepository>();
         _settingsRepoMock.Setup(r => r.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        _browserServiceMock = new Mock<IExternalBrowserService>();
-        _updateServiceMock = new Mock<IUpdateService>();
+        _browserLauncherMock = new Mock<IExternalBrowserLauncher>();
+        _appUpdaterMock = new Mock<IAppUpdater>();
         _statusSubject = new BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
-        _updateServiceMock.SetupGet(s => s.StatusChanged).Returns(_statusSubject);
-        _updateServiceMock.SetupGet(s => s.LatestVersion).Returns("1.2.0");
-        _updateServiceMock.SetupGet(s => s.IsSupported).Returns(true);
+        _appUpdaterMock.SetupGet(s => s.StatusChanged).Returns(_statusSubject);
+        _appUpdaterMock.SetupGet(s => s.LatestVersion).Returns("1.2.0");
+        _appUpdaterMock.SetupGet(s => s.IsSupported).Returns(true);
 
-        _checkUpdateUseCase = new CheckUpdateUseCase(_updateServiceMock.Object);
+        _checkUpdateUseCase = new CheckUpdateUseCase(_appUpdaterMock.Object);
     }
 
     [TearDown]
@@ -73,16 +73,16 @@ public class WelcomeViewUpdateE2ETests
     public async Task UpdateFlow_WhenUpdateAvailable_ShouldTransitionToReadyToApply_AndShowApplyButton()
     {
         // 1. Arrange: アップデートが存在する場合のモック設定
-        _updateServiceMock.Setup(s => s.CheckForUpdatesAsync())
+        _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync())
             .Callback(() => _statusSubject.OnNext(UpdateStatus.Checking))
             .ReturnsAsync(true);
 
-        _updateServiceMock.Setup(s => s.DownloadUpdateAsync())
+        _appUpdaterMock.Setup(s => s.DownloadUpdateAsync())
             .Callback(() => _statusSubject.OnNext(UpdateStatus.Downloading))
             .Returns(Task.CompletedTask)
             .Callback(() => _statusSubject.OnNext(UpdateStatus.ReadyToApply));
 
-        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         InitializeView(vm);
 
         // 初期化時の非同期実行（InitializeAsync）の完了を待機
@@ -108,19 +108,19 @@ public class WelcomeViewUpdateE2ETests
         applyButton.Command.Execute(null);
 
         // 5. Assert: ApplyAndRestart が呼ばれたことを検証
-        _updateServiceMock.Verify(s => s.ApplyAndRestart(), Times.Once);
+        _appUpdaterMock.Verify(s => s.ApplyAndRestart(), Times.Once);
     }
 
     [AvaloniaTest]
     public async Task UpdateFlow_WhenNoUpdate_ShouldShowUpToDateMessage_AndManualCheckButton()
     {
         // 1. Arrange: アップデートがない場合
-        _updateServiceMock.Setup(s => s.CheckForUpdatesAsync())
+        _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync())
             .Callback(() => _statusSubject.OnNext(UpdateStatus.Checking))
             .ReturnsAsync(false)
             .Callback(() => _statusSubject.OnNext(UpdateStatus.Idle));
 
-        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         InitializeView(vm);
 
         for (int i = 0; i < 50; i++)
@@ -140,25 +140,25 @@ public class WelcomeViewUpdateE2ETests
         Assert.That(manualCheckButton!.IsVisible, Is.True);
 
         // 3. Act: 手動チェックボタンを押下
-        _updateServiceMock.Invocations.Clear();
-        _updateServiceMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
+        _appUpdaterMock.Invocations.Clear();
+        _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
 
         manualCheckButton.Command.Execute(null);
         await Task.Delay(50);
 
         // 4. Assert: 再度 CheckForUpdatesAsync が呼ばれたこと
-        _updateServiceMock.Verify(s => s.CheckForUpdatesAsync(), Times.Once);
+        _appUpdaterMock.Verify(s => s.CheckForUpdatesAsync(), Times.Once);
     }
 
     [AvaloniaTest]
     public async Task UpdateFlow_WhenErrorOccurs_ShouldShowErrorMessage_AndRetryButton()
     {
         // 1. Arrange: エラー発生時
-        _updateServiceMock.Setup(s => s.CheckForUpdatesAsync())
+        _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync())
             .Callback(() => _statusSubject.OnNext(UpdateStatus.Checking))
             .ThrowsAsync(new System.Net.Http.HttpRequestException("Network failure"));
 
-        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         InitializeView(vm);
 
         // エラーステータスへ通知
@@ -177,23 +177,23 @@ public class WelcomeViewUpdateE2ETests
         Assert.That(retryButton!.IsVisible, Is.True);
 
         // 3. Act: リトライボタンを押下
-        _updateServiceMock.Invocations.Clear();
-        _updateServiceMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
+        _appUpdaterMock.Invocations.Clear();
+        _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
 
         retryButton.Command.Execute(null);
         await Task.Delay(50);
 
-        _updateServiceMock.Verify(s => s.CheckForUpdatesAsync(), Times.Once);
+        _appUpdaterMock.Verify(s => s.CheckForUpdatesAsync(), Times.Once);
     }
 
     [AvaloniaTest]
     public async Task WhenUpdateNotSupported_ManualCheckButtonShouldBeHidden()
     {
-        // 1. Arrange: アップデート非対応（Web版 / NullUpdateService）のモック
-        _updateServiceMock.SetupGet(s => s.IsSupported).Returns(false);
-        _updateServiceMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
+        // 1. Arrange: アップデート非対応（Web版 / NullAppUpdater）のモック
+        _appUpdaterMock.SetupGet(s => s.IsSupported).Returns(false);
+        _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
 
-        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         InitializeView(vm);
 
         await Task.Delay(50);
@@ -210,3 +210,4 @@ public class WelcomeViewUpdateE2ETests
         Assert.That(manualCheckButtons, Has.All.Property("IsVisible").EqualTo(false), "Web版（非対応環境）では手動チェックリンクがすべて非表示であること");
     }
 }
+

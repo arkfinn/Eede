@@ -12,6 +12,7 @@ namespace Eede.Infrastructure.Updates;
 
 public class VelopackUpdateService : IUpdateService, IDisposable
 {
+    public bool IsSupported => true;
     public UpdateStatus Status { get; private set; } = UpdateStatus.Idle;
     public string? LatestVersion { get; private set; }
 

@@ -40,6 +40,7 @@ public class WelcomeViewUpdateE2ETests
         _statusSubject = new BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
         _updateServiceMock.SetupGet(s => s.StatusChanged).Returns(_statusSubject);
         _updateServiceMock.SetupGet(s => s.LatestVersion).Returns("1.2.0");
+        _updateServiceMock.SetupGet(s => s.IsSupported).Returns(true);
 
         _checkUpdateUseCase = new CheckUpdateUseCase(_updateServiceMock.Object);
     }
@@ -183,5 +184,29 @@ public class WelcomeViewUpdateE2ETests
         await Task.Delay(50);
 
         _updateServiceMock.Verify(s => s.CheckForUpdatesAsync(), Times.Once);
+    }
+
+    [AvaloniaTest]
+    public async Task WhenUpdateNotSupported_ManualCheckButtonShouldBeHidden()
+    {
+        // 1. Arrange: アップデート非対応（Web版 / NullUpdateService）のモック
+        _updateServiceMock.SetupGet(s => s.IsSupported).Returns(false);
+        _updateServiceMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
+
+        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        InitializeView(vm);
+
+        await Task.Delay(50);
+
+        // 2. Assert: ViewModel で IsUpdateSupported が false であること
+        Assert.That(vm.IsUpdateSupported, Is.False);
+        Assert.That(vm.IsUpdateAvailable, Is.False);
+
+        // 3. Assert: View の手動チェックボタンがすべて非表示であること
+        var buttons = _welcomeView.GetVisualDescendants().OfType<Button>().ToList();
+        var manualCheckButtons = buttons.Where(b => b.Command == vm.ManualCheckUpdateCommand).ToList();
+
+        Assert.That(manualCheckButtons, Is.Not.Empty);
+        Assert.That(manualCheckButtons, Has.All.Property("IsVisible").EqualTo(false), "Web版（非対応環境）では手動チェックリンクがすべて非表示であること");
     }
 }

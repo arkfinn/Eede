@@ -22,6 +22,7 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
 
     public string Version => GetVersion();
     public string DisplayVersion => LatestVersion ?? Version;
+    public bool IsUpdateSupported => _updateService?.IsSupported ?? false;
 
     [Reactive] public partial UpdateStatus UpdateStatus { get; set; }
     [Reactive] public partial string? LatestVersion { get; set; }
@@ -29,6 +30,7 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
     [ObservableAsProperty] private bool _isUpdateDownloading;
     [ObservableAsProperty] private bool _isUpdateReady;
     [ObservableAsProperty] private bool _isUpdateAvailable;
+    [ObservableAsProperty] private bool _isManualCheckVisible;
     [ObservableAsProperty] private string? _updateMessage;
 
     [Reactive] public partial bool HasPreviousSession { get; set; }
@@ -130,7 +132,7 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
         }, canApplyUpdate);
 
         var canCheckUpdate = this.WhenAnyValue(x => x.UpdateStatus)
-            .Select(status => status == UpdateStatus.Idle || status == UpdateStatus.Error);
+            .Select(status => IsUpdateSupported && (status == UpdateStatus.Idle || status == UpdateStatus.Error));
         ManualCheckUpdateCommand = ReactiveCommand.CreateFromTask(async () =>
         {
             if (_checkUpdateUseCase != null)
@@ -143,6 +145,7 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
         _isUpdateDownloadingHelper = null!;
         _isUpdateReadyHelper = null!;
         _isUpdateAvailableHelper = null!;
+        _isManualCheckVisibleHelper = null!;
         _updateMessageHelper = null!;
 
         this.WhenAnyValue(x => x.UpdateStatus)
@@ -160,6 +163,10 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
         this.WhenAnyValue(x => x.UpdateStatus)
             .Select(x => x != UpdateStatus.Idle)
             .ToProperty(this, nameof(IsUpdateAvailable), out _isUpdateAvailableHelper);
+
+        this.WhenAnyValue(x => x.UpdateStatus)
+            .Select(status => IsUpdateSupported && status != UpdateStatus.ReadyToApply)
+            .ToProperty(this, nameof(IsManualCheckVisible), out _isManualCheckVisibleHelper);
 
         this.WhenAnyValue(x => x.UpdateStatus, x => x.LatestVersion)
             .Select(x => x.Item1 switch

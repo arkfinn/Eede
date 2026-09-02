@@ -259,12 +259,13 @@ public class SessionRecoveryE2ETests
         await mainVM.InitializeAsync();
 
         // 3. Assert (起動時チェック): WelcomeViewModel にセッション再開情報が表示される
-        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.True);
+        Assert.That(mainVM.WelcomeViewModel, Is.Not.Null);
+        Assert.That(mainVM.WelcomeViewModel!.HasPreviousSession, Is.True);
         Assert.That(mainVM.WelcomeViewModel.PreviousSessionDescription, Does.Contain("2 件のファイル"));
         Assert.That(mainVM.Pictures, Is.Empty);
 
         // 4. Act: WelcomeViewModel から再開コマンドを実行
-        await mainVM.WelcomeViewModel.ResumeLastSessionCommand.Execute().ToTask();
+        await mainVM.WelcomeViewModel!.ResumeLastSessionCommand!.Execute().ToTask();
 
         // 5. Assert (復元結果):
         // 再開カード非表示
@@ -322,10 +323,11 @@ public class SessionRecoveryE2ETests
         var mainVM = CreateMainViewModel();
         await mainVM.InitializeAsync();
 
-        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.True);
+        Assert.That(mainVM.WelcomeViewModel, Is.Not.Null);
+        Assert.That(mainVM.WelcomeViewModel!.HasPreviousSession, Is.True);
 
         // 3. Act: 破棄コマンドを実行
-        await mainVM.WelcomeViewModel.DiscardLastSessionCommand.Execute().ToTask();
+        await mainVM.WelcomeViewModel!.DiscardLastSessionCommand!.Execute().ToTask();
 
         // 4. Assert: プロンプトが非表示になり、ストレージがクリアされている
         Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.False);
@@ -355,12 +357,13 @@ public class SessionRecoveryE2ETests
         await mainVM.InitializeAsync();
 
         // 3. Assert: 正常終了後でも WelcomeViewModel に「前回の作業を再開」が表示される
-        Assert.That(mainVM.WelcomeViewModel.HasPreviousSession, Is.True);
-        Assert.That(mainVM.WelcomeViewModel.IsCrashRecovery, Is.False);
-        Assert.That(mainVM.WelcomeViewModel.PreviousSessionTitle, Is.EqualTo("前回の作業を再開"));
+        Assert.That(mainVM.WelcomeViewModel, Is.Not.Null);
+        Assert.That(mainVM.WelcomeViewModel!.HasPreviousSession, Is.True);
+        Assert.That(mainVM.WelcomeViewModel!.IsCrashRecovery, Is.False);
+        Assert.That(mainVM.WelcomeViewModel!.PreviousSessionTitle, Is.EqualTo("前回の作業を再開"));
 
         // 4. Act: 再開コマンドを実行
-        await mainVM.WelcomeViewModel.ResumeLastSessionCommand.Execute().ToTask();
+        await mainVM.WelcomeViewModel!.ResumeLastSessionCommand!.Execute().ToTask();
 
         // 5. Assert: 正常にタブが復元される
         Assert.That(mainVM.Pictures.Count, Is.EqualTo(1));

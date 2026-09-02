@@ -22,7 +22,7 @@ namespace Eede.Application.Tests.PaintLayers
         {
             var paintSize = new MagnifiedSize(new PictureSize(10, 10), new Magnification(1.0f));
             var transfer = new DirectImageTransfer();
-            var layer = new PaintBufferLayer(paintSize, null, transfer);
+            var layer = new PaintBufferLayer(paintSize, null!, transfer);
 
             var destination = Picture.CreateEmpty(new PictureSize(10, 10));
 

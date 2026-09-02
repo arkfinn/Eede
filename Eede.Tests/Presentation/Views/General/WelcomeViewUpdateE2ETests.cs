@@ -105,7 +105,7 @@ public class WelcomeViewUpdateE2ETests
         Assert.That(applyButton!.IsVisible, Is.True, "再起動適用ボタンが表示されていること");
 
         // 4. Act: 適用ボタンを押下（コマンド実行）
-        applyButton.Command.Execute(null);
+        applyButton.Command!.Execute(null);
 
         // 5. Assert: ApplyAndRestart が呼ばれたことを検証
         _appUpdaterMock.Verify(s => s.ApplyAndRestart(), Times.Once);
@@ -143,7 +143,7 @@ public class WelcomeViewUpdateE2ETests
         _appUpdaterMock.Invocations.Clear();
         _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
 
-        manualCheckButton.Command.Execute(null);
+        manualCheckButton.Command!.Execute(null);
         await Task.Delay(50);
 
         // 4. Assert: 再度 CheckForUpdatesAsync が呼ばれたこと
@@ -180,7 +180,7 @@ public class WelcomeViewUpdateE2ETests
         _appUpdaterMock.Invocations.Clear();
         _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
 
-        retryButton.Command.Execute(null);
+        retryButton.Command!.Execute(null);
         await Task.Delay(50);
 
         _appUpdaterMock.Verify(s => s.CheckForUpdatesAsync(), Times.Once);

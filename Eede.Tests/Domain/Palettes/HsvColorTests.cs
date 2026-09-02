@@ -9,7 +9,9 @@ namespace Eede.Domain.Tests.Palettes
         [Test]
         public void EqualsTest()
         {
-            Assert.That(HsvColor.FromHsv(1, 2, 3), Is.EqualTo(HsvColor.FromHsv(1, 2, 3)));
+            var c1 = HsvColor.FromHsv(1, 2, 3);
+            var c2 = HsvColor.FromHsv(1, 2, 3);
+            Assert.That(c1, Is.EqualTo(c2));
         }
 
         [Test]
@@ -24,7 +26,9 @@ namespace Eede.Domain.Tests.Palettes
         [Test]
         public void GetHashCodeTest()
         {
-            Assert.That(HsvColor.FromHsv(1, 2, 3).GetHashCode(), Is.EqualTo(HsvColor.FromHsv(1, 2, 3).GetHashCode()));
+            var c1 = HsvColor.FromHsv(1, 2, 3);
+            var c2 = HsvColor.FromHsv(1, 2, 3);
+            Assert.That(c1.GetHashCode(), Is.EqualTo(c2.GetHashCode()));
         }
 
         [TestCase(0, 255, 255, 255, 0, 0)] // Red

@@ -17,6 +17,7 @@ using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
 using Eede.Presentation.Services;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -230,7 +231,7 @@ public class RegressionTests_PresentationFixes
             state, clipboard, bitmapAdapter, pictureRepo, drawStyleFactory,
             transformUseCase, new Mock<IScalingImageUseCase>().Object, transferToCanvas, transferFromCanvas,
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
-            paletteVM, pictureIOService, new Mock<IThemeService>().Object,
+            paletteVM, pictureIOService, new Mock<IThemeDetector>().Object,
             loadUseCase, saveUseCase,
             new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
             () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
@@ -238,4 +239,5 @@ public class RegressionTests_PresentationFixes
         );
     }
 }
+
 

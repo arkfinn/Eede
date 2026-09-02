@@ -17,6 +17,7 @@ using Eede.Domain.ImageEditing.Transformation;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
 using Eede.Presentation.Services;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -138,7 +139,7 @@ public class MainViewModelCharacterizationTests
             _drawingSessionViewModelMock.Object,
             _paletteContainerViewModelMock.Object,
             pictureIOService,
-            new Mock<IThemeService>().Object,
+            new Mock<IThemeDetector>().Object,
             loadUseCase,
             saveUseCase,
             new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
@@ -149,4 +150,5 @@ public class MainViewModelCharacterizationTests
         Assert.That(vm, Is.Not.Null);
     }
 }
+
 

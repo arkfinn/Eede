@@ -1,8 +1,8 @@
 using Avalonia.Styling;
 
-namespace Eede.Presentation.Services;
+namespace Eede.Presentation.Theming;
 
-public interface IThemeService
+public interface IThemeDetector
 {
     ThemeVariant GetActualThemeVariant();
 }

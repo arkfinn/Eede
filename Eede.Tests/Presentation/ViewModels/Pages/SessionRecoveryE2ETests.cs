@@ -28,6 +28,7 @@ using Eede.Domain.SharedKernel;
 using Eede.Infrastructure.Pictures;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Services;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -60,7 +61,7 @@ public class SessionRecoveryE2ETests
     private TransferImageFromCanvasUseCase _transferImageFromCanvasUseCase = default!;
     private DrawingSessionProvider _drawingSessionProvider = default!;
     private Mock<IPictureIOService> _pictureIOServiceMock = default!;
-    private Mock<IThemeService> _themeServiceMock = default!;
+    private Mock<IThemeDetector> _themeDetectorMock = default!;
     private Mock<ILoadSettingsUseCase> _loadSettingsUseCaseMock = default!;
     private Mock<ISaveSettingsUseCase> _saveSettingsUseCaseMock = default!;
     private Mock<IAppUpdater> _appUpdaterMock = default!;
@@ -97,7 +98,7 @@ public class SessionRecoveryE2ETests
         _drawingSessionProvider.Update(new DrawingSession(initialPicture));
 
         _pictureIOServiceMock = new Mock<IPictureIOService>();
-        _themeServiceMock = new Mock<IThemeService>();
+        _themeDetectorMock = new Mock<IThemeDetector>();
         _loadSettingsUseCaseMock = new Mock<ILoadSettingsUseCase>();
         _loadSettingsUseCaseMock.Setup(x => x.ExecuteAsync()).ReturnsAsync(new AppSettings { GridWidth = 32, GridHeight = 32 });
         _saveSettingsUseCaseMock = new Mock<ISaveSettingsUseCase>();
@@ -177,7 +178,7 @@ public class SessionRecoveryE2ETests
             drawingSessionVM,
             _paletteContainerViewModel,
             _pictureIOServiceMock.Object,
-            _themeServiceMock.Object,
+            _themeDetectorMock.Object,
             _loadSettingsUseCaseMock.Object,
             _saveSettingsUseCaseMock.Object,
             welcomeVM,
@@ -625,5 +626,6 @@ public class SessionRecoveryE2ETests
         return Picture.Create(size, bytes);
     }
 }
+
 
 

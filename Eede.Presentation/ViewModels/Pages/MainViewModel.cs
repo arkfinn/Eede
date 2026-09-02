@@ -21,6 +21,7 @@ using Eede.Application.Infrastructure;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
 using Eede.Presentation.Services;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
@@ -178,7 +179,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly ITransferImageFromCanvasUseCase _transferImageFromCanvasUseCase;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
     private readonly IPictureIOService _pictureIOService;
-    private readonly IThemeService _themeService;
+    private readonly IThemeDetector _themeDetector;
     private readonly ILoadSettingsUseCase _loadSettingsUseCase;
     private readonly ISaveSettingsUseCase _saveSettingsUseCase;
     private readonly IAppUpdater? _appUpdater;
@@ -219,7 +220,7 @@ public partial class MainViewModel : ViewModelBase
         DrawingSessionViewModel drawingSessionViewModel,
         PaletteContainerViewModel paletteContainerViewModel,
         IPictureIOService pictureIOService,
-        IThemeService themeService,
+        IThemeDetector themeDetector,
         ILoadSettingsUseCase loadSettingsUseCase,
         ISaveSettingsUseCase saveSettingsUseCase,
         WelcomeViewModel welcomeViewModel,
@@ -243,7 +244,7 @@ public partial class MainViewModel : ViewModelBase
         _transferImageFromCanvasUseCase = transferImageFromCanvasUseCase;
         _drawingSessionProvider = drawingSessionProvider;
         _pictureIOService = pictureIOService;
-        _themeService = themeService;
+        _themeDetector = themeDetector;
         _loadSettingsUseCase = loadSettingsUseCase;
         _saveSettingsUseCase = saveSettingsUseCase;
         _appUpdater = appUpdater;
@@ -274,7 +275,7 @@ public partial class MainViewModel : ViewModelBase
         DrawingSessionViewModel = drawingSessionViewModel;
         PaletteContainerViewModel = paletteContainerViewModel;
 
-        SelectedThemeIndex = _themeService.GetActualThemeVariant() == Avalonia.Styling.ThemeVariant.Dark ? 1 : 0;
+        SelectedThemeIndex = _themeDetector.GetActualThemeVariant() == Avalonia.Styling.ThemeVariant.Dark ? 1 : 0;
 
         welcomeViewModel.CreateNewPictureCommand.Subscribe(_ => CreateNewPictureCommand?.Execute().Subscribe());
         welcomeViewModel.OpenPictureCommand.Subscribe(_ =>
@@ -1478,4 +1479,5 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 }
+
 

@@ -6,6 +6,7 @@ using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.General;
 using Eede.Presentation.Services;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Application.Infrastructure;
 using Eede.Application.Settings;
@@ -127,7 +128,7 @@ public class MainViewModelTests
             _drawingSessionViewModel,
             _paletteContainerViewModel,
             _pictureIOServiceMock.Object,
-            new Mock<IThemeService>().Object,
+            new Mock<IThemeDetector>().Object,
             _loadSettingsUseCaseMock.Object,
             _saveSettingsUseCaseMock.Object,
             welcomeVM,
@@ -427,6 +428,7 @@ public class MainViewModelTests
         Assert.That(windowCloseInvoked, Is.True);
     }
 }
+
 
 
 

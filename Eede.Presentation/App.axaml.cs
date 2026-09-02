@@ -24,6 +24,7 @@ using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
 using Eede.Presentation.Launchers;
 using Eede.Presentation.Services;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -110,7 +111,7 @@ public partial class App : Avalonia.Application
         {
             services.AddSingleton<IExternalBrowserLauncher, ExternalBrowserLauncher>();
         }
-        services.AddSingleton<IThemeService, AvaloniaThemeService>();
+        services.AddSingleton<IThemeDetector, AvaloniaThemeDetector>();
         services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();
         services.AddTransient<ICopySelectionUseCase, CopySelectionUseCase>();
         services.AddTransient<ICutSelectionUseCase, CutSelectionUseCase>();

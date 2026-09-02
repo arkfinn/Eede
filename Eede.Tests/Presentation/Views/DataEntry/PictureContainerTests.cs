@@ -19,6 +19,7 @@ using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
 using Eede.Presentation.Services;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -123,7 +124,7 @@ public class PictureContainerTests
             drawingSessionVM,
             paletteVM,
             pictureIOService,
-            new Mock<IThemeService>().Object,
+            new Mock<IThemeDetector>().Object,
             loadSettingsUseCase,
             saveSettingsUseCase,
             new WelcomeViewModel(mockSettingsRepoForUseCase.Object, new Mock<IExternalBrowserLauncher>().Object),
@@ -198,4 +199,5 @@ public class PictureContainerTests
             "renderingRoot の背景は Transparent であるべきです。背後の OutsideBackGround.bmp を透過させて正しい市松模様を表示します。");
     }
 }
+
 

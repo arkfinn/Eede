@@ -11,7 +11,7 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataEntry;
 using Moq;
@@ -396,4 +396,5 @@ public class RegionSelectorCharacterizationTests
         Assert.That(vm.SelectingArea!.Value.X, Is.EqualTo(20), "New selection should start at click position (20,20)");
     }
 }
+
 

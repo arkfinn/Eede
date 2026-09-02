@@ -4,7 +4,7 @@ using Eede.Application.UseCase.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.SharedKernel;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Application.Infrastructure;
 using Eede.Presentation.Settings;
@@ -108,3 +108,4 @@ namespace Eede.Presentation.Tests.Characterization
         }
     }
 }
+

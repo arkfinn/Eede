@@ -16,7 +16,7 @@ using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
@@ -239,6 +239,7 @@ public class RegressionTests_PresentationFixes
         );
     }
 }
+
 
 
 

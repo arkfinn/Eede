@@ -12,7 +12,7 @@ using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataEntry;
 using Moq;
@@ -366,4 +366,5 @@ public class RegressionTests_ImprovePastePreview
         Assert.That(_viewModel.PreviewPixels, Is.Null, "PreviewPixels should be null after tool switch");
     }
 }
+
 

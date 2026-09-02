@@ -5,14 +5,14 @@ using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using NUnit.Framework;
 using System;
 using System.Reactive;
 using Avalonia.Headless.NUnit;
 using ReactiveUI;
 
-namespace Eede.Presentation.Tests.Services;
+namespace Eede.Tests.Presentation.Coordinators;
 
 #nullable enable
 

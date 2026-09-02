@@ -11,7 +11,7 @@ using Eede.Domain.Selections;
 using Eede.Domain.SharedKernel;
 using Eede.Domain.Palettes;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataEntry;
 using Moq;
@@ -277,4 +277,5 @@ public class DrawableCanvasViewModelTests
         Assert.That(vm.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be effectively visible at any magnification when ON");
     }
 }
+
 

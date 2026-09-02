@@ -13,7 +13,7 @@ using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Settings;
 using ReactiveUI;
 using System;
@@ -466,4 +466,5 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         }
     }
 }
+
 

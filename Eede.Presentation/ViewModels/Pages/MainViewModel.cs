@@ -20,7 +20,7 @@ using Eede.Presentation.Common.Models;
 using Eede.Application.Infrastructure;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -1479,6 +1479,7 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 }
+
 
 
 

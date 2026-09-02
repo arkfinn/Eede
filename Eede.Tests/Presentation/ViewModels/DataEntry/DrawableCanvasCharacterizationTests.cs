@@ -8,7 +8,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.Common.Models;
 using Eede.Presentation.Settings;
@@ -65,4 +65,5 @@ public class DrawableCanvasCharacterizationTests
         Assert.That(vm, Is.Not.Null);
     }
 }
+
 

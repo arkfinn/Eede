@@ -10,7 +10,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.SharedKernel;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -174,5 +174,6 @@ public class BitmapManagementTests
         Assert.That(_animationViewModel.PreviewBitmap, Is.SameAs(secondBitmap));
     }
 }
+
 
 

@@ -18,7 +18,7 @@ using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
@@ -199,6 +199,7 @@ public class PictureContainerTests
             "renderingRoot の背景は Transparent であるべきです。背後の OutsideBackGround.bmp を透過させて正しい市松模様を表示します。");
     }
 }
+
 
 
 

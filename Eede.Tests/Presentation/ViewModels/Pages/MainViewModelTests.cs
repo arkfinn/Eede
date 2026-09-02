@@ -5,7 +5,7 @@ using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.General;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Application.Infrastructure;
@@ -428,6 +428,7 @@ public class MainViewModelTests
         Assert.That(windowCloseInvoked, Is.True);
     }
 }
+
 
 
 

@@ -16,7 +16,7 @@
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="650"
 			 x:Class="Eede.Presentation.Views.Pages.MainView"
 			 x:DataType="vm:MainViewModel"
-			 DataContext="{ext:ServiceResolve vm:MainViewModel}"
+			 DataContext="{ext:Resolve vm:MainViewModel}"
 			 DragDrop.AllowDrop="True">
 	<UserControl.KeyBindings>
 		<!-- Undo / Redo -->

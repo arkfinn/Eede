@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Eede.Presentation.Common.MarkupExtensions;
 
-public class ServiceResolveExtension : MarkupExtension
+public class ResolveExtension : MarkupExtension
 {
     public Type Type { get; set; }
 
-    public ServiceResolveExtension(Type type)
+    public ResolveExtension(Type type)
     {
         Type = type;
     }

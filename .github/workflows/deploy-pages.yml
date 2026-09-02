@@ -7,6 +7,8 @@ on:
       - "Eede.*/**"
       - "docs/**"
       - ".github/workflows/deploy-pages.yml"
+  release:
+    types: [ published ]
   workflow_dispatch:
 
 # GitHub Pages へのデプロイ権限を設定

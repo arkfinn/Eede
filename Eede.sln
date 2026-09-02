@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eede.Infrastructure", "Eede
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eede.Domain", "Eede.Domain\Eede.Domain.csproj", "{00A5CB38-BF15-422E-8B32-A26E30CCC9DB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{0FA03259-66A9-4916-8510-8936666E2F0A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0FA03259-66A9-4916-8510-8936666E2F0A}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		coverage.ps1 = coverage.ps1

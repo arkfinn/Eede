@@ -1,24 +1,37 @@
 #nullable enable
 using System;
+using System.Text.Json.Serialization;
 
 namespace Eede.Domain.SharedKernel;
 
 public readonly record struct PictureArea
 {
-    public readonly Position Position;
-    public readonly PictureSize Size;
+    [JsonInclude]
+    public Position Position { get; }
 
+    [JsonInclude]
+    public PictureSize Size { get; }
+
+    [JsonConstructor]
     public PictureArea(Position position, PictureSize size)
     {
         Position = position;
         Size = size;
     }
 
+    [JsonIgnore]
     public int X => Position.X;
+
+    [JsonIgnore]
     public int Y => Position.Y;
+
+    [JsonIgnore]
     public int Width => Size.Width;
+
+    [JsonIgnore]
     public int Height => Size.Height;
 
+    [JsonIgnore]
     public bool IsEmpty => Width <= 0 || Height <= 0;
 
     public static PictureArea FromPosition(Position from, Position to, PictureSize limit)

@@ -4,6 +4,7 @@ using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Infrastructure;
 using Eede.Application.Pictures;
+using Eede.Application.Recovery;
 using Eede.Application.UseCase.Animations;
 using Eede.Application.UseCase.Pictures;
 using Eede.Application.UseCase.Settings;
@@ -14,6 +15,8 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.SharedKernel;
 using Eede.Infrastructure.Palettes.Persistence;
+using Eede.Infrastructure.Pictures;
+using Eede.Infrastructure.Recovery;
 using Eede.Infrastructure.Settings;
 using Eede.Infrastructure.Updates;
 using Eede.Presentation.Common.Adapters;
@@ -33,6 +36,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace Eede.Presentation;
 
@@ -163,6 +167,27 @@ public partial class App : Avalonia.Application
         services.AddTransient<ILoadSettingsUseCase, LoadSettingsUseCase>();
         services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();
         services.AddTransient<CheckUpdateUseCase>();
+
+        // Session Recovery Services
+        services.AddSingleton<IPictureCodec, SkiaSharpPictureCodec>();
+        services.AddSingleton<IPullContextTracker, PullContextTracker>();
+        services.AddSingleton<ISessionStorage>(sp =>
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            if (string.IsNullOrWhiteSpace(appData))
+            {
+                appData = System.IO.Path.GetTempPath();
+            }
+            var recoveryDir = System.IO.Path.Combine(appData, "Eede", "session_recovery");
+            return new LocalFileSessionStorage(recoveryDir);
+        });
+        services.AddSingleton<ISessionRecoveryService, SessionRecoveryService>();
+        services.AddSingleton<SessionRecoveryCoordinator>(sp =>
+            new SessionRecoveryCoordinator(
+                sp.GetRequiredService<ISessionStorage>(),
+                sp.GetRequiredService<IPictureCodec>(),
+                () => sp.GetRequiredService<MainViewModel>().CaptureSession()
+            ));
 
         // ViewModels
         services.AddTransient<IInteractionCoordinator, InteractionCoordinator>();

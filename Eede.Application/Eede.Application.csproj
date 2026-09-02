@@ -13,4 +13,8 @@
     <ProjectReference Include="..\Eede.Domain\Eede.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Reactive" Version="7.0.0" />
+  </ItemGroup>
+
 </Project>

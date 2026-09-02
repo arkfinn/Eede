@@ -76,7 +76,7 @@ public partial class App : Avalonia.Application
 
     private void ConfigureServices(IServiceCollection services)
     {
-        // Core/Domain/Application Services
+        // Core/Domain/Application Dependencies
         services.AddSingleton<GlobalState>();
         services.AddSingleton<IClipboard, AvaloniaClipboard>();
         services.AddTransient<IFileStorage>(sp =>
@@ -170,7 +170,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();
         services.AddTransient<CheckUpdateUseCase>();
 
-        // Session Recovery Services
+        // Session Recovery
         services.AddSingleton<IPictureCodec, SkiaSharpPictureCodec>();
         services.AddSingleton<IPullContextTracker, PullContextTracker>();
         services.AddSingleton<ISessionStorage>(sp =>

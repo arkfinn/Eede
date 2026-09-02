@@ -227,13 +227,13 @@ public class WelcomeViewRecentFilesInvestigationTests
         var PictureFileIO = new PictureFileIO(savePictureUseCase, loadPictureUseCase);
 
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         var animationVM = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter());
 
@@ -279,6 +279,7 @@ public class WelcomeViewRecentFilesInvestigationTests
         return (mainVM, welcomeVM);
     }
 }
+
 
 
 

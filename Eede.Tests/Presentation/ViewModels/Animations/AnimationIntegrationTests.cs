@@ -23,13 +23,13 @@ public class AnimationIntegrationTests
     {
         var patternsProvider = new AnimationPatternsProvider();
         var mockFileSystem = new Mock<IFileSystem>();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         var viewModel = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             mockFileSystem.Object,
             new AvaloniaBitmapAdapter());
 
@@ -50,13 +50,13 @@ public class AnimationIntegrationTests
     public async Task DeletePatternIntegration()
     {
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         var viewModel = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter());
 

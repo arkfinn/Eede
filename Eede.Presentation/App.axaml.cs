@@ -122,7 +122,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<IAddAnimationPatternUseCase, AddAnimationPatternUseCase>();
         services.AddTransient<IReplaceAnimationPatternUseCase, ReplaceAnimationPatternUseCase>();
         services.AddTransient<IRemoveAnimationPatternUseCase, RemoveAnimationPatternUseCase>();
-        services.AddTransient<IAnimationPatternService, AnimationPatternService>();
+        services.AddTransient<IAnimationPatternEditor, AnimationPatternEditor>();
 
         services.AddSingleton<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>, AvaloniaBitmapAdapter>();
         services.AddSingleton<IPictureRepository>(sp =>

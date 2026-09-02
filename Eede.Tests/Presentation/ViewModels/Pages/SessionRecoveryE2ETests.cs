@@ -113,7 +113,7 @@ public class SessionRecoveryE2ETests
 
         _animationViewModel = new AnimationViewModel(
             patternsProviderMock.Object,
-            new Mock<IAnimationPatternService>().Object,
+            new Mock<IAnimationPatternEditor>().Object,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter());
 
@@ -626,6 +626,7 @@ public class SessionRecoveryE2ETests
         return Picture.Create(size, bytes);
     }
 }
+
 
 
 

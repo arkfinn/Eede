@@ -28,7 +28,7 @@ public class DockPictureViewModelSaveTests
     private Mock<IPictureFileIO> _PictureFileIOMock;
     private Mock<IFileStorage> _fileStorageMock;
     private Mock<IAnimationPatternsProvider> _patternsProviderMock;
-    private Mock<IAnimationPatternService> _patternServiceMock;
+    private Mock<IAnimationPatternEditor> _patternEditorMock;
     private Mock<IFileSystem> _fileSystemMock;
     private GlobalState _globalState;
     private AnimationViewModel _animationViewModel;
@@ -40,7 +40,7 @@ public class DockPictureViewModelSaveTests
         _PictureFileIOMock = new Mock<IPictureFileIO>();
         _fileStorageMock = new Mock<IFileStorage>();
         _patternsProviderMock = new Mock<IAnimationPatternsProvider>();
-        _patternServiceMock = new Mock<IAnimationPatternService>();
+        _patternEditorMock = new Mock<IAnimationPatternEditor>();
         _fileSystemMock = new Mock<IFileSystem>();
 
         _patternsProviderMock.Setup(x => x.Current).Returns(new AnimationPatterns());
@@ -48,7 +48,7 @@ public class DockPictureViewModelSaveTests
         _globalState = new GlobalState();
         _animationViewModel = new AnimationViewModel(
             _patternsProviderMock.Object,
-            _patternServiceMock.Object,
+            _patternEditorMock.Object,
             _fileSystemMock.Object,
             new AvaloniaBitmapAdapter());
 
@@ -162,3 +162,4 @@ public class DockPictureViewModelSaveTests
         return vm;
     }
 }
+

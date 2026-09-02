@@ -37,13 +37,13 @@ public class DockPictureViewModelTests
     {
         _globalState = new GlobalState();
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         _animationViewModel = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter());
         _mockPictureRepository = new Mock<IPictureRepository>();
@@ -126,4 +126,5 @@ public class DockPictureViewModelTests
         Assert.That(viewModel.Edited, Is.False, "Save successful should reset Edited flag");
     }
 }
+
 

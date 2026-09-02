@@ -68,13 +68,13 @@ public class ViewModelSafetyCharacterizationTests
         drawableCanvasViewModelMock.Object.Magnification = new Magnification(4.0f);
 
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         var animationViewModelMock = new Mock<AnimationViewModel>(
             patternsProvider,
-            patternService,
+            patternEditor,
             Mock.Of<IFileSystem>(),
             bitmapAdapterMock.Object);
 
@@ -146,6 +146,7 @@ public class ViewModelSafetyCharacterizationTests
         });
     }
 }
+
 
 
 

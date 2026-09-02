@@ -22,13 +22,13 @@ public class AnimationViewModelTests
     {
         _fileSystemMock = new Mock<IFileSystem>();
         _patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(_patternsProvider),
             new ReplaceAnimationPatternUseCase(_patternsProvider),
             new RemoveAnimationPatternUseCase(_patternsProvider));
         _viewModel = new AnimationViewModel(
             _patternsProvider,
-            patternService,
+            patternEditor,
             _fileSystemMock.Object,
             new AvaloniaBitmapAdapter());
     }
@@ -57,3 +57,4 @@ public class AnimationViewModelTests
         Assert.DoesNotThrow(() => _viewModel.AddFrame(0), "AddFrame should handle empty patterns gracefully.");
     }
 }
+

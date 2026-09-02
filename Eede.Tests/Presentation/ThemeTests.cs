@@ -88,7 +88,7 @@ public class ThemeTests
         var patternsProvider = new AnimationPatternsProvider();
         var animationVM = new AnimationViewModel(
             patternsProvider,
-            new AnimationPatternService(
+            new AnimationPatternEditor(
                 new AddAnimationPatternUseCase(patternsProvider),
                 new ReplaceAnimationPatternUseCase(patternsProvider),
                 new RemoveAnimationPatternUseCase(patternsProvider)
@@ -122,6 +122,7 @@ public class ThemeTests
         );
     }
 }
+
 
 
 

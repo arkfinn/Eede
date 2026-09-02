@@ -84,13 +84,13 @@ public class MainViewModelCharacterizationTests
             Mock.Of<IInteractionCoordinator>()
         );
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         _animationViewModelMock = new Mock<AnimationViewModel>(
             patternsProvider,
-            patternService,
+            patternEditor,
             Mock.Of<IFileSystem>(),
             Mock.Of<IBitmapAdapter<Bitmap>>());
         _drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(_drawingSessionProviderMock.Object);
@@ -150,6 +150,7 @@ public class MainViewModelCharacterizationTests
         Assert.That(vm, Is.Not.Null);
     }
 }
+
 
 
 

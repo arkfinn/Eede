@@ -29,7 +29,7 @@ namespace Eede.Presentation.ViewModels.Animations;
 public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
 {
     private readonly IAnimationPatternsProvider _patternsProvider;
-    private readonly IAnimationPatternService _patternService;
+    private readonly IAnimationPatternEditor _patternEditor;
     private readonly IFileSystem _fileSystem;
     private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
     private readonly IImageTransfer _imageTransfer = new DirectImageTransfer();
@@ -89,7 +89,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
 
     private AnimationViewModel(IAnimationPatternsProvider provider) : this(
         provider,
-        new AnimationPatternService(
+        new AnimationPatternEditor(
             new AddAnimationPatternUseCase(provider),
             new ReplaceAnimationPatternUseCase(provider),
             new RemoveAnimationPatternUseCase(provider)),
@@ -100,12 +100,12 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
 
     public AnimationViewModel(
         IAnimationPatternsProvider patternsProvider,
-        IAnimationPatternService patternService,
+        IAnimationPatternEditor patternEditor,
         IFileSystem fileSystem,
         IBitmapAdapter<Bitmap> bitmapAdapter)
     {
         _patternsProvider = patternsProvider;
-        _patternService = patternService;
+        _patternEditor = patternEditor;
         _fileSystem = fileSystem;
         _bitmapAdapter = bitmapAdapter;
 
@@ -135,7 +135,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
                 new AnimationFrame(2, 100),
                 new AnimationFrame(1, 100)
             }, new GridSettings(new PictureSize(GridWidth, GridHeight), new Position(0, 0), 0));
-            _patternService.Add(testPattern);
+            _patternEditor.Add(testPattern);
             SelectedPattern = Patterns.FirstOrDefault();
         }
 
@@ -184,7 +184,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
         CreatePatternCommand = ReactiveCommand.Create<string>(name =>
         {
             var newPattern = new AnimationPattern(name, new List<AnimationFrame>(), new GridSettings(new PictureSize(GridWidth, GridHeight), new Position(0, 0), 0));
-            _patternService.Add(newPattern);
+            _patternEditor.Add(newPattern);
             SelectedPattern = Patterns.LastOrDefault();
         });
 
@@ -198,7 +198,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
                 int index = Patterns.IndexOf(SelectedPattern);
                 if (index >= 0)
                 {
-                    _patternService.Remove(index);
+                    _patternEditor.Remove(index);
                     SelectedPattern = Patterns.Count > 0 ? Patterns[0] : null;
                 }
             }
@@ -336,7 +336,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
                 var pattern = JsonSerializer.Deserialize<AnimationPattern>(json);
                 if (pattern != null)
                 {
-                    _patternService.Add(pattern);
+                    _patternEditor.Add(pattern);
                     SelectedPattern = Patterns.LastOrDefault();
                 }
             }
@@ -398,8 +398,9 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
         int index = Patterns.IndexOf(SelectedPattern);
         if (index >= 0)
         {
-            _patternService.Replace(index, newPattern);
+            _patternEditor.Replace(index, newPattern);
             SelectedPattern = Patterns[index];
         }
     }
 }
+

@@ -89,7 +89,7 @@ namespace Eede.Presentation.Tests
             var patternsProvider = new AnimationPatternsProvider();
             var animationVM = new AnimationViewModel(
                 patternsProvider,
-                new AnimationPatternService(
+                new AnimationPatternEditor(
                     new AddAnimationPatternUseCase(patternsProvider),
                     new ReplaceAnimationPatternUseCase(patternsProvider),
                     new RemoveAnimationPatternUseCase(patternsProvider)
@@ -188,6 +188,7 @@ namespace Eede.Presentation.Tests
         }
     }
 }
+
 
 
 

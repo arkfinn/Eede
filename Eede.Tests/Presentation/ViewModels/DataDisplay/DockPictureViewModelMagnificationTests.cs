@@ -35,13 +35,13 @@ public class DockPictureViewModelMagnificationTests
     {
         _globalState = new GlobalState();
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         _animationViewModel = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter()); _mockPictureRepository = new Mock<IPictureRepository>();
         var mockSettingsRepo = new Mock<ISettingsRepository>();
@@ -176,4 +176,5 @@ public class DockPictureViewModelMagnificationTests
         Assert.That(viewModel.Magnification.Value, Is.EqualTo(8f));
     }
 }
+
 

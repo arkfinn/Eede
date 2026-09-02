@@ -51,7 +51,7 @@ public class MainViewModelTests
     private Mock<ISelectionClipboard> _SelectionClipboardMock = default!;
 
     private Mock<IAnimationPatternsProvider> _patternsProviderMock = default!;
-    private Mock<IAnimationPatternService> _animationPatternServiceMock = default!;
+    private Mock<IAnimationPatternEditor> _AnimationPatternEditorMock = default!;
     private Mock<IFileSystem> _fileSystemMock = default!;
     private Mock<ISettingsRepository> _settingsRepositoryMock = default!;
     private Mock<ILoadSettingsUseCase> _loadSettingsUseCaseMock = default!;
@@ -84,7 +84,7 @@ public class MainViewModelTests
         _SelectionClipboardMock = new Mock<ISelectionClipboard>();
         _patternsProviderMock = new Mock<IAnimationPatternsProvider>();
         _patternsProviderMock.Setup(x => x.Current).Returns(new AnimationPatterns());
-        _animationPatternServiceMock = new Mock<IAnimationPatternService>();
+        _AnimationPatternEditorMock = new Mock<IAnimationPatternEditor>();
         _fileSystemMock = new Mock<IFileSystem>();
         _settingsRepositoryMock = new Mock<ISettingsRepository>();
         _loadSettingsUseCaseMock = new Mock<ILoadSettingsUseCase>();
@@ -94,7 +94,7 @@ public class MainViewModelTests
         _appUpdaterMock.SetupGet(x => x.StatusChanged).Returns(System.Reactive.Linq.Observable.Return(UpdateStatus.Idle));
 
         _globalState = new GlobalState();
-        _animationViewModel = new AnimationViewModel(_patternsProviderMock.Object, _animationPatternServiceMock.Object, _fileSystemMock.Object, new AvaloniaBitmapAdapter());
+        _animationViewModel = new AnimationViewModel(_patternsProviderMock.Object, _AnimationPatternEditorMock.Object, _fileSystemMock.Object, new AvaloniaBitmapAdapter());
         _drawingSessionViewModel = new DrawingSessionViewModel(_drawingSessionProviderMock.Object);
         _paletteContainerViewModel = new PaletteContainerViewModel(new Mock<Eede.Application.Infrastructure.IPaletteRepository>().Object, new Mock<Eede.Application.Infrastructure.IPaletteSessionRepository>().Object);
 
@@ -428,6 +428,7 @@ public class MainViewModelTests
         Assert.That(windowCloseInvoked, Is.True);
     }
 }
+
 
 
 

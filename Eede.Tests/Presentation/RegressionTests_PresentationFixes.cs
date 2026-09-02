@@ -205,7 +205,7 @@ public class RegressionTests_PresentationFixes
         var patternsProvider = new AnimationPatternsProvider();
         var animationVM = new AnimationViewModel(
             patternsProvider,
-            new AnimationPatternService(
+            new AnimationPatternEditor(
                 new AddAnimationPatternUseCase(patternsProvider),
                 new ReplaceAnimationPatternUseCase(patternsProvider),
                 new RemoveAnimationPatternUseCase(patternsProvider)
@@ -239,6 +239,7 @@ public class RegressionTests_PresentationFixes
         );
     }
 }
+
 
 
 

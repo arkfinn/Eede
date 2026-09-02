@@ -9,12 +9,12 @@ using System.Collections.Generic;
 namespace Eede.Application.Tests.Animations;
 
 [TestFixture]
-public class AnimationPatternServiceTests
+public class AnimationPatternEditorTests
 {
     private Mock<IAddAnimationPatternUseCase> _addUseCaseMock;
     private Mock<IReplaceAnimationPatternUseCase> _replaceUseCaseMock;
     private Mock<IRemoveAnimationPatternUseCase> _removeUseCaseMock;
-    private AnimationPatternService _service;
+    private AnimationPatternEditor _editor;
 
     [SetUp]
     public void Setup()
@@ -23,7 +23,7 @@ public class AnimationPatternServiceTests
         _replaceUseCaseMock = new Mock<IReplaceAnimationPatternUseCase>();
         _removeUseCaseMock = new Mock<IRemoveAnimationPatternUseCase>();
 
-        _service = new AnimationPatternService(
+        _editor = new AnimationPatternEditor(
             _addUseCaseMock.Object,
             _replaceUseCaseMock.Object,
             _removeUseCaseMock.Object);
@@ -36,7 +36,7 @@ public class AnimationPatternServiceTests
         var pattern = new AnimationPattern("Test", new List<AnimationFrame>(), new GridSettings(new PictureSize(16, 16), new Position(0, 0), 0));
 
         // Act
-        _service.Add(pattern);
+        _editor.Add(pattern);
 
         // Assert
         _addUseCaseMock.Verify(m => m.Execute(pattern), Times.Once);
@@ -50,7 +50,7 @@ public class AnimationPatternServiceTests
         var pattern = new AnimationPattern("Test", new List<AnimationFrame>(), new GridSettings(new PictureSize(16, 16), new Position(0, 0), 0));
 
         // Act
-        _service.Replace(index, pattern);
+        _editor.Replace(index, pattern);
 
         // Assert
         _replaceUseCaseMock.Verify(m => m.Execute(index, pattern), Times.Once);
@@ -63,9 +63,10 @@ public class AnimationPatternServiceTests
         int index = 2;
 
         // Act
-        _service.Remove(index);
+        _editor.Remove(index);
 
         // Assert
         _removeUseCaseMock.Verify(m => m.Execute(index), Times.Once);
     }
 }
+

@@ -3,17 +3,10 @@ using Eede.Domain.Animations;
 
 namespace Eede.Application.Animations;
 
-public interface IAnimationPatternService
-{
-    void Add(AnimationPattern pattern);
-    void Replace(int index, AnimationPattern pattern);
-    void Remove(int index);
-}
-
-public class AnimationPatternService(
+public class AnimationPatternEditor(
     IAddAnimationPatternUseCase addUseCase,
     IReplaceAnimationPatternUseCase replaceUseCase,
-    IRemoveAnimationPatternUseCase removeUseCase) : IAnimationPatternService
+    IRemoveAnimationPatternUseCase removeUseCase) : IAnimationPatternEditor
 {
     public void Add(AnimationPattern pattern) => addUseCase.Execute(pattern);
     public void Replace(int index, AnimationPattern pattern) => replaceUseCase.Execute(index, pattern);

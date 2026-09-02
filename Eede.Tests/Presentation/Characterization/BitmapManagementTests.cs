@@ -35,13 +35,13 @@ public class BitmapManagementTests
         _globalState = new GlobalState();
         AnimationPatternsProvider patternsProvider = new();
         _mockBitmapAdapter = new Mock<IBitmapAdapter<Bitmap>>();
-        AnimationPatternService patternService = new(
+        AnimationPatternEditor patternEditor = new(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         _animationViewModel = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             _mockBitmapAdapter.Object);
         _mockPictureRepository = new Mock<IPictureRepository>();
@@ -174,4 +174,5 @@ public class BitmapManagementTests
         Assert.That(_animationViewModel.PreviewBitmap, Is.SameAs(secondBitmap));
     }
 }
+
 

@@ -219,7 +219,7 @@ public class WelcomeViewRecentFilesInvestigationTests
         var copyUseCase = new CopySelectionUseCase(mockClipboard.Object);
         var cutUseCase = new CutSelectionUseCase(mockClipboard.Object);
         var pasteUseCase = new PasteFromClipboardUseCase(mockClipboard.Object, mockDrawingSessionProvider.Object);
-        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+        var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         var mockPictureRepo = new Mock<IPictureRepository>();
         var savePictureUseCase = new SavePictureUseCase(mockPictureRepo.Object, _settingsRepoMock.Object);
@@ -243,7 +243,7 @@ public class WelcomeViewRecentFilesInvestigationTests
             mockClipboard.Object,
             bitmapAdapter,
             mockDrawingSessionProvider.Object,
-            selectionService,
+            SelectionClipboard,
             mockCoordinator.Object
         );
 
@@ -279,6 +279,7 @@ public class WelcomeViewRecentFilesInvestigationTests
         return (mainVM, welcomeVM);
     }
 }
+
 
 
 

@@ -69,7 +69,7 @@ public class ThemeTests
         var sessionProvider = sessionProviderMock.Object;
         var coordinator = new Mock<IInteractionCoordinator>().Object;
 
-        var selectionService = new SelectionService(
+        var SelectionClipboard = new SelectionClipboard(
             new CopySelectionUseCase(clipboard),
             new CutSelectionUseCase(clipboard),
             new PasteFromClipboardUseCase(clipboard, sessionProvider)
@@ -81,7 +81,7 @@ public class ThemeTests
             clipboard,
             bitmapAdapter,
             sessionProvider,
-            selectionService,
+            SelectionClipboard,
             coordinator
         );
 
@@ -122,6 +122,7 @@ public class ThemeTests
         );
     }
 }
+
 
 
 

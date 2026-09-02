@@ -35,7 +35,7 @@ public class RegressionTests_ImprovePastePreview
     private DrawingSessionProvider _sessionProvider = default!;
     private InteractionCoordinator _coordinator = default!;
     private Mock<IClipboard> _clipboardMock = default!;
-    private ISelectionService _selectionService = default!;
+    private ISelectionClipboard _SelectionClipboard = default!;
     private DrawableCanvasViewModel _viewModel = default!;
     private DrawingSessionViewModel _sessionViewModel = default!;
 
@@ -46,7 +46,7 @@ public class RegressionTests_ImprovePastePreview
         _sessionProvider.Update(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
         _coordinator = new InteractionCoordinator(_sessionProvider);
         _clipboardMock = new Mock<IClipboard>();
-        _selectionService = new SelectionService(
+        _SelectionClipboard = new SelectionClipboard(
             new CopySelectionUseCase(_clipboardMock.Object),
             new CutSelectionUseCase(_clipboardMock.Object),
             new PasteFromClipboardUseCase(_clipboardMock.Object, _sessionProvider));
@@ -61,7 +61,7 @@ public class RegressionTests_ImprovePastePreview
             _clipboardMock.Object,
             bitmapAdapter.Object,
             _sessionProvider,
-            _selectionService,
+            _SelectionClipboard,
             _coordinator);
 
         _viewModel.Magnification = new Magnification(1);
@@ -366,3 +366,4 @@ public class RegressionTests_ImprovePastePreview
         Assert.That(_viewModel.PreviewPixels, Is.Null, "PreviewPixels should be null after tool switch");
     }
 }
+

@@ -31,7 +31,7 @@ public class DrawableCanvasCharacterizationTests
     private Mock<IInteractionCoordinator> _coordinatorMock;
     private Mock<DrawingSessionViewModel> _drawingSessionViewModelMock;
 
-    private ISelectionService _selectionService;
+    private ISelectionClipboard _SelectionClipboard;
 
     [SetUp]
     public void Setup()
@@ -44,7 +44,7 @@ public class DrawableCanvasCharacterizationTests
         _coordinatorMock = new Mock<IInteractionCoordinator>();
         _drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>();
 
-        _selectionService = new SelectionService(
+        _SelectionClipboard = new SelectionClipboard(
             new CopySelectionUseCase(_clipboardServiceMock.Object),
             new CutSelectionUseCase(_clipboardServiceMock.Object),
             new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProviderMock.Object));
@@ -59,9 +59,10 @@ public class DrawableCanvasCharacterizationTests
             _clipboardServiceMock.Object,
             _bitmapAdapterMock.Object,
             _drawingSessionProviderMock.Object,
-            _selectionService,
+            _SelectionClipboard,
             _coordinatorMock.Object);
 
         Assert.That(vm, Is.Not.Null);
     }
 }
+

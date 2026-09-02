@@ -5,17 +5,10 @@ using System.Threading.Tasks;
 
 namespace Eede.Application.Pictures;
 
-public interface ISelectionService
-{
-    Task CopyAsync(Picture picture, PictureArea? area);
-    Task<Picture> CutAsync(Picture picture, PictureArea? area);
-    Task PasteAsync();
-}
-
-public class SelectionService(
+public class SelectionClipboard(
     ICopySelectionUseCase copyUseCase,
     ICutSelectionUseCase cutUseCase,
-    IPasteFromClipboardUseCase pasteUseCase) : ISelectionService
+    IPasteFromClipboardUseCase pasteUseCase) : ISelectionClipboard
 {
     public Task CopyAsync(Picture picture, PictureArea? area) => copyUseCase.ExecuteAsync(picture, area);
     public Task<Picture> CutAsync(Picture picture, PictureArea? area) => cutUseCase.ExecuteAsync(picture, area);

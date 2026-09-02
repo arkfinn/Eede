@@ -116,7 +116,7 @@ public partial class App : Avalonia.Application
         services.AddTransient<ICopySelectionUseCase, CopySelectionUseCase>();
         services.AddTransient<ICutSelectionUseCase, CutSelectionUseCase>();
         services.AddTransient<IPasteFromClipboardUseCase, PasteFromClipboardUseCase>();
-        services.AddTransient<ISelectionService, SelectionService>();
+        services.AddTransient<ISelectionClipboard, SelectionClipboard>();
 
         services.AddSingleton<IAnimationPatternsProvider, AnimationPatternsProvider>();
         services.AddTransient<IAddAnimationPatternUseCase, AddAnimationPatternUseCase>();

@@ -69,7 +69,7 @@ public class MainViewModelCharacterizationTests
         var copyUseCase = new CopySelectionUseCase(_clipboardServiceMock.Object);
         var cutUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
         var pasteUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProviderMock.Object);
-        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+        var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         // DrawableCanvasViewModel usually need real instances or careful mocking. 
         // For characterization tests, we often use nulls if the constructor allows, 
@@ -80,7 +80,7 @@ public class MainViewModelCharacterizationTests
             Mock.Of<IClipboard>(),
             Mock.Of<IBitmapAdapter<Bitmap>>(),
             Mock.Of<IDrawingSessionProvider>(),
-            selectionService,
+            SelectionClipboard,
             Mock.Of<IInteractionCoordinator>()
         );
         var patternsProvider = new AnimationPatternsProvider();
@@ -150,6 +150,7 @@ public class MainViewModelCharacterizationTests
         Assert.That(vm, Is.Not.Null);
     }
 }
+
 
 
 

@@ -186,7 +186,7 @@ public class RegressionTests_PresentationFixes
         var transferToCanvas = new Mock<ITransferImageToCanvasUseCase>().Object;
         var transferFromCanvas = new Mock<ITransferImageFromCanvasUseCase>().Object;
 
-        var selectionService = new SelectionService(
+        var SelectionClipboard = new SelectionClipboard(
             new CopySelectionUseCase(clipboard),
             new CutSelectionUseCase(clipboard),
             new PasteFromClipboardUseCase(clipboard, sessionProvider)
@@ -198,7 +198,7 @@ public class RegressionTests_PresentationFixes
             clipboard,
             bitmapAdapter,
             sessionProvider,
-            selectionService,
+            SelectionClipboard,
             coordinator
         );
 
@@ -239,6 +239,7 @@ public class RegressionTests_PresentationFixes
         );
     }
 }
+
 
 
 

@@ -30,7 +30,7 @@ public class RegionSelectorCharacterizationTests
     private Mock<IClipboard> _clipboardServiceMock = default!;
     private AvaloniaBitmapAdapter _bitmapAdapter = default!;
     private DrawingSessionProvider _drawingSessionProvider = default!;
-    private ISelectionService _selectionService = default!;
+    private ISelectionClipboard _SelectionClipboard = default!;
     private InteractionCoordinator _coordinator = default!;
 
     [SetUp]
@@ -41,7 +41,7 @@ public class RegionSelectorCharacterizationTests
         _clipboardServiceMock = new Mock<IClipboard>();
         _bitmapAdapter = new AvaloniaBitmapAdapter();
         _drawingSessionProvider = new DrawingSessionProvider();
-        _selectionService = new SelectionService(
+        _SelectionClipboard = new SelectionClipboard(
             new CopySelectionUseCase(_clipboardServiceMock.Object),
             new CutSelectionUseCase(_clipboardServiceMock.Object),
             new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProvider));
@@ -57,7 +57,7 @@ public class RegionSelectorCharacterizationTests
             _clipboardServiceMock.Object,
             _bitmapAdapter,
             _drawingSessionProvider,
-            _selectionService,
+            _SelectionClipboard,
             _coordinator);
         return vm;
     }
@@ -396,3 +396,4 @@ public class RegionSelectorCharacterizationTests
         Assert.That(vm.SelectingArea!.Value.X, Is.EqualTo(20), "New selection should start at click position (20,20)");
     }
 }
+

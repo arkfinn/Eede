@@ -66,7 +66,7 @@ public class SessionRecoveryE2ETests
     private Mock<ISaveSettingsUseCase> _saveSettingsUseCaseMock = default!;
     private Mock<IAppUpdater> _appUpdaterMock = default!;
     private Mock<IAddFrameProvider> _addFrameProviderMock = default!;
-    private Mock<ISelectionService> _selectionServiceMock = default!;
+    private Mock<ISelectionClipboard> _SelectionClipboardMock = default!;
     private Mock<IInteractionCoordinator> _interactionCoordinatorMock = default!;
 
     private DrawableCanvasViewModel _drawableCanvasViewModel = default!;
@@ -105,7 +105,7 @@ public class SessionRecoveryE2ETests
         _appUpdaterMock = new Mock<IAppUpdater>();
         _appUpdaterMock.SetupGet(x => x.StatusChanged).Returns(Observable.Return(UpdateStatus.Idle));
         _addFrameProviderMock = new Mock<IAddFrameProvider>();
-        _selectionServiceMock = new Mock<ISelectionService>();
+        _SelectionClipboardMock = new Mock<ISelectionClipboard>();
         _interactionCoordinatorMock = new Mock<IInteractionCoordinator>();
 
         var patternsProviderMock = new Mock<IAnimationPatternsProvider>();
@@ -128,7 +128,7 @@ public class SessionRecoveryE2ETests
             _clipboardMock.Object,
             _bitmapAdapterMock.Object,
             _drawingSessionProvider,
-            _selectionServiceMock.Object,
+            _SelectionClipboardMock.Object,
             _interactionCoordinatorMock.Object);
     }
 
@@ -158,7 +158,7 @@ public class SessionRecoveryE2ETests
             _clipboardMock.Object,
             _bitmapAdapterMock.Object,
             sessionProvider,
-            _selectionServiceMock.Object,
+            _SelectionClipboardMock.Object,
             interactionCoord);
         var drawingSessionVM = new DrawingSessionViewModel(sessionProvider);
 
@@ -626,6 +626,7 @@ public class SessionRecoveryE2ETests
         return Picture.Create(size, bytes);
     }
 }
+
 
 
 

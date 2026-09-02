@@ -53,7 +53,7 @@ public class ViewModelSafetyCharacterizationTests
         var copyUseCase = new CopySelectionUseCase(clipboardServiceMock.Object);
         var cutUseCase = new CutSelectionUseCase(clipboardServiceMock.Object);
         var pasteUseCase = new PasteFromClipboardUseCase(clipboardServiceMock.Object, drawingSessionProviderMock.Object);
-        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+        var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         var drawableCanvasViewModelMock = new Mock<DrawableCanvasViewModel>(
             stateMock.Object,
@@ -61,7 +61,7 @@ public class ViewModelSafetyCharacterizationTests
             clipboardServiceMock.Object,
             bitmapAdapterMock.Object,
             drawingSessionProviderMock.Object,
-            selectionService,
+            SelectionClipboard,
             Mock.Of<IInteractionCoordinator>()
         );
         drawableCanvasViewModelMock.SetupAllProperties();
@@ -146,6 +146,7 @@ public class ViewModelSafetyCharacterizationTests
         });
     }
 }
+
 
 
 

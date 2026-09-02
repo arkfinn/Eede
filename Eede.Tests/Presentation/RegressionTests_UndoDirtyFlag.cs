@@ -70,7 +70,7 @@ namespace Eede.Presentation.Tests
             var transferToCanvas = new TransferImageToCanvasUseCase();
             var transferFromCanvas = new TransferImageFromCanvasUseCase();
 
-            var selectionService = new SelectionService(
+            var selectionClipboard = new SelectionClipboard(
                 new CopySelectionUseCase(clipboard),
                 new CutSelectionUseCase(clipboard),
                 new PasteFromClipboardUseCase(clipboard, _sessionProvider)
@@ -82,7 +82,7 @@ namespace Eede.Presentation.Tests
                 clipboard,
                 bitmapAdapter,
                 _sessionProvider,
-                selectionService: selectionService,
+                selectionClipboard: selectionClipboard,
                 coordinator
             );
 
@@ -188,6 +188,7 @@ namespace Eede.Presentation.Tests
         }
     }
 }
+
 
 
 

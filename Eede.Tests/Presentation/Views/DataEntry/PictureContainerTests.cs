@@ -65,7 +65,7 @@ public class PictureContainerTests
         var copyUseCase = new CopySelectionUseCase(mockClipboard.Object);
         var cutUseCase = new CutSelectionUseCase(mockClipboard.Object);
         var pasteUseCase = new PasteFromClipboardUseCase(mockClipboard.Object, mockDrawingSessionProvider.Object);
-        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+        var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         var mockPictureRepo = new Mock<IPictureRepository>();
         var mockSettingsRepoForUseCase = new Mock<ISettingsRepository>();
@@ -97,7 +97,7 @@ public class PictureContainerTests
             mockClipboard.Object,
             bitmapAdapter,
             mockDrawingSessionProvider.Object,
-            selectionService,
+            SelectionClipboard,
             mockCoordinator.Object
         );
 
@@ -199,6 +199,7 @@ public class PictureContainerTests
             "renderingRoot の背景は Transparent であるべきです。背後の OutsideBackGround.bmp を透過させて正しい市松模様を表示します。");
     }
 }
+
 
 
 

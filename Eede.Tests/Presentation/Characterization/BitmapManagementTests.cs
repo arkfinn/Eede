@@ -83,7 +83,7 @@ public class BitmapManagementTests
     {
         Mock<IInteractionCoordinator> mockCoordinator = new();
         Mock<IDrawingSessionProvider> mockSessionProvider = new();
-        Mock<ISelectionService> mockSelectionService = new();
+        Mock<ISelectionClipboard> mockSelectionClipboard = new();
         Mock<IClipboard> mockClipboard = new();
         Mock<IAddFrameProvider> mockAddFrameProvider = new();
 
@@ -93,7 +93,7 @@ public class BitmapManagementTests
             mockClipboard.Object,
             _mockBitmapAdapter.Object,
             mockSessionProvider.Object,
-            mockSelectionService.Object,
+            mockSelectionClipboard.Object,
             mockCoordinator.Object);
 
         Picture dummyPicture = Picture.CreateEmpty(new PictureSize(32, 32));
@@ -174,3 +174,4 @@ public class BitmapManagementTests
         Assert.That(_animationViewModel.PreviewBitmap, Is.SameAs(secondBitmap));
     }
 }
+

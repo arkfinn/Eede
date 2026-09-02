@@ -48,7 +48,7 @@ public class MainViewModelTests
     private Mock<IPictureFileIO> _PictureFileIOMock = default!;
     private Mock<IInteractionCoordinator> _interactionCoordinatorMock = default!;
     private Mock<IAddFrameProvider> _addFrameProviderMock = default!;
-    private Mock<ISelectionService> _selectionServiceMock = default!;
+    private Mock<ISelectionClipboard> _SelectionClipboardMock = default!;
 
     private Mock<IAnimationPatternsProvider> _patternsProviderMock = default!;
     private Mock<IAnimationPatternService> _animationPatternServiceMock = default!;
@@ -81,7 +81,7 @@ public class MainViewModelTests
         _PictureFileIOMock = new Mock<IPictureFileIO>();
         _interactionCoordinatorMock = new Mock<IInteractionCoordinator>();
         _addFrameProviderMock = new Mock<IAddFrameProvider>();
-        _selectionServiceMock = new Mock<ISelectionService>();
+        _SelectionClipboardMock = new Mock<ISelectionClipboard>();
         _patternsProviderMock = new Mock<IAnimationPatternsProvider>();
         _patternsProviderMock.Setup(x => x.Current).Returns(new AnimationPatterns());
         _animationPatternServiceMock = new Mock<IAnimationPatternService>();
@@ -104,7 +104,7 @@ public class MainViewModelTests
             _clipboardMock.Object,
             _bitmapAdapterMock.Object,
             _drawingSessionProviderMock.Object,
-            _selectionServiceMock.Object,
+            _SelectionClipboardMock.Object,
             _interactionCoordinatorMock.Object);
     }
 
@@ -428,6 +428,7 @@ public class MainViewModelTests
         Assert.That(windowCloseInvoked, Is.True);
     }
 }
+
 
 
 

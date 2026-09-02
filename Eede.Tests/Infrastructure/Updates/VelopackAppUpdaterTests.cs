@@ -14,10 +14,10 @@ using System.Reactive.Linq;
 namespace Eede.Tests.Infrastructure.Updates;
 
 [TestFixture]
-public class VelopackUpdateServiceTests
+public class VelopackAppUpdaterTests
 {
     private Mock<IUpdateManagerWrapper> _mockManager;
-    private VelopackUpdateService _service;
+    private VelopackAppUpdater _updater;
     private List<UpdateStatus> _statusChanges;
     private IDisposable _subscription;
 
@@ -26,29 +26,29 @@ public class VelopackUpdateServiceTests
     {
         _mockManager = new Mock<IUpdateManagerWrapper>();
         // Get the internal constructor using reflection
-        var ctor = typeof(VelopackUpdateService).GetConstructor(
+        var ctor = typeof(VelopackAppUpdater).GetConstructor(
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
             new[] { typeof(Func<IUpdateManagerWrapper>), typeof(string) },
             null
         );
-        _service = (VelopackUpdateService)ctor.Invoke(new object[] { new Func<IUpdateManagerWrapper>(() => _mockManager.Object), "dummy" });
+        _updater = (VelopackAppUpdater)ctor.Invoke(new object[] { new Func<IUpdateManagerWrapper>(() => _mockManager.Object), "dummy" });
 
         _statusChanges = new List<UpdateStatus>();
-        _subscription = _service.StatusChanged.Subscribe(s => _statusChanges.Add(s));
+        _subscription = _updater.StatusChanged.Subscribe(s => _statusChanges.Add(s));
     }
 
     [TearDown]
     public void TearDown()
     {
         _subscription?.Dispose();
-        _service?.Dispose();
+        _updater?.Dispose();
     }
 
     [Test]
     public void IsSupported_ReturnsTrue()
     {
-        Assert.That(_service.IsSupported, Is.True);
+        Assert.That(_updater.IsSupported, Is.True);
     }
 
     [Test]
@@ -62,17 +62,17 @@ public class VelopackUpdateServiceTests
         #pragma warning restore SYSLIB0050
 
         // We set _updateInfo via reflection so that it's not null and we can trigger the download path
-        var updateInfoField = typeof(VelopackUpdateService).GetField("_updateInfo", BindingFlags.NonPublic | BindingFlags.Instance);
-        updateInfoField.SetValue(_service, dummyInfo);
+        var updateInfoField = typeof(VelopackAppUpdater).GetField("_updateInfo", BindingFlags.NonPublic | BindingFlags.Instance);
+        updateInfoField.SetValue(_updater, dummyInfo);
 
         _mockManager.Setup(m => m.DownloadUpdatesAsync(It.IsAny<UpdateInfo>()))
             .ThrowsAsync(new HttpRequestException("Network error"));
 
         // Act
-        await _service.DownloadUpdateAsync();
+        await _updater.DownloadUpdateAsync();
 
         // Assert
-        Assert.That(_service.Status, Is.EqualTo(UpdateStatus.Error));
+        Assert.That(_updater.Status, Is.EqualTo(UpdateStatus.Error));
         Assert.That(_statusChanges, Contains.Item(UpdateStatus.Error));
     }
 
@@ -85,11 +85,11 @@ public class VelopackUpdateServiceTests
             .ThrowsAsync(new HttpRequestException("Network error"));
 
         // Act
-        var result = await _service.CheckForUpdatesAsync();
+        var result = await _updater.CheckForUpdatesAsync();
 
         // Assert
         Assert.That(result, Is.False);
-        Assert.That(_service.Status, Is.EqualTo(UpdateStatus.Idle));
+        Assert.That(_updater.Status, Is.EqualTo(UpdateStatus.Idle));
     }
 
     [Test]
@@ -97,26 +97,26 @@ public class VelopackUpdateServiceTests
     {
         // Arrange
         // We must have ReadyToApply status, so let's set it via reflection
-        var statusProperty = typeof(VelopackUpdateService).GetProperty("Status");
-        statusProperty.SetValue(_service, UpdateStatus.ReadyToApply);
+        var statusProperty = typeof(VelopackAppUpdater).GetProperty("Status");
+        statusProperty.SetValue(_updater, UpdateStatus.ReadyToApply);
 
         #pragma warning disable SYSLIB0050 // FormatterServices is obsolete
         var dummyInfo = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(UpdateInfo)) as UpdateInfo;
         #pragma warning restore SYSLIB0050
 
         // We set _updateInfo via reflection so that it's not null
-        var updateInfoField = typeof(VelopackUpdateService).GetField("_updateInfo", BindingFlags.NonPublic | BindingFlags.Instance);
-        updateInfoField.SetValue(_service, dummyInfo);
+        var updateInfoField = typeof(VelopackAppUpdater).GetField("_updateInfo", BindingFlags.NonPublic | BindingFlags.Instance);
+        updateInfoField.SetValue(_updater, dummyInfo);
 
         _mockManager.Setup(m => m.IsInstalled).Returns(true);
         _mockManager.Setup(m => m.ApplyUpdatesAndRestart(It.IsAny<UpdateInfo>()))
             .Throws(new UnauthorizedAccessException("Permission denied"));
 
         // Act
-        _service.ApplyAndRestart();
+        _updater.ApplyAndRestart();
 
         // Assert
-        Assert.That(_service.Status, Is.EqualTo(UpdateStatus.Error));
+        Assert.That(_updater.Status, Is.EqualTo(UpdateStatus.Error));
         Assert.That(_statusChanges, Contains.Item(UpdateStatus.Error));
     }
 }

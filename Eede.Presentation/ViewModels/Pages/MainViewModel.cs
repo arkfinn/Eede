@@ -181,7 +181,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly ILoadSettingsUseCase _loadSettingsUseCase;
     private readonly ISaveSettingsUseCase _saveSettingsUseCase;
-    private readonly IUpdateService? _updateService;
+    private readonly IAppUpdater? _appUpdater;
     private readonly CheckUpdateUseCase? _checkUpdateUseCase;
     private readonly GlobalState _state;
     private readonly IClipboard _clipboard;
@@ -225,7 +225,7 @@ public partial class MainViewModel : ViewModelBase
         WelcomeViewModel welcomeViewModel,
         Func<DockPictureViewModel> dockPictureFactory,
         Func<NewPictureWindowViewModel> newPictureWindowFactory,
-        IUpdateService? updateService = null,
+        IAppUpdater? appUpdater = null,
         CheckUpdateUseCase? checkUpdateUseCase = null,
         IPullContextTracker? pullContextTracker = null,
         SessionRecoveryCoordinator? sessionRecoveryCoordinator = null,
@@ -246,7 +246,7 @@ public partial class MainViewModel : ViewModelBase
         _themeService = themeService;
         _loadSettingsUseCase = loadSettingsUseCase;
         _saveSettingsUseCase = saveSettingsUseCase;
-        _updateService = updateService;
+        _appUpdater = appUpdater;
         _checkUpdateUseCase = checkUpdateUseCase;
         WelcomeViewModel = welcomeViewModel;
         _dockPictureFactory = dockPictureFactory;
@@ -476,16 +476,16 @@ public partial class MainViewModel : ViewModelBase
         CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         PasteCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
 
-        if (_updateService != null)
+        if (_appUpdater != null)
         {
-            var canApplyUpdate = _updateService.StatusChanged
+            var canApplyUpdate = _appUpdater.StatusChanged
                 .Select(status => status == UpdateStatus.ReadyToApply);
             ApplyUpdateCommand = ReactiveCommand.Create(() =>
             {
-                _updateService.ApplyAndRestart();
+                _appUpdater.ApplyAndRestart();
             }, canApplyUpdate);
 
-            _updateService.StatusChanged
+            _appUpdater.StatusChanged
                 .Select(status => status == UpdateStatus.ReadyToApply)
                 .ToProperty(this, nameof(IsUpdateReady), out _isUpdateReadyHelper);
         }

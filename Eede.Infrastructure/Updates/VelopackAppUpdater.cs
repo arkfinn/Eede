@@ -10,7 +10,7 @@ using Velopack.Sources;
 
 namespace Eede.Infrastructure.Updates;
 
-public class VelopackUpdateService : IUpdateService, IDisposable
+public class VelopackAppUpdater : IAppUpdater, IDisposable
 {
     public bool IsSupported => true;
     public UpdateStatus Status { get; private set; } = UpdateStatus.Idle;
@@ -23,12 +23,12 @@ public class VelopackUpdateService : IUpdateService, IDisposable
     private readonly string _githubUrl;
     private UpdateInfo? _updateInfo;
 
-    public VelopackUpdateService(string githubUrl)
+    public VelopackAppUpdater(string githubUrl)
         : this(() => new UpdateManagerWrapper(githubUrl), githubUrl)
     {
     }
 
-    internal VelopackUpdateService(Func<IUpdateManagerWrapper> managerFactory, string githubUrl)
+    internal VelopackAppUpdater(Func<IUpdateManagerWrapper> managerFactory, string githubUrl)
     {
         _managerFactory = managerFactory;
         _githubUrl = githubUrl;

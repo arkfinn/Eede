@@ -7,7 +7,7 @@ using Eede.Domain.SharedKernel;
 
 namespace Eede.Infrastructure.Updates;
 
-public class NullUpdateService : IUpdateService
+public class NullAppUpdater : IAppUpdater
 {
     private readonly BehaviorSubject<UpdateStatus> _statusSubject = new(UpdateStatus.Idle);
 

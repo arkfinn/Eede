@@ -146,7 +146,7 @@ public partial class App : Avalonia.Application
         {
             services.AddSingleton<IPaletteSessionRepository, LocalStoragePaletteSessionRepository>();
             services.AddSingleton<ISettingsRepository, LocalStorageSettingsRepository>();
-            services.AddSingleton<IUpdateService, NullUpdateService>();
+            services.AddSingleton<IAppUpdater, NullAppUpdater>();
         }
         else
         {
@@ -162,7 +162,7 @@ public partial class App : Avalonia.Application
                 var path = System.IO.Path.Combine(appData, "Eede", "settings.json");
                 return new Eede.Infrastructure.Settings.JsonSettingsRepository(path);
             });
-            services.AddSingleton<IUpdateService>(sp => new VelopackUpdateService(@"https://github.com/arkfinn/Eede"));
+            services.AddSingleton<IAppUpdater>(sp => new VelopackAppUpdater(@"https://github.com/arkfinn/Eede"));
         }
         services.AddTransient<ILoadSettingsUseCase, LoadSettingsUseCase>();
         services.AddTransient<ISaveSettingsUseCase, SaveSettingsUseCase>();

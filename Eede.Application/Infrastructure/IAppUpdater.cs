@@ -5,7 +5,7 @@ using Eede.Domain.SharedKernel;
 
 namespace Eede.Application.Infrastructure;
 
-public interface IUpdateService
+public interface IAppUpdater
 {
     bool IsSupported { get; }
     UpdateStatus Status { get; }

@@ -63,7 +63,7 @@ public class SessionRecoveryE2ETests
     private Mock<IThemeService> _themeServiceMock = default!;
     private Mock<ILoadSettingsUseCase> _loadSettingsUseCaseMock = default!;
     private Mock<ISaveSettingsUseCase> _saveSettingsUseCaseMock = default!;
-    private Mock<IUpdateService> _updateServiceMock = default!;
+    private Mock<IAppUpdater> _appUpdaterMock = default!;
     private Mock<IAddFrameProvider> _addFrameProviderMock = default!;
     private Mock<ISelectionService> _selectionServiceMock = default!;
     private Mock<IInteractionCoordinator> _interactionCoordinatorMock = default!;
@@ -101,8 +101,8 @@ public class SessionRecoveryE2ETests
         _loadSettingsUseCaseMock = new Mock<ILoadSettingsUseCase>();
         _loadSettingsUseCaseMock.Setup(x => x.ExecuteAsync()).ReturnsAsync(new AppSettings { GridWidth = 32, GridHeight = 32 });
         _saveSettingsUseCaseMock = new Mock<ISaveSettingsUseCase>();
-        _updateServiceMock = new Mock<IUpdateService>();
-        _updateServiceMock.SetupGet(x => x.StatusChanged).Returns(Observable.Return(UpdateStatus.Idle));
+        _appUpdaterMock = new Mock<IAppUpdater>();
+        _appUpdaterMock.SetupGet(x => x.StatusChanged).Returns(Observable.Return(UpdateStatus.Idle));
         _addFrameProviderMock = new Mock<IAddFrameProvider>();
         _selectionServiceMock = new Mock<ISelectionService>();
         _interactionCoordinatorMock = new Mock<IInteractionCoordinator>();
@@ -139,14 +139,14 @@ public class SessionRecoveryE2ETests
 
     private MainViewModel CreateMainViewModel()
     {
-        var checkUpdateUseCase = new CheckUpdateUseCase(_updateServiceMock.Object);
+        var checkUpdateUseCase = new CheckUpdateUseCase(_appUpdaterMock.Object);
         var settingsRepoMock = new Mock<ISettingsRepository>();
         settingsRepoMock.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
         var welcomeVM = new WelcomeViewModel(
             settingsRepoMock.Object,
             new Mock<IExternalBrowserService>().Object,
-            _updateServiceMock.Object,
+            _appUpdaterMock.Object,
             checkUpdateUseCase);
 
         var sessionProvider = new DrawingSessionProvider();
@@ -183,7 +183,7 @@ public class SessionRecoveryE2ETests
             welcomeVM,
             () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object),
             () => null!,
-            _updateServiceMock.Object,
+            _appUpdaterMock.Object,
             checkUpdateUseCase,
             _pullTracker,
             _coordinator,

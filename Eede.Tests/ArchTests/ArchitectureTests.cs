@@ -9,7 +9,7 @@ namespace Eede.Tests.ArchTests
     {
         private static readonly Assembly DomainAssembly = typeof(Eede.Domain.Palettes.Palette).Assembly;
         private static readonly Assembly ApplicationAssembly = typeof(Eede.Application.UseCase.Updates.CheckUpdateUseCase).Assembly;
-        private static readonly Assembly InfrastructureAssembly = typeof(Eede.Infrastructure.Updates.VelopackUpdateService).Assembly;
+        private static readonly Assembly InfrastructureAssembly = typeof(Eede.Infrastructure.Updates.VelopackAppUpdater).Assembly;
         private static readonly Assembly PresentationAssembly = typeof(Eede.Presentation.ViewModels.Pages.MainViewModel).Assembly;
 
         [Test]

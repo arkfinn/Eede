@@ -19,8 +19,10 @@ using Eede.Infrastructure.Pictures;
 using Eede.Infrastructure.Recovery;
 using Eede.Infrastructure.Settings;
 using Eede.Infrastructure.Updates;
+using Eede.Infrastructure.Launchers;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
+using Eede.Presentation.Launchers;
 using Eede.Presentation.Services;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
@@ -28,7 +30,6 @@ using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.General;
 using Eede.Presentation.ViewModels.Pages;
-using Eede.Infrastructure.Services;
 using Eede.Presentation.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -103,11 +104,11 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IFileSystem, AvaloniaFileSystem>();
         if (OperatingSystem.IsBrowser())
         {
-            services.AddSingleton<IExternalBrowserService, WebExternalBrowserService>();
+            services.AddSingleton<IExternalBrowserLauncher, WebExternalBrowserLauncher>();
         }
         else
         {
-            services.AddSingleton<IExternalBrowserService, ExternalBrowserService>();
+            services.AddSingleton<IExternalBrowserLauncher, ExternalBrowserLauncher>();
         }
         services.AddSingleton<IThemeService, AvaloniaThemeService>();
         services.AddTransient<IDrawActionUseCase, DrawActionUseCase>();

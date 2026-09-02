@@ -112,7 +112,7 @@ public class ViewModelSafetyCharacterizationTests
             new Mock<IThemeService>().Object,
             loadUseCase,
             saveUseCase,
-            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
+            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
             dockPictureFactory,
             newPictureWindowFactory
         );
@@ -145,3 +145,4 @@ public class ViewModelSafetyCharacterizationTests
         });
     }
 }
+

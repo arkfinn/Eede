@@ -46,7 +46,7 @@ namespace Eede.Presentation.Tests.Views.General;
 public class WelcomeViewRecentFilesInvestigationTests
 {
     private Mock<ISettingsRepository> _settingsRepoMock = default!;
-    private Mock<IExternalBrowserService> _browserServiceMock = default!;
+    private Mock<IExternalBrowserLauncher> _browserLauncherMock = default!;
     private Mock<IAppUpdater> _appUpdaterMock = default!;
     private AppSettings _appSettings = default!;
     private CheckUpdateUseCase _checkUpdateUseCase = default!;
@@ -55,7 +55,7 @@ public class WelcomeViewRecentFilesInvestigationTests
     public void Setup()
     {
         _settingsRepoMock = new Mock<ISettingsRepository>();
-        _browserServiceMock = new Mock<IExternalBrowserService>();
+        _browserLauncherMock = new Mock<IExternalBrowserLauncher>();
         _appUpdaterMock = new Mock<IAppUpdater>();
 
         var statusSubject = new BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
@@ -74,7 +74,7 @@ public class WelcomeViewRecentFilesInvestigationTests
     public async Task WelcomeViewModel_Instantiation_AutoLoadsRecentFiles()
     {
         // WelcomeViewModel 単体初期化時に、自動的に RecentFiles がロードされることを検証
-        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
 
         // 非同期ロードを待機
         for (int i = 0; i < 50; i++)
@@ -127,7 +127,7 @@ public class WelcomeViewRecentFilesInvestigationTests
     public async Task Proof3_VisualTree_WelcomeView_Displays_RecentFiles_WhenLoaded()
     {
         // 調査観点3: XAML バインディングと ItemsControl のビジュアルツリー描画検証
-        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         
         // 正常にロードされた場合
         await welcomeVM.LoadRecentFilesCommand.Execute().ToTask();
@@ -171,7 +171,7 @@ public class WelcomeViewRecentFilesInvestigationTests
     public async Task Proof4_PictureFrame_DataContext_Propagation_To_WelcomeView()
     {
         // 調査観点1 & 3: PictureFrame 内の WelcomeView に WelcomeViewModel が正しく伝達されるか？
-        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         await welcomeVM.LoadRecentFilesCommand.Execute().ToTask();
 
         var pictureFrame = new PictureFrame
@@ -249,7 +249,7 @@ public class WelcomeViewRecentFilesInvestigationTests
         var paletteVM = new PaletteContainerViewModel(new Mock<IPaletteRepository>().Object, new Mock<IPaletteSessionRepository>().Object);
         var loadSettingsUseCase = new LoadSettingsUseCase(_settingsRepoMock.Object);
         var saveSettingsUseCase = new SaveSettingsUseCase(_settingsRepoMock.Object);
-        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
 
         var mainVM = new MainViewModel(
             globalState,
@@ -278,4 +278,5 @@ public class WelcomeViewRecentFilesInvestigationTests
         return (mainVM, welcomeVM);
     }
 }
+
 

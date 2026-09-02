@@ -126,7 +126,7 @@ public class PictureContainerTests
             new Mock<IThemeService>().Object,
             loadSettingsUseCase,
             saveSettingsUseCase,
-            new WelcomeViewModel(mockSettingsRepoForUseCase.Object, new Mock<IExternalBrowserService>().Object),
+            new WelcomeViewModel(mockSettingsRepoForUseCase.Object, new Mock<IExternalBrowserLauncher>().Object),
             () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
             () => new NewPictureWindowViewModel()
         );
@@ -198,3 +198,4 @@ public class PictureContainerTests
             "renderingRoot の背景は Transparent であるべきです。背後の OutsideBackGround.bmp を透過させて正しい市松模様を表示します。");
     }
 }
+

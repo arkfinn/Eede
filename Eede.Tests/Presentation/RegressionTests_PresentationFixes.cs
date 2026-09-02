@@ -232,9 +232,10 @@ public class RegressionTests_PresentationFixes
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
             paletteVM, pictureIOService, new Mock<IThemeService>().Object,
             loadUseCase, saveUseCase,
-            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
+            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
             () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
             () => new NewPictureWindowViewModel()
         );
     }
 }
+

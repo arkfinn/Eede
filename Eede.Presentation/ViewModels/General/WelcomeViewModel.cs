@@ -75,19 +75,19 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
     }
 
     private readonly ISettingsRepository _settingsRepository;
-    private readonly IExternalBrowserService _externalBrowserService;
+    private readonly IExternalBrowserLauncher _browserLauncher;
     private readonly CheckUpdateUseCase? _checkUpdateUseCase;
     private readonly IAppUpdater? _appUpdater;
     private readonly CompositeDisposable _disposables = new();
 
     public WelcomeViewModel(
         ISettingsRepository settingsRepository,
-        IExternalBrowserService externalBrowserService,
+        IExternalBrowserLauncher browserLauncher,
         IAppUpdater? appUpdater = null,
         CheckUpdateUseCase? checkUpdateUseCase = null)
     {
         _settingsRepository = settingsRepository;
-        _externalBrowserService = externalBrowserService;
+        _browserLauncher = browserLauncher;
         _appUpdater = appUpdater;
         _checkUpdateUseCase = checkUpdateUseCase;
 
@@ -105,7 +105,7 @@ public partial class WelcomeViewModel : ViewModelBase, IDisposable
             {
                 await Task.Run(() =>
                 {
-                    _externalBrowserService.OpenUrl(url);
+                    _browserLauncher.OpenUrl(url);
                 });
             }
             return url;

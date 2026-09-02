@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Eede.Application.Infrastructure;
 
-namespace Eede.Infrastructure.Services;
+namespace Eede.Infrastructure.Launchers;
 
-public class ExternalBrowserService : IExternalBrowserService
+public class ExternalBrowserLauncher : IExternalBrowserLauncher
 {
     public void OpenUrl(string url)
     {

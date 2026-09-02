@@ -21,7 +21,7 @@ namespace Eede.Presentation.Tests.Views.General;
 public class WelcomeViewUpdateE2ETests
 {
     private Mock<ISettingsRepository> _settingsRepoMock = default!;
-    private Mock<IExternalBrowserService> _browserServiceMock = default!;
+    private Mock<IExternalBrowserLauncher> _browserLauncherMock = default!;
     private Mock<IAppUpdater> _appUpdaterMock = default!;
     private BehaviorSubject<UpdateStatus> _statusSubject = default!;
     private CheckUpdateUseCase _checkUpdateUseCase = default!;
@@ -35,7 +35,7 @@ public class WelcomeViewUpdateE2ETests
         _settingsRepoMock = new Mock<ISettingsRepository>();
         _settingsRepoMock.Setup(r => r.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        _browserServiceMock = new Mock<IExternalBrowserService>();
+        _browserLauncherMock = new Mock<IExternalBrowserLauncher>();
         _appUpdaterMock = new Mock<IAppUpdater>();
         _statusSubject = new BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
         _appUpdaterMock.SetupGet(s => s.StatusChanged).Returns(_statusSubject);
@@ -82,7 +82,7 @@ public class WelcomeViewUpdateE2ETests
             .Returns(Task.CompletedTask)
             .Callback(() => _statusSubject.OnNext(UpdateStatus.ReadyToApply));
 
-        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         InitializeView(vm);
 
         // 初期化時の非同期実行（InitializeAsync）の完了を待機
@@ -120,7 +120,7 @@ public class WelcomeViewUpdateE2ETests
             .ReturnsAsync(false)
             .Callback(() => _statusSubject.OnNext(UpdateStatus.Idle));
 
-        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         InitializeView(vm);
 
         for (int i = 0; i < 50; i++)
@@ -158,7 +158,7 @@ public class WelcomeViewUpdateE2ETests
             .Callback(() => _statusSubject.OnNext(UpdateStatus.Checking))
             .ThrowsAsync(new System.Net.Http.HttpRequestException("Network failure"));
 
-        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         InitializeView(vm);
 
         // エラーステータスへ通知
@@ -193,7 +193,7 @@ public class WelcomeViewUpdateE2ETests
         _appUpdaterMock.SetupGet(s => s.IsSupported).Returns(false);
         _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
 
-        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var vm = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         InitializeView(vm);
 
         await Task.Delay(50);
@@ -210,3 +210,4 @@ public class WelcomeViewUpdateE2ETests
         Assert.That(manualCheckButtons, Has.All.Property("IsVisible").EqualTo(false), "Web版（非対応環境）では手動チェックリンクがすべて非表示であること");
     }
 }
+

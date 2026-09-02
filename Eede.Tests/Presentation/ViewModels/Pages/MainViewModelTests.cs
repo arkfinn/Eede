@@ -110,7 +110,7 @@ public class MainViewModelTests
     private MainViewModel CreateMainViewModel()
     {
         var checkUpdateUseCase = new Eede.Application.UseCase.Updates.CheckUpdateUseCase(_appUpdaterMock.Object);
-        var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object, new Mock<IExternalBrowserService>().Object, _appUpdaterMock.Object, checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object, new Mock<IExternalBrowserLauncher>().Object, _appUpdaterMock.Object, checkUpdateUseCase);
         return new MainViewModel(
             _globalState,
             _clipboardMock.Object,
@@ -427,5 +427,6 @@ public class MainViewModelTests
         Assert.That(windowCloseInvoked, Is.True);
     }
 }
+
 
 

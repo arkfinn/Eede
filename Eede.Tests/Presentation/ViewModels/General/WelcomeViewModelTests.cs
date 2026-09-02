@@ -18,7 +18,7 @@ namespace Eede.Presentation.Tests.ViewModels.General;
 public class WelcomeViewModelTests
 {
     private Mock<ISettingsRepository> _settingsRepoMock;
-    private Mock<IExternalBrowserService> _browserServiceMock;
+    private Mock<IExternalBrowserLauncher> _browserLauncherMock;
     private Mock<IAppUpdater> _appUpdaterMock;
     private BehaviorSubject<UpdateStatus> _statusSubject;
     private AppSettings _appSettings;
@@ -28,7 +28,7 @@ public class WelcomeViewModelTests
     public void Setup()
     {
         _settingsRepoMock = new Mock<ISettingsRepository>();
-        _browserServiceMock = new Mock<IExternalBrowserService>();
+        _browserLauncherMock = new Mock<IExternalBrowserLauncher>();
         _appUpdaterMock = new Mock<IAppUpdater>();
         _statusSubject = new BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
         _appUpdaterMock.SetupGet(s => s.StatusChanged).Returns(_statusSubject);
@@ -51,7 +51,7 @@ public class WelcomeViewModelTests
     [Test]
     public async Task LoadRecentFiles_ShouldRefreshList()
     {
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
 
         await viewModel.LoadRecentFilesCommand.Execute().ToTask();
         Assert.That(viewModel.RecentFiles.Count, Is.EqualTo(1));
@@ -68,14 +68,14 @@ public class WelcomeViewModelTests
     public void InitialStatus_ShouldBeIdle()
     {
         // 初期状態は Idle であることを検証
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         Assert.That(viewModel.UpdateStatus, Is.EqualTo(UpdateStatus.Idle));
     }
 
     [Test]
     public void CheckUpdate_ShouldUpdateStatus()
     {
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
 
         // サービス側のステータスが変更されたら反映されることを検証
         _statusSubject.OnNext(UpdateStatus.Downloading);
@@ -86,7 +86,7 @@ public class WelcomeViewModelTests
     [Test]
     public void ApplyUpdateCommand_ShouldCallApplyAndRestart()
     {
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
 
         // コマンドが実行可能になるステータスに変更
         _statusSubject.OnNext(UpdateStatus.ReadyToApply);
@@ -99,23 +99,24 @@ public class WelcomeViewModelTests
     [Test]
     public async Task OpenUrlCommand_ShouldCallBrowserService_WhenUrlIsSafe()
     {
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         var url = "https://example.com";
 
         await viewModel.OpenUrlCommand.Execute(url).ToTask();
 
-        _browserServiceMock.Verify(x => x.OpenUrl(url), Times.Once);
+        _browserLauncherMock.Verify(x => x.OpenUrl(url), Times.Once);
     }
 
     [Test]
     public async Task OpenUrlCommand_ShouldNotCallBrowserService_WhenUrlIsUnsafe()
     {
-        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         var url = "file:///C:/Windows/System32/calc.exe";
 
         await viewModel.OpenUrlCommand.Execute(url).ToTask();
 
-        _browserServiceMock.Verify(x => x.OpenUrl(It.IsAny<string>()), Times.Never);
+        _browserLauncherMock.Verify(x => x.OpenUrl(It.IsAny<string>()), Times.Never);
     }
 }
+
 

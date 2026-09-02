@@ -2,13 +2,13 @@ using System;
 using System.Runtime.InteropServices.JavaScript;
 using Eede.Application.Infrastructure;
 
-namespace Eede.Presentation.Services;
+namespace Eede.Presentation.Launchers;
 
-public partial class WebExternalBrowserService : IExternalBrowserService
+public partial class WebExternalBrowserLauncher : IExternalBrowserLauncher
 {
     private readonly Action<string>? _openAction;
 
-    public WebExternalBrowserService(Action<string>? openAction = null)
+    public WebExternalBrowserLauncher(Action<string>? openAction = null)
     {
         _openAction = openAction;
     }
@@ -33,7 +33,7 @@ public partial class WebExternalBrowserService : IExternalBrowserService
         }
         else
         {
-            System.Diagnostics.Trace.WriteLine($"WebExternalBrowserService: {uri.AbsoluteUri}");
+            System.Diagnostics.Trace.WriteLine($"WebExternalBrowserLauncher: {uri.AbsoluteUri}");
         }
     }
 
@@ -56,3 +56,4 @@ public partial class WebExternalBrowserService : IExternalBrowserService
         internal static partial void Open(string url, string target = "_blank");
     }
 }
+

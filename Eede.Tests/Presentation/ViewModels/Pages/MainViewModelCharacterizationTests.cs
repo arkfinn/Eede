@@ -141,7 +141,7 @@ public class MainViewModelCharacterizationTests
             new Mock<IThemeService>().Object,
             loadUseCase,
             saveUseCase,
-            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
+            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
             _dockPictureFactory,
             _newPictureWindowFactory
         );
@@ -149,3 +149,4 @@ public class MainViewModelCharacterizationTests
         Assert.That(vm, Is.Not.Null);
     }
 }
+

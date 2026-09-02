@@ -145,7 +145,7 @@ public class SessionRecoveryE2ETests
 
         var welcomeVM = new WelcomeViewModel(
             settingsRepoMock.Object,
-            new Mock<IExternalBrowserService>().Object,
+            new Mock<IExternalBrowserLauncher>().Object,
             _appUpdaterMock.Object,
             checkUpdateUseCase);
 
@@ -625,4 +625,5 @@ public class SessionRecoveryE2ETests
         return Picture.Create(size, bytes);
     }
 }
+
 

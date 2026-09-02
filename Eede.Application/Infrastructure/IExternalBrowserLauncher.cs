@@ -1,6 +1,6 @@
 namespace Eede.Application.Infrastructure;
 
-public interface IExternalBrowserService
+public interface IExternalBrowserLauncher
 {
     void OpenUrl(string url);
 }

@@ -1,7 +1,14 @@
 <Project>
   <PropertyGroup>
-    <Version>0.15.0</Version>
     <LangVersion>13.0</LangVersion>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="7.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

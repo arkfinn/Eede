@@ -46,6 +46,12 @@ public class VelopackUpdateServiceTests
     }
 
     [Test]
+    public void IsSupported_ReturnsTrue()
+    {
+        Assert.That(_service.IsSupported, Is.True);
+    }
+
+    [Test]
     public async Task DownloadUpdateAsync_WhenExceptionThrown_SetsStatusToError()
     {
         // Arrange

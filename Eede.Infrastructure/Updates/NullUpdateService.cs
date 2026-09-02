@@ -11,6 +11,8 @@ public class NullUpdateService : IUpdateService
 {
     private readonly BehaviorSubject<UpdateStatus> _statusSubject = new(UpdateStatus.Idle);
 
+    public bool IsSupported => false;
+
     public UpdateStatus Status => _statusSubject.Value;
 
     public IObservable<UpdateStatus> StatusChanged => _statusSubject.AsObservable();

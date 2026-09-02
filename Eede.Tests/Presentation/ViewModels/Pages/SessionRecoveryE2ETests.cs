@@ -27,7 +27,8 @@ using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Infrastructure.Pictures;
 using Eede.Presentation.Common.Adapters;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -46,7 +47,7 @@ public class SessionRecoveryE2ETests
     private InMemorySessionStorage _storage = default!;
     private SkiaSharpPictureCodec _codec = default!;
     private PullContextTracker _pullTracker = default!;
-    private SessionRecoveryService _recoveryService = default!;
+    private SessionRecoverer _recoverer = default!;
     private SessionRecoveryCoordinator _coordinator = default!;
 
     private GlobalState _globalState = default!;
@@ -59,13 +60,13 @@ public class SessionRecoveryE2ETests
     private TransferImageToCanvasUseCase _transferImageToCanvasUseCase = default!;
     private TransferImageFromCanvasUseCase _transferImageFromCanvasUseCase = default!;
     private DrawingSessionProvider _drawingSessionProvider = default!;
-    private Mock<IPictureIOService> _pictureIOServiceMock = default!;
-    private Mock<IThemeService> _themeServiceMock = default!;
+    private Mock<IPictureFileIO> _PictureFileIOMock = default!;
+    private Mock<IThemeDetector> _themeDetectorMock = default!;
     private Mock<ILoadSettingsUseCase> _loadSettingsUseCaseMock = default!;
     private Mock<ISaveSettingsUseCase> _saveSettingsUseCaseMock = default!;
-    private Mock<IUpdateService> _updateServiceMock = default!;
+    private Mock<IAppUpdater> _appUpdaterMock = default!;
     private Mock<IAddFrameProvider> _addFrameProviderMock = default!;
-    private Mock<ISelectionService> _selectionServiceMock = default!;
+    private Mock<ISelectionClipboard> _SelectionClipboardMock = default!;
     private Mock<IInteractionCoordinator> _interactionCoordinatorMock = default!;
 
     private DrawableCanvasViewModel _drawableCanvasViewModel = default!;
@@ -79,7 +80,7 @@ public class SessionRecoveryE2ETests
         _storage = new InMemorySessionStorage();
         _codec = new SkiaSharpPictureCodec();
         _pullTracker = new PullContextTracker();
-        _recoveryService = new SessionRecoveryService(_storage, _codec);
+        _recoverer = new SessionRecoverer(_storage, _codec);
         _coordinator = new SessionRecoveryCoordinator(_storage, _codec, null);
 
         _globalState = new GlobalState();
@@ -96,15 +97,15 @@ public class SessionRecoveryE2ETests
         _drawingSessionProvider = new DrawingSessionProvider();
         _drawingSessionProvider.Update(new DrawingSession(initialPicture));
 
-        _pictureIOServiceMock = new Mock<IPictureIOService>();
-        _themeServiceMock = new Mock<IThemeService>();
+        _PictureFileIOMock = new Mock<IPictureFileIO>();
+        _themeDetectorMock = new Mock<IThemeDetector>();
         _loadSettingsUseCaseMock = new Mock<ILoadSettingsUseCase>();
         _loadSettingsUseCaseMock.Setup(x => x.ExecuteAsync()).ReturnsAsync(new AppSettings { GridWidth = 32, GridHeight = 32 });
         _saveSettingsUseCaseMock = new Mock<ISaveSettingsUseCase>();
-        _updateServiceMock = new Mock<IUpdateService>();
-        _updateServiceMock.SetupGet(x => x.StatusChanged).Returns(Observable.Return(UpdateStatus.Idle));
+        _appUpdaterMock = new Mock<IAppUpdater>();
+        _appUpdaterMock.SetupGet(x => x.StatusChanged).Returns(Observable.Return(UpdateStatus.Idle));
         _addFrameProviderMock = new Mock<IAddFrameProvider>();
-        _selectionServiceMock = new Mock<ISelectionService>();
+        _SelectionClipboardMock = new Mock<ISelectionClipboard>();
         _interactionCoordinatorMock = new Mock<IInteractionCoordinator>();
 
         var patternsProviderMock = new Mock<IAnimationPatternsProvider>();
@@ -112,7 +113,7 @@ public class SessionRecoveryE2ETests
 
         _animationViewModel = new AnimationViewModel(
             patternsProviderMock.Object,
-            new Mock<IAnimationPatternService>().Object,
+            new Mock<IAnimationPatternEditor>().Object,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter());
 
@@ -127,7 +128,7 @@ public class SessionRecoveryE2ETests
             _clipboardMock.Object,
             _bitmapAdapterMock.Object,
             _drawingSessionProvider,
-            _selectionServiceMock.Object,
+            _SelectionClipboardMock.Object,
             _interactionCoordinatorMock.Object);
     }
 
@@ -139,14 +140,14 @@ public class SessionRecoveryE2ETests
 
     private MainViewModel CreateMainViewModel()
     {
-        var checkUpdateUseCase = new CheckUpdateUseCase(_updateServiceMock.Object);
+        var checkUpdateUseCase = new CheckUpdateUseCase(_appUpdaterMock.Object);
         var settingsRepoMock = new Mock<ISettingsRepository>();
         settingsRepoMock.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
         var welcomeVM = new WelcomeViewModel(
             settingsRepoMock.Object,
-            new Mock<IExternalBrowserService>().Object,
-            _updateServiceMock.Object,
+            new Mock<IExternalBrowserLauncher>().Object,
+            _appUpdaterMock.Object,
             checkUpdateUseCase);
 
         var sessionProvider = new DrawingSessionProvider();
@@ -157,7 +158,7 @@ public class SessionRecoveryE2ETests
             _clipboardMock.Object,
             _bitmapAdapterMock.Object,
             sessionProvider,
-            _selectionServiceMock.Object,
+            _SelectionClipboardMock.Object,
             interactionCoord);
         var drawingSessionVM = new DrawingSessionViewModel(sessionProvider);
 
@@ -176,18 +177,18 @@ public class SessionRecoveryE2ETests
             _animationViewModel,
             drawingSessionVM,
             _paletteContainerViewModel,
-            _pictureIOServiceMock.Object,
-            _themeServiceMock.Object,
+            _PictureFileIOMock.Object,
+            _themeDetectorMock.Object,
             _loadSettingsUseCaseMock.Object,
             _saveSettingsUseCaseMock.Object,
             welcomeVM,
-            () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object),
+            () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object),
             () => null!,
-            _updateServiceMock.Object,
+            _appUpdaterMock.Object,
             checkUpdateUseCase,
             _pullTracker,
             _coordinator,
-            _recoveryService,
+            _recoverer,
             _storage);
     }
 
@@ -372,7 +373,7 @@ public class SessionRecoveryE2ETests
         var mainVM = CreateMainViewModel();
 
         var dummyPicture = Picture.CreateEmpty(new PictureSize(32, 32));
-        var dockVm = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var dockVm = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         dockVm.Initialize(dummyPicture, FilePath.Empty());
         mainVM.Pictures.Add(dockVm);
 
@@ -403,12 +404,12 @@ public class SessionRecoveryE2ETests
         var mainVM = CreateMainViewModel();
 
         var pic1 = Picture.CreateEmpty(new PictureSize(32, 32));
-        var tab1 = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var tab1 = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         tab1.Initialize(pic1, FilePath.Empty());
         tab1.Edited = true;
 
         var pic2 = Picture.CreateEmpty(new PictureSize(16, 16));
-        var tab2 = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var tab2 = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         tab2.Initialize(pic2, new FilePath("C:/saved.png"));
         tab2.Edited = false;
 
@@ -441,7 +442,7 @@ public class SessionRecoveryE2ETests
         mainVM.CloseWindowInteraction.RegisterHandler(c => c.SetOutput(System.Reactive.Unit.Default));
 
         var pic = Picture.CreateEmpty(new PictureSize(16, 16));
-        var tab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var tab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         tab.Initialize(pic, FilePath.Empty());
         tab.Edited = false;
         mainVM.Pictures.Add(tab);
@@ -564,7 +565,7 @@ public class SessionRecoveryE2ETests
 
         var redColor = new ArgbColor(255, 255, 0, 0);
         var initialPic = CreateFilledPicture(new PictureSize(32, 32), redColor);
-        var dockVm = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var dockVm = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         dockVm.Initialize(initialPic, FilePath.Empty());
         mainVM.Pictures.Add(dockVm);
 
@@ -598,8 +599,8 @@ public class SessionRecoveryE2ETests
         await nextMainVM.InitializeAsync();
         Assert.That(nextMainVM.WelcomeViewModel.HasPreviousSession, Is.True);
 
-        var service = new SessionRecoveryService(_storage, _codec);
-        var restoredData = await service.RestoreSessionAsync();
+        var recoverer = new SessionRecoverer(_storage, _codec);
+        var restoredData = await recoverer.RestoreSessionAsync();
         Assert.That(restoredData.PullState, Is.Not.Null, "Restored PullState must not be null");
         Assert.That(restoredData.PullState!.CanvasPicture, Is.Not.Null, "Restored CanvasPicture must not be null");
         Assert.That(restoredData.PullState!.CanvasPicture!.Size, Is.EqualTo(new PictureSize(8, 8)));
@@ -625,3 +626,10 @@ public class SessionRecoveryE2ETests
         return Picture.Create(size, bytes);
     }
 }
+
+
+
+
+
+
+

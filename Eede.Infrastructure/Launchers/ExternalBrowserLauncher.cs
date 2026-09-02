@@ -1,0 +1,58 @@
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using Eede.Application.Infrastructure;
+
+namespace Eede.Infrastructure.Launchers;
+
+public class ExternalBrowserLauncher : IExternalBrowserLauncher
+{
+    public void OpenUrl(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            throw new ArgumentException("Invalid URL scheme. Only http and https are allowed.", nameof(url));
+        }
+
+        StartProcess(uri.AbsoluteUri);
+    }
+
+    protected virtual void StartProcess(string url)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "explorer",
+                UseShellExecute = false
+            };
+            psi.ArgumentList.Add(url);
+            Process.Start(psi);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "xdg-open",
+                UseShellExecute = false
+            };
+            psi.ArgumentList.Add(url);
+            Process.Start(psi);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "open",
+                UseShellExecute = false
+            };
+            psi.ArgumentList.Add(url);
+            Process.Start(psi);
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("Operating system not supported for opening external URLs.");
+        }
+    }
+}

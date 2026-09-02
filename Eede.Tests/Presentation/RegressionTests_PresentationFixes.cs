@@ -16,7 +16,8 @@ using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -64,12 +65,12 @@ public class RegressionTests_PresentationFixes
         var mainVM = CreateMainViewModel(_drawingSessionProviderMock.Object, _coordinatorMock.Object);
 
         var picture1 = Picture.CreateEmpty(new PictureSize(16, 16));
-        var dockVM1 = new DockPictureViewModel(new GlobalState(), mainVM.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureIOService>());
+        var dockVM1 = new DockPictureViewModel(new GlobalState(), mainVM.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureFileIO>());
         dockVM1.PictureBuffer = picture1;
         var doc1 = new Document { DataContext = dockVM1 };
 
         var picture2 = Picture.CreateEmpty(new PictureSize(16, 16));
-        var dockVM2 = new DockPictureViewModel(new GlobalState(), mainVM.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureIOService>());
+        var dockVM2 = new DockPictureViewModel(new GlobalState(), mainVM.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureFileIO>());
         dockVM2.PictureBuffer = picture2;
         var doc2 = new Document { DataContext = dockVM2 };
 
@@ -185,7 +186,7 @@ public class RegressionTests_PresentationFixes
         var transferToCanvas = new Mock<ITransferImageToCanvasUseCase>().Object;
         var transferFromCanvas = new Mock<ITransferImageFromCanvasUseCase>().Object;
 
-        var selectionService = new SelectionService(
+        var SelectionClipboard = new SelectionClipboard(
             new CopySelectionUseCase(clipboard),
             new CutSelectionUseCase(clipboard),
             new PasteFromClipboardUseCase(clipboard, sessionProvider)
@@ -197,14 +198,14 @@ public class RegressionTests_PresentationFixes
             clipboard,
             bitmapAdapter,
             sessionProvider,
-            selectionService,
+            SelectionClipboard,
             coordinator
         );
 
         var patternsProvider = new AnimationPatternsProvider();
         var animationVM = new AnimationViewModel(
             patternsProvider,
-            new AnimationPatternService(
+            new AnimationPatternEditor(
                 new AddAnimationPatternUseCase(patternsProvider),
                 new ReplaceAnimationPatternUseCase(patternsProvider),
                 new RemoveAnimationPatternUseCase(patternsProvider)
@@ -218,7 +219,7 @@ public class RegressionTests_PresentationFixes
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        var pictureIOService = new PictureIOService(
+        var PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(pictureRepo, settingsRepo.Object),
             new LoadPictureUseCase(pictureRepo, settingsRepo.Object)
         );
@@ -230,11 +231,17 @@ public class RegressionTests_PresentationFixes
             state, clipboard, bitmapAdapter, pictureRepo, drawStyleFactory,
             transformUseCase, new Mock<IScalingImageUseCase>().Object, transferToCanvas, transferFromCanvas,
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
-            paletteVM, pictureIOService, new Mock<IThemeService>().Object,
+            paletteVM, PictureFileIO, new Mock<IThemeDetector>().Object,
             loadUseCase, saveUseCase,
-            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
-            () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
+            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
+            () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), PictureFileIO),
             () => new NewPictureWindowViewModel()
         );
     }
 }
+
+
+
+
+
+

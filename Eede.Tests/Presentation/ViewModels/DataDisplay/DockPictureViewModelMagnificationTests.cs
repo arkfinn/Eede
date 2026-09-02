@@ -28,25 +28,25 @@ public class DockPictureViewModelMagnificationTests
     private GlobalState _globalState;
     private AnimationViewModel _animationViewModel;
     private Mock<IPictureRepository> _mockPictureRepository;
-    private IPictureIOService _pictureIOService;
+    private IPictureFileIO _PictureFileIO;
 
     [SetUp]
     public void Setup()
     {
         _globalState = new GlobalState();
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         _animationViewModel = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter()); _mockPictureRepository = new Mock<IPictureRepository>();
         var mockSettingsRepo = new Mock<ISettingsRepository>();
         mockSettingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
-        _pictureIOService = new PictureIOService(
+        _PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(_mockPictureRepository.Object, mockSettingsRepo.Object),
             new LoadPictureUseCase(_mockPictureRepository.Object, mockSettingsRepo.Object));
     }
@@ -55,7 +55,7 @@ public class DockPictureViewModelMagnificationTests
     public void DefaultMagnificationIs1()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
 
         Assert.That(viewModel.Magnification.Value, Is.EqualTo(1f));
     }
@@ -64,7 +64,7 @@ public class DockPictureViewModelMagnificationTests
     public void CanUpdateMagnification()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService)
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO)
         {
             Magnification = new Magnification(2)
         };
@@ -76,7 +76,7 @@ public class DockPictureViewModelMagnificationTests
     public void ZoomInFollowsSteps()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
         // Default is 1
         viewModel.ZoomIn();
         Assert.That(viewModel.Magnification.Value, Is.EqualTo(2f));
@@ -96,7 +96,7 @@ public class DockPictureViewModelMagnificationTests
     public void ZoomOutFollowsSteps()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
         viewModel.Magnification = new Magnification(12);
 
         viewModel.ZoomOut();
@@ -117,7 +117,7 @@ public class DockPictureViewModelMagnificationTests
     public void ZoomInCommandIncreasesMagnification()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
 
         viewModel.ZoomInCommand.Execute().Subscribe();
         scheduler.AdvanceBy(1);
@@ -129,7 +129,7 @@ public class DockPictureViewModelMagnificationTests
     public void ZoomOutCommandDecreasesMagnification()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
         viewModel.Magnification = new Magnification(4);
 
         viewModel.ZoomOutCommand.Execute().Subscribe();
@@ -142,7 +142,7 @@ public class DockPictureViewModelMagnificationTests
     public void DisplaySizeIsCorrect()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
         viewModel.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), new FilePath("test.png"));
 
         // 4倍時
@@ -168,7 +168,7 @@ public class DockPictureViewModelMagnificationTests
     public void SetMagnificationCommandUpdatesMagnification()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
 
         viewModel.SetMagnificationCommand.Execute(8f).Subscribe();
         scheduler.AdvanceBy(1);
@@ -176,3 +176,5 @@ public class DockPictureViewModelMagnificationTests
         Assert.That(viewModel.Magnification.Value, Is.EqualTo(8f));
     }
 }
+
+

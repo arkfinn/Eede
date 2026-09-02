@@ -13,6 +13,6 @@
         Title="Eede"
         ExtendClientAreaToDecorationsHint="False"
         x:DataType="vm:MainViewModel"
-        DataContext="{ext:ServiceResolve vm:MainViewModel}">
+        DataContext="{ext:Resolve vm:MainViewModel}">
   <pages:MainView />
 </reactiveUi:ReactiveWindow>

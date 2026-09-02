@@ -16,7 +16,8 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -33,7 +34,7 @@ namespace Eede.Presentation.Tests.ViewModels.Pages;
 public class MainViewModelCharacterizationTests
 {
     private Mock<GlobalState> _stateMock;
-    private Mock<IClipboard> _clipboardServiceMock;
+    private Mock<IClipboard> _clipboardMock;
     private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock;
     private Mock<IPictureRepository> _pictureRepositoryMock;
     private Mock<IDrawStyleFactory> _drawStyleFactoryMock;
@@ -54,7 +55,7 @@ public class MainViewModelCharacterizationTests
     public void Setup()
     {
         _stateMock = new Mock<GlobalState>();
-        _clipboardServiceMock = new Mock<IClipboard>();
+        _clipboardMock = new Mock<IClipboard>();
         _bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
         _pictureRepositoryMock = new Mock<IPictureRepository>();
         _drawStyleFactoryMock = new Mock<IDrawStyleFactory>();
@@ -65,10 +66,10 @@ public class MainViewModelCharacterizationTests
         _drawingSessionProviderMock.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));
 
         // UseCases
-        var copyUseCase = new CopySelectionUseCase(_clipboardServiceMock.Object);
-        var cutUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
-        var pasteUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProviderMock.Object);
-        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+        var copyUseCase = new CopySelectionUseCase(_clipboardMock.Object);
+        var cutUseCase = new CutSelectionUseCase(_clipboardMock.Object);
+        var pasteUseCase = new PasteFromClipboardUseCase(_clipboardMock.Object, _drawingSessionProviderMock.Object);
+        var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         // DrawableCanvasViewModel usually need real instances or careful mocking. 
         // For characterization tests, we often use nulls if the constructor allows, 
@@ -79,17 +80,17 @@ public class MainViewModelCharacterizationTests
             Mock.Of<IClipboard>(),
             Mock.Of<IBitmapAdapter<Bitmap>>(),
             Mock.Of<IDrawingSessionProvider>(),
-            selectionService,
+            SelectionClipboard,
             Mock.Of<IInteractionCoordinator>()
         );
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         _animationViewModelMock = new Mock<AnimationViewModel>(
             patternsProvider,
-            patternService,
+            patternEditor,
             Mock.Of<IFileSystem>(),
             Mock.Of<IBitmapAdapter<Bitmap>>());
         _drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>(_drawingSessionProviderMock.Object);
@@ -99,13 +100,13 @@ public class MainViewModelCharacterizationTests
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        var pictureIOService = new PictureIOService(
+        var PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object),
             new LoadPictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object));
 
         _savePictureUseCaseMock = new Mock<SavePictureUseCase>(_pictureRepositoryMock.Object, settingsRepo.Object);
         _loadPictureUseCaseMock = new Mock<LoadPictureUseCase>(_pictureRepositoryMock.Object, settingsRepo.Object);
-        _dockPictureFactory = () => new DockPictureViewModel(Mock.Of<GlobalState>(), _animationViewModelMock.Object, _bitmapAdapterMock.Object, pictureIOService);
+        _dockPictureFactory = () => new DockPictureViewModel(Mock.Of<GlobalState>(), _animationViewModelMock.Object, _bitmapAdapterMock.Object, PictureFileIO);
         _newPictureWindowFactory = () => new Mock<NewPictureWindowViewModel>().Object;
     }
 
@@ -115,7 +116,7 @@ public class MainViewModelCharacterizationTests
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        var pictureIOService = new PictureIOService(
+        var PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object),
             new LoadPictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object));
 
@@ -124,7 +125,7 @@ public class MainViewModelCharacterizationTests
 
         var vm = new MainViewModel(
             _stateMock.Object,
-            _clipboardServiceMock.Object,
+            _clipboardMock.Object,
             _bitmapAdapterMock.Object,
             _pictureRepositoryMock.Object,
             _drawStyleFactoryMock.Object,
@@ -137,11 +138,11 @@ public class MainViewModelCharacterizationTests
             _animationViewModelMock.Object,
             _drawingSessionViewModelMock.Object,
             _paletteContainerViewModelMock.Object,
-            pictureIOService,
-            new Mock<IThemeService>().Object,
+            PictureFileIO,
+            new Mock<IThemeDetector>().Object,
             loadUseCase,
             saveUseCase,
-            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
+            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
             _dockPictureFactory,
             _newPictureWindowFactory
         );
@@ -149,3 +150,10 @@ public class MainViewModelCharacterizationTests
         Assert.That(vm, Is.Not.Null);
     }
 }
+
+
+
+
+
+
+

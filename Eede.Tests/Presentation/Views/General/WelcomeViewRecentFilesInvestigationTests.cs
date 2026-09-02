@@ -27,7 +27,8 @@ using Eede.Domain.ImageEditing.History;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Files;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -46,8 +47,8 @@ namespace Eede.Presentation.Tests.Views.General;
 public class WelcomeViewRecentFilesInvestigationTests
 {
     private Mock<ISettingsRepository> _settingsRepoMock = default!;
-    private Mock<IExternalBrowserService> _browserServiceMock = default!;
-    private Mock<IUpdateService> _updateServiceMock = default!;
+    private Mock<IExternalBrowserLauncher> _browserLauncherMock = default!;
+    private Mock<IAppUpdater> _appUpdaterMock = default!;
     private AppSettings _appSettings = default!;
     private CheckUpdateUseCase _checkUpdateUseCase = default!;
 
@@ -55,26 +56,26 @@ public class WelcomeViewRecentFilesInvestigationTests
     public void Setup()
     {
         _settingsRepoMock = new Mock<ISettingsRepository>();
-        _browserServiceMock = new Mock<IExternalBrowserService>();
-        _updateServiceMock = new Mock<IUpdateService>();
+        _browserLauncherMock = new Mock<IExternalBrowserLauncher>();
+        _appUpdaterMock = new Mock<IAppUpdater>();
 
         var statusSubject = new BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
-        _updateServiceMock.SetupGet(s => s.StatusChanged).Returns(statusSubject);
-        _updateServiceMock.SetupGet(s => s.LatestVersion).Returns("1.0.0");
+        _appUpdaterMock.SetupGet(s => s.StatusChanged).Returns(statusSubject);
+        _appUpdaterMock.SetupGet(s => s.LatestVersion).Returns("1.0.0");
 
         _appSettings = new AppSettings();
         _appSettings.AddRecentFile("C:\\test\\file1.png", DateTime.Now.AddDays(-1));
         _appSettings.AddRecentFile("C:\\test\\file2.png", DateTime.Now.AddDays(-2));
         _settingsRepoMock.Setup(r => r.LoadAsync()).ReturnsAsync(_appSettings);
 
-        _checkUpdateUseCase = new CheckUpdateUseCase(_updateServiceMock.Object);
+        _checkUpdateUseCase = new CheckUpdateUseCase(_appUpdaterMock.Object);
     }
 
     [AvaloniaTest]
     public async Task WelcomeViewModel_Instantiation_AutoLoadsRecentFiles()
     {
         // WelcomeViewModel 単体初期化時に、自動的に RecentFiles がロードされることを検証
-        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
 
         // 非同期ロードを待機
         for (int i = 0; i < 50; i++)
@@ -127,7 +128,7 @@ public class WelcomeViewRecentFilesInvestigationTests
     public async Task Proof3_VisualTree_WelcomeView_Displays_RecentFiles_WhenLoaded()
     {
         // 調査観点3: XAML バインディングと ItemsControl のビジュアルツリー描画検証
-        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         
         // 正常にロードされた場合
         await welcomeVM.LoadRecentFilesCommand.Execute().ToTask();
@@ -171,7 +172,7 @@ public class WelcomeViewRecentFilesInvestigationTests
     public async Task Proof4_PictureFrame_DataContext_Propagation_To_WelcomeView()
     {
         // 調査観点1 & 3: PictureFrame 内の WelcomeView に WelcomeViewModel が正しく伝達されるか？
-        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         await welcomeVM.LoadRecentFilesCommand.Execute().ToTask();
 
         var pictureFrame = new PictureFrame
@@ -218,21 +219,21 @@ public class WelcomeViewRecentFilesInvestigationTests
         var copyUseCase = new CopySelectionUseCase(mockClipboard.Object);
         var cutUseCase = new CutSelectionUseCase(mockClipboard.Object);
         var pasteUseCase = new PasteFromClipboardUseCase(mockClipboard.Object, mockDrawingSessionProvider.Object);
-        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+        var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         var mockPictureRepo = new Mock<IPictureRepository>();
         var savePictureUseCase = new SavePictureUseCase(mockPictureRepo.Object, _settingsRepoMock.Object);
         var loadPictureUseCase = new LoadPictureUseCase(mockPictureRepo.Object, _settingsRepoMock.Object);
-        var pictureIOService = new PictureIOService(savePictureUseCase, loadPictureUseCase);
+        var PictureFileIO = new PictureFileIO(savePictureUseCase, loadPictureUseCase);
 
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         var animationVM = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter());
 
@@ -242,14 +243,14 @@ public class WelcomeViewRecentFilesInvestigationTests
             mockClipboard.Object,
             bitmapAdapter,
             mockDrawingSessionProvider.Object,
-            selectionService,
+            SelectionClipboard,
             mockCoordinator.Object
         );
 
         var paletteVM = new PaletteContainerViewModel(new Mock<IPaletteRepository>().Object, new Mock<IPaletteSessionRepository>().Object);
         var loadSettingsUseCase = new LoadSettingsUseCase(_settingsRepoMock.Object);
         var saveSettingsUseCase = new SaveSettingsUseCase(_settingsRepoMock.Object);
-        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserServiceMock.Object, _updateServiceMock.Object, _checkUpdateUseCase);
+        var welcomeVM = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
 
         var mainVM = new MainViewModel(
             globalState,
@@ -266,15 +267,22 @@ public class WelcomeViewRecentFilesInvestigationTests
             animationVM,
             drawingSessionVM,
             paletteVM,
-            pictureIOService,
-            new Mock<IThemeService>().Object,
+            PictureFileIO,
+            new Mock<IThemeDetector>().Object,
             loadSettingsUseCase,
             saveSettingsUseCase,
             welcomeVM,
-            () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
+            () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, PictureFileIO),
             () => new NewPictureWindowViewModel()
         );
 
         return (mainVM, welcomeVM);
     }
 }
+
+
+
+
+
+
+

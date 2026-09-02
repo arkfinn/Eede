@@ -4,7 +4,7 @@ using Eede.Application.UseCase.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.SharedKernel;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Application.Infrastructure;
 using Eede.Presentation.Settings;
@@ -24,7 +24,7 @@ namespace Eede.Presentation.Tests.Characterization
         private DrawingSessionProvider _sessionProvider;
         private InteractionCoordinator _coordinator;
         private Mock<IClipboard> _clipboardMock;
-        private ISelectionService _selectionService;
+        private ISelectionClipboard _SelectionClipboard;
         private DrawableCanvasViewModel _viewModel;
 
         [SetUp]
@@ -34,7 +34,7 @@ namespace Eede.Presentation.Tests.Characterization
             _sessionProvider.Update(new DrawingSession(Picture.CreateEmpty(new PictureSize(32, 32))));
             _coordinator = new InteractionCoordinator(_sessionProvider);
             _clipboardMock = new Mock<IClipboard>();
-            _selectionService = new SelectionService(
+            _SelectionClipboard = new SelectionClipboard(
                 new CopySelectionUseCase(_clipboardMock.Object),
                 new CutSelectionUseCase(_clipboardMock.Object),
                 new PasteFromClipboardUseCase(_clipboardMock.Object, _sessionProvider));
@@ -49,7 +49,7 @@ namespace Eede.Presentation.Tests.Characterization
                 _clipboardMock.Object,
                 bitmapAdapter.Object,
                 _sessionProvider,
-                _selectionService,
+                _SelectionClipboard,
                 _coordinator);
 
             _viewModel.Magnification = new Magnification(1);
@@ -108,3 +108,4 @@ namespace Eede.Presentation.Tests.Characterization
         }
     }
 }
+

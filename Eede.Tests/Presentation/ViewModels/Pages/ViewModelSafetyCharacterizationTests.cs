@@ -16,7 +16,8 @@ using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.Animations;
 using Eede.Presentation.ViewModels.DataDisplay;
@@ -39,7 +40,7 @@ public class ViewModelSafetyCharacterizationTests
     public void SetUp()
     {
         var stateMock = new Mock<GlobalState>();
-        var clipboardServiceMock = new Mock<IClipboard>();
+        var clipboardMock = new Mock<IClipboard>();
         var bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
         var pictureRepositoryMock = new Mock<IPictureRepository>();
         var drawStyleFactoryMock = new Mock<IDrawStyleFactory>();
@@ -49,31 +50,31 @@ public class ViewModelSafetyCharacterizationTests
         var drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
         drawingSessionProviderMock.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));
 
-        var copyUseCase = new CopySelectionUseCase(clipboardServiceMock.Object);
-        var cutUseCase = new CutSelectionUseCase(clipboardServiceMock.Object);
-        var pasteUseCase = new PasteFromClipboardUseCase(clipboardServiceMock.Object, drawingSessionProviderMock.Object);
-        var selectionService = new SelectionService(copyUseCase, cutUseCase, pasteUseCase);
+        var copyUseCase = new CopySelectionUseCase(clipboardMock.Object);
+        var cutUseCase = new CutSelectionUseCase(clipboardMock.Object);
+        var pasteUseCase = new PasteFromClipboardUseCase(clipboardMock.Object, drawingSessionProviderMock.Object);
+        var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         var drawableCanvasViewModelMock = new Mock<DrawableCanvasViewModel>(
             stateMock.Object,
             Mock.Of<IAddFrameProvider>(),
-            clipboardServiceMock.Object,
+            clipboardMock.Object,
             bitmapAdapterMock.Object,
             drawingSessionProviderMock.Object,
-            selectionService,
+            SelectionClipboard,
             Mock.Of<IInteractionCoordinator>()
         );
         drawableCanvasViewModelMock.SetupAllProperties();
         drawableCanvasViewModelMock.Object.Magnification = new Magnification(4.0f);
 
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         var animationViewModelMock = new Mock<AnimationViewModel>(
             patternsProvider,
-            patternService,
+            patternEditor,
             Mock.Of<IFileSystem>(),
             bitmapAdapterMock.Object);
 
@@ -83,11 +84,11 @@ public class ViewModelSafetyCharacterizationTests
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        var pictureIOService = new PictureIOService(
+        var PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(pictureRepositoryMock.Object, settingsRepo.Object),
             new LoadPictureUseCase(pictureRepositoryMock.Object, settingsRepo.Object));
 
-        Func<DockPictureViewModel> dockPictureFactory = () => new DockPictureViewModel(stateMock.Object, animationViewModelMock.Object, bitmapAdapterMock.Object, pictureIOService);
+        Func<DockPictureViewModel> dockPictureFactory = () => new DockPictureViewModel(stateMock.Object, animationViewModelMock.Object, bitmapAdapterMock.Object, PictureFileIO);
         Func<NewPictureWindowViewModel> newPictureWindowFactory = () => new Mock<NewPictureWindowViewModel>().Object;
 
         var loadUseCase = new LoadSettingsUseCase(settingsRepo.Object);
@@ -95,7 +96,7 @@ public class ViewModelSafetyCharacterizationTests
 
         _vm = new MainViewModel(
             stateMock.Object,
-            clipboardServiceMock.Object,
+            clipboardMock.Object,
             bitmapAdapterMock.Object,
             pictureRepositoryMock.Object,
             drawStyleFactoryMock.Object,
@@ -108,11 +109,11 @@ public class ViewModelSafetyCharacterizationTests
             animationViewModelMock.Object,
             drawingSessionViewModelMock.Object,
             paletteContainerViewModelMock.Object,
-            pictureIOService,
-            new Mock<IThemeService>().Object,
+            PictureFileIO,
+            new Mock<IThemeDetector>().Object,
             loadUseCase,
             saveUseCase,
-            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
+            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
             dockPictureFactory,
             newPictureWindowFactory
         );
@@ -145,3 +146,10 @@ public class ViewModelSafetyCharacterizationTests
         });
     }
 }
+
+
+
+
+
+
+

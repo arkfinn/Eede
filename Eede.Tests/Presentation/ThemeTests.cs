@@ -1,6 +1,7 @@
 using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.Settings;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
+using Eede.Presentation.Theming;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
 using Eede.Presentation.ViewModels.Animations;
@@ -34,10 +35,10 @@ public class ThemeTests
     [AvaloniaTest]
     public void InitialTheme_ShouldMatchSystemSetting_Dark()
     {
-        var themeServiceMock = new Mock<IThemeService>();
-        themeServiceMock.Setup(x => x.GetActualThemeVariant()).Returns(Avalonia.Styling.ThemeVariant.Dark);
+        var themeDetectorMock = new Mock<IThemeDetector>();
+        themeDetectorMock.Setup(x => x.GetActualThemeVariant()).Returns(Avalonia.Styling.ThemeVariant.Dark);
 
-        var mainVM = CreateMainViewModel(themeServiceMock.Object);
+        var mainVM = CreateMainViewModel(themeDetectorMock.Object);
         
         Assert.That(mainVM.SelectedThemeIndex, Is.EqualTo(1), "SelectedThemeIndex should be 1 (Dark) when system theme is Dark.");
     }
@@ -45,15 +46,15 @@ public class ThemeTests
     [AvaloniaTest]
     public void InitialTheme_ShouldMatchSystemSetting_Light()
     {
-        var themeServiceMock = new Mock<IThemeService>();
-        themeServiceMock.Setup(x => x.GetActualThemeVariant()).Returns(Avalonia.Styling.ThemeVariant.Light);
+        var themeDetectorMock = new Mock<IThemeDetector>();
+        themeDetectorMock.Setup(x => x.GetActualThemeVariant()).Returns(Avalonia.Styling.ThemeVariant.Light);
 
-        var mainVM = CreateMainViewModel(themeServiceMock.Object);
+        var mainVM = CreateMainViewModel(themeDetectorMock.Object);
 
         Assert.That(mainVM.SelectedThemeIndex, Is.EqualTo(0), "SelectedThemeIndex should be 0 (Light) when system theme is Light.");
     }
 
-    private MainViewModel CreateMainViewModel(IThemeService themeService)
+    private MainViewModel CreateMainViewModel(IThemeDetector themeDetector)
     {
         var state = new GlobalState();
         var clipboard = new Mock<IClipboard>().Object;
@@ -68,7 +69,7 @@ public class ThemeTests
         var sessionProvider = sessionProviderMock.Object;
         var coordinator = new Mock<IInteractionCoordinator>().Object;
 
-        var selectionService = new SelectionService(
+        var SelectionClipboard = new SelectionClipboard(
             new CopySelectionUseCase(clipboard),
             new CutSelectionUseCase(clipboard),
             new PasteFromClipboardUseCase(clipboard, sessionProvider)
@@ -80,14 +81,14 @@ public class ThemeTests
             clipboard,
             bitmapAdapter,
             sessionProvider,
-            selectionService,
+            SelectionClipboard,
             coordinator
         );
 
         var patternsProvider = new AnimationPatternsProvider();
         var animationVM = new AnimationViewModel(
             patternsProvider,
-            new AnimationPatternService(
+            new AnimationPatternEditor(
                 new AddAnimationPatternUseCase(patternsProvider),
                 new ReplaceAnimationPatternUseCase(patternsProvider),
                 new RemoveAnimationPatternUseCase(patternsProvider)
@@ -101,7 +102,7 @@ public class ThemeTests
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        var pictureIOService = new PictureIOService(
+        var PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(pictureRepo, settingsRepo.Object),
             new LoadPictureUseCase(pictureRepo, settingsRepo.Object)
         );
@@ -113,11 +114,17 @@ public class ThemeTests
             state, clipboard, bitmapAdapter, pictureRepo, drawStyleFactory,
             transformUseCase, new Mock<IScalingImageUseCase>().Object, transferToCanvas, transferFromCanvas,
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
-            paletteVM, pictureIOService, themeService,
+            paletteVM, PictureFileIO, themeDetector,
             loadUseCase, saveUseCase,
-            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserService>().Object),
-            () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
+            new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
+            () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), PictureFileIO),
             () => new NewPictureWindowViewModel()
         );
     }
 }
+
+
+
+
+
+

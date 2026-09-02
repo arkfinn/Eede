@@ -16,13 +16,13 @@ public class AnimationDockViewModelTests
     public void ShouldInitializeWithCorrectProperties()
     {
         var patternsProvider = new AnimationPatternsProvider();
-        var patternService = new AnimationPatternService(
+        var patternEditor = new AnimationPatternEditor(
             new AddAnimationPatternUseCase(patternsProvider),
             new ReplaceAnimationPatternUseCase(patternsProvider),
             new RemoveAnimationPatternUseCase(patternsProvider));
         var animationViewModel = new AnimationViewModel(
             patternsProvider,
-            patternService,
+            patternEditor,
             new Mock<IFileSystem>().Object,
             new AvaloniaBitmapAdapter());
 
@@ -33,3 +33,4 @@ public class AnimationDockViewModelTests
         Assert.That(dockViewModel.AnimationViewModel, Is.SameAs(animationViewModel));
     }
 }
+

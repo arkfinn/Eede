@@ -6,19 +6,19 @@ namespace Eede.Application.UseCase.Updates;
 
 public class CheckUpdateUseCase
 {
-    private readonly IUpdateService _updateService;
+    private readonly IAppUpdater _appUpdater;
 
-    public CheckUpdateUseCase(IUpdateService updateService)
+    public CheckUpdateUseCase(IAppUpdater appUpdater)
     {
-        _updateService = updateService;
+        _appUpdater = appUpdater;
     }
 
     public async Task ExecuteAsync()
     {
-        var hasUpdate = await _updateService.CheckForUpdatesAsync();
+        var hasUpdate = await _appUpdater.CheckForUpdatesAsync();
         if (hasUpdate)
         {
-            await _updateService.DownloadUpdateAsync();
+            await _appUpdater.DownloadUpdateAsync();
         }
     }
 }

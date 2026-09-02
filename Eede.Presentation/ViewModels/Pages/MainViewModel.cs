@@ -20,7 +20,8 @@ using Eede.Presentation.Common.Models;
 using Eede.Application.Infrastructure;
 using Eede.Presentation.Events;
 using Eede.Presentation.Files;
-using Eede.Presentation.Services;
+using Eede.Presentation.Coordinators;
+using Eede.Presentation.Theming;
 using Eede.Presentation.Settings;
 using Eede.Presentation.ViewModels.DataDisplay;
 using Eede.Presentation.ViewModels.DataEntry;
@@ -177,11 +178,11 @@ public partial class MainViewModel : ViewModelBase
     private readonly ITransferImageToCanvasUseCase _transferImageToCanvasUseCase;
     private readonly ITransferImageFromCanvasUseCase _transferImageFromCanvasUseCase;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
-    private readonly IPictureIOService _pictureIOService;
-    private readonly IThemeService _themeService;
+    private readonly IPictureFileIO _pictureFileIO;
+    private readonly IThemeDetector _themeDetector;
     private readonly ILoadSettingsUseCase _loadSettingsUseCase;
     private readonly ISaveSettingsUseCase _saveSettingsUseCase;
-    private readonly IUpdateService? _updateService;
+    private readonly IAppUpdater? _appUpdater;
     private readonly CheckUpdateUseCase? _checkUpdateUseCase;
     private readonly GlobalState _state;
     private readonly IClipboard _clipboard;
@@ -190,7 +191,7 @@ public partial class MainViewModel : ViewModelBase
 
     private readonly IPullContextTracker _pullContextTracker;
     private readonly SessionRecoveryCoordinator? _coordinator;
-    private readonly ISessionRecoveryService? _recoveryService;
+    private readonly ISessionRecoverer? _recoverer;
     private readonly ISessionStorage? _sessionStorage;
     private readonly Guid _sessionId = Guid.NewGuid();
     private readonly Dictionary<DockPictureViewModel, CompositeDisposable> _pictureSubscriptions = new();
@@ -218,18 +219,18 @@ public partial class MainViewModel : ViewModelBase
         AnimationViewModel animationViewModel,
         DrawingSessionViewModel drawingSessionViewModel,
         PaletteContainerViewModel paletteContainerViewModel,
-        IPictureIOService pictureIOService,
-        IThemeService themeService,
+        IPictureFileIO pictureFileIO,
+        IThemeDetector themeDetector,
         ILoadSettingsUseCase loadSettingsUseCase,
         ISaveSettingsUseCase saveSettingsUseCase,
         WelcomeViewModel welcomeViewModel,
         Func<DockPictureViewModel> dockPictureFactory,
         Func<NewPictureWindowViewModel> newPictureWindowFactory,
-        IUpdateService? updateService = null,
+        IAppUpdater? appUpdater = null,
         CheckUpdateUseCase? checkUpdateUseCase = null,
         IPullContextTracker? pullContextTracker = null,
         SessionRecoveryCoordinator? sessionRecoveryCoordinator = null,
-        ISessionRecoveryService? sessionRecoveryService = null,
+        ISessionRecoverer? sessionRecoverer = null,
         ISessionStorage? sessionStorage = null)
     {
         _state = State;
@@ -242,11 +243,11 @@ public partial class MainViewModel : ViewModelBase
         _transferImageToCanvasUseCase = transferImageToCanvasUseCase;
         _transferImageFromCanvasUseCase = transferImageFromCanvasUseCase;
         _drawingSessionProvider = drawingSessionProvider;
-        _pictureIOService = pictureIOService;
-        _themeService = themeService;
+        _pictureFileIO = pictureFileIO;
+        _themeDetector = themeDetector;
         _loadSettingsUseCase = loadSettingsUseCase;
         _saveSettingsUseCase = saveSettingsUseCase;
-        _updateService = updateService;
+        _appUpdater = appUpdater;
         _checkUpdateUseCase = checkUpdateUseCase;
         WelcomeViewModel = welcomeViewModel;
         _dockPictureFactory = dockPictureFactory;
@@ -254,7 +255,7 @@ public partial class MainViewModel : ViewModelBase
 
         _pullContextTracker = pullContextTracker ?? new PullContextTracker();
         _coordinator = sessionRecoveryCoordinator;
-        _recoveryService = sessionRecoveryService;
+        _recoverer = sessionRecoverer;
         _sessionStorage = sessionStorage;
 
         if (_coordinator != null)
@@ -274,7 +275,7 @@ public partial class MainViewModel : ViewModelBase
         DrawingSessionViewModel = drawingSessionViewModel;
         PaletteContainerViewModel = paletteContainerViewModel;
 
-        SelectedThemeIndex = _themeService.GetActualThemeVariant() == Avalonia.Styling.ThemeVariant.Dark ? 1 : 0;
+        SelectedThemeIndex = _themeDetector.GetActualThemeVariant() == Avalonia.Styling.ThemeVariant.Dark ? 1 : 0;
 
         welcomeViewModel.CreateNewPictureCommand.Subscribe(_ => CreateNewPictureCommand?.Execute().Subscribe());
         welcomeViewModel.OpenPictureCommand.Subscribe(_ =>
@@ -476,16 +477,16 @@ public partial class MainViewModel : ViewModelBase
         CutCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
         PasteCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
 
-        if (_updateService != null)
+        if (_appUpdater != null)
         {
-            var canApplyUpdate = _updateService.StatusChanged
+            var canApplyUpdate = _appUpdater.StatusChanged
                 .Select(status => status == UpdateStatus.ReadyToApply);
             ApplyUpdateCommand = ReactiveCommand.Create(() =>
             {
-                _updateService.ApplyAndRestart();
+                _appUpdater.ApplyAndRestart();
             }, canApplyUpdate);
 
-            _updateService.StatusChanged
+            _appUpdater.StatusChanged
                 .Select(status => status == UpdateStatus.ReadyToApply)
                 .ToProperty(this, nameof(IsUpdateReady), out _isUpdateReadyHelper);
         }
@@ -834,7 +835,7 @@ public partial class MainViewModel : ViewModelBase
         {
             string pathStr = path.IsAbsoluteUri ? (path.IsFile ? path.LocalPath : path.ToString()) : path.OriginalString;
             FilePath filePath = new(pathStr);
-            Picture? picture = await _pictureIOService.LoadAsync(filePath);
+            Picture? picture = await _pictureFileIO.LoadAsync(filePath);
             if (picture == null)
             {
                 return null;
@@ -1116,16 +1117,16 @@ public partial class MainViewModel : ViewModelBase
 
     public async Task InitializeAsync()
     {
-        if (_recoveryService == null) return;
+        if (_recoverer == null) return;
 
         try
         {
-            if (await _recoveryService.HasPendingRecoveryAsync())
+            if (await _recoverer.HasPendingRecoveryAsync())
             {
-                var metadata = await _recoveryService.GetRecoveryMetadataAsync();
+                var metadata = await _recoverer.GetRecoveryMetadataAsync();
                 if (metadata != null)
                 {
-                    bool isCrash = await _recoveryService.IsCrashRecoveryAsync();
+                    bool isCrash = await _recoverer.IsCrashRecoveryAsync();
                     WelcomeViewModel.SetPreviousSessionInfo(metadata, isCrash);
 
                     var docCount = metadata.Documents.Count;
@@ -1264,11 +1265,11 @@ public partial class MainViewModel : ViewModelBase
 
     private async Task ExecuteRestoreRecoveryAsync()
     {
-        if (_recoveryService == null) return;
+        if (_recoverer == null) return;
 
         try
         {
-            var restored = await _recoveryService.RestoreSessionAsync();
+            var restored = await _recoverer.RestoreSessionAsync();
 
             var docMap = RestoreDocuments(restored.Documents, restored.Snapshot.ActiveDocumentId);
             RestorePullState(restored.PullState, docMap);
@@ -1415,9 +1416,9 @@ public partial class MainViewModel : ViewModelBase
 
     private async Task ExecuteDiscardRecoveryAsync()
     {
-        if (_recoveryService != null)
+        if (_recoverer != null)
         {
-            await _recoveryService.DiscardSessionAsync();
+            await _recoverer.DiscardSessionAsync();
         }
         IsRecoveryPromptVisible = false;
         WelcomeViewModel.ClearPreviousSessionInfo();
@@ -1478,3 +1479,7 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 }
+
+
+
+

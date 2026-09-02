@@ -120,14 +120,14 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public GlobalState GlobalState { get; }
         public AnimationViewModel AnimationViewModel { get; }
         private readonly IBitmapAdapter<Bitmap> BitmapAdapter;
-        private readonly IPictureFileIO pictureFileIO;
+        private readonly IPictureFileIO _pictureFileIO;
 
         public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureFileIO pictureFileIO)
         {
             GlobalState = globalState;
             AnimationViewModel = animationViewModel;
             BitmapAdapter = bitmapAdapter;
-            pictureFileIO = pictureFileIO;
+            _pictureFileIO = pictureFileIO;
 
             Id = Guid.NewGuid().ToString();
 

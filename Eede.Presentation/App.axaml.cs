@@ -46,7 +46,7 @@ namespace Eede.Presentation;
 
 public partial class App : Avalonia.Application
 {
-    public static IServiceProvider? Services { get; private set; }
+    public static IServiceProvider? Services { get; set; }
 
     public override void Initialize()
     {

@@ -174,13 +174,13 @@
             <TextBlock Text="リンク" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColor}"/>
             <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede" Classes="Link">
               <StackPanel Orientation="Horizontal" Spacing="10">
-                <PathIcon Data="{StaticResource FillSquareIconGeometry}"/>
+                <PathIcon Data="{StaticResource GithubIconGeometry}"/>
                 <TextBlock Text="GitHub リポジトリ"/>
               </StackPanel>
             </Button>
             <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/arkfinn/Eede/discussions" Classes="Link">
               <StackPanel Orientation="Horizontal" Spacing="10">
-                <PathIcon Data="{StaticResource FillSquareIconGeometry}"/>
+                <PathIcon Data="{StaticResource ForumIconGeometry}"/>
                 <TextBlock Text="GitHub 議論板 (Discussions)"/>
               </StackPanel>
             </Button>

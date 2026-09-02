@@ -5,7 +5,7 @@ using Eede.Domain.ImageEditing.Recovery;
 
 namespace Eede.Application.Recovery;
 
-public interface ISessionRecoveryService
+public interface ISessionRecoverer
 {
     Task<bool> HasPendingRecoveryAsync(CancellationToken ct = default);
     Task<bool> IsCrashRecoveryAsync(CancellationToken ct = default);

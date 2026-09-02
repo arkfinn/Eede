@@ -14,18 +14,18 @@ using NUnit.Framework;
 namespace Eede.Tests.Application.Recovery;
 
 [TestFixture]
-public class SessionRecoveryServiceTests
+public class SessionRecovererTests
 {
     private InMemorySessionStorage _storage = null!;
     private SkiaSharpPictureCodec _codec = null!;
-    private SessionRecoveryService _service = null!;
+    private SessionRecoverer _recoverer = null!;
 
     [SetUp]
     public void SetUp()
     {
         _storage = new InMemorySessionStorage();
         _codec = new SkiaSharpPictureCodec();
-        _service = new SessionRecoveryService(_storage, _codec);
+        _recoverer = new SessionRecoverer(_storage, _codec);
     }
 
     private static (SessionSnapshot Snapshot, Dictionary<string, byte[]> Payloads) CreateSampleSnapshotWithPayloads(
@@ -83,7 +83,7 @@ public class SessionRecoveryServiceTests
     [Test]
     public async Task HasPendingRecoveryAsync_WhenNoSession_ReturnsFalse()
     {
-        var result = await _service.HasPendingRecoveryAsync();
+        var result = await _recoverer.HasPendingRecoveryAsync();
         Assert.That(result, Is.False);
     }
 
@@ -93,7 +93,7 @@ public class SessionRecoveryServiceTests
         var (snapshot, payloads) = CreateSampleSnapshotWithPayloads(_codec);
         _storage.DirectSetSession(snapshot, payloads);
 
-        var result = await _service.HasPendingRecoveryAsync();
+        var result = await _recoverer.HasPendingRecoveryAsync();
         Assert.That(result, Is.True);
     }
 
@@ -103,7 +103,7 @@ public class SessionRecoveryServiceTests
         var (snapshot, payloads) = CreateSampleSnapshotWithPayloads(_codec);
         _storage.DirectSetSession(snapshot, payloads);
 
-        var metadata = await _service.GetRecoveryMetadataAsync();
+        var metadata = await _recoverer.GetRecoveryMetadataAsync();
         Assert.That(metadata, Is.Not.Null);
         Assert.That(metadata!.SessionId, Is.EqualTo(snapshot.SessionId));
         Assert.That(metadata.ActiveDocumentId, Is.EqualTo("doc-1"));
@@ -116,7 +116,7 @@ public class SessionRecoveryServiceTests
         var (snapshot, payloads) = CreateSampleSnapshotWithPayloads(_codec, includePull: true);
         _storage.DirectSetSession(snapshot, payloads);
 
-        var restored = await _service.RestoreSessionAsync();
+        var restored = await _recoverer.RestoreSessionAsync();
 
         Assert.That(restored, Is.Not.Null);
         Assert.That(restored.HasCorruptedDocuments, Is.False);
@@ -151,7 +151,7 @@ public class SessionRecoveryServiceTests
     {
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await _service.RestoreSessionAsync();
+            await _recoverer.RestoreSessionAsync();
         });
     }
 
@@ -164,7 +164,7 @@ public class SessionRecoveryServiceTests
         payloads["doc_2.png"] = new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44 };
         _storage.DirectSetSession(snapshot, payloads);
 
-        var restored = await _service.RestoreSessionAsync();
+        var restored = await _recoverer.RestoreSessionAsync();
 
         Assert.That(restored, Is.Not.Null);
         Assert.That(restored.HasCorruptedDocuments, Is.True);
@@ -186,7 +186,7 @@ public class SessionRecoveryServiceTests
         payloads.Remove("doc_2.png");
         _storage.DirectSetSession(snapshot, payloads);
 
-        var restored = await _service.RestoreSessionAsync();
+        var restored = await _recoverer.RestoreSessionAsync();
 
         Assert.That(restored, Is.Not.Null);
         Assert.That(restored.HasCorruptedDocuments, Is.True);
@@ -204,11 +204,12 @@ public class SessionRecoveryServiceTests
         var (snapshot, payloads) = CreateSampleSnapshotWithPayloads(_codec);
         _storage.DirectSetSession(snapshot, payloads);
 
-        Assert.That(await _service.HasPendingRecoveryAsync(), Is.True);
+        Assert.That(await _recoverer.HasPendingRecoveryAsync(), Is.True);
 
-        await _service.DiscardSessionAsync();
+        await _recoverer.DiscardSessionAsync();
 
-        Assert.That(await _service.HasPendingRecoveryAsync(), Is.False);
+        Assert.That(await _recoverer.HasPendingRecoveryAsync(), Is.False);
         Assert.That(await _storage.LoadLatestSnapshotAsync(), Is.Null);
     }
 }
+

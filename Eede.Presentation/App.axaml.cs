@@ -181,7 +181,7 @@ public partial class App : Avalonia.Application
             var recoveryDir = System.IO.Path.Combine(appData, "Eede", "session_recovery");
             return new LocalFileSessionStorage(recoveryDir);
         });
-        services.AddSingleton<ISessionRecoveryService, SessionRecoveryService>();
+        services.AddSingleton<ISessionRecoverer, SessionRecoverer>();
         services.AddSingleton<SessionRecoveryCoordinator>(sp =>
             new SessionRecoveryCoordinator(
                 sp.GetRequiredService<ISessionStorage>(),

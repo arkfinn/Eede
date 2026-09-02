@@ -46,7 +46,7 @@ public class SessionRecoveryE2ETests
     private InMemorySessionStorage _storage = default!;
     private SkiaSharpPictureCodec _codec = default!;
     private PullContextTracker _pullTracker = default!;
-    private SessionRecoveryService _recoveryService = default!;
+    private SessionRecoverer _recoverer = default!;
     private SessionRecoveryCoordinator _coordinator = default!;
 
     private GlobalState _globalState = default!;
@@ -79,7 +79,7 @@ public class SessionRecoveryE2ETests
         _storage = new InMemorySessionStorage();
         _codec = new SkiaSharpPictureCodec();
         _pullTracker = new PullContextTracker();
-        _recoveryService = new SessionRecoveryService(_storage, _codec);
+        _recoverer = new SessionRecoverer(_storage, _codec);
         _coordinator = new SessionRecoveryCoordinator(_storage, _codec, null);
 
         _globalState = new GlobalState();
@@ -187,7 +187,7 @@ public class SessionRecoveryE2ETests
             checkUpdateUseCase,
             _pullTracker,
             _coordinator,
-            _recoveryService,
+            _recoverer,
             _storage);
     }
 
@@ -598,7 +598,7 @@ public class SessionRecoveryE2ETests
         await nextMainVM.InitializeAsync();
         Assert.That(nextMainVM.WelcomeViewModel.HasPreviousSession, Is.True);
 
-        var service = new SessionRecoveryService(_storage, _codec);
+        var service = new SessionRecoverer(_storage, _codec);
         var restoredData = await service.RestoreSessionAsync();
         Assert.That(restoredData.PullState, Is.Not.Null, "Restored PullState must not be null");
         Assert.That(restoredData.PullState!.CanvasPicture, Is.Not.Null, "Restored CanvasPicture must not be null");
@@ -625,3 +625,4 @@ public class SessionRecoveryE2ETests
         return Picture.Create(size, bytes);
     }
 }
+

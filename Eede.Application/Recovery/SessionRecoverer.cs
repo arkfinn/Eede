@@ -9,12 +9,12 @@ using Eede.Domain.ImageEditing.Recovery;
 
 namespace Eede.Application.Recovery;
 
-public sealed class SessionRecoveryService : ISessionRecoveryService
+public sealed class SessionRecoverer : ISessionRecoverer
 {
     private readonly ISessionStorage _storage;
     private readonly IPictureCodec _codec;
 
-    public SessionRecoveryService(ISessionStorage storage, IPictureCodec codec)
+    public SessionRecoverer(ISessionStorage storage, IPictureCodec codec)
     {
         _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         _codec = codec ?? throw new ArgumentNullException(nameof(codec));

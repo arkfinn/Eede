@@ -190,7 +190,7 @@ public partial class MainViewModel : ViewModelBase
 
     private readonly IPullContextTracker _pullContextTracker;
     private readonly SessionRecoveryCoordinator? _coordinator;
-    private readonly ISessionRecoveryService? _recoveryService;
+    private readonly ISessionRecoverer? _recoverer;
     private readonly ISessionStorage? _sessionStorage;
     private readonly Guid _sessionId = Guid.NewGuid();
     private readonly Dictionary<DockPictureViewModel, CompositeDisposable> _pictureSubscriptions = new();
@@ -229,7 +229,7 @@ public partial class MainViewModel : ViewModelBase
         CheckUpdateUseCase? checkUpdateUseCase = null,
         IPullContextTracker? pullContextTracker = null,
         SessionRecoveryCoordinator? sessionRecoveryCoordinator = null,
-        ISessionRecoveryService? sessionRecoveryService = null,
+        ISessionRecoverer? sessionRecoverer = null,
         ISessionStorage? sessionStorage = null)
     {
         _state = State;
@@ -254,7 +254,7 @@ public partial class MainViewModel : ViewModelBase
 
         _pullContextTracker = pullContextTracker ?? new PullContextTracker();
         _coordinator = sessionRecoveryCoordinator;
-        _recoveryService = sessionRecoveryService;
+        _recoverer = sessionRecoverer;
         _sessionStorage = sessionStorage;
 
         if (_coordinator != null)
@@ -1116,16 +1116,16 @@ public partial class MainViewModel : ViewModelBase
 
     public async Task InitializeAsync()
     {
-        if (_recoveryService == null) return;
+        if (_recoverer == null) return;
 
         try
         {
-            if (await _recoveryService.HasPendingRecoveryAsync())
+            if (await _recoverer.HasPendingRecoveryAsync())
             {
-                var metadata = await _recoveryService.GetRecoveryMetadataAsync();
+                var metadata = await _recoverer.GetRecoveryMetadataAsync();
                 if (metadata != null)
                 {
-                    bool isCrash = await _recoveryService.IsCrashRecoveryAsync();
+                    bool isCrash = await _recoverer.IsCrashRecoveryAsync();
                     WelcomeViewModel.SetPreviousSessionInfo(metadata, isCrash);
 
                     var docCount = metadata.Documents.Count;
@@ -1264,11 +1264,11 @@ public partial class MainViewModel : ViewModelBase
 
     private async Task ExecuteRestoreRecoveryAsync()
     {
-        if (_recoveryService == null) return;
+        if (_recoverer == null) return;
 
         try
         {
-            var restored = await _recoveryService.RestoreSessionAsync();
+            var restored = await _recoverer.RestoreSessionAsync();
 
             var docMap = RestoreDocuments(restored.Documents, restored.Snapshot.ActiveDocumentId);
             RestorePullState(restored.PullState, docMap);
@@ -1415,9 +1415,9 @@ public partial class MainViewModel : ViewModelBase
 
     private async Task ExecuteDiscardRecoveryAsync()
     {
-        if (_recoveryService != null)
+        if (_recoverer != null)
         {
-            await _recoveryService.DiscardSessionAsync();
+            await _recoverer.DiscardSessionAsync();
         }
         IsRecoveryPromptVisible = false;
         WelcomeViewModel.ClearPreviousSessionInfo();
@@ -1478,3 +1478,4 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 }
+

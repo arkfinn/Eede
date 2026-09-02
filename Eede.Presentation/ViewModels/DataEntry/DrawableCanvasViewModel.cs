@@ -426,7 +426,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Copy failed: {ex}");
+            System.Diagnostics.Trace.WriteLine($"Copy failed: {ex}");
         }
     }
 
@@ -446,7 +446,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Cut failed: {ex}");
+            System.Diagnostics.Trace.WriteLine($"Cut failed: {ex}");
         }
     }
 
@@ -462,7 +462,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Paste failed: {ex}");
+            System.Diagnostics.Trace.WriteLine($"Paste failed: {ex}");
         }
     }
 }

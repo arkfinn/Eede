@@ -99,9 +99,10 @@ public sealed class SessionRecoverer : ISessionRecoverer
                         canvasPicture = _codec.DecodeFromPng(payload);
                     }
                 }
-                catch (Exception)
+                catch (Exception ex) when (ex is ArgumentException || ex is System.IO.IOException || ex is UnauthorizedAccessException || ex is FormatException || ex is InvalidOperationException)
                 {
                     // Pull canvas image corruption is isolated to avoid breaking the entire session restore
+                    System.Diagnostics.Trace.WriteLine($"Failed to decode pull canvas image payload '{snapshot.PullState.CanvasImagePayloadRef}': {ex.Message}");
                 }
             }
 

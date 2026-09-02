@@ -11,6 +11,7 @@ using Eede.Presentation.ViewModels.General;
 using Moq;
 using NUnit.Framework;
 using ReactiveUI;
+using ReactiveUI.Builder;
 
 namespace Eede.Presentation.Tests.ViewModels.General;
 
@@ -23,6 +24,21 @@ public class WelcomeViewModelTests
     private BehaviorSubject<UpdateStatus> _statusSubject;
     private AppSettings _appSettings;
     private CheckUpdateUseCase _checkUpdateUseCase;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+        try
+        {
+            RxAppBuilder.CreateReactiveUIBuilder()
+                .WithCoreServices()
+                .BuildApp();
+        }
+        catch
+        {
+            // すでに初期化されている場合は無視
+        }
+    }
 
     [SetUp]
     public void Setup()
@@ -116,6 +132,28 @@ public class WelcomeViewModelTests
         await viewModel.OpenUrlCommand.Execute(url).ToTask();
 
         _browserLauncherMock.Verify(x => x.OpenUrl(It.IsAny<string>()), Times.Never);
+    }
+
+    [Test]
+    public void Version_ShouldReturnSemanticVersion_FromAssemblyInformationalVersion()
+    {
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
+
+        Assert.That(viewModel.Version, Is.Not.Null.And.Not.Empty);
+        Assert.That(viewModel.Version, Does.Match(@"^\d+\.\d+\.\d+"));
+        Assert.That(viewModel.Version, Does.Not.Contain("+"), "ビルドメタデータ（+コミットハッシュ）は表示用にトリムされていること");
+    }
+
+    [Test]
+    public void DisplayVersion_WhenLatestVersionIsNull_ShouldFallbackToVersion()
+    {
+        var nullUpdaterMock = new Mock<IAppUpdater>();
+        nullUpdaterMock.SetupGet(s => s.StatusChanged).Returns(Observable.Return(UpdateStatus.Idle));
+        nullUpdaterMock.SetupGet(s => s.LatestVersion).Returns((string?)null);
+
+        var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, nullUpdaterMock.Object, null);
+
+        Assert.That(viewModel.DisplayVersion, Is.EqualTo(viewModel.Version));
     }
 }
 

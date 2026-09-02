@@ -1,4 +1,4 @@
-using Eede.Domain.ImageEditing;
+﻿using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.SharedKernel;
@@ -164,8 +164,8 @@ public class DrawingSessionTests
         Assert.Multiple(() =>
         {
             Assert.That(previewSession.CurrentPreviewContent, Is.Not.Null);
-            Assert.That(previewSession.CurrentPreviewContent.Pixels, Is.EqualTo(pastedPixels));
-            Assert.That(previewSession.CurrentPreviewContent.Type, Is.EqualTo(SelectionPreviewType.Paste));
+            Assert.That(previewSession.CurrentPreviewContent!.Pixels, Is.EqualTo(pastedPixels));
+            Assert.That(previewSession.CurrentPreviewContent!.Type, Is.EqualTo(SelectionPreviewType.Paste));
             Assert.That(previewSession.CanUndo(), Is.True, "Should be able to undo paste preview when history exists");
         });
 

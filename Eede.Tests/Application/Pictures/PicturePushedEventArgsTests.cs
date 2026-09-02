@@ -1,4 +1,4 @@
-﻿using Eede.Application.Pictures;
+using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using NUnit.Framework;
@@ -23,7 +23,7 @@ namespace Eede.Application.Tests.Pictures
         {
             _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                PicturePushEventArgs h = new(null, new Position(2, 2));
+                PicturePushEventArgs h = new(null!, new Position(2, 2));
             });
         }
     }

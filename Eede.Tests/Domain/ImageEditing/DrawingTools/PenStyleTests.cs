@@ -1,4 +1,4 @@
-﻿using Eede.Domain.ImageEditing.Blending;
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.Palettes;
 using NUnit.Framework;
@@ -27,7 +27,7 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
         {
             _ = Assert.Throws<ArgumentNullException>(() =>
             {
-                _ = new PenStyle(null, new ArgbColor(255, 0, 0, 0), 1);
+                _ = new PenStyle(null!, new ArgbColor(255, 0, 0, 0), 1);
             });
         }
 

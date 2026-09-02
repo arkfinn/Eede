@@ -41,7 +41,7 @@ public class AvaloniaClipboard : IClipboard
         // 2. PNG
         using (var ms = new MemoryStream())
         {
-            bitmap.Save(ms);
+            bitmap.Save(ms, new PngBitmapEncoderOptions());
             item.Set(DataFormat.CreateBytesPlatformFormat("PNG"), ms.ToArray());
         }
 

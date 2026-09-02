@@ -32,7 +32,7 @@ public class VelopackAppUpdaterTests
             new[] { typeof(Func<IUpdateManagerWrapper>), typeof(string) },
             null
         );
-        _updater = (VelopackAppUpdater)ctor.Invoke(new object[] { new Func<IUpdateManagerWrapper>(() => _mockManager.Object), "dummy" });
+        _updater = (VelopackAppUpdater)ctor!.Invoke(new object[] { new Func<IUpdateManagerWrapper>(() => _mockManager.Object), "dummy" });
 
         _statusChanges = new List<UpdateStatus>();
         _subscription = _updater.StatusChanged.Subscribe(s => _statusChanges.Add(s));
@@ -63,7 +63,7 @@ public class VelopackAppUpdaterTests
 
         // We set _updateInfo via reflection so that it's not null and we can trigger the download path
         var updateInfoField = typeof(VelopackAppUpdater).GetField("_updateInfo", BindingFlags.NonPublic | BindingFlags.Instance);
-        updateInfoField.SetValue(_updater, dummyInfo);
+        updateInfoField!.SetValue(_updater, dummyInfo);
 
         _mockManager.Setup(m => m.DownloadUpdatesAsync(It.IsAny<UpdateInfo>()))
             .ThrowsAsync(new HttpRequestException("Network error"));
@@ -98,7 +98,7 @@ public class VelopackAppUpdaterTests
         // Arrange
         // We must have ReadyToApply status, so let's set it via reflection
         var statusProperty = typeof(VelopackAppUpdater).GetProperty("Status");
-        statusProperty.SetValue(_updater, UpdateStatus.ReadyToApply);
+        statusProperty!.SetValue(_updater, UpdateStatus.ReadyToApply);
 
         #pragma warning disable SYSLIB0050 // FormatterServices is obsolete
         var dummyInfo = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(UpdateInfo)) as UpdateInfo;
@@ -106,7 +106,7 @@ public class VelopackAppUpdaterTests
 
         // We set _updateInfo via reflection so that it's not null
         var updateInfoField = typeof(VelopackAppUpdater).GetField("_updateInfo", BindingFlags.NonPublic | BindingFlags.Instance);
-        updateInfoField.SetValue(_updater, dummyInfo);
+        updateInfoField!.SetValue(_updater, dummyInfo);
 
         _mockManager.Setup(m => m.IsInstalled).Returns(true);
         _mockManager.Setup(m => m.ApplyUpdatesAndRestart(It.IsAny<UpdateInfo>()))

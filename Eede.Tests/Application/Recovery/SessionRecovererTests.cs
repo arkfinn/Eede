@@ -211,5 +211,35 @@ public class SessionRecovererTests
         Assert.That(await _recoverer.HasPendingRecoveryAsync(), Is.False);
         Assert.That(await _storage.LoadLatestSnapshotAsync(), Is.Null);
     }
+
+    [Test]
+    public void Constructor_WhenStorageIsNull_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => new SessionRecoverer(null!, _codec));
+    }
+
+    [Test]
+    public void Constructor_WhenCodecIsNull_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => new SessionRecoverer(_storage, null!));
+    }
+
+    [Test]
+    public async Task RestoreSessionAsync_WhenPullCanvasPayloadCorrupted_HandlesGracefully()
+    {
+        var (snapshot, payloads) = CreateSampleSnapshotWithPayloads(_codec, includePull: true);
+        // 意図的に pull_canvas.png を不正なバイナリに置き換える
+        payloads["pull_canvas.png"] = new byte[] { 0xFF, 0xFF, 0x00 };
+        _storage.DirectSetSession(snapshot, payloads);
+
+        var restored = await _recoverer.RestoreSessionAsync();
+
+        Assert.That(restored, Is.Not.Null);
+        // PullState 自体は保持されるが、CanvasPicture は安全に null にフォールバックされる
+        Assert.That(restored.PullState, Is.Not.Null);
+        Assert.That(restored.PullState!.CanvasPicture, Is.Null);
+        // ドキュメント群の復元は影響を受けず完了する
+        Assert.That(restored.Documents.Count, Is.EqualTo(2));
+    }
 }
 

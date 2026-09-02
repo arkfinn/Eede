@@ -178,7 +178,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly ITransferImageToCanvasUseCase _transferImageToCanvasUseCase;
     private readonly ITransferImageFromCanvasUseCase _transferImageFromCanvasUseCase;
     private readonly IDrawingSessionProvider _drawingSessionProvider;
-    private readonly IPictureIOService _pictureIOService;
+    private readonly IPictureFileIO _pictureFileIO;
     private readonly IThemeDetector _themeDetector;
     private readonly ILoadSettingsUseCase _loadSettingsUseCase;
     private readonly ISaveSettingsUseCase _saveSettingsUseCase;
@@ -219,7 +219,7 @@ public partial class MainViewModel : ViewModelBase
         AnimationViewModel animationViewModel,
         DrawingSessionViewModel drawingSessionViewModel,
         PaletteContainerViewModel paletteContainerViewModel,
-        IPictureIOService pictureIOService,
+        IPictureFileIO pictureFileIO,
         IThemeDetector themeDetector,
         ILoadSettingsUseCase loadSettingsUseCase,
         ISaveSettingsUseCase saveSettingsUseCase,
@@ -243,7 +243,7 @@ public partial class MainViewModel : ViewModelBase
         _transferImageToCanvasUseCase = transferImageToCanvasUseCase;
         _transferImageFromCanvasUseCase = transferImageFromCanvasUseCase;
         _drawingSessionProvider = drawingSessionProvider;
-        _pictureIOService = pictureIOService;
+        _pictureFileIO = pictureFileIO;
         _themeDetector = themeDetector;
         _loadSettingsUseCase = loadSettingsUseCase;
         _saveSettingsUseCase = saveSettingsUseCase;
@@ -835,7 +835,7 @@ public partial class MainViewModel : ViewModelBase
         {
             string pathStr = path.IsAbsoluteUri ? (path.IsFile ? path.LocalPath : path.ToString()) : path.OriginalString;
             FilePath filePath = new(pathStr);
-            Picture? picture = await _pictureIOService.LoadAsync(filePath);
+            Picture? picture = await _pictureFileIO.LoadAsync(filePath);
             if (picture == null)
             {
                 return null;
@@ -1479,5 +1479,6 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 }
+
 
 

@@ -224,7 +224,7 @@ public class WelcomeViewRecentFilesInvestigationTests
         var mockPictureRepo = new Mock<IPictureRepository>();
         var savePictureUseCase = new SavePictureUseCase(mockPictureRepo.Object, _settingsRepoMock.Object);
         var loadPictureUseCase = new LoadPictureUseCase(mockPictureRepo.Object, _settingsRepoMock.Object);
-        var pictureIOService = new PictureIOService(savePictureUseCase, loadPictureUseCase);
+        var PictureFileIO = new PictureFileIO(savePictureUseCase, loadPictureUseCase);
 
         var patternsProvider = new AnimationPatternsProvider();
         var patternService = new AnimationPatternService(
@@ -267,18 +267,19 @@ public class WelcomeViewRecentFilesInvestigationTests
             animationVM,
             drawingSessionVM,
             paletteVM,
-            pictureIOService,
+            PictureFileIO,
             new Mock<IThemeDetector>().Object,
             loadSettingsUseCase,
             saveSettingsUseCase,
             welcomeVM,
-            () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
+            () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, PictureFileIO),
             () => new NewPictureWindowViewModel()
         );
 
         return (mainVM, welcomeVM);
     }
 }
+
 
 
 

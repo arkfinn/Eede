@@ -100,13 +100,13 @@ public class MainViewModelCharacterizationTests
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        var pictureIOService = new PictureIOService(
+        var PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object),
             new LoadPictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object));
 
         _savePictureUseCaseMock = new Mock<SavePictureUseCase>(_pictureRepositoryMock.Object, settingsRepo.Object);
         _loadPictureUseCaseMock = new Mock<LoadPictureUseCase>(_pictureRepositoryMock.Object, settingsRepo.Object);
-        _dockPictureFactory = () => new DockPictureViewModel(Mock.Of<GlobalState>(), _animationViewModelMock.Object, _bitmapAdapterMock.Object, pictureIOService);
+        _dockPictureFactory = () => new DockPictureViewModel(Mock.Of<GlobalState>(), _animationViewModelMock.Object, _bitmapAdapterMock.Object, PictureFileIO);
         _newPictureWindowFactory = () => new Mock<NewPictureWindowViewModel>().Object;
     }
 
@@ -116,7 +116,7 @@ public class MainViewModelCharacterizationTests
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        var pictureIOService = new PictureIOService(
+        var PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object),
             new LoadPictureUseCase(_pictureRepositoryMock.Object, settingsRepo.Object));
 
@@ -138,7 +138,7 @@ public class MainViewModelCharacterizationTests
             _animationViewModelMock.Object,
             _drawingSessionViewModelMock.Object,
             _paletteContainerViewModelMock.Object,
-            pictureIOService,
+            PictureFileIO,
             new Mock<IThemeDetector>().Object,
             loadUseCase,
             saveUseCase,
@@ -150,5 +150,6 @@ public class MainViewModelCharacterizationTests
         Assert.That(vm, Is.Not.Null);
     }
 }
+
 
 

@@ -25,7 +25,7 @@ namespace Eede.Presentation.Tests.ViewModels.DataDisplay;
 public class DockPictureViewModelSaveTests
 {
     private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock;
-    private Mock<IPictureIOService> _pictureIOServiceMock;
+    private Mock<IPictureFileIO> _PictureFileIOMock;
     private Mock<IFileStorage> _fileStorageMock;
     private Mock<IAnimationPatternsProvider> _patternsProviderMock;
     private Mock<IAnimationPatternService> _patternServiceMock;
@@ -37,7 +37,7 @@ public class DockPictureViewModelSaveTests
     public void SetUp()
     {
         _bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
-        _pictureIOServiceMock = new Mock<IPictureIOService>();
+        _PictureFileIOMock = new Mock<IPictureFileIO>();
         _fileStorageMock = new Mock<IFileStorage>();
         _patternsProviderMock = new Mock<IAnimationPatternsProvider>();
         _patternServiceMock = new Mock<IAnimationPatternService>();
@@ -157,7 +157,7 @@ public class DockPictureViewModelSaveTests
 
     private DockPictureViewModel CreateViewModel(FilePath path)
     {
-        var vm = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var vm = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         vm.Initialize(Picture.CreateEmpty(new PictureSize(1, 1)), path);
         return vm;
     }

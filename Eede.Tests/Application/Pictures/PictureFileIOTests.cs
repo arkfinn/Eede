@@ -10,18 +10,18 @@ using System.Threading.Tasks;
 
 namespace Eede.Application.Tests.Pictures
 {
-    public class PictureIOServiceTests
+    public class PictureFileIOTests
     {
         private Mock<ISavePictureUseCase> _mockSaveUseCase;
         private Mock<ILoadPictureUseCase> _mockLoadUseCase;
-        private PictureIOService _service;
+        private PictureFileIO _fileIO;
 
         [SetUp]
         public void SetUp()
         {
             _mockSaveUseCase = new Mock<ISavePictureUseCase>();
             _mockLoadUseCase = new Mock<ILoadPictureUseCase>();
-            _service = new PictureIOService(_mockSaveUseCase.Object, _mockLoadUseCase.Object);
+            _fileIO = new PictureFileIO(_mockSaveUseCase.Object, _mockLoadUseCase.Object);
         }
 
         [Test]
@@ -30,7 +30,7 @@ namespace Eede.Application.Tests.Pictures
             var picture = Picture.CreateEmpty(new PictureSize(16, 16));
             var path = new FilePath("test.png");
 
-            await _service.SaveAsync(picture, path);
+            await _fileIO.SaveAsync(picture, path);
 
             _mockSaveUseCase.Verify(x => x.ExecuteAsync(picture, path), Times.Once);
         }
@@ -42,7 +42,7 @@ namespace Eede.Application.Tests.Pictures
             var expectedPicture = Picture.CreateEmpty(new PictureSize(16, 16));
             _mockLoadUseCase.Setup(x => x.ExecuteAsync(path)).ReturnsAsync(expectedPicture);
 
-            var result = await _service.LoadAsync(path);
+            var result = await _fileIO.LoadAsync(path);
 
             _mockLoadUseCase.Verify(x => x.ExecuteAsync(path), Times.Once);
             Assert.That(result, Is.EqualTo(expectedPicture));
@@ -55,7 +55,7 @@ namespace Eede.Application.Tests.Pictures
             var path = new FilePath("test.png");
             _mockSaveUseCase.Setup(x => x.ExecuteAsync(picture, path)).ThrowsAsync(new IOException("Test exception"));
 
-            Assert.ThrowsAsync<IOException>(async () => await _service.SaveAsync(picture, path));
+            Assert.ThrowsAsync<IOException>(async () => await _fileIO.SaveAsync(picture, path));
         }
 
         [Test]
@@ -64,7 +64,8 @@ namespace Eede.Application.Tests.Pictures
             var path = new FilePath("test.png");
             _mockLoadUseCase.Setup(x => x.ExecuteAsync(path)).ThrowsAsync(new IOException("Test exception"));
 
-            Assert.ThrowsAsync<IOException>(async () => await _service.LoadAsync(path));
+            Assert.ThrowsAsync<IOException>(async () => await _fileIO.LoadAsync(path));
         }
     }
 }
+

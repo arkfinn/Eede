@@ -45,7 +45,7 @@ public class MainViewModelTests
     private Mock<ITransferImageToCanvasUseCase> _transferImageToCanvasUseCaseMock = default!;
     private Mock<ITransferImageFromCanvasUseCase> _transferImageFromCanvasUseCaseMock = default!;
     private Mock<IDrawingSessionProvider> _drawingSessionProviderMock = default!;
-    private Mock<IPictureIOService> _pictureIOServiceMock = default!;
+    private Mock<IPictureFileIO> _PictureFileIOMock = default!;
     private Mock<IInteractionCoordinator> _interactionCoordinatorMock = default!;
     private Mock<IAddFrameProvider> _addFrameProviderMock = default!;
     private Mock<ISelectionService> _selectionServiceMock = default!;
@@ -78,7 +78,7 @@ public class MainViewModelTests
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
         var initialPicture = Picture.CreateEmpty(new PictureSize(32, 32));
         _drawingSessionProviderMock.Setup(x => x.CurrentSession).Returns(new DrawingSession(initialPicture));
-        _pictureIOServiceMock = new Mock<IPictureIOService>();
+        _PictureFileIOMock = new Mock<IPictureFileIO>();
         _interactionCoordinatorMock = new Mock<IInteractionCoordinator>();
         _addFrameProviderMock = new Mock<IAddFrameProvider>();
         _selectionServiceMock = new Mock<ISelectionService>();
@@ -127,12 +127,12 @@ public class MainViewModelTests
             _animationViewModel,
             _drawingSessionViewModel,
             _paletteContainerViewModel,
-            _pictureIOServiceMock.Object,
+            _PictureFileIOMock.Object,
             new Mock<IThemeDetector>().Object,
             _loadSettingsUseCaseMock.Object,
             _saveSettingsUseCaseMock.Object,
             welcomeVM,
-            () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object),
+            () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object),
             () => null!,
             _appUpdaterMock.Object,
             checkUpdateUseCase);
@@ -142,7 +142,7 @@ public class MainViewModelTests
     public void OnPullToDrawArea_ShouldCallCommitSelectionWithTrue()
     {
         var mainVM = CreateMainViewModel();
-        var dockPictureVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var dockPictureVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         mainVM.Pictures.Add(dockPictureVM);
 
         var area = new PictureArea(new Position(0, 0), new PictureSize(16, 16));
@@ -161,7 +161,7 @@ public class MainViewModelTests
     public void OnPushFromDrawArea_ShouldCallCommitSelectionWithTrue()
     {
         var mainVM = CreateMainViewModel();
-        var dockPictureVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var dockPictureVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         mainVM.Pictures.Add(dockPictureVM);
 
         var pos = new Position(10, 10);
@@ -259,7 +259,7 @@ public class MainViewModelTests
         Assert.That(mainVM.CursorSize, Is.EqualTo(currentSize));
 
         // 2. 新しい画像を追加（Pictures.Add 時に SetupDockPicture が走ることを期待）
-        var newDockVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var newDockVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         mainVM.Pictures.Add(newDockVM);
 
         // 3. 新しい DockPictureViewModel が現在のサイズを引き継いでいることを確認
@@ -364,11 +364,11 @@ public class MainViewModelTests
         var mainVM = CreateMainViewModel();
 
         // 未編集タブと編集済みタブを用意
-        var uneditedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var uneditedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         uneditedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
         uneditedTab.Edited = false;
 
-        var editedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var editedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         editedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
         editedTab.Edited = true;
         // キャンセルをシミュレート（Closable = false）
@@ -399,11 +399,11 @@ public class MainViewModelTests
     {
         var mainVM = CreateMainViewModel();
 
-        var uneditedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var uneditedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         uneditedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
         uneditedTab.Edited = false;
 
-        var editedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _pictureIOServiceMock.Object);
+        var editedTab = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
         editedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
         editedTab.Edited = true;
         editedTab.RequestClose += async (s, e) =>
@@ -428,6 +428,7 @@ public class MainViewModelTests
         Assert.That(windowCloseInvoked, Is.True);
     }
 }
+
 
 
 

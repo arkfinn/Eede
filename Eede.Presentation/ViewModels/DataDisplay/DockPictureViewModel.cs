@@ -25,16 +25,16 @@ namespace Eede.Presentation.ViewModels.DataDisplay
     public partial class DockPictureViewModel : ViewModelBase
     {
 
-        public static DockPictureViewModel FromFile(Picture picture, FilePath filePath, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureIOService pictureIOService)
+        public static DockPictureViewModel FromFile(Picture picture, FilePath filePath, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureFileIO pictureFileIO)
         {
-            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, pictureIOService);
+            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, pictureFileIO);
             vm.Initialize(picture, filePath);
             return vm;
         }
 
-        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureIOService pictureIOService)
+        public static DockPictureViewModel FromSize(PictureSize size, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureFileIO pictureFileIO)
         {
-            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, pictureIOService);
+            DockPictureViewModel vm = new(globalState, animationViewModel, bitmapAdapter, pictureFileIO);
             vm.Initialize(Picture.CreateEmpty(size), FilePath.Empty());
             return vm;
         }
@@ -120,14 +120,14 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public GlobalState GlobalState { get; }
         public AnimationViewModel AnimationViewModel { get; }
         private readonly IBitmapAdapter<Bitmap> BitmapAdapter;
-        private readonly IPictureIOService PictureIOService;
+        private readonly IPictureFileIO pictureFileIO;
 
-        public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureIOService pictureIOService)
+        public DockPictureViewModel(GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureFileIO pictureFileIO)
         {
             GlobalState = globalState;
             AnimationViewModel = animationViewModel;
             BitmapAdapter = bitmapAdapter;
-            PictureIOService = pictureIOService;
+            pictureFileIO = pictureFileIO;
 
             Id = Guid.NewGuid().ToString();
 
@@ -339,3 +339,4 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         }
     }
 }
+

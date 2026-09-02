@@ -30,7 +30,7 @@ public class DockPictureViewModelTests
     private GlobalState _globalState;
     private AnimationViewModel _animationViewModel;
     private Mock<IPictureRepository> _mockPictureRepository;
-    private IPictureIOService _pictureIOService;
+    private IPictureFileIO _PictureFileIO;
 
     [SetUp]
     public void Setup()
@@ -49,7 +49,7 @@ public class DockPictureViewModelTests
         _mockPictureRepository = new Mock<IPictureRepository>();
         var mockSettingsRepo = new Mock<ISettingsRepository>();
         mockSettingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
-        _pictureIOService = new PictureIOService(
+        _PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(_mockPictureRepository.Object, mockSettingsRepo.Object),
             new LoadPictureUseCase(_mockPictureRepository.Object, mockSettingsRepo.Object));
     }
@@ -58,7 +58,7 @@ public class DockPictureViewModelTests
     public void Characterization_Initialize()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
 
         var size = new PictureSize(32, 32);
         var picture = Picture.CreateEmpty(size);
@@ -79,7 +79,7 @@ public class DockPictureViewModelTests
     public void Characterization_PictureUpdate()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
 
         var initialSize = new PictureSize(32, 32);
         viewModel.Initialize(Picture.CreateEmpty(initialSize), new FilePath("test.png"));
@@ -102,7 +102,7 @@ public class DockPictureViewModelTests
     public async Task Characterization_Save()
     {
         var scheduler = new TestScheduler();
-        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _pictureIOService);
+        var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
 
         var mockFile = new Mock<IImageFile>();
         var bitmap = new WriteableBitmap(new Avalonia.PixelSize(32, 32), new Avalonia.Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
@@ -126,3 +126,4 @@ public class DockPictureViewModelTests
         Assert.That(viewModel.Edited, Is.False, "Save successful should reset Edited flag");
     }
 }
+

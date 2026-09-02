@@ -142,7 +142,7 @@ public partial class App : Avalonia.Application
             ));
         services.AddSingleton<ISavePictureUseCase, SavePictureUseCase>();
         services.AddSingleton<ILoadPictureUseCase, LoadPictureUseCase>();
-        services.AddSingleton<IPictureIOService, PictureIOService>();
+        services.AddSingleton<IPictureFileIO, PictureFileIO>();
         services.AddSingleton<IPaletteRepository, Eede.Infrastructure.Palettes.Persistence.PaletteRepository>();
         if (OperatingSystem.IsBrowser())
         {

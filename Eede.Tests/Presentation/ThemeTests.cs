@@ -102,7 +102,7 @@ public class ThemeTests
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        var pictureIOService = new PictureIOService(
+        var PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(pictureRepo, settingsRepo.Object),
             new LoadPictureUseCase(pictureRepo, settingsRepo.Object)
         );
@@ -114,13 +114,14 @@ public class ThemeTests
             state, clipboard, bitmapAdapter, pictureRepo, drawStyleFactory,
             transformUseCase, new Mock<IScalingImageUseCase>().Object, transferToCanvas, transferFromCanvas,
             sessionProvider, drawableCanvasVM, animationVM, sessionVM,
-            paletteVM, pictureIOService, themeDetector,
+            paletteVM, PictureFileIO, themeDetector,
             loadUseCase, saveUseCase,
             new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
-            () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), pictureIOService),
+            () => new DockPictureViewModel(state, animationVM, new AvaloniaBitmapAdapter(), PictureFileIO),
             () => new NewPictureWindowViewModel()
         );
     }
 }
+
 
 

@@ -72,7 +72,7 @@ public class PictureContainerTests
         mockSettingsRepoForUseCase.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
         var savePictureUseCase = new SavePictureUseCase(mockPictureRepo.Object, mockSettingsRepoForUseCase.Object);
         var loadPictureUseCase = new LoadPictureUseCase(mockPictureRepo.Object, mockSettingsRepoForUseCase.Object);
-        var pictureIOService = new PictureIOService(savePictureUseCase, loadPictureUseCase);
+        var PictureFileIO = new PictureFileIO(savePictureUseCase, loadPictureUseCase);
 
         // 2. Sub ViewModels Dependencies
         var patternsProvider = new AnimationPatternsProvider();
@@ -123,17 +123,17 @@ public class PictureContainerTests
             animationVM,
             drawingSessionVM,
             paletteVM,
-            pictureIOService,
+            PictureFileIO,
             new Mock<IThemeDetector>().Object,
             loadSettingsUseCase,
             saveSettingsUseCase,
             new WelcomeViewModel(mockSettingsRepoForUseCase.Object, new Mock<IExternalBrowserLauncher>().Object),
-            () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService),
+            () => new DockPictureViewModel(globalState, animationVM, bitmapAdapter, PictureFileIO),
             () => new NewPictureWindowViewModel()
         );
 
         // DockPictureViewModel
-        _dockViewModel = new DockPictureViewModel(globalState, animationVM, bitmapAdapter, pictureIOService);
+        _dockViewModel = new DockPictureViewModel(globalState, animationVM, bitmapAdapter, PictureFileIO);
         _dockViewModel.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), new FilePath("test.png"));
 
         // Setup Window and Container
@@ -199,5 +199,6 @@ public class PictureContainerTests
             "renderingRoot の背景は Transparent であるべきです。背後の OutsideBackGround.bmp を透過させて正しい市松模様を表示します。");
     }
 }
+
 
 

@@ -103,7 +103,7 @@ namespace Eede.Presentation.Tests
             var settingsRepo = new Mock<ISettingsRepository>();
             settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-            var pictureIOService = new PictureIOService(
+            var PictureFileIO = new PictureFileIO(
                 new SavePictureUseCase(pictureRepo, settingsRepo.Object),
                 new LoadPictureUseCase(pictureRepo, settingsRepo.Object)
             );
@@ -115,10 +115,10 @@ namespace Eede.Presentation.Tests
                 _state, clipboard, bitmapAdapter, pictureRepo, drawStyleFactory,
                 transformUseCase, new Mock<IScalingImageUseCase>().Object, transferToCanvas, transferFromCanvas,
                 _sessionProvider, drawableCanvasVM, animationVM, sessionVM,
-                paletteVM, pictureIOService, new Mock<IThemeDetector>().Object,
+                paletteVM, PictureFileIO, new Mock<IThemeDetector>().Object,
                 loadUseCase, saveUseCase,
                 new WelcomeViewModel(settingsRepo.Object, new Mock<IExternalBrowserLauncher>().Object),
-                () => new DockPictureViewModel(_state, animationVM, bitmapAdapter, pictureIOService),
+                () => new DockPictureViewModel(_state, animationVM, bitmapAdapter, PictureFileIO),
                 () => new NewPictureWindowViewModel()
             );
         }
@@ -127,7 +127,7 @@ namespace Eede.Presentation.Tests
         public void Pull_Undo_ShouldRevertEditedFlag()
         {
             var picture = Picture.CreateEmpty(new PictureSize(10, 10));
-            var vm = new DockPictureViewModel(_state, _mainViewModel.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureIOService>());
+            var vm = new DockPictureViewModel(_state, _mainViewModel.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureFileIO>());
             vm.Initialize(picture, new FilePath("test.png"));
             _mainViewModel.Pictures.Add(vm);
             _mainViewModel.ActiveDockable = new Document { DataContext = vm };
@@ -152,7 +152,7 @@ namespace Eede.Presentation.Tests
         public void PictureAction_ShouldMarkActiveDockAsEdited()
         {
             var picture = Picture.CreateEmpty(new PictureSize(10, 10));
-            var vm = new DockPictureViewModel(_state, _mainViewModel.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureIOService>());
+            var vm = new DockPictureViewModel(_state, _mainViewModel.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureFileIO>());
             vm.Initialize(picture, new FilePath("test.png"));
             _mainViewModel.Pictures.Add(vm);
             _mainViewModel.ActiveDockable = new Document { DataContext = vm };
@@ -170,7 +170,7 @@ namespace Eede.Presentation.Tests
         public void PictureAction_Undo_ShouldRevertEditedFlag()
         {
             var picture = Picture.CreateEmpty(new PictureSize(10, 10));
-            var vm = new DockPictureViewModel(_state, _mainViewModel.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureIOService>());
+            var vm = new DockPictureViewModel(_state, _mainViewModel.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureFileIO>());
             vm.Initialize(picture, new FilePath("test.png"));
             _mainViewModel.Pictures.Add(vm);
             _mainViewModel.ActiveDockable = new Document { DataContext = vm };
@@ -188,5 +188,6 @@ namespace Eede.Presentation.Tests
         }
     }
 }
+
 
 

@@ -25,7 +25,7 @@ public class BitmapManagementTests
     private GlobalState _globalState;
     private AnimationViewModel _animationViewModel;
     private Mock<IPictureRepository> _mockPictureRepository;
-    private IPictureIOService _pictureIOService;
+    private IPictureFileIO _PictureFileIO;
     private Mock<IBitmapAdapter<Bitmap>> _mockBitmapAdapter;
 
     [SetUp]
@@ -47,7 +47,7 @@ public class BitmapManagementTests
         _mockPictureRepository = new Mock<IPictureRepository>();
         Mock<ISettingsRepository> mockSettingsRepository = new();
         _ = mockSettingsRepository.Setup(r => r.LoadAsync()).ReturnsAsync(new Eede.Application.Settings.AppSettings());
-        _pictureIOService = new PictureIOService(
+        _PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(_mockPictureRepository.Object, mockSettingsRepository.Object),
             new LoadPictureUseCase(_mockPictureRepository.Object, mockSettingsRepository.Object));
     }
@@ -61,7 +61,7 @@ public class BitmapManagementTests
             .Callback(() => mockCalled = true)
             .Returns(mockBitmap);
 
-        DockPictureViewModel viewModel = new(_globalState, _animationViewModel, _mockBitmapAdapter.Object, _pictureIOService)
+        DockPictureViewModel viewModel = new(_globalState, _animationViewModel, _mockBitmapAdapter.Object, _PictureFileIO)
         {
             // 手動で PictureBuffer をセットして発火を促す
             PictureBuffer = Picture.CreateEmpty(new PictureSize(32, 32))

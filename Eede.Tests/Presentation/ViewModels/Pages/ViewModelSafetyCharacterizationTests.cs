@@ -84,11 +84,11 @@ public class ViewModelSafetyCharacterizationTests
         var settingsRepo = new Mock<ISettingsRepository>();
         settingsRepo.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings());
 
-        var pictureIOService = new PictureIOService(
+        var PictureFileIO = new PictureFileIO(
             new SavePictureUseCase(pictureRepositoryMock.Object, settingsRepo.Object),
             new LoadPictureUseCase(pictureRepositoryMock.Object, settingsRepo.Object));
 
-        Func<DockPictureViewModel> dockPictureFactory = () => new DockPictureViewModel(stateMock.Object, animationViewModelMock.Object, bitmapAdapterMock.Object, pictureIOService);
+        Func<DockPictureViewModel> dockPictureFactory = () => new DockPictureViewModel(stateMock.Object, animationViewModelMock.Object, bitmapAdapterMock.Object, PictureFileIO);
         Func<NewPictureWindowViewModel> newPictureWindowFactory = () => new Mock<NewPictureWindowViewModel>().Object;
 
         var loadUseCase = new LoadSettingsUseCase(settingsRepo.Object);
@@ -109,7 +109,7 @@ public class ViewModelSafetyCharacterizationTests
             animationViewModelMock.Object,
             drawingSessionViewModelMock.Object,
             paletteContainerViewModelMock.Object,
-            pictureIOService,
+            PictureFileIO,
             new Mock<IThemeDetector>().Object,
             loadUseCase,
             saveUseCase,
@@ -146,5 +146,6 @@ public class ViewModelSafetyCharacterizationTests
         });
     }
 }
+
 
 

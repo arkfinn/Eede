@@ -82,7 +82,6 @@
 			<StyleInclude Source="/Styles/Styles.axaml" />
 		</Panel.Styles>
 		<DockPanel LastChildFill="True">
-
 			<Grid ColumnDefinitions="*, 4, *" DockPanel.Dock="Bottom">
 				<DockPanel Grid.Column="0" LastChildFill="True">
 					<Panel DockPanel.Dock="Top" >

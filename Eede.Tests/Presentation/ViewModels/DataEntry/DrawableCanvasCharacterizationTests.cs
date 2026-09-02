@@ -25,7 +25,7 @@ public class DrawableCanvasCharacterizationTests
 {
     private Mock<GlobalState> _globalStateMock;
     private Mock<IAddFrameProvider> _addFrameProviderMock;
-    private Mock<IClipboard> _clipboardServiceMock;
+    private Mock<IClipboard> _clipboardMock;
     private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock;
     private Mock<IDrawingSessionProvider> _drawingSessionProviderMock;
     private Mock<IInteractionCoordinator> _coordinatorMock;
@@ -38,16 +38,16 @@ public class DrawableCanvasCharacterizationTests
     {
         _globalStateMock = new Mock<GlobalState>();
         _addFrameProviderMock = new Mock<IAddFrameProvider>();
-        _clipboardServiceMock = new Mock<IClipboard>();
+        _clipboardMock = new Mock<IClipboard>();
         _bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
         _drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
         _coordinatorMock = new Mock<IInteractionCoordinator>();
         _drawingSessionViewModelMock = new Mock<DrawingSessionViewModel>();
 
         _SelectionClipboard = new SelectionClipboard(
-            new CopySelectionUseCase(_clipboardServiceMock.Object),
-            new CutSelectionUseCase(_clipboardServiceMock.Object),
-            new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProviderMock.Object));
+            new CopySelectionUseCase(_clipboardMock.Object),
+            new CutSelectionUseCase(_clipboardMock.Object),
+            new PasteFromClipboardUseCase(_clipboardMock.Object, _drawingSessionProviderMock.Object));
     }
 
     [Test]
@@ -56,7 +56,7 @@ public class DrawableCanvasCharacterizationTests
         var vm = new DrawableCanvasViewModel(
             _globalStateMock.Object,
             _addFrameProviderMock.Object,
-            _clipboardServiceMock.Object,
+            _clipboardMock.Object,
             _bitmapAdapterMock.Object,
             _drawingSessionProviderMock.Object,
             _SelectionClipboard,
@@ -65,5 +65,6 @@ public class DrawableCanvasCharacterizationTests
         Assert.That(vm, Is.Not.Null);
     }
 }
+
 
 

@@ -97,7 +97,7 @@ public class WelcomeViewModelTests
     }
 
     [Test]
-    public async Task OpenUrlCommand_ShouldCallBrowserService_WhenUrlIsSafe()
+    public async Task OpenUrlCommand_ShouldCallBrowserLauncher_WhenUrlIsSafe()
     {
         var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         var url = "https://example.com";
@@ -108,7 +108,7 @@ public class WelcomeViewModelTests
     }
 
     [Test]
-    public async Task OpenUrlCommand_ShouldNotCallBrowserService_WhenUrlIsUnsafe()
+    public async Task OpenUrlCommand_ShouldNotCallBrowserLauncher_WhenUrlIsUnsafe()
     {
         var viewModel = new WelcomeViewModel(_settingsRepoMock.Object, _browserLauncherMock.Object, _appUpdaterMock.Object, _checkUpdateUseCase);
         var url = "file:///C:/Windows/System32/calc.exe";

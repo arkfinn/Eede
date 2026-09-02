@@ -344,7 +344,7 @@ public class MainViewModelTests
     }
 
     [AvaloniaTest]
-    public void IsUpdateReady_ShouldSyncWithService()
+    public void IsUpdateReady_ShouldSyncWithUpdater()
     {
         var statusSubject = new System.Reactive.Subjects.BehaviorSubject<UpdateStatus>(UpdateStatus.Idle);
         _appUpdaterMock.SetupGet(x => x.StatusChanged).Returns(statusSubject);

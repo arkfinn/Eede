@@ -27,7 +27,7 @@ public class RegionSelectorCharacterizationTests
 {
     private GlobalState _globalState = default!;
     private Mock<IAddFrameProvider> _addFrameProviderMock = default!;
-    private Mock<IClipboard> _clipboardServiceMock = default!;
+    private Mock<IClipboard> _clipboardMock = default!;
     private AvaloniaBitmapAdapter _bitmapAdapter = default!;
     private DrawingSessionProvider _drawingSessionProvider = default!;
     private ISelectionClipboard _SelectionClipboard = default!;
@@ -38,13 +38,13 @@ public class RegionSelectorCharacterizationTests
     {
         _globalState = new GlobalState();
         _addFrameProviderMock = new Mock<IAddFrameProvider>();
-        _clipboardServiceMock = new Mock<IClipboard>();
+        _clipboardMock = new Mock<IClipboard>();
         _bitmapAdapter = new AvaloniaBitmapAdapter();
         _drawingSessionProvider = new DrawingSessionProvider();
         _SelectionClipboard = new SelectionClipboard(
-            new CopySelectionUseCase(_clipboardServiceMock.Object),
-            new CutSelectionUseCase(_clipboardServiceMock.Object),
-            new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProvider));
+            new CopySelectionUseCase(_clipboardMock.Object),
+            new CutSelectionUseCase(_clipboardMock.Object),
+            new PasteFromClipboardUseCase(_clipboardMock.Object, _drawingSessionProvider));
         _coordinator = new InteractionCoordinator(_drawingSessionProvider);
     }
 
@@ -54,7 +54,7 @@ public class RegionSelectorCharacterizationTests
         var vm = new DrawableCanvasViewModel(
             _globalState,
             _addFrameProviderMock.Object,
-            _clipboardServiceMock.Object,
+            _clipboardMock.Object,
             _bitmapAdapter,
             _drawingSessionProvider,
             _SelectionClipboard,
@@ -396,5 +396,6 @@ public class RegionSelectorCharacterizationTests
         Assert.That(vm.SelectingArea!.Value.X, Is.EqualTo(20), "New selection should start at click position (20,20)");
     }
 }
+
 
 

@@ -34,7 +34,7 @@ namespace Eede.Presentation.Tests.ViewModels.Pages;
 public class MainViewModelCharacterizationTests
 {
     private Mock<GlobalState> _stateMock;
-    private Mock<IClipboard> _clipboardServiceMock;
+    private Mock<IClipboard> _clipboardMock;
     private Mock<IBitmapAdapter<Bitmap>> _bitmapAdapterMock;
     private Mock<IPictureRepository> _pictureRepositoryMock;
     private Mock<IDrawStyleFactory> _drawStyleFactoryMock;
@@ -55,7 +55,7 @@ public class MainViewModelCharacterizationTests
     public void Setup()
     {
         _stateMock = new Mock<GlobalState>();
-        _clipboardServiceMock = new Mock<IClipboard>();
+        _clipboardMock = new Mock<IClipboard>();
         _bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
         _pictureRepositoryMock = new Mock<IPictureRepository>();
         _drawStyleFactoryMock = new Mock<IDrawStyleFactory>();
@@ -66,9 +66,9 @@ public class MainViewModelCharacterizationTests
         _drawingSessionProviderMock.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));
 
         // UseCases
-        var copyUseCase = new CopySelectionUseCase(_clipboardServiceMock.Object);
-        var cutUseCase = new CutSelectionUseCase(_clipboardServiceMock.Object);
-        var pasteUseCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _drawingSessionProviderMock.Object);
+        var copyUseCase = new CopySelectionUseCase(_clipboardMock.Object);
+        var cutUseCase = new CutSelectionUseCase(_clipboardMock.Object);
+        var pasteUseCase = new PasteFromClipboardUseCase(_clipboardMock.Object, _drawingSessionProviderMock.Object);
         var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         // DrawableCanvasViewModel usually need real instances or careful mocking. 
@@ -125,7 +125,7 @@ public class MainViewModelCharacterizationTests
 
         var vm = new MainViewModel(
             _stateMock.Object,
-            _clipboardServiceMock.Object,
+            _clipboardMock.Object,
             _bitmapAdapterMock.Object,
             _pictureRepositoryMock.Object,
             _drawStyleFactoryMock.Object,
@@ -150,6 +150,7 @@ public class MainViewModelCharacterizationTests
         Assert.That(vm, Is.Not.Null);
     }
 }
+
 
 
 

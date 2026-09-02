@@ -40,7 +40,7 @@ public class ViewModelSafetyCharacterizationTests
     public void SetUp()
     {
         var stateMock = new Mock<GlobalState>();
-        var clipboardServiceMock = new Mock<IClipboard>();
+        var clipboardMock = new Mock<IClipboard>();
         var bitmapAdapterMock = new Mock<IBitmapAdapter<Bitmap>>();
         var pictureRepositoryMock = new Mock<IPictureRepository>();
         var drawStyleFactoryMock = new Mock<IDrawStyleFactory>();
@@ -50,15 +50,15 @@ public class ViewModelSafetyCharacterizationTests
         var drawingSessionProviderMock = new Mock<IDrawingSessionProvider>();
         drawingSessionProviderMock.Setup(x => x.CurrentSession).Returns(new DrawingSession(Picture.CreateEmpty(new PictureSize(1, 1))));
 
-        var copyUseCase = new CopySelectionUseCase(clipboardServiceMock.Object);
-        var cutUseCase = new CutSelectionUseCase(clipboardServiceMock.Object);
-        var pasteUseCase = new PasteFromClipboardUseCase(clipboardServiceMock.Object, drawingSessionProviderMock.Object);
+        var copyUseCase = new CopySelectionUseCase(clipboardMock.Object);
+        var cutUseCase = new CutSelectionUseCase(clipboardMock.Object);
+        var pasteUseCase = new PasteFromClipboardUseCase(clipboardMock.Object, drawingSessionProviderMock.Object);
         var SelectionClipboard = new SelectionClipboard(copyUseCase, cutUseCase, pasteUseCase);
 
         var drawableCanvasViewModelMock = new Mock<DrawableCanvasViewModel>(
             stateMock.Object,
             Mock.Of<IAddFrameProvider>(),
-            clipboardServiceMock.Object,
+            clipboardMock.Object,
             bitmapAdapterMock.Object,
             drawingSessionProviderMock.Object,
             SelectionClipboard,
@@ -96,7 +96,7 @@ public class ViewModelSafetyCharacterizationTests
 
         _vm = new MainViewModel(
             stateMock.Object,
-            clipboardServiceMock.Object,
+            clipboardMock.Object,
             bitmapAdapterMock.Object,
             pictureRepositoryMock.Object,
             drawStyleFactoryMock.Object,
@@ -146,6 +146,7 @@ public class ViewModelSafetyCharacterizationTests
         });
     }
 }
+
 
 
 

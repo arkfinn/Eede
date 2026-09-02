@@ -1,4 +1,4 @@
-﻿using Eede.Application.Infrastructure;
+using Eede.Application.Infrastructure;
 using Eede.Application.Pictures;
 using Eede.Application.UseCase.Pictures;
 using Eede.Domain.ImageEditing;
@@ -12,23 +12,23 @@ namespace Eede.Application.Tests.Pictures;
 [TestFixture]
 public class PasteFromClipboardUseCaseTests
 {
-    private Mock<IClipboard> _clipboardServiceMock;
+    private Mock<IClipboard> _clipboardMock;
     private DrawingSessionProvider _sessionProvider;
     private PasteFromClipboardUseCase _useCase;
 
     [SetUp]
     public void SetUp()
     {
-        _clipboardServiceMock = new Mock<IClipboard>();
+        _clipboardMock = new Mock<IClipboard>();
         _sessionProvider = new DrawingSessionProvider();
-        _useCase = new PasteFromClipboardUseCase(_clipboardServiceMock.Object, _sessionProvider);
+        _useCase = new PasteFromClipboardUseCase(_clipboardMock.Object, _sessionProvider);
     }
 
     [Test]
     public async Task Execute_ShouldUpdateSessionWithPictureFromClipboard()
     {
         var expectedPicture = Picture.CreateEmpty(new PictureSize(10, 10));
-        _clipboardServiceMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(expectedPicture);
+        _clipboardMock.Setup(x => x.GetPictureAsync()).ReturnsAsync(expectedPicture);
 
         await _useCase.ExecuteAsync();
 
@@ -36,3 +36,4 @@ public class PasteFromClipboardUseCaseTests
         Assert.That(_sessionProvider.CurrentSession.CurrentPreviewContent.Pixels, Is.EqualTo(expectedPicture));
     }
 }
+

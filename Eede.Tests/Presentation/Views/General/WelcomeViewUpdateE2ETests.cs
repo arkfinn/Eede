@@ -189,7 +189,7 @@ public class WelcomeViewUpdateE2ETests
     [AvaloniaTest]
     public async Task WhenUpdateNotSupported_ManualCheckButtonShouldBeHidden()
     {
-        // 1. Arrange: アップデート非対応（Web版 / NullUpdateService）のモック
+        // 1. Arrange: アップデート非対応（Web版 / NullAppUpdater）のモック
         _appUpdaterMock.SetupGet(s => s.IsSupported).Returns(false);
         _appUpdaterMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(false);
 

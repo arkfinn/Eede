@@ -599,8 +599,8 @@ public class SessionRecoveryE2ETests
         await nextMainVM.InitializeAsync();
         Assert.That(nextMainVM.WelcomeViewModel.HasPreviousSession, Is.True);
 
-        var service = new SessionRecoverer(_storage, _codec);
-        var restoredData = await service.RestoreSessionAsync();
+        var recoverer = new SessionRecoverer(_storage, _codec);
+        var restoredData = await recoverer.RestoreSessionAsync();
         Assert.That(restoredData.PullState, Is.Not.Null, "Restored PullState must not be null");
         Assert.That(restoredData.PullState!.CanvasPicture, Is.Not.Null, "Restored CanvasPicture must not be null");
         Assert.That(restoredData.PullState!.CanvasPicture!.Size, Is.EqualTo(new PictureSize(8, 8)));

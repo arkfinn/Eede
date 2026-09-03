@@ -47,6 +47,19 @@ namespace Eede.Presentation.Common.Adapters
             }
         }
 
+        public static void RegisterCacheData(string key, byte[] data, string? name = null)
+        {
+            if (string.IsNullOrEmpty(key) || data == null) return;
+            StaticDataCache[key] = data;
+            if (!string.IsNullOrEmpty(name))
+            {
+                StaticNameCache[key] = name;
+                StaticDataCache[name] = data;
+                StaticDataCache["/" + name] = data;
+                StaticDataCache["\\" + name] = data;
+            }
+        }
+
         public static string? TryGetOriginalFileName(string path)
         {
             if (string.IsNullOrEmpty(path)) return null;

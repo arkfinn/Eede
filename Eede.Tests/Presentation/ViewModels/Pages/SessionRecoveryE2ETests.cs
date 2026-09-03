@@ -713,6 +713,43 @@ public class SessionRecoveryE2ETests
         }
         return Picture.Create(size, bytes);
     }
+
+    [AvaloniaTest]
+    public async Task CaptureSession_WhenDocumentIsVirtualUriOrUneditedWebFile_SavesImagePayloadAndRestoresNonEmptyPicture()
+    {
+        // 1. Arrange: Web版/仮想URI (blob:) の未編集画像（青色）を持つ MainViewModel
+        var mainVM = CreateMainViewModel();
+        var blueColor = new ArgbColor(255, 0, 0, 255);
+        var bluePicture = CreateFilledPicture(new PictureSize(16, 16), blueColor);
+        var virtualPath = "blob:http://localhost:5000/1234-5678";
+
+        var picVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
+        picVM.Initialize(bluePicture, new FilePath(virtualPath));
+        picVM.Edited = false; // 未編集のまま
+        mainVM.Pictures.Add(picVM);
+
+        // 2. Act: スナップショットを抽出
+        var capture = mainVM.CaptureSession();
+
+        // 3. Assert: 仮想URIやWeb環境では、ディスクから再ロードできないため未編集でも画像ペイロードが保存されること！
+        Assert.That(capture, Is.Not.Null);
+        var docSnapshot = capture!.Snapshot.Documents[0];
+        Assert.That(docSnapshot.ImagePayloadRef, Is.Not.Null, "仮想URIの画像は未編集であってもImagePayloadRefが保存されること");
+        Assert.That(capture.Pictures.ContainsKey(docSnapshot.ImagePayloadRef!), Is.True, "画像ペイロード実体がキャプチャに含まれること");
+
+        // 4. Act 2: セッションコーディネーターで保存し、次回起動で復元
+        await _coordinator.FlushAsync(capture);
+
+        var nextMainVM = CreateMainViewModel();
+        await nextMainVM.InitializeAsync();
+        Assert.That(nextMainVM.WelcomeViewModel.HasPreviousSession, Is.True);
+        await nextMainVM.WelcomeViewModel.ResumeLastSessionCommand!.Execute().ToTask();
+
+        // 5. Assert 2: 復元されたドックの画像が空画像（透明）ではなく、元の青色画像であること！
+        Assert.That(nextMainVM.Pictures.Count, Is.EqualTo(1));
+        var restoredPic = nextMainVM.Pictures[0];
+        Assert.That(restoredPic.PictureBuffer.PickColor(new Position(0, 0)), Is.EqualTo(blueColor), "ドックエリアの画像が空にならず正しく復元されること");
+    }
 }
 
 

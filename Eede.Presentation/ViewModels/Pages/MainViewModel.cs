@@ -1257,15 +1257,26 @@ public partial class MainViewModel : ViewModelBase
         foreach (var picVm in Pictures)
         {
             string? payloadRef = null;
-            if (picVm.Edited)
+            if (ShouldSaveDocumentPayload(picVm))
             {
                 payloadRef = $"doc_{picVm.Id}.png";
                 picturesDict[payloadRef] = picVm.PictureBuffer;
             }
 
+            string? filePathStr = picVm.FilePath?.IsEmpty() == false ? picVm.FilePath.ToString() : null;
+            if (!string.IsNullOrEmpty(filePathStr))
+            {
+                // blob: などのブラウザ仮想URIの場合、元のファイル名（hero.png等）を優先して記録
+                string? originalName = AvaloniaFileStorage.TryGetOriginalFileName(filePathStr);
+                if (!string.IsNullOrEmpty(originalName))
+                {
+                    filePathStr = originalName;
+                }
+            }
+
             var docSnapshot = new DocumentSnapshot(
                 picVm.Id,
-                picVm.FilePath?.IsEmpty() == false ? picVm.FilePath.ToString() : null,
+                filePathStr,
                 picVm.Edited,
                 picVm.PictureBuffer.Size,
                 picVm.Magnification.Value,
@@ -1275,6 +1286,37 @@ public partial class MainViewModel : ViewModelBase
         }
 
         return docSnapshots;
+    }
+
+    private static bool ShouldSaveDocumentPayload(DockPictureViewModel picVm)
+    {
+        // 1. 編集済みの場合は、プラットフォームに関わらず必ずペイロードを保存
+        if (picVm.Edited)
+        {
+            return true;
+        }
+
+        // 2. ブラウザ環境（WebAssembly / WASM）ではローカルディスクが存在しないため、未編集であっても必ず全画像を保存
+        if (OperatingSystem.IsBrowser())
+        {
+            return true;
+        }
+
+        // 3. ファイルパスが存在しない新規作成画像の場合は、ディスクから再ロードできないためペイロードを保存
+        if (picVm.FilePath == null || picVm.FilePath.IsEmpty())
+        {
+            return true;
+        }
+
+        // 4. ファイルパスが物理ローカルファイルとして実在しない場合（仮想URI、blob、非fileスキーム等）もディスクから再ロードできないため保存
+        string pathStr = picVm.FilePath.ToString();
+        if (Uri.TryCreate(pathStr, UriKind.Absolute, out var uri) && uri.Scheme != Uri.UriSchemeFile)
+        {
+            return true;
+        }
+
+        // デスクトップ環境で実在する物理ローカルファイルかつ未編集の場合は、容量節約のためペイロードをスキップ
+        return false;
     }
 
     private PullSnapshot? CapturePullSnapshot(Dictionary<string, Picture> picturesDict)
@@ -1368,7 +1410,7 @@ public partial class MainViewModel : ViewModelBase
         catch (Exception ex)
         {
             RecoveryPromptMessage = $"セッションの復元中にエラーが発生しました: {ex.Message}";
-            System.Diagnostics.Debug.WriteLine($"[Eede] RestoreSession failed: {ex}");
+            System.Diagnostics.Trace.WriteLine($"[Eede] RestoreSession failed: {ex}");
         }
     }
 
@@ -1399,7 +1441,7 @@ public partial class MainViewModel : ViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[Eede] RestoreDocuments: Failed to reload original file '{filePath}': {ex.Message}");
+                    System.Diagnostics.Trace.WriteLine($"[Eede] RestoreDocuments: Failed to reload original file '{filePath}': {ex.Message}");
                 }
             }
 
@@ -1407,6 +1449,20 @@ public partial class MainViewModel : ViewModelBase
             vm.Id = doc.Snapshot.DocumentId;
             vm.Edited = doc.Snapshot.IsEdited;
             vm.Magnification = new Magnification(doc.Snapshot.Magnification);
+
+            if (!filePath.IsEmpty() && pictureToUse != null)
+            {
+                try
+                {
+                    var codec = new Infrastructure.Pictures.SkiaSharpPictureCodec();
+                    var pngBytes = codec.EncodeToPng(pictureToUse);
+                    AvaloniaFileStorage.RegisterCacheData(filePath.ToString(), pngBytes, filePath.ToString());
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.WriteLine($"[Eede] Failed to register restored picture to static cache: {ex.Message}");
+                }
+            }
 
             Pictures.Add(vm);
             docMap[doc.Snapshot.DocumentId] = vm;

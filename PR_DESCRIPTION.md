@@ -14,13 +14,17 @@
 4. **Windows版セッション再開時の既存ファイル空白化の解消**:
    - 未編集の既存ファイル（`Edited == false` かつ `OriginalFilePath != null`）について、復元時（`RestoreDocumentsAsync`）に `_pictureFileIO.LoadAsync(filePath)` で実画像を安全に再ロード。
 5. **セッション再開時のパレット「一時パレット」固定化＆クローズ不可バグの解消**:
-   - `PaletteTabSnapshot` に `CustomTitle`, `IsClosable`, `SourceIdentity` を完全保持させ、再開後も元のタイトルと閉じられる状態（×ボタン）を100%復元。
+6. **Web版（WASM）セッション復元対応（IndexedDB による大容量・非同期・容量オーバー防護）**:
+   - Web版においてブラウザのリロード（F5）やタブ再開時に仮想ファイルシステムが初期化されて「前回の作業を再開」が消えていた制約を克服。
+   - `BrowserIndexedDbSessionStorage` および `window.eedeSessionDb` を新設し、ブラウザの **IndexedDB**（大容量非同期ストア）にセッションメタデータと画像ペイロードを安全に退避。
+   - **容量オーバー（QuotaExceededError）時の優雅な縮退（Graceful Degradation）**: ディスク逼迫やクォータ超過時には画像ペイロードを間引き、タブ構成等のメタデータを死守してアプリのクラッシュや描画停止を 100% 回避。
 
 ---
 
 ## 🧪 テスト・検証結果 (Verification)
-- **テストスイート (`dotnet test`)**: **818 件 ALL PASS**（0 fail / 100% 成功）
+- **テストスイート (`dotnet test`)**: **823 件 ALL PASS**（0 fail / 100% 成功）
 - **新規テスト**:
+  - `BrowserIndexedDbSessionStorageTests`: IndexedDB ストレージの保存・復元、クリーン終了追跡、および容量オーバー（QuotaExceededError）時の優雅な縮退を検証（5件）
   - `MainViewModelTests.LoadPictureCommand_WhenOpeningGuidBlobUri_WithSingleStreamRead_AutoExtractsPaletteAndRestoresOriginalFileName`:
     - ブラウザ特有の「拡張子なし GUID blob URI」および「2回目の OpenReadAsync 禁止（例外スロー）」環境を完全再現し、パレット抽出・タブ追加・タイトル復元が正常動作することを検証。
   - `PictureRepositoryTests`: 256色PNGのデコード時に赤と青が反転せず正確な色でロードされることの検証

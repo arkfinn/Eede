@@ -179,6 +179,10 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IPullContextTracker, PullContextTracker>();
         services.AddSingleton<ISessionStorage>(sp =>
         {
+            if (OperatingSystem.IsBrowser())
+            {
+                return new BrowserIndexedDbSessionStorage();
+            }
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             if (string.IsNullOrWhiteSpace(appData))
             {

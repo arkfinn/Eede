@@ -10,41 +10,102 @@ namespace Eede.Presentation.Common.Adapters
     {
         public readonly IStorageProvider StorageProvider = storageProvider;
         private static readonly Dictionary<string, IStorageFile> StaticFileCache = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, byte[]> StaticDataCache = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, string> StaticNameCache = new(StringComparer.OrdinalIgnoreCase);
 
         public static void CacheFile(IStorageFile? file)
         {
             if (file == null) return;
+            string? name = file.Name;
             if (file.Path != null)
             {
-                StaticFileCache[file.Path.ToString()] = file;
-                StaticFileCache[file.Path.OriginalString] = file;
+                RegisterCacheKey(file.Path.ToString(), file, name);
+                RegisterCacheKey(file.Path.OriginalString, file, name);
                 if (file.Path.IsAbsoluteUri)
                 {
                     if (file.Path.IsFile)
                     {
-                        StaticFileCache[file.Path.LocalPath] = file;
+                        RegisterCacheKey(file.Path.LocalPath, file, name);
                     }
-                    StaticFileCache[file.Path.AbsoluteUri] = file;
+                    RegisterCacheKey(file.Path.AbsoluteUri, file, name);
                 }
             }
-            if (!string.IsNullOrEmpty(file.Name))
+            if (!string.IsNullOrEmpty(name))
             {
-                StaticFileCache[file.Name] = file;
-                StaticFileCache["/" + file.Name] = file;
-                StaticFileCache["\\" + file.Name] = file;
+                RegisterCacheKey(name, file, name);
+                RegisterCacheKey("/" + name, file, name);
+                RegisterCacheKey("\\" + name, file, name);
             }
+        }
+
+        private static void RegisterCacheKey(string key, IStorageFile file, string? name)
+        {
+            StaticFileCache[key] = file;
+            if (!string.IsNullOrEmpty(name))
+            {
+                StaticNameCache[key] = name;
+            }
+        }
+
+        public static string? TryGetOriginalFileName(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+            if (StaticNameCache.TryGetValue(path, out var name)) return name;
+            string fileName = System.IO.Path.GetFileName(path);
+            if (!string.IsNullOrEmpty(fileName) && StaticNameCache.TryGetValue(fileName, out name)) return name;
+            return null;
         }
 
         public static async Task<System.IO.Stream?> TryOpenReadStreamStaticAsync(string path)
         {
             if (string.IsNullOrEmpty(path)) return null;
 
+            // 1. メモリキャッシュにあれば即座に MemoryStream を返す（ブラウザでの再読み込み・多重オープンを100%保証）
+            if (StaticDataCache.TryGetValue(path, out var cachedBytes))
+            {
+                return new System.IO.MemoryStream(cachedBytes);
+            }
             string fileName = System.IO.Path.GetFileName(path);
+            if (!string.IsNullOrEmpty(fileName) && StaticDataCache.TryGetValue(fileName, out cachedBytes))
+            {
+                return new System.IO.MemoryStream(cachedBytes);
+            }
+
+            // 2. IStorageFile キャッシュから読み込み、全バイトをメモリキャッシュする
             if (StaticFileCache.TryGetValue(path, out var file) ||
                 (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
                 (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)))
             {
-                return await file.OpenReadAsync();
+                try
+                {
+                    await using var stream = await file.OpenReadAsync();
+                    using var ms = new System.IO.MemoryStream();
+                    await stream.CopyToAsync(ms);
+                    byte[] bytes = ms.ToArray();
+
+                    StaticDataCache[path] = bytes;
+                    if (!string.IsNullOrEmpty(fileName))
+                    {
+                        StaticDataCache[fileName] = bytes;
+                    }
+                    if (!string.IsNullOrEmpty(file.Name))
+                    {
+                        StaticDataCache[file.Name] = bytes;
+                        StaticDataCache["/" + file.Name] = bytes;
+                        StaticDataCache["\\" + file.Name] = bytes;
+                    }
+                    if (file.Path != null)
+                    {
+                        StaticDataCache[file.Path.ToString()] = bytes;
+                        StaticDataCache[file.Path.OriginalString] = bytes;
+                    }
+
+                    return new System.IO.MemoryStream(bytes);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.WriteLine($"[AvaloniaFileStorage] Error reading static cached file: {ex}");
+                }
             }
             return null;
         }

@@ -534,6 +534,56 @@ public class MainViewModelTests
         Assert.That(importedTab.CustomTitle, Is.EqualTo("character_sheet.png"));
         Assert.That(importedTab.Palette, Is.EqualTo(expectedPalette));
     }
+
+    [AvaloniaTest]
+    public async Task LoadPictureCommand_WhenOpeningGuidBlobUri_WithSingleStreamRead_AutoExtractsPaletteAndRestoresOriginalFileName()
+    {
+        var extractorMock = new Mock<Eede.Application.Palettes.IImagePaletteExtractor>();
+        var expectedPalette = Palette.Create();
+        extractorMock.Setup(x => x.ExtractAsync(It.IsAny<Stream>(), It.IsAny<Picture>(), ".png"))
+            .ReturnsAsync(expectedPalette);
+
+        var mainVM = CreateMainViewModel(extractorMock.Object);
+        var dummyPicture = Picture.CreateEmpty(new PictureSize(16, 16));
+        _PictureFileIOMock.Setup(x => x.LoadAsync(It.IsAny<FilePath>())).ReturnsAsync(dummyPicture);
+
+        // Web仮想ファイル: URLはGUIDのみ（拡張子なし）、Nameは "character_sheet.png"
+        var guidBlobUri = new Uri("blob:http://localhost:5000/3e9b16f3-13bb-4573-8a39-55e1db320f2b");
+        var storageFileMock = new Mock<Avalonia.Platform.Storage.IStorageFile>();
+        storageFileMock.SetupGet(f => f.Path).Returns(guidBlobUri);
+        storageFileMock.SetupGet(f => f.Name).Returns("character_sheet.png");
+
+        // 1回目の OpenReadAsync() は正常、2回目はブラウザ制限を模して InvalidOperationException をスロー
+        int readCallCount = 0;
+        storageFileMock.Setup(f => f.OpenReadAsync()).Returns(() =>
+        {
+            readCallCount++;
+            if (readCallCount > 1)
+            {
+                throw new InvalidOperationException("Browser stream cannot be reopened.");
+            }
+            return Task.FromResult<Stream>(new MemoryStream([1, 2, 3]));
+        });
+
+        AvaloniaFileStorage.CacheFile(storageFileMock.Object);
+
+        // PictureRepository で 1 回ストリームを読み込ませる（キャッシュ化トリガー）
+        var firstStream = await AvaloniaFileStorage.TryOpenReadStreamStaticAsync(guidBlobUri.ToString());
+        Assert.That(firstStream, Is.Not.Null);
+        await firstStream!.DisposeAsync();
+
+        // 2回目の読み込み（TryExtractPaletteFromImageAsync）がメモリキャッシュから成功することを確認
+        var storageMock = new Mock<IFileStorage>();
+        storageMock.Setup(x => x.OpenFilePickerAsync()).ReturnsAsync(guidBlobUri);
+
+        await mainVM.LoadPictureCommand.Execute(storageMock.Object).ToTask();
+
+        Assert.That(mainVM.Pictures.Count, Is.EqualTo(1));
+        Assert.That(_paletteContainerViewModel.Tabs.Count, Is.EqualTo(2), "GUID blob URI でもパレットが抽出されてタブが追加されること");
+        var importedTab = _paletteContainerViewModel.Tabs[1];
+        Assert.That(importedTab.CustomTitle, Is.EqualTo("character_sheet.png"), "元のファイル名がタブタイトルに復元されること");
+        Assert.That(importedTab.Palette, Is.EqualTo(expectedPalette));
+    }
 }
 
 

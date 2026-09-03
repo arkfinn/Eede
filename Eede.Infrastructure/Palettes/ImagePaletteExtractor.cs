@@ -28,7 +28,21 @@ public class ImagePaletteExtractor : IImagePaletteExtractor
                 return Task.FromResult(arvPalette);
             }
 
-            if (ext == ".png")
+            // 拡張子が .png またはストリーム先頭がPNGシグネチャの場合（拡張子のない blob: URI 対応）
+            bool isPng = ext == ".png";
+            if (!isPng && stream.CanSeek && stream.Length >= 8)
+            {
+                long pos = stream.Position;
+                byte[] sig = new byte[8];
+                int read = stream.Read(sig, 0, 8);
+                stream.Position = pos;
+                if (read == 8 && sig[0] == 0x89 && sig[1] == 0x50 && sig[2] == 0x4E && sig[3] == 0x47)
+                {
+                    isPng = true;
+                }
+            }
+
+            if (isPng)
             {
                 // 1. まずインデックスカラー PNG (PLTE チャンク) を試行
                 var pngPalette = PngPaletteReader.Read(stream);

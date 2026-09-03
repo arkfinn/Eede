@@ -109,7 +109,7 @@ public class MainViewModelTests
             _interactionCoordinatorMock.Object);
     }
 
-    private MainViewModel CreateMainViewModel()
+    private MainViewModel CreateMainViewModel(Eede.Application.Palettes.IImagePaletteExtractor? imagePaletteExtractor = null)
     {
         var checkUpdateUseCase = new Eede.Application.UseCase.Updates.CheckUpdateUseCase(_appUpdaterMock.Object);
         var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object, new Mock<IExternalBrowserLauncher>().Object, _appUpdaterMock.Object, checkUpdateUseCase);
@@ -136,7 +136,8 @@ public class MainViewModelTests
             () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object),
             () => null!,
             _appUpdaterMock.Object,
-            checkUpdateUseCase);
+            checkUpdateUseCase,
+            imagePaletteExtractor: imagePaletteExtractor);
     }
 
     [AvaloniaTest]
@@ -500,6 +501,38 @@ public class MainViewModelTests
         await mainVM.LoadPictureCommand.Execute(storageMock.Object).ToTask();
 
         Assert.That(mainVM.Pictures.Count, Is.EqualTo(1), "非ファイルURI（WASM/blob）でもピクチャが正しく読み込まれること");
+    }
+
+    [AvaloniaTest]
+    public async Task LoadPictureCommand_WhenOpeningWebBrowserImage_AutoExtractsPaletteFromCache()
+    {
+        var extractorMock = new Mock<Eede.Application.Palettes.IImagePaletteExtractor>();
+        var expectedPalette = Palette.Create();
+        extractorMock.Setup(x => x.ExtractAsync(It.IsAny<Stream>(), It.IsAny<Picture>(), ".png"))
+            .ReturnsAsync(expectedPalette);
+
+        var mainVM = CreateMainViewModel(extractorMock.Object);
+        var dummyPicture = Picture.CreateEmpty(new PictureSize(16, 16));
+        _PictureFileIOMock.Setup(x => x.LoadAsync(It.IsAny<FilePath>())).ReturnsAsync(dummyPicture);
+
+        // Web仮想ファイル（blob:）をキャッシュに登録
+        var blobUri = new Uri("blob:http://localhost:5000/character_sheet.png");
+        var storageFileMock = new Mock<Avalonia.Platform.Storage.IStorageFile>();
+        storageFileMock.SetupGet(f => f.Path).Returns(blobUri);
+        storageFileMock.SetupGet(f => f.Name).Returns("character_sheet.png");
+        storageFileMock.Setup(f => f.OpenReadAsync()).ReturnsAsync(new MemoryStream([1, 2, 3]));
+        AvaloniaFileStorage.CacheFile(storageFileMock.Object);
+
+        var storageMock = new Mock<IFileStorage>();
+        storageMock.Setup(x => x.OpenFilePickerAsync()).ReturnsAsync(blobUri);
+
+        await mainVM.LoadPictureCommand.Execute(storageMock.Object).ToTask();
+
+        Assert.That(mainVM.Pictures.Count, Is.EqualTo(1));
+        Assert.That(_paletteContainerViewModel.Tabs.Count, Is.EqualTo(2), "Web版でもパレットが自動抽出されてタブが追加されること");
+        var importedTab = _paletteContainerViewModel.Tabs[1];
+        Assert.That(importedTab.CustomTitle, Is.EqualTo("character_sheet.png"));
+        Assert.That(importedTab.Palette, Is.EqualTo(expectedPalette));
     }
 }
 

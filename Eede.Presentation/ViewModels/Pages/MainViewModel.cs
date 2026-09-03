@@ -1327,7 +1327,7 @@ public partial class MainViewModel : ViewModelBase
         {
             var restored = await _recoverer.RestoreSessionAsync();
 
-            var docMap = RestoreDocuments(restored.Documents, restored.Snapshot.ActiveDocumentId);
+            var docMap = await RestoreDocumentsAsync(restored.Documents, restored.Snapshot.ActiveDocumentId);
             RestorePullState(restored.PullState, docMap);
             RestorePaletteState(restored.PaletteState);
 
@@ -1352,7 +1352,7 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
-    private Dictionary<string, DockPictureViewModel> RestoreDocuments(
+    private async Task<Dictionary<string, DockPictureViewModel>> RestoreDocumentsAsync(
         IReadOnlyList<RestoredDocument> documents,
         string activeDocumentId)
     {
@@ -1365,7 +1365,25 @@ public partial class MainViewModel : ViewModelBase
                 ? FilePath.Empty()
                 : new FilePath(doc.Snapshot.OriginalFilePath);
 
-            vm.Initialize(doc.Picture, filePath);
+            Picture pictureToUse = doc.Picture;
+            // ペイロードが無く（未編集でスナップショット保存された既存ファイル）、ファイルパスが存在する場合はディスクから実画像を再ロード
+            if (doc.Snapshot.ImagePayloadRef is null && !filePath.IsEmpty())
+            {
+                try
+                {
+                    var loaded = await _pictureFileIO.LoadAsync(filePath);
+                    if (loaded != null)
+                    {
+                        pictureToUse = loaded;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Eede] RestoreDocuments: Failed to reload original file '{filePath}': {ex.Message}");
+                }
+            }
+
+            vm.Initialize(pictureToUse, filePath);
             vm.Id = doc.Snapshot.DocumentId;
             vm.Edited = doc.Snapshot.IsEdited;
             vm.Magnification = new Magnification(doc.Snapshot.Magnification);

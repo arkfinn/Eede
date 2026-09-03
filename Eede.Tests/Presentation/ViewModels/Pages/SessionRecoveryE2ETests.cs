@@ -304,6 +304,50 @@ public class SessionRecoveryE2ETests
     }
 
     [AvaloniaTest]
+    public async Task ResumeLastSession_WhenDocumentIsUneditedExistingFile_ReloadsImageFromOriginalFilePath()
+    {
+        // 1. Arrange: 未編集の既存ファイル（ペイロード無し、OriginalFilePathあり）を持つセッションスナップショット
+        var docId = "doc-saved-1";
+        var docPath = "C:/test/hero.png";
+        var docSize = new PictureSize(16, 16);
+        var docSnapshot = new DocumentSnapshot(docId, docPath, false, docSize, 1.0f, null);
+
+        var paletteSnapshot = new PaletteSnapshot(new ArgbColor(255, 0, 0, 0), 0, new ArgbColor[256]);
+        var sessionSnapshot = new SessionSnapshot(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            docId,
+            new[] { docSnapshot },
+            null,
+            paletteSnapshot);
+
+        await _storage.SaveSnapshotAsync(sessionSnapshot, new Dictionary<string, byte[]>());
+
+        // ディスク上の実ファイルとして緑色 (255, 0, 255, 0) の画像をモック設定
+        var greenBytes = new byte[16 * 16 * 4];
+        greenBytes[0] = 0;   // B
+        greenBytes[1] = 255; // G
+        greenBytes[2] = 0;   // R
+        greenBytes[3] = 255; // A
+        var greenColor = new ArgbColor(255, 0, 255, 0);
+        var diskPicture = Picture.Create(docSize, greenBytes);
+        _PictureFileIOMock.Setup(x => x.LoadAsync(It.Is<FilePath>(p => p.ToString() == docPath)))
+            .ReturnsAsync(diskPicture);
+
+        // 2. Act: MainViewModel を初期化してセッション再開
+        var mainVM = CreateMainViewModel();
+        await mainVM.InitializeAsync();
+        await mainVM.WelcomeViewModel!.ResumeLastSessionCommand!.Execute().ToTask();
+
+        // 3. Assert: 既存ファイルが空白（空画像）ではなく、ディスクから正しくロードされていること
+        Assert.That(mainVM.Pictures.Count, Is.EqualTo(1));
+        var tab = mainVM.Pictures[0];
+        Assert.That(tab.FilePath.ToString(), Is.EqualTo(docPath));
+        Assert.That(tab.Edited, Is.False);
+        Assert.That(tab.PictureBuffer.PickColor(new Position(0, 0)), Is.EqualTo(greenColor), "ディスクから実画像がロードされて空白にならないこと");
+    }
+
+    [AvaloniaTest]
     public async Task DiscardRecovery_HidesPromptAndClearsStorage()
     {
         // 1. Arrange: クラッシュセッションデータを用意

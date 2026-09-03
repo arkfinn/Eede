@@ -96,8 +96,16 @@ namespace Eede.Presentation.Common.Adapters
                     pinnedArray.Free();
                 }
 
-                // For non-writeable bitmaps, we don't easily know the format, 
-                // but we assume standard platform behavior.
+                // 非WriteableBitmapでFormatがRGBAの場合はBGRAにスワップ
+                if (bitmap.Format.HasValue && IsRgba(bitmap.Format.Value))
+                {
+                    for (int i = 0; i < pixels.Length; i += 4)
+                    {
+                        byte temp = pixels[i];
+                        pixels[i] = pixels[i + 2];
+                        pixels[i + 2] = temp;
+                    }
+                }
             }
             return Picture.Create(new PictureSize(width, height), pixels);
         }

@@ -13,11 +13,16 @@ namespace Eede.Presentation.Common.Adapters
     public class PictureRepository : IPictureRepository
     {
         private readonly IBitmapAdapter<Bitmap> _bitmapAdapter;
+        private readonly IPictureCodec? _pictureCodec;
         private readonly Func<IFileStorage?> _fileStorageProvider;
 
-        public PictureRepository(IBitmapAdapter<Bitmap> bitmapAdapter, Func<IFileStorage?>? fileStorageProvider = null)
+        public PictureRepository(
+            IBitmapAdapter<Bitmap> bitmapAdapter,
+            IPictureCodec? pictureCodec = null,
+            Func<IFileStorage?>? fileStorageProvider = null)
         {
             _bitmapAdapter = bitmapAdapter;
+            _pictureCodec = pictureCodec;
             _fileStorageProvider = fileStorageProvider ?? (() => null);
         }
 
@@ -37,25 +42,7 @@ namespace Eede.Presentation.Common.Adapters
             {
                 await using (cachedStream)
                 {
-                    using var ms = new MemoryStream();
-                    await cachedStream.CopyToAsync(ms);
-                    ms.Position = 0;
-
-                    if (extension == ".arv")
-                    {
-                        ArvFileReader reader = new();
-                        return reader.Read(ms);
-                    }
-                    try
-                    {
-                        using var bitmap = new Bitmap(ms);
-                        return _bitmapAdapter.ConvertToPicture(bitmap);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[Eede] Error decoding bitmap from cached stream: {ex}");
-                        throw;
-                    }
+                    return await DecodeStreamAsync(cachedStream, extension);
                 }
             }
 
@@ -68,17 +55,7 @@ namespace Eede.Presentation.Common.Adapters
                     try
                     {
                         await using var stream = await fileStorage.OpenReadStreamAsync(uri);
-                        using var ms = new MemoryStream();
-                        await stream.CopyToAsync(ms);
-                        ms.Position = 0;
-
-                        if (extension == ".arv")
-                        {
-                            ArvFileReader reader = new();
-                            return reader.Read(ms);
-                        }
-                        using var bitmap = new Bitmap(ms);
-                        return _bitmapAdapter.ConvertToPicture(bitmap);
+                        return await DecodeStreamAsync(stream, extension);
                     }
                     catch (Exception ex)
                     {
@@ -91,18 +68,42 @@ namespace Eede.Presentation.Common.Adapters
             if (File.Exists(pathStr))
             {
                 await using var fs = new FileStream(pathStr, FileMode.Open, FileAccess.Read);
-                if (extension == ".arv")
-                {
-                    ArvFileReader reader = new();
-                    return reader.Read(fs);
-                }
-                using var bitmap = new Bitmap(fs);
-                return _bitmapAdapter.ConvertToPicture(bitmap);
+                return await DecodeStreamAsync(fs, extension);
             }
 
             // 4. 直接パス指定フォールバック
             using var directBitmap = new Bitmap(pathStr);
             return _bitmapAdapter.ConvertToPicture(directBitmap);
+        }
+
+        private async Task<Picture> DecodeStreamAsync(Stream stream, string extension)
+        {
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            ms.Position = 0;
+
+            if (extension == ".arv")
+            {
+                ArvFileReader reader = new();
+                return reader.Read(ms);
+            }
+
+            // PNG形式またはSkiaSharpデコード可能な場合はIPictureCodecを優先（インデックスカラーPNGの色化けやフォーマット反転を完全防止）
+            if (_pictureCodec != null)
+            {
+                try
+                {
+                    return _pictureCodec.DecodeFromPng(ms.ToArray());
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Eede] IPictureCodec decode failed, fallback to Avalonia Bitmap: {ex.Message}");
+                }
+            }
+
+            ms.Position = 0;
+            using var bitmap = new Bitmap(ms);
+            return _bitmapAdapter.ConvertToPicture(bitmap);
         }
 
         public async Task SaveAsync(Picture picture, FilePath path)

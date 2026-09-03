@@ -122,4 +122,67 @@ public class PaletteContainerViewModelTests
         
         _paletteSessionRepositoryMock.Verify(x => x.LoadAsync(), Times.Once);
     }
+
+    [AvaloniaTest]
+    public void OpenImportedPalette_AddsNewTabAndSelectsIt()
+    {
+        var sut = new PaletteContainerViewModel(_paletteRepositoryMock.Object, _paletteSessionRepositoryMock.Object);
+        var palette = Palette.Create();
+
+        sut.OpenImportedPalette(palette, "sample.png", "C:\\sample.png");
+
+        Assert.That(sut.Tabs.Count, Is.EqualTo(2));
+        var importedTab = sut.Tabs[1];
+        Assert.That(importedTab.CustomTitle, Is.EqualTo("sample.png"));
+        Assert.That(importedTab.FilePath, Is.Null, "画像からインポートしたタブの FilePath は null であること");
+        Assert.That(importedTab.IsClosable, Is.True, "画像からインポートしたタブは閉じられること");
+        Assert.That(importedTab.SourceIdentity, Is.EqualTo("C:\\sample.png"));
+        Assert.That(sut.SelectedTab, Is.EqualTo(importedTab));
+    }
+
+    [AvaloniaTest]
+    public void OpenImportedPalette_WhenSameSourceIdentityAlreadyOpened_ActivatesExistingTabWithoutAddingDuplicate()
+    {
+        var sut = new PaletteContainerViewModel(_paletteRepositoryMock.Object, _paletteSessionRepositoryMock.Object);
+        var palette1 = Palette.Create();
+        var palette2 = Palette.Create();
+
+        sut.OpenImportedPalette(palette1, "sample.png", "C:\\sample.png");
+        Assert.That(sut.Tabs.Count, Is.EqualTo(2));
+        var firstImportedTab = sut.Tabs[1];
+
+        // 一時パレットに切り替え
+        sut.SelectedTab = sut.Tabs[0];
+
+        // 同一の sourceIdentity で再インポート
+        sut.OpenImportedPalette(palette2, "sample.png", "C:\\sample.png");
+
+        Assert.That(sut.Tabs.Count, Is.EqualTo(2), "タブは増殖しないこと");
+        Assert.That(sut.SelectedTab, Is.EqualTo(firstImportedTab), "既存のタブがフォーカスされること");
+    }
+
+    [AvaloniaTest]
+    public async Task TryCloseTabAsync_WhenImportedTabIsDirty_TriggersConfirmCloseInteraction()
+    {
+        var sut = new PaletteContainerViewModel(_paletteRepositoryMock.Object, _paletteSessionRepositoryMock.Object);
+        var palette = Palette.Create();
+        sut.OpenImportedPalette(palette, "sample.png", "C:\\sample.png");
+        var tab = sut.Tabs[1];
+
+        // 色を変更してダーティにする
+        tab.Palette = tab.Palette.Apply(0, new ArgbColor(255, 255, 0, 0));
+        Assert.That(tab.IsDirty, Is.True);
+
+        bool interactionHandled = false;
+        sut.ConfirmCloseInteraction.RegisterHandler(ctx =>
+        {
+            interactionHandled = true;
+            ctx.SetOutput(Eede.Presentation.Common.Enums.SaveAlertResult.NoSave);
+        });
+
+        await sut.CloseTabCommand.Execute(tab).ToTask();
+
+        Assert.That(interactionHandled, Is.True, "未保存の画像インポートパレットを閉じる際は警告ダイアログが発火すること");
+        Assert.That(sut.Tabs.Contains(tab), Is.False, "NoSave の場合はタブが閉じられること");
+    }
 }

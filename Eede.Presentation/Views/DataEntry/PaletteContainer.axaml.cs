@@ -26,7 +26,10 @@ public partial class PaletteContainer : ReactiveUserControl<PaletteContainerView
 
     private async Task DoConfirmCloseAsync(IInteractionContext<PaletteTabViewModel, SaveAlertResult> interaction)
     {
-        var window = new Eede.Views.Pages.SaveAlertWindow(interaction.Input.FilePath ?? "");
+        string displayName = string.IsNullOrEmpty(interaction.Input.FilePath)
+            ? interaction.Input.CustomTitle
+            : interaction.Input.FilePath;
+        var window = new Eede.Views.Pages.SaveAlertWindow(displayName);
         if (TopLevel.GetTopLevel(this) is Window parent)
         {
             await window.ShowDialog(parent);

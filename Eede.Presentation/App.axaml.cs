@@ -130,6 +130,7 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IPictureRepository>(sp =>
             new PictureRepository(
                 sp.GetRequiredService<IBitmapAdapter<Avalonia.Media.Imaging.Bitmap>>(),
+                sp.GetService<IPictureCodec>(),
                 () =>
                 {
                     try

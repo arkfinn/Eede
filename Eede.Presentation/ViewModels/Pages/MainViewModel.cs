@@ -872,11 +872,24 @@ public partial class MainViewModel : ViewModelBase
         try
         {
             Stream? stream = null;
-            if (FileStorage != null)
+            // 1. 静的キャッシュから開く（Web版ドラッグ＆ドロップやファイルピッカー選択ファイルを確実に捕捉）
+            stream = await AvaloniaFileStorage.TryOpenReadStreamStaticAsync(pathStr);
+
+            // 2. FileStorage から開く
+            if (stream == null && FileStorage != null)
             {
-                stream = await FileStorage.OpenReadStreamAsync(uri);
+                try
+                {
+                    stream = await FileStorage.OpenReadStreamAsync(uri);
+                }
+                catch
+                {
+                    // Fallback
+                }
             }
-            else if (System.IO.File.Exists(pathStr))
+
+            // 3. 物理ファイルから開く
+            if (stream == null && System.IO.File.Exists(pathStr))
             {
                 stream = new FileStream(pathStr, FileMode.Open, FileAccess.Read, FileShare.Read);
             }

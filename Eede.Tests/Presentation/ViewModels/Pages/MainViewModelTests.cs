@@ -484,6 +484,23 @@ public class MainViewModelTests
         Assert.That(importedTab.Palette, Is.EqualTo(expectedPalette));
         Assert.That(_paletteContainerViewModel.SelectedTab, Is.EqualTo(importedTab), "インポートされたタブが選択されること");
     }
+
+    [AvaloniaTest]
+    public async Task LoadPictureCommand_SupportsNonFileUri_InBrowserWasmEnvironment()
+    {
+        var mainVM = CreateMainViewModel();
+        var dummyPicture = Picture.CreateEmpty(new PictureSize(16, 16));
+        _PictureFileIOMock.Setup(x => x.LoadAsync(It.IsAny<FilePath>())).ReturnsAsync(dummyPicture);
+
+        var storageMock = new Mock<IFileStorage>();
+        var blobUri = new Uri("blob:http://localhost:5000/550e8400-e29b-41d4-a716-446655440000");
+        storageMock.Setup(x => x.OpenFilePickerAsync()).ReturnsAsync(blobUri);
+        mainVM.FileStorage = storageMock.Object;
+
+        await mainVM.LoadPictureCommand.Execute(storageMock.Object).ToTask();
+
+        Assert.That(mainVM.Pictures.Count, Is.EqualTo(1), "非ファイルURI（WASM/blob）でもピクチャが正しく読み込まれること");
+    }
 }
 
 

@@ -104,7 +104,7 @@ namespace Eede.Presentation.Common.Adapters
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[AvaloniaFileStorage] Error reading static cached file: {ex}");
+                    System.Diagnostics.Trace.WriteLine($"[AvaloniaFileStorage] Error reading static cached file: {ex}");
                 }
             }
             return null;

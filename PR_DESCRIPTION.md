@@ -1,36 +1,23 @@
-# 🌐 fix(wasm): Web版パレット自動抽出の完全修復 & feat(wasm): IndexedDBによるWeb版セッション復元・容量超過防護
+# 🌐 fix(wasm): Web版セッション復元時にドックエリアの画像が空になる不具合の修正
 
 ## 🎯 概要 (Overview)
-本PRは、WebAssembly（ブラウザ版）において画像オープン時にパレットタブが生成されなかった問題の完全修復と、ブラウザリロード（F5）やタブ再開時にも前回の作業状態を安全に復元可能にする IndexedDB セッション永続化機構の追加を行います。
+本PRは、WebAssembly（ブラウザ版）において「前回の作業を復元」「前回の作業を再開」を実行した際、ドックエリアに配置された画像が透明な空画像（`Picture.CreateEmpty`）になってしまう不具合を根本解決します。
 
-### 1. Web版でのパレット自動抽出の完全修復
-- **ブラウザでのストリーム再オープン不可の克服**:
-  - `PictureRepository` が画像ロード時にストリームを読み切った後、`TryExtractPaletteFromImageAsync` で再度ストレージから開こうとした際に、WebAssembly（`Avalonia.Browser`）の JS Interop 制約（2回目のオープン拒絶/破棄例外）によってパレット抽出が失敗していた問題を解決。
-  - `AvaloniaFileStorage.StaticDataCache`（バイト配列インメモリキャッシュ）を新設し、初回ロード時の全バイトをメモリ保持して 2 回目以降は即座に `MemoryStream` を複製して返すよう改善。
-- **GUID blob URI による拡張子・元ファイル名欠落の解決**:
-  - ブラウザ環境で URI が `blob:.../3e9b16f3-...`（拡張子のないGUID）となり、従来の `.png` 拡張子判定を素通りしていた問題を解決。
-  - `StaticNameCache` による元のファイル名復元に加え、ストリーム先頭 8 バイトの PNG シグネチャ（`0x89 0x50 0x4E 0x47`）自動検知ロジックを追加し、拡張子のない仮想 URI でも 100% 確実に PNG パレット抽出を実行。
-- **チャンク化ストリームの完全読み切り**:
-  - WebAssembly の JSStream による部分読み込みで PNG チャンク検証が途中で不正終了していた問題を、`PngPaletteReader` の `TryReadExactly` 化により解決。
-
-### 2. Web版（WASM）セッション復元対応（IndexedDB による大容量・非同期・容量オーバー防護）
-- **IndexedDB による大容量非同期ストア**:
-  - Web版でブラウザをリロード（F5）したりタブを閉じた際に、仮想インメモリファイルシステムが初期化されて「前回の作業を再開」が消えていた制約を克服。
-  - `BrowserIndexedDbSessionStorage` および `window.eedeSessionDb` を新設し、ブラウザの **IndexedDB** にセッションメタデータと画像ペイロードを安全に永続化。
-- **容量オーバー（QuotaExceededError）時の優雅な縮退（Graceful Degradation）**:
-  - ディスク逼迫やクォータ超過時には画像ペイロードを間引き、タブ構成・名前・キャンバスサイズなどのメタデータを死守して保存。
-  - ストレージ例外を内部で安全に吸収し、ユーザーが描画中のペン操作やUIを決してクラッシュ・停止させない多層防御を配備。
+### 🔍 真因と解決内容
+1. **未編集ドキュメントの画像ペイロード永続化規律の配備**:
+   - デスクトップ版の「未編集ファイル（`Edited == false`）はディスク上の実ファイルから再ロードできるため画像ペイロードをスキップする」規律がWeb版にも適用されていたため、ブラウザ再読込後にローカルファイル不在でドックエリアが空画像になっていた問題を特定。
+   - Web環境（`OperatingSystem.IsBrowser()`）、ブラウザ仮想URI（`blob:` 等）、および未保存画像（`FilePath.IsEmpty()`）においては、未編集であっても必ず全ドキュメントの画像ペイロード（`ImagePayloadRef`）を生成して IndexedDB / スナップショットへ保存するよう条件分岐（`ShouldSaveDocumentPayload`）を整備。
+2. **ブラウザ仮想URIからの元ファイル名復元と劣化防止**:
+   - スナップショット作成時、ブラウザの仮想URI（`blob:http://...`）から `AvaloniaFileStorage.TryGetOriginalFileName` を用いて元ファイル名（`hero.png` 等）を抽出し、`OriginalFilePath` に優先保存。
+   - セッション復元時のタブ表示名やダウンロード保存名が無意味な GUID blob 文字列に劣化することを防止。
+3. **復元画像の静的キャッシュ再登録**:
+   - `RestoreDocumentsAsync` において、復元されたドキュメントの画像バイト列を `AvaloniaFileStorage.RegisterCacheData` により静的キャッシュに再登録。復元直後であってもパレット抽出やストリーム再利用が即座に動作するよう保証。
 
 ---
 
 ## 🧪 テスト・検証結果 (Verification)
-- **テストスイート (`dotnet test`)**: **823 件 ALL PASS**（0 fail / 100% 成功）
-- **ソリューション全体ビルド**: **0 警告・0 エラー**（`Eede.Presentation.Browser` 含む）
-- **新規テスト**:
-  - `BrowserIndexedDbSessionStorageTests` (5件):
-    - IndexedDB ストレージの保存・復元
-    - クリーン終了マーカー追跡（正常終了とクラッシュ復旧の分離）
-    - 容量オーバー（`QuotaExceededError`）時の安全縮退
-    - セッション消去
-  - `MainViewModelTests.LoadPictureCommand_WhenOpeningGuidBlobUri_WithSingleStreamRead_AutoExtractsPaletteAndRestoresOriginalFileName`:
-    - ブラウザ特有の「拡張子なし GUID blob URI」および「2回目の OpenReadAsync 禁止（例外スロー）」環境を完全再現し、パレット抽出・タブ追加・タイトル復元が正常動作することを実証。
+- **テストスイート (`dotnet test`)**: **824 件 ALL PASS**（0 fail / 100% 成功）
+- **WebAssembly プロジェクトビルド (`Eede.Presentation.Browser`)**: **0 警告・0 エラー**
+- **新規結合テスト**:
+  - `SessionRecoveryE2ETests.CaptureSession_WhenDocumentIsVirtualUriOrUneditedWebFile_SavesImagePayloadAndRestoresNonEmptyPicture`:
+    - 仮想URI（`blob:`）の未編集画像をスナップショット保存・再起動復元した際に、画像ペイロードが正しく保持され、ドックエリアに元の実画像（青色ピクセル）が完全に復元されることを実証。

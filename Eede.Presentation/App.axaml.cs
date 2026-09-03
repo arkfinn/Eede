@@ -3,6 +3,7 @@ using Avalonia.Markup.Xaml;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Infrastructure;
+using Eede.Application.Palettes;
 using Eede.Application.Pictures;
 using Eede.Application.Recovery;
 using Eede.Application.UseCase.Animations;
@@ -14,6 +15,7 @@ using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.SharedKernel;
+using Eede.Infrastructure.Palettes;
 using Eede.Infrastructure.Palettes.Persistence;
 using Eede.Infrastructure.Pictures;
 using Eede.Infrastructure.Recovery;
@@ -143,6 +145,7 @@ public partial class App : Avalonia.Application
         services.AddSingleton<ISavePictureUseCase, SavePictureUseCase>();
         services.AddSingleton<ILoadPictureUseCase, LoadPictureUseCase>();
         services.AddSingleton<IPictureFileIO, PictureFileIO>();
+        services.AddSingleton<IImagePaletteExtractor, ImagePaletteExtractor>();
         services.AddSingleton<IPaletteRepository, Eede.Infrastructure.Palettes.Persistence.PaletteRepository>();
         if (OperatingSystem.IsBrowser())
         {

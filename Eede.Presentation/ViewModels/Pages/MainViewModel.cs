@@ -13,6 +13,7 @@ using Eede.Domain.ImageEditing.GeometricTransformations;
 using Eede.Domain.ImageEditing.History;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
+using Eede.Application.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Actions;
 using Eede.Presentation.Common.Adapters;
@@ -38,6 +39,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using RxVoid = ReactiveUI.Primitives.RxVoid;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -193,6 +195,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly SessionRecoveryCoordinator? _coordinator;
     private readonly ISessionRecoverer? _recoverer;
     private readonly ISessionStorage? _sessionStorage;
+    private readonly IImagePaletteExtractor? _imagePaletteExtractor;
     private readonly Guid _sessionId = Guid.NewGuid();
     private readonly Dictionary<DockPictureViewModel, CompositeDisposable> _pictureSubscriptions = new();
     private readonly Dictionary<PaletteTabViewModel, IDisposable> _paletteTabSubscriptions = new();
@@ -231,7 +234,8 @@ public partial class MainViewModel : ViewModelBase
         IPullContextTracker? pullContextTracker = null,
         SessionRecoveryCoordinator? sessionRecoveryCoordinator = null,
         ISessionRecoverer? sessionRecoverer = null,
-        ISessionStorage? sessionStorage = null)
+        ISessionStorage? sessionStorage = null,
+        IImagePaletteExtractor? imagePaletteExtractor = null)
     {
         _state = State;
         _clipboard = clipboard;
@@ -257,6 +261,7 @@ public partial class MainViewModel : ViewModelBase
         _coordinator = sessionRecoveryCoordinator;
         _recoverer = sessionRecoverer;
         _sessionStorage = sessionStorage;
+        _imagePaletteExtractor = imagePaletteExtractor;
 
         if (_coordinator != null)
         {
@@ -840,6 +845,9 @@ public partial class MainViewModel : ViewModelBase
             {
                 return null;
             }
+
+            await TryExtractPaletteFromImageAsync(path, pathStr, filePath, picture);
+
             DockPictureViewModel vm = _dockPictureFactory();
             vm.Initialize(picture, filePath);
             return vm;
@@ -848,6 +856,43 @@ public partial class MainViewModel : ViewModelBase
         {
             Console.WriteLine($"[Eede] OpenPicture failed for path '{path}': {ex}");
             return null;
+        }
+    }
+
+    private async Task TryExtractPaletteFromImageAsync(Uri uri, string pathStr, FilePath filePath, Picture picture)
+    {
+        if (_imagePaletteExtractor == null) return;
+
+        try
+        {
+            Stream? stream = null;
+            if (FileStorage != null)
+            {
+                stream = await FileStorage.OpenReadStreamAsync(uri);
+            }
+            else if (System.IO.File.Exists(pathStr))
+            {
+                stream = new FileStream(pathStr, FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+
+            if (stream != null)
+            {
+                await using (stream.ConfigureAwait(false))
+                {
+                    string extension = filePath.GetExtension();
+                    var palette = await _imagePaletteExtractor.ExtractAsync(stream, picture, extension);
+                    if (palette != null)
+                    {
+                        string fileName = System.IO.Path.GetFileName(pathStr);
+                        string title = string.IsNullOrEmpty(fileName) ? "画像パレット" : fileName;
+                        PaletteContainerViewModel.OpenImportedPalette(palette, title, sourceIdentity: pathStr);
+                    }
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            System.Diagnostics.Trace.WriteLine($"[MainViewModel] Failed to extract palette from image '{pathStr}': {ex.Message}");
         }
     }
 

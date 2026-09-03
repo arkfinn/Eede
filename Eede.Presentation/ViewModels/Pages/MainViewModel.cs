@@ -745,6 +745,11 @@ public partial class MainViewModel : ViewModelBase
 
         foreach (IStorageItem file in files)
         {
+            if (file is IStorageFile storageFile)
+            {
+                AvaloniaFileStorage.CacheFile(storageFile);
+            }
+
             if (IsSupportedImageFile(file))
             {
                 DockPictureViewModel? newPicture = await OpenPicture(file.Path);
@@ -755,21 +760,22 @@ public partial class MainViewModel : ViewModelBase
             }
             else if (IsSupportedPaletteFile(file))
             {
-                PaletteContainerViewModel.LoadPalette(file.Path.LocalPath);
+                string palettePath = file.Path.IsAbsoluteUri && file.Path.IsFile
+                    ? file.Path.LocalPath
+                    : file.Path.ToString();
+                PaletteContainerViewModel.LoadPalette(palettePath);
             }
         }
     }
 
     private bool IsSupportedPaletteFile(IStorageItem file)
     {
-        var path = file.Path.LocalPath.ToLower();
-        return path.EndsWith(".act") || path.EndsWith(".aact");
+        return FileClassification.IsSupportedPalette(file.Name);
     }
 
     private bool IsSupportedImageFile(IStorageItem file)
     {
-        var path = file.Path.LocalPath.ToLower();
-        return path.EndsWith(".png") || path.EndsWith(".bmp") || path.EndsWith(".arv");
+        return FileClassification.IsSupportedImage(file.Name);
     }
 
     private async void ExecuteLoadPicture(IFileStorage? storage)
@@ -879,18 +885,23 @@ public partial class MainViewModel : ViewModelBase
             {
                 await using (stream.ConfigureAwait(false))
                 {
+                    string fileName = System.IO.Path.GetFileName(pathStr);
                     string extension = filePath.GetExtension();
+                    if (string.IsNullOrEmpty(extension))
+                    {
+                        extension = FileClassification.GetExtension(fileName);
+                    }
+
                     var palette = await _imagePaletteExtractor.ExtractAsync(stream, picture, extension);
                     if (palette != null)
                     {
-                        string fileName = System.IO.Path.GetFileName(pathStr);
                         string title = string.IsNullOrEmpty(fileName) ? "画像パレット" : fileName;
                         PaletteContainerViewModel.OpenImportedPalette(palette, title, sourceIdentity: pathStr);
                     }
                 }
             }
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        catch (Exception ex)
         {
             System.Diagnostics.Trace.WriteLine($"[MainViewModel] Failed to extract palette from image '{pathStr}': {ex.Message}");
         }
@@ -1281,7 +1292,14 @@ public partial class MainViewModel : ViewModelBase
         {
             var colors = new List<ArgbColor>();
             tab.Palette.ForEach((c, i) => colors.Add(c));
-            tabSnapshots.Add(new PaletteTabSnapshot(tab.FilePath, tab.IsDirty, colors));
+            tabSnapshots.Add(new PaletteTabSnapshot(
+                tab.FilePath,
+                tab.IsDirty,
+                colors,
+                tab.CustomTitle,
+                tab.IsClosable,
+                tab.SourceIdentity
+            ));
         }
 
         var activeTab = PaletteContainerViewModel.SelectedTab;
@@ -1316,7 +1334,7 @@ public partial class MainViewModel : ViewModelBase
         {
             var restored = await _recoverer.RestoreSessionAsync();
 
-            var docMap = RestoreDocuments(restored.Documents, restored.Snapshot.ActiveDocumentId);
+            var docMap = await RestoreDocumentsAsync(restored.Documents, restored.Snapshot.ActiveDocumentId);
             RestorePullState(restored.PullState, docMap);
             RestorePaletteState(restored.PaletteState);
 
@@ -1341,7 +1359,7 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
-    private Dictionary<string, DockPictureViewModel> RestoreDocuments(
+    private async Task<Dictionary<string, DockPictureViewModel>> RestoreDocumentsAsync(
         IReadOnlyList<RestoredDocument> documents,
         string activeDocumentId)
     {
@@ -1354,7 +1372,25 @@ public partial class MainViewModel : ViewModelBase
                 ? FilePath.Empty()
                 : new FilePath(doc.Snapshot.OriginalFilePath);
 
-            vm.Initialize(doc.Picture, filePath);
+            Picture pictureToUse = doc.Picture;
+            // ペイロードが無く（未編集でスナップショット保存された既存ファイル）、ファイルパスが存在する場合はディスクから実画像を再ロード
+            if (doc.Snapshot.ImagePayloadRef is null && !filePath.IsEmpty())
+            {
+                try
+                {
+                    var loaded = await _pictureFileIO.LoadAsync(filePath);
+                    if (loaded != null)
+                    {
+                        pictureToUse = loaded;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Eede] RestoreDocuments: Failed to reload original file '{filePath}': {ex.Message}");
+                }
+            }
+
+            vm.Initialize(pictureToUse, filePath);
             vm.Id = doc.Snapshot.DocumentId;
             vm.Edited = doc.Snapshot.IsEdited;
             vm.Magnification = new Magnification(doc.Snapshot.Magnification);
@@ -1400,31 +1436,28 @@ public partial class MainViewModel : ViewModelBase
 
         if (paletteState.Tabs.Count > 0)
         {
-            // 全タブを完全復元
-            // 既存タブのうち一時パレット（Tabs[0]）以外をクリア
-            while (PaletteContainerViewModel.Tabs.Count > 1)
-            {
-                PaletteContainerViewModel.Tabs.RemoveAt(PaletteContainerViewModel.Tabs.Count - 1);
-            }
+            PaletteContainerViewModel.Tabs.Clear();
 
-            // 0番目（一時パレット）の色を復元
-            var tempTabSnapshot = paletteState.Tabs[0];
-            if (tempTabSnapshot.Colors.Count == Palette.MAX_LENGTH)
+            foreach (var tabSnapshot in paletteState.Tabs)
             {
-                PaletteContainerViewModel.Tabs[0].Palette = Palette.FromColors(tempTabSnapshot.Colors.ToArray());
-            }
-
-            // 1番目以降（ファイルパレット）を復元
-            for (int i = 1; i < paletteState.Tabs.Count; i++)
-            {
-                var tabSnapshot = paletteState.Tabs[i];
                 if (tabSnapshot.Colors.Count == Palette.MAX_LENGTH)
                 {
                     var palette = Palette.FromColors(tabSnapshot.Colors.ToArray());
-                    var newTab = new PaletteTabViewModel(palette, tabSnapshot.FilePath);
+                    var newTab = new PaletteTabViewModel(
+                        palette,
+                        tabSnapshot.FilePath,
+                        tabSnapshot.IsClosable,
+                        tabSnapshot.CustomTitle,
+                        tabSnapshot.SourceIdentity
+                    );
                     newTab.IsDirty = tabSnapshot.IsDirty;
                     PaletteContainerViewModel.Tabs.Add(newTab);
                 }
+            }
+
+            if (PaletteContainerViewModel.Tabs.Count == 0)
+            {
+                PaletteContainerViewModel.Tabs.Add(new PaletteTabViewModel(Palette.Create()));
             }
 
             // アクティブタブの復元

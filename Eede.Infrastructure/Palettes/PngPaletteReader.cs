@@ -34,8 +34,7 @@ public static class PngPaletteReader
     private static Palette? ReadInternal(Stream stream)
     {
         Span<byte> header = stackalloc byte[8];
-        int bytesRead = stream.Read(header);
-        if (bytesRead < 8 || !header.SequenceEqual(PngSignature))
+        if (!TryReadExactly(stream, header) || !header.SequenceEqual(PngSignature))
         {
             return null;
         }
@@ -46,7 +45,7 @@ public static class PngPaletteReader
         Span<byte> chunkHeader = stackalloc byte[8];
         Span<byte> crcBuffer = stackalloc byte[4];
 
-        while (stream.Read(chunkHeader) == 8)
+        while (TryReadExactly(stream, chunkHeader))
         {
             uint length = BinaryPrimitives.ReadUInt32BigEndian(chunkHeader[..4]);
             uint type = BinaryPrimitives.ReadUInt32BigEndian(chunkHeader[4..8]);
@@ -62,7 +61,7 @@ public static class PngPaletteReader
             {
                 if (length < 13) return null;
                 byte[] ihdrData = new byte[length];
-                if (stream.Read(ihdrData) < length) return null;
+                if (!TryReadExactly(stream, ihdrData)) return null;
 
                 byte colorType = ihdrData[9];
                 if (colorType != 3) // 3 = Indexed-color
@@ -81,7 +80,7 @@ public static class PngPaletteReader
 
                 int colorCount = (int)(length / 3);
                 byte[] plteData = new byte[length];
-                if (stream.Read(plteData) < length) return null;
+                if (!TryReadExactly(stream, plteData)) return null;
 
                 paletteEntries = new ArgbColor[Palette.MAX_LENGTH];
                 for (int i = 0; i < colorCount; i++)
@@ -101,7 +100,7 @@ public static class PngPaletteReader
                 if (isIndexed && paletteEntries != null)
                 {
                     byte[] trnsData = new byte[length];
-                    if (stream.Read(trnsData) < length) return null;
+                    if (!TryReadExactly(stream, trnsData)) return null;
 
                     int count = Math.Min((int)length, Palette.MAX_LENGTH);
                     for (int i = 0; i < count; i++)
@@ -126,13 +125,25 @@ public static class PngPaletteReader
             }
 
             // CRC 4バイトをスキップ
-            if (stream.Read(crcBuffer) < 4)
+            if (!TryReadExactly(stream, crcBuffer))
             {
                 break;
             }
         }
 
         return paletteEntries != null ? Palette.FromColors(paletteEntries) : null;
+    }
+
+    private static bool TryReadExactly(Stream stream, Span<byte> buffer)
+    {
+        int totalRead = 0;
+        while (totalRead < buffer.Length)
+        {
+            int read = stream.Read(buffer[totalRead..]);
+            if (read == 0) return false;
+            totalRead += read;
+        }
+        return true;
     }
 
     private static void SkipBytes(Stream stream, long count)

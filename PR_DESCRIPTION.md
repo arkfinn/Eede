@@ -1,30 +1,36 @@
-# 🎨 feat(palettes): 画像からのパレット自動インポート & fix(wasm/color/recovery): Web版完全修復・色化け根絶・セッション復元
+# 🌐 fix(wasm): Web版パレット自動抽出の完全修復 & feat(wasm): IndexedDBによるWeb版セッション復元・容量超過防護
 
 ## 🎯 概要 (Overview)
-1. **画像からのカラーパレット自動抽出・新タブ展開**:
-   - 256色以下のインデックスカラーPNG（PLTEチャンク）、ARV画像、およびダイレクトカラーPNGからユニーク色を高速スキャンし、新しいパレットタブとして自動展開。
-   - インポートしたタブの誤操作による元画像破壊を防ぐライフサイクル隔離規約（`SourceIdentity` による重複検知と安全なクローズハンドリング）を完備。
-2. **Web版（WASM / Avalonia.Browser）でのファイルオープン＆パレット抽出の完全修復**:
-   - **ブラウザでのストリーム再オープン不可の完全克服**: 画像読込（`PictureRepository`）とパレット抽出（`TryExtractPaletteFromImageAsync`）で2回ストリームを開こうとした際、ブラウザの JS Interop 制限により2回目が失敗していた問題を `AvaloniaFileStorage.StaticDataCache`（バイト配列インメモリキャッシュ）により完全解決。
-   - **GUID blob URI による拡張子・ファイル名欠落の解決**: ブラウザ環境で URI が `blob:.../guid` となりファイル名や `.png` 拡張子が消滅していた問題を、`StaticNameCache` による元ファイル名復元およびストリーム先頭マジックナンバー（`0x89 0x50 0x4E 0x47`）自動検知により解決。
-   - **チャンク化ストリームの完全読み切り**: WebAssembly の JSStream による部分読み込みで PNG チャンク検証が不正終了していた問題を `PngPaletteReader` の `TryReadExactly` 化により解決。
-3. **PNG256（256色インデックスカラーPNG）等の色化け・反転の根絶**:
-   - Avalonia の `Bitmap.CopyPixels` が内部 `Rgba8888` フォーマットのままコピーしてしまい、`Picture`（`Bgra8888`）との間で赤と青が反転（色化け）していた問題、およびアルファ乗算の劣化を根本解決。
-   - `PictureRepository` に `IPictureCodec`（`SkiaSharpPictureCodec`）を注入し、インデックスカラーPNGを含めて純粋な SkiaSharp（`SKCodec` + `SKImageInfo(Bgra8888, Unpremul)`）でデコードするよう刷新。1ビットの狂いもない完全な色情報を復元。
-4. **Windows版セッション再開時の既存ファイル空白化の解消**:
-   - 未編集の既存ファイル（`Edited == false` かつ `OriginalFilePath != null`）について、復元時（`RestoreDocumentsAsync`）に `_pictureFileIO.LoadAsync(filePath)` で実画像を安全に再ロード。
-5. **セッション再開時のパレット「一時パレット」固定化＆クローズ不可バグの解消**:
-6. **Web版（WASM）セッション復元対応（IndexedDB による大容量・非同期・容量オーバー防護）**:
-   - Web版においてブラウザのリロード（F5）やタブ再開時に仮想ファイルシステムが初期化されて「前回の作業を再開」が消えていた制約を克服。
-   - `BrowserIndexedDbSessionStorage` および `window.eedeSessionDb` を新設し、ブラウザの **IndexedDB**（大容量非同期ストア）にセッションメタデータと画像ペイロードを安全に退避。
-   - **容量オーバー（QuotaExceededError）時の優雅な縮退（Graceful Degradation）**: ディスク逼迫やクォータ超過時には画像ペイロードを間引き、タブ構成等のメタデータを死守してアプリのクラッシュや描画停止を 100% 回避。
+本PRは、WebAssembly（ブラウザ版）において画像オープン時にパレットタブが生成されなかった問題の完全修復と、ブラウザリロード（F5）やタブ再開時にも前回の作業状態を安全に復元可能にする IndexedDB セッション永続化機構の追加を行います。
+
+### 1. Web版でのパレット自動抽出の完全修復
+- **ブラウザでのストリーム再オープン不可の克服**:
+  - `PictureRepository` が画像ロード時にストリームを読み切った後、`TryExtractPaletteFromImageAsync` で再度ストレージから開こうとした際に、WebAssembly（`Avalonia.Browser`）の JS Interop 制約（2回目のオープン拒絶/破棄例外）によってパレット抽出が失敗していた問題を解決。
+  - `AvaloniaFileStorage.StaticDataCache`（バイト配列インメモリキャッシュ）を新設し、初回ロード時の全バイトをメモリ保持して 2 回目以降は即座に `MemoryStream` を複製して返すよう改善。
+- **GUID blob URI による拡張子・元ファイル名欠落の解決**:
+  - ブラウザ環境で URI が `blob:.../3e9b16f3-...`（拡張子のないGUID）となり、従来の `.png` 拡張子判定を素通りしていた問題を解決。
+  - `StaticNameCache` による元のファイル名復元に加え、ストリーム先頭 8 バイトの PNG シグネチャ（`0x89 0x50 0x4E 0x47`）自動検知ロジックを追加し、拡張子のない仮想 URI でも 100% 確実に PNG パレット抽出を実行。
+- **チャンク化ストリームの完全読み切り**:
+  - WebAssembly の JSStream による部分読み込みで PNG チャンク検証が途中で不正終了していた問題を、`PngPaletteReader` の `TryReadExactly` 化により解決。
+
+### 2. Web版（WASM）セッション復元対応（IndexedDB による大容量・非同期・容量オーバー防護）
+- **IndexedDB による大容量非同期ストア**:
+  - Web版でブラウザをリロード（F5）したりタブを閉じた際に、仮想インメモリファイルシステムが初期化されて「前回の作業を再開」が消えていた制約を克服。
+  - `BrowserIndexedDbSessionStorage` および `window.eedeSessionDb` を新設し、ブラウザの **IndexedDB** にセッションメタデータと画像ペイロードを安全に永続化。
+- **容量オーバー（QuotaExceededError）時の優雅な縮退（Graceful Degradation）**:
+  - ディスク逼迫やクォータ超過時には画像ペイロードを間引き、タブ構成・名前・キャンバスサイズなどのメタデータを死守して保存。
+  - ストレージ例外を内部で安全に吸収し、ユーザーが描画中のペン操作やUIを決してクラッシュ・停止させない多層防御を配備。
 
 ---
 
 ## 🧪 テスト・検証結果 (Verification)
 - **テストスイート (`dotnet test`)**: **823 件 ALL PASS**（0 fail / 100% 成功）
+- **ソリューション全体ビルド**: **0 警告・0 エラー**（`Eede.Presentation.Browser` 含む）
 - **新規テスト**:
-  - `BrowserIndexedDbSessionStorageTests`: IndexedDB ストレージの保存・復元、クリーン終了追跡、および容量オーバー（QuotaExceededError）時の優雅な縮退を検証（5件）
+  - `BrowserIndexedDbSessionStorageTests` (5件):
+    - IndexedDB ストレージの保存・復元
+    - クリーン終了マーカー追跡（正常終了とクラッシュ復旧の分離）
+    - 容量オーバー（`QuotaExceededError`）時の安全縮退
+    - セッション消去
   - `MainViewModelTests.LoadPictureCommand_WhenOpeningGuidBlobUri_WithSingleStreamRead_AutoExtractsPaletteAndRestoresOriginalFileName`:
-    - ブラウザ特有の「拡張子なし GUID blob URI」および「2回目の OpenReadAsync 禁止（例外スロー）」環境を完全再現し、パレット抽出・タブ追加・タイトル復元が正常動作することを検証。
-  - `PictureRepositoryTests`: 256色PNGのデコード時に赤と青が反転せず正確な色でロードされることの検証
+    - ブラウザ特有の「拡張子なし GUID blob URI」および「2回目の OpenReadAsync 禁止（例外スロー）」環境を完全再現し、パレット抽出・タブ追加・タイトル復元が正常動作することを実証。

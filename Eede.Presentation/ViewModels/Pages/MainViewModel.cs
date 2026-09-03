@@ -745,6 +745,11 @@ public partial class MainViewModel : ViewModelBase
 
         foreach (IStorageItem file in files)
         {
+            if (file is IStorageFile storageFile)
+            {
+                AvaloniaFileStorage.CacheFile(storageFile);
+            }
+
             if (IsSupportedImageFile(file))
             {
                 DockPictureViewModel? newPicture = await OpenPicture(file.Path);
@@ -755,21 +760,22 @@ public partial class MainViewModel : ViewModelBase
             }
             else if (IsSupportedPaletteFile(file))
             {
-                PaletteContainerViewModel.LoadPalette(file.Path.LocalPath);
+                string palettePath = file.Path.IsAbsoluteUri && file.Path.IsFile
+                    ? file.Path.LocalPath
+                    : file.Path.ToString();
+                PaletteContainerViewModel.LoadPalette(palettePath);
             }
         }
     }
 
     private bool IsSupportedPaletteFile(IStorageItem file)
     {
-        var path = file.Path.LocalPath.ToLower();
-        return path.EndsWith(".act") || path.EndsWith(".aact");
+        return FileClassification.IsSupportedPalette(file.Name);
     }
 
     private bool IsSupportedImageFile(IStorageItem file)
     {
-        var path = file.Path.LocalPath.ToLower();
-        return path.EndsWith(".png") || path.EndsWith(".bmp") || path.EndsWith(".arv");
+        return FileClassification.IsSupportedImage(file.Name);
     }
 
     private async void ExecuteLoadPicture(IFileStorage? storage)

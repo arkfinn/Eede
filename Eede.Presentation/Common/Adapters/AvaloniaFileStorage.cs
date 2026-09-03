@@ -20,7 +20,10 @@ namespace Eede.Presentation.Common.Adapters
                 StaticFileCache[file.Path.OriginalString] = file;
                 if (file.Path.IsAbsoluteUri)
                 {
-                    StaticFileCache[file.Path.LocalPath] = file;
+                    if (file.Path.IsFile)
+                    {
+                        StaticFileCache[file.Path.LocalPath] = file;
+                    }
                     StaticFileCache[file.Path.AbsoluteUri] = file;
                 }
             }
@@ -70,7 +73,7 @@ namespace Eede.Presentation.Common.Adapters
                 StaticFileCache.TryGetValue(origStr, out file) ||
                 (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
                 (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)) ||
-                (uri.IsAbsoluteUri && StaticFileCache.TryGetValue(uri.LocalPath, out file)))
+                (uri.IsAbsoluteUri && uri.IsFile && StaticFileCache.TryGetValue(uri.LocalPath, out file)))
             {
                 return true;
             }

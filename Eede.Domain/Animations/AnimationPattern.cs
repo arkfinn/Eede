@@ -70,4 +70,23 @@ public class AnimationPattern
         newFrames[index] = frame;
         return new AnimationPattern(Name, newFrames, Grid);
     }
+
+    public bool Validate()
+    {
+        if (string.IsNullOrWhiteSpace(Name)) return false;
+        if (Grid == null) return false;
+        if (Grid.CellSize.Width <= 0 || Grid.CellSize.Height <= 0) return false;
+        if (Grid.Offset.X < 0 || Grid.Offset.Y < 0) return false;
+        if (Grid.Padding < 0) return false;
+        if (Frames == null) return false;
+
+        for (int i = 0; i < Frames.Count; i++)
+        {
+            var frame = Frames[i];
+            if (frame == null) return false;
+            if (frame.CellIndex < 0 || frame.Duration < 0) return false;
+        }
+
+        return true;
+    }
 }

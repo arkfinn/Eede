@@ -167,4 +167,26 @@ public class AnimationPatternTests
 
         Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.UpdateFrame(1, new AnimationFrame(0, 200)));
     }
+
+    [Test]
+    public void ValidateTest()
+    {
+        var validGrid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var validFrames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
+
+        var validPattern = new AnimationPattern("Valid", validFrames, validGrid);
+        Assert.That(validPattern.Validate(), Is.True);
+
+        var emptyNamePattern = new AnimationPattern("", validFrames, validGrid);
+        Assert.That(emptyNamePattern.Validate(), Is.False);
+
+        var invalidGridPattern = new AnimationPattern("InvalidGrid", validFrames, new GridSettings(new PictureSize(0, 32), new Position(0, 0), 0));
+        Assert.That(invalidGridPattern.Validate(), Is.False);
+
+        var negativeDurationPattern = new AnimationPattern("InvalidFrame", new List<AnimationFrame> { new AnimationFrame(0, -10) }, validGrid);
+        Assert.That(negativeDurationPattern.Validate(), Is.False);
+
+        var negativeIndexPattern = new AnimationPattern("InvalidIndex", new List<AnimationFrame> { new AnimationFrame(-1, 100) }, validGrid);
+        Assert.That(negativeIndexPattern.Validate(), Is.False);
+    }
 }

@@ -334,7 +334,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
                 }
 
                 var pattern = JsonSerializer.Deserialize<AnimationPattern>(json);
-                if (pattern != null)
+                if (pattern != null && pattern.Validate())
                 {
                     _patternEditor.Add(pattern);
                     SelectedPattern = Patterns.LastOrDefault();

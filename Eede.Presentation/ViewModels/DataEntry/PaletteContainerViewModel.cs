@@ -174,6 +174,26 @@ public partial class PaletteContainerViewModel : ViewModelBase
         SelectedTab = newTab;
     }
 
+    public void OpenImportedPalette(Palette palette, string title, string? sourceIdentity = null)
+    {
+        ArgumentNullException.ThrowIfNull(palette);
+        ArgumentNullException.ThrowIfNull(title);
+
+        var existingTab = Tabs.FirstOrDefault(t =>
+            (!string.IsNullOrEmpty(sourceIdentity) && t.SourceIdentity == sourceIdentity) ||
+            (string.IsNullOrEmpty(sourceIdentity) && t.CustomTitle == title));
+
+        if (existingTab != null)
+        {
+            SelectedTab = existingTab;
+            return;
+        }
+
+        var newTab = new PaletteTabViewModel(palette, filePath: null, isClosable: true, title: title, sourceIdentity: sourceIdentity);
+        Tabs.Add(newTab);
+        SelectedTab = newTab;
+    }
+
     private async Task ExecuteSaveTab(PaletteTabViewModel tab)
     {
         if (tab.FilePath == null) return;
@@ -233,14 +253,21 @@ public partial class PaletteContainerViewModel : ViewModelBase
     {
         if (!tab.IsClosable) return false;
 
-        if (tab.IsDirty && tab.FilePath != null)
+        if (tab.IsDirty)
         {
             var result = await ConfirmCloseInteraction.Handle(tab).ToTask();
             switch (result)
             {
                 case SaveAlertResult.Save:
-                    _paletteRepository.Save(tab.Palette, tab.FilePath);
-                    tab.ResetDirty();
+                    if (tab.FilePath != null)
+                    {
+                        _paletteRepository.Save(tab.Palette, tab.FilePath);
+                        tab.ResetDirty();
+                    }
+                    else
+                    {
+                        return false;
+                    }
                     break;
                 case SaveAlertResult.NoSave:
                     break;

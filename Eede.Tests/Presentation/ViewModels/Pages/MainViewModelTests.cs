@@ -21,6 +21,7 @@ using Eede.Domain.Animations;
 using Eede.Application.Animations;
 using Eede.Application.UseCase.Settings;
 using Eede.Domain.Files;
+using Eede.Domain.Palettes;
 using Eede.Presentation.Common.Enums;
 using System;
 using System.Linq;
@@ -426,6 +427,62 @@ public class MainViewModelTests
 
         Assert.That(mainVM.IsCloseConfirmed, Is.True);
         Assert.That(windowCloseInvoked, Is.True);
+    }
+
+    [AvaloniaTest]
+    public async Task OpenPicture_WhenImageHasPalette_AddsPaletteTabToPaletteContainer()
+    {
+        var extractorMock = new Mock<Eede.Application.Palettes.IImagePaletteExtractor>();
+        var expectedPalette = Palette.Create();
+        extractorMock
+            .Setup(x => x.ExtractAsync(It.IsAny<System.IO.Stream>(), It.IsAny<Picture>(), It.IsAny<string>()))
+            .ReturnsAsync(expectedPalette);
+
+        var checkUpdateUseCase = new Eede.Application.UseCase.Updates.CheckUpdateUseCase(_appUpdaterMock.Object);
+        var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object, new Mock<IExternalBrowserLauncher>().Object, _appUpdaterMock.Object, checkUpdateUseCase);
+
+        var mainVM = new MainViewModel(
+            _globalState,
+            _clipboardMock.Object,
+            _bitmapAdapterMock.Object,
+            _pictureRepositoryMock.Object,
+            _drawStyleFactoryMock.Object,
+            _transformImageUseCaseMock.Object,
+            _scalingImageUseCaseMock.Object,
+            _transferImageToCanvasUseCaseMock.Object,
+            _transferImageFromCanvasUseCaseMock.Object,
+            _drawingSessionProviderMock.Object,
+            _drawableCanvasViewModel,
+            _animationViewModel,
+            _drawingSessionViewModel,
+            _paletteContainerViewModel,
+            _PictureFileIOMock.Object,
+            new Mock<IThemeDetector>().Object,
+            _loadSettingsUseCaseMock.Object,
+            _saveSettingsUseCaseMock.Object,
+            welcomeVM,
+            () => new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object),
+            () => null!,
+            _appUpdaterMock.Object,
+            checkUpdateUseCase,
+            imagePaletteExtractor: extractorMock.Object);
+
+        var dummyPicture = Picture.CreateEmpty(new PictureSize(16, 16));
+        _PictureFileIOMock.Setup(x => x.LoadAsync(It.IsAny<FilePath>())).ReturnsAsync(dummyPicture);
+
+        var storageMock = new Mock<IFileStorage>();
+        var dummyUri = new Uri("file:///C:/test/hero.png");
+        storageMock.Setup(x => x.OpenFilePickerAsync()).ReturnsAsync(dummyUri);
+        storageMock.Setup(x => x.OpenReadStreamAsync(dummyUri)).ReturnsAsync(new System.IO.MemoryStream([0x89, 0x50]));
+        mainVM.FileStorage = storageMock.Object;
+
+        await mainVM.LoadPictureCommand.Execute(storageMock.Object).ToTask();
+
+        Assert.That(_paletteContainerViewModel.Tabs.Count, Is.EqualTo(2), "パレットタブが追加されること");
+        var importedTab = _paletteContainerViewModel.Tabs[1];
+        Assert.That(importedTab.CustomTitle, Is.EqualTo("hero.png"));
+        Assert.That(importedTab.Palette, Is.EqualTo(expectedPalette));
+        Assert.That(_paletteContainerViewModel.SelectedTab, Is.EqualTo(importedTab), "インポートされたタブが選択されること");
     }
 }
 

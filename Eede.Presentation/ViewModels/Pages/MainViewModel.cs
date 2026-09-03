@@ -885,18 +885,23 @@ public partial class MainViewModel : ViewModelBase
             {
                 await using (stream.ConfigureAwait(false))
                 {
+                    string fileName = System.IO.Path.GetFileName(pathStr);
                     string extension = filePath.GetExtension();
+                    if (string.IsNullOrEmpty(extension))
+                    {
+                        extension = FileClassification.GetExtension(fileName);
+                    }
+
                     var palette = await _imagePaletteExtractor.ExtractAsync(stream, picture, extension);
                     if (palette != null)
                     {
-                        string fileName = System.IO.Path.GetFileName(pathStr);
                         string title = string.IsNullOrEmpty(fileName) ? "画像パレット" : fileName;
                         PaletteContainerViewModel.OpenImportedPalette(palette, title, sourceIdentity: pathStr);
                     }
                 }
             }
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        catch (Exception ex)
         {
             System.Diagnostics.Trace.WriteLine($"[MainViewModel] Failed to extract palette from image '{pathStr}': {ex.Message}");
         }

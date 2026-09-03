@@ -1292,7 +1292,14 @@ public partial class MainViewModel : ViewModelBase
         {
             var colors = new List<ArgbColor>();
             tab.Palette.ForEach((c, i) => colors.Add(c));
-            tabSnapshots.Add(new PaletteTabSnapshot(tab.FilePath, tab.IsDirty, colors));
+            tabSnapshots.Add(new PaletteTabSnapshot(
+                tab.FilePath,
+                tab.IsDirty,
+                colors,
+                tab.CustomTitle,
+                tab.IsClosable,
+                tab.SourceIdentity
+            ));
         }
 
         var activeTab = PaletteContainerViewModel.SelectedTab;
@@ -1429,31 +1436,28 @@ public partial class MainViewModel : ViewModelBase
 
         if (paletteState.Tabs.Count > 0)
         {
-            // 全タブを完全復元
-            // 既存タブのうち一時パレット（Tabs[0]）以外をクリア
-            while (PaletteContainerViewModel.Tabs.Count > 1)
-            {
-                PaletteContainerViewModel.Tabs.RemoveAt(PaletteContainerViewModel.Tabs.Count - 1);
-            }
+            PaletteContainerViewModel.Tabs.Clear();
 
-            // 0番目（一時パレット）の色を復元
-            var tempTabSnapshot = paletteState.Tabs[0];
-            if (tempTabSnapshot.Colors.Count == Palette.MAX_LENGTH)
+            foreach (var tabSnapshot in paletteState.Tabs)
             {
-                PaletteContainerViewModel.Tabs[0].Palette = Palette.FromColors(tempTabSnapshot.Colors.ToArray());
-            }
-
-            // 1番目以降（ファイルパレット）を復元
-            for (int i = 1; i < paletteState.Tabs.Count; i++)
-            {
-                var tabSnapshot = paletteState.Tabs[i];
                 if (tabSnapshot.Colors.Count == Palette.MAX_LENGTH)
                 {
                     var palette = Palette.FromColors(tabSnapshot.Colors.ToArray());
-                    var newTab = new PaletteTabViewModel(palette, tabSnapshot.FilePath);
+                    var newTab = new PaletteTabViewModel(
+                        palette,
+                        tabSnapshot.FilePath,
+                        tabSnapshot.IsClosable,
+                        tabSnapshot.CustomTitle,
+                        tabSnapshot.SourceIdentity
+                    );
                     newTab.IsDirty = tabSnapshot.IsDirty;
                     PaletteContainerViewModel.Tabs.Add(newTab);
                 }
+            }
+
+            if (PaletteContainerViewModel.Tabs.Count == 0)
+            {
+                PaletteContainerViewModel.Tabs.Add(new PaletteTabViewModel(Palette.Create()));
             }
 
             // アクティブタブの復元

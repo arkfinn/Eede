@@ -348,6 +348,47 @@ public class SessionRecoveryE2ETests
     }
 
     [AvaloniaTest]
+    public async Task ResumeLastSession_RestoresImportedPaletteTab_WithTitleAndClosable()
+    {
+        // 1. Arrange: 画像からインポートされたパレットタブ（FilePath=null, CustomTitle="hero.png", IsClosable=true）
+        var docId = "doc-1";
+        var docSnapshot = new DocumentSnapshot(docId, null, true, new PictureSize(16, 16), 1.0f, null);
+
+        var paletteColors = new ArgbColor[256];
+        var tab1Snapshot = new PaletteTabSnapshot(null, false, paletteColors, "一時パレット", false, null);
+        var tab2Snapshot = new PaletteTabSnapshot(null, false, paletteColors, "hero.png", true, "C:/images/hero.png");
+
+        var paletteSnapshot = new PaletteSnapshot(
+            new ArgbColor(255, 0, 0, 0),
+            1,
+            paletteColors,
+            new[] { tab1Snapshot, tab2Snapshot });
+
+        var sessionSnapshot = new SessionSnapshot(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            docId,
+            new[] { docSnapshot },
+            null,
+            paletteSnapshot);
+
+        await _storage.SaveSnapshotAsync(sessionSnapshot, new Dictionary<string, byte[]>());
+
+        // 2. Act: MainViewModel を初期化して再開
+        var mainVM = CreateMainViewModel();
+        await mainVM.InitializeAsync();
+        await mainVM.WelcomeViewModel!.ResumeLastSessionCommand!.Execute().ToTask();
+
+        // 3. Assert: インポートされたパレットタブが「一時パレット」化せず、元のタイトルとIsClosable=trueで復元されること
+        Assert.That(mainVM.PaletteContainerViewModel.Tabs.Count, Is.EqualTo(2));
+        var restoredTab2 = mainVM.PaletteContainerViewModel.Tabs[1];
+        Assert.That(restoredTab2.CustomTitle, Is.EqualTo("hero.png"));
+        Assert.That(restoredTab2.IsClosable, Is.True, "インポートパレットタブが閉じられること");
+        Assert.That(restoredTab2.SourceIdentity, Is.EqualTo("C:/images/hero.png"));
+        Assert.That(mainVM.PaletteContainerViewModel.SelectedTab, Is.EqualTo(restoredTab2));
+    }
+
+    [AvaloniaTest]
     public async Task DiscardRecovery_HidesPromptAndClearsStorage()
     {
         // 1. Arrange: クラッシュセッションデータを用意

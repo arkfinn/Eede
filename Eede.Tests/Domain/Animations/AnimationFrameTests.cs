@@ -38,4 +38,20 @@ public class AnimationFrameTests
         Assert.That(frame1, Is.Not.EqualTo(frame3));
         Assert.That(frame1 != frame3, Is.True);
     }
+
+    [Test]
+    public void ValidateTest()
+    {
+        var validFrame = new AnimationFrame(0, 100);
+        Assert.That(validFrame.Validate(), Is.True);
+
+        var zeroDurationFrame = new AnimationFrame(0, 0);
+        Assert.That(zeroDurationFrame.Validate(), Is.False, "Duration == 0 must be invalid to prevent infinite loop DoS.");
+
+        var negativeDurationFrame = new AnimationFrame(0, -50);
+        Assert.That(negativeDurationFrame.Validate(), Is.False);
+
+        var negativeIndexFrame = new AnimationFrame(-1, 100);
+        Assert.That(negativeIndexFrame.Validate(), Is.False);
+    }
 }

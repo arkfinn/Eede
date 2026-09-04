@@ -339,6 +339,10 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
                     _patternEditor.Add(pattern);
                     SelectedPattern = Patterns.LastOrDefault();
                 }
+                else
+                {
+                    System.Diagnostics.Trace.WriteLine("Failed to import animation file: Invalid pattern schema or data.");
+                }
             }
             catch (Exception ex)
             {

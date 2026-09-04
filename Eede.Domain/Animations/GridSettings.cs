@@ -6,6 +6,13 @@ namespace Eede.Domain.Animations;
 
 public record GridSettings(PictureSize CellSize, Position Offset, int Padding)
 {
+    public bool Validate()
+    {
+        return CellSize.Width > 0 && CellSize.Height > 0 &&
+               Offset.X >= 0 && Offset.Y >= 0 &&
+               Padding >= 0;
+    }
+
     public int CalculateCellIndex(Position position, PictureSize imageSize)
     {
         int columns = Math.Max(1, (imageSize.Width - Offset.X + Padding) / (CellSize.Width + Padding));

@@ -93,7 +93,7 @@ public class AnimationIOViewModelTests
         var uri = new Uri("file:///path/to/animation.json");
         mockStorage.Setup(s => s.OpenAnimationFilePickerAsync()).ReturnsAsync(uri);
 
-        var json = "{\"Name\":\"Test\",\"Frames\":[],\"Grid\":{\"CellSize\":{\"Width\":-10,\"Height\":0},\"Offset\":{\"X\":0,\"Y\":0},\"Padding\":0}}";
+        var json = "{\"Name\":\"ImportTest\",\"Frames\":[{\"CellIndex\":0,\"Duration\":100}],\"Grid\":{\"CellSize\":{\"Width\":-10,\"Height\":0},\"Offset\":{\"X\":0,\"Y\":0},\"Padding\":0}}";
         _fileSystemMock.Setup(fs => fs.ReadAllTextAsync(uri.LocalPath)).ReturnsAsync(json);
 
         int initialCount = _viewModel.Patterns.Count;
@@ -136,6 +136,40 @@ public class AnimationIOViewModelTests
 
         Assert.That(_viewModel.Patterns.Count, Is.EqualTo(initialCount + 1));
         Assert.That(_viewModel.Patterns.Last().Name, Is.EqualTo("ValidTest"));
+    }
+
+    [Test]
+    public async Task ImportCommand_WithZeroFrameDuration_ShouldNotAddPattern()
+    {
+        var mockStorage = new Mock<IFileStorage>();
+        var uri = new Uri("file:///path/to/animation.json");
+        mockStorage.Setup(s => s.OpenAnimationFilePickerAsync()).ReturnsAsync(uri);
+
+        var json = "{\"Name\":\"Test\",\"Frames\":[{\"CellIndex\":0,\"Duration\":0}],\"Grid\":{\"CellSize\":{\"Width\":32,\"Height\":32},\"Offset\":{\"X\":0,\"Y\":0},\"Padding\":0}}";
+        _fileSystemMock.Setup(fs => fs.ReadAllTextAsync(uri.LocalPath)).ReturnsAsync(json);
+
+        int initialCount = _viewModel.Patterns.Count;
+
+        await _viewModel.ImportCommand.Execute(mockStorage.Object);
+
+        Assert.That(_viewModel.Patterns.Count, Is.EqualTo(initialCount));
+    }
+
+    [Test]
+    public async Task ImportCommand_WithEmptyFrames_ShouldNotAddPattern()
+    {
+        var mockStorage = new Mock<IFileStorage>();
+        var uri = new Uri("file:///path/to/animation.json");
+        mockStorage.Setup(s => s.OpenAnimationFilePickerAsync()).ReturnsAsync(uri);
+
+        var json = "{\"Name\":\"Test\",\"Frames\":[],\"Grid\":{\"CellSize\":{\"Width\":32,\"Height\":32},\"Offset\":{\"X\":0,\"Y\":0},\"Padding\":0}}";
+        _fileSystemMock.Setup(fs => fs.ReadAllTextAsync(uri.LocalPath)).ReturnsAsync(json);
+
+        int initialCount = _viewModel.Patterns.Count;
+
+        await _viewModel.ImportCommand.Execute(mockStorage.Object);
+
+        Assert.That(_viewModel.Patterns.Count, Is.EqualTo(initialCount));
     }
 }
 

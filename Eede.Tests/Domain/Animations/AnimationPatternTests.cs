@@ -180,6 +180,15 @@ public class AnimationPatternTests
         var emptyNamePattern = new AnimationPattern("", validFrames, validGrid);
         Assert.That(emptyNamePattern.Validate(), Is.False);
 
+        var tooLongNamePattern = new AnimationPattern(new string('a', 101), validFrames, validGrid);
+        Assert.That(tooLongNamePattern.Validate(), Is.False);
+
+        var emptyFramesPattern = new AnimationPattern("EmptyFrames", new List<AnimationFrame>(), validGrid);
+        Assert.That(emptyFramesPattern.Validate(), Is.False, "Empty frames list must be invalid.");
+
+        var zeroDurationPattern = new AnimationPattern("ZeroDuration", new List<AnimationFrame> { new AnimationFrame(0, 0) }, validGrid);
+        Assert.That(zeroDurationPattern.Validate(), Is.False, "Duration == 0 must be invalid.");
+
         var invalidGridPattern = new AnimationPattern("InvalidGrid", validFrames, new GridSettings(new PictureSize(0, 32), new Position(0, 0), 0));
         Assert.That(invalidGridPattern.Validate(), Is.False);
 

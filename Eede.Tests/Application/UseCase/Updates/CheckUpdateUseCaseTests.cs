@@ -1,17 +1,16 @@
-#nullable enable
-using NUnit.Framework;
-using Moq;
+using System.Threading.Tasks;
 using Eede.Application.Infrastructure;
 using Eede.Application.UseCase.Updates;
-using System.Threading.Tasks;
+using Moq;
+using NUnit.Framework;
 
-namespace Eede.Application.Tests.UseCase.Updates;
+namespace Eede.Tests.Application.UseCase.Updates;
 
 [TestFixture]
 public class CheckUpdateUseCaseTests
 {
-    private Mock<IAppUpdater> _appUpdaterMock;
-    private CheckUpdateUseCase _useCase;
+    private Mock<IAppUpdater> _appUpdaterMock = default!;
+    private CheckUpdateUseCase _useCase = default!;
 
     [SetUp]
     public void SetUp()
@@ -21,32 +20,24 @@ public class CheckUpdateUseCaseTests
     }
 
     [Test]
-    public async Task ExecuteAsync_ShouldCallCheckForUpdates()
+    public async Task ExecuteAsync_WhenUpdateIsAvailable_DownloadsUpdate()
     {
-        _appUpdaterMock.Setup(x => x.CheckForUpdatesAsync()).ReturnsAsync(false);
+        _appUpdaterMock.Setup(u => u.CheckForUpdatesAsync()).ReturnsAsync(true);
 
         await _useCase.ExecuteAsync();
 
-        _appUpdaterMock.Verify(x => x.CheckForUpdatesAsync(), Times.Once);
+        _appUpdaterMock.Verify(u => u.CheckForUpdatesAsync(), Times.Once);
+        _appUpdaterMock.Verify(u => u.DownloadUpdateAsync(), Times.Once);
     }
 
     [Test]
-    public async Task ExecuteAsync_ShouldCallDownloadUpdate_WhenUpdateAvailable()
+    public async Task ExecuteAsync_WhenUpdateIsNotAvailable_DoesNotDownloadUpdate()
     {
-        _appUpdaterMock.Setup(x => x.CheckForUpdatesAsync()).ReturnsAsync(true);
+        _appUpdaterMock.Setup(u => u.CheckForUpdatesAsync()).ReturnsAsync(false);
 
         await _useCase.ExecuteAsync();
 
-        _appUpdaterMock.Verify(x => x.DownloadUpdateAsync(), Times.Once);
-    }
-
-    [Test]
-    public async Task ExecuteAsync_ShouldNotCallDownloadUpdate_WhenUpdateNotAvailable()
-    {
-        _appUpdaterMock.Setup(x => x.CheckForUpdatesAsync()).ReturnsAsync(false);
-
-        await _useCase.ExecuteAsync();
-
-        _appUpdaterMock.Verify(x => x.DownloadUpdateAsync(), Times.Never);
+        _appUpdaterMock.Verify(u => u.CheckForUpdatesAsync(), Times.Once);
+        _appUpdaterMock.Verify(u => u.DownloadUpdateAsync(), Times.Never);
     }
 }

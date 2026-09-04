@@ -40,18 +40,17 @@ public class AnimationFrameTests
     }
 
     [Test]
+    public void Constructor_WithInvalidValues_ThrowsArgumentOutOfRangeException()
+    {
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(-1, 100));
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(0, 0));
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(0, -50));
+    }
+
+    [Test]
     public void ValidateTest()
     {
         var validFrame = new AnimationFrame(0, 100);
         Assert.That(validFrame.Validate(), Is.True);
-
-        var zeroDurationFrame = new AnimationFrame(0, 0);
-        Assert.That(zeroDurationFrame.Validate(), Is.False, "Duration == 0 must be invalid to prevent infinite loop DoS.");
-
-        var negativeDurationFrame = new AnimationFrame(0, -50);
-        Assert.That(negativeDurationFrame.Validate(), Is.False);
-
-        var negativeIndexFrame = new AnimationFrame(-1, 100);
-        Assert.That(negativeIndexFrame.Validate(), Is.False);
     }
 }

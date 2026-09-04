@@ -4,8 +4,27 @@ using System.Text.Json.Serialization;
 
 namespace Eede.Domain.Animations;
 
-public record GridSettings(PictureSize CellSize, Position Offset, int Padding)
+public record GridSettings
 {
+    public PictureSize CellSize { get; }
+    public Position Offset { get; }
+    public int Padding { get; }
+
+    [JsonConstructor]
+    public GridSettings(PictureSize cellSize, Position offset, int padding)
+    {
+        if (cellSize.Width <= 0 || cellSize.Height <= 0)
+            throw new ArgumentOutOfRangeException(nameof(cellSize), "Cell dimensions must be positive.");
+        if (offset.X < 0 || offset.Y < 0)
+            throw new ArgumentOutOfRangeException(nameof(offset), "Offset coordinates must be non-negative.");
+        if (padding < 0)
+            throw new ArgumentOutOfRangeException(nameof(padding), "Padding must be non-negative.");
+
+        CellSize = cellSize;
+        Offset = offset;
+        Padding = padding;
+    }
+
     public bool Validate()
     {
         return CellSize.Width > 0 && CellSize.Height > 0 &&

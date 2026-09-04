@@ -14,7 +14,15 @@ public class AnimationPattern
     [JsonConstructor]
     public AnimationPattern(string name, IReadOnlyList<AnimationFrame> frames, GridSettings grid)
     {
-        if (frames == null) throw new ArgumentNullException(nameof(frames));
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name cannot be null or whitespace.", nameof(name));
+        if (name.Length > 100)
+            throw new ArgumentException("Name cannot exceed 100 characters.", nameof(name));
+        if (frames == null)
+            throw new ArgumentNullException(nameof(frames));
+        if (grid == null)
+            throw new ArgumentNullException(nameof(grid));
+
         Name = name;
 
         if (frames is System.Collections.Immutable.IImmutableList<AnimationFrame> || frames is System.Collections.ObjectModel.ReadOnlyCollection<AnimationFrame>)
@@ -37,6 +45,7 @@ public class AnimationPattern
     public AnimationPattern AddFrame(AnimationFrame frame)
     {
         if (frame == null) throw new ArgumentNullException(nameof(frame));
+        if (!frame.Validate()) throw new ArgumentException("Invalid animation frame.", nameof(frame));
         var newFrames = new List<AnimationFrame>(Frames);
         newFrames.Add(frame);
         return new AnimationPattern(Name, newFrames, Grid);
@@ -66,6 +75,7 @@ public class AnimationPattern
     {
         if (index < 0 || index >= Frames.Count) throw new ArgumentOutOfRangeException(nameof(index));
         if (frame == null) throw new ArgumentNullException(nameof(frame));
+        if (!frame.Validate()) throw new ArgumentException("Invalid animation frame.", nameof(frame));
         var newFrames = new List<AnimationFrame>(Frames);
         newFrames[index] = frame;
         return new AnimationPattern(Name, newFrames, Grid);

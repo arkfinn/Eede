@@ -167,4 +167,29 @@ public class AnimationPatternTests
 
         Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.UpdateFrame(1, new AnimationFrame(0, 200)));
     }
+
+    [Test]
+    public void Constructor_WithInvalidValues_ThrowsException()
+    {
+        var validGrid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var validFrames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
+
+        Assert.Throws<System.ArgumentException>(() => new AnimationPattern("", validFrames, validGrid));
+        Assert.Throws<System.ArgumentException>(() => new AnimationPattern(new string('a', 101), validFrames, validGrid));
+        Assert.Throws<System.ArgumentNullException>(() => new AnimationPattern("Test", null!, validGrid));
+        Assert.Throws<System.ArgumentNullException>(() => new AnimationPattern("Test", validFrames, null!));
+    }
+
+    [Test]
+    public void ValidateTest()
+    {
+        var validGrid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var validFrames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
+
+        var validPattern = new AnimationPattern("Valid", validFrames, validGrid);
+        Assert.That(validPattern.Validate(), Is.True);
+
+        var emptyFramesPattern = new AnimationPattern("EmptyFrames", new List<AnimationFrame>(), validGrid);
+        Assert.That(emptyFramesPattern.Validate(), Is.True, "Empty frames list is valid.");
+    }
 }

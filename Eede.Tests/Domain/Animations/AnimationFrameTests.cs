@@ -38,4 +38,19 @@ public class AnimationFrameTests
         Assert.That(frame1, Is.Not.EqualTo(frame3));
         Assert.That(frame1 != frame3, Is.True);
     }
+
+    [Test]
+    public void Constructor_WithInvalidValues_ThrowsArgumentOutOfRangeException()
+    {
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(-1, 100));
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(0, 0));
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(0, -50));
+    }
+
+    [Test]
+    public void ValidateTest()
+    {
+        var validFrame = new AnimationFrame(0, 100);
+        Assert.That(validFrame.Validate(), Is.True);
+    }
 }

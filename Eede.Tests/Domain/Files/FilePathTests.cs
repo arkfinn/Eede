@@ -13,6 +13,12 @@ namespace Eede.Domain.Tests.Files
             Assert.That(path.ToString(), Is.EqualTo(@"Files\test\test.png"));
         }
 
+        [Test]
+        public void ThrowArgumentNullExceptionWhenFilePathIsNull()
+        {
+            _ = Assert.Throws<System.ArgumentNullException>(() => new FilePath(null!));
+        }
+
         [TestCase(false, @"Files\test\test.png")]
         [TestCase(true, "")]
         public void IsEmptyTest(bool expected, string path)

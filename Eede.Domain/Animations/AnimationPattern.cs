@@ -85,7 +85,7 @@ public class AnimationPattern
     {
         if (string.IsNullOrWhiteSpace(Name) || Name.Length > 100) return false;
         if (Grid == null || !Grid.Validate()) return false;
-        if (Frames == null || Frames.Count == 0) return false;
+        if (Frames == null) return false;
 
         for (int i = 0; i < Frames.Count; i++)
         {

@@ -190,6 +190,6 @@ public class AnimationPatternTests
         Assert.That(validPattern.Validate(), Is.True);
 
         var emptyFramesPattern = new AnimationPattern("EmptyFrames", new List<AnimationFrame>(), validGrid);
-        Assert.That(emptyFramesPattern.Validate(), Is.False, "Empty frames list must be invalid.");
+        Assert.That(emptyFramesPattern.Validate(), Is.True, "Empty frames list is valid.");
     }
 }

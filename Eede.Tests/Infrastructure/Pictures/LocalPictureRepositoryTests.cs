@@ -51,18 +51,21 @@ public class LocalPictureRepositoryTests
         });
     }
 
-    [Test]
-    public void LoadAsync_WithUnsupportedExtension_ThrowsNotSupportedException()
+    [TestCase(".png")]
+    [TestCase(".bmp")]
+    [TestCase(".jpg")]
+    [TestCase(".gif")]
+    public void LoadAsync_WithUnsupportedExtension_ThrowsNotSupportedException(string extension)
     {
         var repository = new LocalPictureRepository();
-        var filePath = new FilePath(Path.Combine(_tempDirectory, "unsupported.png"));
+        var filePath = new FilePath(Path.Combine(_tempDirectory, $"unsupported{extension}"));
 
         var ex = Assert.ThrowsAsync<NotSupportedException>(async () =>
         {
             await repository.LoadAsync(filePath);
         });
 
-        Assert.That(ex!.Message, Does.Contain("not supported"));
+        Assert.That(ex!.Message, Is.EqualTo($"Extension {extension} is not supported in Infrastructure layer yet."));
     }
 
     [Test]

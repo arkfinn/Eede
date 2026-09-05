@@ -192,4 +192,48 @@ public class AnimationPatternTests
         var emptyFramesPattern = new AnimationPattern("EmptyFrames", new List<AnimationFrame>(), validGrid);
         Assert.That(emptyFramesPattern.Validate(), Is.True, "Empty frames list is valid.");
     }
+
+    [Test]
+    public void AddFrame_WhenUsingImmutableList_PreservesImmutabilityAndCorrectCount()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var initialFrames = new List<AnimationFrame>
+        {
+            new AnimationFrame(0, 100),
+            new AnimationFrame(1, 100)
+        };
+        var pattern = new AnimationPattern("Test", initialFrames, grid);
+        var newFrame = new AnimationFrame(2, 100);
+
+        var updatedPattern = pattern.AddFrame(newFrame);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(pattern.Frames.Count, Is.EqualTo(2));
+            Assert.That(updatedPattern.Frames.Count, Is.EqualTo(3));
+            Assert.That(updatedPattern.Frames[2], Is.EqualTo(newFrame));
+        });
+    }
+
+    [Test]
+    public void UpdateFrame_WhenUsingImmutableList_UpdatesCorrectFrame()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var initialFrames = new List<AnimationFrame>
+        {
+            new AnimationFrame(0, 100),
+            new AnimationFrame(1, 100)
+        };
+        var pattern = new AnimationPattern("Test", initialFrames, grid);
+        var updatedFrame = new AnimationFrame(0, 250);
+
+        var updatedPattern = pattern.UpdateFrame(0, updatedFrame);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(pattern.Frames[0].Duration, Is.EqualTo(100));
+            Assert.That(updatedPattern.Frames[0].Duration, Is.EqualTo(250));
+            Assert.That(updatedPattern.Frames[1].Duration, Is.EqualTo(100));
+        });
+    }
 }

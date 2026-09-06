@@ -8,6 +8,9 @@ namespace PerfBench;
 [MemoryDiagnoser]
 public class AnimationPatternBenchmark
 {
+    [Params(4, 16, 64)]
+    public int FrameCount { get; set; }
+
     private AnimationPattern _pattern = default!;
     private AnimationFrame _newFrame = default!;
 
@@ -16,12 +19,24 @@ public class AnimationPatternBenchmark
     {
         var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
         var frames = new List<AnimationFrame>();
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < FrameCount; i++)
         {
             frames.Add(new AnimationFrame(i, 100));
         }
         _pattern = new AnimationPattern("Test", frames, grid);
-        _newFrame = new AnimationFrame(100, 100);
+        _newFrame = new AnimationFrame(999, 100);
+    }
+
+    [Benchmark]
+    public int ReadFramesByIndex()
+    {
+        int totalDuration = 0;
+        var frames = _pattern.Frames;
+        for (int i = 0; i < frames.Count; i++)
+        {
+            totalDuration += frames[i].Duration;
+        }
+        return totalDuration;
     }
 
     [Benchmark]
@@ -33,18 +48,18 @@ public class AnimationPatternBenchmark
     [Benchmark]
     public AnimationPattern RemoveFrame()
     {
-        return _pattern.RemoveFrame(50);
+        return _pattern.RemoveFrame(FrameCount / 2);
     }
 
     [Benchmark]
     public AnimationPattern UpdateFrame()
     {
-        return _pattern.UpdateFrame(50, _newFrame);
+        return _pattern.UpdateFrame(FrameCount / 2, _newFrame);
     }
 
     [Benchmark]
     public AnimationPattern MoveFrame()
     {
-        return _pattern.MoveFrame(10, 80);
+        return _pattern.MoveFrame(0, FrameCount - 1);
     }
 }

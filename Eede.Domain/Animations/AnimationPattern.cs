@@ -8,10 +8,10 @@ namespace Eede.Domain.Animations;
 
 public class AnimationPattern
 {
-    private readonly ImmutableList<AnimationFrame> _frames;
+    private readonly ImmutableArray<AnimationFrame> _frames;
 
     public string Name { get; }
-    public IReadOnlyList<AnimationFrame> Frames => _frames;
+    public IReadOnlyList<AnimationFrame> Frames => _frames.IsDefault ? ImmutableArray<AnimationFrame>.Empty : _frames;
     public GridSettings Grid { get; }
 
     [JsonConstructor]
@@ -27,21 +27,14 @@ public class AnimationPattern
             throw new ArgumentNullException(nameof(grid));
 
         Name = name;
-
-        if (frames is ImmutableList<AnimationFrame> immutableList)
-        {
-            _frames = immutableList;
-        }
-        else
-        {
-            _frames = frames.ToImmutableList();
-        }
-
+        _frames = frames is ImmutableArray<AnimationFrame> immutableArray
+            ? (immutableArray.IsDefault ? ImmutableArray<AnimationFrame>.Empty : immutableArray)
+            : frames.ToImmutableArray();
         Grid = grid;
     }
 
     public AnimationPattern(string name, IEnumerable<AnimationFrame> frames, GridSettings grid)
-        : this(name, frames is ImmutableList<AnimationFrame> immutableList ? immutableList : (frames?.ToImmutableList() ?? throw new ArgumentNullException(nameof(frames))), grid)
+        : this(name, (frames as IReadOnlyList<AnimationFrame>) ?? frames?.ToImmutableArray() ?? throw new ArgumentNullException(nameof(frames)), grid)
     {
     }
 
@@ -54,14 +47,16 @@ public class AnimationPattern
 
     public AnimationPattern RemoveFrame(int index)
     {
-        if (index < 0 || index >= _frames.Count) throw new ArgumentOutOfRangeException(nameof(index));
+        if (index < 0 || index >= _frames.Length) throw new ArgumentOutOfRangeException(nameof(index));
         return new AnimationPattern(Name, _frames.RemoveAt(index), Grid);
     }
 
     public AnimationPattern MoveFrame(int fromIndex, int toIndex)
     {
-        if (fromIndex < 0 || fromIndex >= _frames.Count) throw new ArgumentOutOfRangeException(nameof(fromIndex));
-        if (toIndex < 0 || toIndex >= _frames.Count) throw new ArgumentOutOfRangeException(nameof(toIndex));
+        if (fromIndex < 0 || fromIndex >= _frames.Length) throw new ArgumentOutOfRangeException(nameof(fromIndex));
+        if (toIndex < 0 || toIndex >= _frames.Length) throw new ArgumentOutOfRangeException(nameof(toIndex));
+
+        if (fromIndex == toIndex) return this;
 
         var item = _frames[fromIndex];
         var newFrames = _frames.RemoveAt(fromIndex).Insert(toIndex, item);
@@ -70,7 +65,7 @@ public class AnimationPattern
 
     public AnimationPattern UpdateFrame(int index, AnimationFrame frame)
     {
-        if (index < 0 || index >= _frames.Count) throw new ArgumentOutOfRangeException(nameof(index));
+        if (index < 0 || index >= _frames.Length) throw new ArgumentOutOfRangeException(nameof(index));
         if (frame == null) throw new ArgumentNullException(nameof(frame));
         if (!frame.Validate()) throw new ArgumentException("Invalid animation frame.", nameof(frame));
         return new AnimationPattern(Name, _frames.SetItem(index, frame), Grid);
@@ -80,11 +75,11 @@ public class AnimationPattern
     {
         if (string.IsNullOrWhiteSpace(Name) || Name.Length > 100) return false;
         if (Grid == null || !Grid.Validate()) return false;
-        if (Frames == null) return false;
+        if (_frames.IsDefault) return false;
 
-        for (int i = 0; i < Frames.Count; i++)
+        for (int i = 0; i < _frames.Length; i++)
         {
-            var frame = Frames[i];
+            var frame = _frames[i];
             if (frame == null || !frame.Validate()) return false;
         }
 

@@ -300,6 +300,23 @@ public class LocalFileSessionStorageTests
     }
 
     [Test]
+    public void WriteSnapshotAndPayloadsAsync_WhenPayloadPathIsOutsideTargetDirectory_ThrowsArgumentException()
+    {
+        Directory.CreateDirectory(_testDirectory);
+        var testStorage = new ExposedWriteSessionStorage(_testDirectory);
+        var snapshot = CreateSampleSnapshot();
+        var payloads = new Dictionary<string, byte[]>
+        {
+            ["../outside.bin"] = new byte[] { 1, 2, 3 }
+        };
+
+        Assert.ThrowsAsync<ArgumentException>(async () =>
+        {
+            await testStorage.PublicWriteSnapshotAndPayloadsAsync(_testDirectory, snapshot, payloads, CancellationToken.None);
+        });
+    }
+
+    [Test]
     public void Constructor_WithInvalidBaseDirectory_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentNullException>(() => new LocalFileSessionStorage(null!));
@@ -349,6 +366,20 @@ public class LocalFileSessionStorageTests
                 throw new IOException("Simulated disk failure during write.");
             }
             return base.WriteSnapshotAndPayloadsAsync(targetDirectory, snapshot, imagePayloads, ct);
+        }
+    }
+
+    private class ExposedWriteSessionStorage : LocalFileSessionStorage
+    {
+        public ExposedWriteSessionStorage(string baseDirectory) : base(baseDirectory) { }
+
+        public Task PublicWriteSnapshotAndPayloadsAsync(
+            string targetDirectory,
+            SessionSnapshot snapshot,
+            IReadOnlyDictionary<string, byte[]> imagePayloads,
+            CancellationToken ct)
+        {
+            return WriteSnapshotAndPayloadsAsync(targetDirectory, snapshot, imagePayloads, ct);
         }
     }
 }

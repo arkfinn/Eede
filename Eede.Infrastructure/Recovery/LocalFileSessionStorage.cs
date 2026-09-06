@@ -121,6 +121,21 @@ public class LocalFileSessionStorage : ISessionStorage
         }
     }
 
+    private static void EnsurePathInDirectory(string parentDirectory, string targetPath)
+    {
+        var fullParentPath = Path.GetFullPath(parentDirectory);
+        if (!fullParentPath.EndsWith(Path.DirectorySeparatorChar))
+        {
+            fullParentPath += Path.DirectorySeparatorChar;
+        }
+
+        var fullTargetPath = Path.GetFullPath(targetPath);
+        if (!fullTargetPath.StartsWith(fullParentPath, StringComparison.Ordinal))
+        {
+            throw new ArgumentException($"Path '{targetPath}' is outside of target directory '{parentDirectory}'.", nameof(targetPath));
+        }
+    }
+
     protected virtual async Task WriteSnapshotAndPayloadsAsync(
         string targetDirectory,
         SessionSnapshot snapshot,
@@ -128,6 +143,7 @@ public class LocalFileSessionStorage : ISessionStorage
         CancellationToken ct)
     {
         var jsonPath = Path.Combine(targetDirectory, "session.json");
+        EnsurePathInDirectory(targetDirectory, jsonPath);
         var json = JsonSerializer.Serialize(snapshot, _jsonOptions);
         await File.WriteAllTextAsync(jsonPath, json, ct);
 
@@ -135,6 +151,7 @@ public class LocalFileSessionStorage : ISessionStorage
         {
             ct.ThrowIfCancellationRequested();
             var payloadPath = Path.Combine(targetDirectory, payloadRef);
+            EnsurePathInDirectory(targetDirectory, payloadPath);
             await File.WriteAllBytesAsync(payloadPath, data, ct);
         }
     }
@@ -214,6 +231,7 @@ public class LocalFileSessionStorage : ISessionStorage
         ct.ThrowIfCancellationRequested();
 
         var payloadPath = Path.Combine(_currentDirectory, payloadRef);
+        EnsurePathInDirectory(_currentDirectory, payloadPath);
         if (!File.Exists(payloadPath))
         {
             return null;

@@ -305,8 +305,8 @@ public class AnimationPatternTests
         Assert.Throws<System.ArgumentNullException>(() => pattern.AddFrame(null!));
         Assert.Throws<System.ArgumentNullException>(() => pattern.UpdateFrame(0, null!));
 
-        // Invalid frame (e.g., duration <= 0) throws ArgumentException
-        var invalidFrame = new AnimationFrame(0, 0);
+        // Uninitialized instance bypasses constructor validation, resulting in Duration == 0 (Validate() == false)
+        var invalidFrame = (AnimationFrame)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(AnimationFrame));
         Assert.Throws<System.ArgumentException>(() => pattern.AddFrame(invalidFrame));
         Assert.Throws<System.ArgumentException>(() => pattern.UpdateFrame(0, invalidFrame));
 

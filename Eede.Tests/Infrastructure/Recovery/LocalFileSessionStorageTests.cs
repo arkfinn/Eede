@@ -440,7 +440,7 @@ public class LocalFileSessionStorageTests
             }
         }
 
-        public Task<byte[]> PublicEnsurePathInDirectoryAndLoadPayloadAsync(string payloadRef)
+        public Task<byte[]?> PublicEnsurePathInDirectoryAndLoadPayloadAsync(string payloadRef)
         {
             return LoadImagePayloadAsync(payloadRef);
         }

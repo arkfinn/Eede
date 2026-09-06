@@ -123,14 +123,14 @@ public class LocalFileSessionStorage : ISessionStorage
 
     private static void EnsurePathInDirectory(string parentDirectory, string targetPath)
     {
-        var fullParentPath = Path.GetFullPath(parentDirectory);
-        if (!fullParentPath.EndsWith(Path.DirectorySeparatorChar))
-        {
-            fullParentPath += Path.DirectorySeparatorChar;
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(parentDirectory);
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetPath);
 
-        var fullTargetPath = Path.GetFullPath(targetPath);
-        if (!fullTargetPath.StartsWith(fullParentPath, StringComparison.Ordinal))
+        var relative = Path.GetRelativePath(parentDirectory, targetPath);
+        var isCaseInsensitiveOs = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
+        var comparison = isCaseInsensitiveOs ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        if (relative == "." || relative.StartsWith("..", comparison) || Path.IsPathRooted(relative))
         {
             throw new ArgumentException($"Path '{targetPath}' is outside of target directory '{parentDirectory}'.", nameof(targetPath));
         }
@@ -143,7 +143,6 @@ public class LocalFileSessionStorage : ISessionStorage
         CancellationToken ct)
     {
         var jsonPath = Path.Combine(targetDirectory, "session.json");
-        EnsurePathInDirectory(targetDirectory, jsonPath);
         var json = JsonSerializer.Serialize(snapshot, _jsonOptions);
         await File.WriteAllTextAsync(jsonPath, json, ct);
 

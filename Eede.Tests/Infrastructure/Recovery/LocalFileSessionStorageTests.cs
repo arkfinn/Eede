@@ -317,6 +317,50 @@ public class LocalFileSessionStorageTests
     }
 
     [Test]
+    public void EnsurePathInDirectory_AllowsDifferentCaseDriveLettersAndPaths()
+    {
+        if (!OperatingSystem.IsWindows() && !OperatingSystem.IsMacOS())
+        {
+            Assert.Ignore("Case-insensitive path testing is only applicable on Windows or macOS.");
+        }
+
+        Directory.CreateDirectory(_testDirectory);
+        var testStorage = new ExposedWriteSessionStorage(_testDirectory);
+        var lowerParent = _testDirectory.ToLowerInvariant();
+        var upperTargetPath = Path.Combine(_testDirectory.ToUpperInvariant(), "test.bin");
+
+        Assert.DoesNotThrow(() =>
+        {
+            testStorage.PublicEnsurePathInDirectory(lowerParent, upperTargetPath);
+        });
+    }
+
+    [Test]
+    public void LoadImagePayloadAsync_WhenPathIsOutsideDirectory_ThrowsArgumentException()
+    {
+        Directory.CreateDirectory(_testDirectory);
+        var testStorage = new ExposedWriteSessionStorage(_testDirectory);
+
+        Assert.ThrowsAsync<ArgumentException>(async () =>
+        {
+            await testStorage.PublicEnsurePathInDirectoryAndLoadPayloadAsync("../outside.bin");
+        });
+    }
+
+    [Test]
+    public void EnsurePathInDirectory_WhenPathIsRootedOrDifferentDrive_ThrowsArgumentException()
+    {
+        Directory.CreateDirectory(_testDirectory);
+        var testStorage = new ExposedWriteSessionStorage(_testDirectory);
+        var absoluteOutsidePath = OperatingSystem.IsWindows() ? @"D:\outside.bin" : "/absolute/outside.bin";
+
+        Assert.Throws<ArgumentException>(() =>
+        {
+            testStorage.PublicEnsurePathInDirectory(_testDirectory, absoluteOutsidePath);
+        });
+    }
+
+    [Test]
     public void Constructor_WithInvalidBaseDirectory_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentNullException>(() => new LocalFileSessionStorage(null!));
@@ -380,6 +424,25 @@ public class LocalFileSessionStorageTests
             CancellationToken ct)
         {
             return WriteSnapshotAndPayloadsAsync(targetDirectory, snapshot, imagePayloads, ct);
+        }
+
+        public void PublicEnsurePathInDirectory(string parentDirectory, string targetPath)
+        {
+            try
+            {
+                typeof(LocalFileSessionStorage)
+                    .GetMethod("EnsurePathInDirectory", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
+                    .Invoke(null, new object[] { parentDirectory, targetPath });
+            }
+            catch (System.Reflection.TargetInvocationException ex) when (ex.InnerException is not null)
+            {
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+            }
+        }
+
+        public Task<byte[]> PublicEnsurePathInDirectoryAndLoadPayloadAsync(string payloadRef)
+        {
+            return LoadImagePayloadAsync(payloadRef);
         }
     }
 }

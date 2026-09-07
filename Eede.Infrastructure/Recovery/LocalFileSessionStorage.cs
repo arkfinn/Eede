@@ -121,6 +121,21 @@ public class LocalFileSessionStorage : ISessionStorage
         }
     }
 
+    private static void EnsurePathInDirectory(string parentDirectory, string targetPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(parentDirectory);
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetPath);
+
+        var relative = Path.GetRelativePath(parentDirectory, targetPath);
+        var isCaseInsensitiveOs = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
+        var comparison = isCaseInsensitiveOs ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        if (relative == "." || relative.StartsWith("..", comparison) || Path.IsPathRooted(relative))
+        {
+            throw new ArgumentException($"Path '{targetPath}' is outside of target directory '{parentDirectory}'.", nameof(targetPath));
+        }
+    }
+
     protected virtual async Task WriteSnapshotAndPayloadsAsync(
         string targetDirectory,
         SessionSnapshot snapshot,
@@ -135,6 +150,7 @@ public class LocalFileSessionStorage : ISessionStorage
         {
             ct.ThrowIfCancellationRequested();
             var payloadPath = Path.Combine(targetDirectory, payloadRef);
+            EnsurePathInDirectory(targetDirectory, payloadPath);
             await File.WriteAllBytesAsync(payloadPath, data, ct);
         }
     }
@@ -214,6 +230,7 @@ public class LocalFileSessionStorage : ISessionStorage
         ct.ThrowIfCancellationRequested();
 
         var payloadPath = Path.Combine(_currentDirectory, payloadRef);
+        EnsurePathInDirectory(_currentDirectory, payloadPath);
         if (!File.Exists(payloadPath))
         {
             return null;

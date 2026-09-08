@@ -58,34 +58,44 @@ public class GridSettingsTests
         var indexLeft = settings.CalculateCellIndex(new Position(-15, 5), imageSize);
         // col = -15/10 = -1 < 0
         Assert.That(indexLeft, Is.EqualTo(-1));
+
+        // col < 0, near zero (was erroneously returning 0 due to integer truncation toward zero)
+        var indexLeftNearZero = settings.CalculateCellIndex(new Position(-5, 5), imageSize);
+        Assert.That(indexLeftNearZero, Is.EqualTo(-1));
     }
 
     [Test]
     public void CalculateCellIndex_OutOfBoundsY_ReturnsMinusOne()
     {
         var settings = new GridSettings(new PictureSize(10, 10), new Position(0, 0), 0);
-        var imageSize = new PictureSize(30, 30); // 3 columns
+        var imageSize = new PictureSize(30, 30); // 3 columns, 3 rows
 
         // index < 0 (row < 0)
         var indexTop = settings.CalculateCellIndex(new Position(5, -15), imageSize);
-        // row = -15/10 = -1
-        // col = 5/10 = 0
-        // index = -1 * 3 + 0 = -3 < 0
         Assert.That(indexTop, Is.EqualTo(-1));
+
+        // row < 0, near zero (was erroneously returning 0)
+        var indexTopNearZero = settings.CalculateCellIndex(new Position(5, -5), imageSize);
+        Assert.That(indexTopNearZero, Is.EqualTo(-1));
+
+        // row >= rows (bottom overflow)
+        var indexBottom = settings.CalculateCellIndex(new Position(5, 35), imageSize);
+        Assert.That(indexBottom, Is.EqualTo(-1));
     }
 
     [Test]
-    public void CalculateCellIndex_NegativePositionButZeroColumn_ReturnsCorrectIndex()
+    public void CalculateCellIndex_PositionBeforeOffset_ReturnsMinusOne()
     {
         var settings = new GridSettings(new PictureSize(10, 10), new Position(5, 5), 0);
         var imageSize = new PictureSize(35, 35); // 3 columns
 
-        // C# division truncates towards zero. So -4 / 10 is 0.
-        var index = settings.CalculateCellIndex(new Position(1, 5), imageSize);
-        // col = (1-5)/10 = -4/10 = 0
-        // row = (5-5)/10 = 0/10 = 0
-        // index = 0 * 3 + 0 = 0
-        Assert.That(index, Is.EqualTo(0));
+        // Position X before offset (1 < 5) should be out of bounds (-1)
+        var indexBeforeOffsetX = settings.CalculateCellIndex(new Position(1, 5), imageSize);
+        Assert.That(indexBeforeOffsetX, Is.EqualTo(-1));
+
+        // Position Y before offset (2 < 5) should be out of bounds (-1)
+        var indexBeforeOffsetY = settings.CalculateCellIndex(new Position(5, 2), imageSize);
+        Assert.That(indexBeforeOffsetY, Is.EqualTo(-1));
     }
 
     [Test]

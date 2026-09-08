@@ -34,11 +34,19 @@ public record GridSettings
 
     public int CalculateCellIndex(Position position, PictureSize imageSize)
     {
-        int columns = Math.Max(1, (imageSize.Width - Offset.X + Padding) / (CellSize.Width + Padding));
-        int col = (position.X - Offset.X) / (CellSize.Width + Padding);
-        int row = (position.Y - Offset.Y) / (CellSize.Height + Padding);
+        if (position.X < Offset.X || position.Y < Offset.Y) return -1;
 
-        if (col < 0 || col >= columns) return -1;
+        int cellStepW = CellSize.Width + Padding;
+        int cellStepH = CellSize.Height + Padding;
+        if (cellStepW <= 0 || cellStepH <= 0) return -1;
+
+        int columns = Math.Max(1, (imageSize.Width - Offset.X + Padding) / cellStepW);
+        int rows = Math.Max(1, (imageSize.Height - Offset.Y + Padding) / cellStepH);
+
+        int col = (position.X - Offset.X) / cellStepW;
+        int row = (position.Y - Offset.Y) / cellStepH;
+
+        if (col < 0 || col >= columns || row < 0 || row >= rows) return -1;
         int index = row * columns + col;
         return index < 0 ? -1 : index;
     }

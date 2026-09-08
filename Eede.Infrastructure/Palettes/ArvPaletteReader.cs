@@ -54,6 +54,10 @@ public static class ArvPaletteReader
 
             // 5. パレットデータの読み取り
             byte paletteLength = reader.ReadByte();
+            if (paletteLength < 2)
+            {
+                return null;
+            }
             _ = reader.ReadByte(); // skip 1 byte
             byte[] paletteBytes = reader.ReadBytes(paletteLength - 2);
 

@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -146,13 +147,12 @@ public sealed class SessionRecoveryCoordinator : IDisposable
             // Phase 2: Taskpool 非同期オフロード
             await Task.Run(async () =>
             {
-                var encodedPayloads = new Dictionary<string, byte[]>();
-                foreach (var (key, picture) in capture.Pictures)
+                var encodedPayloads = new ConcurrentDictionary<string, byte[]>();
+                Parallel.ForEach(capture.Pictures, new ParallelOptions { CancellationToken = ct }, kvp =>
                 {
-                    ct.ThrowIfCancellationRequested();
-                    var encoded = _codec.EncodeToPng(picture);
-                    encodedPayloads[key] = encoded;
-                }
+                    var encoded = _codec.EncodeToPng(kvp.Value);
+                    encodedPayloads[kvp.Key] = encoded;
+                });
 
                 ct.ThrowIfCancellationRequested();
                 await _storage.SaveSnapshotAsync(capture.Snapshot, encodedPayloads, ct).ConfigureAwait(false);

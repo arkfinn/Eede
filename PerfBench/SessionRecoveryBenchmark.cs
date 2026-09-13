@@ -8,6 +8,7 @@ using Eede.Infrastructure.Pictures;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PerfBench;
@@ -18,6 +19,9 @@ public class SessionRecoveryBenchmark
     private SkiaSharpPictureCodec _codec = default!;
     private SessionCapture _capture = default!;
 
+    [Params(1, 2, 4, 8)]
+    public int DocumentCount { get; set; }
+
     [GlobalSetup]
     public void Setup()
     {
@@ -25,10 +29,15 @@ public class SessionRecoveryBenchmark
         var dict = new Dictionary<string, Picture>();
         var docs = new List<DocumentSnapshot>();
 
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < DocumentCount; i++)
         {
             var id = $"doc_{i}";
-            var pic = Picture.CreateEmpty(new PictureSize(256, 256));
+            byte[] pixels = new byte[256 * 256 * 4];
+            for (int p = 0; p < pixels.Length; p++)
+            {
+                pixels[p] = (byte)((p * 31 + i * 17) % 256);
+            }
+            var pic = Picture.Create(new PictureSize(256, 256), pixels);
             dict[id] = pic;
             docs.Add(new DocumentSnapshot(id, null, true, pic.Size, 1.0f, id));
         }
@@ -45,26 +54,44 @@ public class SessionRecoveryBenchmark
     }
 
     [Benchmark(Baseline = true)]
-    public Dictionary<string, byte[]> EncodeSequential()
+    public IReadOnlyDictionary<string, byte[]> EncodeSequential()
     {
-        var encodedPayloads = new Dictionary<string, byte[]>();
+        var dict = new Dictionary<string, byte[]>(_capture.Pictures.Count);
         foreach (var (key, picture) in _capture.Pictures)
         {
-            var encoded = _codec.EncodeToPng(picture);
-            encodedPayloads[key] = encoded;
+            dict[key] = _codec.EncodeToPng(picture);
         }
-        return encodedPayloads;
+        return dict;
     }
 
     [Benchmark]
-    public ConcurrentDictionary<string, byte[]> EncodeParallel()
+    public IReadOnlyDictionary<string, byte[]> EncodeProductionLogic()
     {
-        var encodedPayloads = new ConcurrentDictionary<string, byte[]>();
-        Parallel.ForEach(_capture.Pictures, kvp =>
+        if (_capture.Pictures.Count <= 1)
         {
+            var dict = new Dictionary<string, byte[]>(_capture.Pictures.Count);
+            foreach (var (key, picture) in _capture.Pictures)
+            {
+                dict[key] = _codec.EncodeToPng(picture);
+            }
+            return dict;
+        }
+
+        var maxParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4);
+        var parallelOptions = new ParallelOptions
+        {
+            CancellationToken = CancellationToken.None,
+            MaxDegreeOfParallelism = maxParallelism
+        };
+
+        var concurrentDict = new ConcurrentDictionary<string, byte[]>(maxParallelism, _capture.Pictures.Count);
+        Parallel.ForEach(_capture.Pictures, parallelOptions, kvp =>
+        {
+            parallelOptions.CancellationToken.ThrowIfCancellationRequested();
             var encoded = _codec.EncodeToPng(kvp.Value);
-            encodedPayloads[kvp.Key] = encoded;
+            concurrentDict[kvp.Key] = encoded;
         });
-        return encodedPayloads;
+
+        return concurrentDict;
     }
 }

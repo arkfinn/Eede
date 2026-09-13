@@ -147,12 +147,37 @@ public sealed class SessionRecoveryCoordinator : IDisposable
             // Phase 2: Taskpool 非同期オフロード
             await Task.Run(async () =>
             {
-                var encodedPayloads = new ConcurrentDictionary<string, byte[]>();
-                Parallel.ForEach(capture.Pictures, new ParallelOptions { CancellationToken = ct }, kvp =>
+                IReadOnlyDictionary<string, byte[]> encodedPayloads;
+
+                if (capture.Pictures.Count <= 1)
                 {
-                    var encoded = _codec.EncodeToPng(kvp.Value);
-                    encodedPayloads[kvp.Key] = encoded;
-                });
+                    var dict = new Dictionary<string, byte[]>(capture.Pictures.Count);
+                    foreach (var (key, picture) in capture.Pictures)
+                    {
+                        ct.ThrowIfCancellationRequested();
+                        dict[key] = _codec.EncodeToPng(picture);
+                    }
+                    encodedPayloads = dict;
+                }
+                else
+                {
+                    var maxParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4);
+                    var parallelOptions = new ParallelOptions
+                    {
+                        CancellationToken = ct,
+                        MaxDegreeOfParallelism = maxParallelism
+                    };
+
+                    var concurrentDict = new ConcurrentDictionary<string, byte[]>(maxParallelism, capture.Pictures.Count);
+                    Parallel.ForEach(capture.Pictures, parallelOptions, kvp =>
+                    {
+                        parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+                        var encoded = _codec.EncodeToPng(kvp.Value);
+                        concurrentDict[kvp.Key] = encoded;
+                    });
+
+                    encodedPayloads = concurrentDict;
+                }
 
                 ct.ThrowIfCancellationRequested();
                 await _storage.SaveSnapshotAsync(capture.Snapshot, encodedPayloads, ct).ConfigureAwait(false);

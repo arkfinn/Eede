@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -146,12 +147,36 @@ public sealed class SessionRecoveryCoordinator : IDisposable
             // Phase 2: Taskpool 非同期オフロード
             await Task.Run(async () =>
             {
-                var encodedPayloads = new Dictionary<string, byte[]>();
-                foreach (var (key, picture) in capture.Pictures)
+                IReadOnlyDictionary<string, byte[]> encodedPayloads;
+
+                if (capture.Pictures.Count <= 1)
                 {
-                    ct.ThrowIfCancellationRequested();
-                    var encoded = _codec.EncodeToPng(picture);
-                    encodedPayloads[key] = encoded;
+                    var dict = new Dictionary<string, byte[]>(capture.Pictures.Count);
+                    foreach (var (key, picture) in capture.Pictures)
+                    {
+                        ct.ThrowIfCancellationRequested();
+                        dict[key] = _codec.EncodeToPng(picture);
+                    }
+                    encodedPayloads = dict;
+                }
+                else
+                {
+                    var maxParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4);
+                    var parallelOptions = new ParallelOptions
+                    {
+                        CancellationToken = ct,
+                        MaxDegreeOfParallelism = maxParallelism
+                    };
+
+                    var concurrentDict = new ConcurrentDictionary<string, byte[]>(maxParallelism, capture.Pictures.Count);
+                    Parallel.ForEach(capture.Pictures, parallelOptions, kvp =>
+                    {
+                        parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+                        var encoded = _codec.EncodeToPng(kvp.Value);
+                        concurrentDict[kvp.Key] = encoded;
+                    });
+
+                    encodedPayloads = concurrentDict;
                 }
 
                 ct.ThrowIfCancellationRequested();

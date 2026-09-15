@@ -221,4 +221,397 @@ public class SessionRecoveryCoordinatorTests
         Assert.That(_storage.SaveCount, Is.EqualTo(1));
         Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-stream"));
     }
+
+    [Test]
+    public async Task FlushAsync_SequentialCalls_CompletesSuccessfullyWithoutDisposedException()
+    {
+        // 1回目の保存が完了した後に、2回目の保存が正常に行われること（CTS破棄後再利用バグの回帰テスト）
+        var capture1 = CreateCapture("doc-first");
+        var capture2 = CreateCapture("doc-second");
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            captureFactory: () => capture1,
+            scheduler: _scheduler);
+
+        await coordinator.FlushAsync(capture1);
+        Assert.That(_storage.SaveCount, Is.EqualTo(1));
+        Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-first"));
+
+        // 1回目完了後、2回目の FlushAsync が ObjectDisposedException を投げずに正常に完了すること
+        Assert.DoesNotThrowAsync(async () => await coordinator.FlushAsync(capture2));
+        Assert.That(_storage.SaveCount, Is.EqualTo(2));
+        Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-second"));
+    }
+
+    [Test]
+    public async Task FlushAsync_MultiplePictures_EncodesAndSavesAllPicturesSuccessfully()
+    {
+        var dict = new Dictionary<string, Picture>();
+        var docs = new List<DocumentSnapshot>();
+
+        for (int i = 0; i < 4; i++)
+        {
+            var id = $"doc_{i}";
+            var pic = Picture.CreateEmpty(new PictureSize(16, 16));
+            var payloadRef = $"payload_{i}.png";
+            dict[payloadRef] = pic;
+            docs.Add(new DocumentSnapshot(id, null, true, pic.Size, 1.0f, payloadRef));
+        }
+
+        var palette = new PaletteSnapshot(new ArgbColor(255, 0, 0, 0), 0, Array.Empty<ArgbColor>());
+        var snapshot = new SessionSnapshot(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            "doc_0",
+            docs,
+            null,
+            palette);
+
+        var capture = new SessionCapture(snapshot, dict);
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            captureFactory: () => capture,
+            scheduler: _scheduler,
+            maxParallelism: 2);
+
+        await coordinator.FlushAsync();
+
+        Assert.That(_storage.SaveCount, Is.EqualTo(1));
+        Assert.That(_storage.LatestSnapshot, Is.Not.Null);
+
+        foreach (var key in dict.Keys)
+        {
+            var payload = await _storage.LoadImagePayloadAsync(key);
+            Assert.That(payload, Is.Not.Null, $"Payload for key '{key}' should be saved in storage.");
+            Assert.That(payload!.Length, Is.GreaterThan(0));
+        }
+    }
+
+    private class CancelingPictureCodec : Eede.Application.Pictures.IPictureCodec
+    {
+        private readonly Eede.Application.Pictures.IPictureCodec _inner;
+        private readonly CancellationTokenSource _cts;
+
+        public CancelingPictureCodec(Eede.Application.Pictures.IPictureCodec inner, CancellationTokenSource cts)
+        {
+            _inner = inner;
+            _cts = cts;
+        }
+
+        public Picture DecodeFromPng(byte[] bytes) => _inner.DecodeFromPng(bytes);
+
+        public byte[] EncodeToPng(Picture picture)
+        {
+            _cts.Cancel();
+            return _inner.EncodeToPng(picture);
+        }
+    }
+
+    [Test]
+    public async Task FlushAsync_ExternalCancellation_ThrowsOperationCanceledExceptionAndDoesNotReportError()
+    {
+        var dict = new Dictionary<string, Picture>();
+        var docs = new List<DocumentSnapshot>();
+
+        for (int i = 0; i < 8; i++)
+        {
+            var id = $"doc_{i}";
+            var pic = Picture.CreateEmpty(new PictureSize(16, 16));
+            var payloadRef = $"payload_{i}.png";
+            dict[payloadRef] = pic;
+            docs.Add(new DocumentSnapshot(id, null, true, pic.Size, 1.0f, payloadRef));
+        }
+
+        var palette = new PaletteSnapshot(new ArgbColor(255, 0, 0, 0), 0, Array.Empty<ArgbColor>());
+        var snapshot = new SessionSnapshot(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            "doc_0",
+            docs,
+            null,
+            palette);
+
+        var capture = new SessionCapture(snapshot, dict);
+
+        using var cts = new CancellationTokenSource();
+        var cancelingCodec = new CancelingPictureCodec(_codec, cts);
+        var reportedErrors = new List<Exception>();
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            cancelingCodec,
+            captureFactory: () => capture,
+            scheduler: _scheduler,
+            maxParallelism: 2);
+
+        using var sub = coordinator.SaveErrors.Subscribe(ex => reportedErrors.Add(ex));
+
+        Assert.ThrowsAsync<OperationCanceledException>(async () => await coordinator.FlushAsync(capture, cts.Token));
+
+        Assert.That(reportedErrors, Is.Empty, "Cancellation during parallel encoding should not be reported to SaveErrors.");
+        Assert.That(_storage.SaveCount, Is.EqualTo(0), "Storage should not be updated when parallel save is canceled.");
+    }
+
+    private class FailingPictureCodec : Eede.Application.Pictures.IPictureCodec
+    {
+        public Picture DecodeFromPng(byte[] bytes) => throw new NotImplementedException();
+
+        public byte[] EncodeToPng(Picture picture)
+        {
+            throw new InvalidOperationException("Codec encoding failed.");
+        }
+    }
+
+    [Test]
+    public async Task FlushAsync_CodecException_PropagatesToSaveErrorsAndThrows()
+    {
+        var dict = new Dictionary<string, Picture>();
+        var docs = new List<DocumentSnapshot>();
+
+        for (int i = 0; i < 4; i++)
+        {
+            var id = $"doc_{i}";
+            var pic = Picture.CreateEmpty(new PictureSize(16, 16));
+            var payloadRef = $"payload_{i}.png";
+            dict[payloadRef] = pic;
+            docs.Add(new DocumentSnapshot(id, null, true, pic.Size, 1.0f, payloadRef));
+        }
+
+        var palette = new PaletteSnapshot(new ArgbColor(255, 0, 0, 0), 0, Array.Empty<ArgbColor>());
+        var snapshot = new SessionSnapshot(
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow,
+            "doc_0",
+            docs,
+            null,
+            palette);
+
+        var capture = new SessionCapture(snapshot, dict);
+
+        var reportedErrors = new List<Exception>();
+        var failingCodec = new FailingPictureCodec();
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            failingCodec,
+            captureFactory: () => capture,
+            scheduler: _scheduler,
+            maxParallelism: 2);
+
+        using var sub = coordinator.SaveErrors.Subscribe(ex => reportedErrors.Add(ex));
+
+        var ex = Assert.CatchAsync<Exception>(async () => await coordinator.FlushAsync(capture));
+        var actualException = ex is AggregateException agg ? agg.InnerException : ex;
+        Assert.That(actualException, Is.InstanceOf<InvalidOperationException>());
+
+        Assert.That(reportedErrors, Is.Not.Empty, "Genuine errors during parallel encoding must be reported to SaveErrors.");
+        var reported = reportedErrors[0] is AggregateException aggReported ? aggReported.InnerException : reportedErrors[0];
+        Assert.That(reported, Is.InstanceOf<InvalidOperationException>());
+    }
+
+    [TestCase(0)]
+    [TestCase(-2)]
+    public void Constructor_InvalidMaxParallelism_ThrowsArgumentOutOfRangeException(int invalidParallelism)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            scheduler: _scheduler,
+            maxParallelism: invalidParallelism));
+    }
+
+    [Test]
+    public void Constructor_UnlimitedMaxParallelism_DoesNotThrow()
+    {
+        Assert.DoesNotThrow(() => new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            scheduler: _scheduler,
+            maxParallelism: -1));
+    }
+
+    [Test]
+    public void EncodePayloads_SinglePicture_ExecutesSequentialPath()
+    {
+        var dict = new Dictionary<string, Picture>
+        {
+            ["pic1"] = Picture.CreateEmpty(new PictureSize(8, 8))
+        };
+
+        var payloads = SessionRecoveryCoordinator.EncodePayloads(dict, _codec);
+        Assert.That(payloads.Count, Is.EqualTo(1));
+        Assert.That(payloads["pic1"], Is.Not.Empty);
+    }
+
+    [Test]
+    public void EncodePayloads_AlreadyCanceledToken_WithEmptyPictures_ThrowsOperationCanceledException()
+    {
+        var dict = new Dictionary<string, Picture>();
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        Assert.Throws<OperationCanceledException>(() =>
+            SessionRecoveryCoordinator.EncodePayloads(dict, _codec, ct: cts.Token));
+    }
+
+    [TestCase(0)]
+    [TestCase(-2)]
+    public void EncodePayloads_InvalidConfiguredMaxParallelism_ThrowsArgumentOutOfRangeException(int invalidParallelism)
+    {
+        var dict = new Dictionary<string, Picture>
+        {
+            ["pic1"] = Picture.CreateEmpty(new PictureSize(8, 8))
+        };
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            SessionRecoveryCoordinator.EncodePayloads(dict, _codec, configuredMaxParallelism: invalidParallelism));
+    }
+
+    [Test]
+    public async Task FlushAsync_AlreadyCanceledToken_DoesNotCancelPriorRunningSave()
+    {
+        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(150);
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            captureFactory: () => CreateCapture("doc-unused"),
+            scheduler: _scheduler);
+
+        var capture1 = CreateCapture("doc-valid");
+        var task1 = coordinator.FlushAsync(capture1);
+
+        await Task.Delay(20);
+
+        using var canceledCts = new CancellationTokenSource();
+        canceledCts.Cancel();
+
+        var capture2 = CreateCapture("doc-canceled");
+        Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            await coordinator.FlushAsync(capture2, canceledCts.Token));
+
+        await task1;
+
+        Assert.That(_storage.SaveCount, Is.EqualTo(1));
+        Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-valid"));
+    }
+
+    [Test]
+    public async Task Dispose_DuringActiveSave_CompletesGracefullyWithoutThrowingObjectDisposedException()
+    {
+        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(200);
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            captureFactory: () => CreateCapture("doc-unused"),
+            scheduler: _scheduler);
+
+        var reportedErrors = new List<Exception>();
+        using var sub = coordinator.SaveErrors.Subscribe(
+            onNext: ex => reportedErrors.Add(ex),
+            onError: ex => reportedErrors.Add(ex));
+
+        var capture = CreateCapture("doc-disposing");
+        var flushTask = coordinator.FlushAsync(capture);
+
+        await Task.Delay(30);
+
+        Assert.DoesNotThrow(() => coordinator.Dispose());
+
+        try
+        {
+            await flushTask;
+        }
+        catch (Exception ex)
+        {
+            Assert.That(ex, Is.InstanceOf<OperationCanceledException>(), $"Expected OperationCanceledException, but got {ex.GetType().Name}: {ex.Message}");
+        }
+
+        // None of the reported errors should be ObjectDisposedException
+        Assert.That(reportedErrors.OfType<ObjectDisposedException>(), Is.Empty);
+    }
+
+    private class MultiFailingPictureCodec : Eede.Application.Pictures.IPictureCodec
+    {
+        public Picture DecodeFromPng(byte[] bytes) => throw new NotImplementedException();
+
+        public byte[] EncodeToPng(Picture picture)
+        {
+            throw new InvalidOperationException($"Codec failed for {picture.Width}x{picture.Height}");
+        }
+    }
+
+    [Test]
+    public void EncodePayloads_MultipleExceptions_ThrowsAggregateException()
+    {
+        var dict = new Dictionary<string, Picture>();
+        for (int i = 0; i < 4; i++)
+        {
+            dict[$"doc_{i}"] = Picture.CreateEmpty(new PictureSize(16 + i, 16));
+        }
+
+        var multiFailingCodec = new MultiFailingPictureCodec();
+
+        var ex = Assert.Catch<Exception>(() =>
+            SessionRecoveryCoordinator.EncodePayloads(dict, multiFailingCodec, configuredMaxParallelism: 4));
+
+        Assert.That(ex, Is.InstanceOf<AggregateException>());
+        var agg = (AggregateException)ex!;
+        Assert.That(agg.InnerExceptions.Count, Is.GreaterThan(1));
+    }
+
+    [Test]
+    public async Task Concurrent_RapidFlushAsync_EnsuresLatestSnapshotWins()
+    {
+        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(50);
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            scheduler: _scheduler);
+
+        var tasks = new List<Task>();
+        for (int i = 0; i < 5; i++)
+        {
+            var capture = CreateCapture($"doc-{i}");
+            tasks.Add(coordinator.FlushAsync(capture));
+            await Task.Delay(10);
+        }
+
+        await Task.WhenAll(tasks);
+
+        Assert.That(_storage.LatestSnapshot, Is.Not.Null);
+        Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-4"));
+    }
+
+    [Test]
+    public async Task FlushAsync_WhenSuperseded_AwaitingFirstFlush_GuaranteesSessionIsSaved()
+    {
+        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(100);
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            scheduler: _scheduler);
+
+        var capture1 = CreateCapture("doc-1");
+        var capture2 = CreateCapture("doc-2");
+
+        var task1 = coordinator.FlushAsync(capture1);
+        await Task.Delay(20);
+        var task2 = coordinator.FlushAsync(capture2);
+
+        // task1 を await する。task1 が正常完了したと主張するなら、ストレージへの保存が完了していなければならない！
+        await task1;
+
+        Assert.That(_storage.SaveCount, Is.GreaterThanOrEqualTo(1), "When FlushAsync completes without exception, storage save must have actually completed!");
+        Assert.That(_storage.LatestSnapshot, Is.Not.Null);
+        Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-2"));
+    }
 }
+

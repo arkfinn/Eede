@@ -32,11 +32,12 @@ description: "Eede Session Recovery architecture, atomic swap, IndexedDB fallbac
   - Phase 1 (スナップショット抽出): UI スレッド上で不変な `SessionSnapshot` を瞬時に抽出（< 1ms）。
   - Phase 2 (Taskpool オフロード): 重い画像エンコード（`Parallel.ForEach` によるマルチコア並列化）と保存はワーカースレッド上で非同期実行。
   - `SemaphoreSlim(1, 1)` による直列排他制御と先行 `CancellationTokenSource` キャンセルを協調させ、常に最新状態のみをコミットする。
-- **Superseded保存における保存完了保証規律 (TaskCompletionSource Chaining)**:
+- **Superseded保存における保存完了保証規律 (TaskCompletionSource Chaining & Deadlock Defense)**:
   - 先行する同期保存（`FlushAsync`）が後続リクエストに置き換えられた（Superseded）際、単に例外を握りつぶして早期リターンしてはならない（後続タスクの書き込み完了前にアプリプロセスが終了し、データが消失するリスクを排除するため）。
-  - `TaskCompletionSource` の連鎖により、先行タスクは後続の最新保存タスクの完了を待機してストレージへの物理保存完了を保証すること。
+  - 各保存操作は `SaveOperation`（CTS, TCS, `IsSuperseded`, `NextTask`）としてカプセル化し、先行タスクに直接チェーンを接続することで、後続完了後の状態変化に左右されない確実な世代追跡を行うこと。
+  - **デッドロック絶対防衛**: 先行タスクが後続タスクの完了（`NextTask`）を待機する際、**必ずセマフォ（`_semaphore`）を解放した後**に `await` すること。セマフォを保持したまま待機すると、セマフォ取得待ちの後続タスクと循環待機（デッドロック）に陥る。
+  - 後続タスク待機時も `NextTask.WaitAsync(externalCt)` を用いて外部トークンのキャンセルを検知し、自発的・明示的なキャンセル要求を遅延なく即座に伝播させること。
   - 自動保存（バックグラウンド）が後続リクエスト不在で中断した場合は、例外を握りつぶさず `_errorSubject` へ伝播させること。
-  - `IsSuperseded` 判定時はアクティブ操作の存在（`_activeOperation.HasValue`）を確認し、先行タスク完了後の null 状態を誤認しないこと。
 - **Pull/Push およびキャンバス操作契機における Dirty 通知の網羅的伝播原則**:
   - ドックからキャンバスへの領域転送（Pull）や書き戻し（Push）、Undo/Redo、画像変形など、キャンバス状態が変化するすべての契機で即座に `SessionRecoveryCoordinator.NotifyDirty()` を発火させること。
   - 復元側（`RestorePullState`）でも、`DrawingSessionViewModel.Sync` ➔ `DrawableCanvasViewModel.SyncWithSession` ➔ `SetPictureToDrawArea` の順序で強制同期を適用すること。

@@ -31,9 +31,23 @@ public sealed class SessionRecoveryCoordinator : IDisposable
     private readonly Subject<Exception> _errorSubject = new();
     private readonly CompositeDisposable _disposables = new();
 
+    private sealed class SaveOperation
+    {
+        public CancellationTokenSource Cts { get; }
+        public TaskCompletionSource Tcs { get; }
+        public bool IsSuperseded { get; set; }
+        public Task? NextTask { get; set; }
+
+        public SaveOperation(CancellationTokenSource cts)
+        {
+            Cts = cts;
+            Tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
+    }
+
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private readonly object _ctsLock = new();
-    private (CancellationTokenSource Cts, TaskCompletionSource Tcs)? _activeOperation;
+    private SaveOperation? _activeOperation;
     private Task? _lastSaveTask;
     private bool _isDisposed;
 
@@ -214,19 +228,28 @@ public sealed class SessionRecoveryCoordinator : IDisposable
     {
         externalCt.ThrowIfCancellationRequested();
 
-        CancellationTokenSource linkedCts;
-        TaskCompletionSource currentTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
+        SaveOperation myOp;
         lock (_ctsLock)
         {
-            if (_isDisposed) return;
-
-            // 先行タスクをキャンセル
-            if (_activeOperation.HasValue)
+            if (_isDisposed)
             {
+                if (throwOnError)
+                {
+                    throw new ObjectDisposedException(nameof(SessionRecoveryCoordinator));
+                }
+                return;
+            }
+
+            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(externalCt);
+            myOp = new SaveOperation(linkedCts);
+
+            if (_activeOperation is not null)
+            {
+                _activeOperation.IsSuperseded = true;
+                _activeOperation.NextTask = myOp.Tcs.Task;
                 try
                 {
-                    _activeOperation.Value.Cts.Cancel();
+                    _activeOperation.Cts.Cancel();
                 }
                 catch (ObjectDisposedException)
                 {
@@ -234,24 +257,13 @@ public sealed class SessionRecoveryCoordinator : IDisposable
                 }
             }
 
-            linkedCts = CancellationTokenSource.CreateLinkedTokenSource(externalCt);
-            _activeOperation = (linkedCts, currentTcs);
+            _activeOperation = myOp;
         }
 
-        var ct = linkedCts.Token;
+        var ct = myOp.Cts.Token;
         bool semaphoreAcquired = false;
-
-        Task? GetNextOperationTask()
-        {
-            lock (_ctsLock)
-            {
-                if (_activeOperation.HasValue && !ReferenceEquals(_activeOperation.Value.Cts, linkedCts))
-                {
-                    return _activeOperation.Value.Tcs.Task;
-                }
-                return null;
-            }
-        }
+        bool saveSucceeded = false;
+        Exception? caughtException = null;
 
         try
         {
@@ -274,53 +286,19 @@ public sealed class SessionRecoveryCoordinator : IDisposable
                 _snapshotSavedSubject.OnNext(capture.Snapshot);
             }
 
-            currentTcs.TrySetResult();
+            saveSucceeded = true;
         }
         catch (OperationCanceledException ex)
         {
-            var nextTask = GetNextOperationTask();
-            if (nextTask is not null)
-            {
-                // 後続の保存タスクによって置き換えられた場合
-                currentTcs.TrySetResult();
-
-                if (throwOnError)
-                {
-                    // FlushAsync の場合は後続タスクの完了を待機して、保存完了を保証する
-                    await nextTask.ConfigureAwait(false);
-                }
-                return;
-            }
-
-            currentTcs.TrySetCanceled(ct);
-
-            // 置き換えではないキャンセル（外部トークン要求や自発的中断）
-            if (throwOnError)
-            {
-                throw;
-            }
-            else if (!_isDisposed)
-            {
-                _errorSubject.OnNext(ex);
-            }
+            caughtException = ex;
         }
         catch (ObjectDisposedException) when (_isDisposed)
         {
-            currentTcs.TrySetCanceled();
-            return;
+            caughtException = new OperationCanceledException("Coordinator was disposed during operation.", externalCt);
         }
         catch (Exception ex)
         {
-            currentTcs.TrySetException(ex);
-
-            if (!_isDisposed)
-            {
-                _errorSubject.OnNext(ex);
-            }
-            if (throwOnError)
-            {
-                throw;
-            }
+            caughtException = ex;
         }
         finally
         {
@@ -338,12 +316,95 @@ public sealed class SessionRecoveryCoordinator : IDisposable
 
             lock (_ctsLock)
             {
-                if (_activeOperation.HasValue && ReferenceEquals(_activeOperation.Value.Cts, linkedCts))
+                if (ReferenceEquals(_activeOperation, myOp))
                 {
                     _activeOperation = null;
                 }
             }
-            linkedCts.Dispose();
+            myOp.Cts.Dispose();
+        }
+
+        // --- セマフォおよび自タスクの CTS を解放した後のポストプロセッシング ---
+
+        if (saveSucceeded)
+        {
+            myOp.Tcs.TrySetResult();
+            return;
+        }
+
+        if (caughtException is OperationCanceledException oce)
+        {
+            // 外部から明示的にキャンセルが要求されていた場合は、後続タスクを待たずに即座にキャンセル扱い
+            if (externalCt.IsCancellationRequested)
+            {
+                myOp.Tcs.TrySetCanceled(externalCt);
+                if (throwOnError)
+                {
+                    externalCt.ThrowIfCancellationRequested();
+                }
+                return;
+            }
+
+            // 後続タスクによって置き換えられた（Superseded）場合
+            if (myOp.IsSuperseded)
+            {
+                if (myOp.NextTask is not null)
+                {
+                    try
+                    {
+                        // 後続タスクの完了を待機（セマフォは解放済みなので安全に待機可能）
+                        // externalCt を渡すことで、待機中に外部キャンセル要求があれば即座に中断する
+                        await myOp.NextTask.WaitAsync(externalCt).ConfigureAwait(false);
+                        myOp.Tcs.TrySetResult();
+                    }
+                    catch (OperationCanceledException nextOce)
+                    {
+                        myOp.Tcs.TrySetCanceled(nextOce.CancellationToken);
+                        if (throwOnError)
+                        {
+                            throw;
+                        }
+                    }
+                    catch (Exception nextEx)
+                    {
+                        myOp.Tcs.TrySetException(nextEx);
+                        if (throwOnError)
+                        {
+                            throw;
+                        }
+                    }
+                }
+                else
+                {
+                    myOp.Tcs.TrySetResult();
+                }
+                return;
+            }
+
+            // 置き換えではないキャンセル（内部トークンキャンセル等）
+            myOp.Tcs.TrySetCanceled(oce.CancellationToken);
+            if (throwOnError)
+            {
+                throw oce;
+            }
+            else if (!_isDisposed)
+            {
+                _errorSubject.OnNext(oce);
+            }
+            return;
+        }
+
+        if (caughtException is not null)
+        {
+            myOp.Tcs.TrySetException(caughtException);
+            if (!_isDisposed)
+            {
+                _errorSubject.OnNext(caughtException);
+            }
+            if (throwOnError)
+            {
+                ExceptionDispatchInfo.Capture(caughtException).Throw();
+            }
         }
     }
 
@@ -357,21 +418,24 @@ public sealed class SessionRecoveryCoordinator : IDisposable
         if (_isDisposed) return;
         _isDisposed = true;
 
+        SaveOperation? activeOp;
         lock (_ctsLock)
         {
-            if (_activeOperation.HasValue)
+            activeOp = _activeOperation;
+            _activeOperation = null;
+        }
+
+        if (activeOp is not null)
+        {
+            try
             {
-                try
-                {
-                    _activeOperation.Value.Cts.Cancel();
-                }
-                catch (ObjectDisposedException)
-                {
-                    System.Diagnostics.Trace.WriteLine("SessionRecoveryCoordinator active CTS already disposed on Dispose.");
-                }
-                _activeOperation.Value.Tcs.TrySetCanceled();
-                _activeOperation = null;
+                activeOp.Cts.Cancel();
             }
+            catch (ObjectDisposedException)
+            {
+                System.Diagnostics.Trace.WriteLine("SessionRecoveryCoordinator active CTS already disposed on Dispose.");
+            }
+            activeOp.Tcs.TrySetCanceled();
         }
 
         _disposables.Dispose();

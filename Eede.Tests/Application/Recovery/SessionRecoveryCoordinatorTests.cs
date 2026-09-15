@@ -613,5 +613,91 @@ public class SessionRecoveryCoordinatorTests
         Assert.That(_storage.LatestSnapshot, Is.Not.Null);
         Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-2"));
     }
+
+    [Test]
+    public async Task FlushAsync_MultipleSupersededChain_AllPriorTasksCompleteSuccessfullyAndSaveLatest()
+    {
+        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(80);
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            scheduler: _scheduler);
+
+        var task1 = coordinator.FlushAsync(CreateCapture("chain-1"));
+        await Task.Delay(15);
+        var task2 = coordinator.FlushAsync(CreateCapture("chain-2"));
+        await Task.Delay(15);
+        var task3 = coordinator.FlushAsync(CreateCapture("chain-3"));
+
+        await Task.WhenAll(task1, task2, task3);
+
+        Assert.That(_storage.LatestSnapshot, Is.Not.Null);
+        Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("chain-3"));
+    }
+
+    [Test]
+    public async Task FlushAsync_WhenSupersedingTaskFails_PriorTasksPropagateException()
+    {
+        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(50);
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            scheduler: _scheduler);
+
+        var task1 = coordinator.FlushAsync(CreateCapture("doc-ok"));
+        await Task.Delay(15);
+
+        // 後続タスクの直前にストレージを失敗するように設定
+        _storage.SimulatedException = new InvalidOperationException("Disk write failure");
+        var task2 = coordinator.FlushAsync(CreateCapture("doc-failing"));
+
+        // task1 も後続タスクの失敗により例外を受け取らなければならない
+        var ex1 = Assert.CatchAsync<Exception>(async () => await task1);
+        var ex2 = Assert.CatchAsync<Exception>(async () => await task2);
+
+        var inner1 = ex1 is AggregateException agg1 ? agg1.InnerException : ex1;
+        var inner2 = ex2 is AggregateException agg2 ? agg2.InnerException : ex2;
+
+        Assert.That(inner1, Is.InstanceOf<InvalidOperationException>());
+        Assert.That(inner2, Is.InstanceOf<InvalidOperationException>());
+        Assert.That(inner1!.Message, Is.EqualTo("Disk write failure"));
+    }
+
+    [Test]
+    public async Task FlushAsync_ExternalCancellationDuringSupersededWait_ThrowsImmediatelyWithoutWaiting()
+    {
+        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(300);
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            scheduler: _scheduler);
+
+        using var cts1 = new CancellationTokenSource();
+        var task1 = coordinator.FlushAsync(CreateCapture("doc-1"), cts1.Token);
+        await Task.Delay(20);
+
+        // task2 を開始して task1 を Superseded にする
+        var task2 = coordinator.FlushAsync(CreateCapture("doc-2"));
+        await Task.Delay(20);
+
+        // task1 の外部トークンをキャンセル
+        cts1.Cancel();
+
+        // task1 は task2 (300ms) の完了を待たずに直ちにキャンセル例外を投げること
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var ex = Assert.CatchAsync<OperationCanceledException>(async () => await task1);
+        sw.Stop();
+
+        Assert.That(ex, Is.Not.Null);
+        Assert.That(ex, Is.InstanceOf<OperationCanceledException>());
+        Assert.That(sw.ElapsedMilliseconds, Is.LessThan(200), "Task1 should have aborted immediately upon external cancellation rather than waiting for task2.");
+
+        // task2 自体は正常に完了すること
+        await task2;
+        Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-2"));
+    }
 }
 

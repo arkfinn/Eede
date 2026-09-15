@@ -30,8 +30,13 @@ description: "Eede Session Recovery architecture, atomic swap, IndexedDB fallbac
 ## 3. コーディネーション & 状態同期 (Coordination & Sync)
 - **2フェーズ・アイドル保存と直列先行キャンセル (SessionRecoveryCoordinator)**:
   - Phase 1 (スナップショット抽出): UI スレッド上で不変な `SessionSnapshot` を瞬時に抽出（< 1ms）。
-  - Phase 2 (Taskpool オフロード): 重い画像エンコードと保存はワーカースレッド上で非同期実行。
+  - Phase 2 (Taskpool オフロード): 重い画像エンコード（`Parallel.ForEach` によるマルチコア並列化）と保存はワーカースレッド上で非同期実行。
   - `SemaphoreSlim(1, 1)` による直列排他制御と先行 `CancellationTokenSource` キャンセルを協調させ、常に最新状態のみをコミットする。
+- **Superseded保存における保存完了保証規律 (TaskCompletionSource Chaining)**:
+  - 先行する同期保存（`FlushAsync`）が後続リクエストに置き換えられた（Superseded）際、単に例外を握りつぶして早期リターンしてはならない（後続タスクの書き込み完了前にアプリプロセスが終了し、データが消失するリスクを排除するため）。
+  - `TaskCompletionSource` の連鎖により、先行タスクは後続の最新保存タスクの完了を待機してストレージへの物理保存完了を保証すること。
+  - 自動保存（バックグラウンド）が後続リクエスト不在で中断した場合は、例外を握りつぶさず `_errorSubject` へ伝播させること。
+  - `IsSuperseded` 判定時はアクティブ操作の存在（`_activeOperation.HasValue`）を確認し、先行タスク完了後の null 状態を誤認しないこと。
 - **Pull/Push およびキャンバス操作契機における Dirty 通知の網羅的伝播原則**:
   - ドックからキャンバスへの領域転送（Pull）や書き戻し（Push）、Undo/Redo、画像変形など、キャンバス状態が変化するすべての契機で即座に `SessionRecoveryCoordinator.NotifyDirty()` を発火させること。
   - 復元側（`RestorePullState`）でも、`DrawingSessionViewModel.Sync` ➔ `DrawableCanvasViewModel.SyncWithSession` ➔ `SetPictureToDrawArea` の順序で強制同期を適用すること。

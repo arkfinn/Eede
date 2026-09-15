@@ -33,7 +33,7 @@ public sealed class SessionRecoveryCoordinator : IDisposable
 
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private readonly object _ctsLock = new();
-    private CancellationTokenSource? _activeSaveCts;
+    private (CancellationTokenSource Cts, TaskCompletionSource Tcs)? _activeOperation;
     private Task? _lastSaveTask;
     private bool _isDisposed;
 
@@ -215,116 +215,132 @@ public sealed class SessionRecoveryCoordinator : IDisposable
         externalCt.ThrowIfCancellationRequested();
 
         CancellationTokenSource linkedCts;
+        TaskCompletionSource currentTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
         lock (_ctsLock)
         {
             if (_isDisposed) return;
 
             // 先行タスクをキャンセル
-            if (_activeSaveCts is not null)
+            if (_activeOperation.HasValue)
             {
                 try
                 {
-                    _activeSaveCts.Cancel();
+                    _activeOperation.Value.Cts.Cancel();
                 }
                 catch (ObjectDisposedException)
                 {
+                    System.Diagnostics.Trace.WriteLine("SessionRecoveryCoordinator active CTS already disposed during cancellation.");
                 }
             }
 
-            _activeSaveCts = CancellationTokenSource.CreateLinkedTokenSource(externalCt);
-            linkedCts = _activeSaveCts;
+            linkedCts = CancellationTokenSource.CreateLinkedTokenSource(externalCt);
+            _activeOperation = (linkedCts, currentTcs);
         }
 
         var ct = linkedCts.Token;
+        bool semaphoreAcquired = false;
 
-        bool IsSuperseded()
+        Task? GetNextOperationTask()
         {
             lock (_ctsLock)
             {
-                return !ReferenceEquals(_activeSaveCts, linkedCts);
+                if (_activeOperation.HasValue && !ReferenceEquals(_activeOperation.Value.Cts, linkedCts))
+                {
+                    return _activeOperation.Value.Tcs.Task;
+                }
+                return null;
             }
         }
 
         try
         {
-            try
+            await _semaphore.WaitAsync(ct).ConfigureAwait(false);
+            semaphoreAcquired = true;
+
+            ct.ThrowIfCancellationRequested();
+
+            // Phase 2: CPUバウンドな画像エンコードをスレッドプールでオフロード
+            var encodedPayloads = await Task.Run(
+                () => EncodePayloads(capture.Pictures, _codec, _configuredMaxParallelism, ct),
+                ct).ConfigureAwait(false);
+
+            // Phase 3: I/Oバウンドなストレージ保存
+            ct.ThrowIfCancellationRequested();
+            await _storage.SaveSnapshotAsync(capture.Snapshot, encodedPayloads, ct).ConfigureAwait(false);
+
+            if (!_isDisposed)
             {
-                await _semaphore.WaitAsync(ct).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                // セマフォ待機中にキャンセルされた場合:
-                // 後続タスクによって置き換えられた（Superseded）なら静かに退場。
-                // 外部トークン要求や自発的キャンセルかつ throwOnError の場合は例外を再送。
-                if (throwOnError && !IsSuperseded())
-                {
-                    throw;
-                }
-                return;
-            }
-            catch (ObjectDisposedException)
-            {
-                // コーディネーター破棄時は静かに終了
-                return;
+                _snapshotSavedSubject.OnNext(capture.Snapshot);
             }
 
-            try
+            currentTcs.TrySetResult();
+        }
+        catch (OperationCanceledException ex)
+        {
+            var nextTask = GetNextOperationTask();
+            if (nextTask is not null)
             {
-                ct.ThrowIfCancellationRequested();
+                // 後続の保存タスクによって置き換えられた場合
+                currentTcs.TrySetResult();
 
-                // Phase 2: CPUバウンドな画像エンコードをスレッドプールでオフロード
-                var encodedPayloads = await Task.Run(
-                    () => EncodePayloads(capture.Pictures, _codec, _configuredMaxParallelism, ct),
-                    ct).ConfigureAwait(false);
-
-                // Phase 3: I/Oバウンドなストレージ保存
-                ct.ThrowIfCancellationRequested();
-                await _storage.SaveSnapshotAsync(capture.Snapshot, encodedPayloads, ct).ConfigureAwait(false);
-
-                if (!_isDisposed)
-                {
-                    _snapshotSavedSubject.OnNext(capture.Snapshot);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // 実行中にキャンセルされた場合:
-                // 後続タスクによって置き換えられた（Superseded）なら静かに退場。
-                // それ以外のキャンセルで throwOnError なら再スロー。
-                if (throwOnError && !IsSuperseded())
-                {
-                    throw;
-                }
-            }
-            catch (Exception ex)
-            {
-                if (!_isDisposed)
-                {
-                    _errorSubject.OnNext(ex);
-                }
                 if (throwOnError)
                 {
-                    throw;
+                    // FlushAsync の場合は後続タスクの完了を待機して、保存完了を保証する
+                    await nextTask.ConfigureAwait(false);
                 }
+                return;
             }
-            finally
+
+            currentTcs.TrySetCanceled(ct);
+
+            // 置き換えではないキャンセル（外部トークン要求や自発的中断）
+            if (throwOnError)
+            {
+                throw;
+            }
+            else if (!_isDisposed)
+            {
+                _errorSubject.OnNext(ex);
+            }
+        }
+        catch (ObjectDisposedException) when (_isDisposed)
+        {
+            currentTcs.TrySetCanceled();
+            return;
+        }
+        catch (Exception ex)
+        {
+            currentTcs.TrySetException(ex);
+
+            if (!_isDisposed)
+            {
+                _errorSubject.OnNext(ex);
+            }
+            if (throwOnError)
+            {
+                throw;
+            }
+        }
+        finally
+        {
+            if (semaphoreAcquired)
             {
                 try
                 {
                     _semaphore.Release();
                 }
-                catch (ObjectDisposedException)
+                catch (ObjectDisposedException) when (_isDisposed)
                 {
+                    System.Diagnostics.Trace.WriteLine("SessionRecoveryCoordinator semaphore disposed during release.");
                 }
             }
-        }
-        finally
-        {
+
             lock (_ctsLock)
             {
-                if (ReferenceEquals(_activeSaveCts, linkedCts))
+                if (_activeOperation.HasValue && ReferenceEquals(_activeOperation.Value.Cts, linkedCts))
                 {
-                    _activeSaveCts = null;
+                    _activeOperation = null;
                 }
             }
             linkedCts.Dispose();
@@ -343,16 +359,18 @@ public sealed class SessionRecoveryCoordinator : IDisposable
 
         lock (_ctsLock)
         {
-            if (_activeSaveCts is not null)
+            if (_activeOperation.HasValue)
             {
                 try
                 {
-                    _activeSaveCts.Cancel();
+                    _activeOperation.Value.Cts.Cancel();
                 }
                 catch (ObjectDisposedException)
                 {
+                    System.Diagnostics.Trace.WriteLine("SessionRecoveryCoordinator active CTS already disposed on Dispose.");
                 }
-                _activeSaveCts = null;
+                _activeOperation.Value.Tcs.TrySetCanceled();
+                _activeOperation = null;
             }
         }
 

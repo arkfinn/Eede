@@ -588,5 +588,30 @@ public class SessionRecoveryCoordinatorTests
         Assert.That(_storage.LatestSnapshot, Is.Not.Null);
         Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-4"));
     }
+
+    [Test]
+    public async Task FlushAsync_WhenSuperseded_AwaitingFirstFlush_GuaranteesSessionIsSaved()
+    {
+        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(100);
+
+        var coordinator = new SessionRecoveryCoordinator(
+            _storage,
+            _codec,
+            scheduler: _scheduler);
+
+        var capture1 = CreateCapture("doc-1");
+        var capture2 = CreateCapture("doc-2");
+
+        var task1 = coordinator.FlushAsync(capture1);
+        await Task.Delay(20);
+        var task2 = coordinator.FlushAsync(capture2);
+
+        // task1 を await する。task1 が正常完了したと主張するなら、ストレージへの保存が完了していなければならない！
+        await task1;
+
+        Assert.That(_storage.SaveCount, Is.GreaterThanOrEqualTo(1), "When FlushAsync completes without exception, storage save must have actually completed!");
+        Assert.That(_storage.LatestSnapshot, Is.Not.Null);
+        Assert.That(_storage.LatestSnapshot!.ActiveDocumentId, Is.EqualTo("doc-2"));
+    }
 }
 

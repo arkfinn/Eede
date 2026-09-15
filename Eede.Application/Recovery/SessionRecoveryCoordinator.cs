@@ -82,7 +82,10 @@ public sealed class SessionRecoveryCoordinator : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    _errorSubject.OnNext(ex);
+                    if (!_isDisposed)
+                    {
+                        _errorSubject.OnNext(ex);
+                    }
                     return;
                 }
 
@@ -113,6 +116,7 @@ public sealed class SessionRecoveryCoordinator : IDisposable
     public async Task FlushAsync(SessionCapture? directCapture = null, CancellationToken ct = default)
     {
         ThrowIfDisposed();
+        ct.ThrowIfCancellationRequested();
 
         // Phase 1: スナップショット抽出
         var capture = directCapture ?? _captureFactory?.Invoke();
@@ -140,6 +144,14 @@ public sealed class SessionRecoveryCoordinator : IDisposable
     {
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(codec);
+        ct.ThrowIfCancellationRequested();
+
+        if (configuredMaxParallelism is <= 0 and not -1)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(configuredMaxParallelism),
+                "configuredMaxParallelism must be greater than 0, or -1 for unlimited.");
+        }
 
         var effectiveParallelism = configuredMaxParallelism switch
         {
@@ -200,6 +212,8 @@ public sealed class SessionRecoveryCoordinator : IDisposable
 
     private async Task ExecuteSaveAsync(SessionCapture capture, CancellationToken externalCt, bool throwOnError)
     {
+        externalCt.ThrowIfCancellationRequested();
+
         CancellationTokenSource linkedCts;
         lock (_ctsLock)
         {
@@ -248,6 +262,11 @@ public sealed class SessionRecoveryCoordinator : IDisposable
                 }
                 return;
             }
+            catch (ObjectDisposedException)
+            {
+                // コーディネーター破棄時は静かに終了
+                return;
+            }
 
             try
             {
@@ -262,7 +281,10 @@ public sealed class SessionRecoveryCoordinator : IDisposable
                 ct.ThrowIfCancellationRequested();
                 await _storage.SaveSnapshotAsync(capture.Snapshot, encodedPayloads, ct).ConfigureAwait(false);
 
-                _snapshotSavedSubject.OnNext(capture.Snapshot);
+                if (!_isDisposed)
+                {
+                    _snapshotSavedSubject.OnNext(capture.Snapshot);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -276,7 +298,10 @@ public sealed class SessionRecoveryCoordinator : IDisposable
             }
             catch (Exception ex)
             {
-                _errorSubject.OnNext(ex);
+                if (!_isDisposed)
+                {
+                    _errorSubject.OnNext(ex);
+                }
                 if (throwOnError)
                 {
                     throw;

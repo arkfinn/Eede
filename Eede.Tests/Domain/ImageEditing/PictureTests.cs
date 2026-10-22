@@ -184,5 +184,23 @@ namespace Eede.Domain.Tests.ImageEditing
             }
             return Picture.Create(new PictureSize(width, height), data);
         }
+
+        [Test]
+        public void Create_ThrowsException_WhenImageDataLengthDoesNotMatchTotalBytes()
+        {
+            var size = new PictureSize(10, 10);
+            byte[] invalidData = new byte[10];
+            Assert.Throws<ArgumentException>(() => Picture.Create(size, invalidData));
+        }
+
+        [Test]
+        public void CreateEmpty_AtMaxDimension_CreatesSuccessfully()
+        {
+            var size = new PictureSize(PictureSize.MaxDimension, 1);
+            Picture picture = Picture.CreateEmpty(size);
+            Assert.That(picture.Width, Is.EqualTo(PictureSize.MaxDimension));
+            Assert.That(picture.Height, Is.EqualTo(1));
+            Assert.That(picture.Length, Is.EqualTo(PictureSize.MaxDimension * 4));
+        }
     }
 }

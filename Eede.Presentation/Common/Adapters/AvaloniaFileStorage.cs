@@ -78,16 +78,17 @@ namespace Eede.Presentation.Common.Adapters
             {
                 return new System.IO.MemoryStream(cachedBytes);
             }
+            bool isRooted = System.IO.Path.IsPathRooted(path);
             string fileName = System.IO.Path.GetFileName(path);
-            if (!string.IsNullOrEmpty(fileName) && StaticDataCache.TryGetValue(fileName, out cachedBytes))
+            if (!isRooted && !string.IsNullOrEmpty(fileName) && StaticDataCache.TryGetValue(fileName, out cachedBytes))
             {
                 return new System.IO.MemoryStream(cachedBytes);
             }
 
             // 2. IStorageFile キャッシュから読み込み、全バイトをメモリキャッシュする
             if (StaticFileCache.TryGetValue(path, out var file) ||
-                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
-                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)))
+                (!isRooted && !string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
+                (!isRooted && !string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)))
             {
                 try
                 {
@@ -127,10 +128,11 @@ namespace Eede.Presentation.Common.Adapters
         {
             if (string.IsNullOrEmpty(path)) return null;
 
+            bool isRooted = System.IO.Path.IsPathRooted(path);
             string fileName = System.IO.Path.GetFileName(path);
             if (StaticFileCache.TryGetValue(path, out var file) ||
-                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
-                (!string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)))
+                (!isRooted && !string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue(fileName, out file)) ||
+                (!isRooted && !string.IsNullOrEmpty(fileName) && StaticFileCache.TryGetValue("/" + fileName, out file)))
             {
                 return await file.OpenWriteAsync();
             }

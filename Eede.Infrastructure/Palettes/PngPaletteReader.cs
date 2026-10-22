@@ -59,7 +59,7 @@ public static class PngPaletteReader
 
             if (type == 0x49484452) // IHDR
             {
-                if (length < 13) return null;
+                if (length != 13) return null;
                 byte[] ihdrData = new byte[length];
                 if (!TryReadExactly(stream, ihdrData)) return null;
 
@@ -73,7 +73,7 @@ public static class PngPaletteReader
             }
             else if (type == 0x504C5445) // PLTE
             {
-                if (!isIndexed || length > 768 || length % 3 != 0)
+                if (!isIndexed || length == 0 || length > 768 || length % 3 != 0)
                 {
                     return null;
                 }
@@ -99,6 +99,7 @@ public static class PngPaletteReader
             {
                 if (isIndexed && paletteEntries != null)
                 {
+                    if (length == 0 || length > Palette.MAX_LENGTH) return null;
                     byte[] trnsData = new byte[length];
                     if (!TryReadExactly(stream, trnsData)) return null;
 

@@ -139,4 +139,55 @@ public class PngPaletteReaderTests
         var palette = PngPaletteReader.Read(ms);
         Assert.That(palette, Is.Null);
     }
+
+    [Test]
+    public void Read_InvalidIhdrLength_ReturnsNull()
+    {
+        byte[] ihdrData = new byte[14]; // 13バイトでない不正な長さ
+        ihdrData[9] = 3;
+
+        using MemoryStream ms = new();
+        ms.Write(PngSignature);
+        ms.Write(BuildChunk("IHDR", ihdrData));
+        ms.Position = 0;
+
+        var palette = PngPaletteReader.Read(ms);
+        Assert.That(palette, Is.Null);
+    }
+
+    [Test]
+    public void Read_EmptyPlte_ReturnsNull()
+    {
+        byte[] ihdrData = new byte[13];
+        ihdrData[9] = 3;
+
+        using MemoryStream ms = new();
+        ms.Write(PngSignature);
+        ms.Write(BuildChunk("IHDR", ihdrData));
+        ms.Write(BuildChunk("PLTE", [])); // 空のPLTE (length == 0)
+        ms.Position = 0;
+
+        var palette = PngPaletteReader.Read(ms);
+        Assert.That(palette, Is.Null);
+    }
+
+    [Test]
+    public void Read_InvalidTrnsLength_ReturnsNull()
+    {
+        byte[] ihdrData = new byte[13];
+        ihdrData[9] = 3;
+
+        byte[] plteData = [255, 0, 0];
+        byte[] trnsData = new byte[257]; // 256 (Palette.MAX_LENGTH) を超える不正な長さ
+
+        using MemoryStream ms = new();
+        ms.Write(PngSignature);
+        ms.Write(BuildChunk("IHDR", ihdrData));
+        ms.Write(BuildChunk("PLTE", plteData));
+        ms.Write(BuildChunk("tRNS", trnsData));
+        ms.Position = 0;
+
+        var palette = PngPaletteReader.Read(ms);
+        Assert.That(palette, Is.Null);
+    }
 }

@@ -99,4 +99,18 @@ public class RegionSelectingStateTests
         Assert.That(area!.Value.Width, Is.EqualTo(64));
         Assert.That(area.Value.Height, Is.EqualTo(64));
     }
+
+    [Test]
+    public void GetSelectingArea_Should_Clamp_To_MaxDimension_When_Drag_Exceeds_Bounds()
+    {
+        var start = new Position(0, 0);
+        var now = new Position(20000, 20000);
+        var state = new RegionSelectingState(start, now, _minSize, _minSize);
+
+        var area = state.GetSelectingArea();
+
+        Assert.That(area, Is.Not.Null);
+        Assert.That(area!.Value.Width, Is.LessThanOrEqualTo(PictureSize.MaxDimension));
+        Assert.That(area.Value.Height, Is.LessThanOrEqualTo(PictureSize.MaxDimension));
+    }
 }

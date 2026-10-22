@@ -15,15 +15,23 @@ public record Picture
     public static Picture Create(PictureSize size, byte[] imageData)
     {
         if (imageData == null) throw new ArgumentNullException(nameof(imageData));
-        int stride = size.Width * COLOR_32BIT;
-        return stride * size.Height != imageData.Length
-            ? throw new ArgumentException($"(width:{size.Width}, height:{size.Height}) * {COLOR_32BIT} != length:{imageData.Length}")
-            : new Picture(size, imageData, stride);
+        long totalBytes = (long)size.Width * COLOR_32BIT * size.Height;
+        if (totalBytes > Array.MaxLength || totalBytes != imageData.Length)
+        {
+            throw new ArgumentException($"(width:{size.Width}, height:{size.Height}) * {COLOR_32BIT} != length:{imageData.Length}");
+        }
+        int stride = checked(size.Width * COLOR_32BIT);
+        return new Picture(size, imageData, stride);
     }
 
     public static Picture CreateEmpty(PictureSize size)
     {
-        return Create(size, new byte[size.Width * COLOR_32BIT * size.Height]);
+        long totalBytes = (long)size.Width * COLOR_32BIT * size.Height;
+        if (totalBytes > Array.MaxLength)
+        {
+            throw new ArgumentOutOfRangeException(nameof(size));
+        }
+        return Create(size, new byte[totalBytes]);
     }
 
     public readonly PictureSize Size;

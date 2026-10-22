@@ -6,10 +6,7 @@ using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Infrastructure.Pictures;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PerfBench;
 
@@ -67,31 +64,6 @@ public class SessionRecoveryBenchmark
     [Benchmark]
     public IReadOnlyDictionary<string, byte[]> EncodeProductionLogic()
     {
-        if (_capture.Pictures.Count <= 1)
-        {
-            var dict = new Dictionary<string, byte[]>(_capture.Pictures.Count);
-            foreach (var (key, picture) in _capture.Pictures)
-            {
-                dict[key] = _codec.EncodeToPng(picture);
-            }
-            return dict;
-        }
-
-        var maxParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4);
-        var parallelOptions = new ParallelOptions
-        {
-            CancellationToken = CancellationToken.None,
-            MaxDegreeOfParallelism = maxParallelism
-        };
-
-        var concurrentDict = new ConcurrentDictionary<string, byte[]>(maxParallelism, _capture.Pictures.Count);
-        Parallel.ForEach(_capture.Pictures, parallelOptions, kvp =>
-        {
-            parallelOptions.CancellationToken.ThrowIfCancellationRequested();
-            var encoded = _codec.EncodeToPng(kvp.Value);
-            concurrentDict[kvp.Key] = encoded;
-        });
-
-        return concurrentDict;
+        return SessionRecoveryCoordinator.EncodePayloads(_capture.Pictures, _codec);
     }
 }

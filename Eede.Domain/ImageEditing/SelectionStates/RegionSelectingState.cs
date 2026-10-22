@@ -83,7 +83,7 @@ public class RegionSelectingState : ISelectionState
         }
 
         // マウスの生座標から暫定的な矩形を作成
-        var rawArea = PictureArea.FromPosition(_startPosition, targetPosition, new PictureSize(int.MaxValue, int.MaxValue));
+        var rawArea = PictureArea.FromPosition(_startPosition, targetPosition, PictureSize.MaxValue);
 
         // グリッドサイズ（スナップ単位）を算出。設定されたグリッドサイズの半分を使用する。
         int gridSizeW = _snappingGridSize.Width / 2;
@@ -96,9 +96,9 @@ public class RegionSelectingState : ISelectionState
         int right = Snap(rawArea.X + rawArea.Width + gridSizeW - 1, gridSizeW);
         int bottom = Snap(rawArea.Y + rawArea.Height + gridSizeH - 1, gridSizeH);
 
-        // 最小サイズを確保しつつ、スナップ後のサイズを決定
-        int width = Math.Max(_minSize.Width, right - left);
-        int height = Math.Max(_minSize.Height, bottom - top);
+        // 最小サイズを確保しつつ、スナップ後のサイズを決定（最大サイズも保証）
+        int width = Math.Min(PictureSize.MaxDimension, Math.Max(_minSize.Width, right - left));
+        int height = Math.Min(PictureSize.MaxDimension, Math.Max(_minSize.Height, bottom - top));
 
         return new PictureArea(new Position(left, top), new PictureSize(width, height));
     }

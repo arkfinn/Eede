@@ -6,13 +6,16 @@ namespace Eede.Domain.SharedKernel
 {
     public readonly record struct PictureSize
     {
+        public const int MaxDimension = 16384;
+        public static readonly PictureSize MaxValue = new(MaxDimension, MaxDimension);
+
         public int Width { get; }
         public int Height { get; }
 
         [JsonConstructor]
         public PictureSize(int width, int height)
         {
-            if (width < 0 || height < 0)
+            if (width < 0 || height < 0 || width > MaxDimension || height > MaxDimension)
             {
                 throw new ArgumentException($"invalid argument.width:{width}, height:{height}");
             }

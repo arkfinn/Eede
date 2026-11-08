@@ -4,53 +4,73 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Eede.Presentation.ViewModels.Animations"
              xmlns:anim="clr-namespace:Eede.Domain.Animations;assembly=Eede.Domain"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="150"
+             mc:Ignorable="d" d:DesignWidth="220" d:DesignHeight="300"
              x:Class="Eede.Presentation.Views.Animations.AnimationSequencerView"
              x:DataType="vm:AnimationViewModel"
              x:Name="root">
   <Grid RowDefinitions="Auto, Auto, *">
-    <TextBlock Grid.Row="0" Text="Sequencer" Classes="header" Margin="4"/>
+    <TextBlock Grid.Row="0" Text="Sequencer" Classes="header" Margin="6,4,6,2" FontSize="11" FontWeight="Bold"/>
 
     <!-- Section: Wait Time -->
-    <StackPanel Grid.Row="1" Spacing="4" Margin="8,0,8,8">
-      <TextBlock Text="Next Frame Wait Time (ms)" FontSize="11" FontWeight="Bold"/>
-      <NumericUpDown Value="{Binding WaitTime}" Minimum="10" Maximum="5000" Increment="10" Height="28"/>
+    <StackPanel Grid.Row="1" Spacing="2" Margin="6,0,6,6">
+      <TextBlock Text="Next Frame Wait Time (ms)" FontSize="10" FontWeight="SemiBold"/>
+      <NumericUpDown Value="{Binding WaitTime}" Minimum="10" Maximum="5000" Increment="10" Height="26"/>
     </StackPanel>
     
-    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-      <ListBox ItemsSource="{Binding SelectedPattern.Frames}" 
+    <Grid Grid.Row="2">
+      <ListBox x:Name="SequencerListBox"
+               ItemsSource="{Binding SelectedPattern.Frames}"
+               SelectedIndex="{Binding CurrentFrameIndex, Mode=TwoWay}"
                Background="Transparent" BorderThickness="0"
-               Padding="0">
-        <ListBox.ItemsPanel>
-          <ItemsPanelTemplate>
-            <StackPanel Orientation="Vertical" Spacing="2" Margin="4"/>
-          </ItemsPanelTemplate>
-        </ListBox.ItemsPanel>
+               Padding="0"
+               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+               ScrollViewer.VerticalScrollBarVisibility="Auto">
         <ListBox.Styles>
           <Style Selector="ListBoxItem">
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="4,1"/>
+            <Setter Property="CornerRadius" Value="2"/>
           </Style>
         </ListBox.Styles>
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="anim:AnimationFrame">
-            <Border BorderBrush="Gray" BorderThickness="1" Height="32" x:Name="FrameBorder">
-              <Grid ColumnDefinitions="30, *, 30">
-                <Panel Grid.Column="0" Background="DarkGray">
+            <Border BorderBrush="{DynamicResource OutlineVariantBrush}" BorderThickness="1" Height="30" CornerRadius="2" Background="{DynamicResource RegionBrush}">
+              <Grid ColumnDefinitions="18, 28, *, 26">
+                <!-- Drag Handle -->
+                <Border Grid.Column="0" Background="Transparent"
+                        Cursor="SizeNorthSouth" ToolTip.Tip="ドラッグして並び替え"
+                        PointerPressed="OnDragHandlePointerPressed"
+                        PointerMoved="OnDragHandlePointerMoved"
+                        PointerReleased="OnDragHandlePointerReleased"
+                        PointerCaptureLost="OnDragHandlePointerCaptureLost">
+                  <TextBlock Text="⋮⋮" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <!-- Cell Index -->
+                <Panel Grid.Column="1" Background="{DynamicResource NeutralVariantBrush}">
                   <TextBlock Text="{Binding CellIndex}" 
                              HorizontalAlignment="Center" VerticalAlignment="Center" 
-                             FontSize="12"/>
+                             FontSize="11" FontWeight="Bold"/>
                 </Panel>
-                <TextBlock Grid.Column="1" Text="{Binding Duration, StringFormat='{}{0}ms'}" FontSize="10" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                <Button Grid.Column="2" Content="✕" Padding="0"
-                        Command="{Binding #root.ViewModel.RemoveFrameAtCommand}"
-                        CommandParameter="{Binding .}"
+                <!-- Duration -->
+                <TextBlock Grid.Column="2" Text="{Binding Duration, StringFormat='{}{0}ms'}" FontSize="10" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                <!-- Remove Button -->
+                <Button Grid.Column="3" Content="✕" Padding="0"
+                        Click="OnRemoveFrameClick"
                         ToolTip.Tip="フレーム削除"
-                        Background="Transparent" BorderThickness="0" Foreground="Red" FontWeight="Bold"/>
+                        Background="Transparent" BorderThickness="0" Foreground="Red" FontWeight="Bold"
+                        HorizontalAlignment="Center" VerticalAlignment="Center" Width="22" Height="22"/>
               </Grid>
             </Border>
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
-    </ScrollViewer>
+
+      <!-- Drop Insertion Indicator Line -->
+      <Canvas x:Name="IndicatorCanvas" IsHitTestVisible="False">
+        <Border x:Name="DropIndicator" Height="2" Background="{DynamicResource SystemAccentColor}"
+                IsVisible="False" HorizontalAlignment="Stretch" Width="210"/>
+      </Canvas>
+    </Grid>
   </Grid>
 </UserControl>

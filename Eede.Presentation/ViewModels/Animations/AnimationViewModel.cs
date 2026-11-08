@@ -52,25 +52,17 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
     public bool IsDesktopPlatform => !OperatingSystem.IsBrowser();
 
     [Reactive] public partial Magnification Magnification { get; set; }
+    [Reactive] public partial bool IsPreviewExpanded { get; set; }
+    [Reactive] public partial double SavedPreviewHeight { get; set; }
     [Reactive] public partial Picture? ActivePicture { get; set; }
-    private Bitmap? _previewBitmap;
-    public Bitmap? PreviewBitmap
-    {
-        get => _previewBitmap;
-        set
-        {
-            if (_previewBitmap != value)
-            {
-                _previewBitmap?.Dispose();
-            }
-            _ = this.RaiseAndSetIfChanged(ref _previewBitmap, value);
-        }
-    }
+    [Reactive] public partial Bitmap? PreviewBitmap { get; set; }
 
     public ReactiveCommand<string, RxVoid> CreatePatternCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> RemovePatternCommand { get; }
     public ReactiveCommand<int, RxVoid> AddFrameCommand { get; }
     public ReactiveCommand<AnimationFrame, RxVoid> RemoveFrameAtCommand { get; }
+    public ReactiveCommand<int, RxVoid> RemoveFrameIndexCommand { get; }
+    public ReactiveCommand<(int FromIndex, int TargetSlotIndex), RxVoid> MoveFrameCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> TogglePlayCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> NextFrameCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> PreviousFrameCommand { get; }
@@ -122,6 +114,8 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
         GridHeight = 32;
         WaitTime = 100;
         Magnification = new Magnification(4);
+        IsPreviewExpanded = true;
+        SavedPreviewHeight = 360.0;
 
         SyncPatterns(_patternsProvider.Current);
         _patternsProvider.Changed += SyncPatterns;
@@ -143,6 +137,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
             .Where(x => x != null)
             .Subscribe(x =>
             {
+                if (_isUpdatingPattern) return;
                 GridWidth = x!.Grid.CellSize.Width;
                 GridHeight = x!.Grid.CellSize.Height;
                 if (x.Frames.Count > 0)
@@ -235,12 +230,67 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
             }
         }, canExecute);
 
-        this.WhenAnyValue(x => x.ActivePicture, x => x.CurrentFrame, x => x.Magnification)
+        RemoveFrameIndexCommand = ReactiveCommand.Create<int>(index =>
+        {
+            if (SelectedPattern != null && index >= 0 && index < SelectedPattern.Frames.Count)
+            {
+                var newPattern = SelectedPattern.RemoveFrame(index);
+                int nextIndex = CurrentFrameIndex;
+                if (nextIndex >= newPattern.Frames.Count)
+                {
+                    nextIndex = Math.Max(0, newPattern.Frames.Count - 1);
+                }
+                UpdatePattern(newPattern, nextIndex);
+            }
+        }, canExecute);
+
+        MoveFrameCommand = ReactiveCommand.Create<(int FromIndex, int TargetSlotIndex)>(param =>
+        {
+            if (SelectedPattern == null) return;
+            int fromIndex = param.FromIndex;
+            int targetSlot = param.TargetSlotIndex;
+            int count = SelectedPattern.Frames.Count;
+            if (fromIndex < 0 || fromIndex >= count) return;
+            if (targetSlot < 0 || targetSlot > count) return;
+
+            int toIndex = fromIndex < targetSlot ? targetSlot - 1 : targetSlot;
+            if (fromIndex == toIndex) return;
+            if (toIndex < 0 || toIndex >= count) return;
+
+            var newPattern = SelectedPattern.MoveFrame(fromIndex, toIndex);
+
+            int current = CurrentFrameIndex;
+            int nextFrameIndex = current;
+            if (current == fromIndex)
+            {
+                nextFrameIndex = toIndex;
+            }
+            else if (fromIndex < current && current <= toIndex)
+            {
+                nextFrameIndex = current - 1;
+            }
+            else if (toIndex <= current && current < fromIndex)
+            {
+                nextFrameIndex = current + 1;
+            }
+
+            UpdatePattern(newPattern, nextFrameIndex);
+        }, canExecute);
+
+        this.WhenAnyValue(x => x.ActivePicture, x => x.CurrentFrame, x => x.Magnification, x => x.IsPreviewExpanded)
             .Subscribe(x =>
             {
                 var picture = x.Item1;
                 var frame = x.Item2;
                 var mag = x.Item3;
+                bool isExpanded = x.Item4;
+
+                if (!isExpanded)
+                {
+                    PreviewBitmap = null;
+                    return;
+                }
+
                 if (picture != null && frame != null && SelectedPattern != null)
                 {
                     var cellSize = SelectedPattern.Grid.CellSize;
@@ -350,12 +400,13 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
             }
         });
 
-        this.WhenAnyValue(x => x.IsPlaying, x => x.SelectedPattern)
+        this.WhenAnyValue(x => x.IsPlaying, x => x.SelectedPattern, x => x.IsPreviewExpanded)
             .Select(x =>
             {
                 bool playing = x.Item1;
                 var pattern = x.Item2;
-                if (!playing || pattern == null || pattern.Frames.Count == 0)
+                bool isExpanded = x.Item3;
+                if (!playing || pattern == null || pattern.Frames.Count == 0 || !isExpanded)
                 {
                     return Observable.Empty<int>();
                 }
@@ -388,22 +439,48 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
 
     private void SyncPatterns(AnimationPatterns patterns)
     {
-        // シンプルな同期（必要に応じて最適化）
-        Patterns.Clear();
-        foreach (var p in patterns.Items)
+        var items = patterns.Items;
+        for (int i = 0; i < items.Count; i++)
         {
-            Patterns.Add(p);
+            if (i < Patterns.Count)
+            {
+                if (Patterns[i] != items[i])
+                {
+                    Patterns[i] = items[i];
+                }
+            }
+            else
+            {
+                Patterns.Add(items[i]);
+            }
+        }
+        while (Patterns.Count > items.Count)
+        {
+            Patterns.RemoveAt(Patterns.Count - 1);
         }
     }
 
-    private void UpdatePattern(AnimationPattern newPattern)
+    private bool _isUpdatingPattern;
+    private void UpdatePattern(AnimationPattern newPattern, int? nextFrameIndex = null)
     {
         if (SelectedPattern == null) return;
         int index = Patterns.IndexOf(SelectedPattern);
         if (index >= 0)
         {
-            _patternEditor.Replace(index, newPattern);
-            SelectedPattern = Patterns[index];
+            _isUpdatingPattern = true;
+            try
+            {
+                _patternEditor.Replace(index, newPattern);
+                SelectedPattern = Patterns[index];
+                if (nextFrameIndex.HasValue)
+                {
+                    CurrentFrameIndex = nextFrameIndex.Value;
+                }
+            }
+            finally
+            {
+                _isUpdatingPattern = false;
+            }
         }
     }
 }

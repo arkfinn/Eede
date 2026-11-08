@@ -73,6 +73,49 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
                 RemoveHandler(DragDrop.DropEvent, ViewModel.DropPicture);
             }));
 
+            // アニメーションパネルの折りたたみ・展開連動
+            const double MinExpandedHeight = 220.0;
+            if (ViewModel.AnimationViewModel != null)
+            {
+                var animVm = ViewModel.AnimationViewModel;
+                disposables.Add(animVm.WhenAnyValue(x => x.IsPreviewExpanded)
+                    .Subscribe(isExpanded =>
+                    {
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        {
+                            var panelGrid = this.FindControl<Grid>("AnimationPanelGrid");
+                            var previewControl = this.FindControl<Control>("AnimationPreview");
+                            var splitter = this.FindControl<GridSplitter>("AnimationPanelSplitter");
+                            if (panelGrid == null) return;
+
+                            var rowDef = panelGrid.RowDefinitions[0];
+                            if (!isExpanded)
+                            {
+                                double currentHeight = rowDef.Height.IsAbsolute ? rowDef.Height.Value : (previewControl?.Bounds.Height ?? 0);
+                                animVm.SavedPreviewHeight = Math.Max(currentHeight, MinExpandedHeight);
+                                rowDef.MinHeight = 0;
+                                rowDef.Height = GridLength.Auto;
+                                if (splitter != null)
+                                {
+                                    splitter.IsEnabled = false;
+                                    splitter.IsVisible = false;
+                                }
+                            }
+                            else
+                            {
+                                rowDef.MinHeight = MinExpandedHeight;
+                                double targetHeight = animVm.SavedPreviewHeight >= MinExpandedHeight ? animVm.SavedPreviewHeight : 360.0;
+                                rowDef.Height = new GridLength(targetHeight, GridUnitType.Pixel);
+                                if (splitter != null)
+                                {
+                                    splitter.IsEnabled = true;
+                                    splitter.IsVisible = true;
+                                }
+                            }
+                        });
+                    }));
+            }
+
             // Window依存の登録
             var window = TopLevel.GetTopLevel(this) as Window;
             if (window != null)

@@ -264,12 +264,15 @@
 						<!-- Content Area -->
 						<Border Grid.Column="0" Width="220" IsVisible="{Binding IsAnimationPanelExpanded}"
 								BorderBrush="{DynamicResource BaseBrush}" BorderThickness="1,0,0,0" Background="{DynamicResource RegionBrush}">
-							<Grid RowDefinitions="Auto, *">
-								<animations:AnimationPreviewView Grid.Row="0"
+							<Grid x:Name="AnimationPanelGrid" RowDefinitions="360, 4, *">
+								<animations:AnimationPreviewView x:Name="AnimationPreview" Grid.Row="0"
 																 DataContext="{Binding AnimationViewModel}"
 																 FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
 																 Width="220" />
-								<animations:AnimationSequencerView Grid.Row="1" DataContext="{Binding AnimationViewModel}" Width="220" />
+								<GridSplitter x:Name="AnimationPanelSplitter" Grid.Row="1"
+											  Height="4" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+											  Background="{DynamicResource BaseBrush}" />
+								<animations:AnimationSequencerView Grid.Row="2" DataContext="{Binding AnimationViewModel}" Width="220" />
 							</Grid>
 						</Border>
 

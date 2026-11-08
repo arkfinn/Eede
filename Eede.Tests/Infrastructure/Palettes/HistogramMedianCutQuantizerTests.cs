@@ -275,6 +275,7 @@ public class HistogramMedianCutQuantizerTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result!.Value.IsRepresentative, Is.True);
         Assert.That(allocated, Is.LessThan(85000), $"LOHアロケーション(>=85,000B)が発生しないこと (実測: {allocated} bytes)");
-        Assert.That(sw.Elapsed.TotalMilliseconds, Is.LessThan(250.0), $"2000x2000走査が高速に完了すること (実測: {sw.Elapsed.TotalMilliseconds:F2} ms)");
+        // CI共有VMの負荷変動・JITジッターを許容する安全弁（暴走・ハング抑止上限: 1000ms）。厳密な性能測定は PerfBench に一元化。
+        Assert.That(sw.Elapsed.TotalMilliseconds, Is.LessThan(1000.0), $"2000x2000走査がハング・暴走せず完了すること (実測: {sw.Elapsed.TotalMilliseconds:F2} ms)");
     }
 }

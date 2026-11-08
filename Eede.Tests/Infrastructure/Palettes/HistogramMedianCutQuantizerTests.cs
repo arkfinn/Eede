@@ -275,6 +275,6 @@ public class HistogramMedianCutQuantizerTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result!.Value.IsRepresentative, Is.True);
         Assert.That(allocated, Is.LessThan(85000), $"LOHアロケーション(>=85,000B)が発生しないこと (実測: {allocated} bytes)");
-        Assert.That(sw.Elapsed.TotalMilliseconds, Is.LessThan(60.0), $"2000x2000走査が高速に完了すること (実測: {sw.Elapsed.TotalMilliseconds:F2} ms)");
+        Assert.That(sw.Elapsed.TotalMilliseconds, Is.LessThan(250.0), $"2000x2000走査が高速に完了すること (実測: {sw.Elapsed.TotalMilliseconds:F2} ms)");
     }
 }

@@ -55,19 +55,7 @@ public partial class AnimationViewModel : ViewModelBase, IAddFrameProvider
     [Reactive] public partial bool IsPreviewExpanded { get; set; }
     [Reactive] public partial double SavedPreviewHeight { get; set; }
     [Reactive] public partial Picture? ActivePicture { get; set; }
-    private Bitmap? _previewBitmap;
-    public Bitmap? PreviewBitmap
-    {
-        get => _previewBitmap;
-        set
-        {
-            if (_previewBitmap != value)
-            {
-                _previewBitmap?.Dispose();
-            }
-            _ = this.RaiseAndSetIfChanged(ref _previewBitmap, value);
-        }
-    }
+    [Reactive] public partial Bitmap? PreviewBitmap { get; set; }
 
     public ReactiveCommand<string, RxVoid> CreatePatternCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> RemovePatternCommand { get; }

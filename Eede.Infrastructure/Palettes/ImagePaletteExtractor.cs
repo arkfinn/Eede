@@ -13,7 +13,7 @@ namespace Eede.Infrastructure.Palettes;
 /// </summary>
 public class ImagePaletteExtractor : IImagePaletteExtractor
 {
-    public Task<Palette?> ExtractAsync(Stream stream, Picture picture, string extension)
+    public Task<PaletteExtractionResult?> ExtractAsync(Stream stream, Picture picture, string extension)
     {
         ArgumentNullException.ThrowIfNull(stream);
         ArgumentNullException.ThrowIfNull(picture);
@@ -25,7 +25,10 @@ public class ImagePaletteExtractor : IImagePaletteExtractor
             if (ext == ".arv")
             {
                 var arvPalette = ArvPaletteReader.Read(stream);
-                return Task.FromResult(arvPalette);
+                PaletteExtractionResult? arvResult = arvPalette != null
+                    ? new PaletteExtractionResult(arvPalette, IsRepresentative: false)
+                    : null;
+                return Task.FromResult(arvResult);
             }
 
             // 拡張子が .png またはストリーム先頭がPNGシグネチャの場合（拡張子のない blob: URI 対応）
@@ -48,7 +51,8 @@ public class ImagePaletteExtractor : IImagePaletteExtractor
                 var pngPalette = PngPaletteReader.Read(stream);
                 if (pngPalette != null)
                 {
-                    return Task.FromResult<Palette?>(pngPalette);
+                    return Task.FromResult<PaletteExtractionResult?>(
+                        new PaletteExtractionResult(pngPalette, IsRepresentative: false));
                 }
 
                 // 2. インデックスカラーでない場合はダイレクトカラーピクセルを走査
@@ -63,7 +67,7 @@ public class ImagePaletteExtractor : IImagePaletteExtractor
         catch (Exception ex) when (ex is IOException or InvalidDataException)
         {
             System.Diagnostics.Trace.WriteLine($"[ImagePaletteExtractor] Failed to extract palette: {ex.Message}");
-            return Task.FromResult<Palette?>(null);
+            return Task.FromResult<PaletteExtractionResult?>(null);
         }
     }
 }

@@ -460,6 +460,9 @@ memory-bank/*
 insert-variables.cmd
 .gemini/*
 .agents/*
+.agents/
+Documents/*
+Documents/
 
 # Docs Web Edition Build Output
 docs/app/

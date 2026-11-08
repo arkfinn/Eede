@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using Eede.Application.Palettes;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
@@ -22,10 +23,12 @@ public class DirectColorPaletteScannerTests
         ];
         var picture = Picture.Create(new PictureSize(2, 2), pixels);
 
-        var palette = DirectColorPaletteScanner.Scan(picture);
+        var result = DirectColorPaletteScanner.Scan(picture);
 
-        Assert.That(palette, Is.Not.Null);
-        var firstColor = palette!.Fetch(0);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.False);
+        var palette = result.Value.Palette;
+        var firstColor = palette.Fetch(0);
         Assert.That(firstColor.Red, Is.EqualTo(255));
         Assert.That(firstColor.Green, Is.EqualTo(0));
         Assert.That(firstColor.Blue, Is.EqualTo(0));
@@ -50,21 +53,23 @@ public class DirectColorPaletteScannerTests
         }
         var picture = Picture.Create(new PictureSize(16, 16), pixels);
 
-        var palette = DirectColorPaletteScanner.Scan(picture);
+        var result = DirectColorPaletteScanner.Scan(picture);
 
-        Assert.That(palette, Is.Not.Null);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.False);
+        var palette = result.Value.Palette;
         for (int i = 0; i < 256; i++)
         {
-            var color = palette!.Fetch(i);
+            var color = palette.Fetch(i);
             Assert.That(color.Blue, Is.EqualTo((byte)i));
             Assert.That(color.Alpha, Is.EqualTo(255));
         }
     }
 
     [Test]
-    public void Scan_257Colors_ReturnsNullDueToEarlyExit()
+    public void Scan_257Colors_ReturnsRepresentativePalette()
     {
-        // 257 ピクセル（257色）
+        // 257 ピクセル（257色）+ 残り15ピクセル透明
         // 17x16 = 272 ピクセル
         byte[] pixels = new byte[272 * 4];
         for (int i = 0; i < 257; i++)
@@ -76,9 +81,11 @@ public class DirectColorPaletteScannerTests
         }
         var picture = Picture.Create(new PictureSize(17, 16), pixels);
 
-        var palette = DirectColorPaletteScanner.Scan(picture);
+        var result = DirectColorPaletteScanner.Scan(picture);
 
-        Assert.That(palette, Is.Null);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.True);
+        Assert.That(result.Value.Palette.Fetch(0), Is.EqualTo(new ArgbColor(0, 0, 0, 0)));
     }
 
     [Test]
@@ -94,11 +101,13 @@ public class DirectColorPaletteScannerTests
         ];
         var picture = Picture.Create(new PictureSize(2, 2), pixels);
 
-        var palette = DirectColorPaletteScanner.Scan(picture);
+        var result = DirectColorPaletteScanner.Scan(picture);
 
-        Assert.That(palette, Is.Not.Null);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.False);
+        var palette = result.Value.Palette;
         // 最初の透明色は (0,0,0,0) に正規化されて 1 つ目
-        var c0 = palette!.Fetch(0);
+        var c0 = palette.Fetch(0);
         Assert.That(c0.Alpha, Is.EqualTo(0));
         Assert.That(c0.Red, Is.EqualTo(0));
         Assert.That(c0.Green, Is.EqualTo(0));
@@ -129,10 +138,12 @@ public class DirectColorPaletteScannerTests
         ];
         var picture = Picture.Create(new PictureSize(2, 2), pixels);
 
-        var palette = DirectColorPaletteScanner.Scan(picture);
+        var result = DirectColorPaletteScanner.Scan(picture);
 
-        Assert.That(palette, Is.Not.Null);
-        Assert.That(palette!.Fetch(0).Red, Is.EqualTo(255), "0番は赤");
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.False);
+        var palette = result.Value.Palette;
+        Assert.That(palette.Fetch(0).Red, Is.EqualTo(255), "0番は赤");
         Assert.That(palette.Fetch(1).Green, Is.EqualTo(255), "1番は緑");
         Assert.That(palette.Fetch(2).Blue, Is.EqualTo(255), "2番は青");
     }

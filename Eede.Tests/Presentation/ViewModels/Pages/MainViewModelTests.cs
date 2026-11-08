@@ -437,7 +437,7 @@ public class MainViewModelTests
         var expectedPalette = Palette.Create();
         extractorMock
             .Setup(x => x.ExtractAsync(It.IsAny<System.IO.Stream>(), It.IsAny<Picture>(), It.IsAny<string>()))
-            .ReturnsAsync(expectedPalette);
+            .ReturnsAsync(new Eede.Application.Palettes.PaletteExtractionResult(expectedPalette, false));
 
         var checkUpdateUseCase = new Eede.Application.UseCase.Updates.CheckUpdateUseCase(_appUpdaterMock.Object);
         var welcomeVM = new WelcomeViewModel(_settingsRepositoryMock.Object, new Mock<IExternalBrowserLauncher>().Object, _appUpdaterMock.Object, checkUpdateUseCase);
@@ -487,6 +487,33 @@ public class MainViewModelTests
     }
 
     [AvaloniaTest]
+    public async Task OpenPicture_WhenImageHasRepresentativePalette_AddsPaletteTabWithRepresentativeSuffix()
+    {
+        var extractorMock = new Mock<Eede.Application.Palettes.IImagePaletteExtractor>();
+        var expectedPalette = Palette.Create();
+        extractorMock
+            .Setup(x => x.ExtractAsync(It.IsAny<System.IO.Stream>(), It.IsAny<Picture>(), It.IsAny<string>()))
+            .ReturnsAsync(new Eede.Application.Palettes.PaletteExtractionResult(expectedPalette, true));
+
+        var mainVM = CreateMainViewModel(extractorMock.Object);
+        var dummyPicture = Picture.CreateEmpty(new PictureSize(16, 16));
+        _PictureFileIOMock.Setup(x => x.LoadAsync(It.IsAny<FilePath>())).ReturnsAsync(dummyPicture);
+
+        var storageMock = new Mock<IFileStorage>();
+        var dummyUri = new Uri("file:///C:/test/illustration.png");
+        storageMock.Setup(x => x.OpenFilePickerAsync()).ReturnsAsync(dummyUri);
+        storageMock.Setup(x => x.OpenReadStreamAsync(dummyUri)).ReturnsAsync(new System.IO.MemoryStream([0x89, 0x50]));
+        mainVM.FileStorage = storageMock.Object;
+
+        await mainVM.LoadPictureCommand.Execute(storageMock.Object).ToTask();
+
+        Assert.That(_paletteContainerViewModel.Tabs.Count, Is.EqualTo(2));
+        var importedTab = _paletteContainerViewModel.Tabs[1];
+        Assert.That(importedTab.CustomTitle, Is.EqualTo("illustration.png (代表256色)"));
+        Assert.That(importedTab.Palette, Is.EqualTo(expectedPalette));
+    }
+
+    [AvaloniaTest]
     public async Task LoadPictureCommand_SupportsNonFileUri_InBrowserWasmEnvironment()
     {
         var mainVM = CreateMainViewModel();
@@ -509,7 +536,7 @@ public class MainViewModelTests
         var extractorMock = new Mock<Eede.Application.Palettes.IImagePaletteExtractor>();
         var expectedPalette = Palette.Create();
         extractorMock.Setup(x => x.ExtractAsync(It.IsAny<Stream>(), It.IsAny<Picture>(), ".png"))
-            .ReturnsAsync(expectedPalette);
+            .ReturnsAsync(new Eede.Application.Palettes.PaletteExtractionResult(expectedPalette, false));
 
         var mainVM = CreateMainViewModel(extractorMock.Object);
         var dummyPicture = Picture.CreateEmpty(new PictureSize(16, 16));
@@ -541,7 +568,7 @@ public class MainViewModelTests
         var extractorMock = new Mock<Eede.Application.Palettes.IImagePaletteExtractor>();
         var expectedPalette = Palette.Create();
         extractorMock.Setup(x => x.ExtractAsync(It.IsAny<Stream>(), It.IsAny<Picture>(), ".png"))
-            .ReturnsAsync(expectedPalette);
+            .ReturnsAsync(new Eede.Application.Palettes.PaletteExtractionResult(expectedPalette, false));
 
         var mainVM = CreateMainViewModel(extractorMock.Object);
         var dummyPicture = Picture.CreateEmpty(new PictureSize(16, 16));

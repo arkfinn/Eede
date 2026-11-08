@@ -665,10 +665,10 @@ public class SessionRecoveryCoordinatorTests
         Assert.That(inner1!.Message, Is.EqualTo("Disk write failure"));
     }
 
-    [Test]
+    [Test, CancelAfter(5000)]
     public async Task FlushAsync_ExternalCancellationDuringSupersededWait_ThrowsImmediatelyWithoutWaiting()
     {
-        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(300);
+        _storage.SimulatedDelay = TimeSpan.FromMilliseconds(500);
 
         var coordinator = new SessionRecoveryCoordinator(
             _storage,
@@ -686,14 +686,14 @@ public class SessionRecoveryCoordinatorTests
         // task1 の外部トークンをキャンセル
         cts1.Cancel();
 
-        // task1 は task2 (300ms) の完了を待たずに直ちにキャンセル例外を投げること
-        var sw = System.Diagnostics.Stopwatch.StartNew();
+        // task1 は task2 (500ms) の完了を待たずに直ちにキャンセル例外を投げること
         var ex = Assert.CatchAsync<OperationCanceledException>(async () => await task1);
-        sw.Stop();
 
         Assert.That(ex, Is.Not.Null);
         Assert.That(ex, Is.InstanceOf<OperationCanceledException>());
-        Assert.That(sw.ElapsedMilliseconds, Is.LessThan(200), "Task1 should have aborted immediately upon external cancellation rather than waiting for task2.");
+
+        // 決定論的検証: task1 がアボートした時点で、task2 はまだ待機中/実行中（未完了）であること
+        Assert.That(task2.IsCompleted, Is.False, "Task1 should have aborted immediately upon external cancellation rather than waiting for task2.");
 
         // task2 自体は正常に完了すること
         await task2;

@@ -1269,11 +1269,15 @@ public partial class MainViewModel : ViewModelBase
             string? filePathStr = picVm.FilePath?.IsEmpty() == false ? picVm.FilePath.ToString() : null;
             if (!string.IsNullOrEmpty(filePathStr))
             {
-                // blob: などのブラウザ仮想URIの場合、元のファイル名（hero.png等）を優先して記録
-                string? originalName = AvaloniaFileStorage.TryGetOriginalFileName(filePathStr);
-                if (!string.IsNullOrEmpty(originalName))
+                // ブラウザ環境（WASM）または blob: 等の仮想URIの場合のみ、元のファイル名（hero.png等）を記録
+                // デスクトップ環境の実在ローカルファイルは、復元時にディスクから再ロードできるようパス文字列を保持する
+                if (OperatingSystem.IsBrowser() || (Uri.TryCreate(filePathStr, UriKind.Absolute, out var uri) && uri.Scheme != Uri.UriSchemeFile))
                 {
-                    filePathStr = originalName;
+                    string? originalName = AvaloniaFileStorage.TryGetOriginalFileName(filePathStr);
+                    if (!string.IsNullOrEmpty(originalName))
+                    {
+                        filePathStr = originalName;
+                    }
                 }
             }
 
@@ -1437,6 +1441,19 @@ public partial class MainViewModel : ViewModelBase
                 try
                 {
                     var loaded = await _pictureFileIO.LoadAsync(filePath);
+                    if (loaded == null && !System.IO.Path.IsPathRooted(filePath.ToString()))
+                    {
+                        // 過去のセッションデータ等で相対パス（ファイル名単体）になっている場合、RecentFilesから同名ファイルを探索して救済
+                        _appSettings ??= await _loadSettingsUseCase.ExecuteAsync();
+                        var candidate = _appSettings?.RecentFiles
+                            .FirstOrDefault(f => string.Equals(System.IO.Path.GetFileName(f.Path), filePath.ToString(), StringComparison.OrdinalIgnoreCase));
+                        if (candidate != null && System.IO.File.Exists(candidate.Path))
+                        {
+                            filePath = new FilePath(candidate.Path);
+                            loaded = await _pictureFileIO.LoadAsync(filePath);
+                        }
+                    }
+
                     if (loaded != null)
                     {
                         pictureToUse = loaded;

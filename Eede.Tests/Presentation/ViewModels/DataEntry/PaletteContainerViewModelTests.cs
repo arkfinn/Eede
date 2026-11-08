@@ -185,4 +185,46 @@ public class PaletteContainerViewModelTests
         Assert.That(interactionHandled, Is.True, "未保存の画像インポートパレットを閉じる際は警告ダイアログが発火すること");
         Assert.That(sut.Tabs.Contains(tab), Is.False, "NoSave の場合はタブが閉じられること");
     }
+
+    [AvaloniaTest]
+    public async Task ReplaceColorCommand_WhenDifferentColors_ShouldInvokeOnReplaceColorAndKeepPaletteUnchanged()
+    {
+        var sut = new PaletteContainerViewModel(_paletteRepositoryMock.Object, _paletteSessionRepositoryMock.Object);
+        var tab = sut.SelectedTab!;
+        var color1 = new ArgbColor(255, 255, 0, 0);
+        var color2 = new ArgbColor(255, 0, 255, 0);
+        tab.Palette = tab.Palette.Apply(0, color1).Apply(1, color2);
+
+        (ArgbColor source, ArgbColor target)? replacedArgs = null;
+        sut.OnReplaceColor += (source, target) => replacedArgs = (source, target);
+
+        await sut.ReplaceColorCommand.Execute((0, 1)).ToTask();
+
+        Assert.That(replacedArgs, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(replacedArgs!.Value.source, Is.EqualTo(color1));
+            Assert.That(replacedArgs!.Value.target, Is.EqualTo(color2));
+            Assert.That(tab.Palette.Fetch(0), Is.EqualTo(color1), "パレットのスロット0の色は維持されること");
+            Assert.That(tab.Palette.Fetch(1), Is.EqualTo(color2), "パレットのスロット1の色は維持されること");
+        });
+    }
+
+    [AvaloniaTest]
+    public async Task ReplaceColorCommand_WhenSameSlotOrSameColor_ShouldNotInvokeOnReplaceColor()
+    {
+        var sut = new PaletteContainerViewModel(_paletteRepositoryMock.Object, _paletteSessionRepositoryMock.Object);
+        var tab = sut.SelectedTab!;
+        var sameColor = new ArgbColor(255, 255, 0, 0);
+        tab.Palette = tab.Palette.Apply(0, sameColor).Apply(1, sameColor);
+
+        bool invoked = false;
+        sut.OnReplaceColor += (_, _) => invoked = true;
+
+        await sut.ReplaceColorCommand.Execute((0, 0)).ToTask();
+        Assert.That(invoked, Is.False, "同一スロットへのドロップでは発火しないこと");
+
+        await sut.ReplaceColorCommand.Execute((0, 1)).ToTask();
+        Assert.That(invoked, Is.False, "同一色同士のドロップでは発火しないこと");
+    }
 }

@@ -4,6 +4,7 @@ using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using System;
+using System.Runtime.InteropServices;
 
 namespace Eede.Domain.ImageEditing;
 
@@ -161,5 +162,51 @@ public record Picture
             }
         }
         return Create(Size, pixels);
+    }
+
+    public Picture ReplaceColor(ArgbColor targetColor, ArgbColor replacementColor, PictureArea? area = null)
+    {
+        if (targetColor.EqualsArgb(replacementColor) || ImageData.Length == 0 || (area.HasValue && area.Value.IsEmpty))
+        {
+            return this;
+        }
+
+        int startX = area.HasValue ? Math.Max(0, area.Value.X) : 0;
+        int startY = area.HasValue ? Math.Max(0, area.Value.Y) : 0;
+        int endX = area.HasValue ? Math.Min(Width, area.Value.X + area.Value.Width) : Width;
+        int endY = area.HasValue ? Math.Min(Height, area.Value.Y + area.Value.Height) : Height;
+        int width = endX - startX;
+        if (width <= 0 || endY - startY <= 0)
+        {
+            return this;
+        }
+
+        Span<byte> colorBuf = stackalloc byte[8] { targetColor.Blue, targetColor.Green, targetColor.Red, targetColor.Alpha, replacementColor.Blue, replacementColor.Green, replacementColor.Red, replacementColor.Alpha };
+        uint targetUint = MemoryMarshal.Read<uint>(colorBuf[..4]);
+        uint replacementUint = MemoryMarshal.Read<uint>(colorBuf[4..]);
+
+        byte[]? clonedPixels = null;
+        Span<uint> destUints = default;
+        ReadOnlySpan<uint> srcUints = MemoryMarshal.Cast<byte, uint>(AsSpan());
+
+        for (int y = startY; y < endY; y++)
+        {
+            int rowOffset = y * Width + startX;
+            ReadOnlySpan<uint> srcRow = srcUints.Slice(rowOffset, width);
+            for (int x = 0; x < width; x++)
+            {
+                if (srcRow[x] == targetUint)
+                {
+                    if (clonedPixels == null)
+                    {
+                        clonedPixels = CloneImage();
+                        destUints = MemoryMarshal.Cast<byte, uint>(clonedPixels.AsSpan());
+                    }
+                    destUints[rowOffset + x] = replacementUint;
+                }
+            }
+        }
+
+        return clonedPixels != null ? Create(Size, clonedPixels) : this;
     }
 }

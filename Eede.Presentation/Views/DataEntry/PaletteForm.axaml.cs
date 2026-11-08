@@ -42,6 +42,20 @@ public partial class PaletteForm : UserControl
         set => SetValue(PointerRightButtonPressedCommandProperty, value);
     }
 
+    public static readonly StyledProperty<ICommand?> PointerColorReplacedCommandProperty =
+        AvaloniaProperty.Register<PaletteForm, ICommand?>(nameof(PointerColorReplacedCommand));
+    public ICommand? PointerColorReplacedCommand
+    {
+        get => GetValue(PointerColorReplacedCommandProperty);
+        set => SetValue(PointerColorReplacedCommandProperty, value);
+    }
+
+    private const double DRAG_THRESHOLD = 5.0;
+    private Point? _dragStartPosition;
+    private int _dragStartSlot = -1;
+    private int _hoverSlot = -1;
+    private bool _isDragging;
+
     public PaletteForm()
     {
         InitializeComponent();
@@ -62,7 +76,9 @@ public partial class PaletteForm : UserControl
         });
 
         image.PointerPressed += OnCanvasPointerPressed;
-
+        image.PointerMoved += OnCanvasPointerMoved;
+        image.PointerReleased += OnCanvasPointerReleased;
+        image.PointerCaptureLost += OnCanvasPointerCaptureLost;
     }
 
     private readonly Picture PaletteBuffer;
@@ -71,32 +87,147 @@ public partial class PaletteForm : UserControl
     private void Refresh()
     {
         Picture Buffer = PaletteBuffer;
+        var directBlender = new DirectImageBlender();
         Palette.ForEach((color, index) =>
         {
-            Drawer drawer = new(Buffer, new PenStyle(new DirectImageBlender(), color, 1));
+            Drawer drawer = new(Buffer, new PenStyle(directBlender, color, 1));
             int x = index % 16 * CELL_WIDTH;
             int y = index / 16 * CELL_HEIGHT;
             var result = drawer.DrawFillRectangle(new Position(x, y), new Position(x + CELL_WIDTH - 1, y + CELL_HEIGHT - 1));
             Buffer = result.Picture;
         });
+
+        if (_isDragging)
+        {
+            if (_dragStartSlot >= 0 && _dragStartSlot < Palette.MAX_LENGTH)
+            {
+                Buffer = DrawSlotBorder(Buffer, _dragStartSlot, new ArgbColor(255, 255, 255, 0));
+            }
+            if (_hoverSlot >= 0 && _hoverSlot < Palette.MAX_LENGTH && _hoverSlot != _dragStartSlot)
+            {
+                Buffer = DrawSlotBorder(Buffer, _hoverSlot, new ArgbColor(255, 0, 255, 255));
+            }
+        }
+
         PaletteBitmap?.Dispose();
         PaletteBitmap = AvaloniaBitmapAdapter.StaticConvertToBitmap(Buffer);
         image.Source = PaletteBitmap;
     }
 
+    private static Picture DrawSlotBorder(Picture buffer, int slot, ArgbColor borderColor)
+    {
+        int x = slot % 16 * CELL_WIDTH;
+        int y = slot / 16 * CELL_HEIGHT;
+        Drawer drawer = new(buffer, new PenStyle(new DirectImageBlender(), borderColor, 1));
+        return drawer.DrawRectangle(new Position(x, y), new Position(x + CELL_WIDTH - 1, y + CELL_HEIGHT - 1)).Picture;
+    }
+
+    private static int GetSlotFromPosition(Point pos)
+    {
+        int col = (int)Math.Floor(pos.X / CELL_WIDTH);
+        int row = (int)Math.Floor(pos.Y / CELL_HEIGHT);
+        if (col < 0 || col >= 16 || row < 0 || row >= 16)
+        {
+            return -1;
+        }
+        return col + (row * 16);
+    }
+
     private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         Point pos = e.GetPosition(image);
-        int number = (int)(pos.X / CELL_WIDTH) + ((int)(pos.Y / CELL_HEIGHT) * 16);
+        int number = GetSlotFromPosition(pos);
+        if (number < 0) return;
+
         PointerPointProperties pointer = e.GetCurrentPoint(image).Properties;
         if (pointer.IsLeftButtonPressed)
         {
-            PointerLeftButtonPressedCommand?.Execute(number);
+            _dragStartPosition = pos;
+            _dragStartSlot = number;
+            _hoverSlot = number;
+            _isDragging = false;
+            e.Pointer.Capture(image);
         }
 
         if (pointer.IsRightButtonPressed)
         {
             PointerRightButtonPressedCommand?.Execute(number);
         }
+    }
+
+    private void OnCanvasPointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (_dragStartPosition == null || _dragStartSlot < 0) return;
+
+        Point pos = e.GetPosition(image);
+        if (!_isDragging)
+        {
+            double dx = pos.X - _dragStartPosition.Value.X;
+            double dy = pos.Y - _dragStartPosition.Value.Y;
+            if ((dx * dx) + (dy * dy) >= DRAG_THRESHOLD * DRAG_THRESHOLD)
+            {
+                _isDragging = true;
+                _hoverSlot = GetSlotFromPosition(pos);
+                Refresh();
+                return;
+            }
+        }
+
+        if (_isDragging)
+        {
+            int nextHover = GetSlotFromPosition(pos);
+            if (_hoverSlot != nextHover)
+            {
+                _hoverSlot = nextHover;
+                Refresh();
+            }
+        }
+    }
+
+    private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (_dragStartPosition == null || _dragStartSlot < 0) return;
+
+        if (e.InitialPressMouseButton == MouseButton.Left)
+        {
+            Point pos = e.GetPosition(image);
+            int dropSlot = GetSlotFromPosition(pos);
+            bool wasDragging = _isDragging;
+            int startSlot = _dragStartSlot;
+
+            ResetDragState();
+            e.Pointer.Capture(null);
+
+            if (wasDragging)
+            {
+                Refresh();
+                if (dropSlot >= 0 && dropSlot != startSlot)
+                {
+                    PointerColorReplacedCommand?.Execute((startSlot, dropSlot));
+                }
+            }
+            else
+            {
+                PointerLeftButtonPressedCommand?.Execute(startSlot);
+            }
+        }
+    }
+
+    private void OnCanvasPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
+    {
+        bool wasDragging = _isDragging;
+        ResetDragState();
+        if (wasDragging)
+        {
+            Refresh();
+        }
+    }
+
+    private void ResetDragState()
+    {
+        _dragStartPosition = null;
+        _dragStartSlot = -1;
+        _hoverSlot = -1;
+        _isDragging = false;
     }
 }

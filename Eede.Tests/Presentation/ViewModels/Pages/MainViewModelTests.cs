@@ -611,6 +611,76 @@ public class MainViewModelTests
         Assert.That(importedTab.CustomTitle, Is.EqualTo("character_sheet.png"), "元のファイル名がタブタイトルに復元されること");
         Assert.That(importedTab.Palette, Is.EqualTo(expectedPalette));
     }
+
+    [AvaloniaTest]
+    public async Task PaletteReplaceColor_WhenTargetColorExistsInCanvas_ReplacesColorAndPushesUndoHistory()
+    {
+        var color1 = new ArgbColor(255, 255, 0, 0);
+        var color2 = new ArgbColor(255, 0, 255, 0);
+
+        byte[] rawPixels = new byte[4 * 4 * 4];
+        rawPixels[0] = color2.Blue;
+        rawPixels[1] = color2.Green;
+        rawPixels[2] = color2.Red;
+        rawPixels[3] = color2.Alpha;
+        var initialPic = Picture.Create(new PictureSize(4, 4), rawPixels);
+
+        var currentSession = new DrawingSession(initialPic);
+        _drawingSessionProviderMock.SetupGet(x => x.CurrentSession).Returns(() => currentSession);
+        _drawingSessionProviderMock.Setup(x => x.Update(It.IsAny<DrawingSession>()))
+            .Callback<DrawingSession>(s =>
+            {
+                currentSession = s;
+                _drawingSessionProviderMock.Raise(p => p.SessionChanged += null, s);
+            });
+
+        var mainVM = CreateMainViewModel();
+        mainVM.DrawableCanvasViewModel.SetPicture(initialPic);
+
+        var tab = _paletteContainerViewModel.SelectedTab!;
+        tab.Palette = tab.Palette.Apply(0, color1).Apply(1, color2);
+
+        await _paletteContainerViewModel.ReplaceColorCommand.Execute((0, 1)).ToTask();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(currentSession.CurrentPicture.PickColor(new Position(0, 0)), Is.EqualTo(color1), "キャンバス上の色2が色1に置換されること");
+            Assert.That(currentSession.CanUndo(), Is.True, "Undo履歴が追加されること");
+        });
+
+        await mainVM.UndoCommand.Execute().ToTask();
+        Assert.That(currentSession.CurrentPicture.PickColor(new Position(0, 0)), Is.EqualTo(color2), "Undoで元の色2に戻ること");
+
+        await mainVM.RedoCommand.Execute().ToTask();
+        Assert.That(currentSession.CurrentPicture.PickColor(new Position(0, 0)), Is.EqualTo(color1), "Redoで置換後の色1に戻ること");
+    }
+
+    [AvaloniaTest]
+    public async Task PaletteReplaceColor_WhenTargetColorDoesNotExistInCanvas_DoesNotPushUndoHistory()
+    {
+        var color1 = new ArgbColor(255, 255, 0, 0);
+        var color2 = new ArgbColor(255, 0, 255, 0);
+        var initialPic = Picture.CreateEmpty(new PictureSize(4, 4));
+
+        var currentSession = new DrawingSession(initialPic);
+        _drawingSessionProviderMock.SetupGet(x => x.CurrentSession).Returns(() => currentSession);
+        _drawingSessionProviderMock.Setup(x => x.Update(It.IsAny<DrawingSession>()))
+            .Callback<DrawingSession>(s =>
+            {
+                currentSession = s;
+                _drawingSessionProviderMock.Raise(p => p.SessionChanged += null, s);
+            });
+
+        var mainVM = CreateMainViewModel();
+        mainVM.DrawableCanvasViewModel.SetPicture(initialPic);
+
+        var tab = _paletteContainerViewModel.SelectedTab!;
+        tab.Palette = tab.Palette.Apply(0, color1).Apply(1, color2);
+
+        await _paletteContainerViewModel.ReplaceColorCommand.Execute((0, 1)).ToTask();
+
+        Assert.That(currentSession.CanUndo(), Is.False, "対象色がキャンバスに存在しない場合はUndo履歴が増えないこと");
+    }
 }
 
 

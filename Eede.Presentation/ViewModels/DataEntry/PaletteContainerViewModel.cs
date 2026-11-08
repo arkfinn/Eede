@@ -23,9 +23,11 @@ public partial class PaletteContainerViewModel : ViewModelBase
 
     public ReactiveCommand<int, RxVoid> ApplyColorCommand { get; }
     public ReactiveCommand<int, RxVoid> FetchColorCommand { get; }
+    public ReactiveCommand<(int SourceSlot, int TargetSlot), RxVoid> ReplaceColorCommand { get; }
 
     public event Action<ArgbColor>? OnFetchColor;
     public event Func<ArgbColor>? OnApplyColor;
+    public event Action<ArgbColor, ArgbColor>? OnReplaceColor;
 
     public bool IsBrowserPlatform => OperatingSystem.IsBrowser();
     public bool IsDesktopPlatform => !OperatingSystem.IsBrowser();
@@ -77,6 +79,7 @@ public partial class PaletteContainerViewModel : ViewModelBase
 
         ApplyColorCommand = ReactiveCommand.Create<int>(ExecuteApplyColor);
         FetchColorCommand = ReactiveCommand.Create<int>(ExecuteFetchColor);
+        ReplaceColorCommand = ReactiveCommand.Create<(int SourceSlot, int TargetSlot)>(ExecuteReplaceColor);
 
         LoadPaletteCommand = ReactiveCommand.CreateFromTask<IFileStorage?>(ExecuteLoadPalette);
         SaveTabCommand = ReactiveCommand.CreateFromTask<PaletteTabViewModel>(ExecuteSaveTab);
@@ -121,6 +124,26 @@ public partial class PaletteContainerViewModel : ViewModelBase
     {
         if (SelectedTab == null) return;
         OnFetchColor?.Invoke(SelectedTab.Palette.Fetch(number));
+    }
+
+    private void ExecuteReplaceColor((int SourceSlot, int TargetSlot) args)
+    {
+        if (SelectedTab == null) return;
+        if (args.SourceSlot < 0 || args.SourceSlot >= Palette.MAX_LENGTH ||
+            args.TargetSlot < 0 || args.TargetSlot >= Palette.MAX_LENGTH ||
+            args.SourceSlot == args.TargetSlot)
+        {
+            return;
+        }
+
+        ArgbColor sourceColor = SelectedTab.Palette.Fetch(args.SourceSlot);
+        ArgbColor targetColor = SelectedTab.Palette.Fetch(args.TargetSlot);
+        if (sourceColor.EqualsArgb(targetColor))
+        {
+            return;
+        }
+
+        OnReplaceColor?.Invoke(sourceColor, targetColor);
     }
 
     private async Task ExecuteLoadPalette(IFileStorage? storage)

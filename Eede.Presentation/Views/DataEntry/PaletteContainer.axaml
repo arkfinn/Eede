@@ -73,7 +73,8 @@
                              BorderThickness="1"
                              Palette="{Binding Palette}"
                              PointerLeftButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).FetchColorCommand}"
-                             PointerRightButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ApplyColorCommand}" />
+                             PointerRightButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ApplyColorCommand}"
+                             PointerColorReplacedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ReplaceColorCommand}" />
         </DockPanel>
       </DataTemplate>
     </TabControl.ContentTemplate>

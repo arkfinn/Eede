@@ -905,11 +905,14 @@ public partial class MainViewModel : ViewModelBase
                         extension = FileClassification.GetExtension(originalName);
                     }
 
-                    var palette = await _imagePaletteExtractor.ExtractAsync(stream, picture, extension);
-                    if (palette != null)
+                    var extractionResult = await _imagePaletteExtractor.ExtractAsync(stream, picture, extension);
+                    if (extractionResult != null)
                     {
-                        string title = string.IsNullOrEmpty(originalName) ? "画像パレット" : originalName;
-                        PaletteContainerViewModel.OpenImportedPalette(palette, title, sourceIdentity: pathStr);
+                        string baseTitle = string.IsNullOrEmpty(originalName) ? "画像パレット" : originalName;
+                        string title = extractionResult.Value.IsRepresentative
+                            ? $"{baseTitle} (代表256色)"
+                            : baseTitle;
+                        PaletteContainerViewModel.OpenImportedPalette(extractionResult.Value.Palette, title, sourceIdentity: pathStr);
                     }
                 }
             }

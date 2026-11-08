@@ -1,21 +1,26 @@
 #nullable enable
 using System;
-using System.Collections.Generic;
+using System.Buffers;
+using Eede.Application.Palettes;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Palettes;
 
 namespace Eede.Infrastructure.Palettes;
 
 /// <summary>
-/// 画像のピクセルデータからユニーク色を走査し、256色以下のパレットを抽出するスキャナー。
+/// 画像のピクセルデータを統合単一パスで走査し、256色以下の完全一致パレットまたは257色以上の代表256色パレットを抽出するスキャナー。
 /// </summary>
 public static class DirectColorPaletteScanner
 {
+    private const int HistogramSize = HistogramMedianCutQuantizer.HistogramSize;
+    private const int HashTableSize = 512;
+    private const uint HashTableMask = HashTableSize - 1;
+
     /// <summary>
-    /// Picture の全ピクセルを走査し、256色以下であれば出現順を維持した Palette を生成する。
-    /// ユニーク色が 257 色に達した場合は即座に走査を打ち切って null を返す。
+    /// Picture の全ピクセルを単一パスで走査し、256色以下であれば出現順を維持した完全一致パレットを、
+    /// 257色以上であればRGB555メディアンカットによる代表256色パレットを生成する。
     /// </summary>
-    public static Palette? Scan(Picture picture)
+    public static PaletteExtractionResult? Scan(Picture picture)
     {
         ArgumentNullException.ThrowIfNull(picture);
 
@@ -31,36 +36,132 @@ public static class DirectColorPaletteScanner
             return null;
         }
 
-        HashSet<ArgbColor> seen = [];
-        List<ArgbColor> orderedColors = new(Palette.MAX_LENGTH);
+        int[] rentedHistogram = ArrayPool<int>.Shared.Rent(HistogramSize);
+        uint[] rentedAnchorArgb = ArrayPool<uint>.Shared.Rent(HistogramSize);
 
-        for (int i = 0; i < expectedBytes; i += 4)
+        try
         {
-            byte b = pixels[i];
-            byte g = pixels[i + 1];
-            byte r = pixels[i + 2];
-            byte a = pixels[i + 3];
+            Span<int> histogram = rentedHistogram.AsSpan(0, HistogramSize);
+            Span<uint> anchorArgb = rentedAnchorArgb.AsSpan(0, HistogramSize);
+            histogram.Clear();
+            anchorArgb.Clear();
 
-            // 完全透明ピクセルはRGBに関わらず統一して (0, 0, 0, 0) に正規化
-            ArgbColor color = a == 0 ? new ArgbColor(0, 0, 0, 0) : new ArgbColor(a, r, g, b);
+            Span<ArgbColor> uniqueColors = stackalloc ArgbColor[Palette.MAX_LENGTH];
+            Span<uint> seenKeys = stackalloc uint[HashTableSize];
+            Span<byte> seenOccupied = stackalloc byte[HashTableSize];
+            seenOccupied.Clear();
 
-            if (seen.Add(color))
+            int uniqueCount = 0;
+            bool isExactMatch = true;
+            bool hasTransparent = false;
+
+            bool hasPrev = false;
+            uint prevPacked = 0;
+            int prevColor555 = 0;
+            int prevWeight = 0;
+
+            for (int i = 0; i < expectedBytes; i += 4)
             {
-                if (orderedColors.Count >= Palette.MAX_LENGTH)
+                byte b = pixels[i];
+                byte g = pixels[i + 1];
+                byte r = pixels[i + 2];
+                byte a = pixels[i + 3];
+
+                uint packed = a == 0
+                    ? 0u
+                    : ((uint)a << 24) | ((uint)r << 16) | ((uint)g << 8) | b;
+
+                if (hasPrev && packed == prevPacked)
                 {
-                    // 257色目を検出した瞬間に即座に脱出
-                    return null;
+                    if (prevWeight > 0)
+                    {
+                        histogram[prevColor555] += prevWeight;
+                    }
+                    continue;
                 }
-                orderedColors.Add(color);
+
+                hasPrev = true;
+                prevPacked = packed;
+
+                if (a == 0)
+                {
+                    hasTransparent = true;
+                    prevWeight = 0;
+                }
+                else if (a < 16)
+                {
+                    prevWeight = 0;
+                }
+                else
+                {
+                    int color555 = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+                    int weight = a >> 4;
+                    histogram[color555] += weight;
+
+                    uint currentAnchor = anchorArgb[color555];
+                    if (currentAnchor == 0 || a > (byte)(currentAnchor >> 24))
+                    {
+                        anchorArgb[color555] = packed;
+                    }
+
+                    prevColor555 = color555;
+                    prevWeight = weight;
+                }
+
+                if (isExactMatch)
+                {
+                    uint slot = (packed * 2654435761u) >> 23;
+                    bool found = false;
+                    while (seenOccupied[(int)slot] != 0)
+                    {
+                        if (seenKeys[(int)slot] == packed)
+                        {
+                            found = true;
+                            break;
+                        }
+                        slot = (slot + 1) & HashTableMask;
+                    }
+
+                    if (!found)
+                    {
+                        if (uniqueCount >= Palette.MAX_LENGTH)
+                        {
+                            isExactMatch = false;
+                        }
+                        else
+                        {
+                            seenOccupied[(int)slot] = 1;
+                            seenKeys[(int)slot] = packed;
+                            uniqueColors[uniqueCount++] = a == 0
+                                ? new ArgbColor(0, 0, 0, 0)
+                                : new ArgbColor(a, r, g, b);
+                        }
+                    }
+                }
             }
-        }
 
-        ArgbColor[] fullColors = new ArgbColor[Palette.MAX_LENGTH];
-        for (int i = 0; i < Palette.MAX_LENGTH; i++)
+            if (isExactMatch)
+            {
+                ArgbColor[] fullColors = new ArgbColor[Palette.MAX_LENGTH];
+                for (int i = 0; i < Palette.MAX_LENGTH; i++)
+                {
+                    fullColors[i] = i < uniqueCount ? uniqueColors[i] : new ArgbColor(0, 0, 0, 0);
+                }
+                return new PaletteExtractionResult(Palette.FromColors(fullColors), IsRepresentative: false);
+            }
+
+            Palette representativePalette = HistogramMedianCutQuantizer.Quantize(
+                histogram,
+                anchorArgb,
+                uniqueColors,
+                hasTransparent);
+
+            return new PaletteExtractionResult(representativePalette, IsRepresentative: true);
+        }
+        finally
         {
-            fullColors[i] = i < orderedColors.Count ? orderedColors[i] : new ArgbColor(0, 0, 0, 0);
+            ArrayPool<int>.Shared.Return(rentedHistogram);
+            ArrayPool<uint>.Shared.Return(rentedAnchorArgb);
         }
-
-        return Palette.FromColors(fullColors);
     }
 }

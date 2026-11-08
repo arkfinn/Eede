@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Eede.Application.Palettes;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
@@ -42,19 +43,20 @@ public class ImagePaletteExtractorTests
     }
 
     [Test]
-    public async Task ExtractAsync_DirectColorPngUnder256Colors_ReturnsScannedPalette()
+    public async Task ExtractAsync_DirectColorPngUnder256Colors_ReturnsScannedExactPalette()
     {
         using MemoryStream ms = new([0x00]);
 
-        var palette = await _extractor.ExtractAsync(ms, _dummyPicture, ".png");
+        var result = await _extractor.ExtractAsync(ms, _dummyPicture, ".png");
 
-        Assert.That(palette, Is.Not.Null);
-        var c0 = palette!.Fetch(0);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.False);
+        var c0 = result.Value.Palette.Fetch(0);
         Assert.That(c0.Red, Is.EqualTo(255));
     }
 
     [Test]
-    public async Task ExtractAsync_DirectColorOver256Colors_ReturnsNull()
+    public async Task ExtractAsync_DirectColorOver256Colors_ReturnsRepresentativePalette()
     {
         byte[] pixels = new byte[272 * 4];
         for (int i = 0; i < 257; i++)
@@ -68,9 +70,10 @@ public class ImagePaletteExtractorTests
 
         using MemoryStream ms = new();
 
-        var palette = await _extractor.ExtractAsync(ms, picture, ".png");
+        var result = await _extractor.ExtractAsync(ms, picture, ".png");
 
-        Assert.That(palette, Is.Null);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.True);
     }
 
     [Test]
@@ -96,10 +99,11 @@ public class ImagePaletteExtractorTests
         ms.Write(palettePayload);
         ms.Position = 0;
 
-        var palette = await _extractor.ExtractAsync(ms, _dummyPicture, ".arv");
+        var result = await _extractor.ExtractAsync(ms, _dummyPicture, ".arv");
 
-        Assert.That(palette, Is.Not.Null);
-        var c0 = palette!.Fetch(0);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.False);
+        var c0 = result.Value.Palette.Fetch(0);
         Assert.That(c0.Red, Is.EqualTo(255));
     }
 
@@ -111,10 +115,11 @@ public class ImagePaletteExtractorTests
         using MemoryStream ms = new(pngSig);
 
         // 拡張子空文字
-        var palette = await _extractor.ExtractAsync(ms, _dummyPicture, "");
+        var result = await _extractor.ExtractAsync(ms, _dummyPicture, "");
 
-        Assert.That(palette, Is.Not.Null);
-        var c0 = palette!.Fetch(0);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.False);
+        var c0 = result.Value.Palette.Fetch(0);
         Assert.That(c0.Red, Is.EqualTo(255));
     }
 
@@ -123,10 +128,11 @@ public class ImagePaletteExtractorTests
     {
         using MemoryStream ms = new();
 
-        var palette = await _extractor.ExtractAsync(ms, _dummyPicture, ".bmp");
+        var result = await _extractor.ExtractAsync(ms, _dummyPicture, ".bmp");
 
-        Assert.That(palette, Is.Not.Null);
-        var c0 = palette!.Fetch(0);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Value.IsRepresentative, Is.False);
+        var c0 = result.Value.Palette.Fetch(0);
         Assert.That(c0.Red, Is.EqualTo(255));
     }
 

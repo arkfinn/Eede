@@ -13,7 +13,7 @@ public interface IImagePaletteExtractor
 {
     /// <summary>
     /// 画像ストリームおよびデコード済み Picture からパレットの抽出を試みる。
-    /// 256色以下のパレットが存在・抽出できた場合は Palette を、256色を超える場合や非対応の場合は null を返す。
+    /// 256色以下の完全一致パレットまたは257色以上の代表256色パレットを PaletteExtractionResult として返す。
     /// </summary>
-    Task<Palette?> ExtractAsync(Stream stream, Picture picture, string extension);
+    Task<PaletteExtractionResult?> ExtractAsync(Stream stream, Picture picture, string extension);
 }

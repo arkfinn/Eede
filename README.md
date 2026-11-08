@@ -7,7 +7,7 @@
 
 Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描くための専用ツールです。
 
-📖 **[キーボードショートカット一覧・操作ガイドはこちら (Keybindings Reference)](Documents/features/keybindings.md)**
+📖 **[キーボードショートカット一覧・操作ガイドはこちら (Keybindings Reference)](guides/keybindings.md)**
 
 ## 必要条件
 

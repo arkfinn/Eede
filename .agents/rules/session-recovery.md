@@ -16,7 +16,9 @@ description: "Eede Session Recovery architecture, atomic swap, IndexedDB fallbac
 ## 2. セッション復旧・再開 UX (Session Resume & Rehydration)
 - **未編集既存ファイルのディスク再ロード規約 (Unedited Document Rehydration)**:
   - セッションスナップショット保存時、デスクトップ環境で実在する物理ローカルファイル（`Edited == false` かつ `OriginalFilePath != null` かつローカルファイル）のみ容量節約のため画像ペイロード（`ImagePayloadRef`）をスキップする。
+  - **絶対パス保持規律**: セッション保存時、デスクトップ環境の物理ファイルパスは `AvaloniaFileStorage.TryGetOriginalFileName` 等でファイル名単体に上書きしてはならない。必ず物理絶対パスを維持して記録すること（ファイル名単体への置換は `OperatingSystem.IsBrowser()` または `blob:` 等の非file仮想URIに厳格に限定する）。
   - 復元側（`RestoreDocumentsAsync`）において、`doc.Snapshot.ImagePayloadRef is null` かつ `!filePath.IsEmpty()` の場合、空白画像にするのではなく、必ず `_pictureFileIO.LoadAsync(filePath)` を呼び出してディスク上の実画像をリロードすること。
+  - **相対パス救済フォールバック**: 過去のセッションデータ等で相対パス（ファイル名単体）が記録されている場合、直近開いたファイル（`AppSettings.RecentFiles`）から同名ファイルを探索・救済して元画像をロードし、フルパスへ自己修復すること。
 - **Web版 (WASM) および仮想URIにおける画像ペイロード完全永続化規律 (Web/Virtual Payload Defense)**:
   - Web版（`OperatingSystem.IsBrowser()`）またはブラウザ仮想URI（`blob:` 等）や新規未保存画像（`FilePath.IsEmpty()`）では、物理ディスク上の永続ファイルが存在しないため、未編集（`Edited == false`）であっても必ず全ドキュメントの画像ペイロード（`ImagePayloadRef`）を IndexedDB / スナップショットへ保存すること。
   - セッション保存時、仮想URI（`blob:` 等）から元ファイル名（`AvaloniaFileStorage.TryGetOriginalFileName`）を復元して `OriginalFilePath` に記録し、復元時のタブ表示名やダウンロード保存名の劣化を防ぐこと。

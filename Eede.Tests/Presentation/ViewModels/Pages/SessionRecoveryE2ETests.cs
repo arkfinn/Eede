@@ -750,6 +750,118 @@ public class SessionRecoveryE2ETests
         var restoredPic = nextMainVM.Pictures[0];
         Assert.That(restoredPic.PictureBuffer.PickColor(new Position(0, 0)), Is.EqualTo(blueColor), "ドックエリアの画像が空にならず正しく復元されること");
     }
+
+    [AvaloniaTest]
+    public async Task CaptureSession_WhenDesktopFileIsCached_MaintainsAbsolutePath()
+    {
+        // 1. Arrange: デスクトップのローカル絶対パスを持つ未編集画像
+        var mainVM = CreateMainViewModel();
+        var tempFile = Path.Combine(Path.GetTempPath(), $"eede_test_{Guid.NewGuid():N}.png");
+        try
+        {
+            var blueColor = new ArgbColor(255, 0, 0, 255);
+            var bluePicture = CreateFilledPicture(new PictureSize(16, 16), blueColor);
+            var codec = new SkiaSharpPictureCodec();
+            var bytes = codec.EncodeToPng(bluePicture);
+            await File.WriteAllBytesAsync(tempFile, bytes);
+
+            // AvaloniaFileStorage のキャッシュに登録（ファイル名が登録された状態を模倣）
+            AvaloniaFileStorage.RegisterCacheData(tempFile, bytes, Path.GetFileName(tempFile));
+
+            _PictureFileIOMock.Setup(x => x.LoadAsync(It.Is<FilePath>(f => f.ToString() == tempFile)))
+                .ReturnsAsync(bluePicture);
+
+            var picVM = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
+            picVM.Initialize(bluePicture, new FilePath(tempFile));
+            picVM.Edited = false; // 未編集（保存済み）
+            mainVM.Pictures.Add(picVM);
+
+            // 2. Act: スナップショットを抽出
+            var capture = mainVM.CaptureSession();
+
+            // 3. Assert: 絶対パスが単なるファイル名に破壊されず、絶対パスのまま保持されていること！
+            Assert.That(capture, Is.Not.Null);
+            var docSnapshot = capture!.Snapshot.Documents[0];
+            Assert.That(docSnapshot.OriginalFilePath, Is.EqualTo(Path.GetFullPath(tempFile)));
+            Assert.That(docSnapshot.ImagePayloadRef, Is.Null, "ローカル実ファイルが存在して未編集の場合は容量節約のためペイロードはnull");
+
+            // 4. Act 2: セッション復元
+            await _coordinator.FlushAsync(capture);
+            var nextMainVM = CreateMainViewModel();
+            await nextMainVM.InitializeAsync();
+            await nextMainVM.WelcomeViewModel.ResumeLastSessionCommand!.Execute().ToTask();
+
+            // 5. Assert 2: ディスクの絶対パスから再ロードされ、空画像にならず正しく復元されること！
+            Assert.That(nextMainVM.Pictures.Count, Is.EqualTo(1));
+            var restoredPic = nextMainVM.Pictures[0];
+            Assert.That(restoredPic.FilePath.ToString(), Is.EqualTo(tempFile));
+            Assert.That(restoredPic.PictureBuffer.PickColor(new Position(0, 0)), Is.EqualTo(blueColor));
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
+    }
+
+    [AvaloniaTest]
+    public async Task RestoreDocuments_WhenRelativePathMatchesRecentFiles_RecoversPictureFromDisk()
+    {
+        // 1. Arrange: 過去のバグ等でファイル名単体（相対パス）で保存されてしまったセッション
+        var tempFile = Path.Combine(Path.GetTempPath(), $"eede_test_{Guid.NewGuid():N}.png");
+        var fileNameOnly = Path.GetFileName(tempFile);
+        try
+        {
+            var redColor = new ArgbColor(255, 255, 0, 0);
+            var redPicture = CreateFilledPicture(new PictureSize(16, 16), redColor);
+            var codec = new SkiaSharpPictureCodec();
+            var bytes = codec.EncodeToPng(redPicture);
+            await File.WriteAllBytesAsync(tempFile, bytes);
+
+            _PictureFileIOMock.Setup(x => x.LoadAsync(It.Is<FilePath>(f => f.ToString() == tempFile)))
+                .ReturnsAsync(redPicture);
+
+            // AppSettings の RecentFiles にフルパスが存在する設定
+            var settings = new AppSettings();
+            settings.AddRecentFile(tempFile, DateTime.Now);
+            _loadSettingsUseCaseMock.Setup(x => x.ExecuteAsync()).ReturnsAsync(settings);
+
+            // 相対パス（ファイル名単体）で ImagePayloadRef = null のスナップショットを作成
+            var docId = Guid.NewGuid().ToString();
+            var docSnapshot = new DocumentSnapshot(docId, fileNameOnly, false, new PictureSize(16, 16), 1, null);
+            var paletteSnapshot = new PaletteSnapshot(new ArgbColor(255, 0, 0, 0), 0, new ArgbColor[256]);
+            var sessionSnapshot = new SessionSnapshot(
+                Guid.NewGuid(),
+                DateTimeOffset.UtcNow,
+                docId,
+                [docSnapshot],
+                null,
+                paletteSnapshot);
+            var capture = new SessionCapture(sessionSnapshot, new Dictionary<string, Picture>());
+
+            await _coordinator.FlushAsync(capture);
+
+            // 2. Act: 次回起動で復元
+            var nextMainVM = CreateMainViewModel();
+            await nextMainVM.InitializeAsync();
+            await nextMainVM.WelcomeViewModel.ResumeLastSessionCommand!.Execute().ToTask();
+
+            // 3. Assert: RecentFiles から救済されて画像が読み込まれ、空画像ではなく赤色画像として復元されること！
+            Assert.That(nextMainVM.Pictures.Count, Is.EqualTo(1));
+            var restoredPic = nextMainVM.Pictures[0];
+            Assert.That(restoredPic.FilePath.ToString(), Is.EqualTo(tempFile), "救済によりフルパスが復元されること");
+            Assert.That(restoredPic.PictureBuffer.PickColor(new Position(0, 0)), Is.EqualTo(redColor), "中身が空画像にならず正しく復元されること");
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
+    }
 }
 
 

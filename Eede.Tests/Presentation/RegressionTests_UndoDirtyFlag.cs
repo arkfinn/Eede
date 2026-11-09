@@ -149,7 +149,7 @@ namespace Eede.Presentation.Tests
         }
 
         [AvaloniaTest]
-        public void PictureAction_ShouldMarkActiveDockAsEdited()
+        public void CanvasOperations_ShouldNotMarkActiveDockAsEdited_UntilPush()
         {
             var picture = Picture.CreateEmpty(new PictureSize(10, 10));
             var vm = new DockPictureViewModel(_state, _mainViewModel.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureFileIO>());
@@ -160,31 +160,51 @@ namespace Eede.Presentation.Tests
             vm.OnPicturePull.Execute(new PictureArea(new Position(0, 0), picture.Size)).Subscribe();
             Assert.That(vm.Edited, Is.False, "Not edited after Pull");
 
-            // Perform PictureAction
+            // Perform PictureAction (Canvas operation)
             _mainViewModel.PictureActionCommand.Execute(PictureActions.RotateLeft).Subscribe();
 
-            Assert.That(vm.Edited, Is.True, "Active dock item should be marked as edited after picture action");
+            // 作業エリアでの操作では、ドック側画像は変更されないため Edited は false のままであるべき
+            Assert.That(vm.Edited, Is.False, "Active dock item should NOT be marked as edited after canvas operation");
+
+            // Undo canvas operation
+            _mainViewModel.UndoCommand.Execute().Subscribe();
+            Assert.That(vm.Edited, Is.False, "Edited flag should remain false after undoing canvas operation");
+
+            // Push to dock
+            vm.OnPicturePush.Execute(new Position(0, 0)).Subscribe();
+            Assert.That(vm.Edited, Is.True, "Active dock item should be marked as edited only after Push to dock");
+
+            // Undo Push
+            _mainViewModel.UndoCommand.Execute().Subscribe();
+            Assert.That(vm.Edited, Is.False, "Edited flag should be reverted to false after undoing Push");
         }
 
         [AvaloniaTest]
-        public void PictureAction_Undo_ShouldRevertEditedFlag()
+        public void CanvasDraw_ShouldNotMarkActiveDockAsEdited_UntilPush()
         {
             var picture = Picture.CreateEmpty(new PictureSize(10, 10));
             var vm = new DockPictureViewModel(_state, _mainViewModel.AnimationViewModel, new AvaloniaBitmapAdapter(), Mock.Of<IPictureFileIO>());
             vm.Initialize(picture, new FilePath("test.png"));
             _mainViewModel.Pictures.Add(vm);
             _mainViewModel.ActiveDockable = new Document { DataContext = vm };
-            vm.OnPicturePull.Execute(new PictureArea(new Position(0, 0), picture.Size)).Subscribe();
 
-            _mainViewModel.PictureActionCommand.Execute(PictureActions.RotateLeft).Subscribe();
-            
-            // Undo
+            vm.OnPicturePull.Execute(new PictureArea(new Position(0, 0), picture.Size)).Subscribe();
+            Assert.That(vm.Edited, Is.False, "Not edited after Pull");
+
+            // Simulate draw event on canvas
+            var prevPic = Picture.CreateEmpty(new PictureSize(10, 10));
+            _mainViewModel.DrawableCanvasViewModel.OnDrew.Execute(prevPic).Subscribe();
+
+            // 作業エリアで描画しても、ドックに Push されるまでは Edited は false のままであるべき
+            Assert.That(vm.Edited, Is.False, "Active dock item should NOT be marked as edited when drawing on canvas");
+
+            // Push to dock
+            vm.OnPicturePush.Execute(new Position(0, 0)).Subscribe();
+            Assert.That(vm.Edited, Is.True, "Active dock item should be marked as edited after Push");
+
+            // Undo Push
             _mainViewModel.UndoCommand.Execute().Subscribe();
-            
-            // NOTE: Current implementation of Canvas operations (Rotate etc.) 
-            // DOES NOT revert Edited flag because it's not stored in CanvasHistoryItem.
-            // But the Pull undo SHOULD revert it.
-            // Let's focus on Pull undo first.
+            Assert.That(vm.Edited, Is.False, "Edited flag should be reverted after Undo");
         }
     }
 }

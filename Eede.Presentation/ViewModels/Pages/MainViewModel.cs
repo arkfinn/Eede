@@ -618,7 +618,6 @@ public partial class MainViewModel : ViewModelBase
         {
             // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
             DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea, previous);
-            MarkActiveDockEdited();
         };
 
         PutBackgroundColorCommand = ReactiveCommand.Create(() =>
@@ -972,7 +971,6 @@ public partial class MainViewModel : ViewModelBase
             DrawingSessionViewModel.Sync(updated);
             DrawableCanvasViewModel.SyncWithSession(true);
             SetPictureToDrawArea(updated.CurrentPicture);
-            MarkActiveDockEdited();
             _coordinator?.NotifyDirty();
         }
     }
@@ -1043,14 +1041,6 @@ public partial class MainViewModel : ViewModelBase
         CursorSize = picture.Size;
     }
 
-    private void MarkActiveDockEdited()
-    {
-        if (ActiveDockable is Dock.Model.Avalonia.Controls.Document doc && doc.DataContext is DockPictureViewModel vm)
-        {
-            vm.Edited = true;
-        }
-    }
-
     private void OnPictureUpdate(object? sender, PictureUpdateEventArgs args)
     {
         if (sender is not DockPictureViewModel vm)
@@ -1078,6 +1068,7 @@ public partial class MainViewModel : ViewModelBase
         DrawingSessionViewModel.PushDockUpdate(vm.Id, args.Position, vm.PictureBuffer, updated, vm.Edited, true);
 
         vm.PictureBuffer = updated;
+        vm.Edited = true;
         _pullContextTracker.ClearPullContext();
         _coordinator?.NotifyDirty();
     }
@@ -1099,7 +1090,6 @@ public partial class MainViewModel : ViewModelBase
         );
 
         DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea);
-        MarkActiveDockEdited();
         _coordinator?.NotifyDirty();
     }
 
@@ -1152,7 +1142,6 @@ public partial class MainViewModel : ViewModelBase
         }
 
         DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea, default, current);
-        MarkActiveDockEdited();
         _coordinator?.NotifyDirty();
     }
 

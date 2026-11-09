@@ -632,6 +632,7 @@ public partial class MainViewModel : ViewModelBase
 
         PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;
         PaletteContainerViewModel.OnFetchColor += OnFetchPaletteColor;
+        PaletteContainerViewModel.OnReplaceColor += OnReplacePaletteColor;
 
         this.WhenAnyValue(x => x.IsAnimationPanelExpanded)
             .Where(expanded => !expanded)
@@ -1137,6 +1138,22 @@ public partial class MainViewModel : ViewModelBase
     private void OnFetchPaletteColor(ArgbColor color)
     {
         PenColor = color;
+    }
+
+    private void OnReplacePaletteColor(ArgbColor sourceColor, ArgbColor targetColor)
+    {
+        DrawableCanvasViewModel.CommitSelection();
+        PictureArea? area = DrawableCanvasViewModel.IsRegionSelecting ? DrawableCanvasViewModel.SelectingArea : null;
+        Picture current = DrawableCanvasViewModel.PictureBuffer.Previous;
+        Picture updated = current.ReplaceColor(targetColor, sourceColor, area);
+        if (ReferenceEquals(updated, current))
+        {
+            return;
+        }
+
+        DrawingSessionViewModel.Push(updated, area, DrawableCanvasViewModel.SelectingArea, default, current);
+        MarkActiveDockEdited();
+        _coordinator?.NotifyDirty();
     }
 
     private async Task RequestCloseAsync()

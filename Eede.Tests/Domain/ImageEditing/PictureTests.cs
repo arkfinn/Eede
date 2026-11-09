@@ -202,5 +202,73 @@ namespace Eede.Domain.Tests.ImageEditing
             Assert.That(picture.Height, Is.EqualTo(1));
             Assert.That(picture.Length, Is.EqualTo(PictureSize.MaxDimension * 4));
         }
+
+        [Test]
+        public void ReplaceColor_ReplacesAllMatchingPixelsInWholePicture()
+        {
+            var colorA = new ArgbColor(255, 255, 0, 0);
+            var colorB = new ArgbColor(255, 0, 255, 0);
+            var colorC = new ArgbColor(255, 0, 0, 255);
+            Picture source = CreateSamplePicture(3, 2,
+                (0, 0, colorA), (1, 0, colorB), (2, 0, colorA),
+                (0, 1, colorB), (1, 1, colorA), (2, 1, colorB));
+
+            Picture result = source.ReplaceColor(colorA, colorC);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.SameAs(source));
+                Assert.That(result.PickColor(new Position(0, 0)), Is.EqualTo(colorC));
+                Assert.That(result.PickColor(new Position(1, 0)), Is.EqualTo(colorB));
+                Assert.That(result.PickColor(new Position(2, 0)), Is.EqualTo(colorC));
+                Assert.That(result.PickColor(new Position(0, 1)), Is.EqualTo(colorB));
+                Assert.That(result.PickColor(new Position(1, 1)), Is.EqualTo(colorC));
+                Assert.That(result.PickColor(new Position(2, 1)), Is.EqualTo(colorB));
+            });
+        }
+
+        [Test]
+        public void ReplaceColor_WithArea_ReplacesOnlyPixelsInsideArea()
+        {
+            var colorA = new ArgbColor(255, 255, 0, 0);
+            var colorB = new ArgbColor(255, 0, 255, 0);
+            Picture source = CreateSamplePicture(3, 3,
+                (0, 0, colorA), (1, 0, colorA), (2, 0, colorA),
+                (0, 1, colorA), (1, 1, colorA), (2, 1, colorA),
+                (0, 2, colorA), (1, 2, colorA), (2, 2, colorA));
+
+            Picture result = source.ReplaceColor(colorA, colorB, new PictureArea(new Position(1, 1), new PictureSize(2, 2)));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.PickColor(new Position(0, 0)), Is.EqualTo(colorA));
+                Assert.That(result.PickColor(new Position(1, 0)), Is.EqualTo(colorA));
+                Assert.That(result.PickColor(new Position(0, 1)), Is.EqualTo(colorA));
+                Assert.That(result.PickColor(new Position(1, 1)), Is.EqualTo(colorB));
+                Assert.That(result.PickColor(new Position(2, 1)), Is.EqualTo(colorB));
+                Assert.That(result.PickColor(new Position(1, 2)), Is.EqualTo(colorB));
+                Assert.That(result.PickColor(new Position(2, 2)), Is.EqualTo(colorB));
+            });
+        }
+
+        [Test]
+        public void ReplaceColor_WhenTargetColorNotFound_ReturnsSameInstance()
+        {
+            var colorA = new ArgbColor(255, 255, 0, 0);
+            var colorB = new ArgbColor(255, 0, 255, 0);
+            var colorC = new ArgbColor(255, 0, 0, 255);
+            Picture source = CreateSamplePicture(2, 2, (0, 0, colorA), (1, 0, colorA), (0, 1, colorA), (1, 1, colorA));
+
+            Assert.That(source.ReplaceColor(colorB, colorC), Is.SameAs(source));
+        }
+
+        [Test]
+        public void ReplaceColor_WhenTargetEqualsReplacement_ReturnsSameInstance()
+        {
+            var colorA = new ArgbColor(255, 255, 0, 0);
+            Picture source = CreateSamplePicture(2, 2, (0, 0, colorA), (1, 0, colorA), (0, 1, colorA), (1, 1, colorA));
+
+            Assert.That(source.ReplaceColor(colorA, colorA), Is.SameAs(source));
+        }
     }
 }

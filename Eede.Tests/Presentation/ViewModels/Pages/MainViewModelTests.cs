@@ -160,6 +160,29 @@ public class MainViewModelTests
     }
 
     [AvaloniaTest]
+    public void OnPullToDrawArea_ShouldUpdateMainAndAllDockCursorSizes()
+    {
+        var mainVM = CreateMainViewModel();
+        var dockPictureVM1 = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
+        var dockPictureVM2 = new DockPictureViewModel(_globalState, _animationViewModel, _bitmapAdapterMock.Object, _PictureFileIOMock.Object);
+        mainVM.Pictures.Add(dockPictureVM1);
+        mainVM.Pictures.Add(dockPictureVM2);
+
+        var newSize = new PictureSize(128, 128);
+        var area = new PictureArea(new Position(0, 0), newSize);
+        var dummyPicture = Picture.CreateEmpty(newSize);
+        _transferImageToCanvasUseCaseMock.Setup(x => x.Execute(It.IsAny<Picture>(), It.IsAny<PictureArea>()))
+            .Returns(dummyPicture);
+
+        dockPictureVM1.OnPicturePull.Execute(area).Subscribe();
+
+        Assert.That(mainVM.CursorSize, Is.EqualTo(newSize));
+        Assert.That(dockPictureVM1.CursorSize, Is.EqualTo(newSize));
+        Assert.That(dockPictureVM2.CursorSize, Is.EqualTo(newSize));
+        Assert.That(mainVM.DrawableCanvasViewModel.CursorSize, Is.EqualTo(newSize));
+    }
+
+    [AvaloniaTest]
     public void OnPushFromDrawArea_ShouldCallCommitSelectionWithTrue()
     {
         var mainVM = CreateMainViewModel();

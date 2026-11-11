@@ -56,8 +56,14 @@ namespace Eede.Presentation.Common
 
         public static Vector CalculateInitialOffset(Vector margin, Size displaySize, Size viewportSize)
         {
-            double initX = margin.X + (displaySize.Width - viewportSize.Width) / 2.0;
-            double initY = margin.Y + (displaySize.Height - viewportSize.Height) / 2.0;
+            double initX = displaySize.Width <= viewportSize.Width
+                ? margin.X + (displaySize.Width - viewportSize.Width) / 2.0
+                : margin.X;
+
+            double initY = displaySize.Height <= viewportSize.Height
+                ? margin.Y + (displaySize.Height - viewportSize.Height) / 2.0
+                : margin.Y;
+
             return new Vector(Math.Max(0, initX), Math.Max(0, initY));
         }
 

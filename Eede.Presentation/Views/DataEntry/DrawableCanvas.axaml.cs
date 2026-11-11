@@ -74,6 +74,16 @@ namespace Eede.Presentation.Views.DataEntry
                         });
                     });
                 _dataContextDisposables.Add(disposable);
+
+                Action onCenterRequest = () =>
+                {
+                    global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                    {
+                        CenterContent();
+                    });
+                };
+                vm.RequestCenterContent += onCenterRequest;
+                _dataContextDisposables.Add(System.Reactive.Disposables.Disposable.Create(() => vm.RequestCenterContent -= onCenterRequest));
             }
         }
 

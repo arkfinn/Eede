@@ -44,20 +44,25 @@ namespace Eede.Application.PaintLayers
             }
 
             // 3. ペン先を描画する
-            PenStyle displayPenStyle = new(PenStyle.Blender, displayColor, PenStyle.Width);
-
             if (PenStyle.Blender is Eede.Domain.ImageEditing.Blending.AlphaImageBlender)
             {
                 // アルファブレンドペンの場合、背景全体の二重ブレンドを防ぐため空レイヤー経由で合成
                 Picture cursorLayer = Picture.CreateEmpty(source.Size);
+                PenStyle displayPenStyle = new(PenStyle.Blender, displayColor, PenStyle.Width);
                 Drawer drawer = new(cursorLayer, displayPenStyle);
                 var result = drawer.DrawPoint(Position);
                 return source.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), result.Picture, new Position(0, 0));
             }
             else
             {
-                // 直接上書き系（Direct, RGBOnly, AlphaOnly等）の場合、背景に直接描くことで
-                // A=0 の透明色や A=1 などのアルファ値がそのまま正しく反映される（消去プレビュー含む）
+                // 直接上書き系（Direct, RGBOnly, AlphaOnly等）の場合：
+                // source は既にトーン変換済みの表示用画像であるため、
+                // トーン変換後の色（displayColor）を DirectImageBlender で描画する。
+                // これにより：
+                // - ARGBレイヤー (Direct): originalColor.Alpha が 0 なら透明になり背面の市松模様が見え、半透明なら薄い市松模様が見える
+                // - RGBレイヤー: 選択色のRGBが不透明で描かれる
+                // - Alphaレイヤー: 選択色のAlpha値がグレースケール輝度として描かれる
+                PenStyle displayPenStyle = new(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), displayColor, PenStyle.Width);
                 Drawer drawer = new(source, displayPenStyle);
                 return drawer.DrawPoint(Position).Picture;
             }

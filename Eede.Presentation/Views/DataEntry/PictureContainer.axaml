@@ -10,7 +10,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Eede.Presentation.Views.DataEntry.PictureContainer"
              x:CompileBindings="False"
-             Background="#0e0e0e"
+             Background="{DynamicResource BaseBrush}"
              Opacity="1.0"
              UseLayoutRounding="True">
   <UserControl.Resources>
@@ -41,11 +41,12 @@
                   DockPanel.Dock="Bottom"
                   VerticalScrollBarVisibility="Visible"
                   HorizontalScrollBarVisibility="Visible"
-                  Background="#0e0e0e">
-      <!-- 物理的な不透明シールド：ハードコードされた黒 (#0e0e0e) でドックのグレーを遮断 -->
-      <Panel Background="#0e0e0e">
-        <!-- 作業エリアと同じ背景タイル：背後を #0e0e0e で完全に塞ぐシールド -->
-        <Panel x:Name="outsideTilePanel" Background="#0e0e0e" Opacity="1.0">
+                  Background="{DynamicResource BaseBrush}">
+      <Panel Background="{DynamicResource BaseBrush}"
+             MinWidth="{Binding #scrollViewer.Viewport.Width}"
+             MinHeight="{Binding #scrollViewer.Viewport.Height}">
+        <!-- 外周背景タイル：BaseBrushの上にOutsideBackGround.pngをタイリング -->
+        <Panel x:Name="outsideTilePanel" Background="{DynamicResource BaseBrush}" Opacity="1.0">
           <Panel Opacity="1.0">
             <Panel.Background>
               <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/OutsideBackGround.png"

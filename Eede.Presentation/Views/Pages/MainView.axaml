@@ -184,14 +184,8 @@
 					</Panel>
 
 
-					<ScrollViewer DockPanel.Dock="Top" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
-						<DockPanel LastChildFill="True" >
-
-							<entry:DrawableCanvas DockPanel.Dock="Bottom"
-												  Background="{Binding BackgroundColor}"
-												  DataContext="{Binding DrawableCanvasViewModel}"/>
-						</DockPanel>
-					</ScrollViewer>
+					<entry:DrawableCanvas DockPanel.Dock="Top"
+										  DataContext="{Binding DrawableCanvasViewModel}"/>
 
 				</DockPanel>
 				<GridSplitter Grid.Column="1" Background="Black" ResizeDirection="Columns"/>

@@ -200,5 +200,53 @@ namespace Eede.Application.Tests.PaintLayers
             Assert.That(bgPixel.Red, Is.EqualTo(255), "Background should remain red.");
             Assert.That(bgPixel.Alpha, Is.EqualTo(255), "Background should remain opaque.");
         }
+
+        [Test]
+        public void Painted_With_AlphaTone_And_AlphaOnlyBlender_Should_Render_Alpha_Grayscale()
+        {
+            var size = new PictureSize(10, 10);
+            var background = CreateFilledPicture(size, new ArgbColor(255, 255, 0, 0)); // Red, Alpha=255
+
+            var penColor = new ArgbColor(128, 0, 0, 255); // Alpha=128
+            var blender = new Eede.Domain.ImageEditing.Blending.AlphaOnlyImageBlender();
+            var penStyle = new PenStyle(blender, penColor, 1);
+
+            var paintSize = new MagnifiedSize(size, new Magnification(1));
+            var transfer = new Eede.Domain.ImageEditing.Transformation.AlphaToneImageTransfer();
+            var cursorPosition = new Position(5, 5);
+            var layer = new CursorLayer(paintSize, background, penStyle, cursorPosition, transfer);
+
+            var result = layer.Painted(background);
+
+            var cursorPixel = result.PickColor(cursorPosition);
+            Assert.That(cursorPixel.Alpha, Is.EqualTo(255), "Alpha should be 255 in tone display.");
+            Assert.That(cursorPixel.Red, Is.EqualTo(128), "Red should reflect alpha grayscale 128.");
+            Assert.That(cursorPixel.Green, Is.EqualTo(128), "Green should reflect alpha grayscale 128.");
+            Assert.That(cursorPixel.Blue, Is.EqualTo(128), "Blue should reflect alpha grayscale 128.");
+        }
+
+        [Test]
+        public void Painted_With_RGBTone_And_RGBOnlyBlender_Should_Render_RGB_Opaque()
+        {
+            var size = new PictureSize(10, 10);
+            var background = CreateFilledPicture(size, new ArgbColor(0, 0, 0, 0)); // Transparent
+
+            var penColor = new ArgbColor(50, 0, 200, 100);
+            var blender = new Eede.Domain.ImageEditing.Blending.RGBOnlyImageBlender();
+            var penStyle = new PenStyle(blender, penColor, 1);
+
+            var paintSize = new MagnifiedSize(size, new Magnification(1));
+            var transfer = new Eede.Domain.ImageEditing.Transformation.RGBToneImageTransfer();
+            var cursorPosition = new Position(5, 5);
+            var layer = new CursorLayer(paintSize, background, penStyle, cursorPosition, transfer);
+
+            var result = layer.Painted(background);
+
+            var cursorPixel = result.PickColor(cursorPosition);
+            Assert.That(cursorPixel.Alpha, Is.EqualTo(255), "Alpha should be 255 in RGB tone display.");
+            Assert.That(cursorPixel.Red, Is.EqualTo(0), "Red should be 0.");
+            Assert.That(cursorPixel.Green, Is.EqualTo(200), "Green should be 200.");
+            Assert.That(cursorPixel.Blue, Is.EqualTo(100), "Blue should be 100.");
+        }
     }
 }

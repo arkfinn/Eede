@@ -345,6 +345,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
 
     public ReactiveCommand<Picture, RxVoid> OnDrew { get; }
     public event Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion>? Drew;
+    public event Action? RequestCenterContent;
     private void ExecuteDrew(Picture previous)
     {
         if (_currentPicture != null)
@@ -358,6 +359,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         if (source == null) return;
         PictureBuffer = ContextFactory.Create(source);
         UpdateImage();
+        RequestCenterContent?.Invoke();
     }
 
     private void UpdateImage()

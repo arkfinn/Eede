@@ -163,8 +163,9 @@ namespace Eede.Tests.Presentation.Common
         }
 
         [Test]
-        public void CalculateInitialOffset_CentersCanvasInViewport()
+        public void CalculateInitialOffset_WhenViewportLarger_CentersCanvasInViewport()
         {
+            // エリアのサイズの方が大きいときは中央寄せ
             // margin = (400, 300), displaySize = (200, 100), viewport = (800, 600)
             // initX = 400 + (200 - 800) / 2 = 100
             // initY = 300 + (100 - 600) / 2 = 50
@@ -175,6 +176,35 @@ namespace Eede.Tests.Presentation.Common
 
             Assert.That(initOffset.X, Is.EqualTo(100.0).Within(0.001));
             Assert.That(initOffset.Y, Is.EqualTo(50.0).Within(0.001));
+        }
+
+        [Test]
+        public void CalculateInitialOffset_WhenDisplayLarger_AlignsOriginToZero()
+        {
+            // ファイルのサイズの方が大きいときはファイルの(0,0)を座標(0,0)にあわせる（Offset = margin）
+            // margin = (400, 300), displaySize = (1000, 800), viewport = (800, 600)
+            // initX = margin.X = 400
+            // initY = margin.Y = 300
+            var margin = new Vector(400, 300);
+            var displaySize = new Size(1000, 800);
+            var viewport = new Size(800, 600);
+            var initOffset = ZoomHelper.CalculateInitialOffset(margin, displaySize, viewport);
+
+            Assert.That(initOffset.X, Is.EqualTo(400.0).Within(0.001));
+            Assert.That(initOffset.Y, Is.EqualTo(300.0).Within(0.001));
+        }
+
+        [Test]
+        public void CalculateInitialOffset_WhenDisplayLargerInOneAxisOnly_HandlesIndependently()
+        {
+            // 横はファイルが大きく(1000 > 800)、縦はエリアが大きい(400 < 600)場合
+            var margin = new Vector(400, 300);
+            var displaySize = new Size(1000, 400);
+            var viewport = new Size(800, 600);
+            var initOffset = ZoomHelper.CalculateInitialOffset(margin, displaySize, viewport);
+
+            Assert.That(initOffset.X, Is.EqualTo(400.0).Within(0.001)); // ファイル0,0合わせ
+            Assert.That(initOffset.Y, Is.EqualTo(200.0).Within(0.001)); // 300 + (400 - 600)/2 = 200 (中央寄せ)
         }
     }
 }

@@ -43,17 +43,24 @@ namespace Eede.Application.PaintLayers
                 displayColor = new ArgbColor(255, originalColor.Red, originalColor.Green, originalColor.Blue);
             }
 
-            // 3. 背景と同じサイズの透明なレイヤーを用意し、そこに等倍のペン先を描く
-            Picture cursorLayer = Picture.CreateEmpty(source.Size);
-            // カーソル描画自体は上書き(Direct)で行う
-            PenStyle displayPenStyle = new(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), displayColor, PenStyle.Width);
-            Drawer drawer = new(cursorLayer, displayPenStyle);
+            // 3. ペン先を描画する
+            PenStyle displayPenStyle = new(PenStyle.Blender, displayColor, PenStyle.Width);
 
-            // 描画位置は元の座標を使用
-            var result = drawer.DrawPoint(Position);
-
-            // 4. トーン変換済みの背景に対して、ペン先のみをアルファブレンドで重ねる
-            return source.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), result.Picture, new Position(0, 0));
+            if (PenStyle.Blender is Eede.Domain.ImageEditing.Blending.AlphaImageBlender)
+            {
+                // アルファブレンドペンの場合、背景全体の二重ブレンドを防ぐため空レイヤー経由で合成
+                Picture cursorLayer = Picture.CreateEmpty(source.Size);
+                Drawer drawer = new(cursorLayer, displayPenStyle);
+                var result = drawer.DrawPoint(Position);
+                return source.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), result.Picture, new Position(0, 0));
+            }
+            else
+            {
+                // 直接上書き系（Direct, RGBOnly, AlphaOnly等）の場合、背景に直接描くことで
+                // A=0 の透明色や A=1 などのアルファ値がそのまま正しく反映される（消去プレビュー含む）
+                Drawer drawer = new(source, displayPenStyle);
+                return drawer.DrawPoint(Position).Picture;
+            }
         }
     }
 }

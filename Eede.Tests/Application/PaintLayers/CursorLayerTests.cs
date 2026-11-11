@@ -149,5 +149,56 @@ namespace Eede.Application.Tests.PaintLayers
             Assert.That(pixel.Blue, Is.EqualTo(0));
             Assert.That(pixel.Alpha, Is.EqualTo(255));
         }
+
+        [Test]
+        public void Painted_With_DirectBlender_And_TransparentColor_Should_Make_Cursor_Pixel_Transparent()
+        {
+            var size = new PictureSize(10, 10);
+            var background = CreateFilledPicture(size, new ArgbColor(255, 255, 0, 0)); // Red
+
+            var transparentColor = new ArgbColor(0, 0, 0, 0);
+            var blender = new Eede.Domain.ImageEditing.Blending.DirectImageBlender();
+            var penStyle = new PenStyle(blender, transparentColor, 1);
+
+            var paintSize = new MagnifiedSize(size, new Magnification(1));
+            var transfer = new DirectImageTransfer();
+            var cursorPosition = new Position(5, 5);
+            var layer = new CursorLayer(paintSize, background, penStyle, cursorPosition, transfer);
+
+            var result = layer.Painted(background);
+
+            var cursorPixel = result.PickColor(cursorPosition);
+            Assert.That(cursorPixel.Alpha, Is.EqualTo(0), "Cursor pixel should become transparent.");
+
+            var bgPixel = result.PickColor(new Position(0, 0));
+            Assert.That(bgPixel.Red, Is.EqualTo(255), "Background should remain red.");
+            Assert.That(bgPixel.Alpha, Is.EqualTo(255), "Background should remain opaque.");
+        }
+
+        [Test]
+        public void Painted_With_DirectBlender_And_SemiTransparentColor_Should_Directly_Apply_Alpha()
+        {
+            var size = new PictureSize(10, 10);
+            var background = CreateFilledPicture(size, new ArgbColor(255, 255, 0, 0)); // Red
+
+            var semiTransparentColor = new ArgbColor(1, 0, 0, 255); // Alpha=1, Blue=255
+            var blender = new Eede.Domain.ImageEditing.Blending.DirectImageBlender();
+            var penStyle = new PenStyle(blender, semiTransparentColor, 1);
+
+            var paintSize = new MagnifiedSize(size, new Magnification(1));
+            var transfer = new DirectImageTransfer();
+            var cursorPosition = new Position(5, 5);
+            var layer = new CursorLayer(paintSize, background, penStyle, cursorPosition, transfer);
+
+            var result = layer.Painted(background);
+
+            var cursorPixel = result.PickColor(cursorPosition);
+            Assert.That(cursorPixel.Alpha, Is.EqualTo(1), "Cursor pixel alpha should be 1.");
+            Assert.That(cursorPixel.Blue, Is.EqualTo(255), "Cursor pixel blue should be 255.");
+
+            var bgPixel = result.PickColor(new Position(0, 0));
+            Assert.That(bgPixel.Red, Is.EqualTo(255), "Background should remain red.");
+            Assert.That(bgPixel.Alpha, Is.EqualTo(255), "Background should remain opaque.");
+        }
     }
 }

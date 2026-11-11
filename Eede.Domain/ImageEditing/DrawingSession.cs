@@ -195,8 +195,7 @@ namespace Eede.Domain.ImageEditing
             var pictureToCompare = beforePicture ?? Buffer.Previous;
             var diffs = region.Select(area => new PictureDiff(
                 area,
-                pictureToCompare.CutOut(area),
-                nextPicture.CutOut(area)
+                pictureToCompare.CutOut(area)
             )).ToList().AsReadOnly();
 
             var (newUndoStack, newUndoCount) = PushUndoStack(new DiffHistoryItem(diffs, areaToStore));
@@ -252,7 +251,9 @@ namespace Eede.Domain.ImageEditing
             }
             else if (historyItem is DiffHistoryItem diffItem)
             {
-                var restoredPicture = Buffer.Previous;
+                var currentPicture = Buffer.Previous;
+                var reversedItem = diffItem.Reverse(currentPicture, SelectingArea);
+                var restoredPicture = currentPicture;
                 var blender = new DirectImageBlender();
                 foreach (var diff in diffItem.Diffs)
                 {
@@ -263,7 +264,7 @@ namespace Eede.Domain.ImageEditing
                     diffItem.SelectingArea,
                     null,
                     newUndoStack,
-                    RedoStack.Push(diffItem.Reverse(SelectingArea)),
+                    RedoStack.Push(reversedItem),
                     newUndoCount,
                     MaxUndoCount);
                 return new UndoResult(nextSession, diffItem);
@@ -307,13 +308,15 @@ namespace Eede.Domain.ImageEditing
             }
             else if (historyItem is DiffHistoryItem diffItem)
             {
-                var restoredPicture = Buffer.Previous;
+                var currentPicture = Buffer.Previous;
+                var reversedItem = diffItem.Reverse(currentPicture, SelectingArea);
+                var restoredPicture = currentPicture;
                 var blender = new DirectImageBlender();
                 foreach (var diff in diffItem.Diffs)
                 {
                     restoredPicture = restoredPicture.Blend(blender, diff.Before, diff.Area.Position);
                 }
-                var (newUndoStack, newUndoCount) = PushUndoStack(diffItem.Reverse(SelectingArea));
+                var (newUndoStack, newUndoCount) = PushUndoStack(reversedItem);
                 var nextSession = new DrawingSession(
                     new DrawingBuffer(restoredPicture),
                     diffItem.SelectingArea,

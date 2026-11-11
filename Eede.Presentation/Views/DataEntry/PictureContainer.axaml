@@ -59,10 +59,11 @@
           </Panel>
         </Panel>
 
-        <Grid Width="{Binding DataContext.DisplayWidth}"
+        <Grid x:Name="canvasGrid"
+              Width="{Binding DataContext.DisplayWidth}"
               Height="{Binding DataContext.DisplayHeight}"
-              HorizontalAlignment="Center"
-              VerticalAlignment="Center"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Top"
               Opacity="1.0"
               UseLayoutRounding="True">
           <!-- 1. 画像エリア直下の不透明レイヤーは不要（背後の outsideTilePanel のグレーを透過させるため） -->

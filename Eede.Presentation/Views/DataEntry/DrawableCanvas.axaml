@@ -25,62 +25,81 @@
     <vm:DrawableCanvasViewModel />
   </Design.DataContext>
 
-  <Panel Background="{DynamicResource BaseBrush}">
-    <Panel>
-      <Panel.Background>
-        <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/OutsideBackGround.png"
-                    Stretch="None"
-                    TileMode="Tile"
-                    SourceRect="0,0,16,16"
-                    DestinationRect="0,0,16,16"
-                    AlignmentY="Top"
-                    AlignmentX="Left"/>
-      </Panel.Background>
-      <Panel x:Name="background"
-             Width="{Binding DisplayWidth}"
-             Height="{Binding DisplayHeight}">
-        <Panel.Background>
-          <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
-                      Stretch="None"
-                      TileMode="Tile"
-                      SourceRect="0,0,16,16"
-                      DestinationRect="0,0,16,16"
-                      AlignmentY="Top"
-                      AlignmentX="Left"/>
-        </Panel.Background>
-        <Panel Width="{Binding DisplayWidth}"
-              Height="{Binding DisplayHeight}" >
+  <ScrollViewer x:Name="scrollViewer"
+                HorizontalScrollBarVisibility="Visible"
+                VerticalScrollBarVisibility="Visible"
+                Background="{DynamicResource BaseBrush}">
+    <Panel Background="{DynamicResource BaseBrush}"
+           MinWidth="{Binding #scrollViewer.Viewport.Width}"
+           MinHeight="{Binding #scrollViewer.Viewport.Height}">
+      <!-- 1. 外周背景（下地 + タイル画像） -->
+      <Panel x:Name="outsideTilePanel" Background="{DynamicResource BaseBrush}" Opacity="1.0">
+        <Panel Opacity="1.0">
           <Panel.Background>
-            <SolidColorBrush Color="{Binding BackgroundColor, Converter={StaticResource BackgroundColorConverter}}"/>
+            <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/OutsideBackGround.png"
+                        Stretch="None"
+                        TileMode="Tile"
+                        SourceRect="0,0,16,16"
+                        DestinationRect="0,0,16,16"
+                        AlignmentY="Top"
+                        AlignmentX="Left"/>
           </Panel.Background>
         </Panel>
-        <Image x:Name="canvas"
-               Stretch="Fill"
-               Focusable="True"
-               Source="{Binding MyBitmap}"
-               Width="{Binding DisplayWidth}"
-               Height="{Binding DisplayHeight}"
-               RenderOptions.BitmapInterpolationMode="None"/>
-        <local:GridOverlay Width="{Binding DisplayWidth}"
-                           Height="{Binding DisplayHeight}"
-                           IsShowPixelGrid="{Binding IsPixelGridEffectivelyVisible}"
-                           IsShowCursorGrid="{Binding IsCursorGridEffectivelyVisible}"
-                           Magnification="{Binding Magnification}"
-                           CursorSize="{Binding CursorSize}"
-                           BackgroundColor="{Binding BackgroundColor.Value}"
-                           IsHitTestVisible="False"/>
-        <general:Region IsVisible="{Binding IsRegionSelecting}"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Margin="{Binding SelectingThickness}"
-                        Width="{Binding SelectingSize.Width}"
-                        Height="{Binding SelectingSize.Height}" 
-                        ShowHandles="{Binding IsShowHandles}"
-                        HandleSize="{Binding HandleSize}"
-                        HandleMargin="{Binding HandleMargin}"
-                        IsHitTestVisible="False" />
-
       </Panel>
+
+      <!-- 2. キャンバスグリッド（マージンによって周囲にオーバースクロール余白を確保） -->
+      <Grid x:Name="canvasGrid"
+            Width="{Binding DisplayWidth}"
+            Height="{Binding DisplayHeight}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Opacity="1.0"
+            UseLayoutRounding="True">
+        <Panel x:Name="background"
+               Width="{Binding DisplayWidth}"
+               Height="{Binding DisplayHeight}">
+          <Panel.Background>
+            <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
+                        Stretch="None"
+                        TileMode="Tile"
+                        SourceRect="0,0,16,16"
+                        DestinationRect="0,0,16,16"
+                        AlignmentY="Top"
+                        AlignmentX="Left"/>
+          </Panel.Background>
+          <Panel Width="{Binding DisplayWidth}"
+                Height="{Binding DisplayHeight}" >
+            <Panel.Background>
+              <SolidColorBrush Color="{Binding BackgroundColor, Converter={StaticResource BackgroundColorConverter}}"/>
+            </Panel.Background>
+          </Panel>
+          <Image x:Name="canvas"
+                 Stretch="Fill"
+                 Focusable="True"
+                 Source="{Binding MyBitmap}"
+                 Width="{Binding DisplayWidth}"
+                 Height="{Binding DisplayHeight}"
+                 RenderOptions.BitmapInterpolationMode="None"/>
+          <local:GridOverlay Width="{Binding DisplayWidth}"
+                             Height="{Binding DisplayHeight}"
+                             IsShowPixelGrid="{Binding IsPixelGridEffectivelyVisible}"
+                             IsShowCursorGrid="{Binding IsCursorGridEffectivelyVisible}"
+                             Magnification="{Binding Magnification}"
+                             CursorSize="{Binding CursorSize}"
+                             BackgroundColor="{Binding BackgroundColor.Value}"
+                             IsHitTestVisible="False"/>
+          <general:Region IsVisible="{Binding IsRegionSelecting}"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Top"
+                          Margin="{Binding SelectingThickness}"
+                          Width="{Binding SelectingSize.Width}"
+                          Height="{Binding SelectingSize.Height}" 
+                          ShowHandles="{Binding IsShowHandles}"
+                          HandleSize="{Binding HandleSize}"
+                          HandleMargin="{Binding HandleMargin}"
+                          IsHitTestVisible="False" />
+        </Panel>
+      </Grid>
     </Panel>
-  </Panel>
+  </ScrollViewer>
 </UserControl>

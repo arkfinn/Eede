@@ -2,12 +2,16 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Common;
 using Eede.Presentation.ViewModels.DataEntry;
+using ReactiveUI;
 using System;
+using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Windows.Input;
 
 namespace Eede.Presentation.Views.DataEntry
@@ -15,17 +19,25 @@ namespace Eede.Presentation.Views.DataEntry
     public partial class DrawableCanvas : UserControl
     {
         private readonly ZoomAndPanController _zoomAndPanController = new();
-        private ScrollViewer? _scrollViewer;
-        private ScrollViewer? ScrollViewer => _scrollViewer ??= this.FindAncestorOfType<ScrollViewer>();
+        private Vector _currentMargin = new(0, 0);
+        private bool _isInitialCentered = false;
+        private readonly List<IDisposable> _dataContextDisposables = new();
 
         public DrawableCanvas()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
 
             this.PointerWheelChanged += OnPointerWheelChanged;
             this.PointerEntered += OnPointerEntered;
             this.PointerCaptureLost += OnPointerCaptureLost;
             _zoomAndPanController.SpaceStateChanged += OnSpaceStateChanged;
+
+            scrollViewer.AddHandler(InputElement.PointerPressedEvent, OnScrollViewerPointerPressed, RoutingStrategies.Tunnel);
+            scrollViewer.AddHandler(InputElement.PointerMovedEvent, OnScrollViewerPointerMoved, RoutingStrategies.Tunnel);
+            scrollViewer.AddHandler(InputElement.PointerReleasedEvent, OnScrollViewerPointerReleased, RoutingStrategies.Tunnel);
+            scrollViewer.PointerCaptureLost += (s, e) => _zoomAndPanController.HandlePointerCaptureLost(e);
+            scrollViewer.GetObservable(ScrollViewer.ViewportProperty).Subscribe(OnViewportChanged);
 
             canvas.PointerPressed += OnCanvasPointerPressed;
             canvas.PointerMoved += OnCanvasPointerMoved;
@@ -41,6 +53,103 @@ namespace Eede.Presentation.Views.DataEntry
             this.KeyUp += OnKeyUp;
         }
 
+        private void OnDataContextChanged(object? sender, EventArgs e)
+        {
+            foreach (var d in _dataContextDisposables)
+            {
+                d.Dispose();
+            }
+            _dataContextDisposables.Clear();
+
+            if (DataContext is DrawableCanvasViewModel vm)
+            {
+                var disposable = vm.WhenAnyValue(x => x.DisplayWidth, x => x.DisplayHeight)
+                    .Where(t => t.Item1 > 0 && t.Item2 > 0)
+                    .DistinctUntilChanged()
+                    .Subscribe(_ =>
+                    {
+                        global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        {
+                            CenterContent();
+                        });
+                    });
+                _dataContextDisposables.Add(disposable);
+            }
+        }
+
+        private void OnViewportChanged(Size viewport)
+        {
+            if (viewport.Width <= 0 || viewport.Height <= 0) return;
+
+            var newMargin = ZoomHelper.CalculateOverscrollMargin(viewport);
+            if (_currentMargin != newMargin)
+            {
+                var oldMargin = _currentMargin;
+                _currentMargin = newMargin;
+                canvasGrid.Margin = new Thickness(newMargin.X, newMargin.Y, newMargin.X, newMargin.Y);
+
+                if (_isInitialCentered && oldMargin.X > 0 && oldMargin.Y > 0)
+                {
+                    var delta = newMargin - oldMargin;
+                    scrollViewer.Offset = new Vector(
+                        Math.Max(0, scrollViewer.Offset.X + delta.X),
+                        Math.Max(0, scrollViewer.Offset.Y + delta.Y));
+                }
+            }
+
+            if (!_isInitialCentered && DataContext is DrawableCanvasViewModel vm && vm.DisplayWidth > 0)
+            {
+                CenterContent();
+            }
+        }
+
+        public void CenterContent()
+        {
+            if (DataContext is not DrawableCanvasViewModel vm || scrollViewer == null) return;
+            var viewport = scrollViewer.Viewport;
+            if (viewport.Width <= 0 || viewport.Height <= 0) return;
+
+            var displaySize = new Size(vm.DisplayWidth, vm.DisplayHeight);
+            if (displaySize.Width <= 0 || displaySize.Height <= 0) return;
+
+            scrollViewer.Offset = ZoomHelper.CalculateInitialOffset(_currentMargin, displaySize, viewport);
+            _isInitialCentered = true;
+        }
+
+        private void OnScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            var props = e.GetCurrentPoint(scrollViewer).Properties;
+            bool isMiddle = props.IsMiddleButtonPressed;
+            bool isSpaceLeft = _zoomAndPanController.IsSpacePressed && props.IsLeftButtonPressed;
+
+            if (isMiddle || isSpaceLeft)
+            {
+                canvas.Focus();
+                if (_zoomAndPanController.HandlePointerPressed(scrollViewer, scrollViewer, e))
+                {
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void OnScrollViewerPointerMoved(object? sender, PointerEventArgs e)
+        {
+            if (_zoomAndPanController.IsPanning)
+            {
+                _zoomAndPanController.HandlePointerMoved(scrollViewer, scrollViewer, e);
+                e.Handled = true;
+            }
+        }
+
+        private void OnScrollViewerPointerReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            if (_zoomAndPanController.IsPanning)
+            {
+                _zoomAndPanController.HandlePointerReleased(scrollViewer, e);
+                e.Handled = true;
+            }
+        }
+
         private void OnPointerEntered(object? sender, PointerEventArgs e)
         {
             canvas.Focus();
@@ -48,14 +157,16 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
         {
-            if (DataContext is DrawableCanvasViewModel vm)
+            if (DataContext is DrawableCanvasViewModel vm && scrollViewer != null)
             {
                 _zoomAndPanController.HandleWheel(
-                    ScrollViewer,
+                    scrollViewer,
                     e,
                     vm.Magnification,
                     mag => vm.Magnification = mag,
-                    () => this.UpdateLayout());
+                    () => this.UpdateLayout(),
+                    null,
+                    _currentMargin);
             }
         }
 
@@ -149,7 +260,7 @@ namespace Eede.Presentation.Views.DataEntry
         {
             canvas.Focus();
 
-            if (_zoomAndPanController.HandlePointerPressed(ScrollViewer, canvas, e))
+            if (_zoomAndPanController.HandlePointerPressed(scrollViewer, canvas, e))
             {
                 return;
             }
@@ -170,7 +281,7 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnCanvasPointerMoved(object? sender, PointerEventArgs e)
         {
-            if (_zoomAndPanController.HandlePointerMoved(ScrollViewer, canvas, e))
+            if (_zoomAndPanController.HandlePointerMoved(scrollViewer, canvas, e))
             {
                 return;
             }
@@ -207,6 +318,10 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnCanvasPointerExited(object? sender, EventArgs e)
         {
+            if (_zoomAndPanController.IsPanning)
+            {
+                return;
+            }
             _zoomAndPanController.Reset();
             PointerLeaveCommand?.Execute(null);
         }

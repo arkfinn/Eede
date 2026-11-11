@@ -58,5 +58,30 @@ namespace Eede.Domain.Tests.Palettes
                 Assert.Throws<ArgumentOutOfRangeException>(() => palette.Apply(Palette.MAX_LENGTH, newColor));
             });
         }
+
+        [Test]
+        public void FromColors_WithInvalidLength_ThrowsInvalidOperationException()
+        {
+            var tooFew = new ArgbColor[Palette.MAX_LENGTH - 1];
+            var tooMany = new ArgbColor[Palette.MAX_LENGTH + 1];
+
+            Assert.Multiple(() =>
+            {
+                Assert.Throws<InvalidOperationException>(() => Palette.FromColors(tooFew));
+                Assert.Throws<InvalidOperationException>(() => Palette.FromColors(tooMany));
+            });
+        }
+
+        [Test]
+        public void Create_InitializesAll256ColorsToTransparent()
+        {
+            var palette = Palette.Create();
+            var transparent = new ArgbColor(0, 0, 0, 0);
+
+            for (int i = 0; i < Palette.MAX_LENGTH; i++)
+            {
+                Assert.That(palette.Fetch(i).EqualsArgb(transparent), Is.True, $"Index {i} should be transparent");
+            }
+        }
     }
 }

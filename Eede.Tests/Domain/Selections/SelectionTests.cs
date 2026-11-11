@@ -18,7 +18,10 @@ public class SelectionTests
             Assert.That(selection.Contains(new Position(10, 10)), Is.True, "Top-left should be contained");
             Assert.That(selection.Contains(new Position(29, 29)), Is.True, "Inside should be contained");
             Assert.That(selection.Contains(new Position(30, 30)), Is.False, "Outside (bottom-right) should not be contained");
+            Assert.That(selection.Contains(new Position(30, 15)), Is.False, "X on boundary should not be contained");
+            Assert.That(selection.Contains(new Position(15, 30)), Is.False, "Y on boundary should not be contained");
             Assert.That(selection.Contains(new Position(9, 10)), Is.False, "Left should not be contained");
+            Assert.That(selection.Contains(new Position(10, 9)), Is.False, "Top should not be contained");
         });
     }
 

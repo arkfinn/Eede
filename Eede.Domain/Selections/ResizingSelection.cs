@@ -54,26 +54,19 @@ public class ResizingSelection
         if (newWidth < 1)
         {
             newWidth = 1;
-            // 左側を動かしていたなら left を修正、右側なら right を修正
+            // 左側を動かしていたなら left を修正
             if (Handle == SelectionHandle.TopLeft || Handle == SelectionHandle.Left || Handle == SelectionHandle.BottomLeft)
             {
                 left = right - 1;
-            }
-            else
-            {
-                right = left + 1;
             }
         }
         if (newHeight < 1)
         {
             newHeight = 1;
+            // 上側を動かしていたなら top を修正
             if (Handle == SelectionHandle.TopLeft || Handle == SelectionHandle.Top || Handle == SelectionHandle.TopRight)
             {
                 top = bottom - 1;
-            }
-            else
-            {
-                bottom = top + 1;
             }
         }
 
@@ -100,7 +93,7 @@ public class ResizingSelection
             newWidth = Math.Max(1, newWidth);
             newHeight = Math.Max(1, newHeight);
 
-            // 調整後のサイズに合わせて座標を再調整 (Anchorは動かさない)
+            // 調整後のサイズに合わせて移動する座標 (left, top) を再調整 (Anchorは動かさない)
             if (Handle == SelectionHandle.TopLeft)
             {
                 left = right - newWidth;
@@ -108,19 +101,13 @@ public class ResizingSelection
             }
             else if (Handle == SelectionHandle.TopRight)
             {
-                right = left + newWidth;
                 top = bottom - newHeight;
             }
             else if (Handle == SelectionHandle.BottomLeft)
             {
                 left = right - newWidth;
-                bottom = top + newHeight;
             }
-            else if (Handle == SelectionHandle.BottomRight)
-            {
-                right = left + newWidth;
-                bottom = top + newHeight;
-            }
+            // BottomRight の場合は (left, top) が固定されているため再調整不要
         }
 
         return new PictureArea(new Position(left, top), new PictureSize(newWidth, newHeight));

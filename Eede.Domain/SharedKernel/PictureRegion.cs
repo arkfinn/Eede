@@ -51,8 +51,6 @@ namespace Eede.Domain.SharedKernel
             PictureArea? combined = null;
             foreach (var area in Areas)
             {
-                if (area.IsEmpty) continue;
-
                 if (combined == null)
                 {
                     combined = area;

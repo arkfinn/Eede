@@ -45,12 +45,21 @@ public class DrawingToolTests
         var newColor = new ArgbColor(255, 255, 0, 0);
 
         var updatedTool = tool.WithColor(newColor);
+        var updatedWidthTool = tool.WithWidth(5);
+        var newStyle = new FreeCurve();
+        var updatedStyleTool = tool.WithStyle(newStyle);
 
         Assert.Multiple(() =>
         {
             Assert.That(updatedTool.PenStyle.Color, Is.EqualTo(newColor));
             Assert.That(tool.PenStyle.Color, Is.EqualTo(_color), "Original tool should not be changed");
             Assert.That(updatedTool.Style, Is.EqualTo(tool.Style));
+
+            Assert.That(updatedWidthTool.PenStyle.Width, Is.EqualTo(5));
+            Assert.That(tool.PenStyle.Width, Is.EqualTo(1));
+
+            Assert.That(updatedStyleTool.Style, Is.SameAs(newStyle));
+            Assert.That(tool.Style, Is.SameAs(_mockStyle.Object));
         });
     }
 }

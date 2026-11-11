@@ -34,10 +34,11 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
         [Test()]
         public void Widthは1以上でなければならない()
         {
-            _ = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
                 _ = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 0);
             });
+            Assert.That(ex!.Message, Does.Contain("width is 1 or more. then:0"));
         }
 
         [Test()]

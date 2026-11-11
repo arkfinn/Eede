@@ -34,7 +34,7 @@ public class AnimationPattern
     }
 
     public AnimationPattern(string name, IEnumerable<AnimationFrame> frames, GridSettings grid)
-        : this(name, (frames as IReadOnlyList<AnimationFrame>) ?? frames?.ToImmutableArray() ?? throw new ArgumentNullException(nameof(frames)), grid)
+        : this(name, frames?.ToImmutableArray() ?? throw new ArgumentNullException(nameof(frames)), grid)
     {
     }
 
@@ -65,7 +65,7 @@ public class AnimationPattern
 
     public AnimationPattern UpdateFrame(int index, AnimationFrame frame)
     {
-        if (index < 0 || index >= _frames.Length) throw new ArgumentOutOfRangeException(nameof(index));
+        if (index < 0 || index >= _frames.Length) throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
         if (frame == null) throw new ArgumentNullException(nameof(frame));
         if (!frame.Validate()) throw new ArgumentException("Invalid animation frame.", nameof(frame));
         return new AnimationPattern(Name, _frames.SetItem(index, frame), Grid);

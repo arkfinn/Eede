@@ -47,6 +47,24 @@ Eede-win-Setup.exe ) をダウンロードして実行してください。
 
 ※ 手動でパッケージングを行う場合は、`vpk` CLI ツールを使用してください。
 
+### テストとミューテーションテスト (Mutation Testing)
+
+Eede では単なるコードカバレッジにとどまらず、**Stryker.NET** によるミューテーションテストを導入し、テストスイートのアサーション強度と品質を担保しています。
+
+- **通常のテスト実行**:
+  ```powershell
+  dotnet test -f net10.0
+  ```
+- **ミューテーションテストの実行**:
+  ```powershell
+  # 既定モジュール (Blending) のミューテーション検証
+  .\scripts\run-mutation-tests.ps1 -Module Blending
+
+  # 描画ツール群の検証 & 終了後に HTML レポートをブラウザで開く
+  .\scripts\run-mutation-tests.ps1 -Module DrawingTools -OpenReport
+  ```
+
+
 ## コントリビューション
 
 プロジェクトへの貢献をお待ちしております。以下の手順で開発に参加してください。

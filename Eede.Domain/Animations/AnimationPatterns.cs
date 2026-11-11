@@ -28,14 +28,14 @@ public class AnimationPatterns
 
     public AnimationPatterns Replace(int index, AnimationPattern pattern)
     {
-        if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index));
+        if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
         if (pattern == null) throw new ArgumentNullException(nameof(pattern));
         return new AnimationPatterns(_items.SetItem(index, pattern));
     }
 
     public AnimationPatterns RemoveAt(int index)
     {
-        if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index));
+        if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
         return new AnimationPatterns(_items.RemoveAt(index));
     }
 }

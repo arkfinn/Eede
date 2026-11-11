@@ -90,6 +90,29 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             Assert.That(resultPicture.CloneImage(), Is.EqualTo(picture.CloneImage()));
         }
 
+        [Test]
+        public void FillStyle_LifeCycle_DrawStart_Drawing_DrawEnd()
+        {
+            var size = new PictureSize(4, 4);
+            var white = new ArgbColor(255, 255, 255, 255);
+            var picture = CreateMonoColorPicture(size, white);
+            var buffer = new DrawingBuffer(picture);
+            var penStyle = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1);
+            var fillStyle = new Fill();
+
+            var history = new CoordinateHistory(new CanvasCoordinate(1, 1));
+            var startBuffer = fillStyle.DrawStart(buffer, penStyle, history, false);
+            var drawingBuffer = fillStyle.Drawing(startBuffer, penStyle, history, false);
+            Assert.That(drawingBuffer, Is.SameAs(startBuffer), "Drawing should return the same buffer instance");
+
+            var result = fillStyle.DrawEnd(drawingBuffer, penStyle, history, false);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.AffectedArea.GetBoundingBox().Size, Is.EqualTo(size));
+                Assert.That(result.Buffer.Fetch().PickColor(new Position(1, 1)).Red, Is.EqualTo(255));
+            });
+        }
+
         private Picture CreateMonoColorPicture(PictureSize size, ArgbColor color)
         {
             var data = new byte[size.Width * size.Height * 4];

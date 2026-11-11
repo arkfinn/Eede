@@ -139,8 +139,11 @@ public class AnimationPatternTests
         var frames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
         var pattern = new AnimationPattern("Test", frames, grid);
 
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.RemoveFrame(1));
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.RemoveFrame(-1));
+        var ex1 = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.RemoveFrame(1));
+        Assert.That(ex1.ParamName, Is.EqualTo("index"));
+
+        var exNeg = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.RemoveFrame(-1));
+        Assert.That(exNeg.ParamName, Is.EqualTo("index"));
     }
 
     [Test]
@@ -150,12 +153,23 @@ public class AnimationPatternTests
         var frames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
         var pattern = new AnimationPattern("Test", frames, grid);
 
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, 1));
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, 2));
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, -1));
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(1, 0));
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(2, 0));
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(-1, 0));
+        var exTo1 = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, 1));
+        Assert.That(exTo1.ParamName, Is.EqualTo("toIndex"));
+
+        var exTo2 = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, 2));
+        Assert.That(exTo2.ParamName, Is.EqualTo("toIndex"));
+
+        var exToNeg = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(0, -1));
+        Assert.That(exToNeg.ParamName, Is.EqualTo("toIndex"));
+
+        var exFrom1 = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(1, 0));
+        Assert.That(exFrom1.ParamName, Is.EqualTo("fromIndex"));
+
+        var exFrom2 = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(2, 0));
+        Assert.That(exFrom2.ParamName, Is.EqualTo("fromIndex"));
+
+        var exFromNeg = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.MoveFrame(-1, 0));
+        Assert.That(exFromNeg.ParamName, Is.EqualTo("fromIndex"));
     }
 
     [Test]
@@ -165,7 +179,13 @@ public class AnimationPatternTests
         var frames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
         var pattern = new AnimationPattern("Test", frames, grid);
 
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.UpdateFrame(1, new AnimationFrame(0, 200)));
+        var ex1 = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.UpdateFrame(1, new AnimationFrame(0, 200)));
+        Assert.That(ex1.ParamName, Is.EqualTo("index"));
+        Assert.That(ex1.Message, Does.Contain("Index is out of range."));
+
+        var exNeg = Assert.Throws<System.ArgumentOutOfRangeException>(() => pattern.UpdateFrame(-1, new AnimationFrame(0, 200)));
+        Assert.That(exNeg.ParamName, Is.EqualTo("index"));
+        Assert.That(exNeg.Message, Does.Contain("Index is out of range."));
     }
 
     [Test]
@@ -174,8 +194,16 @@ public class AnimationPatternTests
         var validGrid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
         var validFrames = new List<AnimationFrame> { new AnimationFrame(0, 100) };
 
-        Assert.Throws<System.ArgumentException>(() => new AnimationPattern("", validFrames, validGrid));
-        Assert.Throws<System.ArgumentException>(() => new AnimationPattern(new string('a', 101), validFrames, validGrid));
+        // 境界値: 100文字ちょうどは許可される
+        var pattern100 = new AnimationPattern(new string('a', 100), validFrames, validGrid);
+        Assert.That(pattern100.Name.Length, Is.EqualTo(100));
+
+        var exEmpty = Assert.Throws<System.ArgumentException>(() => new AnimationPattern("", validFrames, validGrid));
+        Assert.That(exEmpty.Message, Does.Contain("Name cannot be null or whitespace."));
+
+        var ex101 = Assert.Throws<System.ArgumentException>(() => new AnimationPattern(new string('a', 101), validFrames, validGrid));
+        Assert.That(ex101.Message, Does.Contain("Name cannot exceed 100 characters."));
+
         Assert.Throws<System.ArgumentNullException>(() => new AnimationPattern("Test", null!, validGrid));
         Assert.Throws<System.ArgumentNullException>(() => new AnimationPattern("Test", validFrames, null!));
     }
@@ -307,8 +335,11 @@ public class AnimationPatternTests
 
         // Uninitialized instance bypasses constructor validation, resulting in Duration == 0 (Validate() == false)
         var invalidFrame = (AnimationFrame)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(AnimationFrame));
-        Assert.Throws<System.ArgumentException>(() => pattern.AddFrame(invalidFrame));
-        Assert.Throws<System.ArgumentException>(() => pattern.UpdateFrame(0, invalidFrame));
+        var exAdd = Assert.Throws<System.ArgumentException>(() => pattern.AddFrame(invalidFrame));
+        Assert.That(exAdd.Message, Does.Contain("Invalid animation frame."));
+
+        var exUp = Assert.Throws<System.ArgumentException>(() => pattern.UpdateFrame(0, invalidFrame));
+        Assert.That(exUp.Message, Does.Contain("Invalid animation frame."));
 
         // Out of bounds index in UpdateFrame throws ArgumentOutOfRangeException
         var validFrame = new AnimationFrame(1, 100);
@@ -331,5 +362,43 @@ public class AnimationPatternTests
 
         var emptyPattern2 = new AnimationPattern("Empty2", Enumerable.Empty<AnimationFrame>(), grid);
         Assert.That(emptyPattern2.Frames.Count, Is.EqualTo(0));
+
+        // Non-IReadOnlyList IEnumerable triggers frames?.ToImmutableArray()
+        IEnumerable<AnimationFrame> nonList = new[] { new AnimationFrame(0, 100) }.Where(_ => true);
+        var patternEnumerable = new AnimationPattern("Enumerable", nonList, grid);
+        Assert.That(patternEnumerable.Frames.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Validate_ReturnsExpectedResult()
+    {
+        var grid = new GridSettings(new PictureSize(32, 32), new Position(0, 0), 0);
+        var validFrame = new AnimationFrame(0, 100);
+        var pattern = new AnimationPattern("Valid", new[] { validFrame }, grid);
+
+        Assert.That(pattern.Validate(), Is.True);
+
+        // Invalid uninitialized pattern (all fields null/default)
+        var invalidPattern = (AnimationPattern)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(AnimationPattern));
+        Assert.That(invalidPattern.Frames.Count, Is.EqualTo(0));
+        Assert.That(invalidPattern.Validate(), Is.False);
+
+        // Pattern containing invalid grid
+        var invalidGrid = (GridSettings)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(GridSettings));
+        var patternWithInvalidGrid = new AnimationPattern("HasInvalidGrid", new[] { validFrame }, invalidGrid);
+        Assert.That(patternWithInvalidGrid.Validate(), Is.False);
+
+        // Pattern containing invalid frame
+        var invalidFrame = (AnimationFrame)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(AnimationFrame));
+        var patternWithInvalidFrame = new AnimationPattern("HasInvalid", new[] { invalidFrame }, grid);
+        Assert.That(patternWithInvalidFrame.Validate(), Is.False);
+
+        // Pattern with valid Name and Grid, but uninitialized _frames (_frames.IsDefault == true)
+        var patternWithDefaultFrames = (AnimationPattern)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(AnimationPattern));
+        typeof(AnimationPattern).GetField("<Name>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .SetValue(patternWithDefaultFrames, "ValidName");
+        typeof(AnimationPattern).GetField("<Grid>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .SetValue(patternWithDefaultFrames, grid);
+        Assert.That(patternWithDefaultFrames.Validate(), Is.False);
     }
 }

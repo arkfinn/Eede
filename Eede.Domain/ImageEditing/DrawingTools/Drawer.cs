@@ -63,20 +63,17 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         Picture result = DrawingPicture.Draw(dest =>
         {
             byte[] imageData = dest.CloneImage();
-            int width = dest.Width;
-            int height = dest.Height;
-            int stride = dest.Stride;
             int x1 = from.X;
             int y1 = from.Y;
             int x2 = to.X;
             int y2 = to.Y;
             /* 二点間の距離 */
-            int dx = x2 > x1 ? x2 - x1 : x1 - x2;
-            int dy = y2 > y1 ? y2 - y1 : y1 - y2;
+            int dx = Math.Abs(x2 - x1);
+            int dy = Math.Abs(y2 - y1);
 
             /* 二点の方向 */
-            int sx = x2 > x1 ? 1 : -1;
-            int sy = y2 > y1 ? 1 : -1;
+            int sx = x2 >= x1 ? 1 : -1;
+            int sy = y2 >= y1 ? 1 : -1;
 
             int cx = x1;
             int cy = y1;
@@ -91,10 +88,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                 int E = -dx;
                 for (int i = 0; i <= dx; i++)
                 {
-                    if (cy >= 0 && cy < height && cx >= 0 && cx < width)
-                    {
-                        imageData = DrawPointRoutine(dest, imageData, new Position(cx, cy));
-                    }
+                    imageData = DrawPointRoutine(dest, imageData, new Position(cx, cy));
                     cx += sx;
                     E += dy2;
                     if (E > 0)
@@ -102,7 +96,6 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                         cy += sy;
                         E -= dx2;
                     }
-
                 }
             }
             /* 傾きが1以上の場合 */
@@ -111,10 +104,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
                 int E = -dy;
                 for (int i = 0; i <= dy; i++)
                 {
-                    if (cy >= 0 && cy < height && cx >= 0 && cx < width)
-                    {
-                        imageData = DrawPointRoutine(dest, imageData, new Position(cx, cy));
-                    }
+                    imageData = DrawPointRoutine(dest, imageData, new Position(cx, cy));
                     cy += sy;
                     E += dx2;
                     if (E > 0)

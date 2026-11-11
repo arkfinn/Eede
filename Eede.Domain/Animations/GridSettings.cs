@@ -38,7 +38,6 @@ public record GridSettings
 
         int cellStepW = CellSize.Width + Padding;
         int cellStepH = CellSize.Height + Padding;
-        if (cellStepW <= 0 || cellStepH <= 0) return -1;
 
         int columns = Math.Max(1, (imageSize.Width - Offset.X + Padding) / cellStepW);
         int rows = Math.Max(1, (imageSize.Height - Offset.Y + Padding) / cellStepH);
@@ -47,7 +46,6 @@ public record GridSettings
         int row = (position.Y - Offset.Y) / cellStepH;
 
         if (col < 0 || col >= columns || row < 0 || row >= rows) return -1;
-        int index = row * columns + col;
-        return index < 0 ? -1 : index;
+        return row * columns + col;
     }
 }

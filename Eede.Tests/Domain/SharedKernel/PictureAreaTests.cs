@@ -75,6 +75,16 @@ namespace Eede.Domain.Tests.SharedKernel
             }
         };
 
+        [TestCase(0, 0, true)]
+        [TestCase(0, 10, true)]
+        [TestCase(10, 0, true)]
+        [TestCase(10, 10, false)]
+        public void IsEmptyTest(int width, int height, bool expected)
+        {
+            var area = new PictureArea(new Position(5, 5), new PictureSize(width, height));
+            Assert.That(area.IsEmpty, Is.EqualTo(expected));
+        }
+
         [TestCaseSource(nameof(IntersectCases))]
         public void IntersectTest(PictureArea area1, PictureArea area2, PictureArea expected)
         {
@@ -94,6 +104,36 @@ namespace Eede.Domain.Tests.SharedKernel
             new object[] {
                 new PictureArea(new Position(0, 0), new PictureSize(10, 10)),
                 new PictureArea(new Position(20, 20), new PictureSize(10, 10)),
+                new PictureArea(new Position(0, 0), new PictureSize(0, 0))
+            },
+            // Non-overlapping only on Y (X overlaps)
+            new object[] {
+                new PictureArea(new Position(10, 0), new PictureSize(10, 10)),
+                new PictureArea(new Position(10, 20), new PictureSize(10, 10)),
+                new PictureArea(new Position(0, 0), new PictureSize(0, 0))
+            },
+            // Non-overlapping only on X (Y overlaps)
+            new object[] {
+                new PictureArea(new Position(0, 10), new PictureSize(10, 10)),
+                new PictureArea(new Position(20, 10), new PictureSize(10, 10)),
+                new PictureArea(new Position(0, 0), new PictureSize(0, 0))
+            },
+            // Empty area 1
+            new object[] {
+                new PictureArea(new Position(10, 10), new PictureSize(0, 10)),
+                new PictureArea(new Position(10, 10), new PictureSize(10, 10)),
+                new PictureArea(new Position(0, 0), new PictureSize(0, 0))
+            },
+            // Empty area 2
+            new object[] {
+                new PictureArea(new Position(10, 10), new PictureSize(10, 10)),
+                new PictureArea(new Position(10, 10), new PictureSize(10, 0)),
+                new PictureArea(new Position(0, 0), new PictureSize(0, 0))
+            },
+            // Both empty
+            new object[] {
+                new PictureArea(new Position(10, 10), new PictureSize(0, 0)),
+                new PictureArea(new Position(10, 10), new PictureSize(0, 0)),
                 new PictureArea(new Position(0, 0), new PictureSize(0, 0))
             },
             // Negative coordinates overlapping

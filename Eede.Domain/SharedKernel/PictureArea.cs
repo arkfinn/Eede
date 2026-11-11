@@ -67,8 +67,6 @@ public readonly record struct PictureArea
 
     public PictureArea Intersect(PictureArea other)
     {
-        if (IsEmpty || other.IsEmpty) return new PictureArea(new Position(0, 0), new PictureSize(0, 0));
-
         int startX = Math.Max(X, other.X);
         int startY = Math.Max(Y, other.Y);
         int endX = Math.Min(X + Width, other.X + other.Width);

@@ -232,17 +232,16 @@ namespace Eede.Presentation.Views.DataEntry
 
             // 初期カーソルサイズの設定
             _cursorSize = _viewModel.CursorSize;
+            _localCursorArea = HalfBoxArea.Create(new Position(0, 0), _cursorSize);
+            _selectionState = CreateInitialState();
 
             _viewModel.WhenAnyValue(x => x.CursorSize)
                 .Subscribe(size =>
                 {
                     _cursorSize = size;
+                    _localCursorArea = HalfBoxArea.Create(_localCursorArea.RealPosition, size);
                     UpdateCursor();
                 });
-
-            // SelectionState の初期化
-            _localCursorArea = HalfBoxArea.Create(new Position(0, 0), _cursorSize);
-            _selectionState = CreateInitialState();
 
             _viewModel.AnimationViewModel.WhenAnyValue(x => x.IsAnimationMode)
                 .Subscribe(_ =>
@@ -672,6 +671,7 @@ namespace Eede.Presentation.Views.DataEntry
 
                     // 次回のカーソルサイズのためにサイズを保存
                     _cursorSize = finalArea.Value.Size;
+                    vm.CursorSize = finalArea.Value.Size;
                 }
                 else
                 {

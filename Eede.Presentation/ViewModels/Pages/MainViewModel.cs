@@ -1033,6 +1033,7 @@ public partial class MainViewModel : ViewModelBase
         DrawingSessionViewModel.Push(updated, null, DrawableCanvasViewModel.SelectingArea);
         _pullContextTracker.SetPullContext(vm.Id, args.Rect);
         _coordinator?.NotifyDirty();
+        CursorSize = args.Rect.Size;
     }
 
     private void SetPictureToDrawArea(Picture picture)

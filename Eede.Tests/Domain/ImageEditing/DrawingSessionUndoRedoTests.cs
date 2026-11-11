@@ -68,4 +68,52 @@ public class DrawingSessionUndoRedoTests
         var sessionAfterRedo = redoResult.Session;
         Assert.That(sessionAfterRedo.CurrentPicture.AsSpan()[20], Is.EqualTo(128));
     }
+
+    [Test]
+    public void DefaultMaxUndoCount_ShouldBe200()
+    {
+        var session = new DrawingSession(Picture.CreateEmpty(new PictureSize(2, 2)));
+        Assert.That(session.MaxUndoCount, Is.EqualTo(200));
+        Assert.That(session.UndoCount, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void UndoLimit_ShouldDropOldestItem_WhenExceedingLimit()
+    {
+        var initialPixels = new byte[16]; // 2x2
+        var initialPicture = Picture.Create(new PictureSize(2, 2), initialPixels);
+        var session = new DrawingSession(initialPicture, maxUndoCount: 3);
+
+        // 4回変更をPushする (値: 10, 20, 30, 40)
+        for (byte i = 1; i <= 4; i++)
+        {
+            var p = new byte[16];
+            p[0] = (byte)(i * 10);
+            session = session.Push(Picture.Create(new PictureSize(2, 2), p));
+        }
+
+        // 現在値は 40、UndoCount は上限の 3
+        Assert.That(session.CurrentPicture.AsSpan()[0], Is.EqualTo(40));
+        Assert.That(session.UndoCount, Is.EqualTo(3));
+
+        // 1回目 Undo -> 30
+        var u1 = session.Undo();
+        Assert.That(u1.Session.CurrentPicture.AsSpan()[0], Is.EqualTo(30));
+        Assert.That(u1.Session.UndoCount, Is.EqualTo(2));
+        Assert.That(u1.Session.CanUndo(), Is.True);
+
+        // 2回目 Undo -> 20
+        var u2 = u1.Session.Undo();
+        Assert.That(u2.Session.CurrentPicture.AsSpan()[0], Is.EqualTo(20));
+        Assert.That(u2.Session.UndoCount, Is.EqualTo(1));
+        Assert.That(u2.Session.CanUndo(), Is.True);
+
+        // 3回目 Undo -> 10
+        var u3 = u2.Session.Undo();
+        Assert.That(u3.Session.CurrentPicture.AsSpan()[0], Is.EqualTo(10));
+        Assert.That(u3.Session.UndoCount, Is.EqualTo(0));
+
+        // 上限 3 なので、最古の初期状態 0 への復元は破棄されており Undo 不可
+        Assert.That(u3.Session.CanUndo(), Is.False);
+    }
 }

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.VisualTree;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -34,6 +35,8 @@ namespace Eede.Presentation.Views.DataEntry
         private bool _visibleCursor = false;
         private HalfBoxArea _localCursorArea;
         private PictureSize _cursorSize = new(32, 32);
+        private Vector _currentMargin = new(0, 0);
+        private bool _isInitialCentered = false;
 
         public PictureContainer()
         {
@@ -50,12 +53,91 @@ namespace Eede.Presentation.Views.DataEntry
             canvas.KeyDown += OnKeyDown;
             canvas.KeyUp += OnKeyUp;
 
+            scrollViewer.AddHandler(InputElement.PointerPressedEvent, OnScrollViewerPointerPressed, RoutingStrategies.Tunnel);
+            scrollViewer.AddHandler(InputElement.PointerMovedEvent, OnScrollViewerPointerMoved, RoutingStrategies.Tunnel);
+            scrollViewer.AddHandler(InputElement.PointerReleasedEvent, OnScrollViewerPointerReleased, RoutingStrategies.Tunnel);
+            scrollViewer.PointerCaptureLost += (s, e) => _zoomAndPanController.HandlePointerCaptureLost(e);
+            scrollViewer.GetObservable(ScrollViewer.ViewportProperty).Subscribe(OnViewportChanged);
+
             canvas.PointerPressed += OnPointerPressed;
             canvas.PointerMoved += OnPointerMoved;
             canvas.PointerReleased += OnPointerReleased;
             canvas.PointerExited += OnPointerExited;
             _localCursorArea = HalfBoxArea.Create(new Position(0, 0), new PictureSize(32, 32));
             _selectionState = new NormalCursorState(_localCursorArea);
+        }
+
+        private void OnViewportChanged(Size viewport)
+        {
+            if (viewport.Width <= 0 || viewport.Height <= 0) return;
+
+            var newMargin = ZoomHelper.CalculateOverscrollMargin(viewport);
+            if (_currentMargin != newMargin)
+            {
+                var oldMargin = _currentMargin;
+                _currentMargin = newMargin;
+                canvasGrid.Margin = new Thickness(newMargin.X, newMargin.Y, newMargin.X, newMargin.Y);
+
+                if (_isInitialCentered && oldMargin.X > 0 && oldMargin.Y > 0)
+                {
+                    var delta = newMargin - oldMargin;
+                    scrollViewer.Offset = new Vector(
+                        Math.Max(0, scrollViewer.Offset.X + delta.X),
+                        Math.Max(0, scrollViewer.Offset.Y + delta.Y));
+                }
+            }
+
+            if (!_isInitialCentered && _viewModel != null && _viewModel.DisplayWidth > 0)
+            {
+                CenterContent();
+            }
+        }
+
+        public void CenterContent()
+        {
+            if (_viewModel == null || scrollViewer == null) return;
+            var viewport = scrollViewer.Viewport;
+            if (viewport.Width <= 0 || viewport.Height <= 0) return;
+
+            var displaySize = new Size(_viewModel.DisplayWidth, _viewModel.DisplayHeight);
+            if (displaySize.Width <= 0 || displaySize.Height <= 0) return;
+
+            scrollViewer.Offset = ZoomHelper.CalculateInitialOffset(_currentMargin, displaySize, viewport);
+            _isInitialCentered = true;
+        }
+
+        private void OnScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            var props = e.GetCurrentPoint(scrollViewer).Properties;
+            bool isMiddle = props.IsMiddleButtonPressed;
+            bool isSpaceLeft = _zoomAndPanController.IsSpacePressed && props.IsLeftButtonPressed;
+
+            if (isMiddle || isSpaceLeft)
+            {
+                this.Focus();
+                if (_zoomAndPanController.HandlePointerPressed(scrollViewer, scrollViewer, e))
+                {
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void OnScrollViewerPointerMoved(object? sender, PointerEventArgs e)
+        {
+            if (_zoomAndPanController.IsPanning)
+            {
+                _zoomAndPanController.HandlePointerMoved(scrollViewer, scrollViewer, e);
+                e.Handled = true;
+            }
+        }
+
+        private void OnScrollViewerPointerReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            if (_zoomAndPanController.IsPanning)
+            {
+                _zoomAndPanController.HandlePointerReleased(scrollViewer, e);
+                e.Handled = true;
+            }
         }
 
         private void OnPointerEntered(object? sender, PointerEventArgs e)
@@ -72,7 +154,9 @@ namespace Eede.Presentation.Views.DataEntry
                     e,
                     _viewModel.Magnification,
                     mag => _viewModel.Magnification = mag,
-                    () => this.UpdateLayout());
+                    () => this.UpdateLayout(),
+                    null,
+                    _currentMargin);
             }
         }
 
@@ -261,6 +345,7 @@ namespace Eede.Presentation.Views.DataEntry
                 .Where(x => x != null)
                 .Subscribe(bitmap =>
                 {
+                    var oldSize = CanvasSize;
                     CanvasSize = new PictureSize((int)bitmap!.Size.Width, (int)bitmap!.Size.Height);
                     UpdateSelectionPreview();
                     
@@ -270,6 +355,10 @@ namespace Eede.Presentation.Views.DataEntry
                         mainImage.InvalidateVisual();
                         mainImage.InvalidateMeasure();
                         mainImage.InvalidateArrange();
+                        if (oldSize != CanvasSize || !_isInitialCentered)
+                        {
+                            CenterContent();
+                        }
                     }, DispatcherPriority.Render);
                 });
 
@@ -697,6 +786,10 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerExited(object? sender, PointerEventArgs e)
         {
+            if (_zoomAndPanController.IsPanning)
+            {
+                return;
+            }
             _zoomAndPanController.Reset();
             VisibleCursor = false;
             UpdateCursor();

@@ -28,9 +28,7 @@ public record FreeCurve : IDrawStyle
 
     public DrawEndResult DrawEnd(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
-        var result = new DrawEndResult(ContextFactory.Create(buffer.Fetch()), new PictureRegion(AffectedAreas.ToList()));
-        AffectedAreas.Clear();
-        return result;
+        return new DrawEndResult(ContextFactory.Create(buffer.Fetch()), new PictureRegion(AffectedAreas.ToList()));
     }
 
     private (Picture Picture, PictureArea Area) Draw(Drawer drawer, CoordinateHistory coordinateHistory)

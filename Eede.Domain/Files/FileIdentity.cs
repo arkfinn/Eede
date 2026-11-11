@@ -33,7 +33,7 @@ namespace Eede.Domain.Files
             if (queryIndex >= 0) path = path[..queryIndex];
 
             int lastSlash = Math.Max(path.LastIndexOf('/'), path.LastIndexOf('\\'));
-            return lastSlash >= 0 ? path[(lastSlash + 1)..] : path;
+            return path[(lastSlash + 1)..];
         }
 
         public override string ToString() => Path;

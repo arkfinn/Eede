@@ -21,12 +21,7 @@ public class Palette
 
     public static Palette Create()
     {
-        ArgbColor[] colorArray = new ArgbColor[MAX_LENGTH];
-        for (int i = 0; i < MAX_LENGTH; i++)
-        {
-            colorArray[i] = new ArgbColor(0, 0, 0, 0);
-        }
-        return FromColors(colorArray);
+        return FromColors(new ArgbColor[MAX_LENGTH]);
     }
 
     public static Palette FromColors(ArgbColor[] colors)

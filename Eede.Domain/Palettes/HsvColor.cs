@@ -12,25 +12,27 @@ namespace Eede.Domain.Palettes
 
         public static HsvColor FromRgb(int r, int g, int b)
         {
-            double max = Math.Max(Math.Max(r, g), b);
-            double min = Math.Min(Math.Min(r, g), b);
+            int max = Math.Max(Math.Max(r, g), b);
+            int min = Math.Min(Math.Min(r, g), b);
 
             //Vを求める  
-            int v = (int)max;
+            int v = max;
             //RGBすべてが同じ場合　HとSは0     
             if (max == min)
             {
                 return new HsvColor(0, 0, v);
             }
 
+            int delta = max - min;
+
             //Sを求める  
-            int s = (int)((max - min) * 255 / max);
+            int s = delta * 255 / max;
 
             //Hを求める  
             int h = 0;
             if (max == r)
             {
-                h = (int)(60 * (g - b) / (max - min));
+                h = 60 * (g - b) / delta;
                 if (h < 0)
                 {
                     h += 360;
@@ -38,19 +40,11 @@ namespace Eede.Domain.Palettes
             }
             else if (max == g)
             {
-                h = (int)(60 * (b - r) / (max - min)) + 120;
-                if (h < 0)
-                {
-                    h += 360;
-                }
+                h = 60 * (b - r) / delta + 120;
             }
             else if (max == b)
             {
-                h = (int)(60 * (r - g) / (max - min)) + 240;
-                if (h < 0)
-                {
-                    h += 360;
-                }
+                h = 60 * (r - g) / delta + 240;
             }
             return new HsvColor(h, s, v);
         }
@@ -106,11 +100,7 @@ namespace Eede.Domain.Palettes
 
         public override int GetHashCode()
         {
-            int hashCode = -1397884734;
-            hashCode = hashCode * -1521134295 + Hue.GetHashCode();
-            hashCode = hashCode * -1521134295 + Saturation.GetHashCode();
-            hashCode = hashCode * -1521134295 + Value.GetHashCode();
-            return hashCode;
+            return HashCode.Combine(Hue, Saturation, Value);
         }
     }
 }

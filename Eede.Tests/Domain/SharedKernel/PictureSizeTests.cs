@@ -22,7 +22,8 @@ namespace Eede.Domain.Tests.SharedKernel
         [TestCase(10, -1)]
         public void Constructor_ThrowsException_WhenDimensionIsOutOfRange(int width, int height)
         {
-            Assert.Throws<ArgumentException>(() => new PictureSize(width, height));
+            var ex = Assert.Throws<ArgumentException>(() => new PictureSize(width, height));
+            Assert.That(ex!.Message, Does.Contain("invalid argument"));
         }
     }
 }

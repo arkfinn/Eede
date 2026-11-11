@@ -124,5 +124,57 @@ namespace Eede.Tests.Presentation.Common
             Assert.That(result.X, Is.EqualTo(0.0));
             Assert.That(result.Y, Is.EqualTo(0.0));
         }
+
+        [Test]
+        public void CalculateOverscrollMargin_StandardViewport_ReturnsSnappedMargin()
+        {
+            // Viewport = (800, 600)
+            // W: 800 / 32 = 25 -> 25 * 16 = 400
+            // H: 600 / 32 = 18.75 -> ceil(18.75) = 19 -> 19 * 16 = 304
+            var viewport = new Size(800, 600);
+            var margin = ZoomHelper.CalculateOverscrollMargin(viewport);
+
+            Assert.That(margin.X, Is.EqualTo(400.0));
+            Assert.That(margin.Y, Is.EqualTo(304.0));
+        }
+
+        [Test]
+        public void CalculateOverscrollMargin_TinyViewport_ReturnsMinMargin()
+        {
+            var viewport = new Size(10, 10);
+            var margin = ZoomHelper.CalculateOverscrollMargin(viewport);
+
+            Assert.That(margin.X, Is.EqualTo(32.0));
+            Assert.That(margin.Y, Is.EqualTo(32.0));
+        }
+
+        [Test]
+        public void CalculateZoomOffset_WithMargin_KeepsPointerPositionStatic()
+        {
+            // Margin = (100, 100), oldOffset = (100, 100), pointer = (50, 50), 1x -> 2x
+            // newOffset = 100 + ((100 + 50 - 100) * 2) - 50 = 150
+            var oldOffset = new Vector(100, 100);
+            var pointer = new Point(50, 50);
+            var margin = new Vector(100, 100);
+            var newOffset = ZoomHelper.CalculateZoomOffset(oldOffset, pointer, 1f, 2f, margin);
+
+            Assert.That(newOffset.X, Is.EqualTo(150.0).Within(0.001));
+            Assert.That(newOffset.Y, Is.EqualTo(150.0).Within(0.001));
+        }
+
+        [Test]
+        public void CalculateInitialOffset_CentersCanvasInViewport()
+        {
+            // margin = (400, 300), displaySize = (200, 100), viewport = (800, 600)
+            // initX = 400 + (200 - 800) / 2 = 100
+            // initY = 300 + (100 - 600) / 2 = 50
+            var margin = new Vector(400, 300);
+            var displaySize = new Size(200, 100);
+            var viewport = new Size(800, 600);
+            var initOffset = ZoomHelper.CalculateInitialOffset(margin, displaySize, viewport);
+
+            Assert.That(initOffset.X, Is.EqualTo(100.0).Within(0.001));
+            Assert.That(initOffset.Y, Is.EqualTo(50.0).Within(0.001));
+        }
     }
 }

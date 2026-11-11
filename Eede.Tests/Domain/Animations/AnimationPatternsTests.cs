@@ -60,16 +60,36 @@ public class AnimationPatternsTests
         var grid = new GridSettings(new PictureSize(16, 16), new Position(0, 0), 0);
         var pattern = new AnimationPattern("Test", new List<AnimationFrame>(), grid);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => patterns.Replace(0, pattern));
-        Assert.Throws<ArgumentOutOfRangeException>(() => patterns.Replace(-1, pattern));
+        var ex0 = Assert.Throws<ArgumentOutOfRangeException>(() => patterns.Replace(0, pattern));
+        Assert.That(ex0.ParamName, Is.EqualTo("index"));
+        Assert.That(ex0.Message, Does.Contain("Index is out of range."));
+
+        var exNeg = Assert.Throws<ArgumentOutOfRangeException>(() => patterns.Replace(-1, pattern));
+        Assert.That(exNeg.ParamName, Is.EqualTo("index"));
+        Assert.That(exNeg.Message, Does.Contain("Index is out of range."));
 
         var patternsWithOne = patterns.Add(pattern);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.Replace(-1, pattern));
-        Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.Replace(1, pattern));
+        var exNeg1 = Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.Replace(-1, pattern));
+        Assert.That(exNeg1.ParamName, Is.EqualTo("index"));
+        Assert.That(exNeg1.Message, Does.Contain("Index is out of range."));
+
+        var ex1 = Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.Replace(1, pattern));
+        Assert.That(ex1.ParamName, Is.EqualTo("index"));
+        Assert.That(ex1.Message, Does.Contain("Index is out of range."));
+
         Assert.Throws<ArgumentNullException>(() => patternsWithOne.Replace(0, null!));
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.RemoveAt(-1));
-        Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.RemoveAt(1));
+        var exRemNeg = Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.RemoveAt(-1));
+        Assert.That(exRemNeg.ParamName, Is.EqualTo("index"));
+        Assert.That(exRemNeg.Message, Does.Contain("Index is out of range."));
+
+        var exRem1 = Assert.Throws<ArgumentOutOfRangeException>(() => patternsWithOne.RemoveAt(1));
+        Assert.That(exRem1.ParamName, Is.EqualTo("index"));
+        Assert.That(exRem1.Message, Does.Contain("Index is out of range."));
+
+        var exRem0 = Assert.Throws<ArgumentOutOfRangeException>(() => patterns.RemoveAt(0));
+        Assert.That(exRem0.ParamName, Is.EqualTo("index"));
+        Assert.That(exRem0.Message, Does.Contain("Index is out of range."));
     }
 }

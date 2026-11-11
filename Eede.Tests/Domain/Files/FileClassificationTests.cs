@@ -39,6 +39,23 @@ namespace Eede.Tests.Domain.Files
         {
             Assert.That(FileClassification.IsSupportedPalette(input), Is.EqualTo(expected));
         }
+
+        [TestCase("", "")]
+        [TestCase("?query.png", "")]
+        [TestCase("#fragment.png", "")]
+        [TestCase("?query", "")]
+        [TestCase("#fragment", "")]
+        [TestCase("test?query=1", "")]
+        [TestCase("test#hash", "")]
+        [TestCase("test.png?query=1#hash", ".png")]
+        [TestCase(".png", ".png")]
+        [TestCase("noext", "")]
+        [TestCase("folder/.gitignore", ".gitignore")]
+        [TestCase("path/to/FILE.BMP", ".bmp")]
+        public void GetExtension_ReturnsExpected(string input, string expected)
+        {
+            Assert.That(FileClassification.GetExtension(input), Is.EqualTo(expected));
+        }
     }
 
     [TestFixture]
@@ -48,9 +65,22 @@ namespace Eede.Tests.Domain.Files
         public void FileIdentity_ExtractsNameAndExtension_FromLocalPath()
         {
             var identity = new FileIdentity(@"C:\Users\ark\Documents\my_dot.png");
+            Assert.That(identity.Path, Is.EqualTo(@"C:\Users\ark\Documents\my_dot.png"));
             Assert.That(identity.Name, Is.EqualTo("my_dot.png"));
             Assert.That(identity.Extension, Is.EqualTo(".png"));
             Assert.That(identity.IsSupportedImage, Is.True);
+            Assert.That(identity.IsSupportedPalette, Is.False);
+            Assert.That(identity.ToString(), Is.EqualTo(@"C:\Users\ark\Documents\my_dot.png"));
+        }
+
+        [Test]
+        public void FileIdentity_SupportsPalette()
+        {
+            var identity = new FileIdentity(@"C:\palettes\sample.act");
+            Assert.That(identity.Name, Is.EqualTo("sample.act"));
+            Assert.That(identity.Extension, Is.EqualTo(".act"));
+            Assert.That(identity.IsSupportedImage, Is.False);
+            Assert.That(identity.IsSupportedPalette, Is.True);
         }
 
         [Test]
@@ -61,6 +91,28 @@ namespace Eede.Tests.Domain.Files
             Assert.That(identity.Name, Is.EqualTo("avatar.png"));
             Assert.That(identity.Extension, Is.EqualTo(".png"));
             Assert.That(identity.IsSupportedImage, Is.True);
+        }
+
+        [Test]
+        public void FileIdentity_WithNullPath_NormalizesToEmpty()
+        {
+            var identity = new FileIdentity(null!);
+            Assert.That(identity.Path, Is.EqualTo(string.Empty));
+            Assert.That(identity.Name, Is.EqualTo(string.Empty));
+            Assert.That(identity.ToString(), Is.EqualTo(string.Empty));
+        }
+
+        [TestCase("", "")]
+        [TestCase("?query.png", "")]
+        [TestCase("?query=1", "")]
+        [TestCase("/rootfile.png", "rootfile.png")]
+        [TestCase("\\rootfile.png", "rootfile.png")]
+        [TestCase("directfile.png", "directfile.png")]
+        [TestCase("dir/sub/file.png?query=1", "file.png")]
+        public void FileIdentity_ExtractsName_EdgeCases(string path, string expectedName)
+        {
+            var identity = new FileIdentity(path);
+            Assert.That(identity.Name, Is.EqualTo(expectedName));
         }
     }
 }

@@ -36,6 +36,33 @@ namespace Eede.Domain.Tests.Palettes
                 Assert.That(color1.EqualsArgb(color2), Is.True);
                 Assert.That(color1.EqualsRgb(color3), Is.True);
                 Assert.That(color1.EqualsArgb(color3), Is.False);
+
+                // IEquatable<ArgbColor>.Equals
+                Assert.That(color1.Equals(color2), Is.True);
+                Assert.That(color1 == color2, Is.True);
+                Assert.That(color1 != color3, Is.True);
+
+                // 個別コンポーネントが異なる場合の不一致検証 (Logical mutation 撃破)
+                var diffAlpha = new ArgbColor(0, 10, 20, 30);
+                var diffRed = new ArgbColor(255, 99, 20, 30);
+                var diffGreen = new ArgbColor(255, 10, 99, 30);
+                var diffBlue = new ArgbColor(255, 10, 20, 99);
+
+                Assert.That(color1.Equals(diffAlpha), Is.False);
+                Assert.That(color1.Equals(diffRed), Is.False);
+                Assert.That(color1.Equals(diffGreen), Is.False);
+                Assert.That(color1.Equals(diffBlue), Is.False);
+
+                // EqualsRgb と EqualsArgb の各チャンネル不一致検証 (Logical mutation 撃破)
+                Assert.That(color1.EqualsRgb(diffRed), Is.False);
+                Assert.That(color1.EqualsRgb(diffGreen), Is.False);
+                Assert.That(color1.EqualsRgb(diffBlue), Is.False);
+                Assert.That(color1.EqualsRgb(diffAlpha), Is.True);
+
+                Assert.That(color1.EqualsArgb(diffRed), Is.False);
+                Assert.That(color1.EqualsArgb(diffGreen), Is.False);
+                Assert.That(color1.EqualsArgb(diffBlue), Is.False);
+                Assert.That(color1.EqualsArgb(diffAlpha), Is.False);
             });
         }
     }

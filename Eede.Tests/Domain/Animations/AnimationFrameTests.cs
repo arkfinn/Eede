@@ -42,9 +42,14 @@ public class AnimationFrameTests
     [Test]
     public void Constructor_WithInvalidValues_ThrowsArgumentOutOfRangeException()
     {
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(-1, 100));
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(0, 0));
-        Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(0, -50));
+        var exCell = Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(-1, 100));
+        Assert.That(exCell.Message, Does.Contain("CellIndex must be non-negative."));
+
+        var exDur1 = Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(0, 0));
+        Assert.That(exDur1.Message, Does.Contain("Duration must be positive."));
+
+        var exDur2 = Assert.Throws<System.ArgumentOutOfRangeException>(() => new AnimationFrame(0, -50));
+        Assert.That(exDur2.Message, Does.Contain("Duration must be positive."));
     }
 
     [Test]

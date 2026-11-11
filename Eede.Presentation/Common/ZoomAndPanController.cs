@@ -27,7 +27,8 @@ namespace Eede.Presentation.Common
             Magnification currentMag,
             Action<Magnification> setMag,
             Action? updateLayout = null,
-            Visual? relativeTo = null)
+            Visual? relativeTo = null,
+            Vector margin = default)
         {
             if (scrollViewer == null) return false;
             if ((e.KeyModifiers & KeyModifiers.Control) == 0) return false;
@@ -43,7 +44,7 @@ namespace Eede.Presentation.Common
             if (newMag.Value != currentMag.Value)
             {
                 var pointerPos = e.GetPosition(relativeTo ?? scrollViewer);
-                var newOffset = ZoomHelper.CalculateZoomOffset(scrollViewer.Offset, pointerPos, currentMag.Value, newMag.Value);
+                var newOffset = ZoomHelper.CalculateZoomOffset(scrollViewer.Offset, pointerPos, currentMag.Value, newMag.Value, margin);
                 setMag(newMag);
                 updateLayout?.Invoke();
                 scrollViewer.Offset = newOffset;

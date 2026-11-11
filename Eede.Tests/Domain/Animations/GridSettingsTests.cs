@@ -117,4 +117,69 @@ public class GridSettingsTests
         Assert.That(settings1, Is.Not.EqualTo(settings2));
         Assert.That(settings1 != settings2, Is.True);
     }
+
+    [Test]
+    public void Constructor_WithInvalidValues_ThrowsArgumentOutOfRangeException()
+    {
+        // cellSize Width <= 0
+        var exW = Assert.Throws<System.ArgumentOutOfRangeException>(() =>
+            new GridSettings(new PictureSize(0, 10), new Position(0, 0), 0));
+        Assert.That(exW.ParamName, Is.EqualTo("cellSize"));
+        Assert.That(exW.Message, Does.Contain("Cell dimensions must be positive."));
+
+        // cellSize Height <= 0
+        var exH = Assert.Throws<System.ArgumentOutOfRangeException>(() =>
+            new GridSettings(new PictureSize(10, 0), new Position(0, 0), 0));
+        Assert.That(exH.ParamName, Is.EqualTo("cellSize"));
+        Assert.That(exH.Message, Does.Contain("Cell dimensions must be positive."));
+
+        // offset X < 0
+        var exX = Assert.Throws<System.ArgumentOutOfRangeException>(() =>
+            new GridSettings(new PictureSize(10, 10), new Position(-1, 0), 0));
+        Assert.That(exX.ParamName, Is.EqualTo("offset"));
+        Assert.That(exX.Message, Does.Contain("Offset coordinates must be non-negative."));
+
+        // offset Y < 0
+        var exY = Assert.Throws<System.ArgumentOutOfRangeException>(() =>
+            new GridSettings(new PictureSize(10, 10), new Position(0, -1), 0));
+        Assert.That(exY.ParamName, Is.EqualTo("offset"));
+        Assert.That(exY.Message, Does.Contain("Offset coordinates must be non-negative."));
+
+        // padding < 0
+        var exP = Assert.Throws<System.ArgumentOutOfRangeException>(() =>
+            new GridSettings(new PictureSize(10, 10), new Position(0, 0), -1));
+        Assert.That(exP.ParamName, Is.EqualTo("padding"));
+        Assert.That(exP.Message, Does.Contain("Padding must be non-negative."));
+    }
+
+    [Test]
+    public void CalculateCellIndex_WithOffsetAndPadding_CalculatesCorrectRowAndColumn()
+    {
+        // CellSize: 10x10, Offset: (5, 5), Padding: 2 -> step = 12
+        var settings = new GridSettings(new PictureSize(10, 10), new Position(5, 5), 2);
+        // imageSize: Width=41, Height=41 -> (41 - 5 + 2) / 12 = 38 / 12 = 3 columns, 3 rows
+        var imageSize = new PictureSize(41, 41);
+
+        // Position: (5 + 12, 5 + 12) = (17, 17) -> col = 1, row = 1 -> index = 1 * 3 + 1 = 4
+        var index = settings.CalculateCellIndex(new Position(17, 17), imageSize);
+        Assert.That(index, Is.EqualTo(4));
+
+        // Position: (5, 5 + 24) = (5, 29) -> col = 0, row = 2 -> index = 2 * 3 + 0 = 6
+        var indexRow2 = settings.CalculateCellIndex(new Position(5, 29), imageSize);
+        Assert.That(indexRow2, Is.EqualTo(6));
+
+        // Out of bounds row: row >= 3 (Y >= 5 + 36 = 41)
+        var outOfBoundsY = settings.CalculateCellIndex(new Position(17, 41), imageSize);
+        Assert.That(outOfBoundsY, Is.EqualTo(-1));
+    }
+
+    [Test]
+    public void Validate_ReturnsTrueForValidSettings()
+    {
+        var settings = new GridSettings(new PictureSize(10, 10), new Position(0, 0), 0);
+        Assert.That(settings.Validate(), Is.True);
+
+        var uninitialized = (GridSettings)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(GridSettings));
+        Assert.That(uninitialized.Validate(), Is.False);
+    }
 }

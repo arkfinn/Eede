@@ -31,6 +31,20 @@ namespace Eede.Domain.Tests.SharedKernel
         }
 
         [Test]
+        public void OperatorPlusTest()
+        {
+            var p1 = new Position(10, 20);
+            var p2 = new Position(5, 7);
+            var result = p1 + p2;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.X, Is.EqualTo(15));
+                Assert.That(result.Y, Is.EqualTo(27));
+            });
+        }
+
+        [Test]
         public void GetHashCodeTest()
         {
             var p1 = new Position(1, 2);

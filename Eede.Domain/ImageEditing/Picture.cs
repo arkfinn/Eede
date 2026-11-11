@@ -16,22 +16,18 @@ public record Picture
     public static Picture Create(PictureSize size, byte[] imageData)
     {
         if (imageData == null) throw new ArgumentNullException(nameof(imageData));
-        long totalBytes = (long)size.Width * COLOR_32BIT * size.Height;
-        if (totalBytes > Array.MaxLength || totalBytes != imageData.Length)
+        int totalBytes = size.Width * COLOR_32BIT * size.Height;
+        if (totalBytes != imageData.Length)
         {
             throw new ArgumentException($"(width:{size.Width}, height:{size.Height}) * {COLOR_32BIT} != length:{imageData.Length}");
         }
-        int stride = checked(size.Width * COLOR_32BIT);
+        int stride = size.Width * COLOR_32BIT;
         return new Picture(size, imageData, stride);
     }
 
     public static Picture CreateEmpty(PictureSize size)
     {
-        long totalBytes = (long)size.Width * COLOR_32BIT * size.Height;
-        if (totalBytes > Array.MaxLength)
-        {
-            throw new ArgumentOutOfRangeException(nameof(size));
-        }
+        int totalBytes = size.Width * COLOR_32BIT * size.Height;
         return Create(size, new byte[totalBytes]);
     }
 
@@ -86,28 +82,22 @@ public record Picture
         int destinationStride = area.Width * PixelSizeInBytes;
         byte[] cutoutImageData = new byte[destinationStride * area.Height];
 
-        // 画像の有効領域 (0, 0, Width, Height) と area の交差範囲を計算
-        int startX = Math.Max(0, area.X);
-        int startY = Math.Max(0, area.Y);
-        int endX = Math.Min(Width, area.X + area.Width);
-        int endY = Math.Min(Height, area.Y + area.Height);
+        PictureArea bounds = new(new Position(0, 0), Size);
+        PictureArea intersection = bounds.Intersect(area);
 
-        int copyWidth = Math.Max(0, endX - startX);
-        int copyHeight = Math.Max(0, endY - startY);
-
-        if (copyWidth > 0 && copyHeight > 0)
+        if (!intersection.IsEmpty)
         {
-            int copyBytesPerLine = copyWidth * PixelSizeInBytes;
+            int copyBytesPerLine = intersection.Width * PixelSizeInBytes;
             ReadOnlySpan<byte> sourceSpan = AsSpan();
             Span<byte> destinationSpan = new(cutoutImageData);
 
-            for (int y = 0; y < copyHeight; y++)
+            for (int y = 0; y < intersection.Height; y++)
             {
-                int currentSourceY = startY + y;
-                int currentDestY = (startY - area.Y) + y;
+                int currentSourceY = intersection.Y + y;
+                int currentDestY = (intersection.Y - area.Y) + y;
 
-                int sourceStartIndex = (startX * PixelSizeInBytes) + (currentSourceY * Stride);
-                int destinationStartIndex = ((startX - area.X) * PixelSizeInBytes) + (currentDestY * destinationStride);
+                int sourceStartIndex = (intersection.X * PixelSizeInBytes) + (currentSourceY * Stride);
+                int destinationStartIndex = ((intersection.X - area.X) * PixelSizeInBytes) + (currentDestY * destinationStride);
 
                 sourceSpan.Slice(sourceStartIndex, copyBytesPerLine)
                           .CopyTo(destinationSpan.Slice(destinationStartIndex, copyBytesPerLine));
@@ -166,17 +156,14 @@ public record Picture
 
     public Picture ReplaceColor(ArgbColor targetColor, ArgbColor replacementColor, PictureArea? area = null)
     {
-        if (targetColor.EqualsArgb(replacementColor) || ImageData.Length == 0 || (area.HasValue && area.Value.IsEmpty))
+        if (targetColor.EqualsArgb(replacementColor) || ImageData.Length == 0)
         {
             return this;
         }
 
-        int startX = area.HasValue ? Math.Max(0, area.Value.X) : 0;
-        int startY = area.HasValue ? Math.Max(0, area.Value.Y) : 0;
-        int endX = area.HasValue ? Math.Min(Width, area.Value.X + area.Value.Width) : Width;
-        int endY = area.HasValue ? Math.Min(Height, area.Value.Y + area.Value.Height) : Height;
-        int width = endX - startX;
-        if (width <= 0 || endY - startY <= 0)
+        PictureArea bounds = new(new Position(0, 0), Size);
+        PictureArea targetArea = area.HasValue ? bounds.Intersect(area.Value) : bounds;
+        if (targetArea.IsEmpty)
         {
             return this;
         }
@@ -189,7 +176,11 @@ public record Picture
         Span<uint> destUints = default;
         ReadOnlySpan<uint> srcUints = MemoryMarshal.Cast<byte, uint>(AsSpan());
 
-        for (int y = startY; y < endY; y++)
+        int startX = targetArea.X;
+        int endY = targetArea.Y + targetArea.Height;
+        int width = targetArea.Width;
+
+        for (int y = targetArea.Y; y < endY; y++)
         {
             int rowOffset = y * Width + startX;
             ReadOnlySpan<uint> srcRow = srcUints.Slice(rowOffset, width);

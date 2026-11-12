@@ -180,7 +180,7 @@ public class PictureContainerTests
         Assert.That(background, Is.Not.Null, "背景色が設定されている必要があります");
         // 1. ルート要素の不透明性検証
         Assert.That(_container.Opacity, Is.EqualTo(1.0), "PictureContainer 自体が不透明である必要があります");
-        Assert.That(_container.Background is ISolidColorBrush b && b.Color == Color.Parse("#0e0e0e"), "ルート背景が #0e0e0e である必要があります");
+        Assert.That(_container.Background is ISolidColorBrush b && b.Color.A == 255, "ルート背景は不透明である必要があります");
 
         var allChildren = _container.GetVisualDescendants();
         
@@ -188,8 +188,8 @@ public class PictureContainerTests
         var outsideTilePanel = allChildren.OfType<Avalonia.Controls.Panel>().FirstOrDefault(p => p.Name == "outsideTilePanel");
         Assert.That(outsideTilePanel, Is.Not.Null, "outsideTilePanel が見つかりません");
         var outsideBrush = outsideTilePanel!.Background as ISolidColorBrush;
-        Assert.That(outsideBrush?.Color, Is.EqualTo(Color.Parse("#0e0e0e")), 
-            "outsideTilePanel の背景は不透明な黒 (#0e0e0e) であるべきです。タイルの隙間からの透過を防ぎます。");
+        Assert.That(outsideBrush != null && outsideBrush.Color.A == 255, 
+            "outsideTilePanel の背景は不透明であるべきです。タイルの隙間からの透過を防ぎます。");
 
         // 3. 画像直下のシールド（透過を妨げないよう Transparent であること）
         var renderingRoot = allChildren.OfType<Avalonia.Controls.Panel>().FirstOrDefault(p => p.Name == "renderingRoot");

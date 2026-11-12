@@ -11,21 +11,21 @@ public interface IHistoryItem
 
 public record CanvasHistoryItem(Picture Picture, PictureArea? SelectingArea) : IHistoryItem;
 
-public record PictureDiff(PictureArea Area, Picture Before, Picture After)
+public record PictureDiff(PictureArea Area, Picture Before, Picture? After = null)
 {
-    public PictureDiff Reverse() => new PictureDiff(Area, After, Before);
+    public PictureDiff Reverse(Picture currentPicture)
+    {
+        var after = After ?? currentPicture.CutOut(Area);
+        return new PictureDiff(Area, after, Before);
+    }
 }
 
 public record DiffHistoryItem(IReadOnlyList<PictureDiff> Diffs, PictureArea? SelectingArea) : IHistoryItem
 {
-    private IReadOnlyList<PictureDiff>? _reversedDiffs;
-
-    private IReadOnlyList<PictureDiff> ReversedDiffs =>
-        _reversedDiffs ??= Diffs.Select(d => d.Reverse()).ToList().AsReadOnly();
-
-    public DiffHistoryItem Reverse(PictureArea? selectingArea)
+    public DiffHistoryItem Reverse(Picture currentPicture, PictureArea? selectingArea)
     {
-        return new DiffHistoryItem(ReversedDiffs, selectingArea) { _reversedDiffs = Diffs };
+        var reversed = Diffs.Select(d => d.Reverse(currentPicture)).ToList().AsReadOnly();
+        return new DiffHistoryItem(reversed, selectingArea);
     }
 }
 

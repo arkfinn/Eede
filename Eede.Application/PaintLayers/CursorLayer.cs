@@ -43,17 +43,29 @@ namespace Eede.Application.PaintLayers
                 displayColor = new ArgbColor(255, originalColor.Red, originalColor.Green, originalColor.Blue);
             }
 
-            // 3. 背景と同じサイズの透明なレイヤーを用意し、そこに等倍のペン先を描く
-            Picture cursorLayer = Picture.CreateEmpty(source.Size);
-            // カーソル描画自体は上書き(Direct)で行う
-            PenStyle displayPenStyle = new(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), displayColor, PenStyle.Width);
-            Drawer drawer = new(cursorLayer, displayPenStyle);
-
-            // 描画位置は元の座標を使用
-            var result = drawer.DrawPoint(Position);
-
-            // 4. トーン変換済みの背景に対して、ペン先のみをアルファブレンドで重ねる
-            return source.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), result.Picture, new Position(0, 0));
+            // 3. ペン先を描画する
+            if (PenStyle.Blender is Eede.Domain.ImageEditing.Blending.AlphaImageBlender)
+            {
+                // アルファブレンドペンの場合、背景全体の二重ブレンドを防ぐため空レイヤー経由で合成
+                Picture cursorLayer = Picture.CreateEmpty(source.Size);
+                PenStyle displayPenStyle = new(PenStyle.Blender, displayColor, PenStyle.Width);
+                Drawer drawer = new(cursorLayer, displayPenStyle);
+                var result = drawer.DrawPoint(Position);
+                return source.Blend(new Eede.Domain.ImageEditing.Blending.AlphaImageBlender(), result.Picture, new Position(0, 0));
+            }
+            else
+            {
+                // 直接上書き系（Direct, RGBOnly, AlphaOnly等）の場合：
+                // source は既にトーン変換済みの表示用画像であるため、
+                // トーン変換後の色（displayColor）を DirectImageBlender で描画する。
+                // これにより：
+                // - ARGBレイヤー (Direct): originalColor.Alpha が 0 なら透明になり背面の市松模様が見え、半透明なら薄い市松模様が見える
+                // - RGBレイヤー: 選択色のRGBが不透明で描かれる
+                // - Alphaレイヤー: 選択色のAlpha値がグレースケール輝度として描かれる
+                PenStyle displayPenStyle = new(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), displayColor, PenStyle.Width);
+                Drawer drawer = new(source, displayPenStyle);
+                return drawer.DrawPoint(Position).Picture;
+            }
         }
     }
 }

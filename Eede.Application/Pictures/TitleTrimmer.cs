@@ -1,9 +1,10 @@
+#nullable enable
 using System;
 using System.IO;
 
 namespace Eede.Application.Pictures;
 
-public static class TitleTrimmingHelper
+public static class TitleTrimmer
 {
     /// <summary>
     /// 文字列が指定長を超える場合、先頭と末尾（拡張子含む）を保持したまま中間部を "..." に置換して短縮します。
@@ -19,22 +20,21 @@ public static class TitleTrimmingHelper
         }
 
         string ext = Path.GetExtension(text);
-        string nameWithoutExt = Path.GetFileNameWithoutExtension(text);
+        int maxWithoutEllipsis = maxLength - 3;
 
         // 拡張子自体が長すぎて中間省略枠に収まらない場合は末尾をトリム
-        if (ext.Length >= maxLength - 3)
+        if (ext.Length >= maxWithoutEllipsis)
         {
-            return text.Substring(0, maxLength - 3) + "...";
+            return text.Substring(0, maxWithoutEllipsis) + "...";
         }
 
-        int availableLength = maxLength - 3 - ext.Length;
+        string nameWithoutExt = Path.GetFileNameWithoutExtension(text);
+        int availableLength = maxWithoutEllipsis - ext.Length;
         int headLength = (availableLength + 1) / 2;
         int tailLength = availableLength - headLength;
 
         string head = nameWithoutExt.Substring(0, Math.Min(headLength, nameWithoutExt.Length));
-        string tail = tailLength > 0 && nameWithoutExt.Length >= tailLength
-            ? nameWithoutExt.Substring(nameWithoutExt.Length - tailLength)
-            : "";
+        string tail = nameWithoutExt.Substring(nameWithoutExt.Length - tailLength);
 
         return $"{head}...{tail}{ext}";
     }

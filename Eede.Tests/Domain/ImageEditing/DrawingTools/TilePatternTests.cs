@@ -172,6 +172,35 @@ public class TilePatternTests
         });
     }
 
+    [Test]
+    public void StaticPatterns_ExposeExpectedDisplayNamesAndFromTypeLookup()
+    {
+        var expected = new[]
+        {
+            (TilePatternType.Solid, TilePattern.Solid, "100% ベタ塗り"),
+            (TilePatternType.Dense87, TilePattern.Dense87, "87.5%"),
+            (TilePatternType.Dense75, TilePattern.Dense75, "75%"),
+            (TilePatternType.Dense62, TilePattern.Dense62, "62.5%"),
+            (TilePatternType.Checker50, TilePattern.Checker50, "50% 市松"),
+            (TilePatternType.Sparse37, TilePattern.Sparse37, "37.5%"),
+            (TilePatternType.Sparse25, TilePattern.Sparse25, "25%"),
+            (TilePatternType.Sparse12, TilePattern.Sparse12, "12.5%"),
+        };
+
+        Assert.Multiple(() =>
+        {
+            foreach (var (type, pattern, name) in expected)
+            {
+                Assert.That(pattern.DisplayName, Is.EqualTo(name));
+                Assert.That(TilePattern.FromType(type), Is.SameAs(pattern));
+                Assert.That(pattern.WithOffsetX(pattern.OffsetX), Is.SameAs(pattern));
+            }
+            var shifted = TilePattern.Dense87.WithOffsetX(1);
+            Assert.That(shifted.WithOffsetX(1), Is.SameAs(shifted));
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => TilePattern.FromType((TilePatternType)999));
+        });
+    }
+
     private static Picture CreateMonoPicture(PictureSize size, ArgbColor color)
     {
         var data = new byte[size.Width * size.Height * 4];

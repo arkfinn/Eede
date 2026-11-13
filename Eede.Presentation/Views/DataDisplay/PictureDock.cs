@@ -128,7 +128,7 @@ namespace Eede.Presentation.Views.DataDisplay
         {
             if (Pictures != null)
             {
-                TitleDisambiguationService.Recompute(Pictures.OfType<DockPictureViewModel>());
+                TitleDisambiguator.Recompute(Pictures.OfType<DockPictureViewModel>());
             }
         }
     }

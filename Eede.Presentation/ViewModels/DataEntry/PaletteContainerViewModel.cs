@@ -286,7 +286,7 @@ public partial class PaletteContainerViewModel : ViewModelBase
             var newTab = new PaletteTabViewModel(palette, pathStr);
             AddOrSelectTab(newTab);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is ArgumentException or System.IO.IOException or UnauthorizedAccessException or NotSupportedException or InvalidOperationException or FormatException)
         {
             System.Diagnostics.Trace.WriteLine($"Failed to load palette: {ex.Message}");
         }
@@ -412,7 +412,7 @@ public partial class PaletteContainerViewModel : ViewModelBase
             tab.ResetDirty();
             return true;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is ArgumentException or System.IO.IOException or UnauthorizedAccessException or NotSupportedException or InvalidOperationException)
         {
             System.Diagnostics.Trace.WriteLine($"Failed to save palette: {ex.Message}");
             return false;

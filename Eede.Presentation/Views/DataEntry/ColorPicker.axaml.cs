@@ -229,17 +229,7 @@ namespace Eede.Presentation.Views.DataEntry
                 text3.Text = "B";
             }
 
-            _isSyncingSliders = true;
-            try
-            {
-                UpdateSliderConfiguration();
-                UpdatePicker(NowColor);
-            }
-            finally
-            {
-                _isSyncingSliders = false;
-            }
-            UpdateGradationColor();
+            RefreshModeDisplay();
         }
 
         private void ToggleDepthMode(object? sender, RoutedEventArgs e)
@@ -249,16 +239,21 @@ namespace Eede.Presentation.Views.DataEntry
                 : ColorDepthMode.Depth256;
             depthModeText.Text = DepthMode == ColorDepthMode.Depth16 ? "16" : "256";
 
+            RefreshModeDisplay();
+        }
+
+        private void RefreshModeDisplay()
+        {
             _isSyncingSliders = true;
             try
             {
                 UpdateSliderConfiguration();
-                UpdatePicker(NowColor);
             }
             finally
             {
                 _isSyncingSliders = false;
             }
+            UpdatePicker(NowColor);
             UpdateGradationColor();
         }
 

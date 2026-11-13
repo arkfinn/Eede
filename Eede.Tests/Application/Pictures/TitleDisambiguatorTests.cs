@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Eede.Tests.Application.Pictures;
 
 [TestFixture]
-public class TitleDisambiguationServiceTests
+public class TitleDisambiguatorTests
 {
     private class TestItem : IDisambiguatableItem
     {
@@ -19,6 +19,12 @@ public class TitleDisambiguationServiceTests
     }
 
     [Test]
+    public void Recompute_NullItems_DoesNotThrow()
+    {
+        Assert.DoesNotThrow(() => TitleDisambiguator.Recompute<TestItem>(null));
+    }
+
+    [Test]
     public void Recompute_NoDuplicates_SuffixesRemainEmpty()
     {
         var items = new List<TestItem>
@@ -28,7 +34,7 @@ public class TitleDisambiguationServiceTests
             new(@"C:\game\backgrounds\forest.png")
         };
 
-        TitleDisambiguationService.Recompute(items);
+        TitleDisambiguator.Recompute(items);
 
         Assert.That(items[0].DisambiguationSuffix, Is.EqualTo(""));
         Assert.That(items[1].DisambiguationSuffix, Is.EqualTo(""));
@@ -44,7 +50,7 @@ public class TitleDisambiguationServiceTests
             new(@"C:\game\monster\walk.png")
         };
 
-        TitleDisambiguationService.Recompute(items);
+        TitleDisambiguator.Recompute(items);
 
         Assert.That(items[0].DisambiguationSuffix, Is.EqualTo(" — player"));
         Assert.That(items[1].DisambiguationSuffix, Is.EqualTo(" — monster"));
@@ -59,10 +65,40 @@ public class TitleDisambiguationServiceTests
             new(@"C:\projectB\assets\sprites\walk.png")
         };
 
-        TitleDisambiguationService.Recompute(items);
+        TitleDisambiguator.Recompute(items);
 
         Assert.That(items[0].DisambiguationSuffix, Is.EqualTo(" — projectA/assets/sprites"));
         Assert.That(items[1].DisambiguationSuffix, Is.EqualTo(" — projectB/assets/sprites"));
+    }
+
+    [Test]
+    public void Recompute_DifferentDepthWithMatchingLeaf_HandlesBoundaryWithoutOutOfRange()
+    {
+        var items = new List<TestItem>
+        {
+            new("sprites/walk.png"),
+            new("projectB/sprites/walk.png")
+        };
+
+        TitleDisambiguator.Recompute(items);
+
+        Assert.That(items[0].DisambiguationSuffix, Is.EqualTo(" — sprites"));
+        Assert.That(items[1].DisambiguationSuffix, Is.EqualTo(" — projectB/sprites"));
+    }
+
+    [Test]
+    public void Recompute_DuplicateFileNamesWithoutDirectory_SuffixesRemainEmpty()
+    {
+        var items = new List<TestItem>
+        {
+            new("walk.png"),
+            new("WALK.png")
+        };
+
+        TitleDisambiguator.Recompute(items);
+
+        Assert.That(items[0].DisambiguationSuffix, Is.EqualTo(""));
+        Assert.That(items[1].DisambiguationSuffix, Is.EqualTo(""));
     }
 
     [Test]
@@ -72,12 +108,12 @@ public class TitleDisambiguationServiceTests
         var itemB = new TestItem(@"C:\game\monster\walk.png");
         var items = new List<TestItem> { itemA, itemB };
 
-        TitleDisambiguationService.Recompute(items);
+        TitleDisambiguator.Recompute(items);
         Assert.That(itemA.DisambiguationSuffix, Is.EqualTo(" — player"));
 
         // itemB を削除して再計算
         items.Remove(itemB);
-        TitleDisambiguationService.Recompute(items);
+        TitleDisambiguator.Recompute(items);
 
         Assert.That(itemA.DisambiguationSuffix, Is.EqualTo(""));
     }
@@ -92,7 +128,7 @@ public class TitleDisambiguationServiceTests
             new(@"C:\game\player\walk.png")
         };
 
-        Assert.DoesNotThrow(() => TitleDisambiguationService.Recompute(items));
+        Assert.DoesNotThrow(() => TitleDisambiguator.Recompute(items));
         Assert.That(items[0].DisambiguationSuffix, Is.EqualTo(""));
         Assert.That(items[1].DisambiguationSuffix, Is.EqualTo(""));
         Assert.That(items[2].DisambiguationSuffix, Is.EqualTo(""));

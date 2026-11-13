@@ -209,7 +209,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         {
             _ = this.WhenAnyValue(x => x.BaseName, x => x.DisambiguationSuffix, x => x.Edited).Subscribe(_ =>
             {
-                string shortName = TitleTrimmingHelper.TruncateMiddle(BaseName, 18);
+                string shortName = TitleTrimmer.TruncateMiddle(BaseName, 18);
                 string dirtyMark = Edited ? " *" : "";
                 Title = $"{shortName}{DisambiguationSuffix}{dirtyMark}";
             });

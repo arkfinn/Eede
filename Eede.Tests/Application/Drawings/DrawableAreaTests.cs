@@ -60,6 +60,22 @@ namespace Eede.Application.Tests.Drawings
         }
 
         [Test]
+        public void TryPickColor_WhenOutOfBounds_ReturnsFalseWithoutThrowing()
+        {
+            var drawableArea = new DrawableArea(new Magnification(2.0f), new PictureSize(16, 16), null);
+            var picture = CreateFilledPicture(new PictureSize(10, 10), new ArgbColor(255, 10, 20, 30));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(drawableArea.TryPickColor(picture, new Position(-1, 0), out _), Is.False);
+                Assert.That(drawableArea.TryPickColor(picture, new Position(20, 0), out _), Is.False);
+                Assert.That(drawableArea.TryPickColor(picture, new Position(0, 20), out _), Is.False);
+                Assert.That(drawableArea.TryPickColor(picture, new Position(19, 19), out var picked), Is.True);
+                Assert.That(picked, Is.EqualTo(new ArgbColor(255, 10, 20, 30)));
+            });
+        }
+
+        [Test]
         public void DisplaySizeOf_ShouldReturnMagnifiedSize()
         {
             var area = new DrawableArea(new Magnification(2.0f), new PictureSize(16, 16), null);

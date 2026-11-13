@@ -375,9 +375,11 @@ public class InteractionCoordinator : IInteractionCoordinator
             return;
         }
 
-        // 5. 通常描画ツールはスポイトで色を取得する
-        ArgbColor newColor = _drawableArea.PickColor(currentBuffer.Fetch(), pos);
-        colorPickedAction?.Invoke(newColor);
+        // 5. 通常描画ツールはスポイトで色を取得する（キャンバス範囲外の座標は安全にスキップする）
+        if (_drawableArea.TryPickColor(currentBuffer.Fetch(), pos, out ArgbColor newColor))
+        {
+            colorPickedAction?.Invoke(newColor);
+        }
         NotifyStateChanged();
     }
 

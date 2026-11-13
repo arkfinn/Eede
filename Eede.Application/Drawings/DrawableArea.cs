@@ -93,6 +93,19 @@ namespace Eede.Application.Drawings
             return picture.PickColor(RealPositionOf(displayPosition).ToPosition());
         }
 
+        public bool TryPickColor(Picture picture, Position displayPosition, out ArgbColor color)
+        {
+            if (picture == null) throw new ArgumentNullException(nameof(picture));
+            Position realPosition = RealPositionOf(displayPosition).ToPosition();
+            if (!picture.Contains(realPosition))
+            {
+                color = default;
+                return false;
+            }
+            color = picture.PickColor(realPosition);
+            return true;
+        }
+
         private PositionHistory CreatePositionHistory(Position displayPosition)
         {
             return new PositionHistory(RealPositionOf(displayPosition).ToPosition());

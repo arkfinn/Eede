@@ -356,4 +356,47 @@ public class InteractionCoordinatorTests
             Assert.That(_coordinator.IsRegionSelecting, Is.False);
         });
     }
+
+    [AvaloniaTest]
+    public void PointerRightButtonPressed_WhenOutOfBounds_ShouldNotThrowAndShouldCancelDrawingSafely()
+    {
+        var size = new PictureSize(16, 16);
+        var picture = Picture.CreateEmpty(size);
+        _sessionProvider.Update(new DrawingSession(picture));
+        _coordinator.SyncWithSession();
+
+        var freeCurve = new FreeCurve();
+        var penStyle = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 255, 0, 0), 1);
+
+        // 左ドラッグ中にキャンバス外へ出て右クリックキャンセルした場合
+        _coordinator.PointerBegin(new Position(2, 2), _coordinator.CurrentBuffer!, freeCurve, penStyle, false, false, size, null!);
+        Assert.That(_coordinator.CurrentBuffer!.IsDrawing(), Is.True);
+
+        ArgbColor? pickedColor = null;
+        Assert.DoesNotThrow(() => _coordinator.PointerRightButtonPressed(
+            new Position(16, 16),
+            _coordinator.CurrentBuffer!,
+            freeCurve,
+            false,
+            size,
+            color => pickedColor = color,
+            null!));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_coordinator.CurrentBuffer!.IsDrawing(), Is.False);
+            Assert.That(pickedColor, Is.Null);
+        });
+
+        // 負座標での右クリックも例外にならないこと
+        Assert.DoesNotThrow(() => _coordinator.PointerRightButtonPressed(
+            new Position(-5, -5),
+            _coordinator.CurrentBuffer!,
+            freeCurve,
+            false,
+            size,
+            color => pickedColor = color,
+            null!));
+        Assert.That(pickedColor, Is.Null);
+    }
 }

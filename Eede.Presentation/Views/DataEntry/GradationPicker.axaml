@@ -10,27 +10,31 @@
       <StyleInclude Source="/Styles/Styles.axaml" />
     </Grid.Styles>
     <Grid.RowDefinitions>
-      <RowDefinition Height="24"/>
+      <RowDefinition Height="20"/>
       <RowDefinition Height="Auto"/>
-      <RowDefinition Height="24"/>
-      <RowDefinition Height="24"/>
+      <RowDefinition Height="20"/>
+      <RowDefinition Height="22"/>
     </Grid.RowDefinitions>
     <RepeatButton Grid.Row="0"
                   Classes="allow"
+                  MinHeight="0"
+                  Height="20"
                   Click="IncrementValue">
       <Polygon Classes="button-shape" Points="0,7 10,7 5,0" />
     </RepeatButton>
-    <local:GradationSlider x:Name="slider" Grid.Row="1" Width="24" Height="127" HorizontalAlignment="Center"  />
+    <local:GradationSlider x:Name="slider" Grid.Row="1" Width="24" Height="88" HorizontalAlignment="Center"  />
     <RepeatButton Grid.Row="2"
                   Classes="allow"
+                  MinHeight="0"
+                  Height="20"
                   Click="DecrementValue">
       <Polygon Classes="button-shape" Points="0,0 10,0 5,7" />
     </RepeatButton>
     <TextBox x:Name="textbox" Grid.Row="3"
-             MinWidth="24" MinHeight="24"
-             Width="24" Height="24"
+             MinWidth="24" MinHeight="22"
+             Width="24" Height="22"
              FontSize="10"
-             Padding="2 4"
+             Padding="2 2"
              TextAlignment="Center"
              HorizontalAlignment="Center">0</TextBox>
   </Grid>

@@ -1,0 +1,147 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Eede.Presentation.ViewModels.Pages"
+             xmlns:tools="using:Eede.Domain.ImageEditing.DrawingTools"
+             xmlns:pal="using:Eede.Domain.Palettes"
+             xmlns:conv="using:Eede.Presentation.Common.Converters"
+             xmlns:local="using:Eede.Presentation.Views.DataEntry"
+             mc:Ignorable="d" d:DesignWidth="86" d:DesignHeight="160"
+             x:Class="Eede.Presentation.Views.DataEntry.PaletteSidePanel"
+             x:DataType="vm:MainViewModel"
+             MaxHeight="178"
+             VerticalAlignment="Top">
+  <UserControl.Resources>
+    <SolidColorBrush x:Key="ShiftIconActiveArrowBrush" Color="{DynamicResource SystemAccentColorDark3}" />
+    <DataTemplate x:Key="TilePatternCellTemplate" x:DataType="tools:TilePattern">
+      <Button Classes="tile-pattern-side"
+              ToolTip.Tip="{Binding DisplayName}"
+              Command="{Binding $parent[local:PaletteSidePanel].((vm:MainViewModel)DataContext).SelectTilePatternCommand}"
+              CommandParameter="{Binding}">
+        <Panel Width="26" Height="26">
+          <Border BorderBrush="Gray" BorderThickness="1" Padding="0">
+            <local:TilePatternSwatch Pattern="{Binding}"
+                                     ShiftX="{Binding $parent[local:PaletteSidePanel].((vm:MainViewModel)DataContext).IsTilePatternShiftedX}"
+                                     Width="24"
+                                     Height="24" />
+          </Border>
+          <Border BorderBrush="{DynamicResource ToolBorderedBorderChecked}"
+                  BorderThickness="2"
+                  IsHitTestVisible="False">
+            <Border.IsVisible>
+              <MultiBinding Converter="{x:Static local:TilePatternHighlightConverter.Instance}">
+                <Binding />
+                <Binding Path="$parent[local:PaletteSidePanel].((vm:MainViewModel)DataContext).SelectedTilePattern" />
+              </MultiBinding>
+            </Border.IsVisible>
+          </Border>
+        </Panel>
+      </Button>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="Button.tile-pattern-side, ToggleButton.tile-pattern-shift">
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="Width" Value="26" />
+      <Setter Property="Height" Value="26" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="1" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="ToggleButton.tile-pattern-shift Border.shift-inactive">
+      <Setter Property="BorderBrush" Value="Gray" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="ToggleButton.tile-pattern-shift Border.shift-active">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToolBorderedBorderChecked}" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="ToggleButton.tile-pattern-shift:checked Border.shift-active">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="ToggleButton.tile-pattern-shift:checked:pointerover Border.shift-active">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToolBorderedBorderPointerOverChecked}" />
+    </Style>
+    <Style Selector="Button.compact-palette-side">
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="Width" Value="16" />
+      <Setter Property="Height" Value="16" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="1" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Disabled"
+                MaxHeight="178">
+    <StackPanel Orientation="Vertical" Margin="1">
+      <TextBlock Text="パターン" FontSize="9" Margin="1,0,0,1" Opacity="0.8" />
+      <WrapPanel Orientation="Horizontal">
+        <ContentControl Content="{x:Static tools:TilePattern.Solid}" ContentTemplate="{StaticResource TilePatternCellTemplate}" />
+        <ContentControl Content="{x:Static tools:TilePattern.Dense87}" ContentTemplate="{StaticResource TilePatternCellTemplate}" />
+        <ContentControl Content="{x:Static tools:TilePattern.Dense75}" ContentTemplate="{StaticResource TilePatternCellTemplate}" />
+        <ContentControl Content="{x:Static tools:TilePattern.Dense62}" ContentTemplate="{StaticResource TilePatternCellTemplate}" />
+        <ContentControl Content="{x:Static tools:TilePattern.Checker50}" ContentTemplate="{StaticResource TilePatternCellTemplate}" />
+        <ContentControl Content="{x:Static tools:TilePattern.Sparse37}" ContentTemplate="{StaticResource TilePatternCellTemplate}" />
+        <ContentControl Content="{x:Static tools:TilePattern.Sparse25}" ContentTemplate="{StaticResource TilePatternCellTemplate}" />
+        <ContentControl Content="{x:Static tools:TilePattern.Sparse12}" ContentTemplate="{StaticResource TilePatternCellTemplate}" />
+        <ToggleButton Classes="tile-pattern-shift"
+                      IsChecked="{Binding IsTilePatternShiftedX}"
+                      ToolTip.Tip="パターンを横へ1ドットずらす">
+          <Panel Width="26" Height="26">
+            <Border Classes="shift-inactive" Padding="0">
+              <local:TilePatternShiftIcon ShiftX="{Binding IsTilePatternShiftedX}"
+                                            ActiveBackground="{DynamicResource ToolBorderedBackgroundChecked}"
+                                            ActiveArrowBrush="{StaticResource ShiftIconActiveArrowBrush}"
+                                            Width="24"
+                                            Height="24" />
+            </Border>
+            <Border Classes="shift-active" IsHitTestVisible="False" />
+          </Panel>
+        </ToggleButton>
+      </WrapPanel>
+
+      <TextBlock Text="履歴" FontSize="9" Margin="1,2,0,1" Opacity="0.8" />
+      <ItemsControl ItemsSource="{Binding ColorHistory}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="pal:ArgbColor">
+            <Button Classes="compact-palette-side"
+                    ToolTip.Tip="{Binding Converter={x:Static conv:ArgbColorToHexConverter.Instance}}"
+                    Command="{Binding $parent[local:PaletteSidePanel].((vm:MainViewModel)DataContext).SelectHistoryColorCommand}"
+                    CommandParameter="{Binding}">
+              <Panel Width="14" Height="14">
+                <Panel.Background>
+                  <ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
+                              Stretch="None"
+                              TileMode="Tile"
+                              SourceRect="0,0,16,16"
+                              DestinationRect="0,0,16,16"
+                              AlignmentY="Top"
+                              AlignmentX="Left" />
+                </Panel.Background>
+                <Border BorderBrush="#888888"
+                        BorderThickness="1"
+                        Background="{Binding Converter={x:Static conv:ArgbColorToBrushConverter.Instance}}" />
+              </Panel>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

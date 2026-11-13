@@ -130,18 +130,20 @@
 					</Panel>
 
 					<Panel DockPanel.Dock="Bottom" Background="Transparent">
-						<StackPanel Orientation="Horizontal">
-							<Panel>
-								<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
-														FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
-														Margin="4 2 4 8"/>
-							</Panel>
-							<Panel Margin="0" Width="100" />
-						</StackPanel>
+						<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
+												FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
+												Margin="4 2 4 8"
+												HorizontalAlignment="Stretch">
+							<entry:PaletteContainer.SideContent>
+								<entry:PaletteSidePanel DataContext="{Binding $parent[local:MainView].DataContext}" />
+							</entry:PaletteContainer.SideContent>
+						</entry:PaletteContainer>
 					</Panel>
 
 					<Panel DockPanel.Dock="Left" Margin="0" Width="100">
-						<StackPanel Orientation="Vertical">
+						<ScrollViewer VerticalScrollBarVisibility="Hidden"
+									  HorizontalScrollBarVisibility="Disabled">
+							<StackPanel Orientation="Vertical">
 							<navi:DrawStyleMenu Margin="2" DrawStyle="{Binding DrawStyle}" />
 							<entry:PenWidthSelector Margin="2" PenWidth="{Binding PenWidth}"/>
 							<entry:ColorPicker Margin="2" NowColor="{Binding PenColor}"/>
@@ -180,7 +182,8 @@
 														   PutCommand="{Binding PutBackgroundColorCommand}"
 														   GetCommand="{Binding GetBackgroundColorCommand}"/>
 							</StackPanel>
-						</StackPanel>
+							</StackPanel>
+						</ScrollViewer>
 					</Panel>
 
 

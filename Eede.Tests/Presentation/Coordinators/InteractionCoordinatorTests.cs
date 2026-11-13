@@ -3,6 +3,7 @@ using Eede.Application.Pictures;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
+using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Coordinators;
@@ -102,5 +103,257 @@ public class InteractionCoordinatorTests
         Assert.That(pickedColor, Is.Not.Null, "Color should be picked even during drawing cancellation");
         Assert.That(pickedColor!.Value.Alpha, Is.EqualTo(200));
         Assert.That(pickedColor.Value.Green, Is.EqualTo(255));
+    }
+
+    [AvaloniaTest]
+    public void Painted_WhenRegionSelectTool_ShouldNotRenderCursorLayer()
+    {
+        var size = new PictureSize(16, 16);
+        var baseColor = new ArgbColor(255, 0, 0, 0); // 黒背景
+        var pixels = new byte[size.Width * size.Height * 4];
+        for (int i = 0; i < pixels.Length; i += 4)
+        {
+            pixels[i] = baseColor.Blue;
+            pixels[i + 1] = baseColor.Green;
+            pixels[i + 2] = baseColor.Red;
+            pixels[i + 3] = baseColor.Alpha;
+        }
+        var picture = Picture.Create(size, pixels);
+        _sessionProvider.Update(new DrawingSession(picture));
+        _coordinator.SyncWithSession();
+
+        var penColor = new ArgbColor(255, 255, 0, 0); // 赤ペン
+        var penStyle = new PenStyle(new DirectImageBlender(), penColor, 1);
+        var transfer = new DirectImageTransfer();
+        var buffer = new DrawingBuffer(picture);
+
+        // 1. 通常の描画ツールのとき: ホバー位置にペンの赤色が描画される
+        _coordinator.PointerMoved(new Position(5, 5), buffer, new FreeCurve(), penStyle, false, false, new PictureSize(16, 16));
+        var paintedFreeCurve = _coordinator.Painted(buffer, penStyle, transfer);
+        Assert.That(paintedFreeCurve, Is.Not.Null);
+        var pixelAtPos = paintedFreeCurve!.PickColor(new Position(5, 5));
+        Assert.That(pixelAtPos.Red, Is.EqualTo(255), "Draw tool should preview pen color on cursor position");
+
+        // 2. 範囲選択ツールのとき: ホバー位置でもペンの赤色は描画されず、元の黒のまま
+        var regionSelector = new RegionSelector();
+        _coordinator.ChangeDrawStyle(regionSelector);
+        _coordinator.PointerMoved(new Position(5, 5), buffer, regionSelector, penStyle, false, false, new PictureSize(16, 16));
+        var paintedRegionSelect = _coordinator.Painted(buffer, penStyle, transfer);
+        Assert.That(paintedRegionSelect, Is.Not.Null);
+        var pixelAtPosRegion = paintedRegionSelect!.PickColor(new Position(5, 5));
+        Assert.That(pixelAtPosRegion.Red, Is.EqualTo(0), "RegionSelector should NOT preview pen color on canvas");
+    }
+
+    [AvaloniaTest]
+    public void HoverCursor_WhenRegionSelectTool_ShouldUpdateVisibilityAndCursorType()
+    {
+        var size = new PictureSize(16, 16);
+        var picture = Picture.CreateEmpty(size);
+        _sessionProvider.Update(new DrawingSession(picture));
+        _coordinator.SyncWithSession();
+        var buffer = new DrawingBuffer(picture);
+        var penStyle = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
+        var regionSelector = new RegionSelector();
+
+        // 1. 描画ツールのホバー時: IsHoverCursorVisible は false, カーソルは Arrow
+        _coordinator.PointerMoved(new Position(4, 4), buffer, new FreeCurve(), penStyle, false, false, new PictureSize(16, 16));
+        Assert.That(_coordinator.IsHoverCursorVisible, Is.False);
+        Assert.That(_coordinator.ActiveCursor, Is.EqualTo(Avalonia.Input.StandardCursorType.Arrow));
+
+        // 2. 範囲選択ツールのホバー時: IsHoverCursorVisible は true, HoverPosition が一致, カーソルは Cross
+        _coordinator.ChangeDrawStyle(regionSelector);
+        _coordinator.PointerMoved(new Position(4, 4), buffer, regionSelector, penStyle, false, false, new PictureSize(16, 16));
+        Assert.That(_coordinator.IsHoverCursorVisible, Is.True);
+        Assert.That(_coordinator.HoverPosition, Is.EqualTo(new Position(4, 4)));
+        Assert.That(_coordinator.ActiveCursor, Is.EqualTo(Avalonia.Input.StandardCursorType.Cross));
+
+        // 3. キャンバス外に出た時: IsHoverCursorVisible は false, HoverPosition は null
+        _coordinator.CanvasLeave(buffer);
+        Assert.That(_coordinator.IsHoverCursorVisible, Is.False);
+        Assert.That(_coordinator.HoverPosition, Is.Null);
+    }
+
+    [AvaloniaTest]
+    public void PointerRightButtonPressed_WhenRegionSelectorAndUnselected_ShouldDoNothingAndNotPickColor()
+    {
+        var size = new PictureSize(32, 32);
+        var picture = Picture.CreateEmpty(size);
+        _sessionProvider.Update(new DrawingSession(picture));
+        _coordinator.SyncWithSession();
+
+        var regionSelector = new RegionSelector();
+        _coordinator.SetupRegionSelector(regionSelector, new DrawingBuffer(picture), false, new PictureSize(16, 16));
+        _coordinator.ChangeDrawStyle(regionSelector);
+
+        var penStyle = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
+        ArgbColor? pickedColor = null;
+
+        _coordinator.PointerRightButtonPressed(
+            new Position(4, 4),
+            _coordinator.CurrentBuffer!,
+            regionSelector,
+            false,
+            new PictureSize(16, 16),
+            color => pickedColor = color,
+            null!);
+        _coordinator.PointerMoved(new Position(20, 20), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, new PictureSize(16, 16));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(pickedColor, Is.Null);
+            Assert.That(_coordinator.SelectingArea, Is.Null);
+            Assert.That(_coordinator.IsRegionSelecting, Is.False);
+            Assert.That(_coordinator.IsShowHandles, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
+    public void PointerRightButtonPressed_WhenDraggingNewRegion_ShouldCancelAndNotPickColor()
+    {
+        var size = new PictureSize(32, 32);
+        var picture = Picture.CreateEmpty(size);
+        _sessionProvider.Update(new DrawingSession(picture));
+        _coordinator.SyncWithSession();
+
+        var regionSelector = new RegionSelector();
+        var gridSize = new PictureSize(16, 16);
+        _coordinator.SetupRegionSelector(regionSelector, new DrawingBuffer(picture), false, gridSize);
+        _coordinator.ChangeDrawStyle(regionSelector);
+
+        var penStyle = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
+        _coordinator.PointerBegin(new Position(2, 2), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, gridSize, null!);
+        _coordinator.PointerMoved(new Position(10, 10), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, gridSize);
+        Assert.That(_coordinator.IsRegionSelecting, Is.True);
+
+        ArgbColor? pickedColor = null;
+        _coordinator.PointerRightButtonPressed(
+            new Position(10, 10),
+            _coordinator.CurrentBuffer!,
+            regionSelector,
+            false,
+            gridSize,
+            color => pickedColor = color,
+            null!);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(pickedColor, Is.Null);
+            Assert.That(_coordinator.CurrentBuffer!.IsDrawing(), Is.False);
+            Assert.That(_coordinator.SelectingArea, Is.Null);
+            Assert.That(_coordinator.IsRegionSelecting, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
+    public void PointerRightButtonPressed_WhenRegionSelected_ShouldClearSelectionAndNotPickColor()
+    {
+        var size = new PictureSize(32, 32);
+        var picture = Picture.CreateEmpty(size);
+        _sessionProvider.Update(new DrawingSession(picture));
+        _coordinator.SyncWithSession();
+
+        var regionSelector = new RegionSelector();
+        var gridSize = new PictureSize(16, 16);
+        _coordinator.SetupRegionSelector(regionSelector, new DrawingBuffer(picture), false, gridSize);
+        _coordinator.ChangeDrawStyle(regionSelector);
+
+        var penStyle = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
+        _coordinator.PointerBegin(new Position(2, 2), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, gridSize, null!);
+        _coordinator.PointerMoved(new Position(10, 10), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, gridSize);
+        _coordinator.PointerLeftButtonReleased(new Position(10, 10), _coordinator.CurrentBuffer!, regionSelector, false, gridSize, penStyle, false, null!);
+        Assert.That(_coordinator.IsShowHandles, Is.True);
+        Assert.That(_coordinator.SelectingArea, Is.Not.Null);
+
+        ArgbColor? pickedColor = null;
+        _coordinator.PointerRightButtonPressed(
+            new Position(20, 20),
+            _coordinator.CurrentBuffer!,
+            regionSelector,
+            false,
+            gridSize,
+            color => pickedColor = color,
+            null!);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(pickedColor, Is.Null);
+            Assert.That(_coordinator.SelectingArea, Is.Null);
+            Assert.That(_coordinator.IsRegionSelecting, Is.False);
+            Assert.That(_coordinator.IsShowHandles, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
+    public void PointerRightButtonPressed_WhenDraggingSelection_ShouldCancelMoveAndNotPickColor()
+    {
+        var size = new PictureSize(32, 32);
+        var picture = Picture.CreateEmpty(size);
+        _sessionProvider.Update(new DrawingSession(picture));
+        _coordinator.SyncWithSession();
+
+        var regionSelector = new RegionSelector();
+        var gridSize = new PictureSize(16, 16);
+        _coordinator.SetupRegionSelector(regionSelector, new DrawingBuffer(picture), false, gridSize);
+        _coordinator.ChangeDrawStyle(regionSelector);
+
+        var penStyle = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
+        _coordinator.PointerBegin(new Position(0, 0), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, gridSize, null!);
+        _coordinator.PointerMoved(new Position(8, 8), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, gridSize);
+        _coordinator.PointerLeftButtonReleased(new Position(8, 8), _coordinator.CurrentBuffer!, regionSelector, false, gridSize, penStyle, false, null!);
+
+        // 選択範囲内を左ドラッグ開始
+        _coordinator.PointerBegin(new Position(4, 4), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, gridSize, null!);
+        _coordinator.PointerMoved(new Position(12, 12), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, gridSize);
+        Assert.That(_coordinator.PreviewPixels, Is.Not.Null);
+
+        ArgbColor? pickedColor = null;
+        _coordinator.PointerRightButtonPressed(
+            new Position(12, 12),
+            _coordinator.CurrentBuffer!,
+            regionSelector,
+            false,
+            gridSize,
+            color => pickedColor = color,
+            null!);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(pickedColor, Is.Null);
+            Assert.That(_coordinator.PreviewPixels, Is.Null);
+            Assert.That(_coordinator.SelectingArea, Is.Null);
+            Assert.That(_coordinator.IsShowHandles, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
+    public void PointerRightButtonPressed_WithFreeCurveThenSwitchingToRegionSelector_ShouldNotLeaveGhostSelection()
+    {
+        var size = new PictureSize(32, 32);
+        var picture = Picture.CreateEmpty(size);
+        _sessionProvider.Update(new DrawingSession(picture));
+        _coordinator.SyncWithSession();
+
+        var freeCurve = new FreeCurve();
+        var regionSelector = new RegionSelector();
+        var gridSize = new PictureSize(16, 16);
+        var penStyle = new PenStyle(new DirectImageBlender(), new ArgbColor(255, 0, 0, 0), 1);
+
+        _coordinator.PointerRightButtonPressed(
+            new Position(4, 4),
+            _coordinator.CurrentBuffer!,
+            freeCurve,
+            false,
+            gridSize,
+            _ => { },
+            null!);
+
+        _coordinator.ChangeDrawStyle(regionSelector);
+        _coordinator.PointerMoved(new Position(16, 16), _coordinator.CurrentBuffer!, regionSelector, penStyle, false, false, gridSize);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_coordinator.SelectingArea, Is.Null);
+            Assert.That(_coordinator.IsRegionSelecting, Is.False);
+        });
     }
 }

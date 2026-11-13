@@ -44,6 +44,8 @@ public interface IInteractionCoordinator
     bool IsShowHandles { get; }
     Picture? PreviewPixels { get; }
     Position PreviewPosition { get; }
+    Position? HoverPosition { get; }
+    bool IsHoverCursorVisible { get; }
     StandardCursorType ActiveCursor { get; }
     SelectionCursor ActiveSelectionCursor { get; }
     IImageBlender ImageBlender { get; set; }

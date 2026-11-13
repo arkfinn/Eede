@@ -284,5 +284,30 @@ namespace Eede.Application.Tests.Drawings
             Assert.That(updatedArea.Magnification, Is.EqualTo(newMagnification));
             Assert.That(drawableArea.Magnification, Is.EqualTo(initialMagnification), "Original instance should remain unchanged.");
         }
+
+        [Test]
+        public void Painted_WithNullPenStyle_ShouldNotRenderCursorLayer()
+        {
+            // Arrange
+            var magnification = new Magnification(1.0f);
+            var gridSize = new PictureSize(16, 16);
+            var posHistory = new PositionHistory(new Position(2, 2));
+            var drawableArea = new DrawableArea(magnification, gridSize, posHistory);
+
+            var baseColor = new ArgbColor(255, 10, 20, 30);
+            var picture = CreateFilledPicture(new PictureSize(10, 10), baseColor);
+            var buffer = new DrawingBuffer(picture);
+            var transfer = new Eede.Domain.ImageEditing.Transformation.DirectImageTransfer();
+
+            // Act
+            var result = drawableArea.Painted(buffer, null, transfer);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            var colorAtPos = result!.PickColor(new Position(2, 2));
+            Assert.That(colorAtPos.Red, Is.EqualTo(baseColor.Red), "Base color should not be modified when penStyle is null");
+            Assert.That(colorAtPos.Green, Is.EqualTo(baseColor.Green));
+            Assert.That(colorAtPos.Blue, Is.EqualTo(baseColor.Blue));
+        }
     }
 }

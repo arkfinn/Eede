@@ -98,6 +98,17 @@
                           HandleSize="{Binding HandleSize}"
                           HandleMargin="{Binding HandleMargin}"
                           IsHitTestVisible="False" />
+          <!-- 範囲選択ツールホバー時のピクセル枠線（視点ガイド） -->
+          <Panel IsVisible="{Binding IsHoverCursorVisible}"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 Margin="{Binding HoverCursorThickness}"
+                 Width="{Binding HoverCursorWidth}"
+                 Height="{Binding HoverCursorHeight}"
+                 IsHitTestVisible="False">
+            <Rectangle Stroke="Black" StrokeThickness="1" Margin="-1" />
+            <Rectangle Stroke="White" StrokeThickness="1" />
+          </Panel>
         </Panel>
       </Grid>
     </Panel>

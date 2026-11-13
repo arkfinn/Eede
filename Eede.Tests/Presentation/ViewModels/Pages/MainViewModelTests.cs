@@ -454,6 +454,102 @@ public class MainViewModelTests
     }
 
     [AvaloniaTest]
+    public async Task RequestCloseCommand_WhenUserSelectsSaveWithAsyncPictureSave_ShouldSaveAndInvokeCloseWindowInteraction()
+    {
+        var realBitmapAdapter = new AvaloniaBitmapAdapter();
+        var fileStorageMock = new Mock<IFileStorage>();
+        using var outStream = new System.IO.MemoryStream();
+        bool saveStreamOpened = false;
+        fileStorageMock
+            .Setup(x => x.OpenWriteStreamAsync(It.IsAny<Uri>()))
+            .Returns(async () =>
+            {
+                await Task.Delay(10);
+                saveStreamOpened = true;
+                return outStream;
+            });
+
+        var mainVM = CreateMainViewModel();
+        mainVM.FileStorage = fileStorageMock.Object;
+
+        var editedTab = new DockPictureViewModel(_globalState, _animationViewModel, realBitmapAdapter, _PictureFileIOMock.Object);
+        editedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), new FilePath("edited.png"));
+        editedTab.Edited = true;
+
+        editedTab.RequestClose += async (s, e) =>
+        {
+            editedTab.SaveAlertResult = SaveAlertResult.Save;
+            await editedTab.OnClosing.Execute().ToTask();
+        };
+
+        mainVM.Pictures.Add(editedTab);
+
+        bool windowCloseInvoked = false;
+        mainVM.CloseWindowInteraction.RegisterHandler(interaction =>
+        {
+            windowCloseInvoked = true;
+            interaction.SetOutput(Unit.Default);
+        });
+
+        await mainVM.RequestCloseCommand.Execute().ToTask();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(saveStreamOpened, Is.True);
+            Assert.That(editedTab.Edited, Is.False);
+            Assert.That(editedTab.Closable, Is.True);
+            Assert.That(mainVM.IsCloseConfirmed, Is.True);
+            Assert.That(windowCloseInvoked, Is.True);
+        });
+    }
+
+    [AvaloniaTest]
+    public async Task RequestCloseCommand_WhenUserSelectsSaveButSaveFilePickerIsCanceled_ShouldAbortClosing()
+    {
+        var realBitmapAdapter = new AvaloniaBitmapAdapter();
+        var fileStorageMock = new Mock<IFileStorage>();
+        fileStorageMock
+            .Setup(x => x.SaveFilePickerAsync())
+            .Returns(async () =>
+            {
+                await Task.Delay(10);
+                return (Uri?)null;
+            });
+
+        var mainVM = CreateMainViewModel();
+        mainVM.FileStorage = fileStorageMock.Object;
+
+        var editedTab = new DockPictureViewModel(_globalState, _animationViewModel, realBitmapAdapter, _PictureFileIOMock.Object);
+        editedTab.Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
+        editedTab.Edited = true;
+
+        editedTab.RequestClose += async (s, e) =>
+        {
+            editedTab.SaveAlertResult = SaveAlertResult.Save;
+            await editedTab.OnClosing.Execute().ToTask();
+        };
+
+        mainVM.Pictures.Add(editedTab);
+
+        bool windowCloseInvoked = false;
+        mainVM.CloseWindowInteraction.RegisterHandler(interaction =>
+        {
+            windowCloseInvoked = true;
+            interaction.SetOutput(Unit.Default);
+        });
+
+        await mainVM.RequestCloseCommand.Execute().ToTask();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(editedTab.Closable, Is.False);
+            Assert.That(editedTab.Edited, Is.True);
+            Assert.That(mainVM.IsCloseConfirmed, Is.False);
+            Assert.That(windowCloseInvoked, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
     public async Task OpenPicture_WhenImageHasPalette_AddsPaletteTabToPaletteContainer()
     {
         var extractorMock = new Mock<Eede.Application.Palettes.IImagePaletteExtractor>();
@@ -703,6 +799,203 @@ public class MainViewModelTests
         await _paletteContainerViewModel.ReplaceColorCommand.Execute((0, 1)).ToTask();
 
         Assert.That(currentSession.CanUndo(), Is.False, "対象色がキャンバスに存在しない場合はUndo履歴が増えないこと");
+    }
+
+    [AvaloniaTest]
+    public void TilePatternAndColorHistory_ManageSelectionDeduplicationAndMaxLimit()
+    {
+        var mainVM = CreateMainViewModel();
+
+        // TilePattern selection propagates to DrawableCanvasViewModel
+        Assert.That(mainVM.TilePatterns.Count, Is.EqualTo(8));
+        mainVM.SelectTilePatternCommand.Execute(TilePattern.Dense62).Subscribe();
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainVM.SelectedTilePattern, Is.EqualTo(TilePattern.Dense62));
+            Assert.That(mainVM.DrawableCanvasViewModel.TilePattern, Is.EqualTo(TilePattern.Dense62));
+        });
+
+        // ColorHistory records from Eyedropper, Palette fetch, Swap, Background, and Committed draws, up to 16 with LRU dedup
+        var c1 = new ArgbColor(255, 10, 0, 0);
+        var c2 = new ArgbColor(255, 0, 20, 0);
+        var c3 = new ArgbColor(255, 0, 0, 30);
+
+        // 1. Committed draw
+        mainVM.PenColor = c1;
+        mainVM.DrawableCanvasViewModel.DrawStyle = new FreeCurve();
+        var blank = Picture.CreateEmpty(new PictureSize(4, 4));
+        var painted = new Drawer(blank, new PenStyle(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), c1, 1))
+            .DrawPoint(new Position(0, 0)).Picture;
+        var dummyArea = new PictureArea(new Position(0, 0), new PictureSize(4, 4));
+        _interactionCoordinatorMock.Raise(
+            x => x.Drew += null,
+            blank,
+            painted,
+            dummyArea,
+            dummyArea,
+            new PictureRegion(new PictureArea(new Position(0, 0), new PictureSize(1, 1))));
+
+        // 2. Eyedropper pick (ColorPicked)
+        _interactionCoordinatorMock.Setup(x => x.PointerRightButtonPressed(
+            It.IsAny<Position>(),
+            It.IsAny<DrawingBuffer>(),
+            It.IsAny<IDrawStyle>(),
+            It.IsAny<bool>(),
+            It.IsAny<PictureSize>(),
+            It.IsAny<Action<ArgbColor>>(),
+            It.IsAny<ReactiveUI.ReactiveCommand<Picture, ReactiveUI.Primitives.RxVoid>>()))
+            .Callback<Position, DrawingBuffer, IDrawStyle, bool, PictureSize, Action<ArgbColor>, ReactiveUI.ReactiveCommand<Picture, ReactiveUI.Primitives.RxVoid>>(
+                (_, _, _, _, _, cb, _) => cb(c2));
+        mainVM.DrawableCanvasViewModel.PointerRightButtonPressedCommand.Execute(new Position(0, 0)).Subscribe();
+
+        // 3. Palette Fetch
+        var tab = _paletteContainerViewModel.SelectedTab!;
+        tab.Palette = tab.Palette.Apply(0, c3);
+        _paletteContainerViewModel.FetchColorCommand.Execute(0).Subscribe();
+
+        Assert.That(mainVM.ColorHistory, Is.EqualTo(new[] { c3, c2, c1 }));
+
+        // Select from history: updates PenColor without reordering ColorHistory
+        mainVM.SelectHistoryColorCommand.Execute(c1).Subscribe();
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainVM.PenColor, Is.EqualTo(c1));
+            Assert.That(mainVM.ColorHistory, Is.EqualTo(new[] { c3, c2, c1 }));
+        });
+
+        // SwapColors & GetBackgroundColor record foreground color
+        var bg = new ArgbColor(255, 40, 50, 60);
+        mainVM.CurrentBackgroundColor = new BackgroundColor(bg);
+        mainVM.GetBackgroundColorCommand.Execute().Subscribe();
+        Assert.That(mainVM.ColorHistory[0], Is.EqualTo(bg));
+
+        // Duplicate color moves to front, max count is 16
+        for (int i = 0; i < 20; i++)
+        {
+            mainVM.DrawableCanvasViewModel.OnColorPicked.Execute(new ArgbColor(255, (byte)(i * 10), 1, 1)).Subscribe();
+        }
+        Assert.That(mainVM.ColorHistory.Count, Is.EqualTo(MainViewModel.MaxColorHistory));
+
+        // Picking an existing color (i=5 -> R=50) removes old copy and places at index 0 without increasing count
+        var dup = new ArgbColor(255, 50, 1, 1);
+        mainVM.DrawableCanvasViewModel.OnColorPicked.Execute(dup).Subscribe();
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainVM.ColorHistory.Count, Is.EqualTo(MainViewModel.MaxColorHistory));
+            Assert.That(mainVM.ColorHistory[0], Is.EqualTo(dup));
+            Assert.That(mainVM.ColorHistory.Count(c => c.EqualsArgb(dup)), Is.EqualTo(1));
+        });
+    }
+
+    [AvaloniaTest]
+    public void PaletteContainer_HostsPaletteSidePanel_WithCompactButtonsAndBoundedHeight()
+    {
+        var mainVM = CreateMainViewModel();
+        mainVM.DrawableCanvasViewModel.OnColorPicked.Execute(new ArgbColor(255, 12, 34, 56)).Subscribe();
+
+        var sidePanel = new Eede.Presentation.Views.DataEntry.PaletteSidePanel
+        {
+            DataContext = mainVM
+        };
+        var container = new Eede.Presentation.Views.DataEntry.PaletteContainer
+        {
+            DataContext = mainVM.PaletteContainerViewModel,
+            SideContent = sidePanel
+        };
+        var window = new Avalonia.Controls.Window
+        {
+            Content = container,
+            Width = 400,
+            Height = 300
+        };
+        window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        try
+        {
+            var allButtons = Avalonia.VisualTree.VisualExtensions
+                .GetVisualDescendants(sidePanel)
+                .OfType<Avalonia.Controls.Button>()
+                .ToList();
+            var patternButtons = allButtons.Where(b => b.Classes.Contains("tile-pattern-side")).ToList();
+            var historyButtons = allButtons.Where(b => b.Classes.Contains("compact-palette-side")).ToList();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(patternButtons.Count, Is.EqualTo(8));
+                Assert.That(patternButtons.All(b => Math.Abs(b.Bounds.Width - 26) <= 0.5 && Math.Abs(b.Bounds.Height - 26) <= 0.5), Is.True, "Pattern buttons must be 26x26 in 3x3 grid");
+                Assert.That(historyButtons.Count, Is.EqualTo(1));
+                Assert.That(historyButtons.All(b => b.Bounds.Width <= 16.5 && b.Bounds.Height <= 16.5), Is.True, "History buttons must stay 16x16");
+                Assert.That(sidePanel.Bounds.Height, Is.LessThanOrEqualTo(180));
+            });
+
+            // Invoking 5th tile pattern button (center cell) switches SelectedTilePattern to Checker50
+            patternButtons[4].Command?.Execute(patternButtons[4].CommandParameter);
+            Assert.That(mainVM.SelectedTilePattern, Is.EqualTo(TilePattern.Checker50));
+
+            // Toggling horizontal 1px shift button updates SelectedTilePattern, DrawableCanvasViewModel, Swatch.ShiftX, and ShiftIcon.ShiftX
+            var shiftToggle = Avalonia.VisualTree.VisualExtensions
+                .GetVisualDescendants(sidePanel)
+                .OfType<Avalonia.Controls.Primitives.ToggleButton>()
+                .FirstOrDefault(b => b.Classes.Contains("tile-pattern-shift"));
+            Assert.That(shiftToggle, Is.Not.Null);
+            shiftToggle!.IsChecked = true;
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+            var swatches = Avalonia.VisualTree.VisualExtensions
+                .GetVisualDescendants(sidePanel)
+                .OfType<Eede.Presentation.Views.DataEntry.TilePatternSwatch>()
+                .ToList();
+            var shiftIcon = Avalonia.VisualTree.VisualExtensions
+                .GetVisualDescendants(sidePanel)
+                .OfType<Eede.Presentation.Views.DataEntry.TilePatternShiftIcon>()
+                .FirstOrDefault();
+
+            Avalonia.Media.IBrush? expectedBorderBrush = Avalonia.Application.Current?.TryGetResource("ToolBorderedBorderChecked", window.ActualThemeVariant, out var borderRes) == true
+                ? borderRes as Avalonia.Media.IBrush
+                : null;
+            var selectedPatternOverlay = Avalonia.VisualTree.VisualExtensions
+                .GetVisualDescendants(patternButtons[4])
+                .OfType<Avalonia.Controls.Border>()
+                .FirstOrDefault(b => b.BorderThickness == new Avalonia.Thickness(2));
+            var unselectedPatternOverlay = Avalonia.VisualTree.VisualExtensions
+                .GetVisualDescendants(patternButtons[0])
+                .OfType<Avalonia.Controls.Border>()
+                .FirstOrDefault(b => b.BorderThickness == new Avalonia.Thickness(2));
+            var shiftActiveBorder = Avalonia.VisualTree.VisualExtensions
+                .GetVisualDescendants(shiftToggle!)
+                .OfType<Avalonia.Controls.Border>()
+                .FirstOrDefault(b => b.Classes.Contains("shift-active"));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(mainVM.IsTilePatternShiftedX, Is.True);
+                Assert.That(mainVM.SelectedTilePattern.OffsetX, Is.EqualTo(1));
+                Assert.That(mainVM.DrawableCanvasViewModel.TilePattern, Is.EqualTo(TilePattern.Checker50.WithOffsetX(1)));
+                Assert.That(swatches.Count, Is.EqualTo(8));
+                Assert.That(swatches.All(s => s.ShiftX), Is.True);
+                Assert.That(shiftIcon?.ShiftX, Is.True);
+                Assert.That(expectedBorderBrush, Is.Not.Null);
+                Assert.That(selectedPatternOverlay?.IsVisible, Is.True);
+                Assert.That(selectedPatternOverlay?.BorderBrush, Is.EqualTo(expectedBorderBrush));
+                Assert.That(unselectedPatternOverlay?.IsVisible, Is.False);
+                Assert.That(shiftActiveBorder?.IsVisible, Is.True);
+                Assert.That(shiftActiveBorder?.BorderBrush, Is.EqualTo(expectedBorderBrush));
+                Assert.That(shiftIcon?.ActiveBackground, Is.Not.Null);
+                Assert.That(shiftIcon?.ActiveArrowBrush, Is.Not.Null);
+            });
+
+            // Selecting another pattern while shift toggle is active preserves OffsetX == 1
+            patternButtons[5].Command?.Execute(patternButtons[5].CommandParameter);
+            Assert.That(mainVM.SelectedTilePattern, Is.EqualTo(TilePattern.Sparse37.WithOffsetX(1)));
+
+            // Invoking history color button switches PenColor
+            historyButtons[0].Command?.Execute(historyButtons[0].CommandParameter);
+            Assert.That(mainVM.PenColor, Is.EqualTo(new ArgbColor(255, 12, 34, 56)));
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 }
 

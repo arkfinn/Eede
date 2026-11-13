@@ -156,6 +156,24 @@ public partial class MainViewModel : ViewModelBase
     public ReactiveCommand<RxVoid, RxVoid> GetBackgroundColorCommand { get; private set; }
     public PaletteContainerViewModel PaletteContainerViewModel { get; private set; }
 
+    public const int MaxColorHistory = 16;
+    public IReadOnlyList<TilePattern> TilePatterns { get; } =
+    [
+        TilePattern.Solid,
+        TilePattern.Dense87,
+        TilePattern.Dense75,
+        TilePattern.Dense62,
+        TilePattern.Checker50,
+        TilePattern.Sparse37,
+        TilePattern.Sparse25,
+        TilePattern.Sparse12,
+    ];
+    [Reactive] public partial TilePattern SelectedTilePattern { get; set; }
+    [Reactive] public partial bool IsTilePatternShiftedX { get; set; }
+    public ObservableCollection<ArgbColor> ColorHistory { get; } = [];
+    public ReactiveCommand<TilePattern, RxVoid> SelectTilePatternCommand { get; private set; }
+    public ReactiveCommand<ArgbColor, RxVoid> SelectHistoryColorCommand { get; private set; }
+
     public Interaction<ScalingDialogViewModel, ResizeContext?> ShowScalingModal { get; private set; } = new();
     public ReactiveCommand<RxVoid, RxVoid> ScalingCommand { get; private set; }
 
@@ -337,6 +355,15 @@ public partial class MainViewModel : ViewModelBase
             var temp = PenColor;
             PenColor = CurrentBackgroundColor.Value;
             CurrentBackgroundColor = new BackgroundColor(temp);
+            RecordColorHistory(PenColor);
+        });
+        SelectTilePatternCommand = ReactiveCommand.Create<TilePattern>(pattern =>
+        {
+            SelectedTilePattern = pattern.WithOffsetX(IsTilePatternShiftedX ? 1 : 0);
+        });
+        SelectHistoryColorCommand = ReactiveCommand.Create<ArgbColor>(color =>
+        {
+            PenColor = color;
         });
         ResetDefaultColorsCommand = ReactiveCommand.Create(() =>
         {
@@ -504,6 +531,7 @@ public partial class MainViewModel : ViewModelBase
         welcomeViewModel.ResumeLastSessionCommand = RestoreRecoveryCommand;
         welcomeViewModel.DiscardLastSessionCommand = DiscardRecoveryCommand;
 
+        _selectedTilePattern = TilePattern.Solid;
         InitializeConnections();
         _ = LoadSettingsAsync();
         _ = UpdateClipboardStatusAsync();
@@ -556,6 +584,19 @@ public partial class MainViewModel : ViewModelBase
 
         _ = DrawableCanvasViewModel.WhenAnyValue(x => x.PenColor)
             .Subscribe(x => PenColor = x);
+
+        SelectedTilePattern = DrawableCanvasViewModel.TilePattern;
+        IsTilePatternShiftedX = SelectedTilePattern.OffsetX != 0;
+        _ = this.WhenAnyValue(x => x.IsTilePatternShiftedX)
+            .Subscribe(shifted => SelectedTilePattern = SelectedTilePattern.WithOffsetX(shifted ? 1 : 0));
+        _ = this.WhenAnyValue(x => x.SelectedTilePattern)
+            .Subscribe(pattern => DrawableCanvasViewModel.TilePattern = pattern);
+        _ = DrawableCanvasViewModel.WhenAnyValue(x => x.TilePattern)
+            .Subscribe(pattern =>
+            {
+                SelectedTilePattern = pattern;
+                IsTilePatternShiftedX = pattern.OffsetX != 0;
+            });
 
         MinCursorSizeList = new ObservableCollection<int>([8, 16, 24, 32, 48, 64]);
         MinCursorWidth = 32;
@@ -619,6 +660,8 @@ public partial class MainViewModel : ViewModelBase
             // TODO: DrawingSessionViewModel側で位置情報の復元も管理するようにリファクタリング予定
             DrawingSessionViewModel.Push(now, nowArea, previousArea, affectedArea, previous);
         };
+        DrawableCanvasViewModel.ColorCommitted += RecordColorHistory;
+        DrawableCanvasViewModel.ColorPicked += (_, e) => RecordColorHistory(e.NewColor);
 
         PutBackgroundColorCommand = ReactiveCommand.Create(() =>
         {
@@ -627,6 +670,7 @@ public partial class MainViewModel : ViewModelBase
         GetBackgroundColorCommand = ReactiveCommand.Create(() =>
         {
             PenColor = CurrentBackgroundColor.Value;
+            RecordColorHistory(PenColor);
         });
 
         PaletteContainerViewModel.OnApplyColor += OnApplyPaletteColor;
@@ -999,7 +1043,11 @@ public partial class MainViewModel : ViewModelBase
 
     private async Task OnPictureSave(object? sender, PictureSaveEventArgs e)
     {
-        if (FileStorage == null) return;
+        if (FileStorage == null)
+        {
+            e.Cancel();
+            return;
+        }
         SaveImageResult saveResult = e.IsSaveAs
             ? await e.File.SaveAsAsync(FileStorage)
             : await e.File.SaveAsync(FileStorage);
@@ -1129,6 +1177,23 @@ public partial class MainViewModel : ViewModelBase
     private void OnFetchPaletteColor(ArgbColor color)
     {
         PenColor = color;
+        RecordColorHistory(color);
+    }
+
+    private void RecordColorHistory(ArgbColor color)
+    {
+        for (int i = ColorHistory.Count - 1; i >= 0; i--)
+        {
+            if (color.EqualsArgb(ColorHistory[i]))
+            {
+                ColorHistory.RemoveAt(i);
+            }
+        }
+        ColorHistory.Insert(0, color);
+        while (ColorHistory.Count > MaxColorHistory)
+        {
+            ColorHistory.RemoveAt(ColorHistory.Count - 1);
+        }
     }
 
     private void OnReplacePaletteColor(ArgbColor sourceColor, ArgbColor targetColor)
@@ -1175,7 +1240,7 @@ public partial class MainViewModel : ViewModelBase
                 }
             }
 
-            if (!await PaletteContainerViewModel.TryCloseAllAsync())
+            if (!await PaletteContainerViewModel.TryCloseAllAsync(FileStorage))
             {
                 return;
             }
@@ -1532,10 +1597,12 @@ public partial class MainViewModel : ViewModelBase
 
         if (paletteState.Tabs.Count > 0)
         {
-            PaletteContainerViewModel.Tabs.Clear();
+            var restoredTabs = new List<PaletteTabViewModel>();
+            int mappedActiveIndex = -1;
 
-            foreach (var tabSnapshot in paletteState.Tabs)
+            for (int i = 0; i < paletteState.Tabs.Count; i++)
             {
+                var tabSnapshot = paletteState.Tabs[i];
                 if (tabSnapshot.Colors.Count == Palette.MAX_LENGTH)
                 {
                     var palette = Palette.FromColors(tabSnapshot.Colors.ToArray());
@@ -1547,25 +1614,15 @@ public partial class MainViewModel : ViewModelBase
                         tabSnapshot.SourceIdentity
                     );
                     newTab.IsDirty = tabSnapshot.IsDirty;
-                    PaletteContainerViewModel.Tabs.Add(newTab);
+                    if (i == paletteState.ActiveTabIndex)
+                    {
+                        mappedActiveIndex = restoredTabs.Count;
+                    }
+                    restoredTabs.Add(newTab);
                 }
             }
 
-            if (PaletteContainerViewModel.Tabs.Count == 0)
-            {
-                PaletteContainerViewModel.Tabs.Add(new PaletteTabViewModel(Palette.Create()));
-            }
-
-            // アクティブタブの復元
-            var activeIdx = paletteState.ActiveTabIndex;
-            if (activeIdx >= 0 && activeIdx < PaletteContainerViewModel.Tabs.Count)
-            {
-                PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[activeIdx];
-            }
-            else if (PaletteContainerViewModel.Tabs.Count > 0)
-            {
-                PaletteContainerViewModel.SelectedTab = PaletteContainerViewModel.Tabs[0];
-            }
+            PaletteContainerViewModel.RestoreTabs(restoredTabs, mappedActiveIndex);
         }
         else
         {

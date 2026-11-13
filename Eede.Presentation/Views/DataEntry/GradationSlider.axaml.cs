@@ -26,8 +26,34 @@ namespace Eede.Presentation.Views.DataEntry
         private Size SliderSize = new(0, 0);
 
         public event EventHandler<ValueChangedEventArgs>? ValueChanged;
-        public int MaxValue { set; get; } = 255;
-        public int MinValue { get; set; } = 0;
+
+        private int _maxValue = 255;
+        public int MaxValue
+        {
+            get => _maxValue;
+            set
+            {
+                if (_maxValue == value) return;
+                _maxValue = value;
+                Value = _value;
+                InvalidateVisual();
+            }
+        }
+
+        private int _minValue = 0;
+        public int MinValue
+        {
+            get => _minValue;
+            set
+            {
+                if (_minValue == value) return;
+                _minValue = value;
+                Value = _value;
+                InvalidateVisual();
+            }
+        }
+
+        public int LargeChange { get; set; } = 16;
 
         private int _value = 0;
         public int Value
@@ -63,6 +89,8 @@ namespace Eede.Presentation.Views.DataEntry
             PointerPressed += new EventHandler<PointerPressedEventArgs>(OnPointerPressed);
             PointerMoved += new EventHandler<PointerEventArgs>(OnPointerMoved);
             PointerReleased += new EventHandler<PointerReleasedEventArgs>(OnPointerReleased);
+            PointerCaptureLost += new EventHandler<PointerCaptureLostEventArgs>(OnPointerCaptureLost);
+            PointerWheelChanged += new EventHandler<PointerWheelEventArgs>(OnPointerWheelChanged);
             PointerExited += new EventHandler<PointerEventArgs>(OnPointerExited);
             PointerEntered += new EventHandler<PointerEventArgs>(OnPointerEntered);
 
@@ -73,7 +101,6 @@ namespace Eede.Presentation.Views.DataEntry
             VisualChildren.Add(TickPolygon);
 
             MaxHeight = MaxValue + TickPolygon.Height;
-
         }
 
         private Polygon CreateTickPolygon()
@@ -169,10 +196,20 @@ namespace Eede.Presentation.Views.DataEntry
         {
             Dispatcher.UIThread.Post(() =>
             {
-                double yPosition = (MaxValue - (Value - MinValue)) / (double)(MaxValue - MinValue) * SliderSize.Height;
+                double yPosition = MaxValue == MinValue
+                    ? 0
+                    : (MaxValue - (Value - MinValue)) / (double)(MaxValue - MinValue) * SliderSize.Height;
                 TickPolygon.Margin = new Thickness(TickPolygon.Width, yPosition, 0, 0);
             });
+        }
 
+        private double GetTickCenterY()
+        {
+            double sliderHeight = Math.Max(1.0, Height - TickPolygon.Height);
+            double yRatio = MaxValue == MinValue
+                ? 0.0
+                : (double)(MaxValue - (Value - MinValue)) / (MaxValue - MinValue);
+            return (yRatio * sliderHeight) + (TickPolygon.Height / 2.0);
         }
 
         ////リサイズ時、グラデーションの再描画
@@ -182,29 +219,92 @@ namespace Eede.Presentation.Views.DataEntry
             InvalidateVisual();
         }
 
-        private bool mouseDown = false;
+        private bool _isThumbDragging = false;
+        private bool _isTrackClickPending = false;
+        private Point _pressPoint;
+        private double _pressTickCenterY;
+
         private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            UpdateValueByPositionY(e.GetPosition(this).Y);
-            mouseDown = true;
+            Point pos = e.GetPosition(this);
+            double tickCenterY = GetTickCenterY();
+            e.Pointer.Capture(this);
+
+            if (Math.Abs(pos.Y - tickCenterY) <= 3.5)
+            {
+                _isThumbDragging = true;
+                _isTrackClickPending = false;
+                UpdateValueByPositionY(pos.Y);
+            }
+            else
+            {
+                _isTrackClickPending = true;
+                _isThumbDragging = false;
+                _pressPoint = pos;
+                _pressTickCenterY = tickCenterY;
+            }
+            e.Handled = true;
         }
 
         private void OnPointerMoved(object? sender, PointerEventArgs e)
         {
-            if (mouseDown != true)
+            Point pos = e.GetPosition(this);
+            if (_isTrackClickPending)
             {
+                if (Math.Abs(pos.Y - _pressPoint.Y) > 4.0)
+                {
+                    _isTrackClickPending = false;
+                    _isThumbDragging = true;
+                    UpdateValueByPositionY(pos.Y);
+                }
                 return;
             }
-            UpdateValueByPositionY(e.GetPosition(this).Y);
+
+            if (_isThumbDragging)
+            {
+                UpdateValueByPositionY(pos.Y);
+            }
         }
+
         private void UpdateValueByPositionY(double value)
         {
-            Value = (int)(MaxValue - ((value - (TickPolygon.Height / 2)) / (Height - TickPolygon.Height) * (MaxValue - MinValue)));
+            double effectiveHeight = Math.Max(1.0, Height - TickPolygon.Height);
+            Value = (int)Math.Round(MaxValue - ((value - (TickPolygon.Height / 2.0)) / effectiveHeight * (MaxValue - MinValue)));
         }
 
         private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
-            mouseDown = false;
+            if (_isTrackClickPending)
+            {
+                Value += _pressPoint.Y < _pressTickCenterY ? LargeChange : -LargeChange;
+            }
+            _isTrackClickPending = false;
+            _isThumbDragging = false;
+            if (e.Pointer.Captured == this)
+            {
+                e.Pointer.Capture(null);
+            }
+            e.Handled = true;
+        }
+
+        private void OnPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
+        {
+            _isTrackClickPending = false;
+            _isThumbDragging = false;
+        }
+
+        private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+        {
+            int step = e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? LargeChange : 1;
+            if (e.Delta.Y > 0)
+            {
+                Value += step;
+            }
+            else if (e.Delta.Y < 0)
+            {
+                Value -= step;
+            }
+            e.Handled = true;
         }
 
         private bool activeFlag = false;

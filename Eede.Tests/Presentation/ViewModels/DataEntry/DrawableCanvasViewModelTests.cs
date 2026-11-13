@@ -274,6 +274,61 @@ public class DrawableCanvasViewModelTests
         scheduler.AdvanceBy(1);
         Assert.That(vm.IsCursorGridEffectivelyVisible, Is.True, "Cursor grid should be effectively visible at any magnification when ON");
     }
+
+    [AvaloniaTest]
+    public void TilePattern_UpdatesPenStyle_AndPersistsAcrossColorAndSizeChanges()
+    {
+        var vm = CreateViewModel();
+
+        vm.TilePattern = TilePattern.Checker50;
+        Assert.That(vm.PenStyle.TilePattern, Is.EqualTo(TilePattern.Checker50));
+
+        vm.PenColor = new ArgbColor(255, 12, 34, 56);
+        vm.PenSize = 3;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.PenStyle.TilePattern, Is.EqualTo(TilePattern.Checker50));
+            Assert.That(vm.PenStyle.Color, Is.EqualTo(new ArgbColor(255, 12, 34, 56)));
+            Assert.That(vm.PenStyle.Width, Is.EqualTo(3));
+        });
+    }
+
+    [AvaloniaTest]
+    public void ColorCommitted_FiresOnlyWhenDrawingToolModifiesNonEmptyPixels()
+    {
+        var vm = CreateViewModel();
+        var committedColors = new System.Collections.Generic.List<ArgbColor>();
+        vm.ColorCommitted += c => committedColors.Add(c);
+
+        var penColor = new ArgbColor(255, 200, 100, 50);
+        vm.PenColor = penColor;
+        vm.DrawStyle = new FreeCurve();
+
+        var blank = Picture.CreateEmpty(new PictureSize(4, 4));
+        var blankCopy = Picture.CreateEmpty(new PictureSize(4, 4));
+        var painted = new Drawer(blank, new PenStyle(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), penColor, 1))
+            .DrawPoint(new Position(0, 0)).Picture;
+        var dummyArea = new PictureArea(new Position(0, 0), new PictureSize(4, 4));
+        var nonEmptyRegion = new PictureRegion(new PictureArea(new Position(0, 0), new PictureSize(1, 1)));
+
+        // 1. Valid drawing with pixel diff -> fires
+        _interactionCoordinatorMock.Raise(x => x.Drew += null, blank, painted, dummyArea, dummyArea, nonEmptyRegion);
+        Assert.That(committedColors, Is.EqualTo(new[] { penColor }));
+
+        // 2. Identical pixels (no-op draw) -> ignored
+        _interactionCoordinatorMock.Raise(x => x.Drew += null, blank, blankCopy, dummyArea, dummyArea, nonEmptyRegion);
+        Assert.That(committedColors.Count, Is.EqualTo(1));
+
+        // 3. Empty affected area (e.g., Cut / clear without draw region) -> ignored
+        _interactionCoordinatorMock.Raise(x => x.Drew += null, blank, painted, dummyArea, dummyArea, default(PictureRegion));
+        Assert.That(committedColors.Count, Is.EqualTo(1));
+
+        // 4. RegionSelector (selection/move/cut-paste) -> ignored even if pixels changed
+        vm.DrawStyle = new RegionSelector();
+        _interactionCoordinatorMock.Raise(x => x.Drew += null, blank, painted, dummyArea, dummyArea, nonEmptyRegion);
+        Assert.That(committedColors.Count, Is.EqualTo(1));
+    }
 }
 
 

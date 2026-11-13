@@ -113,6 +113,27 @@ namespace Eede.Domain.Tests.ImageEditing.DrawingTools
             });
         }
 
+        [Test]
+        public void Fill_WithChecker50Pattern_DoesNotHangAndPreservesBackground()
+        {
+            var size = new PictureSize(6, 6);
+            var white = new ArgbColor(255, 255, 255, 255);
+            var red = new ArgbColor(255, 255, 0, 0);
+            var picture = CreateMonoColorPicture(size, white);
+
+            var drawer = new Drawer(picture, new PenStyle(new DirectImageBlender(), red, 1, TilePattern.Checker50));
+            var result = drawer.Fill(new Position(2, 2));
+
+            for (int y = 0; y < size.Height; y++)
+            {
+                for (int x = 0; x < size.Width; x++)
+                {
+                    var expected = ((x + y) & 1) == 1 ? red : white;
+                    Assert.That(result.Picture.PickColor(new Position(x, y)), Is.EqualTo(expected), $"({x},{y})");
+                }
+            }
+        }
+
         private Picture CreateMonoColorPicture(PictureSize size, ArgbColor color)
         {
             var data = new byte[size.Width * size.Height * 4];

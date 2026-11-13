@@ -1,7 +1,9 @@
 #nullable enable
+using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 
 namespace Eede.Domain.ImageEditing.DrawingTools;
@@ -11,6 +13,13 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
     public readonly Picture DrawingPicture = drawingPicture ?? throw new ArgumentNullException(nameof(drawingPicture));
 
     private readonly PenStyle PenStyle = penCase ?? throw new ArgumentNullException(nameof(penCase));
+
+    private byte[] CreateDrawingBuffer(Picture dest)
+    {
+        return PenStyle.Blender is AlphaImageBlender
+            ? new byte[dest.Length]
+            : dest.CloneImage();
+    }
 
     public (Picture Picture, PictureArea Area) DrawPoint(CanvasCoordinate coordinate)
     {
@@ -22,7 +31,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         PictureArea area = GetPointArea(position);
         Picture result = DrawingPicture.Draw(dest =>
         {
-            byte[] imageData = DrawPointRoutine(dest, dest.CloneImage(), position);
+            byte[] imageData = DrawPointRoutine(dest, CreateDrawingBuffer(dest), position);
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
         return (result, area);
@@ -62,7 +71,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
         Picture result = DrawingPicture.Draw(dest =>
         {
-            byte[] imageData = dest.CloneImage();
+            byte[] imageData = CreateDrawingBuffer(dest);
             int x1 = from.X;
             int y1 = from.Y;
             int x2 = to.X;
@@ -127,7 +136,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
         Picture result = DrawingPicture.Draw(dest =>
         {
-            byte[] imageData = dest.CloneImage();
+            byte[] imageData = CreateDrawingBuffer(dest);
             ArgbColor color = PenStyle.Color;
 
             int width = tx - fx;
@@ -204,7 +213,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
         Picture result = DrawingPicture.Draw(dest =>
         {
-            byte[] imageData = DrawFillEllipseRoutine(dest, dest.CloneImage(), from, to);
+            byte[] imageData = DrawFillEllipseRoutine(dest, CreateDrawingBuffer(dest), from, to);
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
         return (result, area);
@@ -282,7 +291,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
         Picture result = DrawingPicture.Draw(dest =>
         {
-            byte[] imageData = dest.CloneImage();
+            byte[] imageData = CreateDrawingBuffer(dest);
             ArgbColor color = PenStyle.Color;
             int stride = dest.Stride;
             int width = dest.Width;
@@ -306,7 +315,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
 
         Picture result = DrawingPicture.Draw(dest =>
         {
-            byte[] imageData = dest.CloneImage();
+            byte[] imageData = CreateDrawingBuffer(dest);
             ArgbColor color = PenStyle.Color;
             int stride = dest.Stride;
             int width = dest.Width;
@@ -339,9 +348,13 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
     }
 
 
-    private static void DrawPixel(byte[] imageArray, int stride, int width, int height, int x, int y, ArgbColor color)
+    private void DrawPixel(byte[] imageArray, int stride, int width, int height, int x, int y, ArgbColor color)
     {
         if (x < 0 || x >= width || y < 0 || y >= height)
+        {
+            return;
+        }
+        if (!PenStyle.TilePattern.IsDrawable(x, y))
         {
             return;
         }
@@ -352,7 +365,7 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         imageArray[index + 3] = color.Alpha;
     }
 
-    private static void DrawScanLine(byte[] imageArray, int stride, int width, int height, int x, int y, int toX, ArgbColor color)
+    private void DrawScanLine(byte[] imageArray, int stride, int width, int height, int x, int y, int toX, ArgbColor color)
     {
         if (y < 0 || y >= height)
         {
@@ -366,13 +379,31 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         }
 
         int index = (startX * 4) + (stride * y);
-        for (int i = startX; i <= endX; i++)
+        TilePattern pattern = PenStyle.TilePattern;
+        if (pattern.IsSolid)
         {
-            imageArray[index] = color.Blue;
-            imageArray[index + 1] = color.Green;
-            imageArray[index + 2] = color.Red;
-            imageArray[index + 3] = color.Alpha;
-            index += 4;
+            for (int i = startX; i <= endX; i++)
+            {
+                imageArray[index] = color.Blue;
+                imageArray[index + 1] = color.Green;
+                imageArray[index + 2] = color.Red;
+                imageArray[index + 3] = color.Alpha;
+                index += 4;
+            }
+        }
+        else
+        {
+            for (int i = startX; i <= endX; i++)
+            {
+                if (pattern.IsDrawable(i, y))
+                {
+                    imageArray[index] = color.Blue;
+                    imageArray[index + 1] = color.Green;
+                    imageArray[index + 2] = color.Red;
+                    imageArray[index + 3] = color.Alpha;
+                }
+                index += 4;
+            }
         }
     }
 
@@ -390,7 +421,12 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
         {
             int cWidth = dest.Width;
             int cHeight = dest.Height;
-            byte[] imageData = dest.CloneImage();
+            byte[] imageData = CreateDrawingBuffer(dest);
+            if (cWidth <= 0 || cHeight <= 0 || !dest.Contains(from))
+            {
+                return Picture.Create(dest.Size, imageData);
+            }
+
             ArgbColor targetColor = dest.PickColor(from);
             ArgbColor color = PenStyle.Color;
             if (targetColor == color)
@@ -399,69 +435,103 @@ public class Drawer(Picture drawingPicture, PenStyle penCase)
             }
 
             int stride = dest.Stride;
+            ReadOnlySpan<byte> sourceSpan = dest.AsSpan();
+            int pixelCount = cWidth * cHeight;
+            int visitedByteLength = (pixelCount + 7) >> 3;
+            byte[] visitedBytes = ArrayPool<byte>.Shared.Rent(visitedByteLength);
+            Array.Clear(visitedBytes, 0, visitedByteLength);
 
-            bool IsTargetColor(int x, int y)
+            try
             {
-                if (x < 0 || x >= cWidth || y < 0 || y >= cHeight)
+                static bool IsTargetColorAndUnvisited(ReadOnlySpan<byte> src, byte[] visited, int x, int y, int width, int height, int stride, ArgbColor target)
                 {
-                    return false;
+                    if (x < 0 || x >= width || y < 0 || y >= height)
+                    {
+                        return false;
+                    }
+                    int pixelIdx = (y * width) + x;
+                    if ((visited[pixelIdx >> 3] & (1 << (pixelIdx & 7))) != 0)
+                    {
+                        return false;
+                    }
+                    int index = (x * 4) + (stride * y);
+                    return src[index] == target.Blue &&
+                           src[index + 1] == target.Green &&
+                           src[index + 2] == target.Red &&
+                           src[index + 3] == target.Alpha;
                 }
-                int index = (x * 4) + (stride * y);
-                return imageData[index] == targetColor.Blue &&
-                       imageData[index + 1] == targetColor.Green &&
-                       imageData[index + 2] == targetColor.Red &&
-                       imageData[index + 3] == targetColor.Alpha;
-            }
 
-            void UpdateBounds(int x, int y)
-            {
-                minX = Math.Min(minX, x);
-                minY = Math.Min(minY, y);
-                maxX = Math.Max(maxX, x);
-                maxY = Math.Max(maxY, y);
-                anyFilled = true;
-            }
-
-            Stack<Position> stack = new();
-            stack.Push(from);
-            while (stack.Count > 0)
-            {
-                Position p = stack.Pop();
-                int x = p.X;
-                int y = p.Y;
-                while (x >= 0 && IsTargetColor(x, y))
+                static void MarkVisited(byte[] visited, int x, int y, int width)
                 {
-                    x--;
+                    int pixelIdx = (y * width) + x;
+                    visited[pixelIdx >> 3] |= (byte)(1 << (pixelIdx & 7));
                 }
-                x++;
-                bool spanAbove = false;
-                bool spanBelow = false;
-                while (x < cWidth && IsTargetColor(x, y))
-                {
-                    DrawPixel(imageData, stride, cWidth, cHeight, x, y, color);
-                    UpdateBounds(x, y);
-                    if (!spanAbove && y > 0 && IsTargetColor(x, y - 1))
-                    {
-                        stack.Push(new Position(x, y - 1));
-                        spanAbove = true;
-                    }
-                    else if (spanAbove && y > 0 && !IsTargetColor(x, y - 1))
-                    {
-                        spanAbove = false;
-                    }
 
-                    if (!spanBelow && y < cHeight - 1 && IsTargetColor(x, y + 1))
+                void UpdateBounds(int x, int y)
+                {
+                    minX = Math.Min(minX, x);
+                    minY = Math.Min(minY, y);
+                    maxX = Math.Max(maxX, x);
+                    maxY = Math.Max(maxY, y);
+                    anyFilled = true;
+                }
+
+                TilePattern pattern = PenStyle.TilePattern;
+                Stack<Position> stack = new();
+                stack.Push(from);
+                while (stack.Count > 0)
+                {
+                    Position p = stack.Pop();
+                    int x = p.X;
+                    int y = p.Y;
+                    while (x >= 0 && IsTargetColorAndUnvisited(sourceSpan, visitedBytes, x, y, cWidth, cHeight, stride, targetColor))
                     {
-                        stack.Push(new Position(x, y + 1));
-                        spanBelow = true;
-                    }
-                    else if (spanBelow && y < cHeight - 1 && !IsTargetColor(x, y + 1))
-                    {
-                        spanBelow = false;
+                        x--;
                     }
                     x++;
+                    bool spanAbove = false;
+                    bool spanBelow = false;
+                    while (x < cWidth && IsTargetColorAndUnvisited(sourceSpan, visitedBytes, x, y, cWidth, cHeight, stride, targetColor))
+                    {
+                        MarkVisited(visitedBytes, x, y, cWidth);
+                        if (pattern.IsDrawable(x, y))
+                        {
+                            int index = (x * 4) + (stride * y);
+                            imageData[index] = color.Blue;
+                            imageData[index + 1] = color.Green;
+                            imageData[index + 2] = color.Red;
+                            imageData[index + 3] = color.Alpha;
+                            UpdateBounds(x, y);
+                        }
+
+                        if (!spanAbove && y > 0 && IsTargetColorAndUnvisited(sourceSpan, visitedBytes, x, y - 1, cWidth, cHeight, stride, targetColor))
+                        {
+                            stack.Push(new Position(x, y - 1));
+                            spanAbove = true;
+                        }
+                        else if (spanAbove && y > 0 && !IsTargetColorAndUnvisited(sourceSpan, visitedBytes, x, y - 1, cWidth, cHeight, stride, targetColor))
+                        {
+                            spanAbove = false;
+                        }
+
+                        if (!spanBelow && y < cHeight - 1 && IsTargetColorAndUnvisited(sourceSpan, visitedBytes, x, y + 1, cWidth, cHeight, stride, targetColor))
+                        {
+                            stack.Push(new Position(x, y + 1));
+                            spanBelow = true;
+                        }
+                        else if (spanBelow && y < cHeight - 1 && !IsTargetColorAndUnvisited(sourceSpan, visitedBytes, x, y + 1, cWidth, cHeight, stride, targetColor))
+                        {
+                            spanBelow = false;
+                        }
+                        x++;
+                    }
                 }
             }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(visitedBytes);
+            }
+
             return Picture.Create(dest.Size, imageData);
         }, PenStyle.Blender);
 

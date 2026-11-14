@@ -97,12 +97,8 @@ public partial class PaletteContainer : ReactiveUserControl<PaletteContainerView
         string displayName = string.IsNullOrEmpty(interaction.Input.FilePath)
             ? interaction.Input.CustomTitle
             : interaction.Input.FilePath;
-        var window = new Eede.Views.Pages.SaveAlertWindow(displayName);
-        if (TopLevel.GetTopLevel(this) is Window parent)
-        {
-            await window.ShowDialog(parent);
-            interaction.SetOutput(window.Result);
-        }
+        var result = await Views.Pages.MainView.ShowSaveAlertDialogAsync(displayName, this);
+        interaction.SetOutput(result);
     }
 
     public static readonly StyledProperty<AvaloniaFileStorage> FileStorageProperty =

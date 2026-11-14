@@ -12,9 +12,15 @@
     </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#020617" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Eede - Web Edition</title>
     <base href="./" />
     <link rel="icon" type="image/png" href="../assets/logo.png" />
+    <link rel="apple-touch-icon" href="../assets/logo.png" />
+    <link rel="manifest" href="./manifest.json" />
     <style>
         :root {
             --bg-color: #020617;
@@ -24,6 +30,12 @@
             --accent-teal: #2dd4bf;
             --text-color: #f1f5f9;
             --text-muted: #64748b;
+        }
+
+        html, body, #out {
+            touch-action: none;
+            overscroll-behavior: none;
+            -webkit-touch-callout: none;
         }
 
         html, body {
@@ -41,8 +53,37 @@
 
         #out {
             width: 100vw;
+            width: 100dvw;
             height: 100vh;
+            height: 100dvh;
             display: block;
+        }
+
+        #portrait-warning {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(2, 6, 23, 0.96);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1.5rem;
+        }
+        @media (orientation: portrait) and (pointer: coarse) {
+            #portrait-warning:not(.dismissed) { display: flex; }
+        }
+        .portrait-warning-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .portrait-warning-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+        .portrait-dismiss-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
         }
 
         #loading-screen {
@@ -120,6 +161,12 @@
     </style>
 </head>
 <body>
+    <div id="portrait-warning" role="dialog" aria-label="Orientation Notice">
+        <div class="portrait-warning-title">横画面にしてご利用ください</div>
+        <div class="portrait-warning-sub">Please rotate your device to landscape</div>
+        <button type="button" class="portrait-dismiss-btn" onclick="document.getElementById('portrait-warning').classList.add('dismissed')">このまま表示 / Dismiss</button>
+    </div>
+
     <div id="loading-screen">
         <div class="logo-container">
             <img src="../assets/logo.png" alt="Eede Logo" width="64" height="64" style="image-rendering: pixelated;" onerror="this.style.display='none'" />

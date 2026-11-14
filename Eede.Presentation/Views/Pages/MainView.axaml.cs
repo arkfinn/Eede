@@ -5,9 +5,11 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using Eede.Presentation.Common.Adapters;
+using Eede.Presentation.Common.Enums;
 using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.ViewModels.DataEntry;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
@@ -368,6 +370,52 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             var result = await tcs.Task;
             interaction.SetOutput(result);
         }
+    }
+
+    internal static Func<string, Task<SaveAlertResult>>? InlineSaveAlertHandler { get; set; }
+
+    public Task<SaveAlertResult> ShowInlineSaveAlertAsync(string fileName)
+    {
+        var tcs = new TaskCompletionSource<SaveAlertResult>();
+        var vm = new SaveAlertViewModel(fileName, result =>
+        {
+            ModalOverlayHost.IsVisible = false;
+            ModalContentControl.Content = null;
+            tcs.TrySetResult(result);
+        });
+        ModalContentControl.Content = new Eede.Views.Pages.SaveAlertContentView { DataContext = vm };
+        ModalOverlayHost.IsVisible = true;
+        return tcs.Task;
+    }
+
+    public static async Task<SaveAlertResult> ShowSaveAlertDialogAsync(string fileName, Visual? contextVisual = null)
+    {
+        if (contextVisual != null && TopLevel.GetTopLevel(contextVisual) is Window parentWindow)
+        {
+            var window = new Eede.Views.Pages.SaveAlertWindow(fileName);
+            await window.ShowDialog(parentWindow);
+            return window.Result;
+        }
+        if (contextVisual?.FindAncestorOfType<MainView>() is MainView ancestorMainView)
+        {
+            return await ancestorMainView.ShowInlineSaveAlertAsync(fileName);
+        }
+        if (InlineSaveAlertHandler != null)
+        {
+            return await InlineSaveAlertHandler(fileName);
+        }
+        var lifetime = Avalonia.Application.Current?.ApplicationLifetime;
+        if (lifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime { MainWindow: { } mainWindow })
+        {
+            var window = new Eede.Views.Pages.SaveAlertWindow(fileName);
+            await window.ShowDialog(mainWindow);
+            return window.Result;
+        }
+        if (lifetime is Avalonia.Controls.ApplicationLifetimes.ISingleViewApplicationLifetime { MainView: MainView singleMainView })
+        {
+            return await singleMainView.ShowInlineSaveAlertAsync(fileName);
+        }
+        return SaveAlertResult.Cancel;
     }
 
     public AvaloniaFileStorage? FileStorage { get; private set; }

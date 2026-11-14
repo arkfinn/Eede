@@ -12,6 +12,7 @@ using Eede.Domain.ImageEditing.SelectionStates;
 using Eede.Domain.ImageEditing.Transformation;
 using Eede.Domain.Palettes;
 using Eede.Domain.SharedKernel;
+using Eede.Presentation.Common;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Coordinators;
 using Eede.Presentation.Settings;
@@ -82,6 +83,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public partial bool IsShowPixelGrid { get; set; }
     [Reactive] public partial bool IsShowCursorGrid { get; set; }
     [Reactive] public partial PictureSize CursorSize { get; set; }
+    [Reactive] public partial TouchCanvasMode TouchCanvasMode { get; set; }
 
     [ObservableAsProperty] private bool _isPixelGridEffectivelyVisible;
     [ObservableAsProperty] private bool _isCursorGridEffectivelyVisible;
@@ -205,6 +207,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         PointerRightButtonPressedCommand = ReactiveCommand.Create<Position>(ExecutePonterRightButtonPressedAction);
         DrawingCommand = ReactiveCommand.Create<Position>(ExecuteDrawingAction);
         DrawEndCommand = ReactiveCommand.Create<Position>(ExecuteDrawEndAction);
+        CancelDrawingCommand = ReactiveCommand.Create(CancelDrawing);
         CanvasLeaveCommand = ReactiveCommand.Create(ExecuteCanvasLeaveAction);
 
         CopyCommand = ReactiveCommand.CreateFromTask(ExecuteCopyAction);
@@ -402,7 +405,13 @@ public partial class DrawableCanvasViewModel : ViewModelBase
     public ReactiveCommand<Position, RxVoid> PointerRightButtonPressedCommand { get; }
     public ReactiveCommand<Position, RxVoid> DrawingCommand { get; }
     public ReactiveCommand<Position, RxVoid> DrawEndCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> CancelDrawingCommand { get; }
     public ReactiveCommand<RxVoid, RxVoid> CanvasLeaveCommand { get; }
+
+    public void CancelDrawing()
+    {
+        _coordinator.CancelDrawing();
+    }
 
     private void ExecuteDrawBeginAction(Position pos)
     {

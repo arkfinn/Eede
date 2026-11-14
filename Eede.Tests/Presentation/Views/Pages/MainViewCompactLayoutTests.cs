@@ -180,4 +180,30 @@ public class MainViewCompactLayoutTests
             window.Close();
         }
     }
+
+    [AvaloniaTest]
+    public void TouchModes_ShouldHaveSafeInitialValues_AndPropagateAcrossViewModels()
+    {
+        var vm = CreateMainViewModel();
+        var dockVm = new DockPictureViewModel(new GlobalState(), vm.AnimationViewModel, new AvaloniaBitmapAdapter(), new Mock<IPictureFileIO>().Object);
+        vm.Pictures.Add(dockVm);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.TouchCanvasMode, Is.EqualTo(Eede.Presentation.Common.TouchCanvasMode.Draw));
+            Assert.That(vm.TouchDockMode, Is.EqualTo(Eede.Presentation.Common.TouchDockMode.Pull));
+            Assert.That(vm.IsTouchPaletteRegisterMode, Is.False);
+        });
+
+        vm.SetTouchCanvasModeCommand.Execute(Eede.Presentation.Common.TouchCanvasMode.Eyedropper).Subscribe();
+        vm.SetTouchDockModeCommand.Execute(Eede.Presentation.Common.TouchDockMode.Push).Subscribe();
+        vm.IsTouchPaletteRegisterMode = true;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.DrawableCanvasViewModel.TouchCanvasMode, Is.EqualTo(Eede.Presentation.Common.TouchCanvasMode.Eyedropper));
+            Assert.That(dockVm.TouchDockMode, Is.EqualTo(Eede.Presentation.Common.TouchDockMode.Push));
+            Assert.That(vm.PaletteContainerViewModel.IsRegisterMode, Is.True);
+        });
+    }
 }

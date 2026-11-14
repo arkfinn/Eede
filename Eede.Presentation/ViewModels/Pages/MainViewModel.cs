@@ -16,6 +16,7 @@ using Eede.Domain.Palettes;
 using Eede.Application.Palettes;
 using Eede.Domain.SharedKernel;
 using Eede.Presentation.Actions;
+using Eede.Presentation.Common;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Models;
 using Eede.Application.Infrastructure;
@@ -111,6 +112,19 @@ public partial class MainViewModel : ViewModelBase
     [Reactive] public partial bool IsCompactDockActive { get; set; }
     [Reactive] public partial bool IsCompactPaletteOpen { get; set; }
     [Reactive] public partial bool IsCompactToolPanelOpen { get; set; }
+    [Reactive] public partial TouchCanvasMode TouchCanvasMode { get; set; }
+    [Reactive] public partial TouchDockMode TouchDockMode { get; set; }
+    [Reactive] public partial bool IsTouchPaletteRegisterMode { get; set; }
+
+    public bool IsTouchCanvasDrawMode { get => TouchCanvasMode == TouchCanvasMode.Draw; set { if (value) TouchCanvasMode = TouchCanvasMode.Draw; this.RaisePropertyChanged(); } }
+    public bool IsTouchCanvasEyedropperMode { get => TouchCanvasMode == TouchCanvasMode.Eyedropper; set { if (value) TouchCanvasMode = TouchCanvasMode.Eyedropper; this.RaisePropertyChanged(); } }
+    public bool IsTouchCanvasPanMode { get => TouchCanvasMode == TouchCanvasMode.Pan; set { if (value) TouchCanvasMode = TouchCanvasMode.Pan; this.RaisePropertyChanged(); } }
+    public bool IsTouchDockPullMode { get => TouchDockMode == TouchDockMode.Pull; set { if (value) TouchDockMode = TouchDockMode.Pull; this.RaisePropertyChanged(); } }
+    public bool IsTouchDockPushMode { get => TouchDockMode == TouchDockMode.Push; set { if (value) TouchDockMode = TouchDockMode.Push; this.RaisePropertyChanged(); } }
+    public bool IsTouchDockPanMode { get => TouchDockMode == TouchDockMode.Pan; set { if (value) TouchDockMode = TouchDockMode.Pan; this.RaisePropertyChanged(); } }
+
+    public ReactiveCommand<TouchCanvasMode, RxVoid> SetTouchCanvasModeCommand { get; private set; }
+    public ReactiveCommand<TouchDockMode, RxVoid> SetTouchDockModeCommand { get; private set; }
 
     public bool IsBrowserPlatform => OperatingSystem.IsBrowser();
     public bool IsDesktopPlatform => !OperatingSystem.IsBrowser();
@@ -538,6 +552,8 @@ public partial class MainViewModel : ViewModelBase
 
         _selectedTilePattern = TilePattern.Solid;
         _isCompactToolPanelOpen = true;
+        SetTouchCanvasModeCommand = ReactiveCommand.Create<TouchCanvasMode>(mode => TouchCanvasMode = mode);
+        SetTouchDockModeCommand = ReactiveCommand.Create<TouchDockMode>(mode => TouchDockMode = mode);
         InitializeConnections();
         _ = LoadSettingsAsync();
         _ = UpdateClipboardStatusAsync();
@@ -568,6 +584,21 @@ public partial class MainViewModel : ViewModelBase
         _ = this.WhenAnyValue(x => x.IsShowPixelGrid).BindTo(this, x => x.DrawableCanvasViewModel.IsShowPixelGrid);
         _ = this.WhenAnyValue(x => x.IsShowCursorGrid).BindTo(this, x => x.DrawableCanvasViewModel.IsShowCursorGrid);
         _ = this.WhenAnyValue(x => x.CursorSize).BindTo(this, x => x.DrawableCanvasViewModel.CursorSize);
+        _ = this.WhenAnyValue(x => x.TouchCanvasMode).Subscribe(mode =>
+        {
+            DrawableCanvasViewModel.TouchCanvasMode = mode;
+            this.RaisePropertyChanged(nameof(IsTouchCanvasDrawMode));
+            this.RaisePropertyChanged(nameof(IsTouchCanvasEyedropperMode));
+            this.RaisePropertyChanged(nameof(IsTouchCanvasPanMode));
+        });
+        _ = this.WhenAnyValue(x => x.TouchDockMode).Subscribe(mode =>
+        {
+            foreach (var vm in Pictures) vm.TouchDockMode = mode;
+            this.RaisePropertyChanged(nameof(IsTouchDockPullMode));
+            this.RaisePropertyChanged(nameof(IsTouchDockPushMode));
+            this.RaisePropertyChanged(nameof(IsTouchDockPanMode));
+        });
+        _ = this.WhenAnyValue(x => x.IsTouchPaletteRegisterMode).Subscribe(reg => PaletteContainerViewModel.IsRegisterMode = reg);
 
         _ = this.WhenAnyValue(x => x.ImageBlender)
             .Subscribe(x => DrawableCanvasViewModel.ImageBlender = x);
@@ -982,6 +1013,7 @@ public partial class MainViewModel : ViewModelBase
         vm.PictureSave += OnPictureSave;
         vm.MinCursorSize = new PictureSize(MinCursorWidth, MinCursorHeight);
         vm.CursorSize = CursorSize;
+        vm.TouchDockMode = TouchDockMode;
         _ = this.WhenAnyValue(x => x.AnimationCursor).BindTo(vm, x => x.AnimationCursor);
 
         var disposables = new CompositeDisposable

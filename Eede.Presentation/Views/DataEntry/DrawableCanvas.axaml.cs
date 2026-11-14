@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
@@ -19,6 +20,10 @@ namespace Eede.Presentation.Views.DataEntry
     public partial class DrawableCanvas : UserControl
     {
         private readonly ZoomAndPanController _zoomAndPanController = new();
+        private readonly TouchGestureTracker _touchTracker = new();
+        private DispatcherTimer? _touchLongPressTimer;
+        private bool _isTouchDrawing, _isTouchSingleFingerPanning;
+        private Point _touchPanLastViewportPos, _touchLastCanvasPos;
         private Vector _currentMargin = new(0, 0);
         private bool _isInitialCentered = false;
         private readonly List<IDisposable> _dataContextDisposables = new();
@@ -42,6 +47,7 @@ namespace Eede.Presentation.Views.DataEntry
             canvas.PointerPressed += OnCanvasPointerPressed;
             canvas.PointerMoved += OnCanvasPointerMoved;
             canvas.PointerReleased += OnCanvasPointerReleased;
+            canvas.PointerCaptureLost += OnPointerCaptureLost;
             canvas.PointerExited += OnCanvasPointerExited;
 
             // UserControl自身でRequestBringIntoViewイベントをインターセプトする
@@ -128,6 +134,7 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)
         {
+            if (e.Pointer.Type == PointerType.Touch) { if (e.Source != canvas && (TouchCanvasMode == TouchCanvasMode.Pan || _touchTracker.ActivePointerCount >= 1)) HandleTouchPointerPressed(e); return; }
             var props = e.GetCurrentPoint(scrollViewer).Properties;
             bool isMiddle = props.IsMiddleButtonPressed;
             bool isSpaceLeft = _zoomAndPanController.IsSpacePressed && props.IsLeftButtonPressed;
@@ -144,6 +151,7 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnScrollViewerPointerMoved(object? sender, PointerEventArgs e)
         {
+            if (e.Pointer.Type == PointerType.Touch) { if (e.Source != canvas && _touchTracker.ActivePointerCount >= 1) HandleTouchPointerMoved(e); return; }
             if (_zoomAndPanController.IsPanning)
             {
                 _zoomAndPanController.HandlePointerMoved(scrollViewer, scrollViewer, e);
@@ -153,6 +161,7 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnScrollViewerPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
+            if (e.Pointer.Type == PointerType.Touch) { if (e.Source != canvas && _touchTracker.ActivePointerCount >= 1) HandleTouchPointerReleased(e); return; }
             if (_zoomAndPanController.IsPanning)
             {
                 _zoomAndPanController.HandlePointerReleased(scrollViewer, e);
@@ -228,6 +237,15 @@ namespace Eede.Presentation.Views.DataEntry
             set => SetValue(IsShiftedProperty, value);
         }
 
+        public static readonly StyledProperty<TouchCanvasMode> TouchCanvasModeProperty = AvaloniaProperty.Register<DrawableCanvas, TouchCanvasMode>(nameof(TouchCanvasMode), TouchCanvasMode.Draw);
+        public TouchCanvasMode TouchCanvasMode { get => GetValue(TouchCanvasModeProperty); set => SetValue(TouchCanvasModeProperty, value); }
+        public static readonly StyledProperty<ICommand?> CancelDrawingCommandProperty = AvaloniaProperty.Register<DrawableCanvas, ICommand?>(nameof(CancelDrawingCommand));
+        public ICommand? CancelDrawingCommand { get => GetValue(CancelDrawingCommandProperty); set => SetValue(CancelDrawingCommandProperty, value); }
+        public static readonly StyledProperty<ICommand?> UndoCommandProperty = AvaloniaProperty.Register<DrawableCanvas, ICommand?>(nameof(UndoCommand));
+        public ICommand? UndoCommand { get => GetValue(UndoCommandProperty); set => SetValue(UndoCommandProperty, value); }
+        public static readonly StyledProperty<ICommand?> RedoCommandProperty = AvaloniaProperty.Register<DrawableCanvas, ICommand?>(nameof(RedoCommand));
+        public ICommand? RedoCommand { get => GetValue(RedoCommandProperty); set => SetValue(RedoCommandProperty, value); }
+
         private void OnKeyDown(object? sender, KeyEventArgs e)
         {
             _zoomAndPanController.HandleKeyDown(e);
@@ -269,6 +287,7 @@ namespace Eede.Presentation.Views.DataEntry
         private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             canvas.Focus();
+            if (e.Pointer.Type == PointerType.Touch) { HandleTouchPointerPressed(e); return; }
 
             if (_zoomAndPanController.HandlePointerPressed(scrollViewer, canvas, e))
             {
@@ -291,6 +310,8 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnCanvasPointerMoved(object? sender, PointerEventArgs e)
         {
+            if (e.Pointer.Type == PointerType.Touch) { HandleTouchPointerMoved(e); return; }
+
             if (_zoomAndPanController.HandlePointerMoved(scrollViewer, canvas, e))
             {
                 return;
@@ -307,6 +328,8 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
+            if (e.Pointer.Type == PointerType.Touch) { HandleTouchPointerReleased(e); return; }
+
             if (_zoomAndPanController.HandlePointerReleased(canvas, e))
             {
                 return;
@@ -322,18 +345,107 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
         {
+            if (e.Pointer.Type == PointerType.Touch)
+            {
+                _touchLongPressTimer?.Stop();
+                if (_touchTracker.OnPointerCaptureLost(e.Pointer.Id) && _isTouchDrawing) { _isTouchDrawing = false; ExecuteCancelDrawing(); }
+                if (_touchTracker.ActivePointerCount == 0) _isTouchSingleFingerPanning = false;
+                return;
+            }
             _zoomAndPanController.HandlePointerCaptureLost(e);
             IsLeftButtonPressing = false;
         }
 
         private void OnCanvasPointerExited(object? sender, EventArgs e)
         {
-            if (_zoomAndPanController.IsPanning)
-            {
-                return;
-            }
+            if (_zoomAndPanController.IsPanning || _touchTracker.ActivePointerCount > 0) return;
             _zoomAndPanController.Reset();
             PointerLeaveCommand?.Execute(null);
+        }
+
+        private void HandleTouchPointerPressed(PointerPressedEventArgs e)
+        {
+            Point viewportPos = e.GetPosition(scrollViewer), canvasPos = e.GetPosition(canvas);
+            var down = _touchTracker.OnPointerDown(e.Pointer.Id, viewportPos, Environment.TickCount64);
+            e.Pointer.Capture(canvas);
+            if (down.ShouldCancelSingleFingerAction)
+            {
+                _touchLongPressTimer?.Stop();
+                _isTouchSingleFingerPanning = false;
+                if (_isTouchDrawing) { _isTouchDrawing = false; ExecuteCancelDrawing(); }
+            }
+            else if (down.CanStartSingleFingerAction)
+            {
+                var pos = new Position((int)canvasPos.X, (int)canvasPos.Y);
+                if (TouchCanvasMode == TouchCanvasMode.Pan) { _isTouchSingleFingerPanning = true; _touchPanLastViewportPos = viewportPos; }
+                else if (TouchCanvasMode == TouchCanvasMode.Eyedropper) PointerRightButtonPressedCommand?.Execute(pos);
+                else
+                {
+                    PointerLeftButtonPressedCommand?.Execute(pos);
+                    _isTouchDrawing = true;
+                    _touchLastCanvasPos = canvasPos;
+                    _touchLongPressTimer ??= new DispatcherTimer(TimeSpan.FromMilliseconds(TouchGestureTracker.LongPressDelayMs), DispatcherPriority.Input, OnTouchLongPressTick);
+                    _touchLongPressTimer.Stop();
+                    _touchLongPressTimer.Start();
+                }
+            }
+            e.Handled = true;
+        }
+
+        private void OnTouchLongPressTick(object? sender, EventArgs e)
+        {
+            _touchLongPressTimer?.Stop();
+            if (!_touchTracker.TryTriggerLongPress(Environment.TickCount64, out _)) return;
+            if (_isTouchDrawing) { _isTouchDrawing = false; ExecuteCancelDrawing(); }
+            PointerRightButtonPressedCommand?.Execute(new Position((int)_touchLastCanvasPos.X, (int)_touchLastCanvasPos.Y));
+        }
+
+        private void HandleTouchPointerMoved(PointerEventArgs e)
+        {
+            Point viewportPos = e.GetPosition(scrollViewer), canvasPos = e.GetPosition(canvas);
+            var move = _touchTracker.OnPointerMoved(e.Pointer.Id, viewportPos, Environment.TickCount64);
+            if (!_touchTracker.IsLongPressEligible) _touchLongPressTimer?.Stop();
+            if (move.IsMultiTouch)
+            {
+                _touchLongPressTimer?.Stop();
+                if (DataContext is DrawableCanvasViewModel vm)
+                    TouchGestureTracker.ApplyMultiTouchPanAndZoom(move, scrollViewer, vm.Magnification, mag => vm.Magnification = mag, () => UpdateLayout(), _currentMargin);
+            }
+            else if (move.CanContinueSingleFingerAction)
+            {
+                var pos = new Position((int)canvasPos.X, (int)canvasPos.Y);
+                if (TouchCanvasMode == TouchCanvasMode.Pan && _isTouchSingleFingerPanning && scrollViewer != null)
+                {
+                    scrollViewer.Offset = ZoomHelper.CalculatePanOffset(scrollViewer.Offset, viewportPos - _touchPanLastViewportPos);
+                    _touchPanLastViewportPos = viewportPos;
+                }
+                else if (TouchCanvasMode == TouchCanvasMode.Eyedropper) PointerRightButtonPressedCommand?.Execute(pos);
+                else { _touchLastCanvasPos = canvasPos; if (_isTouchDrawing) PointerMovedCommand?.Execute(pos); }
+            }
+            e.Handled = true;
+        }
+
+        private void HandleTouchPointerReleased(PointerReleasedEventArgs e)
+        {
+            _touchLongPressTimer?.Stop();
+            Point viewportPos = e.GetPosition(scrollViewer), canvasPos = e.GetPosition(canvas);
+            var up = _touchTracker.OnPointerUp(e.Pointer.Id, viewportPos, Environment.TickCount64);
+            e.Pointer.Capture(null);
+            if (up.ShouldEndSingleFingerAction && _isTouchDrawing)
+            {
+                _isTouchDrawing = false;
+                PointerLeftButtonReleasedCommand?.Execute(new Position((int)canvasPos.X, (int)canvasPos.Y));
+            }
+            if (up.ActivePointerCount == 0) _isTouchDrawing = _isTouchSingleFingerPanning = false;
+            if (up.TapAction == TouchTapAction.TwoFingerUndo) UndoCommand?.Execute(null);
+            else if (up.TapAction == TouchTapAction.ThreeFingerRedo) RedoCommand?.Execute(null);
+            e.Handled = true;
+        }
+
+        private void ExecuteCancelDrawing()
+        {
+            if (CancelDrawingCommand != null) CancelDrawingCommand.Execute(null);
+            else (DataContext as DrawableCanvasViewModel)?.CancelDrawing();
         }
     }
 }

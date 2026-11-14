@@ -399,4 +399,33 @@ public class InteractionCoordinatorTests
             null!));
         Assert.That(pickedColor, Is.Null);
     }
+
+    [AvaloniaTest]
+    public void CancelDrawing_WhenDrawingInProgress_ShouldRestoreBufferWithoutPickingColor()
+    {
+        var size = new PictureSize(16, 16);
+        var originalColor = new ArgbColor(255, 10, 20, 30);
+        var picture = Picture.CreateEmpty(size);
+        var blender = new DirectImageBlender();
+        picture = new Drawer(picture, new PenStyle(blender, originalColor, 1)).DrawPoint(new Position(2, 2)).Picture;
+
+        _sessionProvider.Update(new DrawingSession(picture));
+        _coordinator.SyncWithSession();
+
+        var freeCurve = new FreeCurve();
+        var drawPen = new PenStyle(blender, new ArgbColor(255, 255, 0, 0), 1);
+
+        _coordinator.PointerBegin(new Position(2, 2), _coordinator.CurrentBuffer!, freeCurve, drawPen, false, false, size, null!);
+        _coordinator.PointerMoved(new Position(3, 2), _coordinator.CurrentBuffer!, freeCurve, drawPen, false, false, size);
+        Assert.That(_coordinator.CurrentBuffer!.IsDrawing(), Is.True);
+
+        _coordinator.CancelDrawing();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_coordinator.CurrentBuffer!.IsDrawing(), Is.False);
+            Assert.That(_coordinator.CurrentBuffer.Fetch().PickColor(new Position(2, 2)), Is.EqualTo(originalColor));
+            Assert.That(_coordinator.CurrentBuffer.Fetch().PickColor(new Position(3, 2)).Alpha, Is.EqualTo(0));
+        });
+    }
 }

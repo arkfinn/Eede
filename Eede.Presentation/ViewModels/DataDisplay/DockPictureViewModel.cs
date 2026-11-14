@@ -4,6 +4,7 @@ using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Files;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
+using Eede.Presentation.Common;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Enums;
 using Eede.Presentation.Events;
@@ -88,6 +89,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public partial double DisplayWidth { get; set; }
         [Reactive] public partial double DisplayHeight { get; set; }
         [Reactive] public partial BackgroundColor BackgroundColor { get; set; }
+        [Reactive] public partial TouchDockMode TouchDockMode { get; set; }
         public ReactiveCommand<RxVoid, RxVoid> ZoomInCommand { get; }
         public ReactiveCommand<RxVoid, RxVoid> ZoomOutCommand { get; }
         public ReactiveCommand<float, RxVoid> SetMagnificationCommand { get; }

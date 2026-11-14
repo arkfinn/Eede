@@ -9,6 +9,7 @@
 			 xmlns:display="clr-namespace:Eede.Presentation.Views.DataDisplay"
 			 xmlns:general="clr-namespace:Eede.Presentation.Views.General"
 			 xmlns:animations="clr-namespace:Eede.Presentation.Views.Animations"
+			 xmlns:common="using:Eede.Presentation.Common"
 			 xmlns:converters="using:Eede.Presentation.Common.Converters"
 			 xmlns:p="using:Eede.Domain.ImageEditing.DrawingTools"
 			 xmlns:geo="using:Eede.Domain.ImageEditing.GeometricTransformations"
@@ -89,8 +90,9 @@
 					BorderBrush="{DynamicResource BaseBrush}"
 					BorderThickness="0,0,0,1"
 					Padding="4,2">
-				<Grid ColumnDefinitions="Auto, *, Auto">
-					<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
+				<Grid ColumnDefinitions="*, Auto">
+					<ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+					<StackPanel Orientation="Horizontal" Spacing="4">
 						<ToggleButton x:Name="CompactToolToggle"
 									  IsChecked="{Binding IsCompactToolPanelOpen}"
 									  IsVisible="{Binding !IsCompactDockActive}"
@@ -112,8 +114,24 @@
 								<TextBlock Text="パレット" VerticalAlignment="Center" />
 							</StackPanel>
 						</ToggleButton>
+						<ToggleButton x:Name="CompactPaletteRegisterToggle" IsChecked="{Binding IsTouchPaletteRegisterMode}" IsVisible="{Binding !IsCompactDockActive}" Padding="6,2" FontSize="11" Content="パレット登録" ToolTip.Tip="パレット登録モード" />
+						<StackPanel x:Name="CompactCanvasModeBar" Orientation="Horizontal" Spacing="2" IsVisible="{Binding !IsCompactDockActive}">
+							<ToggleButton x:Name="TouchCanvasDrawButton" IsChecked="{Binding IsTouchCanvasDrawMode}" Command="{Binding SetTouchCanvasModeCommand}" CommandParameter="{x:Static common:TouchCanvasMode.Draw}" Padding="6,2" FontSize="11" Content="描画" />
+							<ToggleButton x:Name="TouchCanvasEyedropperButton" IsChecked="{Binding IsTouchCanvasEyedropperMode}" Command="{Binding SetTouchCanvasModeCommand}" CommandParameter="{x:Static common:TouchCanvasMode.Eyedropper}" Padding="6,2" FontSize="11" Content="スポイト" />
+							<ToggleButton x:Name="TouchCanvasPanButton" IsChecked="{Binding IsTouchCanvasPanMode}" Command="{Binding SetTouchCanvasModeCommand}" CommandParameter="{x:Static common:TouchCanvasMode.Pan}" Padding="6,2" FontSize="11" Content="パン" />
+							<Button x:Name="CompactZoomOutButton" Command="{Binding ZoomOutCommand}" Padding="6,2" FontSize="11" Content="ズーム -" />
+							<Button x:Name="CompactZoomInButton" Command="{Binding ZoomInCommand}" Padding="6,2" FontSize="11" Content="ズーム +" />
+							<Button x:Name="CompactUndoButton" Command="{Binding UndoCommand}" Padding="6,2" FontSize="11" Content="Undo" />
+							<Button x:Name="CompactRedoButton" Command="{Binding RedoCommand}" Padding="6,2" FontSize="11" Content="Redo" />
+						</StackPanel>
+						<StackPanel x:Name="CompactDockModeBar" Orientation="Horizontal" Spacing="2" IsVisible="{Binding IsCompactDockActive}">
+							<ToggleButton x:Name="TouchDockPullButton" IsChecked="{Binding IsTouchDockPullMode}" Command="{Binding SetTouchDockModeCommand}" CommandParameter="{x:Static common:TouchDockMode.Pull}" Padding="6,2" FontSize="11" Content="Pull(選択)" />
+							<ToggleButton x:Name="TouchDockPushButton" IsChecked="{Binding IsTouchDockPushMode}" Command="{Binding SetTouchDockModeCommand}" CommandParameter="{x:Static common:TouchDockMode.Push}" Padding="6,2" FontSize="11" Content="Push(転送)" />
+							<ToggleButton x:Name="TouchDockPanButton" IsChecked="{Binding IsTouchDockPanMode}" Command="{Binding SetTouchDockModeCommand}" CommandParameter="{x:Static common:TouchDockMode.Pan}" Padding="6,2" FontSize="11" Content="パン" />
+						</StackPanel>
 					</StackPanel>
-					<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+					</ScrollViewer>
+					<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="4,0,0,0">
 						<ToggleButton x:Name="CompactDockToggle"
 									  IsChecked="{Binding IsCompactDockActive}"
 									  Padding="8,2" FontSize="11" ToolTip.Tip="作業キャンバスとドック（ファイル一覧）を切り替え">
@@ -213,7 +231,8 @@
 								</Panel>
 								<general:ColorSampleButton SampleColor="{Binding CurrentBackgroundColor, Converter={StaticResource BackgroundColorConverter}}"
 														   PutCommand="{Binding PutBackgroundColorCommand}"
-														   GetCommand="{Binding GetBackgroundColorCommand}"/>
+														   GetCommand="{Binding GetBackgroundColorCommand}"
+														   TouchCanvasMode="{Binding TouchCanvasMode}"/>
 							</StackPanel>
 							</StackPanel>
 						</ScrollViewer>
@@ -221,10 +240,13 @@
 
 					<Grid x:Name="CanvasPaletteGrid" RowDefinitions="*, Auto">
 						<entry:DrawableCanvas Grid.Row="0"
-											  DataContext="{Binding DrawableCanvasViewModel}"/>
+											  DataContext="{Binding DrawableCanvasViewModel}"
+											  UndoCommand="{Binding $parent[local:MainView].((vm:MainViewModel)DataContext).UndoCommand}"
+											  RedoCommand="{Binding $parent[local:MainView].((vm:MainViewModel)DataContext).RedoCommand}"/>
 						<Panel x:Name="CompactPaletteBackdrop" Grid.Row="0" Background="#40000000" IsVisible="False" PointerPressed="OnCompactPaletteBackdropPointerPressed" />
 						<Panel x:Name="PaletteHostPanel" Grid.Row="1" Background="Transparent">
 							<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
+													IsRegisterMode="{Binding IsRegisterMode}"
 													FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
 													Margin="4 2 4 8"
 													HorizontalAlignment="Stretch">
@@ -301,6 +323,7 @@
 											  ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"
 											  ImageBlender="{Binding PullBlender}"
 											  BackgroundColor="{Binding CurrentBackgroundColor.Value}"
+											  TouchDockMode="{Binding TouchDockMode}"
 											  WelcomeViewModel="{Binding WelcomeViewModel}"/>
 					</DockPanel>
 

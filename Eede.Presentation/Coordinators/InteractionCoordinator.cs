@@ -383,6 +383,47 @@ public class InteractionCoordinator : IInteractionCoordinator
         NotifyStateChanged();
     }
 
+    public void CancelDrawing()
+    {
+        var currentBuffer = CurrentBuffer;
+        if (currentBuffer == null) return;
+        var drawStyle = _interactionSession?.DrawStyle ?? new FreeCurve();
+        var canvasPos = new Position(_magnification.Minify(_lastMousePosition.X), _magnification.Minify(_lastMousePosition.Y));
+        var currentArea = HalfBoxArea.Create(canvasPos, new PictureSize(16, 16));
+        var previousState = _interactionSession?.SelectionState;
+
+        if (previousState is DraggingState or ResizingState)
+        {
+            _manualSelectingArea = null;
+            DrawingBuffer nextBuffer = currentBuffer;
+            if (_sessionProvider.CurrentSession != null)
+            {
+                var cancelledSession = previousState.Cancel(_sessionProvider.CurrentSession).UpdateSelectingArea(null);
+                _sessionProvider.Update(cancelledSession);
+                if (cancelledSession.Buffer != null) nextBuffer = cancelledSession.Buffer;
+            }
+            _interactionSession = new CanvasInteractionSession(nextBuffer, drawStyle, new NormalCursorState(currentArea));
+            UpdateCursor(canvasPos);
+            NotifyStateChanged();
+            return;
+        }
+
+        if (!currentBuffer.IsDrawing() && _manualSelectingArea == null) return;
+        _manualSelectingArea = null;
+        DrawingResult result = _drawableArea.DrawCancel(currentBuffer);
+        _drawableArea = result.DrawableArea;
+        DrawingBuffer restoredBuffer = result.PictureBuffer ?? currentBuffer;
+        if (_sessionProvider.CurrentSession != null && result.PictureBuffer != null)
+        {
+            var nextSession = _sessionProvider.CurrentSession.UpdateBuffer(result.PictureBuffer);
+            if (drawStyle is RegionSelector) nextSession = nextSession.UpdateSelectingArea(null);
+            _sessionProvider.Update(nextSession);
+        }
+        _interactionSession = new CanvasInteractionSession(restoredBuffer, drawStyle, new NormalCursorState(currentArea));
+        UpdateCursor(canvasPos);
+        NotifyStateChanged();
+    }
+
     public void PointerLeftButtonReleased(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, PenStyle penStyle, bool isShift, ReactiveCommand<Picture, RxVoid> internalUpdateCommand)
     {
         _lastMousePosition = pos;

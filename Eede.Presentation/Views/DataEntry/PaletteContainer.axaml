@@ -92,6 +92,7 @@
                              BorderBrush="Black"
                              BorderThickness="1"
                              Palette="{Binding Palette}"
+                             IsRegisterMode="{Binding $parent[local:PaletteContainer].IsRegisterMode}"
                              PointerLeftButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).FetchColorCommand}"
                              PointerRightButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ApplyColorCommand}"
                              PointerColorReplacedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ReplaceColorCommand}" />

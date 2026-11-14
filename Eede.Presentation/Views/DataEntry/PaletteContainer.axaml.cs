@@ -118,4 +118,13 @@ public partial class PaletteContainer : ReactiveUserControl<PaletteContainerView
         get => GetValue(SideContentProperty);
         set => SetValue(SideContentProperty, value);
     }
+
+    public static readonly StyledProperty<bool> IsRegisterModeProperty =
+        AvaloniaProperty.Register<PaletteContainer, bool>(nameof(IsRegisterMode), false);
+
+    public bool IsRegisterMode
+    {
+        get => GetValue(IsRegisterModeProperty);
+        set => SetValue(IsRegisterModeProperty, value);
+    }
 }

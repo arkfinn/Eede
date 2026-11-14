@@ -11,10 +11,12 @@
              x:DataType="vm:DrawableCanvasViewModel"
              Cursor="{Binding ActiveCursor}"
              IsShifted="{Binding IsShifted}"
+             TouchCanvasMode="{Binding TouchCanvasMode}"
              PointerLeftButtonPressedCommand="{Binding DrawBeginCommand}"
              PointerRightButtonPressedCommand="{Binding PointerRightButtonPressedCommand}"
              PointerMovedCommand="{Binding DrawingCommand}"
              PointerLeftButtonReleasedCommand="{Binding DrawEndCommand}"
+             CancelDrawingCommand="{Binding CancelDrawingCommand}"
              PointerLeaveCommand="{Binding CanvasLeaveCommand}">
   <UserControl.Resources>
     <converters:BackgroundColorConverter x:Key="BackgroundColorConverter"/>

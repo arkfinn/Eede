@@ -22,8 +22,15 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 {
 #nullable enable
 
-    public partial class DockPictureViewModel : ViewModelBase
+    public partial class DockPictureViewModel : ViewModelBase, IDisambiguatableItem
     {
+        string IDisambiguatableItem.FilePath => FilePath != null ? FilePath.ToString() : "";
+        private static int _untitledCounter = 0;
+        public static void ResetUntitledCounter() => _untitledCounter = 0;
+
+        [Reactive] public partial string BaseName { get; set; }
+        [Reactive] public partial string DisambiguationSuffix { get; set; }
+        [Reactive] public partial string ToolTipText { get; set; }
 
         public static DockPictureViewModel FromFile(Picture picture, FilePath filePath, GlobalState globalState, AnimationViewModel animationViewModel, IBitmapAdapter<Bitmap> bitmapAdapter, IPictureFileIO pictureFileIO)
         {
@@ -152,6 +159,9 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             Subject = null!;
             Title = null!;
             FilePath = null!;
+            BaseName = "";
+            DisambiguationSuffix = "";
+            ToolTipText = "";
 
             SetupObservations();
             Initialize(Picture.CreateEmpty(new PictureSize(32, 32)), FilePath.Empty());
@@ -197,21 +207,47 @@ namespace Eede.Presentation.ViewModels.DataDisplay
 
         private void SetupTitleObservation()
         {
-            _ = this.WhenAnyValue(x => x.Subject, x => x.Edited).Subscribe(_ =>
+            _ = this.WhenAnyValue(x => x.BaseName, x => x.DisambiguationSuffix, x => x.Edited).Subscribe(_ =>
             {
-                Title = Edited ? "●" + Subject : Subject;
+                string shortName = TitleTrimmer.TruncateMiddle(BaseName, 18);
+                string dirtyMark = Edited ? " *" : "";
+                Title = $"{shortName}{DisambiguationSuffix}{dirtyMark}";
+            });
+
+            _ = this.WhenAnyValue(x => x.BaseName, x => x.FilePath, x => x.PictureBuffer, x => x.Edited).Subscribe(_ =>
+            {
+                UpdateToolTipText();
             });
         }
 
-
-        public async Task Save()
+        private void UpdateToolTipText()
         {
-            if (PictureSave == null) return;
+            string pathStr = FilePath != null ? FilePath.ToString() : "";
+            string statusStr = Edited ? "未保存の変更あり (*)" : "保存済み";
+            int w = PictureBuffer != null ? PictureBuffer.Width : 0;
+            int h = PictureBuffer != null ? PictureBuffer.Height : 0;
+
+            if (string.IsNullOrEmpty(pathStr))
+            {
+                ToolTipText = $"{BaseName}\nサイズ: {w} × {h} px\n状態: {statusStr}";
+            }
+            else
+            {
+                string? dir = System.IO.Path.GetDirectoryName(pathStr);
+                ToolTipText = $"{BaseName}\n{dir}\nサイズ: {w} × {h} px\n状態: {statusStr}";
+            }
+        }
+
+
+        public async Task<bool> Save()
+        {
+            if (PictureSave == null) return false;
             PictureSaveEventArgs args = CreateSaveEventArgs(false);
             try
             {
                 await PictureSave.Invoke(this, args);
                 HandleSaveResult(args);
+                return !args.IsCanceled;
             }
             finally
             {
@@ -260,7 +296,20 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             PictureBuffer = picture;
             Subject = path.ToString();
 
+            if (path.IsEmpty())
+            {
+                if (string.IsNullOrEmpty(BaseName))
+                {
+                    BaseName = $"無題-{System.Threading.Interlocked.Increment(ref _untitledCounter)}";
+                }
+            }
+            else
+            {
+                BaseName = System.IO.Path.GetFileName(path.ToString());
+            }
+
             Edited = false;
+            UpdateToolTipText();
         }
 
         public async Task<bool> ExecuteClose()
@@ -280,25 +329,28 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public async Task<bool> ExecuteClosing()
         {
             if (!Edited) return true;
-            await AutoSaveIfNeeded();
-            UpdateClosableState();
+            bool autoSaveSucceeded = await AutoSaveIfNeeded();
+            UpdateClosableState(autoSaveSucceeded);
             return Closable;
         }
 
-        private async Task AutoSaveIfNeeded()
+        private async Task<bool> AutoSaveIfNeeded()
         {
             if (SaveAlertResult == SaveAlertResult.Save)
             {
-                await Save();
+                return await Save();
             }
+            return true;
         }
 
-        private void UpdateClosableState()
+        private void UpdateClosableState(bool autoSaveSucceeded)
         {
             Closable = SaveAlertResult switch
             {
+                SaveAlertResult.Save => autoSaveSucceeded,
+                SaveAlertResult.NoSave => true,
                 SaveAlertResult.Cancel => false,
-                _ => true,
+                _ => false,
             };
         }
 

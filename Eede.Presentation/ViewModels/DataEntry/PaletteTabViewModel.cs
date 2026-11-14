@@ -37,9 +37,16 @@ public partial class PaletteTabViewModel : ViewModelBase
                 IsDirty = (FilePath != null || IsClosable) && !p.Equals(_basePalette);
                 this.RaisePropertyChanged(nameof(Title));
             });
+
+        this.WhenAnyValue(x => x.FilePath)
+            .Subscribe(_ => this.RaisePropertyChanged(nameof(ToolTipText)));
     }
 
     public string Title => CustomTitle + (IsDirty ? "*" : "");
+
+    public string ToolTipText => !string.IsNullOrEmpty(FilePath)
+        ? $"{CustomTitle}\n{FilePath}"
+        : $"{CustomTitle}\n未保存の一時パレット";
 
     public void ResetDirty()
     {

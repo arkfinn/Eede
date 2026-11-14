@@ -22,14 +22,14 @@ namespace Eede.Application.Drawings
 
         private readonly PictureSize GridSize;
 
-        private readonly PositionHistory? PositionHistory;
+        public PositionHistory? PositionHistory { get; }
 
         private MagnifiedSize Magnify(PictureSize size)
         {
             return new MagnifiedSize(size, Magnification);
         }
 
-        public Picture? Painted(DrawingBuffer buffer, PenStyle penStyle, IImageTransfer imageTransfer)
+        public Picture? Painted(DrawingBuffer buffer, PenStyle? penStyle, IImageTransfer imageTransfer)
         {
             if (buffer == null)
             {
@@ -44,7 +44,7 @@ namespace Eede.Application.Drawings
             // 表示上のサイズ・ポジション DisplaySize DisplayPosition
             MagnifiedSize displaySize = Magnify(source.Size);
 
-            if (!buffer.IsDrawing() && PositionHistory != null)
+            if (!buffer.IsDrawing() && PositionHistory != null && penStyle != null)
             {
                 CursorLayer cursorLayer = new(displaySize, source, penStyle, PositionHistory.Now, imageTransfer);
                 picture = cursorLayer.Painted(picture);
@@ -91,6 +91,19 @@ namespace Eede.Application.Drawings
         {
             if (picture == null) throw new ArgumentNullException(nameof(picture));
             return picture.PickColor(RealPositionOf(displayPosition).ToPosition());
+        }
+
+        public bool TryPickColor(Picture picture, Position displayPosition, out ArgbColor color)
+        {
+            if (picture == null) throw new ArgumentNullException(nameof(picture));
+            Position realPosition = RealPositionOf(displayPosition).ToPosition();
+            if (!picture.Contains(realPosition))
+            {
+                color = default;
+                return false;
+            }
+            color = picture.PickColor(realPosition);
+            return true;
         }
 
         private PositionHistory CreatePositionHistory(Position displayPosition)

@@ -7,10 +7,59 @@
              mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
              x:DataType="vm:PaletteContainerViewModel"
              x:Class="Eede.Presentation.Views.DataEntry.PaletteContainer">
-  <TabControl ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}">
+  <TabControl x:Name="PART_TabControl"
+              ItemsSource="{Binding Tabs}"
+              SelectedItem="{Binding SelectedTab}"
+              SelectionChanged="OnTabControlSelectionChanged">
+    <TabControl.Template>
+      <ControlTemplate TargetType="TabControl">
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <DockPanel>
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="*, Auto" Margin="0,0,0,2">
+              <ScrollViewer Grid.Column="0"
+                            x:Name="PART_HeaderScrollViewer"
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Disabled">
+                <ItemsPresenter Name="PART_ItemsPresenter"
+                                ItemsPanel="{TemplateBinding ItemsPanel}" />
+              </ScrollViewer>
+              <Button Grid.Column="1"
+                      Classes="tool"
+                      Padding="2"
+                      Margin="2,0"
+                      Click="OnShowTabListClick"
+                      ToolTip.Tip="開いているパレット一覧">
+                <PathIcon Data="{StaticResource ArrowDownwardIconGeometry}" Width="10" Height="10" />
+              </Button>
+            </Grid>
+            <Grid ColumnDefinitions="Auto, *">
+              <ContentPresenter Grid.Column="0"
+                                Name="PART_SelectedContentHost"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding SelectedContent}"
+                                ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+              <ContentPresenter Grid.Column="1"
+                                Content="{Binding SideContent, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}"
+                                Margin="4,0,0,0"
+                                VerticalAlignment="Top" />
+            </Grid>
+          </DockPanel>
+        </Border>
+      </ControlTemplate>
+    </TabControl.Template>
+    <TabControl.ItemsPanel>
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="Horizontal" />
+      </ItemsPanelTemplate>
+    </TabControl.ItemsPanel>
     <TabControl.ItemTemplate>
       <DataTemplate x:DataType="vm:PaletteTabViewModel">
-        <StackPanel Orientation="Horizontal" Spacing="4" Background="Transparent">
+        <StackPanel Orientation="Horizontal" Spacing="4" Background="Transparent" ToolTip.Tip="{Binding ToolTipText}">
           <StackPanel.ContextMenu>
             <ContextMenu>
               <MenuItem Header="保存"
@@ -26,7 +75,7 @@
                         CommandParameter="{Binding}" />
             </ContextMenu>
           </StackPanel.ContextMenu>
-          <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding Title}" VerticalAlignment="Center" MaxWidth="80" TextTrimming="CharacterEllipsis" />
           <Button Classes="tool" Padding="2"
                   IsVisible="{Binding IsClosable}"
                   Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).CloseTabCommand}"
@@ -38,8 +87,15 @@
     </TabControl.ItemTemplate>
     <TabControl.ContentTemplate>
       <DataTemplate x:DataType="vm:PaletteTabViewModel">
-        <DockPanel>
-          <StackPanel DockPanel.Dock="Right" Orientation="Vertical" Margin="4 0">
+        <Grid ColumnDefinitions="272, Auto" HorizontalAlignment="Left">
+          <local:PaletteForm Grid.Column="0"
+                             BorderBrush="Black"
+                             BorderThickness="1"
+                             Palette="{Binding Palette}"
+                             PointerLeftButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).FetchColorCommand}"
+                             PointerRightButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ApplyColorCommand}"
+                             PointerColorReplacedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ReplaceColorCommand}" />
+          <StackPanel Grid.Column="1" Orientation="Vertical" Margin="4 0">
             <Button Classes="tool" ToolTip.Tip="パレットを開く"
                     Command="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).LoadPaletteCommand}"
                     CommandParameter="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:PaletteContainer}}}">
@@ -69,13 +125,7 @@
               <PathIcon Data="{StaticResource DownloadIconGeometry}" Classes="icon" />
             </Button>
           </StackPanel>
-          <local:PaletteForm BorderBrush="Black"
-                             BorderThickness="1"
-                             Palette="{Binding Palette}"
-                             PointerLeftButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).FetchColorCommand}"
-                             PointerRightButtonPressedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ApplyColorCommand}"
-                             PointerColorReplacedCommand="{Binding $parent[local:PaletteContainer].((vm:PaletteContainerViewModel)DataContext).ReplaceColorCommand}" />
-        </DockPanel>
+        </Grid>
       </DataTemplate>
     </TabControl.ContentTemplate>
   </TabControl>

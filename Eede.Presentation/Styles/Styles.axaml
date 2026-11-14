@@ -149,6 +149,15 @@
     <Setter Property="Background" Value="{DynamicResource SurfaceContainerHighestBrush}" />
   </Style>
 
+  <!-- Dock Document Tabs ToolTip and TextTrimming -->
+  <Style Selector="DocumentTabStripItem">
+    <Setter Property="ToolTip.Tip" Value="{ReflectionBinding ToolTipText}" />
+  </Style>
+  <Style Selector="DocumentTabStripItem TextBlock">
+    <Setter Property="MaxWidth" Value="160" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+
   <!-- Global Accent Color Overrides for Input Controls -->
   <Style Selector="ComboBox:focus /template/ Border#HighlightLayer">
     <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />

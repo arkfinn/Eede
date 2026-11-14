@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Eede.Presentation.Views.DataEntry;
@@ -17,11 +18,15 @@ namespace Eede.Presentation.Views.DataEntry
             HSV
         }
 
+        private bool _isShiftPressed;
+
         public GradationPicker()
         {
             InitializeComponent();
             slider.ValueChanged += SliderValueChanged;
             textbox.TextChanging += OnTextChanging;
+            AddHandler(PointerPressedEvent, (_, e) => _isShiftPressed = e.KeyModifiers.HasFlag(KeyModifiers.Shift), RoutingStrategies.Tunnel);
+            PointerWheelChanged += OnPointerWheelChanged;
         }
 
         public int Value
@@ -45,17 +50,41 @@ namespace Eede.Presentation.Views.DataEntry
         public int MaxValue
         {
             get => slider.MaxValue;
-            set => slider.MaxValue = value;
+            set
+            {
+                slider.MaxValue = value;
+                textbox.Text = slider.Value.ToString();
+            }
+        }
+
+        public int LargeChange
+        {
+            get => slider.LargeChange;
+            set => slider.LargeChange = value;
         }
 
         private void IncrementValue(object? sender, RoutedEventArgs e)
         {
-            slider.Value++;
+            slider.Value += _isShiftPressed ? slider.LargeChange : 1;
         }
 
         private void DecrementValue(object? sender, RoutedEventArgs e)
         {
-            slider.Value--;
+            slider.Value -= _isShiftPressed ? slider.LargeChange : 1;
+        }
+
+        private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+        {
+            int step = e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? slider.LargeChange : 1;
+            if (e.Delta.Y > 0)
+            {
+                slider.Value += step;
+            }
+            else if (e.Delta.Y < 0)
+            {
+                slider.Value -= step;
+            }
+            e.Handled = true;
         }
 
         private void SliderValueChanged(object? sender, GradationSlider.ValueChangedEventArgs e)

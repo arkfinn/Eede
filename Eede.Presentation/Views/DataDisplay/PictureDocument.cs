@@ -5,9 +5,12 @@ using Avalonia.Data;
 using Dock.Model.Avalonia.Controls;
 using Eede.Presentation.Common.Enums;
 using Eede.Views.Pages;
+using ReactiveUI;
 using System;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 
 namespace Eede.Presentation.Views.DataDisplay
 {
@@ -58,6 +61,14 @@ namespace Eede.Presentation.Views.DataDisplay
             set => SetValue(SubjectProperty, value);
         }
 
+        public static readonly StyledProperty<string?> ToolTipTextProperty =
+            AvaloniaProperty.Register<PictureDocument, string?>(nameof(ToolTipText), null);
+        public string? ToolTipText
+        {
+            get => GetValue(ToolTipTextProperty);
+            set => SetValue(ToolTipTextProperty, value);
+        }
+
 
         public override bool OnClose()
         {
@@ -78,7 +89,14 @@ namespace Eede.Presentation.Views.DataDisplay
             {
                 await window.ShowDialog(desktop.MainWindow);
                 SaveAlertResult = window.Result;
-                ClosingAction?.Execute(null);
+                if (ClosingAction is ReactiveCommand<RxVoid, bool> rxCommand)
+                {
+                    await rxCommand.Execute().ToTask();
+                }
+                else
+                {
+                    ClosingAction?.Execute(null);
+                }
                 if (Closable)
                 {
                     Factory?.CloseDockable(this);

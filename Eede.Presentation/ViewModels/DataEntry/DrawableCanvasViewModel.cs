@@ -37,6 +37,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public partial IImageBlender ImageBlender { get; set; }
     [Reactive] public partial ArgbColor PenColor { get; set; }
     [Reactive] public partial int PenSize { get; set; }
+    [Reactive] public partial TilePattern TilePattern { get; set; }
     [Reactive] public partial PenStyle PenStyle { get; set; }
     [Reactive] public partial IImageTransfer ImageTransfer { get; set; }
     [Reactive] public partial bool IsShifted { get; set; }
@@ -45,6 +46,10 @@ public partial class DrawableCanvasViewModel : ViewModelBase
     [Reactive] public partial PictureArea? SelectingArea { get; set; }
     [Reactive] public partial Thickness SelectingThickness { get; set; }
     [Reactive] public partial PictureSize SelectingSize { get; set; }
+    [Reactive] public partial bool IsHoverCursorVisible { get; set; }
+    [Reactive] public partial Thickness HoverCursorThickness { get; set; }
+    [Reactive] public partial double HoverCursorWidth { get; set; }
+    [Reactive] public partial double HoverCursorHeight { get; set; }
     [Reactive] public partial Position PreviewPosition { get; set; }
     [Reactive] public partial Picture? PreviewPixels { get; set; }
     [Reactive] public partial Thickness PreviewThickness { get; set; }
@@ -128,10 +133,20 @@ public partial class DrawableCanvasViewModel : ViewModelBase
             ActiveSelectionCursor = _coordinator.ActiveSelectionCursor;
             this.RaisePropertyChanged(nameof(ActiveCursor));
             this.RaisePropertyChanged(nameof(ActiveSelectionCursor));
+            UpdateHoverCursor();
             UpdateImage();
         };
 
-        _coordinator.Drew += (prev, current, area1, area2, affectedArea) => Drew?.Invoke(prev, current, area1, area2, affectedArea);
+        _coordinator.Drew += (prev, current, area1, area2, affectedArea) =>
+        {
+            Drew?.Invoke(prev, current, area1, area2, affectedArea);
+            if (DrawStyle is not RegionSelector &&
+                !affectedArea.IsEmpty &&
+                !prev.AsSpan().SequenceEqual(current.AsSpan()))
+            {
+                ColorCommitted?.Invoke(PenColor);
+            }
+        };
 
         _drawingSessionProvider.SessionChanged += (session) =>
         {
@@ -165,11 +180,16 @@ public partial class DrawableCanvasViewModel : ViewModelBase
         ImageBlender = new DirectImageBlender();
         PenColor = new ArgbColor(255, 0, 0, 0);
         PenSize = 1;
-        PenStyle = new(ImageBlender, PenColor, PenSize);
+        TilePattern = TilePattern.Solid;
+        PenStyle = new(ImageBlender, PenColor, PenSize, TilePattern);
         ImageTransfer = new DirectImageTransfer();
         IsRegionSelecting = false;
         SelectingThickness = new Thickness(0, 0, 0, 0);
         SelectingSize = new PictureSize(0, 0);
+        IsHoverCursorVisible = false;
+        HoverCursorThickness = new Thickness(0, 0, 0, 0);
+        HoverCursorWidth = 0;
+        HoverCursorHeight = 0;
         PreviewPosition = new Position(0, 0);
         PreviewSize = new PictureSize(0, 0);
         RawPreviewSize = new PictureSize(0, 0);
@@ -218,9 +238,9 @@ public partial class DrawableCanvasViewModel : ViewModelBase
                 }
             });
 
-        _ = this.WhenAnyValue(x => x.ImageBlender, x => x.PenColor, x => x.PenSize)
-            .Where(x => x.Item1 != null)
-            .Subscribe(x => PenStyle = new(ImageBlender, PenColor, PenSize));
+        _ = this.WhenAnyValue(x => x.ImageBlender, x => x.PenColor, x => x.PenSize, x => x.TilePattern)
+            .Where(x => x.Item1 != null && x.Item4 != null)
+            .Subscribe(x => PenStyle = new(x.Item1, x.Item2, x.Item3, x.Item4));
 
         _ = this.WhenAnyValue(x => x.ImageBlender)
             .Subscribe(x => _coordinator.ImageBlender = x);
@@ -232,6 +252,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
             .Subscribe(x =>
             {
                 _coordinator.UpdateMagnification(Magnification);
+                UpdateHoverCursor();
                 UpdateImage();
             });
 
@@ -345,6 +366,7 @@ public partial class DrawableCanvasViewModel : ViewModelBase
 
     public ReactiveCommand<Picture, RxVoid> OnDrew { get; }
     public event Action<Picture, Picture, PictureArea?, PictureArea?, PictureRegion>? Drew;
+    public event Action<ArgbColor>? ColorCommitted;
     public event Action? RequestCenterContent;
     private void ExecuteDrew(Picture previous)
     {
@@ -405,6 +427,24 @@ public partial class DrawableCanvasViewModel : ViewModelBase
     private void ExecuteCanvasLeaveAction()
     {
         _coordinator.CanvasLeave(PictureBuffer);
+    }
+
+    private void UpdateHoverCursor()
+    {
+        if (_coordinator.IsHoverCursorVisible && _coordinator.HoverPosition.HasValue)
+        {
+            var hoverPos = _coordinator.HoverPosition.Value;
+            var displayPos = new CanvasCoordinate(hoverPos.X, hoverPos.Y).ToDisplay(Magnification);
+            var cellSize = (double)Magnification.Value;
+            HoverCursorThickness = new Thickness(displayPos.X, displayPos.Y, 0, 0);
+            HoverCursorWidth = cellSize;
+            HoverCursorHeight = cellSize;
+            IsHoverCursorVisible = true;
+        }
+        else
+        {
+            IsHoverCursorVisible = false;
+        }
     }
 
     public void CommitSelection(bool forceClearSelection = false)

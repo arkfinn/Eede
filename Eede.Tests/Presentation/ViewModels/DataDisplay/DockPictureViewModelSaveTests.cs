@@ -18,6 +18,10 @@ using Eede.Domain.Animations;
 using System.Collections.Generic;
 using Eede.Domain.SharedKernel;
 using Avalonia.Headless.NUnit;
+using Eede.Presentation.Common.Enums;
+using ReactiveUI;
+using System.Reactive.Threading.Tasks;
+using RxVoid = ReactiveUI.Primitives.RxVoid;
 
 namespace Eede.Presentation.Tests.ViewModels.DataDisplay;
 
@@ -153,6 +157,70 @@ public class DockPictureViewModelSaveTests
 
         // Assert
         _fileStorageMock.Verify(x => x.SaveFilePickerAsync(), Times.Once);
+    }
+
+    [AvaloniaTest]
+    public async Task ExecuteClosing_WhenSaveAlertResultIsSaveAndAsyncSaveSucceeds_SetsClosableTrue()
+    {
+        var path = new FilePath("test.png");
+        var vm = CreateViewModel(path);
+        vm.Edited = true;
+        bool saved = false;
+        vm.PictureSave += async (s, e) =>
+        {
+            await Task.Delay(10);
+            saved = true;
+        };
+
+        vm.SaveAlertResult = SaveAlertResult.Save;
+        bool result = await ((ReactiveCommand<RxVoid, bool>)vm.OnClosing).Execute().ToTask();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(saved, Is.True);
+            Assert.That(result, Is.True);
+            Assert.That(vm.Closable, Is.True);
+            Assert.That(vm.Edited, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
+    public async Task ExecuteClosing_WhenSaveAlertResultIsSaveAndSaveIsCanceled_KeepsClosableFalse()
+    {
+        var vm = CreateViewModel(FilePath.Empty());
+        vm.Edited = true;
+        vm.PictureSave += async (s, e) =>
+        {
+            await Task.Yield();
+            e.Cancel();
+        };
+
+        vm.SaveAlertResult = SaveAlertResult.Save;
+        bool result = await vm.ExecuteClosing();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.False);
+            Assert.That(vm.Closable, Is.False);
+            Assert.That(vm.Edited, Is.True);
+        });
+    }
+
+    [AvaloniaTest]
+    public async Task ExecuteClosing_WhenSaveAlertResultIsCancel_KeepsClosableFalse()
+    {
+        var vm = CreateViewModel(new FilePath("test.png"));
+        vm.Edited = true;
+        vm.SaveAlertResult = SaveAlertResult.Cancel;
+
+        bool result = await vm.ExecuteClosing();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.False);
+            Assert.That(vm.Closable, Is.False);
+            Assert.That(vm.Edited, Is.True);
+        });
     }
 
     private DockPictureViewModel CreateViewModel(FilePath path)

@@ -1,9 +1,13 @@
 using Avalonia;
 using Avalonia.Data;
 using Dock.Model.Avalonia.Controls;
+using Eede.Application.Pictures;
 using Eede.Presentation.ViewModels.DataDisplay;
+using ReactiveUI;
+using System;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Linq;
 
 
 namespace Eede.Presentation.Views.DataDisplay
@@ -86,6 +90,15 @@ namespace Eede.Presentation.Views.DataDisplay
                             Source = vm,
                             Path = nameof(vm.Title)
                         });
+                        _ = document.Bind(PictureDocument.ToolTipTextProperty, new Binding
+                        {
+                            Source = vm,
+                            Path = nameof(vm.ToolTipText)
+                        });
+                        _ = vm.WhenAnyValue(x => x.FilePath).Subscribe(_ =>
+                        {
+                            RecomputeDisambiguation();
+                        });
                         document.Factory = Factory;
                         vm.RequestClose += document.OpenSaveAlertDialog;
 
@@ -106,6 +119,16 @@ namespace Eede.Presentation.Views.DataDisplay
                         vm.Enabled = false;
                         break;
                     }
+            }
+
+            RecomputeDisambiguation();
+        }
+
+        private void RecomputeDisambiguation()
+        {
+            if (Pictures != null)
+            {
+                TitleDisambiguator.Recompute(Pictures.OfType<DockPictureViewModel>());
             }
         }
     }

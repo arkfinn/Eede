@@ -13,9 +13,10 @@
       <local:GradationPicker x:Name="pickerB"></local:GradationPicker>
     </StackPanel>
     <Button HorizontalAlignment="Stretch"
-            Height="21"
+            MinHeight="0"
+            Height="20"
             Padding="0"
-            Margin="0 3"
+            Margin="0 2"
             Click="ToggleColorMode">
       <Grid>
         <Grid.ColumnDefinitions>
@@ -30,5 +31,49 @@
         <TextBlock x:Name="text3" Grid.Column="3" Text="B" HorizontalAlignment="Center"/>
       </Grid>
     </Button>
+    <Grid ColumnDefinitions="*, 22, 22" Margin="0 1" Height="22" ColumnSpacing="2">
+      <Button Grid.Column="0"
+              x:Name="DepthModeButton"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              MinHeight="0"
+              Height="22"
+              Padding="0"
+              FontSize="11"
+              HorizontalContentAlignment="Center"
+              VerticalContentAlignment="Center"
+              Click="ToggleDepthMode"
+              ToolTip.Tip="階調モード切替 (256段階 / 16段階)">
+        <TextBlock x:Name="depthModeText" Text="256" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Button>
+      <Button Grid.Column="1"
+              x:Name="StepDownButton"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              MinWidth="0" MinHeight="0"
+              Width="22" Height="22"
+              Padding="0"
+              FontSize="12"
+              HorizontalContentAlignment="Center"
+              VerticalContentAlignment="Center"
+              Click="StepDownTone"
+              ToolTip.Tip="一階調暗くする">
+        <TextBlock Text="-" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Button>
+      <Button Grid.Column="2"
+              x:Name="StepUpButton"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              MinWidth="0" MinHeight="0"
+              Width="22" Height="22"
+              Padding="0"
+              FontSize="12"
+              HorizontalContentAlignment="Center"
+              VerticalContentAlignment="Center"
+              Click="StepUpTone"
+              ToolTip.Tip="一階調明るくする">
+        <TextBlock Text="+" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Button>
+    </Grid>
   </StackPanel>
 </UserControl>

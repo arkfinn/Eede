@@ -23,6 +23,7 @@ public interface IInteractionCoordinator
     void PointerMoved(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, PenStyle penStyle, bool isShift, bool isAnimationMode, PictureSize gridSize);
     void PointerRightButtonPressed(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, Action<ArgbColor> colorPickedAction, ReactiveCommand<Picture, RxVoid> internalUpdateCommand);
     void PointerLeftButtonReleased(Position pos, DrawingBuffer buffer, IDrawStyle drawStyle, bool isAnimationMode, PictureSize gridSize, PenStyle penStyle, bool isShift, ReactiveCommand<Picture, RxVoid> internalUpdateCommand);
+    void CancelDrawing();
     void CanvasLeave(DrawingBuffer buffer);
 
     // 状態更新

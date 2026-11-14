@@ -89,7 +89,9 @@ public class DockPictureViewModelMagnificationTests
         viewModel.ZoomIn();
         Assert.That(viewModel.Magnification.Value, Is.EqualTo(12f));
         viewModel.ZoomIn();
-        Assert.That(viewModel.Magnification.Value, Is.EqualTo(12f), "Should stay at max");
+        Assert.That(viewModel.Magnification.Value, Is.EqualTo(16f));
+        viewModel.ZoomIn();
+        Assert.That(viewModel.Magnification.Value, Is.EqualTo(16f), "Should stay at max");
     }
 
     [AvaloniaTest]
@@ -97,8 +99,10 @@ public class DockPictureViewModelMagnificationTests
     {
         var scheduler = new TestScheduler();
         var viewModel = new DockPictureViewModel(_globalState, _animationViewModel, new AvaloniaBitmapAdapter(), _PictureFileIO);
-        viewModel.Magnification = new Magnification(12);
+        viewModel.Magnification = new Magnification(16);
 
+        viewModel.ZoomOut();
+        Assert.That(viewModel.Magnification.Value, Is.EqualTo(12f));
         viewModel.ZoomOut();
         Assert.That(viewModel.Magnification.Value, Is.EqualTo(8f));
         viewModel.ZoomOut();

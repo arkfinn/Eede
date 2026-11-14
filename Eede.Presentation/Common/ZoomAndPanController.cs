@@ -15,6 +15,7 @@ namespace Eede.Presentation.Common
         private Point _panStartPoint;
         private Vector _panStartOffset;
         private IPointer? _capturedPointer;
+        private IInputElement? _captureTarget;
 
         public bool IsPanning => _isPanning;
         public bool IsSpacePressed => _isSpacePressed;
@@ -65,12 +66,13 @@ namespace Eede.Presentation.Common
 
             if (isMiddle || isSpaceLeft)
             {
-                _isPanning = true;
-                _isSpacePan = isSpaceLeft;
                 _panStartPoint = scrollViewer != null ? e.GetPosition(scrollViewer) : e.GetPosition(captureTarget);
                 _panStartOffset = scrollViewer?.Offset ?? new Vector(0, 0);
                 _capturedPointer = e.Pointer;
+                _captureTarget = captureTarget;
                 e.Pointer.Capture(captureTarget);
+                _isPanning = true;
+                _isSpacePan = isSpaceLeft;
                 e.Handled = true;
                 return true;
             }
@@ -102,6 +104,7 @@ namespace Eede.Presentation.Common
             {
                 _isPanning = false;
                 _isSpacePan = false;
+                _captureTarget = null;
                 _capturedPointer?.Capture(null);
                 _capturedPointer = null;
                 e.Handled = true;
@@ -112,9 +115,18 @@ namespace Eede.Presentation.Common
 
         public void HandlePointerCaptureLost(PointerCaptureLostEventArgs e)
         {
+            if (_captureTarget != null && e.Source != null && !ReferenceEquals(e.Source, _captureTarget))
+            {
+                return;
+            }
+            if (_captureTarget != null && ReferenceEquals(e.Pointer?.Captured, _captureTarget))
+            {
+                return;
+            }
             _isPanning = false;
             _isSpacePan = false;
             _capturedPointer = null;
+            _captureTarget = null;
         }
 
         public bool HandleKeyDown(KeyEventArgs e)
@@ -144,6 +156,7 @@ namespace Eede.Presentation.Common
             _isPanning = false;
             _isSpacePan = false;
             _isSpacePressed = false;
+            _captureTarget = null;
             _capturedPointer?.Capture(null);
             _capturedPointer = null;
             SpaceStateChanged?.Invoke(false);

@@ -14,7 +14,8 @@ namespace Eede.Tests.Presentation.Common
         [TestCase(4f, 1, 6f)]
         [TestCase(6f, 1, 8f)]
         [TestCase(8f, 1, 12f)]
-        [TestCase(12f, 1, 12f)] // 上限
+        [TestCase(12f, 1, 16f)]
+        [TestCase(16f, 1, 16f)] // 上限
         [TestCase(3f, 1, 4f)]  // 中間値からの拡大
         public void CalculateNextMagnification_ZoomIn_ReturnsNextStep(float current, int delta, float expected)
         {
@@ -22,6 +23,7 @@ namespace Eede.Tests.Presentation.Common
             Assert.That(result.Value, Is.EqualTo(expected));
         }
 
+        [TestCase(16f, -1, 12f)]
         [TestCase(12f, -1, 8f)]
         [TestCase(8f, -1, 6f)]
         [TestCase(6f, -1, 4f)]

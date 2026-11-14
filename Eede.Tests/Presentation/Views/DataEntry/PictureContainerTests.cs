@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Headless.NUnit;
+using Avalonia.Input;
 using Eede.Application.Animations;
 using Eede.Application.Drawings;
 using Eede.Application.Pictures;
@@ -197,6 +199,111 @@ public class PictureContainerTests
         var rootBrush = renderingRoot!.Background as Avalonia.Media.ISolidColorBrush;
         Assert.That(rootBrush == null || rootBrush.Color == Avalonia.Media.Brushes.Transparent.Color, 
             "renderingRoot の背景は Transparent であるべきです。背後の OutsideBackGround.bmp を透過させて正しい市松模様を表示します。");
+    }
+
+    [AvaloniaTest]
+    public void Should_Support16xMagnificationButton_AndSyncCheckedState()
+    {
+        _window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        var m16Btn = _container.GetVisualDescendants()
+            .OfType<Avalonia.Controls.Primitives.ToggleButton>()
+            .FirstOrDefault(b => b.Name == "m16");
+        Assert.That(m16Btn, Is.Not.Null, "m16 ボタンが存在するべき");
+        Assert.That(m16Btn!.IsChecked, Is.False);
+
+        _dockViewModel.Magnification = new Magnification(16);
+        Assert.That(m16Btn.IsChecked, Is.True);
+
+        _dockViewModel.Magnification = new Magnification(8);
+        Assert.That(m16Btn.IsChecked, Is.False);
+
+        m16Btn.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+        Assert.That(_dockViewModel.Magnification.Value, Is.EqualTo(16f));
+        Assert.That(m16Btn.IsChecked, Is.True);
+    }
+
+    [AvaloniaTest]
+    public void MiddleButtonDrag_OnPictureContainer_ShouldPanScrollViewer()
+    {
+        _dockViewModel.Initialize(Picture.CreateEmpty(new PictureSize(1024, 1024)), new FilePath("large.png"));
+        _window.Width = 400;
+        _window.Height = 400;
+        _window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        _window.UpdateLayout();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        var scrollViewer = _container.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "scrollViewer");
+        var initialOffset = scrollViewer.Offset;
+
+        var startPoint = new Point(200, 200);
+        var movePoint = new Point(150, 140);
+
+        _window.MouseDown(startPoint, Avalonia.Input.MouseButton.Middle);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        _window.MouseMove(movePoint, RawInputModifiers.MiddleMouseButton);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        _window.MouseUp(movePoint, Avalonia.Input.MouseButton.Middle);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        Assert.That(scrollViewer.Offset.X, Is.EqualTo(initialOffset.X + 50).Within(1.0), "PictureContainer上の中ボタンドラッグでX方向にスクロールするべき");
+        Assert.That(scrollViewer.Offset.Y, Is.EqualTo(initialOffset.Y + 60).Within(1.0), "PictureContainer上の中ボタンドラッグでY方向にスクロールするべき");
+    }
+
+    [AvaloniaTest]
+    public void LargePicture_OnPictureContainer_ShouldAlignTopLeft_BothXAndY()
+    {
+        _dockViewModel.Initialize(Picture.CreateEmpty(new PictureSize(1024, 1024)), new FilePath("large.png"));
+        _window.Width = 400;
+        _window.Height = 400;
+        _window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        _window.UpdateLayout();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        var scrollViewer = _container.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "scrollViewer");
+        var canvasGrid = _container.GetVisualDescendants().OfType<Grid>().First(g => g.Name == "canvasGrid");
+
+        Assert.That(scrollViewer.Offset.X, Is.EqualTo(canvasGrid.Margin.Left).Within(0.5), "大きい画像の初期Xオフセットは Margin.Left であるべき");
+        Assert.That(scrollViewer.Offset.Y, Is.EqualTo(canvasGrid.Margin.Top).Within(0.5), "大きい画像の初期Yオフセットは Margin.Top であるべき");
+    }
+
+    [AvaloniaTest]
+    public void LargePicture_OpenedInMainView_ShouldAlignTopLeft_BothXAndY()
+    {
+        var mainView = new Eede.Presentation.Views.Pages.MainView { DataContext = _mainViewModel };
+        var win = new Window { Content = mainView, Width = 1024, Height = 720 };
+        win.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        win.UpdateLayout();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        try
+        {
+            var largeVm = new DockPictureViewModel(new GlobalState(), _mainViewModel.AnimationViewModel, new AvaloniaBitmapAdapter(), new PictureFileIO(new SavePictureUseCase(new Mock<IPictureRepository>().Object, new Mock<ISettingsRepository>().Object), new LoadPictureUseCase(new Mock<IPictureRepository>().Object, new Mock<ISettingsRepository>().Object)));
+            largeVm.Initialize(Picture.CreateEmpty(new PictureSize(800, 800)), new FilePath("large800.png"));
+            _mainViewModel.Pictures.Add(largeVm);
+
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            win.UpdateLayout();
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+            var pc = mainView.GetVisualDescendants().OfType<PictureContainer>().FirstOrDefault();
+            Assert.That(pc, Is.Not.Null, "PictureContainer should be created in Dock");
+            var sv = pc!.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "scrollViewer");
+            var cg = pc.GetVisualDescendants().OfType<Grid>().First(g => g.Name == "canvasGrid");
+
+            Assert.That(sv.Offset.X, Is.EqualTo(cg.Margin.Left).Within(0.5), "Dock内で開いた大きい画像の初期Xオフセットは Margin.Left であるべき");
+            Assert.That(sv.Offset.Y, Is.EqualTo(cg.Margin.Top).Within(0.5), "Dock内で開いた大きい画像の初期Yオフセットは Margin.Top であるべき");
+        }
+        finally
+        {
+            win.Close();
+        }
     }
 }
 

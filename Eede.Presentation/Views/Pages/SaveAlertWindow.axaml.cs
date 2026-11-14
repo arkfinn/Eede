@@ -1,8 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Eede.Presentation.Common.Enums;
-using ReactiveUI;
-using System.Reactive;
+using Eede.Presentation.ViewModels.Pages;
 using System.Windows.Input;
 
 namespace Eede.Views.Pages
@@ -11,6 +10,8 @@ namespace Eede.Views.Pages
 
     public partial class SaveAlertWindow : Window
     {
+        private readonly SaveAlertViewModel _viewModel;
+
         public SaveAlertWindow() : this("無題")
         {
         }
@@ -18,11 +19,16 @@ namespace Eede.Views.Pages
         public SaveAlertWindow(string fileName)
         {
             Avalonia.Markup.Xaml.AvaloniaXamlLoader.Load(this);
-            FileName = fileName;
-            SaveCommand = ReactiveCommand.Create(() => { Result = SaveAlertResult.Save; Close(); });
-            NoSaveCommand = ReactiveCommand.Create(() => { Result = SaveAlertResult.NoSave; Close(); });
-            CancelCommand = ReactiveCommand.Create(() => { Result = SaveAlertResult.Cancel; Close(); });
-            DataContext = this;
+            _viewModel = new SaveAlertViewModel(fileName, r =>
+            {
+                Result = r;
+                Close();
+            });
+            FileName = _viewModel.FileName;
+            SaveCommand = _viewModel.SaveCommand;
+            NoSaveCommand = _viewModel.NoSaveCommand;
+            CancelCommand = _viewModel.CancelCommand;
+            DataContext = _viewModel;
         }
 
         public SaveAlertResult Result { get; private set; } = SaveAlertResult.Cancel;
@@ -32,22 +38,8 @@ namespace Eede.Views.Pages
         public ICommand NoSaveCommand { get; }
         public ICommand CancelCommand { get; }
 
-        public void OnSave(object? sender, RoutedEventArgs e)
-        {
-            Result = SaveAlertResult.Save;
-            Close();
-        }
-
-        public void OnNoSave(object? sender, RoutedEventArgs e)
-        {
-            Result = SaveAlertResult.NoSave;
-            Close();
-        }
-
-        public void OnCancel(object? sender, RoutedEventArgs e)
-        {
-            Result = SaveAlertResult.Cancel;
-            Close();
-        }
+        public void OnSave(object? sender, RoutedEventArgs e) => SaveCommand.Execute(null);
+        public void OnNoSave(object? sender, RoutedEventArgs e) => NoSaveCommand.Execute(null);
+        public void OnCancel(object? sender, RoutedEventArgs e) => CancelCommand.Execute(null);
     }
 }

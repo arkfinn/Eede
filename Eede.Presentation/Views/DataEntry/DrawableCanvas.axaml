@@ -11,10 +11,12 @@
              x:DataType="vm:DrawableCanvasViewModel"
              Cursor="{Binding ActiveCursor}"
              IsShifted="{Binding IsShifted}"
+             TouchCanvasMode="{Binding TouchCanvasMode}"
              PointerLeftButtonPressedCommand="{Binding DrawBeginCommand}"
              PointerRightButtonPressedCommand="{Binding PointerRightButtonPressedCommand}"
              PointerMovedCommand="{Binding DrawingCommand}"
              PointerLeftButtonReleasedCommand="{Binding DrawEndCommand}"
+             CancelDrawingCommand="{Binding CancelDrawingCommand}"
              PointerLeaveCommand="{Binding CanvasLeaveCommand}">
   <UserControl.Resources>
     <converters:BackgroundColorConverter x:Key="BackgroundColorConverter"/>
@@ -29,7 +31,8 @@
                 HorizontalScrollBarVisibility="Visible"
                 VerticalScrollBarVisibility="Visible"
                 Background="{DynamicResource BaseBrush}">
-    <Panel Background="{DynamicResource BaseBrush}"
+    <Panel x:Name="canvasContainer"
+           Background="{DynamicResource BaseBrush}"
            MinWidth="{Binding #scrollViewer.Viewport.Width}"
            MinHeight="{Binding #scrollViewer.Viewport.Height}">
       <!-- 1. 外周背景（下地 + タイル画像） -->

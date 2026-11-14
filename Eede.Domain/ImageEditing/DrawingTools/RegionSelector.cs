@@ -5,6 +5,8 @@ namespace Eede.Domain.ImageEditing.DrawingTools;
 
 public class RegionSelector : IDrawStyle
 {
+    public bool AllowOutOfBoundsStart => true;
+
     public DrawingBuffer DrawStart(DrawingBuffer buffer, PenStyle penStyle, CoordinateHistory coordinateHistory, bool isShift)
     {
         OnDrawStart?.Invoke(this, coordinateHistory.ToPositionHistory());

@@ -54,6 +54,10 @@ namespace Eede.Presentation.Views.Navigation
         {
             Magnification = new Magnification(12);
         }
+        public void SetMagnification16(object sender, RoutedEventArgs e)
+        {
+            Magnification = new Magnification(16);
+        }
         private void UpdateChecked()
         {
             m1.IsChecked = Magnification.Value == 1;
@@ -62,6 +66,7 @@ namespace Eede.Presentation.Views.Navigation
             m6.IsChecked = Magnification.Value == 6;
             m8.IsChecked = Magnification.Value == 8;
             m12.IsChecked = Magnification.Value == 12;
+            m16.IsChecked = Magnification.Value == 16;
         }
     }
 }

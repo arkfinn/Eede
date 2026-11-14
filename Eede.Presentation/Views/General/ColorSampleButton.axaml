@@ -22,7 +22,9 @@
       </Panel.Background>
       <Panel Width="32"
              Height="20"
-             PointerPressed="OnPointerPressed">
+             PointerPressed="OnPointerPressed"
+             PointerReleased="OnPointerReleased"
+             PointerCaptureLost="OnPointerCaptureLost">
         <Panel.Background>
           <SolidColorBrush Color="{Binding $parent[local:ColorSampleButton].SampleColor}"/>
         </Panel.Background>

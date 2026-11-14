@@ -6,6 +6,7 @@ on:
     paths:
       - "Eede.*/**"
       - "docs/**"
+      - "global.json"
       - ".github/workflows/deploy-pages.yml"
   release:
     types: [ published ]
@@ -41,6 +42,7 @@ jobs:
 
       - name: Install WebAssembly workload
         run: |
+          dotnet --version
           dotnet workload install wasm-tools
           dotnet workload restore Eede.Presentation.Browser/Eede.Presentation.Browser.csproj
 

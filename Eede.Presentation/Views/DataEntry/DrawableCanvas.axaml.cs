@@ -26,6 +26,8 @@ namespace Eede.Presentation.Views.DataEntry
         private Point _touchPanLastViewportPos, _touchLastCanvasPos;
         private Vector _currentMargin = new(0, 0);
         private bool _isInitialCentered = false;
+        private bool _hasPendingCenter = false;
+        private bool _isCentering = false;
         private readonly List<IDisposable> _dataContextDisposables = new();
 
         public DrawableCanvas()
@@ -43,6 +45,7 @@ namespace Eede.Presentation.Views.DataEntry
             scrollViewer.AddHandler(InputElement.PointerReleasedEvent, OnScrollViewerPointerReleased, RoutingStrategies.Tunnel);
             scrollViewer.PointerCaptureLost += (s, e) => _zoomAndPanController.HandlePointerCaptureLost(e);
             scrollViewer.GetObservable(ScrollViewer.ViewportProperty).Subscribe(OnViewportChanged);
+            scrollViewer.GetObservable(ScrollViewer.ExtentProperty).Subscribe(OnExtentChanged);
 
             canvas.PointerPressed += OnCanvasPointerPressed;
             canvas.PointerMoved += OnCanvasPointerMoved;
@@ -113,7 +116,16 @@ namespace Eede.Presentation.Views.DataEntry
                 }
             }
 
-            if (!_isInitialCentered && DataContext is DrawableCanvasViewModel vm && vm.DisplayWidth > 0)
+            if ((!_isInitialCentered || _hasPendingCenter) && DataContext is DrawableCanvasViewModel vm && vm.DisplayWidth > 0)
+            {
+                CenterContent();
+            }
+        }
+
+        private void OnExtentChanged(Size extent)
+        {
+            if (extent.Width <= 0 || extent.Height <= 0) return;
+            if (!_isInitialCentered || _hasPendingCenter)
             {
                 CenterContent();
             }
@@ -121,15 +133,56 @@ namespace Eede.Presentation.Views.DataEntry
 
         public void CenterContent()
         {
+            if (_isCentering) return;
             if (DataContext is not DrawableCanvasViewModel vm || scrollViewer == null) return;
-            var viewport = scrollViewer.Viewport;
-            if (viewport.Width <= 0 || viewport.Height <= 0) return;
 
             var displaySize = new Size(vm.DisplayWidth, vm.DisplayHeight);
             if (displaySize.Width <= 0 || displaySize.Height <= 0) return;
 
-            scrollViewer.Offset = ZoomHelper.CalculateInitialOffset(_currentMargin, displaySize, viewport);
-            _isInitialCentered = true;
+            var viewport = scrollViewer.Viewport;
+            if (viewport.Width <= 0 || viewport.Height <= 0)
+            {
+                _hasPendingCenter = true;
+                return;
+            }
+
+            _isCentering = true;
+            try
+            {
+                var newMargin = ZoomHelper.CalculateOverscrollMargin(viewport);
+                if (_currentMargin != newMargin)
+                {
+                    _currentMargin = newMargin;
+                    canvasGrid.Margin = new Thickness(newMargin.X, newMargin.Y, newMargin.X, newMargin.Y);
+                }
+
+                double requiredWidth = displaySize.Width + (_currentMargin.X * 2);
+                double requiredHeight = displaySize.Height + (_currentMargin.Y * 2);
+
+                if (scrollViewer.Extent.Width < requiredWidth - 0.5 ||
+                    scrollViewer.Extent.Height < requiredHeight - 0.5)
+                {
+                    this.UpdateLayout();
+                    viewport = scrollViewer.Viewport;
+                }
+
+                scrollViewer.Offset = ZoomHelper.CalculateInitialOffset(_currentMargin, displaySize, viewport);
+
+                if (scrollViewer.Extent.Width >= requiredWidth - 0.5 &&
+                    scrollViewer.Extent.Height >= requiredHeight - 0.5)
+                {
+                    _isInitialCentered = true;
+                    _hasPendingCenter = false;
+                }
+                else
+                {
+                    _hasPendingCenter = true;
+                }
+            }
+            finally
+            {
+                _isCentering = false;
+            }
         }
 
         private void OnScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)

@@ -98,12 +98,11 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
         public event AsyncEventHandler<PictureSaveEventArgs>? PictureSave;
         public event AsyncEventHandler<EventArgs>? RequestClose;
-        private static readonly float[] MagnificationSteps = [1f, 2f, 4f, 6f, 8f, 12f];
 
         public void ZoomIn()
         {
             float current = Magnification.Value;
-            foreach (float step in MagnificationSteps)
+            foreach (float step in ZoomHelper.MagnificationSteps)
             {
                 if (step > current)
                 {
@@ -116,11 +115,11 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public void ZoomOut()
         {
             float current = Magnification.Value;
-            for (int i = MagnificationSteps.Length - 1; i >= 0; i--)
+            for (int i = ZoomHelper.MagnificationSteps.Length - 1; i >= 0; i--)
             {
-                if (MagnificationSteps[i] < current)
+                if (ZoomHelper.MagnificationSteps[i] < current)
                 {
-                    Magnification = new Magnification(MagnificationSteps[i]);
+                    Magnification = new Magnification(ZoomHelper.MagnificationSteps[i]);
                     return;
                 }
             }

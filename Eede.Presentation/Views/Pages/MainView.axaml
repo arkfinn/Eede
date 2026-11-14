@@ -191,60 +191,60 @@
 						</ScrollViewer>
 					</Panel>
 
-					<Panel x:Name="LeftToolPanel" DockPanel.Dock="Left" Margin="0" Width="100">
-						<ScrollViewer VerticalScrollBarVisibility="Hidden"
-									  HorizontalScrollBarVisibility="Disabled">
-							<StackPanel Orientation="Vertical">
-							<navi:DrawStyleMenu Margin="2" DrawStyle="{Binding DrawStyle}" />
-							<entry:PenWidthSelector Margin="2" PenWidth="{Binding PenWidth}"/>
-							<entry:ColorPicker Margin="2" NowColor="{Binding PenColor}"/>
-							<StackPanel Orientation="Horizontal" Margin="2">
-								<Panel VerticalAlignment="Center">
-									<TextBlock Margin="4" Text="現在色" />
-								</Panel>
-								<Border Background="Gray"
-										BorderBrush="Gray"
-										BorderThickness="1"
-										CornerRadius="0"
-										Padding="0" Margin="4">
-									<Panel Width="32" Height="20">
-										<Panel.Background>
-											<ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
-														Stretch="None"
-														TileMode="Tile"
-														SourceRect="0,0,16,16"
-														DestinationRect="0,0,16,16"
-														AlignmentY="Top"
-														AlignmentX="Left"/>
-										</Panel.Background>
+					<Grid x:Name="CanvasWorkspaceGrid" ColumnDefinitions="Auto, *" RowDefinitions="*, Auto">
+						<Panel x:Name="LeftToolPanel" Grid.Row="0" Grid.Column="0" Margin="0" Width="100">
+							<ScrollViewer VerticalScrollBarVisibility="Hidden"
+										  HorizontalScrollBarVisibility="Disabled">
+								<StackPanel Orientation="Vertical">
+								<navi:DrawStyleMenu Margin="2" DrawStyle="{Binding DrawStyle}" />
+								<entry:PenWidthSelector Margin="2" PenWidth="{Binding PenWidth}"/>
+								<entry:ColorPicker Margin="2" NowColor="{Binding PenColor}"/>
+								<StackPanel Orientation="Horizontal" Margin="2">
+									<Panel VerticalAlignment="Center">
+										<TextBlock Margin="4" Text="現在色" />
+									</Panel>
+									<Border Background="Gray"
+											BorderBrush="Gray"
+											BorderThickness="1"
+											CornerRadius="0"
+											Padding="0" Margin="4">
 										<Panel Width="32" Height="20">
 											<Panel.Background>
-												<SolidColorBrush Color="{Binding NowPenColor}"/>
+												<ImageBrush Source="avares://Eede.Presentation/Assets/Tiles/InvisibleBackground.png"
+															Stretch="None"
+															TileMode="Tile"
+															SourceRect="0,0,16,16"
+															DestinationRect="0,0,16,16"
+															AlignmentY="Top"
+															AlignmentX="Left"/>
 											</Panel.Background>
+											<Panel Width="32" Height="20">
+												<Panel.Background>
+													<SolidColorBrush Color="{Binding NowPenColor}"/>
+												</Panel.Background>
+											</Panel>
 										</Panel>
+									</Border>
+								</StackPanel>
+								<StackPanel Orientation="Horizontal" Margin="2">
+									<Panel VerticalAlignment="Center">
+										<TextBlock Margin="4" Text="背景色" />
 									</Panel>
-								</Border>
-							</StackPanel>
-							<StackPanel Orientation="Horizontal" Margin="2">
-								<Panel VerticalAlignment="Center">
-									<TextBlock Margin="4" Text="背景色" />
-								</Panel>
-								<general:ColorSampleButton SampleColor="{Binding CurrentBackgroundColor, Converter={StaticResource BackgroundColorConverter}}"
-														   PutCommand="{Binding PutBackgroundColorCommand}"
-														   GetCommand="{Binding GetBackgroundColorCommand}"
-														   TouchCanvasMode="{Binding TouchCanvasMode}"/>
-							</StackPanel>
-							</StackPanel>
-						</ScrollViewer>
-					</Panel>
+									<general:ColorSampleButton SampleColor="{Binding CurrentBackgroundColor, Converter={StaticResource BackgroundColorConverter}}"
+															   PutCommand="{Binding PutBackgroundColorCommand}"
+															   GetCommand="{Binding GetBackgroundColorCommand}"
+															   TouchCanvasMode="{Binding TouchCanvasMode}"/>
+								</StackPanel>
+								</StackPanel>
+							</ScrollViewer>
+						</Panel>
 
-					<Grid x:Name="CanvasPaletteGrid" RowDefinitions="*, Auto">
-						<entry:DrawableCanvas Grid.Row="0"
+						<entry:DrawableCanvas Grid.Row="0" Grid.Column="1"
 											  DataContext="{Binding DrawableCanvasViewModel}"
 											  UndoCommand="{Binding $parent[local:MainView].((vm:MainViewModel)DataContext).UndoCommand}"
 											  RedoCommand="{Binding $parent[local:MainView].((vm:MainViewModel)DataContext).RedoCommand}"/>
-						<Panel x:Name="CompactPaletteBackdrop" Grid.Row="0" Background="#40000000" IsVisible="False" PointerPressed="OnCompactPaletteBackdropPointerPressed" />
-						<Panel x:Name="PaletteHostPanel" Grid.Row="1" Background="Transparent">
+						<Panel x:Name="CompactPaletteBackdrop" Grid.Row="0" Grid.Column="1" Background="#40000000" IsVisible="False" PointerPressed="OnCompactPaletteBackdropPointerPressed" />
+						<Panel x:Name="PaletteHostPanel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Background="Transparent">
 							<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
 													IsRegisterMode="{Binding IsRegisterMode}"
 													FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"

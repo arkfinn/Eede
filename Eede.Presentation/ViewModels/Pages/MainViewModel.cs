@@ -417,11 +417,10 @@ public partial class MainViewModel : ViewModelBase
         {
             IsTransparencyEnabled = !IsTransparencyEnabled;
         });
-        float[] magnificationSteps = [1f, 2f, 4f, 6f, 8f, 12f];
         ZoomInCommand = ReactiveCommand.Create(() =>
         {
             float current = Magnification.Value;
-            foreach (float step in magnificationSteps)
+            foreach (float step in ZoomHelper.MagnificationSteps)
             {
                 if (step > current)
                 {
@@ -433,11 +432,11 @@ public partial class MainViewModel : ViewModelBase
         ZoomOutCommand = ReactiveCommand.Create(() =>
         {
             float current = Magnification.Value;
-            for (int i = magnificationSteps.Length - 1; i >= 0; i--)
+            for (int i = ZoomHelper.MagnificationSteps.Length - 1; i >= 0; i--)
             {
-                if (magnificationSteps[i] < current)
+                if (ZoomHelper.MagnificationSteps[i] < current)
                 {
-                    Magnification = new Magnification(magnificationSteps[i]);
+                    Magnification = new Magnification(ZoomHelper.MagnificationSteps[i]);
                     return;
                 }
             }

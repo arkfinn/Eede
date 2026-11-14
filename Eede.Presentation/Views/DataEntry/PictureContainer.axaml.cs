@@ -41,6 +41,8 @@ namespace Eede.Presentation.Views.DataEntry
         private PictureSize _cursorSize = new(32, 32);
         private Vector _currentMargin = new(0, 0);
         private bool _isInitialCentered = false;
+        private bool _hasPendingCenter = false;
+        private bool _isCentering = false;
 
         public PictureContainer()
         {
@@ -62,6 +64,7 @@ namespace Eede.Presentation.Views.DataEntry
             scrollViewer.AddHandler(InputElement.PointerReleasedEvent, OnScrollViewerPointerReleased, RoutingStrategies.Tunnel);
             scrollViewer.PointerCaptureLost += (s, e) => _zoomAndPanController.HandlePointerCaptureLost(e);
             scrollViewer.GetObservable(ScrollViewer.ViewportProperty).Subscribe(OnViewportChanged);
+            scrollViewer.GetObservable(ScrollViewer.ExtentProperty).Subscribe(OnExtentChanged);
 
             canvas.PointerPressed += OnPointerPressed;
             canvas.PointerMoved += OnPointerMoved;
@@ -92,7 +95,16 @@ namespace Eede.Presentation.Views.DataEntry
                 }
             }
 
-            if (!_isInitialCentered && _viewModel != null && _viewModel.DisplayWidth > 0)
+            if ((!_isInitialCentered || _hasPendingCenter) && _viewModel != null && _viewModel.DisplayWidth > 0)
+            {
+                CenterContent();
+            }
+        }
+
+        private void OnExtentChanged(Size extent)
+        {
+            if (extent.Width <= 0 || extent.Height <= 0) return;
+            if (!_isInitialCentered || _hasPendingCenter)
             {
                 CenterContent();
             }
@@ -100,15 +112,56 @@ namespace Eede.Presentation.Views.DataEntry
 
         public void CenterContent()
         {
+            if (_isCentering) return;
             if (_viewModel == null || scrollViewer == null) return;
-            var viewport = scrollViewer.Viewport;
-            if (viewport.Width <= 0 || viewport.Height <= 0) return;
 
             var displaySize = new Size(_viewModel.DisplayWidth, _viewModel.DisplayHeight);
             if (displaySize.Width <= 0 || displaySize.Height <= 0) return;
 
-            scrollViewer.Offset = ZoomHelper.CalculateInitialOffset(_currentMargin, displaySize, viewport);
-            _isInitialCentered = true;
+            var viewport = scrollViewer.Viewport;
+            if (viewport.Width <= 0 || viewport.Height <= 0)
+            {
+                _hasPendingCenter = true;
+                return;
+            }
+
+            _isCentering = true;
+            try
+            {
+                var newMargin = ZoomHelper.CalculateOverscrollMargin(viewport);
+                if (_currentMargin != newMargin)
+                {
+                    _currentMargin = newMargin;
+                    canvasGrid.Margin = new Thickness(newMargin.X, newMargin.Y, newMargin.X, newMargin.Y);
+                }
+
+                double requiredWidth = displaySize.Width + (_currentMargin.X * 2);
+                double requiredHeight = displaySize.Height + (_currentMargin.Y * 2);
+
+                if (scrollViewer.Extent.Width < requiredWidth - 0.5 ||
+                    scrollViewer.Extent.Height < requiredHeight - 0.5)
+                {
+                    this.UpdateLayout();
+                    viewport = scrollViewer.Viewport;
+                }
+
+                scrollViewer.Offset = ZoomHelper.CalculateInitialOffset(_currentMargin, displaySize, viewport);
+
+                if (scrollViewer.Extent.Width >= requiredWidth - 0.5 &&
+                    scrollViewer.Extent.Height >= requiredHeight - 0.5)
+                {
+                    _isInitialCentered = true;
+                    _hasPendingCenter = false;
+                }
+                else
+                {
+                    _hasPendingCenter = true;
+                }
+            }
+            finally
+            {
+                _isCentering = false;
+            }
         }
 
         private void OnScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -370,6 +423,10 @@ namespace Eede.Presentation.Views.DataEntry
                     var oldSize = CanvasSize;
                     CanvasSize = new PictureSize((int)bitmap!.Size.Width, (int)bitmap!.Size.Height);
                     UpdateSelectionPreview();
+                    if (oldSize != CanvasSize)
+                    {
+                        _hasPendingCenter = true;
+                    }
                     
                     // 初期表示時および更新時のビットマップ描画キャッシュの強制破壊と再生成
                     Dispatcher.UIThread.Post(() =>
@@ -377,7 +434,7 @@ namespace Eede.Presentation.Views.DataEntry
                         mainImage.InvalidateVisual();
                         mainImage.InvalidateMeasure();
                         mainImage.InvalidateArrange();
-                        if (oldSize != CanvasSize || !_isInitialCentered)
+                        if (oldSize != CanvasSize || !_isInitialCentered || _hasPendingCenter)
                         {
                             CenterContent();
                         }
@@ -438,6 +495,7 @@ namespace Eede.Presentation.Views.DataEntry
             m6.IsChecked = val == 6;
             m8.IsChecked = val == 8;
             m12.IsChecked = val == 12;
+            m16.IsChecked = val == 16;
         }
 
         private void SetMagnification1(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -468,6 +526,11 @@ namespace Eede.Presentation.Views.DataEntry
         private void SetMagnification12(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (_viewModel != null) _viewModel.Magnification = new Magnification(12);
+        }
+
+        private void SetMagnification16(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_viewModel != null) _viewModel.Magnification = new Magnification(16);
         }
 
         private ISelectionState CreateInitialState()

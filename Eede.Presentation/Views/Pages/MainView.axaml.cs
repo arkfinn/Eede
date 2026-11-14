@@ -225,6 +225,10 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
                     ViewModel?.SetMagnificationCommand.Execute(12f).Subscribe();
                     e.Handled = true;
                     break;
+                case Key.D7:
+                    ViewModel?.SetMagnificationCommand.Execute(16f).Subscribe();
+                    e.Handled = true;
+                    break;
                 case Key.F5:
                     ViewModel?.PullFromActiveDockCommand.Execute().Subscribe();
                     e.Handled = true;
@@ -481,6 +485,8 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
         }
     }
 
+    private const double BottomPaletteFullWidthMinHeight = 600.0;
+
     private void UpdateResponsiveLayout(Size size)
     {
         if (size.Width <= 0 || size.Height <= 0) return;
@@ -508,9 +514,13 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             if (RightDockPane != null) RightDockPane.IsVisible = showRight;
         }
 
+        bool isBottomPaletteFullWidth = !vm.IsCompactLayout && Bounds.Height >= BottomPaletteFullWidthMinHeight;
+
         if (PaletteHostPanel != null)
         {
             Grid.SetRow(PaletteHostPanel, vm.IsCompactLayout ? 0 : 1);
+            Grid.SetColumn(PaletteHostPanel, isBottomPaletteFullWidth ? 0 : 1);
+            Grid.SetColumnSpan(PaletteHostPanel, isBottomPaletteFullWidth ? 2 : 1);
             PaletteHostPanel.VerticalAlignment = vm.IsCompactLayout ? Avalonia.Layout.VerticalAlignment.Bottom : Avalonia.Layout.VerticalAlignment.Stretch;
             PaletteHostPanel.Background = vm.IsCompactLayout && this.TryFindResource("SurfaceContainerHighBrush", ActualThemeVariant, out var res) && res is Avalonia.Media.IBrush brush
                 ? brush
@@ -519,7 +529,12 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             if (CompactPaletteBackdrop != null) CompactPaletteBackdrop.IsVisible = vm.IsCompactLayout && vm.IsCompactPaletteOpen;
         }
 
-        if (LeftToolPanel != null) LeftToolPanel.IsVisible = !vm.IsCompactLayout || vm.IsCompactToolPanelOpen;
+        if (LeftToolPanel != null)
+        {
+            Grid.SetRow(LeftToolPanel, 0);
+            Grid.SetRowSpan(LeftToolPanel, isBottomPaletteFullWidth ? 1 : 2);
+            LeftToolPanel.IsVisible = !vm.IsCompactLayout || vm.IsCompactToolPanelOpen;
+        }
         if (vm.AnimationViewModel != null) UpdateAnimationPanelLayout(vm.AnimationViewModel.IsPreviewExpanded, vm.IsCompactLayout);
     }
 

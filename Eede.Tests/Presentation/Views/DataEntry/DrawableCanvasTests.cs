@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Headless.NUnit;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using Eede.Application.Animations;
@@ -130,5 +132,54 @@ public class DrawableCanvasTests
         // オフセットが設定され、初期センタリングが行われること
         Assert.That(scrollViewer!.Offset.X, Is.GreaterThanOrEqualTo(0.0));
         Assert.That(scrollViewer.Offset.Y, Is.GreaterThanOrEqualTo(0.0));
+    }
+
+    [AvaloniaTest]
+    public void MiddleButtonDrag_OnCanvas_ShouldPanScrollViewer()
+    {
+        _viewModel.SetPicture(Picture.CreateEmpty(new PictureSize(256, 256)));
+        _canvas.ApplyTemplate();
+        _window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        var scrollViewer = _canvas.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "scrollViewer");
+        var initialOffset = scrollViewer.Offset;
+
+        // キャンバス上の中央付近で中ボタン押下 -> ドラッグ移動 -> リリース
+        var startPoint = new Point(400, 300);
+        var movePoint = new Point(350, 240); // (-50, -60) ドラッグ -> Offset は (+50, +60) 増えるはず
+
+        _window.MouseDown(startPoint, Avalonia.Input.MouseButton.Middle);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        _window.MouseMove(movePoint, RawInputModifiers.MiddleMouseButton);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        _window.MouseUp(movePoint, Avalonia.Input.MouseButton.Middle);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        Assert.That(scrollViewer.Offset.X, Is.EqualTo(initialOffset.X + 50).Within(1.0), "中ボタンドラッグでX方向にスクロールするべき");
+        Assert.That(scrollViewer.Offset.Y, Is.EqualTo(initialOffset.Y + 60).Within(1.0), "中ボタンドラッグでY方向にスクロールするべき");
+    }
+
+    [AvaloniaTest]
+    public void LargePicture_ShouldAlignTopLeft_BothXAndY()
+    {
+        // MainViewの左ペインと同様に縦長ビューポート(480x650)で800x800表示(200x200 @ 4x)の画像を初期表示
+        _window.Width = 480;
+        _window.Height = 650;
+        _viewModel.SetPicture(Picture.CreateEmpty(new PictureSize(200, 200)));
+
+        _canvas.ApplyTemplate();
+        _window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        _window.UpdateLayout();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        var scrollViewer = _canvas.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "scrollViewer");
+        var canvasGrid = _canvas.GetVisualDescendants().OfType<Grid>().First(g => g.Name == "canvasGrid");
+
+        Assert.That(scrollViewer.Offset.X, Is.EqualTo(canvasGrid.Margin.Left).Within(0.5), "大きい画像の初期Xオフセットは Margin.Left (画像原点0) であるべき");
+        Assert.That(scrollViewer.Offset.Y, Is.EqualTo(canvasGrid.Margin.Top).Within(0.5), "大きい画像の初期Yオフセットは Margin.Top (画像原点0) であるべき");
     }
 }

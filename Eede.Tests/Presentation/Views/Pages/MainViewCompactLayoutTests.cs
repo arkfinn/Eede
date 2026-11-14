@@ -84,6 +84,9 @@ public class MainViewCompactLayoutTests
 
         try
         {
+            var leftToolPanel = view.FindControl<Control>("LeftToolPanel");
+            var paletteHost = view.FindControl<Control>("PaletteHostPanel");
+
             Assert.Multiple(() =>
             {
                 Assert.That(vm.IsCompactLayout, Is.False);
@@ -91,7 +94,68 @@ public class MainViewCompactLayoutTests
                 Assert.That(view.FindControl<Control>("LeftWorkspacePane")?.IsVisible, Is.True);
                 Assert.That(view.FindControl<Control>("RightDockPane")?.IsVisible, Is.True);
                 Assert.That(view.FindControl<Control>("MainSplitter")?.IsVisible, Is.True);
-                Assert.That(view.FindControl<Control>("PaletteHostPanel")?.IsVisible, Is.True);
+                Assert.That(paletteHost?.IsVisible, Is.True);
+                Assert.That(leftToolPanel, Is.Not.Null);
+                Assert.That(paletteHost, Is.Not.Null);
+                Assert.That(Grid.GetRow(leftToolPanel!), Is.EqualTo(0));
+                Assert.That(Grid.GetRowSpan(leftToolPanel!), Is.EqualTo(1));
+                Assert.That(Grid.GetRow(paletteHost!), Is.EqualTo(1));
+                Assert.That(Grid.GetColumn(paletteHost!), Is.EqualTo(0));
+                Assert.That(Grid.GetColumnSpan(paletteHost!), Is.EqualTo(2));
+                Assert.That(paletteHost!.Bounds.Left, Is.EqualTo(leftToolPanel!.Bounds.Left).Within(1.0));
+                Assert.That(leftToolPanel.Bounds.Bottom, Is.LessThanOrEqualTo(paletteHost.Bounds.Top + 1.0));
+            });
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaTest]
+    [TestCase(800, 600, true)]
+    [TestCase(800, 599, false)]
+    [TestCase(800, 520, false)]
+    public void DesktopHeightThreshold_ShouldSwitchBetweenBottomPaletteFullWidth_AndLeftToolFullHeight(double width, double height, bool expectFullWidthBottomPalette)
+    {
+        var vm = CreateMainViewModel();
+        var view = new MainView { DataContext = vm };
+        var window = new Window { Content = view, Width = width, Height = height };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        try
+        {
+            var leftToolPanel = view.FindControl<Control>("LeftToolPanel");
+            var paletteHost = view.FindControl<Control>("PaletteHostPanel");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(vm.IsCompactLayout, Is.False);
+                Assert.That(leftToolPanel, Is.Not.Null);
+                Assert.That(paletteHost, Is.Not.Null);
+                Assert.That(leftToolPanel!.IsVisible, Is.True);
+                Assert.That(paletteHost!.IsVisible, Is.True);
+
+                if (expectFullWidthBottomPalette)
+                {
+                    Assert.That(Grid.GetRow(leftToolPanel), Is.EqualTo(0));
+                    Assert.That(Grid.GetRowSpan(leftToolPanel), Is.EqualTo(1));
+                    Assert.That(Grid.GetRow(paletteHost), Is.EqualTo(1));
+                    Assert.That(Grid.GetColumn(paletteHost), Is.EqualTo(0));
+                    Assert.That(Grid.GetColumnSpan(paletteHost), Is.EqualTo(2));
+                    Assert.That(paletteHost.Bounds.Left, Is.EqualTo(leftToolPanel.Bounds.Left).Within(1.0));
+                    Assert.That(leftToolPanel.Bounds.Bottom, Is.LessThanOrEqualTo(paletteHost.Bounds.Top + 1.0));
+                }
+                else
+                {
+                    Assert.That(Grid.GetRow(leftToolPanel), Is.EqualTo(0));
+                    Assert.That(Grid.GetRowSpan(leftToolPanel), Is.EqualTo(2));
+                    Assert.That(Grid.GetRow(paletteHost), Is.EqualTo(1));
+                    Assert.That(Grid.GetColumn(paletteHost), Is.EqualTo(1));
+                    Assert.That(Grid.GetColumnSpan(paletteHost), Is.EqualTo(1));
+                    Assert.That(paletteHost.Bounds.Left, Is.GreaterThanOrEqualTo(leftToolPanel.Bounds.Right - 1.0));
+                }
             });
         }
         finally

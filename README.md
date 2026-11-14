@@ -3,6 +3,12 @@
 ![](https://img.shields.io/github/license/arkfinn/Eede)
 ![](https://img.shields.io/github/v/release/arkfinn/Eede)
 
+[![Web Edition - ブラウザで今すぐ試す](https://img.shields.io/badge/Web_Edition-ブラウザで今すぐ試す_(インストール不要)-10b981?style=for-the-badge)](https://arkfinn.github.io/Eede/app/)
+
+### 🌐 [今すぐブラウザで Eede を起動する (https://arkfinn.github.io/Eede/app/)](https://arkfinn.github.io/Eede/app/)
+
+インストール不要でブラウザ上からそのまま動作します（[製品紹介ページはこちら](https://arkfinn.github.io/Eede/)）。
+
 ## 概要
 
 Eede(Excellent Expert Dot Editor)は、32 ビット RGBA のドット絵を描くための専用ツールです。

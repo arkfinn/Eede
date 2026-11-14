@@ -107,6 +107,11 @@ public partial class MainViewModel : ViewModelBase
 
     [Reactive] public partial int SelectedThemeIndex { get; set; }
 
+    [Reactive] public partial bool IsCompactLayout { get; set; }
+    [Reactive] public partial bool IsCompactDockActive { get; set; }
+    [Reactive] public partial bool IsCompactPaletteOpen { get; set; }
+    [Reactive] public partial bool IsCompactToolPanelOpen { get; set; }
+
     public bool IsBrowserPlatform => OperatingSystem.IsBrowser();
     public bool IsDesktopPlatform => !OperatingSystem.IsBrowser();
 
@@ -532,6 +537,7 @@ public partial class MainViewModel : ViewModelBase
         welcomeViewModel.DiscardLastSessionCommand = DiscardRecoveryCommand;
 
         _selectedTilePattern = TilePattern.Solid;
+        _isCompactToolPanelOpen = true;
         InitializeConnections();
         _ = LoadSettingsAsync();
         _ = UpdateClipboardStatusAsync();

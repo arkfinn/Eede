@@ -82,9 +82,50 @@
 			<StyleInclude Source="/Styles/Styles.axaml" />
 		</Panel.Styles>
 		<DockPanel LastChildFill="True">
-			<Grid ColumnDefinitions="*, 4, *" DockPanel.Dock="Bottom">
-				<DockPanel Grid.Column="0" LastChildFill="True">
+			<Border x:Name="CompactHeaderBar"
+					DockPanel.Dock="Top"
+					IsVisible="{Binding IsCompactLayout}"
+					Background="{DynamicResource SurfaceContainerHighBrush}"
+					BorderBrush="{DynamicResource BaseBrush}"
+					BorderThickness="0,0,0,1"
+					Padding="4,2">
+				<Grid ColumnDefinitions="Auto, *, Auto">
+					<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
+						<ToggleButton x:Name="CompactToolToggle"
+									  IsChecked="{Binding IsCompactToolPanelOpen}"
+									  IsVisible="{Binding !IsCompactDockActive}"
+									  Padding="6,2" FontSize="11" ToolTip.Tip="左ツールパネルの表示切替">
+							<TextBlock Text="ツール" />
+						</ToggleButton>
+						<ToggleButton x:Name="CompactPaletteToggle"
+									  IsChecked="{Binding IsCompactPaletteOpen}"
+									  IsVisible="{Binding !IsCompactDockActive}"
+									  Padding="6,2" FontSize="11" ToolTip.Tip="パレットの表示切替">
+							<StackPanel Orientation="Horizontal" Spacing="4">
+								<Border BorderBrush="Gray" BorderThickness="1" Width="12" Height="12" VerticalAlignment="Center">
+									<Panel>
+										<Panel.Background>
+											<SolidColorBrush Color="{Binding NowPenColor}"/>
+										</Panel.Background>
+									</Panel>
+								</Border>
+								<TextBlock Text="パレット" VerticalAlignment="Center" />
+							</StackPanel>
+						</ToggleButton>
+					</StackPanel>
+					<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+						<ToggleButton x:Name="CompactDockToggle"
+									  IsChecked="{Binding IsCompactDockActive}"
+									  Padding="8,2" FontSize="11" ToolTip.Tip="作業キャンバスとドック（ファイル一覧）を切り替え">
+							<TextBlock Text="ドック / ファイル" />
+						</ToggleButton>
+					</StackPanel>
+				</Grid>
+			</Border>
+			<Grid x:Name="MainWorkspaceGrid" ColumnDefinitions="*, 4, *" DockPanel.Dock="Bottom">
+				<DockPanel x:Name="LeftWorkspacePane" Grid.Column="0" LastChildFill="True">
 					<Panel DockPanel.Dock="Top" >
+						<ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
 						<StackPanel Orientation="Horizontal"
 									HorizontalAlignment="Center"
 									Margin="2">
@@ -117,9 +158,11 @@
 								<PathIcon Data="{StaticResource GridViewIconGeometry}" Classes="icon" />
 							</ToggleButton>
 						</StackPanel>
+						</ScrollViewer>
 					</Panel>
 
 					<Panel DockPanel.Dock="Right" Margin="2" Width="24">
+						<ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
 						<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
 							<navi:PictureActionMenu Command="{Binding PictureActionCommand}" ScalingCommand="{Binding ScalingCommand}"/>
 							<Panel Classes="vertical-separator" />
@@ -127,20 +170,10 @@
 								<PathIcon Data="{StaticResource BlurOnIconGeometry}" Classes="icon" />
 							</ToggleButton>
 						</StackPanel>
+						</ScrollViewer>
 					</Panel>
 
-					<Panel DockPanel.Dock="Bottom" Background="Transparent">
-						<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
-												FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
-												Margin="4 2 4 8"
-												HorizontalAlignment="Stretch">
-							<entry:PaletteContainer.SideContent>
-								<entry:PaletteSidePanel DataContext="{Binding $parent[local:MainView].DataContext}" />
-							</entry:PaletteContainer.SideContent>
-						</entry:PaletteContainer>
-					</Panel>
-
-					<Panel DockPanel.Dock="Left" Margin="0" Width="100">
+					<Panel x:Name="LeftToolPanel" DockPanel.Dock="Left" Margin="0" Width="100">
 						<ScrollViewer VerticalScrollBarVisibility="Hidden"
 									  HorizontalScrollBarVisibility="Disabled">
 							<StackPanel Orientation="Vertical">
@@ -186,15 +219,28 @@
 						</ScrollViewer>
 					</Panel>
 
-
-					<entry:DrawableCanvas DockPanel.Dock="Top"
-										  DataContext="{Binding DrawableCanvasViewModel}"/>
+					<Grid x:Name="CanvasPaletteGrid" RowDefinitions="*, Auto">
+						<entry:DrawableCanvas Grid.Row="0"
+											  DataContext="{Binding DrawableCanvasViewModel}"/>
+						<Panel x:Name="CompactPaletteBackdrop" Grid.Row="0" Background="#40000000" IsVisible="False" PointerPressed="OnCompactPaletteBackdropPointerPressed" />
+						<Panel x:Name="PaletteHostPanel" Grid.Row="1" Background="Transparent">
+							<entry:PaletteContainer DataContext="{Binding PaletteContainerViewModel}"
+													FileStorage="{Binding FileStorage, RelativeSource={RelativeSource AncestorType={x:Type local:MainView}}}"
+													Margin="4 2 4 8"
+													HorizontalAlignment="Stretch">
+								<entry:PaletteContainer.SideContent>
+									<entry:PaletteSidePanel DataContext="{Binding $parent[local:MainView].DataContext}" />
+								</entry:PaletteContainer.SideContent>
+							</entry:PaletteContainer>
+						</Panel>
+					</Grid>
 
 				</DockPanel>
-				<GridSplitter Grid.Column="1" Background="Black" ResizeDirection="Columns"/>
-				<Grid Grid.Column="2" ColumnDefinitions="*, Auto" VerticalAlignment="Stretch">
+				<GridSplitter x:Name="MainSplitter" Grid.Column="1" Background="Black" ResizeDirection="Columns"/>
+				<Grid x:Name="RightDockPane" Grid.Column="2" ColumnDefinitions="*, Auto" VerticalAlignment="Stretch">
 					<DockPanel Grid.Column="0" LastChildFill="True">
 						<Panel DockPanel.Dock="Top">
+							<ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
 							<StackPanel Orientation="Horizontal" Margin="2">
 								<Button Classes="tool"
 										ToolTip.Tip="新規作成(Ctrl+N)"
@@ -248,7 +294,9 @@
 								                                                                        ToolTip.Tip="新しいバージョンが利用可能です。クリックして再起動し、適用します。">
 								                                                                        <PathIcon Data="{StaticResource SyncIconGeometry}" Classes="icon" Foreground="{DynamicResource SystemAccentColor}" />
 								                                                                </Button>
-								                                                        </StackPanel>						</Panel>
+								                                                        </StackPanel>
+							</ScrollViewer>
+						</Panel>
 						<display:PictureFrame Pictures="{Binding Pictures}"
 											  ActiveDockable="{Binding ActiveDockable, Mode=TwoWay}"
 											  ImageBlender="{Binding PullBlender}"
@@ -322,8 +370,10 @@
 					BoxShadow="0 8 32 #A0000000"
 					HorizontalAlignment="Center"
 					VerticalAlignment="Center"
+					Margin="12"
 					MinWidth="320"
-					MaxWidth="500">
+					MaxWidth="500"
+					MaxHeight="{Binding #ModalOverlayHost.Bounds.Height}">
 				<ContentControl x:Name="ModalContentControl" Background="#201f1f" />
 			</Border>
 		</Panel>

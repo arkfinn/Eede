@@ -137,9 +137,18 @@ namespace Eede.Application.Drawings
             }
 
             PositionHistory nextHistory = CreatePositionHistory(displayPosition);
-            if (!picture.Fetch().Contains(nextHistory.Now))
+            Picture fetched = picture.Fetch();
+            if (!fetched.Contains(nextHistory.Now))
             {
-                return new DrawingResult(picture, this);
+                if (!drawStyle.AllowOutOfBoundsStart)
+                {
+                    return new DrawingResult(picture, this);
+                }
+
+                Position clamped = new(
+                    Math.Clamp(nextHistory.Now.X, 0, fetched.Size.Width),
+                    Math.Clamp(nextHistory.Now.Y, 0, fetched.Size.Height));
+                nextHistory = new PositionHistory(clamped);
             }
 
             DrawingBuffer result = drawStyle.DrawStart(picture, penStyle, ToCoordinateHistory(nextHistory)!, isShift);

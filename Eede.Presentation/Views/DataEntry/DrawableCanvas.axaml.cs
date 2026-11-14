@@ -47,11 +47,11 @@ namespace Eede.Presentation.Views.DataEntry
             scrollViewer.GetObservable(ScrollViewer.ViewportProperty).Subscribe(OnViewportChanged);
             scrollViewer.GetObservable(ScrollViewer.ExtentProperty).Subscribe(OnExtentChanged);
 
-            canvas.PointerPressed += OnCanvasPointerPressed;
-            canvas.PointerMoved += OnCanvasPointerMoved;
-            canvas.PointerReleased += OnCanvasPointerReleased;
-            canvas.PointerCaptureLost += OnPointerCaptureLost;
-            canvas.PointerExited += OnCanvasPointerExited;
+            canvasContainer.PointerPressed += OnCanvasPointerPressed;
+            canvasContainer.PointerMoved += OnCanvasPointerMoved;
+            canvasContainer.PointerReleased += OnCanvasPointerReleased;
+            canvasContainer.PointerCaptureLost += OnPointerCaptureLost;
+            canvasContainer.PointerExited += OnCanvasPointerExited;
 
             // UserControl自身でRequestBringIntoViewイベントをインターセプトする
             this.AddHandler(RequestBringIntoViewEvent, (s, e) => e.Handled = true);
@@ -187,7 +187,7 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            if (e.Pointer.Type == PointerType.Touch) { if (e.Source != canvas && (TouchCanvasMode == TouchCanvasMode.Pan || _touchTracker.ActivePointerCount >= 1)) HandleTouchPointerPressed(e); return; }
+            if (e.Pointer.Type == PointerType.Touch) { if (!IsEventWithinCanvasContainer(e.Source) && (TouchCanvasMode == TouchCanvasMode.Pan || _touchTracker.ActivePointerCount >= 1)) HandleTouchPointerPressed(e); return; }
             var props = e.GetCurrentPoint(scrollViewer).Properties;
             bool isMiddle = props.IsMiddleButtonPressed;
             bool isSpaceLeft = _zoomAndPanController.IsSpacePressed && props.IsLeftButtonPressed;
@@ -204,7 +204,7 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnScrollViewerPointerMoved(object? sender, PointerEventArgs e)
         {
-            if (e.Pointer.Type == PointerType.Touch) { if (e.Source != canvas && _touchTracker.ActivePointerCount >= 1) HandleTouchPointerMoved(e); return; }
+            if (e.Pointer.Type == PointerType.Touch) { if (!IsEventWithinCanvasContainer(e.Source) && _touchTracker.ActivePointerCount >= 1) HandleTouchPointerMoved(e); return; }
             if (_zoomAndPanController.IsPanning)
             {
                 _zoomAndPanController.HandlePointerMoved(scrollViewer, scrollViewer, e);
@@ -214,13 +214,16 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void OnScrollViewerPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
-            if (e.Pointer.Type == PointerType.Touch) { if (e.Source != canvas && _touchTracker.ActivePointerCount >= 1) HandleTouchPointerReleased(e); return; }
+            if (e.Pointer.Type == PointerType.Touch) { if (!IsEventWithinCanvasContainer(e.Source) && _touchTracker.ActivePointerCount >= 1) HandleTouchPointerReleased(e); return; }
             if (_zoomAndPanController.IsPanning)
             {
                 _zoomAndPanController.HandlePointerReleased(scrollViewer, e);
                 e.Handled = true;
             }
         }
+
+        private bool IsEventWithinCanvasContainer(object? source) =>
+            source is Visual visual && (ReferenceEquals(visual, canvasContainer) || canvasContainer.IsVisualAncestorOf(visual));
 
         private void OnPointerEntered(object? sender, PointerEventArgs e)
         {
@@ -337,27 +340,31 @@ namespace Eede.Presentation.Views.DataEntry
         }
 
         private bool IsLeftButtonPressing = false;
+        private static Position ToCanvasPosition(Point pos) =>
+            new((int)Math.Floor(pos.X), (int)Math.Floor(pos.Y));
+
         private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             canvas.Focus();
             if (e.Pointer.Type == PointerType.Touch) { HandleTouchPointerPressed(e); return; }
 
-            if (_zoomAndPanController.HandlePointerPressed(scrollViewer, canvas, e))
+            if (_zoomAndPanController.HandlePointerPressed(scrollViewer, canvasContainer, e))
             {
                 return;
             }
 
-            Point pos = e.GetPosition(canvas);
-            PointerPointProperties pointer = e.GetCurrentPoint(canvas).Properties;
+            Position pos = ToCanvasPosition(e.GetPosition(canvas));
+            PointerPointProperties pointer = e.GetCurrentPoint(canvasContainer).Properties;
             if (pointer.IsLeftButtonPressed)
             {
-                PointerLeftButtonPressedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
+                e.Pointer.Capture(canvasContainer);
+                PointerLeftButtonPressedCommand?.Execute(pos);
                 IsLeftButtonPressing = true;
             }
 
             if (pointer.IsRightButtonPressed)
             {
-                PointerRightButtonPressedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
+                PointerRightButtonPressedCommand?.Execute(pos);
             }
         }
 
@@ -365,35 +372,43 @@ namespace Eede.Presentation.Views.DataEntry
         {
             if (e.Pointer.Type == PointerType.Touch) { HandleTouchPointerMoved(e); return; }
 
-            if (_zoomAndPanController.HandlePointerMoved(scrollViewer, canvas, e))
+            if (_zoomAndPanController.HandlePointerMoved(scrollViewer, canvasContainer, e))
             {
                 return;
             }
 
-            Point pos = e.GetPosition(canvas);
-            if (IsLeftButtonPressing && e.GetCurrentPoint(canvas).Properties.IsRightButtonPressed)
+            Position pos = ToCanvasPosition(e.GetPosition(canvas));
+            if (IsLeftButtonPressing && e.GetCurrentPoint(canvasContainer).Properties.IsRightButtonPressed)
             {
-                PointerRightButtonPressedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
+                PointerRightButtonPressedCommand?.Execute(pos);
                 IsLeftButtonPressing = false;
+                if (ReferenceEquals(e.Pointer.Captured, canvasContainer))
+                {
+                    e.Pointer.Capture(null);
+                }
             }
-            PointerMovedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
+            PointerMovedCommand?.Execute(pos);
         }
 
         private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
             if (e.Pointer.Type == PointerType.Touch) { HandleTouchPointerReleased(e); return; }
 
-            if (_zoomAndPanController.HandlePointerReleased(canvas, e))
+            if (_zoomAndPanController.HandlePointerReleased(canvasContainer, e))
             {
                 return;
             }
 
             if (IsLeftButtonPressing)
             {
-                Point pos = e.GetPosition(canvas);
-                PointerLeftButtonReleasedCommand?.Execute(new Position((int)pos.X, (int)pos.Y));
+                Position pos = ToCanvasPosition(e.GetPosition(canvas));
+                PointerLeftButtonReleasedCommand?.Execute(pos);
             }
             IsLeftButtonPressing = false;
+            if (ReferenceEquals(e.Pointer.Captured, canvasContainer))
+            {
+                e.Pointer.Capture(null);
+            }
         }
 
         private void OnPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
@@ -420,7 +435,7 @@ namespace Eede.Presentation.Views.DataEntry
         {
             Point viewportPos = e.GetPosition(scrollViewer), canvasPos = e.GetPosition(canvas);
             var down = _touchTracker.OnPointerDown(e.Pointer.Id, viewportPos, Environment.TickCount64);
-            e.Pointer.Capture(canvas);
+            e.Pointer.Capture(canvasContainer);
             if (down.ShouldCancelSingleFingerAction)
             {
                 _touchLongPressTimer?.Stop();
@@ -429,7 +444,7 @@ namespace Eede.Presentation.Views.DataEntry
             }
             else if (down.CanStartSingleFingerAction)
             {
-                var pos = new Position((int)canvasPos.X, (int)canvasPos.Y);
+                var pos = ToCanvasPosition(canvasPos);
                 if (TouchCanvasMode == TouchCanvasMode.Pan) { _isTouchSingleFingerPanning = true; _touchPanLastViewportPos = viewportPos; }
                 else if (TouchCanvasMode == TouchCanvasMode.Eyedropper) PointerRightButtonPressedCommand?.Execute(pos);
                 else
@@ -450,7 +465,7 @@ namespace Eede.Presentation.Views.DataEntry
             _touchLongPressTimer?.Stop();
             if (!_touchTracker.TryTriggerLongPress(Environment.TickCount64, out _)) return;
             if (_isTouchDrawing) { _isTouchDrawing = false; ExecuteCancelDrawing(); }
-            PointerRightButtonPressedCommand?.Execute(new Position((int)_touchLastCanvasPos.X, (int)_touchLastCanvasPos.Y));
+            PointerRightButtonPressedCommand?.Execute(ToCanvasPosition(_touchLastCanvasPos));
         }
 
         private void HandleTouchPointerMoved(PointerEventArgs e)
@@ -466,7 +481,7 @@ namespace Eede.Presentation.Views.DataEntry
             }
             else if (move.CanContinueSingleFingerAction)
             {
-                var pos = new Position((int)canvasPos.X, (int)canvasPos.Y);
+                var pos = ToCanvasPosition(canvasPos);
                 if (TouchCanvasMode == TouchCanvasMode.Pan && _isTouchSingleFingerPanning && scrollViewer != null)
                 {
                     scrollViewer.Offset = ZoomHelper.CalculatePanOffset(scrollViewer.Offset, viewportPos - _touchPanLastViewportPos);
@@ -487,7 +502,7 @@ namespace Eede.Presentation.Views.DataEntry
             if (up.ShouldEndSingleFingerAction && _isTouchDrawing)
             {
                 _isTouchDrawing = false;
-                PointerLeftButtonReleasedCommand?.Execute(new Position((int)canvasPos.X, (int)canvasPos.Y));
+                PointerLeftButtonReleasedCommand?.Execute(ToCanvasPosition(canvasPos));
             }
             if (up.ActivePointerCount == 0) _isTouchDrawing = _isTouchSingleFingerPanning = false;
             if (up.TapAction == TouchTapAction.TwoFingerUndo) UndoCommand?.Execute(null);

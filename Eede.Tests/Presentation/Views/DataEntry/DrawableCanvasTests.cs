@@ -182,4 +182,41 @@ public class DrawableCanvasTests
         Assert.That(scrollViewer.Offset.X, Is.EqualTo(canvasGrid.Margin.Left).Within(0.5), "大きい画像の初期Xオフセットは Margin.Left (画像原点0) であるべき");
         Assert.That(scrollViewer.Offset.Y, Is.EqualTo(canvasGrid.Margin.Top).Within(0.5), "大きい画像の初期Yオフセットは Margin.Top (画像原点0) であるべき");
     }
+
+    [AvaloniaTest]
+    public void LeftButtonDrag_FromOutsideTilePanel_IntoCanvas_ShouldPropagateCommandsWithNegativeCoordinates()
+    {
+        Position? pressedPos = null;
+        Position? movedPos = null;
+        Position? releasedPos = null;
+        _canvas.PointerLeftButtonPressedCommand = ReactiveUI.ReactiveCommand.Create<Position>(p => pressedPos = p);
+        _canvas.PointerMovedCommand = ReactiveUI.ReactiveCommand.Create<Position>(p => movedPos = p);
+        _canvas.PointerLeftButtonReleasedCommand = ReactiveUI.ReactiveCommand.Create<Position>(p => releasedPos = p);
+
+        _canvas.ApplyTemplate();
+        _window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        var canvasImage = _canvas.GetVisualDescendants().OfType<Image>().First(i => i.Name == "canvas");
+        var canvasOriginInWindow = canvasImage.TranslatePoint(new Point(0, 0), _window)!.Value;
+
+        var startInWindow = new Point(canvasOriginInWindow.X - 10, canvasOriginInWindow.Y - 8);
+        var endInWindow = new Point(canvasOriginInWindow.X + 12, canvasOriginInWindow.Y + 15);
+
+        _window.MouseDown(startInWindow, MouseButton.Left);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        _window.MouseMove(endInWindow, RawInputModifiers.LeftMouseButton);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        _window.MouseUp(endInWindow, MouseButton.Left);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(pressedPos, Is.EqualTo(new Position(-10, -8)));
+            Assert.That(movedPos, Is.EqualTo(new Position(12, 15)));
+            Assert.That(releasedPos, Is.EqualTo(new Position(12, 15)));
+        });
+    }
 }

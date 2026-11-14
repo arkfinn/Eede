@@ -167,6 +167,12 @@ public class InteractionCoordinatorTests
         Assert.That(_coordinator.HoverPosition, Is.EqualTo(new Position(4, 4)));
         Assert.That(_coordinator.ActiveCursor, Is.EqualTo(Avalonia.Input.StandardCursorType.Cross));
 
+        // 2.5. 外周余白でのホバー時: IsHoverCursorVisible は false
+        _coordinator.PointerMoved(new Position(-1, 4), buffer, regionSelector, penStyle, false, false, new PictureSize(16, 16));
+        Assert.That(_coordinator.IsHoverCursorVisible, Is.False);
+        _coordinator.PointerMoved(new Position(16, 4), buffer, regionSelector, penStyle, false, false, new PictureSize(16, 16));
+        Assert.That(_coordinator.IsHoverCursorVisible, Is.False);
+
         // 3. キャンバス外に出た時: IsHoverCursorVisible は false, HoverPosition は null
         _coordinator.CanvasLeave(buffer);
         Assert.That(_coordinator.IsHoverCursorVisible, Is.False);

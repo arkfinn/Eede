@@ -64,7 +64,7 @@ public class InteractionCoordinator : IInteractionCoordinator
     }
 
     public Position? HoverPosition => _drawableArea.PositionHistory?.Now;
-    public bool IsHoverCursorVisible => _interactionSession?.DrawStyle is RegionSelector && HoverPosition != null && ActiveSelectionCursor == SelectionCursor.Default && !IsOperating;
+    public bool IsHoverCursorVisible => _interactionSession?.DrawStyle is RegionSelector && HoverPosition is { } hoverPos && CurrentBuffer?.Fetch().Contains(hoverPos) == true && ActiveSelectionCursor == SelectionCursor.Default && !IsOperating;
 
     public StandardCursorType ActiveCursor { get; private set; } = StandardCursorType.Arrow;
     public SelectionCursor ActiveSelectionCursor { get; private set; } = SelectionCursor.Default;

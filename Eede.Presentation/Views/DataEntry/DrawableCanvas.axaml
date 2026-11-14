@@ -31,7 +31,8 @@
                 HorizontalScrollBarVisibility="Visible"
                 VerticalScrollBarVisibility="Visible"
                 Background="{DynamicResource BaseBrush}">
-    <Panel Background="{DynamicResource BaseBrush}"
+    <Panel x:Name="canvasContainer"
+           Background="{DynamicResource BaseBrush}"
            MinWidth="{Binding #scrollViewer.Viewport.Width}"
            MinHeight="{Binding #scrollViewer.Viewport.Height}">
       <!-- 1. 外周背景（下地 + タイル画像） -->

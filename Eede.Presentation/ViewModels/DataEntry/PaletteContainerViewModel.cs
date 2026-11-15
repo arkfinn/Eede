@@ -21,6 +21,7 @@ public partial class PaletteContainerViewModel : ViewModelBase
 {
     public ObservableCollection<PaletteTabViewModel> Tabs { get; } = new();
     [Reactive] public partial PaletteTabViewModel? SelectedTab { get; set; }
+    [Reactive] public partial bool IsRegisterMode { get; set; }
 
     public ReactiveCommand<int, RxVoid> ApplyColorCommand { get; }
     public ReactiveCommand<int, RxVoid> FetchColorCommand { get; }

@@ -14,6 +14,7 @@
                             CancelCommand="{Binding CancelCommand}"
                             Margin="0,20,0,0" />
 
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel Spacing="15">
       <TextBlock Text="サイズ (ピクセル)" FontWeight="Bold"/>
       <Grid ColumnDefinitions="*, 10, *">
@@ -97,5 +98,6 @@
       </UniformGrid>
       <TextBlock Text="※拡大時は左上固定、縮小時は基準位置を選択可能です。" FontSize="10" Foreground="Gray" HorizontalAlignment="Center" TextWrapping="Wrap"/>
     </StackPanel>
+    </ScrollViewer>
   </DockPanel>
 </UserControl>

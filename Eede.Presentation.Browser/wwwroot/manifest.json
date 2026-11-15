@@ -1,0 +1,22 @@
+{
+  "name": "Eede - Web Edition",
+  "short_name": "Eede",
+  "description": "Excellent Expert Dot Editor (WebAssembly)",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [
+    {
+      "src": "../assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

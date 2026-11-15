@@ -83,24 +83,18 @@ namespace Eede.Presentation.Views.DataDisplay
 
         public async Task OpenSaveAlertDialog(object sender, EventArgs? e = null)
         {
-            SaveAlertWindow window = new(Subject);
-
-            if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+            SaveAlertResult = await Views.Pages.MainView.ShowSaveAlertDialogAsync(Subject, Content as Visual);
+            if (ClosingAction is ReactiveCommand<RxVoid, bool> rxCommand)
             {
-                await window.ShowDialog(desktop.MainWindow);
-                SaveAlertResult = window.Result;
-                if (ClosingAction is ReactiveCommand<RxVoid, bool> rxCommand)
-                {
-                    await rxCommand.Execute().ToTask();
-                }
-                else
-                {
-                    ClosingAction?.Execute(null);
-                }
-                if (Closable)
-                {
-                    Factory?.CloseDockable(this);
-                }
+                await rxCommand.Execute().ToTask();
+            }
+            else
+            {
+                ClosingAction?.Execute(null);
+            }
+            if (Closable)
+            {
+                Factory?.CloseDockable(this);
             }
         }
     }

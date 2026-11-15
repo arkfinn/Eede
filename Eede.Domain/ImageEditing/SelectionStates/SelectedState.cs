@@ -31,7 +31,7 @@ public class SelectedState : ISelectionState
         // 高倍率時の 1ピクセル未満の判定誤差を許容するため、遊び(margin)を持たせる
         int margin = Math.Max(1, handleSize / 2);
         bool containsMouse = ContainsWithMargin(_selection.Area, mousePosition, margin);
-        bool containsCursor = ContainsWithMargin(_selection.Area, cursorArea.RealPosition, margin);
+        bool containsCursor = mousePosition.X >= 0 && mousePosition.Y >= 0 && ContainsWithMargin(_selection.Area, cursorArea.RealPosition, margin);
 
         if (containsMouse || containsCursor)
         {

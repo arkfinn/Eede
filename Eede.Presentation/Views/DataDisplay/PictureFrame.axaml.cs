@@ -74,6 +74,14 @@ namespace Eede.Presentation.Views.DataDisplay
             set => SetValue(BackgroundColorProperty, value);
         }
 
+        public static readonly StyledProperty<Eede.Presentation.Common.TouchDockMode> TouchDockModeProperty =
+            AvaloniaProperty.Register<PictureFrame, Eede.Presentation.Common.TouchDockMode>(nameof(TouchDockMode), Eede.Presentation.Common.TouchDockMode.Pull);
+        public Eede.Presentation.Common.TouchDockMode TouchDockMode
+        {
+            get => GetValue(TouchDockModeProperty);
+            set => SetValue(TouchDockModeProperty, value);
+        }
+
         private IDockable? activeDockable;
         public IDockable? ActiveDockable
         {

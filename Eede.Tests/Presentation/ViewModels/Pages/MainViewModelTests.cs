@@ -997,6 +997,40 @@ public class MainViewModelTests
             window.Close();
         }
     }
+
+    [AvaloniaTest]
+    public void ZoomCommandsAndSetMagnification_Support16xAndSyncUI()
+    {
+        var mainVM = CreateMainViewModel();
+        mainVM.SetMagnificationCommand.Execute(12f).Subscribe();
+        Assert.That(mainVM.Magnification.Value, Is.EqualTo(12f));
+
+        mainVM.ZoomInCommand.Execute().Subscribe();
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainVM.Magnification.Value, Is.EqualTo(16f));
+            Assert.That(mainVM.DrawableCanvasViewModel.Magnification.Value, Is.EqualTo(16f));
+        });
+
+        mainVM.ZoomInCommand.Execute().Subscribe();
+        Assert.That(mainVM.Magnification.Value, Is.EqualTo(16f), "Should stay at 16f max");
+
+        mainVM.ZoomOutCommand.Execute().Subscribe();
+        Assert.That(mainVM.Magnification.Value, Is.EqualTo(12f));
+
+        mainVM.SetMagnificationCommand.Execute(16f).Subscribe();
+        mainVM.IsShowPixelGrid = true;
+        Assert.That(mainVM.DrawableCanvasViewModel.IsPixelGridEffectivelyVisible, Is.True);
+
+        var menu = new Eede.Presentation.Views.Navigation.MagnificationMenu { Magnification = new Magnification(16) };
+        var m16Btn = Avalonia.Controls.ControlExtensions.FindControl<Avalonia.Controls.Primitives.ToggleButton>(menu, "m16");
+        Assert.That(m16Btn?.IsChecked, Is.True);
+        var m12Btn = Avalonia.Controls.ControlExtensions.FindControl<Avalonia.Controls.Primitives.ToggleButton>(menu, "m12");
+        m12Btn!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+        Assert.That(menu.Magnification.Value, Is.EqualTo(12f));
+        m16Btn!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+        Assert.That(menu.Magnification.Value, Is.EqualTo(16f));
+    }
 }
 
 

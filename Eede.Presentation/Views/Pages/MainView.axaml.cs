@@ -5,9 +5,11 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using Eede.Presentation.Common.Adapters;
+using Eede.Presentation.Common.Enums;
 using Eede.Presentation.ViewModels.Pages;
 using Eede.Presentation.ViewModels.DataEntry;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.DrawingTools;
 using Eede.Domain.ImageEditing.GeometricTransformations;
@@ -49,7 +51,13 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to load animation cursor: {ex.Message}");
             }
+
+            UpdateResponsiveLayout(Bounds.Size);
+            ApplyCompactLayoutState();
         };
+
+        SizeChanged += (_, e) => UpdateResponsiveLayout(e.NewSize);
+        this.GetObservable(BoundsProperty).Subscribe(bounds => UpdateResponsiveLayout(bounds.Size));
 
         this.AddHandler(KeyDownEvent, OnGlobalKeyDown, RoutingStrategies.Tunnel);
 
@@ -59,6 +67,18 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
 
             // ViewModelの初期化
             InitializeFileStorage();
+            UpdateResponsiveLayout(Bounds.Size);
+
+            disposables.Add(ViewModel.WhenAnyValue(
+                x => x.IsCompactLayout,
+                x => x.IsCompactDockActive,
+                x => x.IsCompactPaletteOpen,
+                x => x.IsCompactToolPanelOpen)
+                .Subscribe(_ =>
+                {
+                    Classes.Set("compact", ViewModel.IsCompactLayout);
+                    ApplyCompactLayoutState();
+                }));
 
             // モーダルダイアログの登録
             disposables.Add(ViewModel.ShowCreateNewPictureModal.RegisterHandler(DoShowCreateNewFileWindowAsync));
@@ -74,45 +94,14 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
             }));
 
             // アニメーションパネルの折りたたみ・展開連動
-            const double MinExpandedHeight = 220.0;
             if (ViewModel.AnimationViewModel != null)
             {
                 var animVm = ViewModel.AnimationViewModel;
                 disposables.Add(animVm.WhenAnyValue(x => x.IsPreviewExpanded)
-                    .Subscribe(isExpanded =>
+                    .CombineLatest(ViewModel.WhenAnyValue(x => x.IsCompactLayout), (isExpanded, isCompact) => (isExpanded, isCompact))
+                    .Subscribe(state =>
                     {
-                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                        {
-                            var panelGrid = this.FindControl<Grid>("AnimationPanelGrid");
-                            var previewControl = this.FindControl<Control>("AnimationPreview");
-                            var splitter = this.FindControl<GridSplitter>("AnimationPanelSplitter");
-                            if (panelGrid == null) return;
-
-                            var rowDef = panelGrid.RowDefinitions[0];
-                            if (!isExpanded)
-                            {
-                                double currentHeight = rowDef.Height.IsAbsolute ? rowDef.Height.Value : (previewControl?.Bounds.Height ?? 0);
-                                animVm.SavedPreviewHeight = Math.Max(currentHeight, MinExpandedHeight);
-                                rowDef.MinHeight = 0;
-                                rowDef.Height = GridLength.Auto;
-                                if (splitter != null)
-                                {
-                                    splitter.IsEnabled = false;
-                                    splitter.IsVisible = false;
-                                }
-                            }
-                            else
-                            {
-                                rowDef.MinHeight = MinExpandedHeight;
-                                double targetHeight = animVm.SavedPreviewHeight >= MinExpandedHeight ? animVm.SavedPreviewHeight : 360.0;
-                                rowDef.Height = new GridLength(targetHeight, GridUnitType.Pixel);
-                                if (splitter != null)
-                                {
-                                    splitter.IsEnabled = true;
-                                    splitter.IsVisible = true;
-                                }
-                            }
-                        });
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() => UpdateAnimationPanelLayout(state.isExpanded, state.isCompact));
                     }));
             }
 
@@ -234,6 +223,10 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
                     break;
                 case Key.D6:
                     ViewModel?.SetMagnificationCommand.Execute(12f).Subscribe();
+                    e.Handled = true;
+                    break;
+                case Key.D7:
+                    ViewModel?.SetMagnificationCommand.Execute(16f).Subscribe();
                     e.Handled = true;
                     break;
                 case Key.F5:
@@ -370,6 +363,52 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
         }
     }
 
+    internal static Func<string, Task<SaveAlertResult>>? InlineSaveAlertHandler { get; set; }
+
+    public Task<SaveAlertResult> ShowInlineSaveAlertAsync(string fileName)
+    {
+        var tcs = new TaskCompletionSource<SaveAlertResult>();
+        var vm = new SaveAlertViewModel(fileName, result =>
+        {
+            ModalOverlayHost.IsVisible = false;
+            ModalContentControl.Content = null;
+            tcs.TrySetResult(result);
+        });
+        ModalContentControl.Content = new Eede.Views.Pages.SaveAlertContentView { DataContext = vm };
+        ModalOverlayHost.IsVisible = true;
+        return tcs.Task;
+    }
+
+    public static async Task<SaveAlertResult> ShowSaveAlertDialogAsync(string fileName, Visual? contextVisual = null)
+    {
+        if (contextVisual != null && TopLevel.GetTopLevel(contextVisual) is Window parentWindow)
+        {
+            var window = new Eede.Views.Pages.SaveAlertWindow(fileName);
+            await window.ShowDialog(parentWindow);
+            return window.Result;
+        }
+        if (contextVisual?.FindAncestorOfType<MainView>() is MainView ancestorMainView)
+        {
+            return await ancestorMainView.ShowInlineSaveAlertAsync(fileName);
+        }
+        if (InlineSaveAlertHandler != null)
+        {
+            return await InlineSaveAlertHandler(fileName);
+        }
+        var lifetime = Avalonia.Application.Current?.ApplicationLifetime;
+        if (lifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime { MainWindow: { } mainWindow })
+        {
+            var window = new Eede.Views.Pages.SaveAlertWindow(fileName);
+            await window.ShowDialog(mainWindow);
+            return window.Result;
+        }
+        if (lifetime is Avalonia.Controls.ApplicationLifetimes.ISingleViewApplicationLifetime { MainView: MainView singleMainView })
+        {
+            return await singleMainView.ShowInlineSaveAlertAsync(fileName);
+        }
+        return SaveAlertResult.Cancel;
+    }
+
     public AvaloniaFileStorage? FileStorage { get; private set; }
 
     private CompositeDisposable? _visualTreeDisposables;
@@ -444,6 +483,93 @@ public partial class MainView : ReactiveUserControl<MainViewModel>
         {
             viewModel.FileStorage = FileStorage;
         }
+    }
+
+    private const double BottomPaletteFullWidthMinHeight = 600.0;
+
+    private void UpdateResponsiveLayout(Size size)
+    {
+        if (size.Width <= 0 || size.Height <= 0) return;
+        bool isCompact = size.Height < 500 || size.Width < 720;
+        Classes.Set("compact", isCompact);
+        if (DataContext is MainViewModel vm) vm.IsCompactLayout = isCompact;
+        ApplyCompactLayoutState();
+    }
+
+    private void ApplyCompactLayoutState()
+    {
+        if (DataContext is not MainViewModel vm) return;
+
+        if (MainWorkspaceGrid?.ColumnDefinitions.Count >= 3)
+        {
+            bool showLeft = !vm.IsCompactLayout || !vm.IsCompactDockActive;
+            bool showRight = !vm.IsCompactLayout || vm.IsCompactDockActive;
+            bool showSplitter = !vm.IsCompactLayout;
+
+            MainWorkspaceGrid.ColumnDefinitions[0].Width = showLeft ? new GridLength(1, GridUnitType.Star) : new GridLength(0, GridUnitType.Pixel);
+            MainWorkspaceGrid.ColumnDefinitions[1].Width = showSplitter ? new GridLength(4, GridUnitType.Pixel) : new GridLength(0, GridUnitType.Pixel);
+            MainWorkspaceGrid.ColumnDefinitions[2].Width = showRight ? new GridLength(1, GridUnitType.Star) : new GridLength(0, GridUnitType.Pixel);
+            if (LeftWorkspacePane != null) LeftWorkspacePane.IsVisible = showLeft;
+            if (MainSplitter != null) MainSplitter.IsVisible = showSplitter;
+            if (RightDockPane != null) RightDockPane.IsVisible = showRight;
+        }
+
+        bool isBottomPaletteFullWidth = !vm.IsCompactLayout && Bounds.Height >= BottomPaletteFullWidthMinHeight;
+
+        if (PaletteHostPanel != null)
+        {
+            Grid.SetRow(PaletteHostPanel, vm.IsCompactLayout ? 0 : 1);
+            Grid.SetColumn(PaletteHostPanel, isBottomPaletteFullWidth ? 0 : 1);
+            Grid.SetColumnSpan(PaletteHostPanel, isBottomPaletteFullWidth ? 2 : 1);
+            PaletteHostPanel.VerticalAlignment = vm.IsCompactLayout ? Avalonia.Layout.VerticalAlignment.Bottom : Avalonia.Layout.VerticalAlignment.Stretch;
+            PaletteHostPanel.Background = vm.IsCompactLayout && this.TryFindResource("SurfaceContainerHighBrush", ActualThemeVariant, out var res) && res is Avalonia.Media.IBrush brush
+                ? brush
+                : Avalonia.Media.Brushes.Transparent;
+            PaletteHostPanel.IsVisible = !vm.IsCompactLayout || vm.IsCompactPaletteOpen;
+            if (CompactPaletteBackdrop != null) CompactPaletteBackdrop.IsVisible = vm.IsCompactLayout && vm.IsCompactPaletteOpen;
+        }
+
+        if (LeftToolPanel != null)
+        {
+            Grid.SetRow(LeftToolPanel, 0);
+            Grid.SetRowSpan(LeftToolPanel, isBottomPaletteFullWidth ? 1 : 2);
+            LeftToolPanel.IsVisible = !vm.IsCompactLayout || vm.IsCompactToolPanelOpen;
+        }
+        if (vm.AnimationViewModel != null) UpdateAnimationPanelLayout(vm.AnimationViewModel.IsPreviewExpanded, vm.IsCompactLayout);
+    }
+
+    private void UpdateAnimationPanelLayout(bool isExpanded, bool isCompact)
+    {
+        if (DataContext is not MainViewModel vm || vm.AnimationViewModel == null || AnimationPanelGrid == null || AnimationPanelGrid.RowDefinitions.Count < 3) return;
+        var animVm = vm.AnimationViewModel;
+        var rowDef = AnimationPanelGrid.RowDefinitions[0];
+        if (!isExpanded)
+        {
+            double currentHeight = rowDef.Height.IsAbsolute ? rowDef.Height.Value : (AnimationPreview?.Bounds.Height ?? 0);
+            if (!isCompact) animVm.SavedPreviewHeight = Math.Max(currentHeight, 220.0);
+            rowDef.MinHeight = 0;
+            rowDef.Height = GridLength.Auto;
+        }
+        else if (isCompact)
+        {
+            rowDef.MinHeight = 80.0;
+            rowDef.Height = new GridLength(1, GridUnitType.Star);
+        }
+        else
+        {
+            rowDef.MinHeight = 220.0;
+            rowDef.Height = new GridLength(animVm.SavedPreviewHeight >= 220.0 ? animVm.SavedPreviewHeight : 360.0, GridUnitType.Pixel);
+        }
+        if (AnimationPanelSplitter != null)
+        {
+            AnimationPanelSplitter.IsEnabled = isExpanded;
+            AnimationPanelSplitter.IsVisible = isExpanded;
+        }
+    }
+
+    private void OnCompactPaletteBackdropPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm) { vm.IsCompactPaletteOpen = false; e.Handled = true; }
     }
 
     public void OnClickThemeSelect(object? sender, SelectionChangedEventArgs e)

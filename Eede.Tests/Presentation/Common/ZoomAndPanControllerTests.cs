@@ -271,5 +271,30 @@ namespace Eede.Tests.Presentation.Common
             Assert.That(pressedHandled, Is.False);
             Assert.That(_controller.IsPanning, Is.False);
         }
+
+        [AvaloniaTest]
+        public void HandlePointerPressed_WhenChildAlreadyCapturedByMouseDevice_ShouldMaintainPanningAfterCaptureTransfer()
+        {
+            var pointer = new Avalonia.Input.Pointer(1, PointerType.Mouse, true);
+            // MouseDevice が押下時にヒットした子要素 (_content) を先に暗黙キャプチャしている状態を再現
+            pointer.Capture(_content);
+            _content.PointerCaptureLost += (s, e) => _controller.HandlePointerCaptureLost(e);
+
+            var pressedProperties = new PointerPointProperties(RawInputModifiers.MiddleMouseButton, PointerUpdateKind.MiddleButtonPressed);
+            var pressedArgs = new PointerPressedEventArgs(
+                _content,
+                pointer,
+                _window,
+                new Point(50, 50),
+                0,
+                pressedProperties,
+                KeyModifiers.None);
+
+            bool pressedHandled = _controller.HandlePointerPressed(_scrollViewer, _scrollViewer, pressedArgs);
+
+            Assert.That(pressedHandled, Is.True);
+            Assert.That(_controller.IsPanning, Is.True, "子要素からScrollViewerへのキャプチャ委譲でPointerCaptureLostが発火してもパン状態が解除されないこと");
+            Assert.That(pointer.Captured, Is.SameAs(_scrollViewer));
+        }
     }
 }

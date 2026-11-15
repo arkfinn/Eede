@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.ImageEditing.Blending;
 using Eede.Domain.ImageEditing.DrawingTools;
@@ -50,11 +51,18 @@ public partial class PaletteForm : UserControl
         set => SetValue(PointerColorReplacedCommandProperty, value);
     }
 
+    public static readonly StyledProperty<bool> IsRegisterModeProperty =
+        AvaloniaProperty.Register<PaletteForm, bool>(nameof(IsRegisterMode), false);
+    public bool IsRegisterMode { get => GetValue(IsRegisterModeProperty); set => SetValue(IsRegisterModeProperty, value); }
+
     private const double DRAG_THRESHOLD = 5.0;
+    private const int TOUCH_LONG_PRESS_MS = 450;
     private Point? _dragStartPosition;
     private int _dragStartSlot = -1;
     private int _hoverSlot = -1;
     private bool _isDragging;
+    private bool _touchLongPressHandled;
+    private DispatcherTimer? _touchLongPressTimer;
 
     public PaletteForm()
     {
@@ -139,6 +147,13 @@ public partial class PaletteForm : UserControl
         int number = GetSlotFromPosition(pos);
         if (number < 0) return;
 
+        if (e.Pointer.Type == PointerType.Touch)
+        {
+            HandleTouchPressSlot(number, pos, e.Pointer);
+            e.Handled = true;
+            return;
+        }
+
         PointerPointProperties pointer = e.GetCurrentPoint(image).Properties;
         if (pointer.IsLeftButtonPressed)
         {
@@ -155,6 +170,36 @@ public partial class PaletteForm : UserControl
         }
     }
 
+    internal void HandleTouchPressSlot(int number, Point pos, IPointer? pointer = null)
+    {
+        _touchLongPressTimer?.Stop();
+        _touchLongPressHandled = false;
+        if (IsRegisterMode)
+        {
+            PointerRightButtonPressedCommand?.Execute(number);
+            return;
+        }
+
+        _dragStartPosition = pos;
+        _dragStartSlot = number;
+        _hoverSlot = number;
+        _isDragging = false;
+        pointer?.Capture(image);
+        _touchLongPressTimer ??= new DispatcherTimer(TimeSpan.FromMilliseconds(TOUCH_LONG_PRESS_MS), DispatcherPriority.Input, (_, _) => TriggerTouchLongPress());
+        _touchLongPressTimer.Start();
+    }
+
+    internal bool TriggerTouchLongPress()
+    {
+        _touchLongPressTimer?.Stop();
+        if (_dragStartPosition == null || _isDragging || _dragStartSlot < 0) return false;
+        int slot = _dragStartSlot;
+        _touchLongPressHandled = true;
+        ResetDragState();
+        PointerRightButtonPressedCommand?.Execute(slot);
+        return true;
+    }
+
     private void OnCanvasPointerMoved(object? sender, PointerEventArgs e)
     {
         if (_dragStartPosition == null || _dragStartSlot < 0) return;
@@ -166,6 +211,7 @@ public partial class PaletteForm : UserControl
             double dy = pos.Y - _dragStartPosition.Value.Y;
             if ((dx * dx) + (dy * dy) >= DRAG_THRESHOLD * DRAG_THRESHOLD)
             {
+                _touchLongPressTimer?.Stop();
                 _isDragging = true;
                 _hoverSlot = GetSlotFromPosition(pos);
                 Refresh();
@@ -186,9 +232,18 @@ public partial class PaletteForm : UserControl
 
     private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
+        _touchLongPressTimer?.Stop();
+        if (e.Pointer.Type == PointerType.Touch && _touchLongPressHandled)
+        {
+            _touchLongPressHandled = false;
+            e.Pointer.Capture(null);
+            e.Handled = true;
+            return;
+        }
+
         if (_dragStartPosition == null || _dragStartSlot < 0) return;
 
-        if (e.InitialPressMouseButton == MouseButton.Left)
+        if (e.InitialPressMouseButton == MouseButton.Left || e.Pointer.Type == PointerType.Touch)
         {
             Point pos = e.GetPosition(image);
             int dropSlot = GetSlotFromPosition(pos);
@@ -215,6 +270,8 @@ public partial class PaletteForm : UserControl
 
     private void OnCanvasPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
     {
+        _touchLongPressTimer?.Stop();
+        _touchLongPressHandled = false;
         bool wasDragging = _isDragging;
         ResetDragState();
         if (wasDragging)

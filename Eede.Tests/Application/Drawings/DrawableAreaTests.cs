@@ -325,5 +325,39 @@ namespace Eede.Application.Tests.Drawings
             Assert.That(colorAtPos.Green, Is.EqualTo(baseColor.Green));
             Assert.That(colorAtPos.Blue, Is.EqualTo(baseColor.Blue));
         }
+
+        [TestCase(-10, -10, 0, 0)]
+        [TestCase(-10, 6, 0, 3)]
+        [TestCase(24, 30, 10, 10)]
+        public void DrawStart_WithRegionSelector_WhenOutOfBounds_ClampsStartPositionAndStarts(int displayX, int displayY, int expectedStartX, int expectedStartY)
+        {
+            var area = new DrawableArea(new Magnification(2.0f), new PictureSize(16, 16), null);
+            var buffer = new DrawingBuffer(Picture.CreateEmpty(new PictureSize(10, 10)));
+            var penStyle = new PenStyle(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), new ArgbColor(255, 255, 255, 255), 1);
+            var selector = new RegionSelector();
+            PositionHistory? capturedHistory = null;
+            selector.OnDrawStart += (_, h) => capturedHistory = h;
+
+            var result = area.DrawStart(selector, penStyle, buffer, new Position(displayX, displayY), false);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.PictureBuffer!.IsDrawing(), Is.True);
+                Assert.That(capturedHistory, Is.Not.Null);
+                Assert.That(capturedHistory!.Start, Is.EqualTo(new Position(expectedStartX, expectedStartY)));
+            });
+        }
+
+        [Test]
+        public void DrawStart_WithFreeCurve_WhenOutOfBounds_ShouldBeIgnored()
+        {
+            var area = new DrawableArea(new Magnification(2.0f), new PictureSize(16, 16), null);
+            var buffer = new DrawingBuffer(Picture.CreateEmpty(new PictureSize(10, 10)));
+            var penStyle = new PenStyle(new Eede.Domain.ImageEditing.Blending.DirectImageBlender(), new ArgbColor(255, 255, 255, 255), 1);
+
+            var result = area.DrawStart(new FreeCurve(), penStyle, buffer, new Position(-2, -2), false);
+
+            Assert.That(result.PictureBuffer!.IsDrawing(), Is.False);
+        }
     }
 }

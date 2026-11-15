@@ -4,6 +4,7 @@ using Eede.Application.UseCase.Pictures;
 using Eede.Domain.Files;
 using Eede.Domain.ImageEditing;
 using Eede.Domain.SharedKernel;
+using Eede.Presentation.Common;
 using Eede.Presentation.Common.Adapters;
 using Eede.Presentation.Common.Enums;
 using Eede.Presentation.Events;
@@ -88,6 +89,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public partial double DisplayWidth { get; set; }
         [Reactive] public partial double DisplayHeight { get; set; }
         [Reactive] public partial BackgroundColor BackgroundColor { get; set; }
+        [Reactive] public partial TouchDockMode TouchDockMode { get; set; }
         public ReactiveCommand<RxVoid, RxVoid> ZoomInCommand { get; }
         public ReactiveCommand<RxVoid, RxVoid> ZoomOutCommand { get; }
         public ReactiveCommand<float, RxVoid> SetMagnificationCommand { get; }
@@ -96,12 +98,11 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public delegate Task AsyncEventHandler<in TEventArgs>(object sender, TEventArgs e);
         public event AsyncEventHandler<PictureSaveEventArgs>? PictureSave;
         public event AsyncEventHandler<EventArgs>? RequestClose;
-        private static readonly float[] MagnificationSteps = [1f, 2f, 4f, 6f, 8f, 12f];
 
         public void ZoomIn()
         {
             float current = Magnification.Value;
-            foreach (float step in MagnificationSteps)
+            foreach (float step in ZoomHelper.MagnificationSteps)
             {
                 if (step > current)
                 {
@@ -114,11 +115,11 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         public void ZoomOut()
         {
             float current = Magnification.Value;
-            for (int i = MagnificationSteps.Length - 1; i >= 0; i--)
+            for (int i = ZoomHelper.MagnificationSteps.Length - 1; i >= 0; i--)
             {
-                if (MagnificationSteps[i] < current)
+                if (ZoomHelper.MagnificationSteps[i] < current)
                 {
-                    Magnification = new Magnification(MagnificationSteps[i]);
+                    Magnification = new Magnification(ZoomHelper.MagnificationSteps[i]);
                     return;
                 }
             }

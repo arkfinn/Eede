@@ -395,6 +395,39 @@ public class RegionSelectorCharacterizationTests
         Assert.That(vm.IsRegionSelecting, Is.True, "Should be selecting new region");
         Assert.That(vm.SelectingArea!.Value.X, Is.EqualTo(20), "New selection should start at click position (20,20)");
     }
+
+    [AvaloniaTest]
+    public void Drag_From_OutOfBounds_Creates_Clamped_Selection()
+    {
+        var vm = CreateViewModel(Picture.CreateEmpty(new PictureSize(32, 32)));
+        vm.Magnification = new Magnification(1);
+        vm.DrawStyle = new RegionSelector();
+
+        // 1. 左上外周 (-10, -10) から (10, 10) へドラッグ -> (0, 0) から 10x10
+        vm.DrawBeginCommand.Execute(new Position(-10, -10)).Subscribe();
+        vm.DrawingCommand.Execute(new Position(10, 10)).Subscribe();
+        vm.DrawEndCommand.Execute(new Position(10, 10)).Subscribe();
+        Assert.That(vm.SelectingArea, Is.EqualTo(new PictureArea(new Position(0, 0), new PictureSize(10, 10))));
+
+        // 2. 既存選択がある状態で左外周 (-5, 5) から (8, 12) へ新規選択 -> (0, 5) から 8x7
+        vm.DrawBeginCommand.Execute(new Position(-5, 5)).Subscribe();
+        vm.DrawingCommand.Execute(new Position(8, 12)).Subscribe();
+        vm.DrawEndCommand.Execute(new Position(8, 12)).Subscribe();
+        Assert.That(vm.SelectingArea, Is.EqualTo(new PictureArea(new Position(0, 5), new PictureSize(8, 7))));
+
+        // 3. 右下外周 (40, 40) から (20, 20) へドラッグ -> (20, 20) から 12x12
+        vm.DrawBeginCommand.Execute(new Position(40, 40)).Subscribe();
+        vm.DrawingCommand.Execute(new Position(20, 20)).Subscribe();
+        vm.DrawEndCommand.Execute(new Position(20, 20)).Subscribe();
+        Assert.That(vm.SelectingArea, Is.EqualTo(new PictureArea(new Position(20, 20), new PictureSize(12, 12))));
+
+        // 4. 外周のみでクリック・リリース (-20, -20) -> (-5, -5) -> IsEmpty のため選択解除
+        vm.DrawBeginCommand.Execute(new Position(-20, -20)).Subscribe();
+        vm.DrawingCommand.Execute(new Position(-5, -5)).Subscribe();
+        vm.DrawEndCommand.Execute(new Position(-5, -5)).Subscribe();
+        Assert.That(vm.IsRegionSelecting, Is.False);
+        Assert.That(vm.SelectingArea, Is.Null);
+    }
 }
 
 

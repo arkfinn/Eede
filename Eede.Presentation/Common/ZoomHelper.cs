@@ -7,7 +7,7 @@ namespace Eede.Presentation.Common
 {
     public static class ZoomHelper
     {
-        public static readonly float[] MagnificationSteps = [1f, 2f, 4f, 6f, 8f, 12f];
+        public static readonly float[] MagnificationSteps = [1f, 2f, 4f, 6f, 8f, 12f, 16f];
 
         public static Magnification CalculateNextMagnification(Magnification current, int deltaY)
         {

@@ -36,6 +36,9 @@
       <ToggleButton x:Name="m12" Classes="tool" Click="SetMagnification12">
         <Image Source="avares://Eede.Presentation/Assets/Tools/mag12.png" Stretch="None" />
       </ToggleButton>
+      <ToggleButton x:Name="m16" Classes="tool" Click="SetMagnification16">
+        <Image Source="avares://Eede.Presentation/Assets/Tools/mag16.png" Stretch="None" />
+      </ToggleButton>
     </StackPanel>
     <ScrollViewer x:Name="scrollViewer"
                   DockPanel.Dock="Bottom"

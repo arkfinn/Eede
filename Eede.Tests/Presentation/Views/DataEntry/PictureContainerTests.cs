@@ -305,6 +305,122 @@ public class PictureContainerTests
             win.Close();
         }
     }
+
+    private static DockPictureViewModel CreateDockVm(MainViewModel mainVm, int width, int height, string name)
+    {
+        var vm = new DockPictureViewModel(new GlobalState(), mainVm.AnimationViewModel, new AvaloniaBitmapAdapter(),
+            new PictureFileIO(new SavePictureUseCase(new Mock<IPictureRepository>().Object, new Mock<ISettingsRepository>().Object), new LoadPictureUseCase(new Mock<IPictureRepository>().Object, new Mock<ISettingsRepository>().Object)));
+        vm.Initialize(Picture.CreateEmpty(new PictureSize(width, height)), new FilePath(name));
+        return vm;
+    }
+
+    private static ScrollViewer FindScrollViewer(Control root, DockPictureViewModel vm) =>
+        root.GetVisualDescendants().OfType<PictureContainer>()
+            .First(c => ReferenceEquals(c.DataContext, vm) || (c.DataContext is StyledElement se && ReferenceEquals(se.DataContext, vm)))
+            .GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "scrollViewer");
+
+    private static void FlushLayout(Window win)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        win.UpdateLayout();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+    }
+
+    [AvaloniaTest]
+    public void TabSwitch_InMainView_ShouldPreserveIndependentScrollOffsetPerTab()
+    {
+        var mainView = new Eede.Presentation.Views.Pages.MainView { DataContext = _mainViewModel };
+        var win = new Window { Content = mainView, Width = 1024, Height = 720 };
+        win.Show();
+        FlushLayout(win);
+
+        try
+        {
+            var dockControl = mainView.GetVisualDescendants().OfType<Eede.Presentation.Views.DataDisplay.PictureFrame>().First()
+                .FindControl<Dock.Avalonia.Controls.DockControl>("DockControl")!;
+            var pictureDock = ((Dock.Model.Avalonia.Controls.ProportionalDock)((Dock.Model.Avalonia.Controls.RootDock)dockControl.Layout!).VisibleDockables![0])
+                .VisibleDockables!.OfType<Eede.Presentation.Views.DataDisplay.PictureDock>().First();
+
+            var vmA = CreateDockVm(_mainViewModel, 800, 800, "a.png");
+            _mainViewModel.Pictures.Add(vmA);
+            FlushLayout(win);
+            var targetOffsetA = FindScrollViewer(mainView, vmA).Offset + new Vector(120, 150);
+            FindScrollViewer(mainView, vmA).Offset = targetOffsetA;
+            FlushLayout(win);
+
+            var vmB = CreateDockVm(_mainViewModel, 800, 800, "b.png");
+            _mainViewModel.Pictures.Add(vmB);
+            FlushLayout(win);
+            var targetOffsetB = FindScrollViewer(mainView, vmB).Offset + new Vector(40, 80);
+            FindScrollViewer(mainView, vmB).Offset = targetOffsetB;
+            FlushLayout(win);
+
+            var docWelcome = pictureDock.VisibleDockables![0];
+            var docs = pictureDock.VisibleDockables!.OfType<Eede.Presentation.Views.DataDisplay.PictureDocument>().ToList();
+            pictureDock.Factory!.SetActiveDockable(docs.First(d => ReferenceEquals(d.DataContext, vmA)));
+            FlushLayout(win);
+            var restoredA = FindScrollViewer(mainView, vmA);
+            Assert.That(restoredA.Offset.X, Is.EqualTo(targetOffsetA.X).Within(0.5));
+            Assert.That(restoredA.Offset.Y, Is.EqualTo(targetOffsetA.Y).Within(0.5));
+
+            pictureDock.Factory.SetActiveDockable(docWelcome);
+            FlushLayout(win);
+            pictureDock.Factory.SetActiveDockable(docs.First(d => ReferenceEquals(d.DataContext, vmB)));
+            FlushLayout(win);
+            var restoredB = FindScrollViewer(mainView, vmB);
+            Assert.That(restoredB.Offset.X, Is.EqualTo(targetOffsetB.X).Within(0.5));
+            Assert.That(restoredB.Offset.Y, Is.EqualTo(targetOffsetB.Y).Within(0.5));
+        }
+        finally { win.Close(); }
+    }
+
+    [AvaloniaTest]
+    public void ScrollOffset_ShouldPersistAcrossDetachReattach_NewContainer_RapidDetach_AndSameSizeUpdate()
+    {
+        _dockViewModel.Initialize(Picture.CreateEmpty(new PictureSize(1024, 1024)), new FilePath("large.png"));
+        _window.Width = 400;
+        _window.Height = 400;
+        _window.Show();
+        FlushLayout(_window);
+
+        var sv = _container.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "scrollViewer");
+        var targetOffset = sv.Offset + new Vector(100, 120);
+        sv.Offset = targetOffset;
+        FlushLayout(_window);
+
+        // 1. 同一インスタンスの Detach / Re-attach
+        _window.Content = new Border();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        _window.Content = _container;
+        FlushLayout(_window);
+        Assert.That(sv.Offset.X, Is.EqualTo(targetOffset.X).Within(0.5));
+        Assert.That(sv.Offset.Y, Is.EqualTo(targetOffset.Y).Within(0.5));
+
+        // 2. 新規生成された PictureContainer での復元
+        var newContainer = new PictureContainer { DataContext = _dockViewModel };
+        _window.Content = newContainer;
+        FlushLayout(_window);
+        var newSv = newContainer.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "scrollViewer");
+        Assert.That(newSv.Offset.X, Is.EqualTo(targetOffset.X).Within(0.5));
+        Assert.That(newSv.Offset.Y, Is.EqualTo(targetOffset.Y).Within(0.5));
+
+        // 3. レイアウト未確定状態での高速 Detach による (0,0) 上書き破壊の防止
+        _window.Content = new PictureContainer { DataContext = _dockViewModel };
+        _window.Content = new Border();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        var afterRapidContainer = new PictureContainer { DataContext = _dockViewModel };
+        _window.Content = afterRapidContainer;
+        FlushLayout(_window);
+        var afterRapidSv = afterRapidContainer.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "scrollViewer");
+        Assert.That(afterRapidSv.Offset.X, Is.EqualTo(targetOffset.X).Within(0.5));
+        Assert.That(afterRapidSv.Offset.Y, Is.EqualTo(targetOffset.Y).Within(0.5));
+
+        // 4. 同一サイズ画像更新時にスクロール位置がリセットされないこと
+        _dockViewModel.PictureBuffer = Picture.CreateEmpty(new PictureSize(1024, 1024));
+        FlushLayout(_window);
+        Assert.That(afterRapidSv.Offset.X, Is.EqualTo(targetOffset.X).Within(0.5));
+        Assert.That(afterRapidSv.Offset.Y, Is.EqualTo(targetOffset.Y).Within(0.5));
+    }
 }
 
 

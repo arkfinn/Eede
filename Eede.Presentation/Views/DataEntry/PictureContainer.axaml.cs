@@ -43,6 +43,9 @@ namespace Eede.Presentation.Views.DataEntry
         private bool _isInitialCentered = false;
         private bool _hasPendingCenter = false;
         private bool _isCentering = false;
+        private bool _isScrollStateReady = false;
+        private bool _hasPendingScrollRestore = false;
+        private bool _isRestoringScroll = false;
 
         public PictureContainer()
         {
@@ -65,6 +68,7 @@ namespace Eede.Presentation.Views.DataEntry
             scrollViewer.PointerCaptureLost += (s, e) => _zoomAndPanController.HandlePointerCaptureLost(e);
             scrollViewer.GetObservable(ScrollViewer.ViewportProperty).Subscribe(OnViewportChanged);
             scrollViewer.GetObservable(ScrollViewer.ExtentProperty).Subscribe(OnExtentChanged);
+            scrollViewer.GetObservable(ScrollViewer.OffsetProperty).Subscribe(OnScrollOffsetChanged);
 
             canvas.PointerPressed += OnPointerPressed;
             canvas.PointerMoved += OnPointerMoved;
@@ -95,39 +99,66 @@ namespace Eede.Presentation.Views.DataEntry
                 }
             }
 
-            if ((!_isInitialCentered || _hasPendingCenter) && _viewModel != null && _viewModel.DisplayWidth > 0)
+            if (_viewModel != null && _viewModel.DisplayWidth > 0)
             {
-                CenterContent();
+                EnsureInitialPositionOrRestore();
             }
         }
 
         private void OnExtentChanged(Size extent)
         {
             if (extent.Width <= 0 || extent.Height <= 0) return;
-            if (!_isInitialCentered || _hasPendingCenter)
+            EnsureInitialPositionOrRestore();
+        }
+
+        private void OnScrollOffsetChanged(Vector offset)
+        {
+            if (!_isScrollStateReady || _isCentering || _isRestoringScroll || _hasPendingCenter || _hasPendingScrollRestore)
+            {
+                return;
+            }
+            if (_viewModel != null)
+            {
+                _viewModel.ScrollOffset = offset;
+            }
+        }
+
+        private void EnsureInitialPositionOrRestore()
+        {
+            if (_viewModel == null) return;
+            if (_viewModel.ScrollOffset.HasValue && (!_isInitialCentered || _hasPendingScrollRestore))
+            {
+                RestoreScrollOffset();
+            }
+            else if (!_isInitialCentered || _hasPendingCenter)
             {
                 CenterContent();
             }
         }
 
-        public void CenterContent()
+        public void CenterContent() => ApplyScrollPosition(restoreSaved: false);
+
+        private void RestoreScrollOffset() => ApplyScrollPosition(restoreSaved: true);
+
+        private void ApplyScrollPosition(bool restoreSaved)
         {
-            if (_isCentering) return;
-            if (_viewModel == null || scrollViewer == null) return;
+            if (_isCentering || _isRestoringScroll || _viewModel == null || scrollViewer == null) return;
+            Vector? savedOffset = restoreSaved ? _viewModel.ScrollOffset : null;
+            if (restoreSaved && savedOffset is null) return;
 
             var displaySize = new Size(_viewModel.DisplayWidth, _viewModel.DisplayHeight);
             if (displaySize.Width <= 0 || displaySize.Height <= 0) return;
 
-            var viewport = scrollViewer.Viewport;
-            if (viewport.Width <= 0 || viewport.Height <= 0)
-            {
-                _hasPendingCenter = true;
-                return;
-            }
-
-            _isCentering = true;
+            if (restoreSaved) _isRestoringScroll = true; else _isCentering = true;
             try
             {
+                var viewport = scrollViewer.Viewport;
+                if (viewport.Width <= 0 || viewport.Height <= 0)
+                {
+                    if (restoreSaved) _hasPendingScrollRestore = true; else _hasPendingCenter = true;
+                    return;
+                }
+
                 var newMargin = ZoomHelper.CalculateOverscrollMargin(viewport);
                 if (_currentMargin != newMargin)
                 {
@@ -137,30 +168,35 @@ namespace Eede.Presentation.Views.DataEntry
 
                 double requiredWidth = displaySize.Width + (_currentMargin.X * 2);
                 double requiredHeight = displaySize.Height + (_currentMargin.Y * 2);
-
-                if (scrollViewer.Extent.Width < requiredWidth - 0.5 ||
-                    scrollViewer.Extent.Height < requiredHeight - 0.5)
+                if (scrollViewer.Extent.Width < requiredWidth - 0.5 || scrollViewer.Extent.Height < requiredHeight - 0.5)
                 {
                     this.UpdateLayout();
                     viewport = scrollViewer.Viewport;
                 }
 
-                scrollViewer.Offset = ZoomHelper.CalculateInitialOffset(_currentMargin, displaySize, viewport);
+                bool extentReady = scrollViewer.Extent.Width >= requiredWidth - 0.5 && scrollViewer.Extent.Height >= requiredHeight - 0.5;
+                if (!restoreSaved || extentReady)
+                {
+                    scrollViewer.Offset = savedOffset ?? ZoomHelper.CalculateInitialOffset(_currentMargin, displaySize, viewport);
+                }
 
-                if (scrollViewer.Extent.Width >= requiredWidth - 0.5 &&
-                    scrollViewer.Extent.Height >= requiredHeight - 0.5)
+                if (extentReady)
                 {
                     _isInitialCentered = true;
                     _hasPendingCenter = false;
+                    _hasPendingScrollRestore = false;
+                    _isScrollStateReady = true;
+                    if (!restoreSaved) _viewModel.ScrollOffset = scrollViewer.Offset;
                 }
                 else
                 {
-                    _hasPendingCenter = true;
+                    if (restoreSaved) _hasPendingScrollRestore = true; else _hasPendingCenter = true;
                 }
             }
             finally
             {
                 _isCentering = false;
+                _isRestoringScroll = false;
             }
         }
 
@@ -257,6 +293,11 @@ namespace Eede.Presentation.Views.DataEntry
 
         protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
         {
+            if (_isScrollStateReady && _viewModel != null && scrollViewer != null)
+            {
+                _viewModel.ScrollOffset = scrollViewer.Offset;
+            }
+            _isScrollStateReady = false;
             ClearParentOpacityObservations();
             base.OnDetachedFromVisualTree(e);
         }
@@ -325,6 +366,11 @@ namespace Eede.Presentation.Views.DataEntry
                 {
                     mainImage.InvalidateVisual();
                     renderingRoot.InvalidateVisual();
+                    if (_viewModel.ScrollOffset.HasValue && !_isScrollStateReady)
+                    {
+                        _hasPendingScrollRestore = true;
+                        RestoreScrollOffset();
+                    }
                 }
             }, DispatcherPriority.Render);
         }
@@ -336,6 +382,11 @@ namespace Eede.Presentation.Views.DataEntry
 
         private void PictureContainer_DataContextChanged(object? sender, EventArgs e)
         {
+            _isScrollStateReady = false;
+            _isInitialCentered = false;
+            _hasPendingCenter = false;
+            _hasPendingScrollRestore = false;
+
             _viewModel = FetchViewModel();
             if (_viewModel == null)
             {
@@ -423,7 +474,8 @@ namespace Eede.Presentation.Views.DataEntry
                     var oldSize = CanvasSize;
                     CanvasSize = new PictureSize((int)bitmap!.Size.Width, (int)bitmap!.Size.Height);
                     UpdateSelectionPreview();
-                    if (oldSize != CanvasSize)
+                    bool sizeChanged = oldSize != CanvasSize;
+                    if (sizeChanged && _isInitialCentered)
                     {
                         _hasPendingCenter = true;
                     }
@@ -434,7 +486,13 @@ namespace Eede.Presentation.Views.DataEntry
                         mainImage.InvalidateVisual();
                         mainImage.InvalidateMeasure();
                         mainImage.InvalidateArrange();
-                        if (oldSize != CanvasSize || !_isInitialCentered || _hasPendingCenter)
+                        if (_viewModel == null) return;
+
+                        if (_viewModel.ScrollOffset.HasValue && (!_isInitialCentered || _hasPendingScrollRestore))
+                        {
+                            RestoreScrollOffset();
+                        }
+                        else if ((sizeChanged && _isInitialCentered) || !_isInitialCentered || _hasPendingCenter)
                         {
                             CenterContent();
                         }

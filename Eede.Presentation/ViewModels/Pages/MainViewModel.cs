@@ -598,6 +598,7 @@ public partial class MainViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(IsTouchDockPanMode));
         });
         _ = this.WhenAnyValue(x => x.IsTouchPaletteRegisterMode).Subscribe(reg => PaletteContainerViewModel.IsRegisterMode = reg);
+        _ = this.WhenAnyValue(x => x.PenColor).Subscribe(color => PaletteContainerViewModel.SelectedColor = color);
 
         _ = this.WhenAnyValue(x => x.ImageBlender)
             .Subscribe(x => DrawableCanvasViewModel.ImageBlender = x);

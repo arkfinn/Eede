@@ -16,8 +16,8 @@ namespace Eede.Presentation.Views.DataEntry;
 
 public partial class PaletteForm : UserControl
 {
-    private const int CELL_WIDTH = 17;
-    private const int CELL_HEIGHT = 11;
+    internal const int CELL_WIDTH = 17;
+    internal const int CELL_HEIGHT = 11;
 
     public static readonly StyledProperty<Palette> PaletteProperty =
         AvaloniaProperty.Register<PaletteForm, Palette>(nameof(Palette), Palette.Create());
@@ -25,6 +25,14 @@ public partial class PaletteForm : UserControl
     {
         get => GetValue(PaletteProperty);
         set => SetValue(PaletteProperty, value);
+    }
+
+    public static readonly StyledProperty<ArgbColor> SelectedColorProperty =
+        AvaloniaProperty.Register<PaletteForm, ArgbColor>(nameof(SelectedColor), default);
+    public ArgbColor SelectedColor
+    {
+        get => GetValue(SelectedColorProperty);
+        set => SetValue(SelectedColorProperty, value);
     }
 
     public static readonly StyledProperty<ICommand?> PointerLeftButtonPressedCommandProperty =
@@ -74,13 +82,21 @@ public partial class PaletteForm : UserControl
         panel.Height = height;
         image.Width = width;
         image.Height = height;
+        selectionOverlay.Width = width;
+        selectionOverlay.Height = height;
         PaletteBitmap = AvaloniaBitmapAdapter.StaticConvertToBitmap(PaletteBuffer);
         image.Source = PaletteBitmap;
         Refresh();
 
-        _ = this.GetObservable(PaletteProperty).Subscribe(_ =>
+        _ = this.GetObservable(PaletteProperty).Subscribe(palette =>
         {
+            selectionOverlay.Palette = palette;
             Refresh();
+        });
+
+        _ = this.GetObservable(SelectedColorProperty).Subscribe(color =>
+        {
+            selectionOverlay.SelectedColor = color;
         });
 
         image.PointerPressed += OnCanvasPointerPressed;
@@ -214,6 +230,7 @@ public partial class PaletteForm : UserControl
                 _touchLongPressTimer?.Stop();
                 _isDragging = true;
                 _hoverSlot = GetSlotFromPosition(pos);
+                SyncSelectionOverlayDragState();
                 Refresh();
                 return;
             }
@@ -225,6 +242,7 @@ public partial class PaletteForm : UserControl
             if (_hoverSlot != nextHover)
             {
                 _hoverSlot = nextHover;
+                SyncSelectionOverlayDragState();
                 Refresh();
             }
         }
@@ -286,5 +304,13 @@ public partial class PaletteForm : UserControl
         _dragStartSlot = -1;
         _hoverSlot = -1;
         _isDragging = false;
+        SyncSelectionOverlayDragState();
+    }
+
+    private void SyncSelectionOverlayDragState()
+    {
+        selectionOverlay.IsDragging = _isDragging;
+        selectionOverlay.DragStartSlot = _dragStartSlot;
+        selectionOverlay.HoverSlot = _hoverSlot;
     }
 }

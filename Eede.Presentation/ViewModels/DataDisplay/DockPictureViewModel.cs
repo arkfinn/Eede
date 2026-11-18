@@ -90,6 +90,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
         [Reactive] public partial double DisplayHeight { get; set; }
         [Reactive] public partial BackgroundColor BackgroundColor { get; set; }
         [Reactive] public partial TouchDockMode TouchDockMode { get; set; }
+        [Reactive] public partial Avalonia.Vector? ScrollOffset { get; set; }
         public ReactiveCommand<RxVoid, RxVoid> ZoomInCommand { get; }
         public ReactiveCommand<RxVoid, RxVoid> ZoomOutCommand { get; }
         public ReactiveCommand<float, RxVoid> SetMagnificationCommand { get; }
@@ -155,6 +156,7 @@ namespace Eede.Presentation.ViewModels.DataDisplay
             ActiveCursor = Avalonia.Input.Cursor.Default;
             Enabled = true;
             Closable = true;
+            ScrollOffset = null;
 
             PictureBuffer = null!;
             Subject = null!;
